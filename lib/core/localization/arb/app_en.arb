@@ -1,0 +1,55 @@
+{
+  "@@locale": "en",
+  "appTitle": "Smart Education Platform",
+  "@appTitle": {
+    "description": "Main application title"
+  },
+  "loading": "Loading...",
+  "@loading": {
+    "description": "Default loading text"
+  },
+  "errorOccurred": "An unexpected error occurred",
+  "@errorOccurred": {
+    "description": "Generic error message"
+  },
+  "retry": "Retry",
+  "@retry": {
+    "description": "Retry action button"
+  },
+  "emptyData": "No data available",
+  "@emptyData": {
+    "description": "Empty state label"
+  },
+  "loginTitle": "Sign In",
+  "@loginTitle": {
+    "description": "Login screen title"
+  },
+  "emailLabel": "Email Address",
+  "@emailLabel": {
+    "description": "Email field label"
+  },
+  "passwordLabel": "Password",
+  "@passwordLabel": {
+    "description": "Password field label"
+  },
+  "loginButton": "Sign In",
+  "@loginButton": {
+    "description": "Login button text"
+  },
+  "tenantSuspendedMessage": "This institutional account is suspended. Please contact administration.",
+  "@tenantSuspendedMessage": {
+    "description": "Tenant suspended notification"
+  },
+  "roleTeacher": "Teacher",
+  "@roleTeacher": {
+    "description": "Teacher role"
+  },
+  "roleStudent": "Student",
+  "@roleStudent": {
+    "description": "Student role"
+  },
+  "roleParent": "Parent",
+  "@roleParent": {
+    "description": "Parent role"
+  }
+}

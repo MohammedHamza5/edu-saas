@@ -1,0 +1,55 @@
+name: edu_saas
+description: "White-label Education SaaS Platform"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.8.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # State Management (Cubit only - locked stack)
+  flutter_bloc: ^8.1.6
+
+  # Backend & Network
+  supabase_flutter: ^2.8.4
+  dio: ^5.8.0+1
+
+  # Routing
+  go_router: ^14.8.1
+
+  # Security & Storage
+  flutter_secure_storage: ^9.2.4
+
+  # Models & Immutability
+  equatable: ^2.0.7
+  json_annotation: ^4.9.0
+
+  # Media & Files
+  cached_network_image: ^3.4.1
+  file_picker: ^8.1.7
+
+  # Localization & Utilities
+  intl: ^0.20.2
+  flutter_dotenv: ^5.2.1
+
+  # Icons
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  build_runner: ^2.4.15
+  json_serializable: ^6.9.4
+
+flutter:
+  uses-material-design: true
+  generate: true
+  assets:
+    - .env

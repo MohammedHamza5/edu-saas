@@ -1,0 +1,55 @@
+{
+  "@@locale": "ar",
+  "appTitle": "منصة التعليم الذكية",
+  "@appTitle": {
+    "description": "عنوان التطبيق الرئيسي"
+  },
+  "loading": "جارٍ التحميل...",
+  "@loading": {
+    "description": "نص التحميل الافتراضي"
+  },
+  "errorOccurred": "حدث خطأ غير متوقع",
+  "@errorOccurred": {
+    "description": "رسالة الخطأ العامة"
+  },
+  "retry": "إعادة المحاولة",
+  "@retry": {
+    "description": "زر إعادة المحاولة"
+  },
+  "emptyData": "لا توجد بيانات حالياً",
+  "@emptyData": {
+    "description": "نص الحالة الفارغة"
+  },
+  "loginTitle": "تسجيل الدخول",
+  "@loginTitle": {
+    "description": "عنوان شاشة تسجيل الدخول"
+  },
+  "emailLabel": "البريد الإلكتروني",
+  "@emailLabel": {
+    "description": "حقل البريد الإلكتروني"
+  },
+  "passwordLabel": "كلمة المرور",
+  "@passwordLabel": {
+    "description": "حقل كلمة المرور"
+  },
+  "loginButton": "دخول",
+  "@loginButton": {
+    "description": "زر تسجيل الدخول"
+  },
+  "tenantSuspendedMessage": "تم تعليق هذا الحساب المؤسسي. يرجى التواصل مع الإدارة.",
+  "@tenantSuspendedMessage": {
+    "description": "رسالة تعليق المستأجر"
+  },
+  "roleTeacher": "معلم",
+  "@roleTeacher": {
+    "description": "دور المعلم"
+  },
+  "roleStudent": "طالب",
+  "@roleStudent": {
+    "description": "دور الطالب"
+  },
+  "roleParent": "ولي أمر",
+  "@roleParent": {
+    "description": "دور ولي الأمر"
+  }
+}
