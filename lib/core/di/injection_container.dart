@@ -23,12 +23,12 @@ class InjectionContainer {
   static AuthCubit createAuthCubit() => AuthCubit(repository: authRepository);
 
   /// Initializes all dependencies in topological dependency order
-  static Future<void> init() async {
+  static Future<void> init({SupabaseClient? customClient}) async {
     // 1. Core Services
     dioClient = DioClient();
 
     // 2. Auth Dependencies
-    authRemoteDataSource = AuthRemoteDataSourceImpl(client: supabaseClient);
+    authRemoteDataSource = AuthRemoteDataSourceImpl(client: customClient);
     authRepository = AuthRepositoryImpl(remoteDataSource: authRemoteDataSource);
   }
 }

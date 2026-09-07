@@ -6,42 +6,7 @@
 -- ملاحظة: يُطبَّق على بيئة Development أولًا ثم Production عبر نفس الملف.
 -- ============================================================================
 
--- ---------- 1) دوال مساعدة (Security Definer + search_path مقفل) ----------
-create or replace function public.my_tenant_id()
-returns uuid language sql stable security definer set search_path = public as $$
-  select tenant_id from public.users where id = auth.uid()
-$$;
-
-create or replace function public.has_role(r text)
-returns boolean language sql stable security definer set search_path = public as $$
-  select exists (
-    select 1 from public.users u
-    where u.id = auth.uid() and u.role = r and u.status = 'active'
-  )
-$$;
-
-create or replace function public.tenant_is_active()
-returns boolean language sql stable security definer set search_path = public as $$
-  select exists (
-    select 1 from public.users u
-    join public.tenants t on t.id = u.tenant_id
-    where u.id = auth.uid() and t.status = 'active'
-  )
-$$;
-
--- منع تعديل الحقول المحمية يدويًا (role / tenant_id / id) عبر Update مباشر
-create or replace function public.prevent_identity_change()
-returns trigger language plpgsql security definer set search_path = public as $$
-begin
-  if new.id      is distinct from old.id or
-     new.role    is distinct from old.role or
-     new.tenant_id is distinct from old.tenant_id then
-    raise exception 'identity fields (id, role, tenant_id) cannot be changed directly';
-  end if;
-  return new;
-end $$;
-
--- ---------- 2) الجداول ----------
+-- ---------- 1) الجداول ----------
 
 create table public.tenants (
   id         uuid primary key default gen_random_uuid(),
@@ -312,6 +277,41 @@ create table public.audit_logs (
   metadata      jsonb not null default '{}'::jsonb,
   created_at    timestamptz not null default now()
 );
+
+-- ---------- 2) دوال مساعدة (Security Definer + search_path مقفل) ----------
+create or replace function public.my_tenant_id()
+returns uuid language sql stable security definer set search_path = public as $$
+  select tenant_id from public.users where id = auth.uid()
+$$;
+
+create or replace function public.has_role(r text)
+returns boolean language sql stable security definer set search_path = public as $$
+  select exists (
+    select 1 from public.users u
+    where u.id = auth.uid() and u.role = r and u.status = 'active'
+  )
+$$;
+
+create or replace function public.tenant_is_active()
+returns boolean language sql stable security definer set search_path = public as $$
+  select exists (
+    select 1 from public.users u
+    join public.tenants t on t.id = u.tenant_id
+    where u.id = auth.uid() and t.status = 'active'
+  )
+$$;
+
+-- منع تعديل الحقول المحمية يدويًا (role / tenant_id / id) عبر Update مباشر
+create or replace function public.prevent_identity_change()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  if new.id      is distinct from old.id or
+     new.role    is distinct from old.role or
+     new.tenant_id is distinct from old.tenant_id then
+    raise exception 'identity fields (id, role, tenant_id) cannot be changed directly';
+  end if;
+  return new;
+end $$;
 
 -- ---------- 3) الفهارس (القسم 4.4 — Index حسب الـQueries الفعلية) ----------
 create index idx_users_tenant on public.users(tenant_id);

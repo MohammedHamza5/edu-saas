@@ -7,6 +7,15 @@ import '../config/app_config.dart';
 class SupabaseService {
   SupabaseService._();
 
+  static bool get isInitialized {
+    try {
+      Supabase.instance;
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   static SupabaseClient get client => Supabase.instance.client;
 
   static Future<void> initialize() async {
@@ -19,7 +28,7 @@ class SupabaseService {
     );
   }
 
-  static User? get currentUser => client.auth.currentUser;
+  static User? get currentUser => isInitialized ? client.auth.currentUser : null;
   static bool get isAuthenticated => currentUser != null;
   static String? get currentUserId => currentUser?.id;
 }

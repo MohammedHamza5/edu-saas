@@ -24,17 +24,18 @@ abstract interface class AuthRemoteDataSource {
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
-  final SupabaseClient _client;
+  final SupabaseClient? _client;
 
-  AuthRemoteDataSourceImpl({SupabaseClient? client})
-      : _client = client ?? SupabaseService.client;
+  AuthRemoteDataSourceImpl({SupabaseClient? client}) : _client = client;
+
+  SupabaseClient get _safeClient => _client ?? SupabaseService.client;
 
   @override
   Future<UserModel> signInWithEmail({
     required String email,
     required String password,
   }) async {
-    final response = await _client.auth.signInWithPassword(
+    final response = await _safeClient.auth.signInWithPassword(
       email: email.trim(),
       password: password,
     );
@@ -55,7 +56,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String phone,
     required String tenantId,
   }) async {
-    final response = await _client.auth.signUp(
+    final response = await _safeClient.auth.signUp(
       email: email.trim(),
       password: password,
       data: {
@@ -76,23 +77,23 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<void> signOut() async {
-    await _client.auth.signOut();
+    await _safeClient.auth.signOut();
   }
 
   @override
   Future<UserModel?> getCurrentUserProfile() async {
-    final user = _client.auth.currentUser;
+    final user = _safeClient.auth.currentUser;
     if (user == null) return null;
     return await _fetchUserProfile(user.id);
   }
 
   @override
   Future<void> resetPassword(String email) async {
-    await _client.auth.resetPasswordForEmail(email.trim());
+    await _safeClient.auth.resetPasswordForEmail(email.trim());
   }
 
   Future<UserModel> _fetchUserProfile(String userId) async {
-    final data = await _client
+    final data = await _safeClient
         .from('users')
         .select('id, tenant_id, role, status, full_name, email, phone')
         .eq('id', userId)
@@ -104,7 +105,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
     // Check if tenant is suspended (Rule 2.6: tenant.status = suspended -> complete block)
     final tenantId = data['tenant_id'] as String;
-    final tenantData = await _client
+    final tenantData = await _safeClient
         .from('tenants')
         .select('status')
         .eq('id', tenantId)

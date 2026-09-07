@@ -31,7 +31,7 @@ class TeacherDashboardPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'نظرة عامة على المجموعات والطلاب',
               style: TextStyle(
                 fontSize: 20,
@@ -39,9 +39,9 @@ class TeacherDashboardPage extends StatelessWidget {
                 color: AppColors.textPrimary,
               ),
             ),
-            const SizedBox(height: AppSpacing.s16),
+            SizedBox(height: AppSpacing.s16),
             Row(
-              children: const [
+              children: [
                 Expanded(
                   child: AppCard(
                     padding: EdgeInsets.all(AppSpacing.s16),
