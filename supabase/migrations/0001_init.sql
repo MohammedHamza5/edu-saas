@@ -280,25 +280,40 @@ create table public.audit_logs (
 
 -- ---------- 2) دوال مساعدة (Security Definer + search_path مقفل) ----------
 create or replace function public.my_tenant_id()
-returns uuid language sql stable security definer set search_path = public as $$
-  select tenant_id from public.users where id = auth.uid()
+returns uuid language plpgsql stable security definer set search_path = public as $$
+declare
+  v_tenant_id uuid;
+begin
+  select tenant_id into v_tenant_id from public.users where id = auth.uid();
+  return v_tenant_id;
+end;
 $$;
 
 create or replace function public.has_role(r text)
-returns boolean language sql stable security definer set search_path = public as $$
+returns boolean language plpgsql stable security definer set search_path = public as $$
+declare
+  v_exists boolean;
+begin
   select exists (
     select 1 from public.users u
     where u.id = auth.uid() and u.role = r and u.status = 'active'
-  )
+  ) into v_exists;
+  return v_exists;
+end;
 $$;
 
 create or replace function public.tenant_is_active()
-returns boolean language sql stable security definer set search_path = public as $$
+returns boolean language plpgsql stable security definer set search_path = public as $$
+declare
+  v_active boolean;
+begin
   select exists (
     select 1 from public.users u
     join public.tenants t on t.id = u.tenant_id
     where u.id = auth.uid() and t.status = 'active'
-  )
+  ) into v_active;
+  return v_active;
+end;
 $$;
 
 -- منع تعديل الحقول المحمية يدويًا (role / tenant_id / id) عبر Update مباشر
@@ -312,6 +327,77 @@ begin
   end if;
   return new;
 end $$;
+
+-- فحص العلاقة بين ولي الأمر والطالب بدون استدعاء RLS متكرر
+create or replace function public.is_parent_of_student(p_parent_id uuid, p_student_id uuid)
+returns boolean language plpgsql stable security definer set search_path = public as $$
+declare
+  v_exists boolean;
+begin
+  select exists (
+    select 1 from public.parent_students ps 
+    where ps.parent_id = p_parent_id and ps.student_id = p_student_id
+  ) into v_exists;
+  return v_exists;
+end;
+$$;
+
+-- فحص انتماء المستخدم لنفس الـ Tenant للمدرس الحالي
+create or replace function public.user_belongs_to_my_tenant(p_user_id uuid)
+returns boolean language plpgsql stable security definer set search_path = public as $$
+declare
+  v_exists boolean;
+begin
+  select exists (
+    select 1 from public.users u 
+    where u.id = p_user_id and u.tenant_id = public.my_tenant_id()
+  ) into v_exists;
+  return v_exists;
+end;
+$$;
+
+-- فحص عضوية الطالب النشطة في المجموعة
+create or replace function public.is_member_of_group(p_group_id uuid, p_student_id uuid)
+returns boolean language plpgsql stable security definer set search_path = public as $$
+declare
+  v_exists boolean;
+begin
+  select exists (
+    select 1 from public.group_members gm 
+    where gm.group_id = p_group_id and gm.student_id = p_student_id and gm.status = 'active'
+  ) into v_exists;
+  return v_exists;
+end;
+$$;
+
+-- فحص انتماء المجموعة لنفس الـ Tenant للمدرس الحالي
+create or replace function public.group_belongs_to_my_tenant(p_group_id uuid)
+returns boolean language plpgsql stable security definer set search_path = public as $$
+declare
+  v_exists boolean;
+begin
+  select exists (
+    select 1 from public.groups g 
+    where g.id = p_group_id and g.tenant_id = public.my_tenant_id()
+  ) into v_exists;
+  return v_exists;
+end;
+$$;
+
+-- فحص امتلاك ولي الأمر لطالب داخل المجموعة
+create or replace function public.parent_has_child_in_group(p_parent_id uuid, p_group_id uuid)
+returns boolean language plpgsql stable security definer set search_path = public as $$
+declare
+  v_exists boolean;
+begin
+  select exists (
+    select 1 from public.group_members gm
+    join public.parent_students ps on ps.student_id = gm.student_id and ps.parent_id = p_parent_id
+    where gm.group_id = p_group_id and gm.status = 'active'
+  ) into v_exists;
+  return v_exists;
+end;
+$$;
 
 -- ---------- 3) الفهارس (القسم 4.4 — Index حسب الـQueries الفعلية) ----------
 create index idx_users_tenant on public.users(tenant_id);
@@ -408,41 +494,33 @@ create policy tenants_student_parent_read on public.tenants for select to authen
 
 -- users
 create policy users_own_read on public.users for select to authenticated
-  using (id = auth.uid() and public.tenant_is_active());
+  using (id = auth.uid());
 create policy users_teacher_read_tenant on public.users for select to authenticated
   using (public.has_role('teacher') and public.tenant_is_active() and tenant_id = public.my_tenant_id());
 create policy users_parent_read_children on public.users for select to authenticated
-  using (public.has_role('parent') and public.tenant_is_active() and exists (
-    select 1 from public.parent_students ps where ps.parent_id = auth.uid() and ps.student_id = users.id));
+  using (public.has_role('parent') and public.tenant_is_active() and public.is_parent_of_student(auth.uid(), users.id));
 create policy users_own_update on public.users for update to authenticated
-  using (id = auth.uid() and public.tenant_is_active());
+  using (id = auth.uid());
 
 -- groups
 create policy groups_teacher_all on public.groups for all to authenticated
   using (public.has_role('teacher') and public.tenant_is_active() and tenant_id = public.my_tenant_id());
 create policy groups_student_read_member on public.groups for select to authenticated
-  using (public.has_role('student') and public.tenant_is_active() and exists (
-    select 1 from public.group_members gm where gm.student_id = auth.uid() and gm.group_id = groups.id));
+  using (public.has_role('student') and public.tenant_is_active() and public.is_member_of_group(groups.id, auth.uid()));
 create policy groups_parent_read_children on public.groups for select to authenticated
-  using (public.has_role('parent') and public.tenant_is_active() and exists (
-    select 1 from public.group_members gm
-    join public.parent_students ps on ps.student_id = gm.student_id and ps.parent_id = auth.uid()
-    where gm.group_id = groups.id));
+  using (public.has_role('parent') and public.tenant_is_active() and public.parent_has_child_in_group(auth.uid(), groups.id));
 
 -- group_members
 create policy gm_teacher_all on public.group_members for all to authenticated
-  using (public.has_role('teacher') and public.tenant_is_active() and exists (
-    select 1 from public.groups g where g.id = group_members.group_id and g.tenant_id = public.my_tenant_id()));
+  using (public.has_role('teacher') and public.tenant_is_active() and public.group_belongs_to_my_tenant(group_members.group_id));
 create policy gm_student_read_own on public.group_members for select to authenticated
   using (student_id = auth.uid() and public.tenant_is_active());
 create policy gm_parent_read_children on public.group_members for select to authenticated
-  using (public.has_role('parent') and public.tenant_is_active() and exists (
-    select 1 from public.parent_students ps where ps.parent_id = auth.uid() and ps.student_id = group_members.student_id));
+  using (public.has_role('parent') and public.tenant_is_active() and public.is_parent_of_student(auth.uid(), group_members.student_id));
 
 -- parent_students
 create policy ps_teacher_all on public.parent_students for all to authenticated
-  using (public.has_role('teacher') and public.tenant_is_active() and exists (
-    select 1 from public.users u where u.id = parent_students.parent_id and u.tenant_id = public.my_tenant_id()));
+  using (public.has_role('teacher') and public.tenant_is_active() and public.user_belongs_to_my_tenant(parent_students.parent_id));
 create policy ps_parent_read_own on public.parent_students for select to authenticated
   using (parent_id = auth.uid() and public.tenant_is_active());
 create policy ps_student_read_own on public.parent_students for select to authenticated
