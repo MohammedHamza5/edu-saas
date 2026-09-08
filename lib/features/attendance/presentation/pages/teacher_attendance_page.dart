@@ -13,6 +13,10 @@ import '../../../../core/widgets/app_text_field.dart';
 import '../../../groups/presentation/cubit/groups_cubit.dart';
 import '../../../groups/presentation/cubit/groups_state.dart';
 import '../../domain/entities/attendance_entity.dart';
+import '../../../../core/extensions/responsive_context_extension.dart';
+import '../../../../core/theme/responsive_breakpoints.dart';
+import '../../../../core/widgets/responsive_container.dart';
+import '../../../../core/widgets/responsive_grid.dart';
 import '../cubit/attendance_cubit.dart';
 import '../cubit/attendance_state.dart';
 import '../widgets/attendance_stat_card.dart';
@@ -176,16 +180,21 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
             }
           },
           builder: (context, attendanceState) {
-            return Column(
-              children: [
-                // Top Filter Header: Group & Date Pickers
-                _buildHeaderBar(context, dateStr),
+            return Center(
+              child: ResponsiveContainer(
+                maxWidth: ResponsiveBreakpoints.maxContentWidth,
+                child: Column(
+                  children: [
+                    // Top Filter Header: Group & Date Pickers
+                    _buildHeaderBar(context, dateStr),
 
-                // Main Content
-                Expanded(
-                  child: _buildAttendanceContent(context, attendanceState),
+                    // Main Content
+                    Expanded(
+                      child: _buildAttendanceContent(context, attendanceState),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             );
           },
         ),
@@ -194,6 +203,92 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
   }
 
   Widget _buildHeaderBar(BuildContext context, String formattedDate) {
+    final isCompact = context.screenWidth < 480;
+
+    final groupSelector = BlocBuilder<GroupsCubit, GroupsState>(
+      builder: (context, groupsState) {
+        if (groupsState is GroupsLoaded) {
+          final groups = groupsState.groups;
+          if (groups.isNotEmpty && _selectedGroupId == null) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                _onGroupChanged(groups.first.id);
+              }
+            });
+          }
+
+          return DropdownButtonFormField<String>(
+            value: _selectedGroupId,
+            decoration: InputDecoration(
+              labelText: 'المجموعة الدراسية',
+              prefixIcon: const Icon(Icons.groups_rounded, color: AppColors.primary),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.s12,
+                vertical: AppSpacing.s8,
+              ),
+            ),
+            items: groups.map((g) {
+              return DropdownMenuItem<String>(
+                value: g.id,
+                child: Text(
+                  '${g.name} (${g.level})',
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                ),
+              );
+            }).toList(),
+            onChanged: _onGroupChanged,
+          );
+        }
+        return const SizedBox(
+          height: 48,
+          child: Center(
+            child: Text(
+              'جارٍ تحميل المجموعات...',
+              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+            ),
+          ),
+        );
+      },
+    );
+
+    final datePickerButton = InkWell(
+      onTap: () => _selectDate(context),
+      borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.s12,
+          vertical: AppSpacing.s12,
+        ),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceVariant,
+          border: Border.all(color: AppColors.border),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.calendar_today_rounded, size: 16, color: AppColors.primary),
+            const SizedBox(width: AppSpacing.s8),
+            Flexible(
+              child: Text(
+                formattedDate,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
     return Container(
       padding: const EdgeInsets.all(AppSpacing.s16),
       decoration: const BoxDecoration(
@@ -202,106 +297,21 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
           bottom: BorderSide(color: AppColors.border),
         ),
       ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              // Group Selector Dropdown
-              Expanded(
-                flex: 3,
-                child: BlocBuilder<GroupsCubit, GroupsState>(
-                  builder: (context, groupsState) {
-                    if (groupsState is GroupsLoaded) {
-                      final groups = groupsState.groups;
-                      if (groups.isNotEmpty && _selectedGroupId == null) {
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          if (mounted) {
-                            _onGroupChanged(groups.first.id);
-                          }
-                        });
-                      }
-
-                      return DropdownButtonFormField<String>(
-                        value: _selectedGroupId,
-                        decoration: InputDecoration(
-                          labelText: 'المجموعة الدراسية',
-                          prefixIcon: const Icon(Icons.groups_rounded, color: AppColors.primary),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.s12,
-                            vertical: AppSpacing.s8,
-                          ),
-                        ),
-                        items: groups.map((g) {
-                          return DropdownMenuItem<String>(
-                            value: g.id,
-                            child: Text(
-                              '${g.name} (${g.level})',
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: _onGroupChanged,
-                      );
-                    }
-                    return const SizedBox(
-                      height: 48,
-                      child: Center(
-                        child: Text(
-                          'جارٍ تحميل المجموعات...',
-                          style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(width: AppSpacing.s12),
-
-              // Date Picker Button
-              Expanded(
-                flex: 2,
-                child: InkWell(
-                  onTap: () => _selectDate(context),
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.s12,
-                      vertical: AppSpacing.s12,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.surfaceVariant,
-                      border: Border.all(color: AppColors.border),
-                      borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.calendar_today_rounded, size: 16, color: AppColors.primary),
-                        const SizedBox(width: AppSpacing.s8),
-                        Flexible(
-                          child: Text(
-                            formattedDate,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.textPrimary,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+      child: isCompact
+          ? Column(
+              children: [
+                groupSelector,
+                const SizedBox(height: AppSpacing.s12),
+                datePickerButton,
+              ],
+            )
+          : Row(
+              children: [
+                Expanded(flex: 3, child: groupSelector),
+                const SizedBox(width: AppSpacing.s12),
+                Expanded(flex: 2, child: datePickerButton),
+              ],
+            ),
     );
   }
 
@@ -340,80 +350,98 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
 
       return Column(
         children: [
-          // Statistics Grid
+          // Statistics Grid (Responsive 2 cols mobile, 4 cols tablet/desktop)
           Padding(
             padding: const EdgeInsets.all(AppSpacing.s16),
-            child: Row(
+            child: ResponsiveGrid(
+              mobileColumns: 2,
+              tabletColumns: 4,
+              desktopColumns: 4,
+              spacing: AppSpacing.s8,
+              runSpacing: AppSpacing.s8,
               children: [
-                Expanded(
-                  child: AttendanceStatCard(
-                    title: 'الحاضرون',
-                    value: '${stats.presentCount}',
-                    subtitle: 'من إجمالي ${stats.totalSessions}',
-                    color: AppColors.success,
-                    icon: Icons.check_circle_rounded,
-                  ),
+                AttendanceStatCard(
+                  title: 'الحاضرون',
+                  value: '${stats.presentCount}',
+                  subtitle: 'من إجمالي ${stats.totalSessions}',
+                  color: AppColors.success,
+                  icon: Icons.check_circle_rounded,
                 ),
-                const SizedBox(width: AppSpacing.s8),
-                Expanded(
-                  child: AttendanceStatCard(
-                    title: 'الغياب',
-                    value: '${stats.absentCount}',
-                    color: AppColors.error,
-                    icon: Icons.cancel_rounded,
-                  ),
+                AttendanceStatCard(
+                  title: 'الغياب',
+                  value: '${stats.absentCount}',
+                  color: AppColors.error,
+                  icon: Icons.cancel_rounded,
                 ),
-                const SizedBox(width: AppSpacing.s8),
-                Expanded(
-                  child: AttendanceStatCard(
-                    title: 'المتأخرون',
-                    value: '${stats.lateCount}',
-                    color: AppColors.warning,
-                    icon: Icons.access_time_filled_rounded,
-                  ),
+                AttendanceStatCard(
+                  title: 'المتأخرون',
+                  value: '${stats.lateCount}',
+                  color: AppColors.warning,
+                  icon: Icons.access_time_filled_rounded,
                 ),
-                const SizedBox(width: AppSpacing.s8),
-                Expanded(
-                  child: AttendanceStatCard(
-                    title: 'معذور',
-                    value: '${stats.excusedCount}',
-                    color: AppColors.info,
-                    icon: Icons.info_rounded,
-                  ),
+                AttendanceStatCard(
+                  title: 'معذور',
+                  value: '${stats.excusedCount}',
+                  color: AppColors.info,
+                  icon: Icons.info_rounded,
                 ),
               ],
             ),
           ),
 
-          // Action Toolbar: Fast Mark All & Save
+          // Action Toolbar: Fast Mark All & Save (Stacked on narrow screens)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16),
-            child: Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    icon: const Icon(Icons.done_all_rounded, size: 16),
-                    label: const Text('تحضير الكل حاضر'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.success,
-                      side: const BorderSide(color: AppColors.success),
-                    ),
-                    onPressed: () => _attendanceCubit.markAll(AttendanceStatus.present),
+            child: context.screenWidth < 360
+                ? Column(
+                    children: [
+                      OutlinedButton.icon(
+                        icon: const Icon(Icons.done_all_rounded, size: 16),
+                        label: const Text('تحضير الكل حاضر'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.success,
+                          side: const BorderSide(color: AppColors.success),
+                          minimumSize: const Size(double.infinity, 44),
+                        ),
+                        onPressed: () => _attendanceCubit.markAll(AttendanceStatus.present),
+                      ),
+                      const SizedBox(height: AppSpacing.s8),
+                      AppButton(
+                        text: 'حفظ كشف الحضور',
+                        icon: Icons.save_rounded,
+                        isLoading: attendanceState.isSaving,
+                        onPressed: attendanceState.isSaving
+                            ? null
+                            : () => _attendanceCubit.saveAttendance(),
+                      ),
+                    ],
+                  )
+                : Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          icon: const Icon(Icons.done_all_rounded, size: 16),
+                          label: const Text('تحضير الكل حاضر'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.success,
+                            side: const BorderSide(color: AppColors.success),
+                          ),
+                          onPressed: () => _attendanceCubit.markAll(AttendanceStatus.present),
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.s12),
+                      Expanded(
+                        child: AppButton(
+                          text: 'حفظ كشف الحضور',
+                          icon: Icons.save_rounded,
+                          isLoading: attendanceState.isSaving,
+                          onPressed: attendanceState.isSaving
+                              ? null
+                              : () => _attendanceCubit.saveAttendance(),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                const SizedBox(width: AppSpacing.s12),
-                Expanded(
-                  child: AppButton(
-                    text: 'حفظ كشف الحضور',
-                    icon: Icons.save_rounded,
-                    isLoading: attendanceState.isSaving,
-                    onPressed: attendanceState.isSaving
-                        ? null
-                        : () => _attendanceCubit.saveAttendance(),
-                  ),
-                ),
-              ],
-            ),
           ),
           const SizedBox(height: AppSpacing.s8),
 
