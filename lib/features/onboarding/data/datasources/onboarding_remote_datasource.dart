@@ -86,8 +86,7 @@ class OnboardingRemoteDataSourceImpl implements OnboardingRemoteDataSource {
   @override
   Future<TenantModel?> getTenantById(String tenantId) async {
     try {
-      final data = await _client
-          .from('tenants')
+      final data = await _safeClient.from('tenants')
           .select()
           .eq('id', tenantId)
           .maybeSingle();
@@ -104,8 +103,7 @@ class OnboardingRemoteDataSourceImpl implements OnboardingRemoteDataSource {
   @override
   Future<List<TenantModel>> listTenants() async {
     try {
-      final List<dynamic> data = await _client
-          .from('tenants')
+      final List<dynamic> data = await _safeClient.from('tenants')
           .select()
           .order('created_at', ascending: false);
 
