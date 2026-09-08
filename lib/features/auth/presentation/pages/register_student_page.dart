@@ -25,6 +25,18 @@ class _RegisterStudentPageState extends State<RegisterStudentPage> {
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _customTrackController = TextEditingController();
+
+  static const List<String> _tracks = [
+    'SAT',
+    'EST',
+    'ACT',
+    'Basics',
+    'Advanced',
+    'مخصص',
+  ];
+
+  String _selectedTrack = 'SAT';
 
   @override
   void dispose() {
@@ -32,18 +44,29 @@ class _RegisterStudentPageState extends State<RegisterStudentPage> {
     _emailController.dispose();
     _phoneController.dispose();
     _passwordController.dispose();
+    _customTrackController.dispose();
     super.dispose();
   }
 
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
 
-    final tenantId = widget.tenantId ?? '00000000-0000-0000-0000-000000000001';
+    // Canonical Tenant ID for default American System Academy
+    final tenantId = widget.tenantId ?? '11111111-1111-1111-1111-111111111111';
+
+    final effectiveTrack = _selectedTrack == 'مخصص'
+        ? _customTrackController.text.trim()
+        : _selectedTrack;
+
+    final studentFullName = _nameController.text.trim();
+    final displayName = effectiveTrack.isNotEmpty
+        ? '$studentFullName ($effectiveTrack)'
+        : studentFullName;
 
     context.read<AuthCubit>().registerStudent(
           email: _emailController.text.trim(),
           password: _passwordController.text,
-          fullName: _nameController.text.trim(),
+          fullName: displayName,
           phone: _phoneController.text.trim(),
           tenantId: tenantId,
         );
@@ -75,7 +98,7 @@ class _RegisterStudentPageState extends State<RegisterStudentPage> {
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(AppSpacing.s24),
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 440),
+                constraints: const BoxConstraints(maxWidth: 480),
                 child: AppCard(
                   padding: const EdgeInsets.all(AppSpacing.s24),
                   child: Form(
@@ -85,7 +108,7 @@ class _RegisterStudentPageState extends State<RegisterStudentPage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         const Text(
-                          'انضم إلى المنصة التعليمية',
+                          'الانضمام للأكاديمية التعليمية',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 20,
@@ -95,7 +118,7 @@ class _RegisterStudentPageState extends State<RegisterStudentPage> {
                         ),
                         const SizedBox(height: AppSpacing.s8),
                         const Text(
-                          'املأ البيانات التالية لتقديم طلب الانضمام للمعلم',
+                          'برنامج الدبلومة الأمريكية والرياضيات المتخصصة (SAT / EST / ACT)',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 13,
@@ -153,6 +176,59 @@ class _RegisterStudentPageState extends State<RegisterStudentPage> {
                             return null;
                           },
                         ),
+                        const SizedBox(height: AppSpacing.s20),
+
+                        // مسار الدراسة / المستوى المطلوب
+                        const Text(
+                          'المسار أو المستوى المستهدف:',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.s8),
+                        Wrap(
+                          spacing: AppSpacing.s8,
+                          runSpacing: AppSpacing.s8,
+                          children: _tracks.map((track) {
+                            final isSelected = _selectedTrack == track;
+                            return ChoiceChip(
+                              label: Text(track),
+                              selected: isSelected,
+                              selectedColor: AppColors.primary,
+                              labelStyle: TextStyle(
+                                color: isSelected ? Colors.white : AppColors.textPrimary,
+                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                              ),
+                              onSelected: (selected) {
+                                if (selected) {
+                                  setState(() {
+                                    _selectedTrack = track;
+                                  });
+                                }
+                              },
+                            );
+                          }).toList(),
+                        ),
+
+                        // حقل إدخال عند اختيار "مخصص"
+                        if (_selectedTrack == 'مخصص') ...[
+                          const SizedBox(height: AppSpacing.s16),
+                          AppTextField(
+                            controller: _customTrackController,
+                            labelText: 'المسار أو المجموعة المخصصة',
+                            hintText: 'مثال: AP Calculus, ورشة المراجعة السريعة...',
+                            prefixIcon: const Icon(Icons.edit_note_outlined, size: 20),
+                            validator: (val) {
+                              if (_selectedTrack == 'مخصص' && (val == null || val.trim().isEmpty)) {
+                                return 'يرجى كتابة اسم المسار أو المجموعة المخصصة';
+                              }
+                              return null;
+                            },
+                          ),
+                        ],
+
                         const SizedBox(height: AppSpacing.s24),
                         AppButton(
                           text: 'تقديم طلب التسجيل',

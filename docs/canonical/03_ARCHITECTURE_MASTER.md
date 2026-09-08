@@ -898,6 +898,10 @@ RLS → Backend Validation → Business Rules → Database
 | تسريب الإجابة الصحيحة | `is_correct` لا يُعاد للطالب في أي Response |
 | التلاعب بالتوقيت (تغيير ساعة الجهاز) | Server time هو المرجع الوحيد للتحقق من الانتهاء |
 | تسليم مزدوج (Double Submit) | Idempotency + Atomic Transaction + Unique Constraints |
+| فتح تابات متعددة للامتحان (Multi-Tab Exploit) | قيد `one_active_attempt_per_student` (Partial Unique Index) يمنع أي محاولة متزامنة + استئناف إجباري |
+| تسليم متزامن من تابات متعددة (Multi-Tab Double Submit) | دالة `submit-exam` كـ Atomic Transaction مع Idempotency؛ أول طلب يقفل الحالة، واللاحق يُرفض فورًا |
+| التلاعب بساعة الجهاز في نافذة خاملة (Timer Tampering) | المرجع الزمني حصري لساعة السيرفر (`server_now <= started_at + duration_minutes`)، والتأخير = `EXAM_EXPIRED` |
+| تزوير مشاهدات الفيديو بتابات متوازية (Video Multi-Tab Farming) | قيد `UNIQUE(video_id, student_id)` + Throttled Upsert مع فحص التقدم المنطقي الفعلي |
 | تسريب Secrets | Secrets داخل Edge Functions فقط، أبدًا داخل Flutter/Git |
 | تزوير Activity (إرسال `video_completed` يدويًا) | Activity Events تُعامَل كـ"إشارة تحليلية"، وليست إثباتًا أمنيًا قاطعًا |
 
@@ -916,6 +920,7 @@ Student → محتوى فيديو غير مصرّح      ❌ يجب أن يفش�
 Student → تعديل درجته                 ❌ يجب أن يفشل
 Student → رؤية الإجابة الصحيحة قبل التسليم ❌ يجب أن يفشل
 Student → عملية إدارية (approve/grade) ❌ يجب أن يفشل
+Student → فتح محاولة امتحان ثانية بتاب موازٍ ❌ يجب أن يفشل
 ---
 Student → محتواه الخاص                ✅ يجب أن ينجح
 Parent → طفله المرتبط                 ✅ يجب أن ينجح
@@ -927,6 +932,25 @@ Teacher → بيانات Tenant الخاص به       ✅ يجب أن ينجح
 ## 12.6 حدود واقعية معلَنة
 
 النظام **لا يدّعي**: منع الغش 100%، منع تصوير الشاشة، أمانًا "مستحيل اختراقه". الهدف الواقعي: كل عملية حساسة محمية في الطبقة التي تملك السلطة الحقيقية عليها.
+
+## 12.7 🔧 [تحصين أمني] حماية التزامن وتعدد النوافذ (Multi-Tab & State Desynchronization Defense)
+
+محاولة الطالب استغلال فتح التطبيق في أكثر من نافذة أو لسان تبويب (Browser Multi-Tabs / Split-Brain Concurrency) هي ناقل هجوم معتاد في المنصات التعليمية. يتم تحصين المنصة ضده بالآتي:
+
+1. **على مستوى قاعدة البيانات (PostgreSQL - خط الدفاع النهائي والملزم):**
+   - **منع تعدد المحاولات المتزامنة:** الفهرس الجزئي الفريد:
+     ```sql
+     CREATE UNIQUE INDEX one_active_attempt_per_student 
+     ON exam_attempts (exam_id, student_id) 
+     WHERE status = 'in_progress';
+     ```
+     يمنع فيزيائيًا إنشاء أي محاولة جديدة لنفس الطالب لنفس الامتحان طالما توجد محاولة قائمة، ويرجع خطأ `ATTEMPT_ALREADY_EXISTS` مع توجيه الطالب لاستئناف نفس المحاولة دون أي زيادة في الوقت.
+   - **الذرية المطلقة للتسليم (Atomic Submit):** لا يمكن تسليم الامتحان مرتين؛ فحص `status = 'in_progress'` وتحديث السجل إلى `submitted` وحساب الدرجة يتم داخل ترانزاكشن خادمية ذرية واحدة. أي طلب تسليم ثانٍ يصل متأخرًا بأجزاء من الثانية يجد الحالة تغيرت فيتم إسقاطه فورًا بـ `EXAM_ALREADY_SUBMITTED`.
+   - **المؤقت الخادمي غير القابل للتلاعب:** انتهاء وقت الامتحان محكوم بـ `now() <= started_at + (duration_minutes * interval '1 minute')` على الخادم، مما يلغي تمامًا أي أثر لإيقاف تشغيل الجافاسكريبت أو تجميد التاب في الخلفية؛ وأي إجابة بعد انقضاء الوقت الخادمي تُرفض وتُسجل كـ `EXAM_EXPIRED`.
+   - **منع مزارع المشاهدة (Video Farming):** جدول `video_progress` مقيد بـ `UNIQUE(video_id, student_id)`، مع تحديث دوري مقيد (Throttled Upsert)، ولا تُعتمد ساعات المشاهدة كدرجة أكاديمية تمنح امتيازًا تلقائيًا.
+
+2. **على مستوى واجهة العميل (Flutter Web - UX Guard):**
+   - تفعيل آلية مزامنة النوافذ (Tab Synchronization عبر Web BroadcastChannel / LocalStorage Storage Events) لتحذير الطالب فور فتح الامتحان في نافذة أخرى، وتعطيل التفاعل في النافذة القديمة تجنبًا لتشتت الإجابات أو الإرباك.
 
 ---
 
