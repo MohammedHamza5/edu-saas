@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../features/attendance/presentation/pages/student_attendance_page.dart';
+import '../../features/attendance/presentation/pages/teacher_attendance_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/register_student_page.dart';
 import '../../features/auth/presentation/pages/student_pending_page.dart';
@@ -8,6 +10,9 @@ import '../../features/dashboard/presentation/pages/parent_dashboard_page.dart';
 import '../../features/dashboard/presentation/pages/splash_page.dart';
 import '../../features/dashboard/presentation/pages/student_dashboard_page.dart';
 import '../../features/dashboard/presentation/pages/teacher_dashboard_page.dart';
+import '../../features/groups/domain/entities/group_entity.dart';
+import '../../features/groups/presentation/pages/group_detail_page.dart';
+import '../../features/groups/presentation/pages/groups_list_page.dart';
 
 class AppRouter {
   AppRouter._();
@@ -22,6 +27,14 @@ class AppRouter {
   static const String teacherDashboard = '/teacher';
   static const String studentDashboard = '/student';
   static const String parentDashboard = '/parent';
+
+  // Feature: Groups routes
+  static const String groupsList = '/teacher/groups';
+  static const String groupDetail = '/teacher/groups/:id';
+
+  // Feature: Attendance routes
+  static const String teacherAttendance = '/teacher/attendance';
+  static const String studentAttendance = '/student/attendance';
 
   static final GoRouter router = GoRouter(
     initialLocation: splash,
@@ -62,6 +75,36 @@ class AppRouter {
         path: teacherDashboard,
         builder: (BuildContext context, GoRouterState state) {
           return const TeacherDashboardPage();
+        },
+      ),
+      GoRoute(
+        path: groupsList,
+        builder: (BuildContext context, GoRouterState state) {
+          return const GroupsListPage();
+        },
+        routes: [
+          GoRoute(
+            path: ':id',
+            builder: (BuildContext context, GoRouterState state) {
+              final id = state.pathParameters['id']!;
+              final group = state.extra as GroupEntity?;
+              return GroupDetailPage(groupId: id, initialGroup: group);
+            },
+          ),
+        ],
+      ),
+      GoRoute(
+        path: teacherAttendance,
+        builder: (BuildContext context, GoRouterState state) {
+          final groupId = state.uri.queryParameters['groupId'];
+          return TeacherAttendancePage(initialGroupId: groupId);
+        },
+      ),
+      GoRoute(
+        path: studentAttendance,
+        builder: (BuildContext context, GoRouterState state) {
+          final studentId = state.uri.queryParameters['studentId'];
+          return StudentAttendancePage(studentId: studentId);
         },
       ),
       GoRoute(

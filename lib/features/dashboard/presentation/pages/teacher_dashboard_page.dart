@@ -26,12 +26,12 @@ class TeacherDashboardPage extends StatelessWidget {
           ),
         ],
       ),
-      body: const SingleChildScrollView(
-        padding: EdgeInsets.all(AppSpacing.s24),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(AppSpacing.s24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'نظرة عامة على المجموعات والطلاب',
               style: TextStyle(
                 fontSize: 20,
@@ -39,10 +39,10 @@ class TeacherDashboardPage extends StatelessWidget {
                 color: AppColors.textPrimary,
               ),
             ),
-            SizedBox(height: AppSpacing.s16),
+            const SizedBox(height: AppSpacing.s16),
             Row(
               children: [
-                Expanded(
+                const Expanded(
                   child: AppCard(
                     padding: EdgeInsets.all(AppSpacing.s16),
                     child: Column(
@@ -55,21 +55,72 @@ class TeacherDashboardPage extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(width: AppSpacing.s16),
+                const SizedBox(width: AppSpacing.s16),
                 Expanded(
                   child: AppCard(
-                    padding: EdgeInsets.all(AppSpacing.s16),
-                    child: Column(
+                    padding: const EdgeInsets.all(AppSpacing.s16),
+                    onTap: () => context.push(AppRouter.groupsList),
+                    child: const Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('المجموعات النشطة', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
                         SizedBox(height: AppSpacing.s8),
-                        Text('5', style: AppTypography.statFigureLarge),
+                        Text('3', style: AppTypography.statFigureLarge),
+                        SizedBox(height: AppSpacing.s4),
+                        Text('اضغط للإدارة والتحكم ←', style: TextStyle(color: AppColors.primary, fontSize: 11, fontWeight: FontWeight.bold)),
                       ],
                     ),
                   ),
                 ),
               ],
+            ),
+            const SizedBox(height: AppSpacing.s24),
+            AppCard(
+              onTap: () => context.push(AppRouter.groupsList),
+              child: const Row(
+                children: [
+                  CircleAvatar(
+                    backgroundColor: AppColors.primaryLight,
+                    child: Icon(Icons.groups_rounded, color: AppColors.primary),
+                  ),
+                  SizedBox(width: AppSpacing.s16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('إدارة المجموعات الدراسية (SAT / EST / ACT)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppColors.textPrimary)),
+                        SizedBox(height: 4),
+                        Text('إنشاء مجموعات جديدة، تخصيص المسارات، وضبط سياسة المحتوى السابق', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                      ],
+                    ),
+                  ),
+                  Icon(Icons.arrow_forward_ios_rounded, size: 16, color: AppColors.textSecondary),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.s16),
+            AppCard(
+              onTap: () => context.push(AppRouter.teacherAttendance),
+              child: const Row(
+                children: [
+                  CircleAvatar(
+                    backgroundColor: AppColors.primaryLight,
+                    child: Icon(Icons.fact_check_rounded, color: AppColors.primary),
+                  ),
+                  SizedBox(width: AppSpacing.s16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('رصد الحضور والغياب اليومي', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppColors.textPrimary)),
+                        SizedBox(height: 4),
+                        Text('تسجيل حضور وغياب الطلاب في المجموعات مع ملاحظات وإحصائيات فورية', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                      ],
+                    ),
+                  ),
+                  Icon(Icons.arrow_forward_ios_rounded, size: 16, color: AppColors.textSecondary),
+                ],
+              ),
             ),
           ],
         ),

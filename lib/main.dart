@@ -8,6 +8,7 @@ import 'core/network/supabase_service.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/presentation/cubit/auth_cubit.dart';
+import 'features/groups/presentation/cubit/groups_cubit.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,6 +40,9 @@ class EduSaaSApp extends StatelessWidget {
       providers: [
         BlocProvider<AuthCubit>(
           create: (_) => InjectionContainer.createAuthCubit()..checkAuthStatus(),
+        ),
+        BlocProvider<GroupsCubit>(
+          create: (_) => InjectionContainer.createGroupsCubit(),
         ),
       ],
       child: MaterialApp.router(
