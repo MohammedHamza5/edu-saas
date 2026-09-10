@@ -5,8 +5,17 @@ import 'failures.dart';
 sealed class Result<T> {
   const Result();
 
+  const factory Result.success(T data) = Success<T>;
+  const factory Result.failure(Failure failure) = FailureResult<T>;
+
   bool get isSuccess => this is Success<T>;
   bool get isFailure => this is FailureResult<T>;
+
+  T get data => switch (this) {
+        Success(:final data) => data,
+        FailureResult(:final failure) =>
+          throw StateError('Cannot access data on failure: $failure'),
+      };
 
   T? get dataOrNull => switch (this) {
         Success(:final data) => data,
@@ -19,16 +28,22 @@ sealed class Result<T> {
       };
 
   R when<R>({
-    required R Function(T data) onSuccess,
-    required R Function(Failure failure) onFailure,
-  }) =>
-      switch (this) {
-        Success(:final data) => onSuccess(data),
-        FailureResult(:final failure) => onFailure(failure),
-      };
+    R Function(T data)? onSuccess,
+    R Function(Failure failure)? onFailure,
+    R Function(T data)? success,
+    R Function(Failure failure)? failure,
+  }) {
+    final s = onSuccess ?? success;
+    final f = onFailure ?? failure;
+    return switch (this) {
+      Success(:final data) => s!(data),
+      FailureResult(:final failure) => f!(failure),
+    };
+  }
 }
 
 final class Success<T> extends Result<T> {
+  @override
   final T data;
   const Success(this.data);
 }

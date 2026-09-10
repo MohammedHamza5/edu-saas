@@ -136,5 +136,68 @@ void main() {
       );
       await tester.pump(const Duration(milliseconds: 100));
     });
+
+    testWidgets('AppButton provides click cursor when enabled and basic when disabled', (tester) async {
+      // Enabled button -> SystemMouseCursors.click
+      await tester.pumpWidget(
+        createTestWidget(
+          AppButton(
+            text: 'Save',
+            onPressed: () {},
+          ),
+        ),
+      );
+
+      final enabledMouseRegion = tester.widget<MouseRegion>(
+        find.descendant(of: find.byType(AppButton), matching: find.byType(MouseRegion)),
+      );
+      expect(enabledMouseRegion.cursor, SystemMouseCursors.click);
+
+      // Disabled button (onPressed: null) -> SystemMouseCursors.basic
+      await tester.pumpWidget(
+        createTestWidget(
+          const AppButton(
+            text: 'Save',
+            onPressed: null,
+          ),
+        ),
+      );
+
+      final disabledMouseRegion = tester.widget<MouseRegion>(
+        find.descendant(of: find.byType(AppButton), matching: find.byType(MouseRegion)),
+      );
+      expect(disabledMouseRegion.cursor, SystemMouseCursors.basic);
+    });
+
+    testWidgets('AppCard provides click cursor when onTap is set, defers cursor when null', (tester) async {
+      // Clickable card -> SystemMouseCursors.click
+      await tester.pumpWidget(
+        createTestWidget(
+          AppCard(
+            onTap: () {},
+            child: const Text('Interactive Card'),
+          ),
+        ),
+      );
+
+      final clickableMouseRegion = tester.widget<MouseRegion>(
+        find.descendant(of: find.byType(AppCard), matching: find.byType(MouseRegion)).first,
+      );
+      expect(clickableMouseRegion.cursor, SystemMouseCursors.click);
+
+      // Non-clickable card -> MouseCursor.defer (to allow child buttons/inputs to handle cursors)
+      await tester.pumpWidget(
+        createTestWidget(
+          const AppCard(
+            child: Text('Static Card'),
+          ),
+        ),
+      );
+
+      final staticMouseRegion = tester.widget<MouseRegion>(
+        find.descendant(of: find.byType(AppCard), matching: find.byType(MouseRegion)).first,
+      );
+      expect(staticMouseRegion.cursor, MouseCursor.defer);
+    });
   });
 }

@@ -18,7 +18,9 @@ class GroupModel extends GroupEntity {
     int count = 0;
     if (json['group_members'] is List) {
       final list = json['group_members'] as List<dynamic>;
-      if (list.isNotEmpty && list.first is Map && (list.first as Map).containsKey('count')) {
+      if (list.isNotEmpty &&
+          list.first is Map &&
+          (list.first as Map).containsKey('count')) {
         count = (list.first as Map)['count'] as int? ?? 0;
       } else {
         count = list.length;
@@ -33,7 +35,8 @@ class GroupModel extends GroupEntity {
       name: json['name'] as String,
       level: json['level'] as String? ?? 'SAT',
       description: json['description'] as String?,
-      previousContentAccess: json['previous_content_access'] as String? ?? 'deny',
+      previousContentAccess:
+          json['previous_content_access'] as String? ?? 'deny',
       status: json['status'] as String? ?? 'active',
       createdAt: json['created_at'] != null
           ? DateTime.tryParse(json['created_at'] as String)

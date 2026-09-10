@@ -81,13 +81,13 @@ final class TeacherAttendanceLoaded extends AttendanceState {
 
   @override
   List<Object?> get props => [
-        groupId,
-        selectedDate,
-        students,
-        isSaving,
-        saveSuccess,
-        message,
-      ];
+    groupId,
+    selectedDate,
+    students,
+    isSaving,
+    saveSuccess,
+    message,
+  ];
 }
 
 final class StudentAttendanceLoaded extends AttendanceState {
@@ -118,12 +118,7 @@ final class StudentAttendanceLoaded extends AttendanceState {
   }
 
   @override
-  List<Object?> get props => [
-        records,
-        stats,
-        selectedGroupId,
-        isRefreshing,
-      ];
+  List<Object?> get props => [records, stats, selectedGroupId, isRefreshing];
 }
 
 final class AttendanceError extends AttendanceState {

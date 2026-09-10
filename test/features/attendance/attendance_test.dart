@@ -428,8 +428,8 @@ void main() {
       expect(find.text('رصد الحضور والغياب'), findsOneWidget);
       expect(find.text('تحضير الكل حاضر'), findsOneWidget);
       expect(find.text('حفظ كشف الحضور'), findsOneWidget);
-      expect(find.text('أحمد علي'), findsOneWidget);
-      expect(find.text('سارة محمد'), findsOneWidget);
+      expect(find.text('أحمد علي', skipOffstage: false), findsOneWidget);
+      expect(find.text('سارة محمد', skipOffstage: false), findsOneWidget);
     });
 
     testWidgets('StudentAttendancePage renders attendance stats and history', (tester) async {

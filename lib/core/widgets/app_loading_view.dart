@@ -3,8 +3,9 @@ import '../localization/generated/app_localizations.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 import 'app_skeleton.dart';
+import 'math_loading_indicator.dart';
 
-enum AppLoadingStyle { spinner, skeletonCard, skeletonList }
+enum AppLoadingStyle { spinner, skeletonCard, skeletonList, mathCurve }
 
 class AppLoadingView extends StatelessWidget {
   final String? message;
@@ -22,6 +23,12 @@ class AppLoadingView extends StatelessWidget {
     final displayMessage = message ?? (l10n != null ? l10n.loading : 'Loading...');
 
     return switch (style) {
+      AppLoadingStyle.mathCurve => Center(
+          child: MathLoadingIndicator(
+            message: displayMessage,
+            size: 110,
+          ),
+        ),
       AppLoadingStyle.spinner => Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,

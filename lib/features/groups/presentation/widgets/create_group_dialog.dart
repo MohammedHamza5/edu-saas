@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_button.dart';
@@ -36,7 +37,7 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
     'ACT',
     'Basics',
     'Advanced',
-    'مخصص',
+    'CUSTOM',
   ];
 
   String _selectedLevel = 'SAT';
@@ -56,18 +57,18 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
 
     setState(() => _isLoading = true);
 
-    final effectiveLevel = _selectedLevel == 'مخصص'
+    final effectiveLevel = _selectedLevel == 'CUSTOM'
         ? _customLevelController.text.trim()
         : _selectedLevel;
 
     final success = await context.read<GroupsCubit>().createGroup(
-          name: _nameController.text.trim(),
-          level: effectiveLevel,
-          description: _descController.text.trim().isNotEmpty
-              ? _descController.text.trim()
-              : null,
-          previousContentAccess: _allowPreviousContent ? 'allow' : 'deny',
-        );
+      name: _nameController.text.trim(),
+      level: effectiveLevel,
+      description: _descController.text.trim().isNotEmpty
+          ? _descController.text.trim()
+          : null,
+      previousContentAccess: _allowPreviousContent ? 'allow' : 'deny',
+    );
 
     if (mounted) {
       setState(() => _isLoading = false);
@@ -97,10 +98,10 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Expanded(
+                      Expanded(
                         child: Text(
-                          'إضافة مجموعة دراسية جديدة',
-                          style: TextStyle(
+                          context.l10n.createGroupDialogTitle,
+                          style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w800,
                             color: AppColors.textPrimary,
@@ -116,20 +117,20 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
                   const SizedBox(height: AppSpacing.s16),
                   AppTextField(
                     controller: _nameController,
-                    labelText: 'اسم المجموعة',
-                    hintText: 'مثال: SAT Math Intensive Level 1',
+                    labelText: context.l10n.groupNameLabel,
+                    hintText: context.l10n.groupNameHint,
                     prefixIcon: const Icon(Icons.group_outlined, size: 20),
                     validator: (val) {
                       if (val == null || val.trim().isEmpty) {
-                        return 'يرجى إدخال اسم المجموعة';
+                        return context.l10n.groupNameRequired;
                       }
                       return null;
                     },
                   ),
                   const SizedBox(height: AppSpacing.s16),
-                  const Text(
-                    'مسار أو مستوى المجموعة:',
-                    style: TextStyle(
+                  Text(
+                    context.l10n.groupTrackOrLevel,
+                    style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
@@ -141,13 +142,19 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
                     runSpacing: AppSpacing.s8,
                     children: _levels.map((level) {
                       final isSelected = _selectedLevel == level;
+                      final isCustom = level == 'CUSTOM';
+                      final labelText = isCustom ? context.l10n.customTrack : level;
                       return ChoiceChip(
-                        label: Text(level),
+                        label: Text(labelText),
                         selected: isSelected,
                         selectedColor: AppColors.primary,
                         labelStyle: TextStyle(
-                          color: isSelected ? Colors.white : AppColors.textPrimary,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          color: isSelected
+                              ? Colors.white
+                              : AppColors.textPrimary,
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.normal,
                         ),
                         onSelected: (selected) {
                           if (selected) {
@@ -157,17 +164,20 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
                       );
                     }).toList(),
                   ),
-                  if (_selectedLevel == 'مخصص') ...[
+                  if (_selectedLevel == 'CUSTOM') ...[
                     const SizedBox(height: AppSpacing.s12),
                     AppTextField(
                       controller: _customLevelController,
-                      labelText: 'المسار أو التصنيف المخصص',
-                      hintText: 'مثال: AP Calculus, الأولمبياد...',
-                      prefixIcon: const Icon(Icons.edit_note_outlined, size: 20),
+                      labelText: context.l10n.customTrackLabel,
+                      hintText: context.l10n.customTrackHint,
+                      prefixIcon: const Icon(
+                        Icons.edit_note_outlined,
+                        size: 20,
+                      ),
                       validator: (val) {
-                        if (_selectedLevel == 'مخصص' &&
+                        if (_selectedLevel == 'CUSTOM' &&
                             (val == null || val.trim().isEmpty)) {
-                          return 'يرجى كتابة اسم المسار المخصص';
+                          return context.l10n.customTrackRequired;
                         }
                         return null;
                       },
@@ -176,17 +186,22 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
                   const SizedBox(height: AppSpacing.s16),
                   AppTextField(
                     controller: _descController,
-                    labelText: 'وصف المجموعة (اختياري)',
-                    hintText: 'أهداف المجموعة ومواعيد المتابعة...',
+                    labelText: context.l10n.groupDescriptionOptional,
+                    hintText: context.l10n.groupDescriptionHint,
                     maxLines: 2,
-                    prefixIcon: const Icon(Icons.description_outlined, size: 20),
+                    prefixIcon: const Icon(
+                      Icons.description_outlined,
+                      size: 20,
+                    ),
                   ),
                   const SizedBox(height: AppSpacing.s16),
                   Container(
                     padding: const EdgeInsets.all(AppSpacing.s12),
                     decoration: BoxDecoration(
                       color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.radiusMedium,
+                      ),
                       border: Border.all(color: AppColors.border),
                     ),
                     child: Row(
@@ -195,9 +210,9 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
-                                'إتاحة المحتوى السابق للطلاب الجدد',
-                                style: TextStyle(
+                              Text(
+                                context.l10n.allowPreviousContentTitle,
+                                style: const TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,
                                   color: AppColors.textPrimary,
@@ -206,8 +221,8 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
                               const SizedBox(height: AppSpacing.s4),
                               Text(
                                 _allowPreviousContent
-                                    ? 'يستطيع الطالب الجديد رؤية ما نُشر قبل انضمامه'
-                                    : 'يرى الطالب فقط المحتوى المنشور بعد انضمامه',
+                                    ? context.l10n.allowPreviousContentDesc
+                                    : context.l10n.denyPreviousContentDesc,
                                 style: const TextStyle(
                                   fontSize: 11,
                                   color: AppColors.textSecondary,
@@ -228,7 +243,7 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
                   ),
                   const SizedBox(height: AppSpacing.s24),
                   AppButton(
-                    text: 'إنشاء المجموعة',
+                    text: context.l10n.createGroupAction,
                     isLoading: _isLoading,
                     onPressed: _submit,
                   ),

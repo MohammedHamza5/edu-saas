@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/di/injection_container.dart';
+import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -10,27 +12,43 @@ import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_error_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
 import '../../../../core/widgets/app_text_field.dart';
+import '../../../../core/widgets/language_switcher_button.dart';
 import '../../domain/entities/provision_tenant_params.dart';
 import '../cubit/onboarding_cubit.dart';
 import '../cubit/onboarding_state.dart';
 
-class PlatformOnboardingPage extends StatefulWidget {
+class PlatformOnboardingPage extends StatelessWidget {
   const PlatformOnboardingPage({super.key});
 
   @override
-  State<PlatformOnboardingPage> createState() => _PlatformOnboardingPageState();
+  Widget build(BuildContext context) {
+    try {
+      context.read<OnboardingCubit>();
+      return const _PlatformOnboardingView();
+    } catch (_) {
+      return BlocProvider<OnboardingCubit>(
+        create: (_) => InjectionContainer.createOnboardingCubit(),
+        child: const _PlatformOnboardingView(),
+      );
+    }
+  }
 }
 
-class _PlatformOnboardingPageState extends State<PlatformOnboardingPage> {
+class _PlatformOnboardingView extends StatefulWidget {
+  const _PlatformOnboardingView();
+
+  @override
+  State<_PlatformOnboardingView> createState() => _PlatformOnboardingViewState();
+}
+
+class _PlatformOnboardingViewState extends State<_PlatformOnboardingView> {
   final _formKey = GlobalKey<FormState>();
 
-  // Tenant Controllers
   final _tenantNameController = TextEditingController();
   final _tenantEmailController = TextEditingController();
   final _tenantPhoneController = TextEditingController();
   final _logoUrlController = TextEditingController();
 
-  // Teacher Controllers
   final _teacherNameController = TextEditingController();
   final _teacherEmailController = TextEditingController();
   final _teacherPasswordController = TextEditingController();
@@ -54,21 +72,21 @@ class _PlatformOnboardingPageState extends State<PlatformOnboardingPage> {
 
     final params = ProvisionTenantParams(
       tenantName: _tenantNameController.text.trim(),
-      tenantEmail: _tenantEmailController.text.trim().isNotEmpty
-          ? _tenantEmailController.text.trim()
-          : null,
-      tenantPhone: _tenantPhoneController.text.trim().isNotEmpty
-          ? _tenantPhoneController.text.trim()
-          : null,
-      logoUrl: _logoUrlController.text.trim().isNotEmpty
-          ? _logoUrlController.text.trim()
-          : null,
+      tenantEmail: _tenantEmailController.text.trim().isEmpty
+          ? null
+          : _tenantEmailController.text.trim(),
+      tenantPhone: _tenantPhoneController.text.trim().isEmpty
+          ? null
+          : _tenantPhoneController.text.trim(),
+      logoUrl: _logoUrlController.text.trim().isEmpty
+          ? null
+          : _logoUrlController.text.trim(),
       teacherFullName: _teacherNameController.text.trim(),
       teacherEmail: _teacherEmailController.text.trim(),
       teacherPassword: _teacherPasswordController.text,
-      teacherPhone: _teacherPhoneController.text.trim().isNotEmpty
-          ? _teacherPhoneController.text.trim()
-          : null,
+      teacherPhone: _teacherPhoneController.text.trim().isEmpty
+          ? null
+          : _teacherPhoneController.text.trim(),
     );
 
     context.read<OnboardingCubit>().provisionTenant(params);
@@ -78,12 +96,16 @@ class _PlatformOnboardingPageState extends State<PlatformOnboardingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('تهيئة مركز تعليمي جديد'),
+        title: Text(context.l10n.provisionNewCenter),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => context.go(AppRouter.login),
         ),
+        actions: const [
+          LanguageSwitcherButton(compact: true),
+          SizedBox(width: AppSpacing.s8),
+        ],
       ),
       body: BlocConsumer<OnboardingCubit, OnboardingState>(
         listener: (context, state) {
@@ -131,9 +153,9 @@ class _PlatformOnboardingPageState extends State<PlatformOnboardingPage> {
                       color: AppColors.success, size: 44),
                 ),
                 const SizedBox(height: AppSpacing.s16),
-                const Text(
-                  'تمت تهيئة المركز وحساب المعلم بنجاح!',
-                  style: TextStyle(
+                Text(
+                  context.l10n.centerProvisionedSuccess,
+                  style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w800,
                     color: AppColors.textPrimary,
@@ -150,28 +172,28 @@ class _PlatformOnboardingPageState extends State<PlatformOnboardingPage> {
                   ),
                   child: Column(
                     children: [
-                      _buildInfoRow('اسم المركز:', tenant.name),
+                      _buildInfoRow(context.l10n.centerNameLabel2, tenant.name),
                       const SizedBox(height: AppSpacing.s8),
-                      _buildInfoRow('معرّف المركز (Tenant ID):', tenant.id),
+                      _buildInfoRow(context.l10n.tenantIdLabel, tenant.id),
                       const SizedBox(height: AppSpacing.s8),
-                      _buildInfoRow('المعلم المسؤول:', teacher.fullName),
+                      _buildInfoRow(context.l10n.leadTeacherLabel, teacher.fullName),
                       const SizedBox(height: AppSpacing.s8),
-                      _buildInfoRow('البريد الإلكتروني:', teacher.email),
+                      _buildInfoRow(context.l10n.emailLabel, teacher.email),
                       const SizedBox(height: AppSpacing.s8),
-                      _buildInfoRow('الحالة:', 'نشط وجاهز للعمل'),
+                      _buildInfoRow(context.l10n.status, context.l10n.activeAndReadyStatus),
                     ],
                   ),
                 ),
                 const SizedBox(height: AppSpacing.s24),
                 AppButton(
-                  text: 'الانتقال لتسجيل الدخول كمعلم',
+                  text: context.l10n.goToTeacherLogin,
                   onPressed: () => context.go(AppRouter.login),
                 ),
                 const SizedBox(height: AppSpacing.s12),
                 TextButton(
                   onPressed: () =>
                       context.read<OnboardingCubit>().reset(),
-                  child: const Text('تهيئة مركز تعليمي آخر'),
+                  child: Text(context.l10n.provisionAnotherCenter),
                 ),
               ],
             ),
@@ -243,7 +265,7 @@ class _PlatformOnboardingPageState extends State<PlatformOnboardingPage> {
                           const SizedBox(width: AppSpacing.s12),
                           Expanded(
                             child: Text(
-                              'بيانات المركز التعليمي (Tenant)',
+                              context.l10n.centerDataHeader,
                               style: AppTypography.textTheme.headlineSmall,
                             ),
                           ),
@@ -252,12 +274,12 @@ class _PlatformOnboardingPageState extends State<PlatformOnboardingPage> {
                       const SizedBox(height: AppSpacing.s16),
                       AppTextField(
                         controller: _tenantNameController,
-                        labelText: 'اسم المركز أو الأكاديمية *',
-                        hintText: 'مثال: أكاديمية النور للرياضيات',
+                        labelText: context.l10n.centerNameRequired,
+                        hintText: context.l10n.tenantNameHint,
                         prefixIcon: const Icon(Icons.school_outlined),
                         validator: (val) {
                           if (val == null || val.trim().isEmpty) {
-                            return 'يرجى إدخال اسم المركز التعليمي';
+                            return context.l10n.centerNameRequiredError;
                           }
                           return null;
                         },
@@ -265,7 +287,7 @@ class _PlatformOnboardingPageState extends State<PlatformOnboardingPage> {
                       const SizedBox(height: AppSpacing.s16),
                       AppTextField(
                         controller: _tenantEmailController,
-                        labelText: 'البريد الإلكتروني للمركز (اختياري)',
+                        labelText: context.l10n.centerEmailOptional,
                         hintText: 'info@academy.edu',
                         keyboardType: TextInputType.emailAddress,
                         prefixIcon: const Icon(Icons.email_outlined),
@@ -273,7 +295,7 @@ class _PlatformOnboardingPageState extends State<PlatformOnboardingPage> {
                       const SizedBox(height: AppSpacing.s16),
                       AppTextField(
                         controller: _tenantPhoneController,
-                        labelText: 'رقم هاتف المركز (اختياري)',
+                        labelText: context.l10n.centerPhoneOptional,
                         hintText: '01000000000',
                         keyboardType: TextInputType.phone,
                         prefixIcon: const Icon(Icons.phone_outlined),
@@ -281,7 +303,7 @@ class _PlatformOnboardingPageState extends State<PlatformOnboardingPage> {
                       const SizedBox(height: AppSpacing.s16),
                       AppTextField(
                         controller: _logoUrlController,
-                        labelText: 'رابط الشعار Logo URL (اختياري)',
+                        labelText: context.l10n.centerLogoUrlOptional,
                         hintText: 'https://example.com/logo.png',
                         prefixIcon: const Icon(Icons.image_outlined),
                       ),
@@ -296,19 +318,19 @@ class _PlatformOnboardingPageState extends State<PlatformOnboardingPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Row(
+                      Row(
                         children: [
-                          CircleAvatar(
+                          const CircleAvatar(
                             radius: 18,
                             backgroundColor: AppColors.primaryLight,
                             child: Icon(Icons.person_outline_rounded,
                                 color: AppColors.primary, size: 20),
                           ),
-                          SizedBox(width: AppSpacing.s12),
+                          const SizedBox(width: AppSpacing.s12),
                           Expanded(
                             child: Text(
-                              'بيانات حساب المعلم الأول',
-                              style: TextStyle(
+                              context.l10n.leadTeacherDataHeader,
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.textPrimary,
@@ -320,12 +342,12 @@ class _PlatformOnboardingPageState extends State<PlatformOnboardingPage> {
                       const SizedBox(height: AppSpacing.s16),
                       AppTextField(
                         controller: _teacherNameController,
-                        labelText: 'الاسم الكامل للمعلم *',
-                        hintText: 'د. أحمد المنشاوي',
+                        labelText: context.l10n.leadTeacherNameRequired,
+                        hintText: context.l10n.teacherNameHint,
                         prefixIcon: const Icon(Icons.badge_outlined),
                         validator: (val) {
                           if (val == null || val.trim().isEmpty) {
-                            return 'يرجى إدخال اسم المعلم';
+                            return context.l10n.leadTeacherNameRequiredError;
                           }
                           return null;
                         },
@@ -333,16 +355,16 @@ class _PlatformOnboardingPageState extends State<PlatformOnboardingPage> {
                       const SizedBox(height: AppSpacing.s16),
                       AppTextField(
                         controller: _teacherEmailController,
-                        labelText: 'البريد الإلكتروني لتسجيل الدخول *',
+                        labelText: context.l10n.leadTeacherEmailRequired,
                         hintText: 'teacher@academy.edu',
                         keyboardType: TextInputType.emailAddress,
                         prefixIcon: const Icon(Icons.alternate_email_rounded),
                         validator: (val) {
                           if (val == null || val.trim().isEmpty) {
-                            return 'يرجى إدخال البريد الإلكتروني';
+                            return context.l10n.leadTeacherEmailRequiredError;
                           }
                           if (!val.contains('@')) {
-                            return 'يرجى إدخال بريد إلكتروني صحيح';
+                            return context.l10n.pleaseEnterValidEmail;
                           }
                           return null;
                         },
@@ -350,13 +372,13 @@ class _PlatformOnboardingPageState extends State<PlatformOnboardingPage> {
                       const SizedBox(height: AppSpacing.s16),
                       AppTextField(
                         controller: _teacherPasswordController,
-                        labelText: 'كلمة المرور *',
+                        labelText: context.l10n.leadTeacherPasswordRequired,
                         hintText: '••••••••',
                         isPassword: true,
                         prefixIcon: const Icon(Icons.lock_outline_rounded),
                         validator: (val) {
                           if (val == null || val.length < 6) {
-                            return 'كلمة المرور يجب ألا تقل عن 6 أحرف';
+                            return context.l10n.leadTeacherPasswordRequiredError;
                           }
                           return null;
                         },
@@ -364,7 +386,7 @@ class _PlatformOnboardingPageState extends State<PlatformOnboardingPage> {
                       const SizedBox(height: AppSpacing.s16),
                       AppTextField(
                         controller: _teacherPhoneController,
-                        labelText: 'رقم هاتف المعلم (اختياري)',
+                        labelText: context.l10n.leadTeacherPhoneOptional,
                         hintText: '01012345678',
                         keyboardType: TextInputType.phone,
                         prefixIcon: const Icon(Icons.smartphone_rounded),
@@ -376,7 +398,7 @@ class _PlatformOnboardingPageState extends State<PlatformOnboardingPage> {
                 const SizedBox(height: AppSpacing.s24),
 
                 AppButton(
-                  text: 'إنشاء وتهيئة المركز التعليمي',
+                  text: context.l10n.createAndProvisionCenter,
                   onPressed: _submit,
                 ),
               ],

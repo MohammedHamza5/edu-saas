@@ -6,6 +6,7 @@ import 'app_button.dart';
 
 class AppEmptyView extends StatelessWidget {
   final String? message;
+  final String? subtitle;
   final String? actionText;
   final VoidCallback? onAction;
   final IconData icon;
@@ -13,6 +14,7 @@ class AppEmptyView extends StatelessWidget {
   const AppEmptyView({
     super.key,
     this.message,
+    this.subtitle,
     this.actionText,
     this.onAction,
     this.icon = Icons.inbox_outlined,
@@ -51,6 +53,17 @@ class AppEmptyView extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
+            if (subtitle != null) ...[
+              const SizedBox(height: AppSpacing.s8),
+              Text(
+                subtitle!,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: AppColors.textMuted,
+                  fontSize: 13,
+                ),
+              ),
+            ],
             if (onAction != null && actionText != null) ...[
               const SizedBox(height: AppSpacing.s20),
               AppButton(

@@ -98,83 +98,4924 @@ abstract class AppLocalizations {
     Locale('en'),
   ];
 
-  /// عنوان التطبيق الرئيسي
+  /// Main platform title
   ///
-  /// In ar, this message translates to:
-  /// **'منصة التعليم الذكية'**
+  /// In en, this message translates to:
+  /// **'Smart Education Platform'**
   String get appTitle;
 
-  /// نص التحميل الافتراضي
+  /// Splash subtitle
   ///
-  /// In ar, this message translates to:
-  /// **'جارٍ التحميل...'**
+  /// In en, this message translates to:
+  /// **'Advanced Mathematics & Education Platform'**
+  String get advancedMathEducationPlatform;
+
+  /// Generic loading state
+  ///
+  /// In en, this message translates to:
+  /// **'Loading...'**
   String get loading;
 
-  /// رسالة الخطأ العامة
+  /// Generic error message
   ///
-  /// In ar, this message translates to:
-  /// **'حدث خطأ غير متوقع'**
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred'**
   String get errorOccurred;
 
-  /// زر إعادة المحاولة
+  /// Retry action button
   ///
-  /// In ar, this message translates to:
-  /// **'إعادة المحاولة'**
+  /// In en, this message translates to:
+  /// **'Retry'**
   String get retry;
 
-  /// نص الحالة الفارغة
+  /// Empty state label
   ///
-  /// In ar, this message translates to:
-  /// **'لا توجد بيانات حالياً'**
+  /// In en, this message translates to:
+  /// **'No data available'**
   String get emptyData;
 
-  /// عنوان شاشة تسجيل الدخول
+  /// Cancel button
   ///
-  /// In ar, this message translates to:
-  /// **'تسجيل الدخول'**
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// Confirm button
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get confirm;
+
+  /// Save button
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// Edit button
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get edit;
+
+  /// Delete button
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// Back button
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get back;
+
+  /// Close button
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
+  /// Search placeholder or button
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get search;
+
+  /// Filter button
+  ///
+  /// In en, this message translates to:
+  /// **'Filter'**
+  String get filter;
+
+  /// All filter option
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get all;
+
+  /// Status label
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get status;
+
+  /// Actions column or header
+  ///
+  /// In en, this message translates to:
+  /// **'Actions'**
+  String get actions;
+
+  /// More options label
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get more;
+
+  /// Drawer tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'All Screens & Sections'**
+  String get allScreensAndSections;
+
+  /// Success message title
+  ///
+  /// In en, this message translates to:
+  /// **'Success'**
+  String get success;
+
+  /// Warning message title
+  ///
+  /// In en, this message translates to:
+  /// **'Warning'**
+  String get warning;
+
+  /// Info message title
+  ///
+  /// In en, this message translates to:
+  /// **'Information'**
+  String get info;
+
+  /// Date label
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get date;
+
+  /// Time label
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get time;
+
+  /// Duration label
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get duration;
+
+  /// Minutes label
+  ///
+  /// In en, this message translates to:
+  /// **'Minutes'**
+  String get minutes;
+
+  /// Questions count label
+  ///
+  /// In en, this message translates to:
+  /// **'Questions'**
+  String get questions;
+
+  /// Total label
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get total;
+
+  /// Details label
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get details;
+
+  /// Logout button
+  ///
+  /// In en, this message translates to:
+  /// **'Sign Out'**
+  String get logout;
+
+  /// Switch language action
+  ///
+  /// In en, this message translates to:
+  /// **'Switch Language'**
+  String get switchLanguage;
+
+  /// English language name
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get english;
+
+  /// Arabic language name
+  ///
+  /// In en, this message translates to:
+  /// **'Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©'**
+  String get arabic;
+
+  /// Select button or prompt
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get select;
+
+  /// Submit button
+  ///
+  /// In en, this message translates to:
+  /// **'Submit'**
+  String get submit;
+
+  /// View action
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get view;
+
+  /// Refresh action
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get refresh;
+
+  /// Search empty state
+  ///
+  /// In en, this message translates to:
+  /// **'No matching results found'**
+  String get noResultsFound;
+
+  /// Feature coming soon note
+  ///
+  /// In en, this message translates to:
+  /// **'Feature under development'**
+  String get underDevelopment;
+
+  /// Active status
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get active;
+
+  /// Inactive status
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive'**
+  String get inactive;
+
+  /// Pending status
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get pending;
+
+  /// Suspended status
+  ///
+  /// In en, this message translates to:
+  /// **'Suspended'**
+  String get suspended;
+
+  /// Rejected status
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get rejected;
+
+  /// Not available abbreviation
+  ///
+  /// In en, this message translates to:
+  /// **'N/A'**
+  String get notAvailable;
+
+  /// Copy action
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get copy;
+
+  /// Copied toast
+  ///
+  /// In en, this message translates to:
+  /// **'Copied to clipboard'**
+  String get copied;
+
+  /// Download action
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get download;
+
+  /// Upload action
+  ///
+  /// In en, this message translates to:
+  /// **'Upload'**
+  String get upload;
+
+  /// Login screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Sign In'**
   String get loginTitle;
 
-  /// حقل البريد الإلكتروني
+  /// Login screen subtitle
   ///
-  /// In ar, this message translates to:
-  /// **'البريد الإلكتروني'**
+  /// In en, this message translates to:
+  /// **'Access your mathematical learning workspace'**
+  String get loginSubtitle;
+
+  /// Email field label
+  ///
+  /// In en, this message translates to:
+  /// **'Email Address'**
   String get emailLabel;
 
-  /// حقل كلمة المرور
+  /// Email hint
   ///
-  /// In ar, this message translates to:
-  /// **'كلمة المرور'**
+  /// In en, this message translates to:
+  /// **'name@example.com'**
+  String get emailHint;
+
+  /// Password field label
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
   String get passwordLabel;
 
-  /// زر تسجيل الدخول
+  /// Password hint
   ///
-  /// In ar, this message translates to:
-  /// **'دخول'**
+  /// In en, this message translates to:
+  /// **'Enter your password'**
+  String get passwordHint;
+
+  /// Login button text
+  ///
+  /// In en, this message translates to:
+  /// **'Sign In'**
   String get loginButton;
 
-  /// رسالة تعليق المستأجر
+  /// Signing in progress text
   ///
-  /// In ar, this message translates to:
-  /// **'تم تعليق هذا الحساب المؤسسي. يرجى التواصل مع الإدارة.'**
-  String get tenantSuspendedMessage;
+  /// In en, this message translates to:
+  /// **'Signing in...'**
+  String get loggingIn;
 
-  /// دور المعلم
+  /// Invalid credentials error
   ///
-  /// In ar, this message translates to:
-  /// **'معلم'**
+  /// In en, this message translates to:
+  /// **'Invalid email or password'**
+  String get invalidCredentials;
+
+  /// Forgot password link
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot Password?'**
+  String get forgotPassword;
+
+  /// Teacher role
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher'**
   String get roleTeacher;
 
-  /// دور الطالب
+  /// Student role
   ///
-  /// In ar, this message translates to:
-  /// **'طالب'**
+  /// In en, this message translates to:
+  /// **'Student'**
   String get roleStudent;
 
-  /// دور ولي الأمر
+  /// Parent role
   ///
-  /// In ar, this message translates to:
-  /// **'ولي أمر'**
+  /// In en, this message translates to:
+  /// **'Parent'**
   String get roleParent;
+
+  /// Role selector label
+  ///
+  /// In en, this message translates to:
+  /// **'Select Role'**
+  String get selectRole;
+
+  /// Student registration title
+  ///
+  /// In en, this message translates to:
+  /// **'Student Registration'**
+  String get registerStudentTitle;
+
+  /// Student registration subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Create your account to join your teacher\'s study groups'**
+  String get registerStudentSubtitle;
+
+  /// Full name field
+  ///
+  /// In en, this message translates to:
+  /// **'Full Name'**
+  String get fullNameLabel;
+
+  /// Full name hint
+  ///
+  /// In en, this message translates to:
+  /// **'Enter student full name'**
+  String get fullNameHint;
+
+  /// Phone field label
+  ///
+  /// In en, this message translates to:
+  /// **'Student Phone Number'**
+  String get phoneLabel;
+
+  /// Phone hint
+  ///
+  /// In en, this message translates to:
+  /// **'01xxxxxxxxx'**
+  String get phoneHint;
+
+  /// Parent phone label
+  ///
+  /// In en, this message translates to:
+  /// **'Parent Phone Number'**
+  String get parentPhoneLabel;
+
+  /// Parent phone hint
+  ///
+  /// In en, this message translates to:
+  /// **'01xxxxxxxxx'**
+  String get parentPhoneHint;
+
+  /// Target exam field
+  ///
+  /// In en, this message translates to:
+  /// **'Target Exam'**
+  String get targetExamLabel;
+
+  /// Target exam dropdown prompt
+  ///
+  /// In en, this message translates to:
+  /// **'Select target standardized exam'**
+  String get selectTargetExam;
+
+  /// Register button
+  ///
+  /// In en, this message translates to:
+  /// **'Create Account'**
+  String get registerSubmitButton;
+
+  /// Register progress
+  ///
+  /// In en, this message translates to:
+  /// **'Creating account...'**
+  String get registeringStudent;
+
+  /// Success title
+  ///
+  /// In en, this message translates to:
+  /// **'Registration Submitted'**
+  String get registrationSuccessTitle;
+
+  /// Success message
+  ///
+  /// In en, this message translates to:
+  /// **'Your account request was submitted. Awaiting teacher review and approval.'**
+  String get registrationSuccessBody;
+
+  /// Already registered link
+  ///
+  /// In en, this message translates to:
+  /// **'Already have an account? Sign in'**
+  String get alreadyHaveAccount;
+
+  /// No account link
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t have an account? Register as a student'**
+  String get dontHaveAccount;
+
+  /// Pending approval title
+  ///
+  /// In en, this message translates to:
+  /// **'Account Pending Approval'**
+  String get studentPendingTitle;
+
+  /// Pending approval subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Your application has been received'**
+  String get studentPendingSubtitle;
+
+  /// Pending approval description
+  ///
+  /// In en, this message translates to:
+  /// **'Your registration request is currently under review by the teacher. You will gain full platform access once approved.'**
+  String get studentPendingDescription;
+
+  /// Check pending status button
+  ///
+  /// In en, this message translates to:
+  /// **'Check Status'**
+  String get checkStatusButton;
+
+  /// Tenant suspended title
+  ///
+  /// In en, this message translates to:
+  /// **'Account Suspended'**
+  String get tenantSuspendedTitle;
+
+  /// Tenant suspended message
+  ///
+  /// In en, this message translates to:
+  /// **'This institutional workspace is currently suspended. Please contact platform administration.'**
+  String get tenantSuspendedMessage;
+
+  /// Tenant suspended help note
+  ///
+  /// In en, this message translates to:
+  /// **'If you believe this is in error, please reach out to your instructor or support team.'**
+  String get tenantSuspendedHelp;
+
+  /// Onboarding title
+  ///
+  /// In en, this message translates to:
+  /// **'Platform Provisioning'**
+  String get platformOnboardingTitle;
+
+  /// Create tenant heading
+  ///
+  /// In en, this message translates to:
+  /// **'Provision New Teacher Workspace'**
+  String get createTenantTitle;
+
+  /// Tenant name label
+  ///
+  /// In en, this message translates to:
+  /// **'Platform / Academy Name'**
+  String get tenantNameLabel;
+
+  /// Tenant name hint
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Newton Math Academy'**
+  String get tenantNameHint;
+
+  /// Subdomain label
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace Subdomain'**
+  String get tenantSubdomainLabel;
+
+  /// Subdomain hint
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. newton-math'**
+  String get tenantSubdomainHint;
+
+  /// Lead teacher name
+  ///
+  /// In en, this message translates to:
+  /// **'Lead Teacher Name'**
+  String get teacherNameLabel;
+
+  /// Lead teacher name hint
+  ///
+  /// In en, this message translates to:
+  /// **'Dr. Full Name'**
+  String get teacherNameHint;
+
+  /// Admin email label
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher Account Email'**
+  String get adminEmailLabel;
+
+  /// Admin email hint
+  ///
+  /// In en, this message translates to:
+  /// **'teacher@domain.com'**
+  String get adminEmailHint;
+
+  /// Provision button
+  ///
+  /// In en, this message translates to:
+  /// **'Provision Workspace'**
+  String get createTenantButton;
+
+  /// Provision progress
+  ///
+  /// In en, this message translates to:
+  /// **'Provisioning workspace...'**
+  String get creatingTenant;
+
+  /// Provision success
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace provisioned successfully!'**
+  String get tenantCreatedSuccess;
+
+  /// Navigation dashboard
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard'**
+  String get navDashboard;
+
+  /// Navigation students
+  ///
+  /// In en, this message translates to:
+  /// **'Students'**
+  String get navStudents;
+
+  /// Navigation groups
+  ///
+  /// In en, this message translates to:
+  /// **'Study Groups'**
+  String get navGroups;
+
+  /// Navigation content library
+  ///
+  /// In en, this message translates to:
+  /// **'Content Library'**
+  String get navContent;
+
+  /// Navigation assignments
+  ///
+  /// In en, this message translates to:
+  /// **'Assignments'**
+  String get navAssignments;
+
+  /// Navigation exams
+  ///
+  /// In en, this message translates to:
+  /// **'Exams & Tests'**
+  String get navExams;
+
+  /// Navigation attendance
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance'**
+  String get navAttendance;
+
+  /// Navigation notifications
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get navNotifications;
+
+  /// Navigation videos
+  ///
+  /// In en, this message translates to:
+  /// **'Video Library'**
+  String get navVideos;
+
+  /// Navigation reports
+  ///
+  /// In en, this message translates to:
+  /// **'Analytics'**
+  String get navReports;
+
+  /// Navigation settings
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get navSettings;
+
+  /// Sidebar section students
+  ///
+  /// In en, this message translates to:
+  /// **'Student Management'**
+  String get navSectionStudents;
+
+  /// Sidebar section academic
+  ///
+  /// In en, this message translates to:
+  /// **'Academic Engine'**
+  String get navSectionAcademic;
+
+  /// Sidebar section system
+  ///
+  /// In en, this message translates to:
+  /// **'System & Tools'**
+  String get navSectionSystem;
+
+  /// Teacher portal header
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher Operations Hub'**
+  String get teacherPortal;
+
+  /// Student portal header
+  ///
+  /// In en, this message translates to:
+  /// **'Student Learning Portal'**
+  String get studentPortal;
+
+  /// Academic mathematics subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Academic Mathematics'**
+  String get academicMathematics;
+
+  /// Select study group title
+  ///
+  /// In en, this message translates to:
+  /// **'Select Study Group'**
+  String get selectSubjectGroup;
+
+  /// Notice when no groups exist
+  ///
+  /// In en, this message translates to:
+  /// **'Please create a study group first to access {feature}'**
+  String createGroupFirstNotice(String feature);
+
+  /// Create group button
+  ///
+  /// In en, this message translates to:
+  /// **'Create Group'**
+  String get createGroup;
+
+  /// Select group header with feature name
+  ///
+  /// In en, this message translates to:
+  /// **'Select Group â€¢ {feature}'**
+  String selectGroupForFeature(String feature);
+
+  /// Send announcement nav label
+  ///
+  /// In en, this message translates to:
+  /// **'Broadcast Announcement'**
+  String get sendAnnouncementNav;
+
+  /// Logout dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Sign Out'**
+  String get logoutDialogTitle;
+
+  /// Logout confirmation message
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to end your active session?'**
+  String get logoutDialogContent;
+
+  /// Student bottom nav home
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get studentNavDashboard;
+
+  /// Student bottom nav notifications
+  ///
+  /// In en, this message translates to:
+  /// **'Alerts'**
+  String get studentNavNotifications;
+
+  /// Student bottom nav materials
+  ///
+  /// In en, this message translates to:
+  /// **'Study Materials'**
+  String get studentNavContent;
+
+  /// Student bottom nav assignments
+  ///
+  /// In en, this message translates to:
+  /// **'Assignments'**
+  String get studentNavAssignments;
+
+  /// Student bottom nav exams
+  ///
+  /// In en, this message translates to:
+  /// **'Exams'**
+  String get studentNavExams;
+
+  /// Student bottom nav attendance
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance'**
+  String get studentNavAttendance;
+
+  /// No groups warning
+  ///
+  /// In en, this message translates to:
+  /// **'You are not enrolled in any study group yet. Please contact your instructor.'**
+  String get studentNoGroupsAssigned;
+
+  /// Group selector title
+  ///
+  /// In en, this message translates to:
+  /// **'Select Study Group'**
+  String get studentSelectGroup;
+
+  /// Switch group button
+  ///
+  /// In en, this message translates to:
+  /// **'Switch Group'**
+  String get studentChangeGroup;
+
+  /// Bottom sheet title
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a Study Group to view its materials'**
+  String get studentGroupsBottomSheetTitle;
+
+  /// Teacher dashboard title
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher Operations Hub'**
+  String get teacherDashboardTitle;
+
+  /// Action radar title
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher Action Radar'**
+  String get teacherActionRadarTitle;
+
+  /// Action radar subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Priority pending operations requiring your review'**
+  String get teacherActionRadarSubtitle;
+
+  /// Pending students count badge
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Students Pending Approval'**
+  String pendingApprovalsCount(int count);
+
+  /// Attendance card title
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance Records'**
+  String get attendanceReviewTitle;
+
+  /// Attendance card subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Track and record daily group attendance'**
+  String get attendanceReviewSubtitle;
+
+  /// Grading queue card title
+  ///
+  /// In en, this message translates to:
+  /// **'Assignments Requiring Grading'**
+  String get gradingQueueTitle;
+
+  /// Grading queue subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Student submissions awaiting assessment'**
+  String get gradingQueueSubtitle;
+
+  /// Activity card title
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Platform Activity'**
+  String get recentActivityTitle;
+
+  /// Quick stats title
+  ///
+  /// In en, this message translates to:
+  /// **'Academic Overview'**
+  String get quickStatsTitle;
+
+  /// Active students stat
+  ///
+  /// In en, this message translates to:
+  /// **'Active Students'**
+  String get activeStudentsCount;
+
+  /// Total groups stat
+  ///
+  /// In en, this message translates to:
+  /// **'Active Study Groups'**
+  String get totalGroupsCount;
+
+  /// Scheduled exams stat
+  ///
+  /// In en, this message translates to:
+  /// **'Active Exams'**
+  String get scheduledExamsCount;
+
+  /// Materials stat
+  ///
+  /// In en, this message translates to:
+  /// **'Published Materials'**
+  String get publishedMaterialsCount;
+
+  /// Student dashboard title
+  ///
+  /// In en, this message translates to:
+  /// **'Student Learning Dashboard'**
+  String get studentDashboardTitle;
+
+  /// Student greeting
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome back, {name}'**
+  String studentWelcomeGreeting(String name);
+
+  /// SAT mastery card title
+  ///
+  /// In en, this message translates to:
+  /// **'SAT Math Domain Mastery'**
+  String get satMasteryTitle;
+
+  /// SAT projected score title
+  ///
+  /// In en, this message translates to:
+  /// **'SAT Projected Math Score'**
+  String get satScoreProjection;
+
+  /// Domain label
+  ///
+  /// In en, this message translates to:
+  /// **'Math Domain'**
+  String get satMathDomain;
+
+  /// SAT math domain 1
+  ///
+  /// In en, this message translates to:
+  /// **'Heart of Algebra'**
+  String get heartOfAlgebra;
+
+  /// SAT math domain 2
+  ///
+  /// In en, this message translates to:
+  /// **'Problem Solving & Data Analysis'**
+  String get problemSolvingDataAnalysis;
+
+  /// SAT math domain 3
+  ///
+  /// In en, this message translates to:
+  /// **'Passport to Advanced Math'**
+  String get passportToAdvancedMath;
+
+  /// SAT math domain 4
+  ///
+  /// In en, this message translates to:
+  /// **'Additional Topics in Math'**
+  String get additionalTopicsMath;
+
+  /// Upcoming exams title
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming Tests & Quizzes'**
+  String get upcomingExamsTitle;
+
+  /// Recent assignments title
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Assignments'**
+  String get recentAssignmentsTitle;
+
+  /// Continue learning button
+  ///
+  /// In en, this message translates to:
+  /// **'Continue Learning'**
+  String get continueLearning;
+
+  /// App bar title
+  ///
+  /// In en, this message translates to:
+  /// **'Parent Portal'**
+  String get parentDashboardTitle;
+
+  /// Child selector dropdown
+  ///
+  /// In en, this message translates to:
+  /// **'Select Student'**
+  String get parentSelectChild;
+
+  /// Academic overview card title
+  ///
+  /// In en, this message translates to:
+  /// **'Academic Performance Overview'**
+  String get academicOverviewTitle;
+
+  /// Attendance rate stat
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance Rate'**
+  String get childAttendanceRate;
+
+  /// Exam average stat
+  ///
+  /// In en, this message translates to:
+  /// **'Exam Score Average'**
+  String get childExamAverage;
+
+  /// Pending assignments stat
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Assignments'**
+  String get childPendingAssignments;
+
+  /// Child activity title
+  ///
+  /// In en, this message translates to:
+  /// **'Child\'s Recent Activity'**
+  String get childRecentActivity;
+
+  /// Call instructor button
+  ///
+  /// In en, this message translates to:
+  /// **'Call Instructor'**
+  String get callTeacherAction;
+
+  /// Message instructor button
+  ///
+  /// In en, this message translates to:
+  /// **'Contact Instructor'**
+  String get messageTeacherAction;
+
+  /// Students list title
+  ///
+  /// In en, this message translates to:
+  /// **'Student Directory'**
+  String get studentsListTitle;
+
+  /// Student search hint
+  ///
+  /// In en, this message translates to:
+  /// **'Search by student name or phone...'**
+  String get searchStudentsHint;
+
+  /// All groups filter
+  ///
+  /// In en, this message translates to:
+  /// **'All Study Groups'**
+  String get allGroupsFilter;
+
+  /// All statuses filter
+  ///
+  /// In en, this message translates to:
+  /// **'All Statuses'**
+  String get allStatusesFilter;
+
+  /// Pending students title
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Student Approvals'**
+  String get pendingStudentsTitle;
+
+  /// Pending students count
+  ///
+  /// In en, this message translates to:
+  /// **'{count} pending applications'**
+  String pendingStudentsCount(int count);
+
+  /// Approve student button
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get approveStudentAction;
+
+  /// Reject student button
+  ///
+  /// In en, this message translates to:
+  /// **'Reject'**
+  String get rejectStudentAction;
+
+  /// Approve student modal title
+  ///
+  /// In en, this message translates to:
+  /// **'Approve Student Registration'**
+  String get approveStudentConfirmTitle;
+
+  /// Approve student modal body
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to approve {name}? They will gain immediate access to their student portal.'**
+  String approveStudentConfirmBody(String name);
+
+  /// Reject student modal title
+  ///
+  /// In en, this message translates to:
+  /// **'Reject Student Registration'**
+  String get rejectStudentConfirmTitle;
+
+  /// Reject student modal body
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to reject the application for {name}?'**
+  String rejectStudentConfirmBody(String name);
+
+  /// Student approved toast
+  ///
+  /// In en, this message translates to:
+  /// **'Student approved successfully'**
+  String get studentApprovedToast;
+
+  /// Student rejected toast
+  ///
+  /// In en, this message translates to:
+  /// **'Student registration rejected'**
+  String get studentRejectedToast;
+
+  /// Assign groups button
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Groups'**
+  String get assignGroupsAction;
+
+  /// Assign groups page title
+  ///
+  /// In en, this message translates to:
+  /// **'Assign Study Groups'**
+  String get assignGroupsTitle;
+
+  /// Assign groups subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Select groups for {name}'**
+  String assignGroupsSubtitle(String name);
+
+  /// Assign groups helper
+  ///
+  /// In en, this message translates to:
+  /// **'Check the groups this student should be enrolled in:'**
+  String get selectGroupsInstruction;
+
+  /// Groups saved toast
+  ///
+  /// In en, this message translates to:
+  /// **'Group assignments updated successfully'**
+  String get groupsAssignedSuccess;
+
+  /// Student 360 profile title
+  ///
+  /// In en, this message translates to:
+  /// **'Student 360Â° Profile'**
+  String get student360Title;
+
+  /// Tab overview
+  ///
+  /// In en, this message translates to:
+  /// **'Overview'**
+  String get tabOverview;
+
+  /// Tab exams history
+  ///
+  /// In en, this message translates to:
+  /// **'Exams & Scores'**
+  String get tabAcademicHistory;
+
+  /// Tab attendance
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance'**
+  String get tabAttendance;
+
+  /// Tab assignments
+  ///
+  /// In en, this message translates to:
+  /// **'Assignments'**
+  String get tabAssignments;
+
+  /// Tab parent info
+  ///
+  /// In en, this message translates to:
+  /// **'Parent Contact'**
+  String get tabParentContact;
+
+  /// Student phone label
+  ///
+  /// In en, this message translates to:
+  /// **'Student Phone'**
+  String get studentPhoneTitle;
+
+  /// Parent phone label
+  ///
+  /// In en, this message translates to:
+  /// **'Parent Phone'**
+  String get parentPhoneTitle;
+
+  /// Enrollment date label
+  ///
+  /// In en, this message translates to:
+  /// **'Enrolled Date'**
+  String get enrollmentDateTitle;
+
+  /// Enrolled groups label
+  ///
+  /// In en, this message translates to:
+  /// **'Enrolled Groups'**
+  String get currentGroupsTitle;
+
+  /// Average exam score
+  ///
+  /// In en, this message translates to:
+  /// **'Average Score'**
+  String get overallExamAverage;
+
+  /// Label for attendance percentage
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance Rate'**
+  String get attendanceRateLabel;
+
+  /// Groups list title
+  ///
+  /// In en, this message translates to:
+  /// **'Study Groups'**
+  String get groupsListTitle;
+
+  /// Create group button
+  ///
+  /// In en, this message translates to:
+  /// **'Create Group'**
+  String get createGroupAction;
+
+  /// Group name label
+  ///
+  /// In en, this message translates to:
+  /// **'Group Name'**
+  String get groupNameLabel;
+
+  /// Group name hint
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. SAT Basics - Cohort Alpha'**
+  String get groupNameHint;
+
+  /// Group description label
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get groupDescriptionLabel;
+
+  /// Group grade level
+  ///
+  /// In en, this message translates to:
+  /// **'Academic Level'**
+  String get groupGradeLevelLabel;
+
+  /// Target exam label
+  ///
+  /// In en, this message translates to:
+  /// **'Target Exam'**
+  String get groupTargetExamLabel;
+
+  /// Capacity label
+  ///
+  /// In en, this message translates to:
+  /// **'Capacity (Students)'**
+  String get groupCapacityLabel;
+
+  /// Schedule label
+  ///
+  /// In en, this message translates to:
+  /// **'Meeting Schedule'**
+  String get groupScheduleLabel;
+
+  /// Schedule hint
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Sundays & Tuesdays @ 5:00 PM'**
+  String get groupScheduleHint;
+
+  /// Group created toast
+  ///
+  /// In en, this message translates to:
+  /// **'Study group created successfully'**
+  String get groupCreatedSuccess;
+
+  /// Group updated toast
+  ///
+  /// In en, this message translates to:
+  /// **'Group details updated'**
+  String get groupUpdatedSuccess;
+
+  /// Group delete title
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Study Group'**
+  String get groupDeleteConfirmTitle;
+
+  /// Group delete body
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this group? All enrolled memberships will be revoked.'**
+  String get groupDeleteConfirmBody;
+
+  /// Group members tab
+  ///
+  /// In en, this message translates to:
+  /// **'Students'**
+  String get groupMembersTab;
+
+  /// Group materials tab
+  ///
+  /// In en, this message translates to:
+  /// **'Materials'**
+  String get groupContentTab;
+
+  /// Group assignments tab
+  ///
+  /// In en, this message translates to:
+  /// **'Assignments'**
+  String get groupAssignmentsTab;
+
+  /// Group exams tab
+  ///
+  /// In en, this message translates to:
+  /// **'Exams'**
+  String get groupExamsTab;
+
+  /// Add student to group button
+  ///
+  /// In en, this message translates to:
+  /// **'Add Student'**
+  String get addMemberAction;
+
+  /// Remove student button
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get removeMemberAction;
+
+  /// Search group members
+  ///
+  /// In en, this message translates to:
+  /// **'Search group students...'**
+  String get searchMembersHint;
+
+  /// Add member modal title
+  ///
+  /// In en, this message translates to:
+  /// **'Add Student to Group'**
+  String get addMemberTitle;
+
+  /// Student dropdown prompt
+  ///
+  /// In en, this message translates to:
+  /// **'Select an active student:'**
+  String get selectStudentToAdd;
+
+  /// Member added toast
+  ///
+  /// In en, this message translates to:
+  /// **'Student added to group'**
+  String get memberAddedSuccess;
+
+  /// Member removed toast
+  ///
+  /// In en, this message translates to:
+  /// **'Student removed from group'**
+  String get memberRemovedSuccess;
+
+  /// Empty group members state
+  ///
+  /// In en, this message translates to:
+  /// **'No students enrolled in this group yet.'**
+  String get emptyMembersMessage;
+
+  /// Content library title
+  ///
+  /// In en, this message translates to:
+  /// **'Content & Library'**
+  String get contentLibraryTitle;
+
+  /// Add content button
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Material'**
+  String get addContentAction;
+
+  /// Content title label
+  ///
+  /// In en, this message translates to:
+  /// **'Material Title'**
+  String get contentTitleLabel;
+
+  /// Content description label
+  ///
+  /// In en, this message translates to:
+  /// **'Summary / Description'**
+  String get contentDescriptionLabel;
+
+  /// Content type label
+  ///
+  /// In en, this message translates to:
+  /// **'Content Type'**
+  String get contentTypeLabel;
+
+  /// Video type
+  ///
+  /// In en, this message translates to:
+  /// **'Recorded Video'**
+  String get contentTypeVideo;
+
+  /// PDF type
+  ///
+  /// In en, this message translates to:
+  /// **'PDF Document'**
+  String get contentTypePdf;
+
+  /// Document type
+  ///
+  /// In en, this message translates to:
+  /// **'Worksheet / Notes'**
+  String get contentTypeDocument;
+
+  /// Link type
+  ///
+  /// In en, this message translates to:
+  /// **'Web Resource Link'**
+  String get contentTypeLink;
+
+  /// URL field
+  ///
+  /// In en, this message translates to:
+  /// **'Resource URL'**
+  String get contentUrlLabel;
+
+  /// Downloadable switch
+  ///
+  /// In en, this message translates to:
+  /// **'Allow Offline Download'**
+  String get isDownloadableLabel;
+
+  /// Status label
+  ///
+  /// In en, this message translates to:
+  /// **'Publication Status'**
+  String get publishStatusLabel;
+
+  /// Draft status
+  ///
+  /// In en, this message translates to:
+  /// **'Draft'**
+  String get statusDraft;
+
+  /// Published status
+  ///
+  /// In en, this message translates to:
+  /// **'Published'**
+  String get statusPublished;
+
+  /// Upload file button
+  ///
+  /// In en, this message translates to:
+  /// **'Select File to Upload'**
+  String get uploadFileAction;
+
+  /// Selected file notice
+  ///
+  /// In en, this message translates to:
+  /// **'Selected: {fileName}'**
+  String fileSelectedNotice(String fileName);
+
+  /// Content created toast
+  ///
+  /// In en, this message translates to:
+  /// **'Material uploaded and saved successfully'**
+  String get contentCreatedSuccess;
+
+  /// Delete content title
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Material'**
+  String get deleteContentConfirmTitle;
+
+  /// Delete content body
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this educational material?'**
+  String get deleteContentConfirmBody;
+
+  /// Material viewer title
+  ///
+  /// In en, this message translates to:
+  /// **'Study Material'**
+  String get materialViewerTitle;
+
+  /// Download button
+  ///
+  /// In en, this message translates to:
+  /// **'Download Resource'**
+  String get downloadMaterialAction;
+
+  /// Open button
+  ///
+  /// In en, this message translates to:
+  /// **'Open Resource'**
+  String get viewMaterialAction;
+
+  /// Access policy note
+  ///
+  /// In en, this message translates to:
+  /// **'Includes access to materials published prior to group enrollment.'**
+  String get previousContentNotice;
+
+  /// Assignments list title
+  ///
+  /// In en, this message translates to:
+  /// **'Assignments & Homework'**
+  String get assignmentsListTitle;
+
+  /// Create assignment button
+  ///
+  /// In en, this message translates to:
+  /// **'New Assignment'**
+  String get createAssignmentAction;
+
+  /// Assignment title label
+  ///
+  /// In en, this message translates to:
+  /// **'Assignment Title'**
+  String get assignmentTitleLabel;
+
+  /// Due date label
+  ///
+  /// In en, this message translates to:
+  /// **'Due Date & Time'**
+  String get assignmentDueDateLabel;
+
+  /// Max score label
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum Score'**
+  String get assignmentMaxScoreLabel;
+
+  /// Instructions label
+  ///
+  /// In en, this message translates to:
+  /// **'Instructions & Requirements'**
+  String get assignmentDescriptionLabel;
+
+  /// Assignment created toast
+  ///
+  /// In en, this message translates to:
+  /// **'Assignment published successfully'**
+  String get assignmentCreatedSuccess;
+
+  /// Submissions title
+  ///
+  /// In en, this message translates to:
+  /// **'Student Submissions'**
+  String get submissionsTitle;
+
+  /// Submitted status
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted'**
+  String get submissionStatusSubmitted;
+
+  /// Not submitted status
+  ///
+  /// In en, this message translates to:
+  /// **'Not Submitted'**
+  String get submissionStatusNotSubmitted;
+
+  /// Graded status
+  ///
+  /// In en, this message translates to:
+  /// **'Graded'**
+  String get submissionStatusGraded;
+
+  /// Submit homework button
+  ///
+  /// In en, this message translates to:
+  /// **'Submit Solution'**
+  String get submitAssignmentAction;
+
+  /// Submission attachment
+  ///
+  /// In en, this message translates to:
+  /// **'Attach Solution File'**
+  String get submissionFileLabel;
+
+  /// Submission notes
+  ///
+  /// In en, this message translates to:
+  /// **'Student Notes (Optional)'**
+  String get submissionNotesLabel;
+
+  /// Homework submitted toast
+  ///
+  /// In en, this message translates to:
+  /// **'Homework submitted successfully!'**
+  String get assignmentSubmittedSuccess;
+
+  /// Grade submission heading
+  ///
+  /// In en, this message translates to:
+  /// **'Grade Student Submission'**
+  String get gradeSubmissionTitle;
+
+  /// Score field
+  ///
+  /// In en, this message translates to:
+  /// **'Score Awarded'**
+  String get scoreEarnedLabel;
+
+  /// Feedback field
+  ///
+  /// In en, this message translates to:
+  /// **'Instructor Feedback & Comments'**
+  String get teacherFeedbackLabel;
+
+  /// Save grade button
+  ///
+  /// In en, this message translates to:
+  /// **'Record Grade'**
+  String get saveGradeAction;
+
+  /// Grade saved toast
+  ///
+  /// In en, this message translates to:
+  /// **'Grade and feedback recorded successfully'**
+  String get gradeSavedSuccess;
+
+  /// Exams list title
+  ///
+  /// In en, this message translates to:
+  /// **'Exams & Quizzes'**
+  String get examsListTitle;
+
+  /// Create exam button
+  ///
+  /// In en, this message translates to:
+  /// **'Create Exam'**
+  String get createExamAction;
+
+  /// Exam title label
+  ///
+  /// In en, this message translates to:
+  /// **'Exam Title'**
+  String get examTitleLabel;
+
+  /// Duration label
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get examDurationLabel;
+
+  /// Duration in minutes format
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} mins'**
+  String examDurationMinutes(int minutes);
+
+  /// Passing score field
+  ///
+  /// In en, this message translates to:
+  /// **'Passing Score (%)'**
+  String get examPassingScoreLabel;
+
+  /// Guidelines label
+  ///
+  /// In en, this message translates to:
+  /// **'Exam Guidelines'**
+  String get examInstructionsLabel;
+
+  /// Assigned group
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned Study Group'**
+  String get examTargetGroupLabel;
+
+  /// Questions count badge
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Questions'**
+  String questionsCountLabel(int count);
+
+  /// Add question button
+  ///
+  /// In en, this message translates to:
+  /// **'Add Question'**
+  String get addQuestionAction;
+
+  /// Question text field
+  ///
+  /// In en, this message translates to:
+  /// **'Question Prompt'**
+  String get questionTextLabel;
+
+  /// Points field
+  ///
+  /// In en, this message translates to:
+  /// **'Point Value'**
+  String get questionPointsLabel;
+
+  /// Option label
+  ///
+  /// In en, this message translates to:
+  /// **'Option {letter}'**
+  String optionTextLabel(String letter);
+
+  /// Correct checkbox
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as Correct Answer'**
+  String get markAsCorrectOption;
+
+  /// Validation error
+  ///
+  /// In en, this message translates to:
+  /// **'Each question must have at least one correct answer option.'**
+  String get atLeastOneCorrectWarning;
+
+  /// Exam created toast
+  ///
+  /// In en, this message translates to:
+  /// **'Exam created and scheduled successfully'**
+  String get examCreatedSuccess;
+
+  /// Student exams title
+  ///
+  /// In en, this message translates to:
+  /// **'Standardized Tests & Quizzes'**
+  String get studentExamsTitle;
+
+  /// Available exams heading
+  ///
+  /// In en, this message translates to:
+  /// **'Available Exams'**
+  String get availableExamsTitle;
+
+  /// Completed exams heading
+  ///
+  /// In en, this message translates to:
+  /// **'Completed Exams'**
+  String get completedExamsTitle;
+
+  /// Start exam button
+  ///
+  /// In en, this message translates to:
+  /// **'Take Exam'**
+  String get startExamAction;
+
+  /// Exam intro title
+  ///
+  /// In en, this message translates to:
+  /// **'Exam Overview & Guidelines'**
+  String get examIntroTitle;
+
+  /// Exam immutable rule
+  ///
+  /// In en, this message translates to:
+  /// **'Once an exam session is submitted, responses become immutable and cannot be re-taken.'**
+  String get examImmutabilityWarning;
+
+  /// Exam duration info
+  ///
+  /// In en, this message translates to:
+  /// **'Total Time Limit: {duration} minutes'**
+  String examDurationInfo(int duration);
+
+  /// Exam questions info
+  ///
+  /// In en, this message translates to:
+  /// **'Total Questions: {count}'**
+  String examTotalQuestionsInfo(int count);
+
+  /// Begin exam button
+  ///
+  /// In en, this message translates to:
+  /// **'Begin Exam Session'**
+  String get beginExamButton;
+
+  /// Active exam title
+  ///
+  /// In en, this message translates to:
+  /// **'Active Exam Session'**
+  String get examTakingTitle;
+
+  /// Time left timer label
+  ///
+  /// In en, this message translates to:
+  /// **'Time Left'**
+  String get timeRemainingLabel;
+
+  /// Question progress
+  ///
+  /// In en, this message translates to:
+  /// **'Question {current} of {total}'**
+  String questionProgressLabel(int current, int total);
+
+  /// Previous question button
+  ///
+  /// In en, this message translates to:
+  /// **'Previous'**
+  String get previousQuestionAction;
+
+  /// Next question button
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get nextQuestionAction;
+
+  /// Flag button
+  ///
+  /// In en, this message translates to:
+  /// **'Flag for Review'**
+  String get flagQuestionAction;
+
+  /// Unflag button
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Flag'**
+  String get unflagQuestionAction;
+
+  /// Submit exam button
+  ///
+  /// In en, this message translates to:
+  /// **'Submit Exam'**
+  String get reviewSubmitAction;
+
+  /// Submit modal title
+  ///
+  /// In en, this message translates to:
+  /// **'Submit Exam Final Responses'**
+  String get submitExamDialogTitle;
+
+  /// Submit modal body
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to finish and submit your exam? All responses will be graded atomically.'**
+  String get submitExamDialogBody;
+
+  /// Submitting progress
+  ///
+  /// In en, this message translates to:
+  /// **'Submitting exam...'**
+  String get submittingExam;
+
+  /// Exam submitted toast
+  ///
+  /// In en, this message translates to:
+  /// **'Exam submitted and graded successfully!'**
+  String get examSubmittedSuccess;
+
+  /// Section title
+  ///
+  /// In en, this message translates to:
+  /// **'Exam & Test Results (P-05)'**
+  String get examResultsTitle;
+
+  /// Score label
+  ///
+  /// In en, this message translates to:
+  /// **'Score Achieved'**
+  String get examScoreLabel;
+
+  /// Percentage label
+  ///
+  /// In en, this message translates to:
+  /// **'Percentage'**
+  String get examPercentageLabel;
+
+  /// Passed badge
+  ///
+  /// In en, this message translates to:
+  /// **'PASSED'**
+  String get examPassedStatus;
+
+  /// Failed badge
+  ///
+  /// In en, this message translates to:
+  /// **'NEEDS IMPROVEMENT'**
+  String get examFailedStatus;
+
+  /// Return button
+  ///
+  /// In en, this message translates to:
+  /// **'Return to Exams'**
+  String get backToExamsAction;
+
+  /// SAT tools sheet title
+  ///
+  /// In en, this message translates to:
+  /// **'SAT Mathematics Reference Tools'**
+  String get satToolsTitle;
+
+  /// Calculator tool
+  ///
+  /// In en, this message translates to:
+  /// **'Desmos Scientific Calculator'**
+  String get satDesmosCalculator;
+
+  /// Reference sheet tool
+  ///
+  /// In en, this message translates to:
+  /// **'SAT Math Reference Formulas'**
+  String get satReferenceSheet;
+
+  /// Formula sheet subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Area, Volume & Special Right Triangles (30-60-90 & 45-45-90)'**
+  String get satFormulaSheet;
+
+  /// SAT timer label
+  ///
+  /// In en, this message translates to:
+  /// **'Timer Running'**
+  String get satCountdownTimer;
+
+  /// Attendance title
+  ///
+  /// In en, this message translates to:
+  /// **'Lecture Attendance'**
+  String get attendanceTitle;
+
+  /// Date label
+  ///
+  /// In en, this message translates to:
+  /// **'Select Date'**
+  String get selectDateLabel;
+
+  /// Mark all present button
+  ///
+  /// In en, this message translates to:
+  /// **'Mark All Present'**
+  String get markAllPresentAction;
+
+  /// Save attendance button
+  ///
+  /// In en, this message translates to:
+  /// **'Save Attendance Record'**
+  String get saveAttendanceAction;
+
+  /// Attendance saved toast
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance records saved successfully'**
+  String get attendanceSavedSuccess;
+
+  /// Attendance status present
+  ///
+  /// In en, this message translates to:
+  /// **'Present'**
+  String get statusPresent;
+
+  /// Attendance status absent
+  ///
+  /// In en, this message translates to:
+  /// **'Absent'**
+  String get statusAbsent;
+
+  /// Attendance status late
+  ///
+  /// In en, this message translates to:
+  /// **'Late'**
+  String get statusLate;
+
+  /// Attendance status excused
+  ///
+  /// In en, this message translates to:
+  /// **'Excused'**
+  String get statusExcused;
+
+  /// Attendance summary heading
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance Summary'**
+  String get attendanceSummaryTitle;
+
+  /// Present count
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Present'**
+  String presentCountLabel(int count);
+
+  /// Absent count
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Absent'**
+  String absentCountLabel(int count);
+
+  /// Student attendance title
+  ///
+  /// In en, this message translates to:
+  /// **'My Attendance Record'**
+  String get studentAttendanceTitle;
+
+  /// Student attendance history
+  ///
+  /// In en, this message translates to:
+  /// **'Recorded Sessions History'**
+  String get studentAttendanceHistory;
+
+  /// Video player title
+  ///
+  /// In en, this message translates to:
+  /// **'Lecture Video Player'**
+  String get videoPlayerTitle;
+
+  /// Video upload modal title
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Lecture Video'**
+  String get videoUploadTitle;
+
+  /// Video title field
+  ///
+  /// In en, this message translates to:
+  /// **'Video Title'**
+  String get videoTitleLabel;
+
+  /// Choose video button
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Video File (MP4, MOV)'**
+  String get selectVideoFileAction;
+
+  /// Upload notice
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading video to Bunny Stream...'**
+  String get uploadingVideoNotice;
+
+  /// Processing notice
+  ///
+  /// In en, this message translates to:
+  /// **'Transcoding & encoding multi-resolution stream...'**
+  String get processingVideoNotice;
+
+  /// Video ready
+  ///
+  /// In en, this message translates to:
+  /// **'Ready for Streaming'**
+  String get videoReadyStatus;
+
+  /// Video failed
+  ///
+  /// In en, this message translates to:
+  /// **'Video Processing Failed'**
+  String get videoFailedStatus;
+
+  /// Playback speed
+  ///
+  /// In en, this message translates to:
+  /// **'Speed'**
+  String get playbackSpeedLabel;
+
+  /// Quality auto
+  ///
+  /// In en, this message translates to:
+  /// **'Auto (HLS adaptive)'**
+  String get qualityAuto;
+
+  /// Buffering text
+  ///
+  /// In en, this message translates to:
+  /// **'Buffering high quality video stream...'**
+  String get bufferingNotice;
+
+  /// Resume video question
+  ///
+  /// In en, this message translates to:
+  /// **'Resume from previous position at {timestamp}?'**
+  String resumeVideoPrompt(String timestamp);
+
+  /// Resume video button
+  ///
+  /// In en, this message translates to:
+  /// **'Resume'**
+  String get resumeVideoAction;
+
+  /// Start over button
+  ///
+  /// In en, this message translates to:
+  /// **'Start from Beginning'**
+  String get startOverAction;
+
+  /// Notifications page title
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications Center'**
+  String get notificationsCenterTitle;
+
+  /// Mark all read button
+  ///
+  /// In en, this message translates to:
+  /// **'Mark All as Read'**
+  String get markAllReadAction;
+
+  /// Empty notifications title
+  ///
+  /// In en, this message translates to:
+  /// **'All caught up!'**
+  String get noNotificationsTitle;
+
+  /// Empty notifications body
+  ///
+  /// In en, this message translates to:
+  /// **'You have no unread notifications or announcements at this time.'**
+  String get noNotificationsBody;
+
+  /// Page title
+  ///
+  /// In en, this message translates to:
+  /// **'Send Announcement & Alert'**
+  String get sendAnnouncementTitle;
+
+  /// Field label
+  ///
+  /// In en, this message translates to:
+  /// **'Announcement Title'**
+  String get announcementTitleLabel;
+
+  /// Field label
+  ///
+  /// In en, this message translates to:
+  /// **'Announcement Content'**
+  String get announcementBodyLabel;
+
+  /// Dropdown label
+  ///
+  /// In en, this message translates to:
+  /// **'Target Audience'**
+  String get targetAudienceLabel;
+
+  /// All students audience
+  ///
+  /// In en, this message translates to:
+  /// **'All Enrolled Students'**
+  String get audienceAllStudents;
+
+  /// Group audience
+  ///
+  /// In en, this message translates to:
+  /// **'Specific Study Group'**
+  String get audienceSpecificGroup;
+
+  /// Broadcast button
+  ///
+  /// In en, this message translates to:
+  /// **'Broadcast Message'**
+  String get sendAnnouncementAction;
+
+  /// Toast message
+  ///
+  /// In en, this message translates to:
+  /// **'Announcement sent successfully'**
+  String get announcementSentSuccess;
+
+  /// New notification alert
+  ///
+  /// In en, this message translates to:
+  /// **'New notification received'**
+  String get newNotificationToast;
+
+  /// Custom track label
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get customTrack;
+
+  /// Field hint
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. AP Calculus, Olympiad...'**
+  String get customTrackHint;
+
+  /// Target academic track label
+  ///
+  /// In en, this message translates to:
+  /// **'Target Academic Track:'**
+  String get targetAcademicTrack;
+
+  /// Registration badge
+  ///
+  /// In en, this message translates to:
+  /// **'Enroll in New Academic Cohort'**
+  String get studentRegistrationBadge;
+
+  /// Full name input hint
+  ///
+  /// In en, this message translates to:
+  /// **'Full Name (as on student ID)'**
+  String get fullNameInputHint;
+
+  /// Validation error
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter student name'**
+  String get pleaseEnterFullName;
+
+  /// Validation error
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter at least first and last name'**
+  String get pleaseEnterValidFullName;
+
+  /// Validation error
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid email address'**
+  String get pleaseEnterValidEmail;
+
+  /// Phone label
+  ///
+  /// In en, this message translates to:
+  /// **'Phone Number (Student WhatsApp)'**
+  String get studentWhatsappPhone;
+
+  /// Validation error
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid phone number (at least 10 digits)'**
+  String get pleaseEnterValidPhone;
+
+  /// Password hint
+  ///
+  /// In en, this message translates to:
+  /// **'Password (at least 6 characters)'**
+  String get passwordFieldHint;
+
+  /// Validation error
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter password (at least 6 characters)'**
+  String get pleaseEnterPasswordMin;
+
+  /// Register button
+  ///
+  /// In en, this message translates to:
+  /// **'Create Account & Start Learning â†’'**
+  String get registerAndStartLearning;
+
+  /// Already registered prompt
+  ///
+  /// In en, this message translates to:
+  /// **'Already registered?'**
+  String get alreadyRegisteredPrompt;
+
+  /// Sign in link
+  ///
+  /// In en, this message translates to:
+  /// **'Sign In Now â†’'**
+  String get signInNowLink;
+
+  /// Notice
+  ///
+  /// In en, this message translates to:
+  /// **'Your application will be reviewed and approved by the teacher upon submission'**
+  String get registrationApprovalNotice;
+
+  /// New student prompt
+  ///
+  /// In en, this message translates to:
+  /// **'New student to the cohort?'**
+  String get newStudentCohortPrompt;
+
+  /// Register link
+  ///
+  /// In en, this message translates to:
+  /// **'Register as New Student Now â†’'**
+  String get registerNewStudentLink;
+
+  /// Security note
+  ///
+  /// In en, this message translates to:
+  /// **'Encrypted & secure academic platform for cohort students'**
+  String get secureAcademicEncrypted;
+
+  /// Back to home button
+  ///
+  /// In en, this message translates to:
+  /// **'Return to Home'**
+  String get backToHome;
+
+  /// Back to login button
+  ///
+  /// In en, this message translates to:
+  /// **'Return to Sign In'**
+  String get backToLogin;
+
+  /// Dear student fallback
+  ///
+  /// In en, this message translates to:
+  /// **'Dear Student'**
+  String get dearStudent;
+
+  /// Student pending approval greeting
+  ///
+  /// In en, this message translates to:
+  /// **'Hello {name}, your registration details have been received at {brandName}.\nYour account is pending review by {teacherName} to assign you to your designated study group ({track}).'**
+  String studentPendingGreeting(
+    String name,
+    String brandName,
+    String teacherName,
+    String track,
+  );
+
+  /// Platform onboarding title
+  ///
+  /// In en, this message translates to:
+  /// **'Provision New Educational Center'**
+  String get provisionNewCenter;
+
+  /// Success banner
+  ///
+  /// In en, this message translates to:
+  /// **'Educational center and teacher account provisioned successfully!'**
+  String get centerProvisionedSuccess;
+
+  /// Header
+  ///
+  /// In en, this message translates to:
+  /// **'Center & Institution Information (Tenant)'**
+  String get centerDataHeader;
+
+  /// Field label
+  ///
+  /// In en, this message translates to:
+  /// **'Center or Academy Name *'**
+  String get centerNameRequired;
+
+  /// Error
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter center name'**
+  String get centerNameRequiredError;
+
+  /// Optional email
+  ///
+  /// In en, this message translates to:
+  /// **'Center Email (Optional)'**
+  String get centerEmailOptional;
+
+  /// Optional phone
+  ///
+  /// In en, this message translates to:
+  /// **'Center Phone Number (Optional)'**
+  String get centerPhoneOptional;
+
+  /// Optional logo
+  ///
+  /// In en, this message translates to:
+  /// **'Logo URL (Optional)'**
+  String get centerLogoUrlOptional;
+
+  /// Header
+  ///
+  /// In en, this message translates to:
+  /// **'Lead Teacher Account Information'**
+  String get leadTeacherDataHeader;
+
+  /// Field label
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher Full Name *'**
+  String get leadTeacherNameRequired;
+
+  /// Error
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter teacher name'**
+  String get leadTeacherNameRequiredError;
+
+  /// Field label
+  ///
+  /// In en, this message translates to:
+  /// **'Login Email *'**
+  String get leadTeacherEmailRequired;
+
+  /// Error
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter email address'**
+  String get leadTeacherEmailRequiredError;
+
+  /// Field label
+  ///
+  /// In en, this message translates to:
+  /// **'Password *'**
+  String get leadTeacherPasswordRequired;
+
+  /// Error
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 6 characters'**
+  String get leadTeacherPasswordRequiredError;
+
+  /// Optional phone
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher Phone (Optional)'**
+  String get leadTeacherPhoneOptional;
+
+  /// Button
+  ///
+  /// In en, this message translates to:
+  /// **'Provision Educational Center'**
+  String get createAndProvisionCenter;
+
+  /// Button
+  ///
+  /// In en, this message translates to:
+  /// **'Proceed to Teacher Sign In'**
+  String get goToTeacherLogin;
+
+  /// Button
+  ///
+  /// In en, this message translates to:
+  /// **'Provision Another Center'**
+  String get provisionAnotherCenter;
+
+  /// Label
+  ///
+  /// In en, this message translates to:
+  /// **'Center Name:'**
+  String get centerNameLabel2;
+
+  /// Label
+  ///
+  /// In en, this message translates to:
+  /// **'Tenant ID:'**
+  String get tenantIdLabel;
+
+  /// Label
+  ///
+  /// In en, this message translates to:
+  /// **'Lead Teacher:'**
+  String get leadTeacherLabel;
+
+  /// No description provided for @activeAndReadyStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Active & Ready'**
+  String get activeAndReadyStatus;
+
+  /// Radar no delays
+  ///
+  /// In en, this message translates to:
+  /// **'Great! No delays currently in this item ðŸŽ‰'**
+  String get radarNoDelays;
+
+  /// Radar title
+  ///
+  /// In en, this message translates to:
+  /// **'Instant Monitoring & Rapid Intervention Radar'**
+  String get radarInstantTitle;
+
+  /// Radar subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Real-time tracking of lecture views, drill submissions, and exam scores'**
+  String get radarInstantSubtitle;
+
+  /// Radar card
+  ///
+  /// In en, this message translates to:
+  /// **'Lecture Views'**
+  String get radarLectureViewsTitle;
+
+  /// Radar card
+  ///
+  /// In en, this message translates to:
+  /// **'Students incomplete'**
+  String get radarLectureViewsSubtitle;
+
+  /// Modal title
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Lecture Watch Time'**
+  String get radarLectureModalTitle;
+
+  /// Modal subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Students who have watched less than 50% of recorded session'**
+  String get radarLectureModalSubtitle;
+
+  /// Action
+  ///
+  /// In en, this message translates to:
+  /// **'Send Watch Reminder to Students â†’'**
+  String get radarSendWatchAlert;
+
+  /// Radar card
+  ///
+  /// In en, this message translates to:
+  /// **'Drill Submissions'**
+  String get radarDrillSubmissionsTitle;
+
+  /// Radar card
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue homework'**
+  String get radarDrillSubmissionsSubtitle;
+
+  /// Modal title
+  ///
+  /// In en, this message translates to:
+  /// **'Follow up Overdue Drill Homework'**
+  String get radarDrillModalTitle;
+
+  /// Modal subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Students who have not uploaded required screenshot or homework file'**
+  String get radarDrillModalSubtitle;
+
+  /// Action
+  ///
+  /// In en, this message translates to:
+  /// **'Open Homework & Submissions â†’'**
+  String get radarOpenHomeworkList;
+
+  /// Radar card
+  ///
+  /// In en, this message translates to:
+  /// **'Score Alert'**
+  String get radarScoreWarningTitle;
+
+  /// Radar card
+  ///
+  /// In en, this message translates to:
+  /// **'Under 600 in exam'**
+  String get radarScoreWarningSubtitle;
+
+  /// Modal title
+  ///
+  /// In en, this message translates to:
+  /// **'Academic Score Alert'**
+  String get radarScoreModalTitle;
+
+  /// Modal subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Students who scored low on last quiz requiring extra support'**
+  String get radarScoreModalSubtitle;
+
+  /// Action
+  ///
+  /// In en, this message translates to:
+  /// **'Review Student Performance & Exams â†’'**
+  String get radarReviewPerformance;
+
+  /// Radar card
+  ///
+  /// In en, this message translates to:
+  /// **'Admission Requests'**
+  String get radarPendingJoinTitle;
+
+  /// Radar card
+  ///
+  /// In en, this message translates to:
+  /// **'Students pending approval'**
+  String get radarPendingStudentsCount;
+
+  /// Radar card
+  ///
+  /// In en, this message translates to:
+  /// **'No pending requests'**
+  String get radarNoPendingRequests;
+
+  /// Badge
+  ///
+  /// In en, this message translates to:
+  /// **'Urgent Alert'**
+  String get radarUrgentAlert;
+
+  /// Cohorts section title
+  ///
+  /// In en, this message translates to:
+  /// **'Accredited Test-Prep Cohorts'**
+  String get testPrepCohortsTitle;
+
+  /// Cohorts subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Distribution of students in target 5-student cohorts for SAT / EST / ACT'**
+  String get testPrepCohortsSubtitle;
+
+  /// Label
+  ///
+  /// In en, this message translates to:
+  /// **'Academic Focus: '**
+  String get academicFocusLabel;
+
+  /// Label
+  ///
+  /// In en, this message translates to:
+  /// **'Average Score: '**
+  String get averageScoreLabel;
+
+  /// Chip
+  ///
+  /// In en, this message translates to:
+  /// **'Handouts & PDFs'**
+  String get chipHandoutsPdfs;
+
+  /// Chip
+  ///
+  /// In en, this message translates to:
+  /// **'Drill Homework'**
+  String get chipDrillHomework;
+
+  /// Chip
+  ///
+  /// In en, this message translates to:
+  /// **'Exams & Simulations'**
+  String get chipExamsSimulations;
+
+  /// Chip
+  ///
+  /// In en, this message translates to:
+  /// **'Record Attendance'**
+  String get chipRecordAttendance;
+
+  /// Title
+  ///
+  /// In en, this message translates to:
+  /// **'Library & Academic Content'**
+  String get libraryAndAcademicContent;
+
+  /// Subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Select study group to view and manage its materials and files:'**
+  String get chooseGroupForLibrary;
+
+  /// Button label
+  ///
+  /// In en, this message translates to:
+  /// **'Assignments & Submissions'**
+  String get assignmentsAndSubmissions;
+
+  /// Subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Select study group to view assignments and grade students:'**
+  String get chooseGroupForAssignments;
+
+  /// Title
+  ///
+  /// In en, this message translates to:
+  /// **'Question Bank & Exams'**
+  String get questionBankAndExams;
+
+  /// Subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Select study group to create and manage interactive exams:'**
+  String get chooseGroupForExams;
+
+  /// Title
+  ///
+  /// In en, this message translates to:
+  /// **'Select Group'**
+  String get selectGroupModalTitle;
+
+  /// Subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Choose study group to proceed:'**
+  String get selectGroupModalSubtitle;
+
+  /// Empty state
+  ///
+  /// In en, this message translates to:
+  /// **'No study groups created yet.'**
+  String get noGroupsCreatedYet;
+
+  /// Description
+  ///
+  /// In en, this message translates to:
+  /// **'A study group must be created first before adding exams and content.'**
+  String get mustCreateGroupFirst;
+
+  /// Button
+  ///
+  /// In en, this message translates to:
+  /// **'Create New Group Now'**
+  String get createNewGroupNow;
+
+  /// Group level
+  ///
+  /// In en, this message translates to:
+  /// **'Level: {level}'**
+  String groupLevelLabel(String level);
+
+  /// Button
+  ///
+  /// In en, this message translates to:
+  /// **'Enter â†’'**
+  String get enterAction;
+
+  /// Dialog content
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to log out of the teacher dashboard?'**
+  String get confirmLogoutTeacher;
+
+  /// App bar title
+  ///
+  /// In en, this message translates to:
+  /// **'{brandName} â€¢ Teacher Operations Hub'**
+  String teacherDashboardHeader(String brandName);
+
+  /// Teacher dashboard title (no AppBar)
+  ///
+  /// In en, this message translates to:
+  /// **'Academic Command Center'**
+  String get academicDashboardTitle;
+
+  /// Teacher dashboard subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Manage student groups, track lecture progress, and monitor academic performance across all levels.'**
+  String get teacherDashboardSubtitle;
+
+  /// Tap to view placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to view'**
+  String get tapToView;
+
+  /// Attendance card subtitle for lecture watch tracking
+  ///
+  /// In en, this message translates to:
+  /// **'Lecture watch tracking analytics'**
+  String get lectureWatchingAnalytics;
+
+  /// Hero title
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to {brandName} • {teacherName}'**
+  String welcomeTeacherTitle(String brandName, String teacherName);
+
+  /// Hero subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Comprehensive tracking for US curriculum students (SAT / EST / ACT), monitoring attendance and lecture views, and analyzing solution speed & accuracy'**
+  String get welcomeTeacherSubtitle;
+
+  /// Button
+  ///
+  /// In en, this message translates to:
+  /// **'Create New Group'**
+  String get createNewGroup;
+
+  /// Button
+  ///
+  /// In en, this message translates to:
+  /// **'Send Announcement to Students'**
+  String get sendAnnouncementToStudents;
+
+  /// Card title
+  ///
+  /// In en, this message translates to:
+  /// **'Groups & Students Overview'**
+  String get groupsAndStudentsOverview;
+
+  /// Badge
+  ///
+  /// In en, this message translates to:
+  /// **'+{count} Pending'**
+  String pendingLabel(int count);
+
+  /// Badge
+  ///
+  /// In en, this message translates to:
+  /// **'100% Active'**
+  String get allActive;
+
+  /// Label
+  ///
+  /// In en, this message translates to:
+  /// **'Total Students'**
+  String get totalStudents;
+
+  /// Action
+  ///
+  /// In en, this message translates to:
+  /// **'View Student Lists & Approvals â†’'**
+  String get viewStudentsAndApprovals;
+
+  /// Label
+  ///
+  /// In en, this message translates to:
+  /// **'Active Groups'**
+  String get activeGroups;
+
+  /// Action
+  ///
+  /// In en, this message translates to:
+  /// **'Click to Manage & Control â†’'**
+  String get clickToManageAndControl;
+
+  /// Badge
+  ///
+  /// In en, this message translates to:
+  /// **'Excellent'**
+  String get excellentStatus;
+
+  /// Label
+  ///
+  /// In en, this message translates to:
+  /// **'Cumulative Attendance Rate'**
+  String get cumulativeAttendanceRate;
+
+  /// Badge
+  ///
+  /// In en, this message translates to:
+  /// **'{count} New'**
+  String newNotificationsCount(int count);
+
+  /// Label
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications Center'**
+  String get notificationsCenter;
+
+  /// Action
+  ///
+  /// In en, this message translates to:
+  /// **'Student Announcements & Updates â†’'**
+  String get studentAnnouncementsAndUpdates;
+
+  /// Section title
+  ///
+  /// In en, this message translates to:
+  /// **'Academic Platform Services & Sections'**
+  String get academicServicesAndSections;
+
+  /// Section subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Direct instant access to all administrative and academic tools for the instructor'**
+  String get directAccessAllTools;
+
+  /// Card title
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Students & Approvals'**
+  String get manageStudentsAndApprovals;
+
+  /// Card subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Review registration requests, approve/reject students, and academic profiles'**
+  String get manageStudentsDesc;
+
+  /// Card title
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Study Groups (SAT / EST)'**
+  String get manageStudyGroups;
+
+  /// Card subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Create new groups, assign tracks, and configure previous content policy'**
+  String get manageGroupsDesc;
+
+  /// Card title
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Attendance Tracking'**
+  String get recordDailyAttendance;
+
+  /// Card subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Record student attendance/absence in groups and track commitment statistics'**
+  String get recordAttendanceDesc;
+
+  /// Card title
+  ///
+  /// In en, this message translates to:
+  /// **'Send Announcement or Broadcast'**
+  String get sendNoticeOrBroadcast;
+
+  /// Card subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Publish an announcement to a specific group or all students with instant push notification'**
+  String get sendNoticeDesc;
+
+  /// Card title
+  ///
+  /// In en, this message translates to:
+  /// **'Question Bank & Interactive Exams'**
+  String get interactiveExamsBank;
+
+  /// Card subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Create and grade online exams, monitor student scores and attempts'**
+  String get interactiveExamsDesc;
+
+  /// Dialog content
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to log out of your student account?'**
+  String get confirmLogoutStudent;
+
+  /// App bar title
+  ///
+  /// In en, this message translates to:
+  /// **'{brandName} â€¢ Student Portal'**
+  String studentDashboardHeader(String brandName);
+
+  /// Hero title
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to {brandName}'**
+  String welcomeStudentHeader(String brandName);
+
+  /// Hero subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Intensive preparation program supervised by {teacherName} to achieve Target 800 in {academicTrack} exams'**
+  String studentHeroSubtitle(String teacherName, String academicTrack);
+
+  /// Badge
+  ///
+  /// In en, this message translates to:
+  /// **'American Mathematics Academy'**
+  String get americanMathAcademy;
+
+  /// Label
+  ///
+  /// In en, this message translates to:
+  /// **'Academic Track'**
+  String get academicTrackLabel;
+
+  /// Label
+  ///
+  /// In en, this message translates to:
+  /// **'Assessment System'**
+  String get assessmentSystemLabel;
+
+  /// Card desc
+  ///
+  /// In en, this message translates to:
+  /// **'View assigned homework, upload solutions, and track grades'**
+  String get studentAssignmentsDesc;
+
+  /// Card title
+  ///
+  /// In en, this message translates to:
+  /// **'My Exams & Assessments'**
+  String get myExamsAndAssessments;
+
+  /// Card desc
+  ///
+  /// In en, this message translates to:
+  /// **'Take interactive online exams, practice drills, and review grades'**
+  String get myExamsAndAssessmentsDesc;
+
+  /// Card title
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher Announcements & Alerts'**
+  String get teacherAnnouncements;
+
+  /// Card desc
+  ///
+  /// In en, this message translates to:
+  /// **'Follow important messages, schedules, and group updates'**
+  String get teacherAnnouncementsDesc;
+
+  /// Card title
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance & Absence Record'**
+  String get attendanceRecord;
+
+  /// Card desc
+  ///
+  /// In en, this message translates to:
+  /// **'Track your session attendance rate, commitment record, and dates'**
+  String get attendanceRecordDesc;
+
+  /// Tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh Data'**
+  String get refreshDashboard;
+
+  /// Empty state
+  ///
+  /// In en, this message translates to:
+  /// **'No students are currently linked to your account.\nPlease provide the teacher with your email address to link your child\'s account.'**
+  String get parentNoChildrenLinked;
+
+  /// Button
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh Dashboard'**
+  String get refreshDashboardButton;
+
+  /// Notice title
+  ///
+  /// In en, this message translates to:
+  /// **'Note for Parents'**
+  String get parentNoticeTitle;
+
+  /// Notice desc
+  ///
+  /// In en, this message translates to:
+  /// **'This dashboard is read-only. Exam results and attendance records are updated immediately once approved by the teacher.'**
+  String get parentNoticeDesc;
+
+  /// Section title
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Attendance Sessions (P-06)'**
+  String get recentAttendanceSessions;
+
+  /// Badge
+  ///
+  /// In en, this message translates to:
+  /// **'Last 5 Sessions'**
+  String get lastFiveSessions;
+
+  /// Empty
+  ///
+  /// In en, this message translates to:
+  /// **'No attendance records recorded yet'**
+  String get noAttendanceRecordsYet;
+
+  /// Label
+  ///
+  /// In en, this message translates to:
+  /// **'Note: {note}'**
+  String noteLabel(String note);
+
+  /// Badge
+  ///
+  /// In en, this message translates to:
+  /// **'Approved Results'**
+  String get approvedResults;
+
+  /// Empty
+  ///
+  /// In en, this message translates to:
+  /// **'No exam results recorded for this student yet'**
+  String get noExamResultsYet;
+
+  /// Label
+  ///
+  /// In en, this message translates to:
+  /// **'Submission Date: {date}'**
+  String submissionDateLabel(String date);
+
+  /// Domain title
+  ///
+  /// In en, this message translates to:
+  /// **'Heart of Algebra (Linear Equations & Systems)'**
+  String get domainAlgebraTitle;
+
+  /// Domain status
+  ///
+  /// In en, this message translates to:
+  /// **'Mastered'**
+  String get domainMastered;
+
+  /// Domain title
+  ///
+  /// In en, this message translates to:
+  /// **'Passport to Advanced Math (Nonlinear & Quadratics)'**
+  String get domainAdvancedMathTitle;
+
+  /// Domain status
+  ///
+  /// In en, this message translates to:
+  /// **'Proficient'**
+  String get domainProficient;
+
+  /// Domain title
+  ///
+  /// In en, this message translates to:
+  /// **'Problem Solving & Data Analysis (Ratios & Stats)'**
+  String get domainDataAnalysisTitle;
+
+  /// Domain status
+  ///
+  /// In en, this message translates to:
+  /// **'In Progress'**
+  String get domainInProgress;
+
+  /// Domain title
+  ///
+  /// In en, this message translates to:
+  /// **'Geometry & Trigonometry (Coordinate & Circles)'**
+  String get domainGeometryTitle;
+
+  /// Card badge
+  ///
+  /// In en, this message translates to:
+  /// **'SAT Mastery Index (Target 800)'**
+  String get satMasteryIndicator;
+
+  /// Card title
+  ///
+  /// In en, this message translates to:
+  /// **'SAT Mastery Index & Projected Score (Target 800)'**
+  String get satMasteryPredictedScore;
+
+  /// Card subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Cumulative performance analysis across 4 College Board domains â€¢ {groupName}'**
+  String satMasteryDesc(String groupName);
+
+  /// Mission title
+  ///
+  /// In en, this message translates to:
+  /// **'Your Next Task with {teacherName}:'**
+  String nextMissionWithTeacher(String teacherName);
+
+  /// Mission desc
+  ///
+  /// In en, this message translates to:
+  /// **'Drill Homework: Coordinate Geometry & Circles (15 Qs - Screenshot upload)'**
+  String get drillHomeworkTitle;
+
+  /// Button
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Homework Solution Now â†’'**
+  String get uploadHomeworkSolutionNow;
+
+  /// Section title
+  ///
+  /// In en, this message translates to:
+  /// **'Currently Active Study Groups'**
+  String get currentlyActiveStudyGroups;
+
+  /// Button
+  ///
+  /// In en, this message translates to:
+  /// **'Add Group'**
+  String get addGroup;
+
+  /// Chip
+  ///
+  /// In en, this message translates to:
+  /// **'Content & Handouts'**
+  String get chipContentAndHandouts;
+
+  /// Chip
+  ///
+  /// In en, this message translates to:
+  /// **'Group Details â†’'**
+  String get groupDetailsAction;
+
+  /// Description
+  ///
+  /// In en, this message translates to:
+  /// **'Upload PDFs, lecture notes, and organize academic content per group'**
+  String get uploadPdfHandoutsDesc;
+
+  /// Badge
+  ///
+  /// In en, this message translates to:
+  /// **'Select Group'**
+  String get selectGroupBadge;
+
+  /// Card title
+  ///
+  /// In en, this message translates to:
+  /// **'Homework, Submissions & Grading'**
+  String get assignmentsAndGradingTitle;
+
+  /// Card subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Assign weekly homework, review solutions, and grade submissions'**
+  String get assignmentsAndGradingDesc;
+
+  /// Card title
+  ///
+  /// In en, this message translates to:
+  /// **'Academy Setup & Tracks Wizard'**
+  String get academyOnboardingWizardTitle;
+
+  /// Card subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Configure instructor and academy profiles, configure American curriculum tracks'**
+  String get academyOnboardingWizardDesc;
+
+  /// Assignments chip label
+  ///
+  /// In en, this message translates to:
+  /// **'Assignments'**
+  String get assignments;
+
+  /// Exams chip label
+  ///
+  /// In en, this message translates to:
+  /// **'Exams'**
+  String get exams;
+
+  /// Student suspended toast
+  ///
+  /// In en, this message translates to:
+  /// **'Student account suspended'**
+  String get studentSuspendedToast;
+
+  /// Student activated toast
+  ///
+  /// In en, this message translates to:
+  /// **'Student account reactivated'**
+  String get studentActivatedToast;
+
+  /// Status updated toast
+  ///
+  /// In en, this message translates to:
+  /// **'Status updated'**
+  String get statusUpdatedToast;
+
+  /// Suspend title
+  ///
+  /// In en, this message translates to:
+  /// **'Suspend Student Account?'**
+  String get suspendStudentConfirmTitle;
+
+  /// Suspend body
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to temporarily suspend access for {name}?'**
+  String suspendStudentConfirmBody(String name);
+
+  /// Suspend action
+  ///
+  /// In en, this message translates to:
+  /// **'Suspend'**
+  String get suspendStudentAction;
+
+  /// Reactivate title
+  ///
+  /// In en, this message translates to:
+  /// **'Reactivate Student Account?'**
+  String get activateStudentConfirmTitle;
+
+  /// Reactivate body
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to reactivate access for {name}?'**
+  String activateStudentConfirmBody(String name);
+
+  /// Reactivate action
+  ///
+  /// In en, this message translates to:
+  /// **'Reactivate'**
+  String get activateStudentAction;
+
+  /// Pending approval status badge
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Approval'**
+  String get pendingApproval;
+
+  /// Empty search result
+  ///
+  /// In en, this message translates to:
+  /// **'No students matching \"{query}\"'**
+  String noStudentsMatchingSearch(String query);
+
+  /// Button label
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Search'**
+  String get clearSearch;
+
+  /// Filter empty state
+  ///
+  /// In en, this message translates to:
+  /// **'No students found with this status'**
+  String get noStudentsWithStatus;
+
+  /// No students empty state
+  ///
+  /// In en, this message translates to:
+  /// **'No registered students yet'**
+  String get noStudentsRegistered;
+
+  /// Tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Students List'**
+  String get backToStudentsList;
+
+  /// Page title
+  ///
+  /// In en, this message translates to:
+  /// **'New Registration Requests'**
+  String get newRegistrationRequests;
+
+  /// Empty state
+  ///
+  /// In en, this message translates to:
+  /// **'No pending registration requests at this time.\nNew applicants will appear here once submitted.'**
+  String get noPendingRegistrationRequests;
+
+  /// Guidance banner
+  ///
+  /// In en, this message translates to:
+  /// **'There are ({count}) registration requests pending approval. Approving a student activates their account, and group assignment is required next.'**
+  String pendingGuidanceBanner(int count);
+
+  /// Approve detail
+  ///
+  /// In en, this message translates to:
+  /// **'{name} will be approved and will have platform access once assigned to a study group.'**
+  String approveStudentPendingDetail(String name);
+
+  /// Reject detail
+  ///
+  /// In en, this message translates to:
+  /// **'Registration request for {name} will be rejected. The account will not be deleted and can be activated later.'**
+  String rejectStudentPendingDetail(String name);
+
+  /// Date label
+  ///
+  /// In en, this message translates to:
+  /// **'Request Date: {date}'**
+  String requestDateLabel(String date);
+
+  /// Reject button
+  ///
+  /// In en, this message translates to:
+  /// **'Reject Request'**
+  String get rejectRequestAction;
+
+  /// Approve button
+  ///
+  /// In en, this message translates to:
+  /// **'Approve & Admit'**
+  String get approveAndAdmitAction;
+
+  /// Groups count badge
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Groups'**
+  String groupsCountBadge(int count);
+
+  /// Section header
+  ///
+  /// In en, this message translates to:
+  /// **'Currently Enrolled Groups'**
+  String get currentlyEnrolledGroups;
+
+  /// Empty state
+  ///
+  /// In en, this message translates to:
+  /// **'No groups currently assigned.\nAdd the student to a group below to grant them content access.'**
+  String get noAssignedGroupsEmpty;
+
+  /// Section header
+  ///
+  /// In en, this message translates to:
+  /// **'Available Groups to Enroll'**
+  String get availableGroupsToAdd;
+
+  /// Search hint
+  ///
+  /// In en, this message translates to:
+  /// **'Search groups...'**
+  String get searchInGroups;
+
+  /// Empty state
+  ///
+  /// In en, this message translates to:
+  /// **'Student is already enrolled in all available academy groups.'**
+  String get studentEnrolledInAllGroups;
+
+  /// Search empty state
+  ///
+  /// In en, this message translates to:
+  /// **'No groups matching \"{query}\"'**
+  String noGroupsMatchingQuery(String query);
+
+  /// Modal title
+  ///
+  /// In en, this message translates to:
+  /// **'Assign Study Group?'**
+  String get assignGroupConfirmTitle;
+
+  /// Modal body
+  ///
+  /// In en, this message translates to:
+  /// **'Student will be enrolled in \"{groupName}\" and will immediately gain access to materials and assignments according to content policy.'**
+  String assignGroupConfirmBody(String groupName);
+
+  /// Button
+  ///
+  /// In en, this message translates to:
+  /// **'Assign Now'**
+  String get assignNowAction;
+
+  /// Modal title
+  ///
+  /// In en, this message translates to:
+  /// **'Unassign Study Group?'**
+  String get unassignGroupConfirmTitle;
+
+  /// Modal body
+  ///
+  /// In en, this message translates to:
+  /// **'Student will be removed from \"{groupName}\". They will no longer have access to sessions or homework submissions.'**
+  String unassignGroupConfirmBody(String groupName);
+
+  /// Date label
+  ///
+  /// In en, this message translates to:
+  /// **'Joined: {date}'**
+  String joinedDateLabel(String date);
+
+  /// Button
+  ///
+  /// In en, this message translates to:
+  /// **'Unassign'**
+  String get unassignAction;
+
+  /// Button
+  ///
+  /// In en, this message translates to:
+  /// **'Assign +'**
+  String get assignActionPlus;
+
+  /// Title
+  ///
+  /// In en, this message translates to:
+  /// **'Student Profile'**
+  String get studentProfileTitle;
+
+  /// WhatsApp report card title
+  ///
+  /// In en, this message translates to:
+  /// **'Instant Parent WhatsApp Report'**
+  String get whatsappParentReportTitle;
+
+  /// WhatsApp report card subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Generate a professional weekly report ready to send including attendance, views, and exam scores'**
+  String get whatsappParentReportSubtitle;
+
+  /// Button
+  ///
+  /// In en, this message translates to:
+  /// **'Generate & Share Report'**
+  String get createAndShareReport;
+
+  /// Button
+  ///
+  /// In en, this message translates to:
+  /// **'Generate Report'**
+  String get createReport;
+
+  /// Section header
+  ///
+  /// In en, this message translates to:
+  /// **'Performance Statistics'**
+  String get statsOverviewTitle;
+
+  /// Stat label
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted Homework'**
+  String get submittedHomeworksLabel;
+
+  /// Stat subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Reviewed'**
+  String reviewedSubtitle(int count);
+
+  /// Stat label
+  ///
+  /// In en, this message translates to:
+  /// **'Exam Average'**
+  String get examAverageLabel;
+
+  /// Stat label
+  ///
+  /// In en, this message translates to:
+  /// **'Video Completion'**
+  String get videoCompletionLabel;
+
+  /// Section title
+  ///
+  /// In en, this message translates to:
+  /// **'Enrolled Study Groups'**
+  String get enrolledStudyGroups;
+
+  /// Empty state
+  ///
+  /// In en, this message translates to:
+  /// **'No study groups assigned to this student yet'**
+  String get noGroupsAssignedToStudent;
+
+  /// Section title
+  ///
+  /// In en, this message translates to:
+  /// **'Last Recorded Activity'**
+  String get lastRecordedActivity;
+
+  /// Section title
+  ///
+  /// In en, this message translates to:
+  /// **'Account Actions'**
+  String get accountActionsTitle;
+
+  /// Tile title
+  ///
+  /// In en, this message translates to:
+  /// **'Suspend Account Temporarily'**
+  String get suspendAccountTemporary;
+
+  /// Tile subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Prevents access without deleting data'**
+  String get suspendAccountDesc;
+
+  /// Tile title
+  ///
+  /// In en, this message translates to:
+  /// **'Reactivate Account'**
+  String get reactivateAccountTitle;
+
+  /// Tile subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Restore full platform access'**
+  String get reactivateAccountDesc;
+
+  /// Tile title
+  ///
+  /// In en, this message translates to:
+  /// **'Approve & Admit Student'**
+  String get approveAndAdmitStudentTitle;
+
+  /// Pill badge
+  ///
+  /// In en, this message translates to:
+  /// **'Previous Content Allowed'**
+  String get previousContentAllowedPill;
+
+  /// Pill badge
+  ///
+  /// In en, this message translates to:
+  /// **'New Only'**
+  String get newOnlyPill;
+
+  /// Tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Attendance'**
+  String get quickAttendanceTooltip;
+
+  /// Filter chip
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get filterAll;
+
+  /// FAB button
+  ///
+  /// In en, this message translates to:
+  /// **'New Group'**
+  String get newGroupButton;
+
+  /// Loading message
+  ///
+  /// In en, this message translates to:
+  /// **'Loading study groups...'**
+  String get loadingGroupsList;
+
+  /// Search hint
+  ///
+  /// In en, this message translates to:
+  /// **'Search by group name...'**
+  String get searchGroupsHint;
+
+  /// Empty state message
+  ///
+  /// In en, this message translates to:
+  /// **'No study groups created yet'**
+  String get noGroupsYet;
+
+  /// Empty state action
+  ///
+  /// In en, this message translates to:
+  /// **'Create First Group'**
+  String get createFirstGroup;
+
+  /// Empty filter message
+  ///
+  /// In en, this message translates to:
+  /// **'No groups match your search or filter'**
+  String get noGroupsMatchingFilter;
+
+  /// Reset action
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Filters'**
+  String get resetFilters;
+
+  /// Dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Add New Study Group'**
+  String get createGroupDialogTitle;
+
+  /// Validation error
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter group name'**
+  String get groupNameRequired;
+
+  /// Field label
+  ///
+  /// In en, this message translates to:
+  /// **'Group Track / Level:'**
+  String get groupTrackOrLevel;
+
+  /// Field label
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Track or Category'**
+  String get customTrackLabel;
+
+  /// Validation error
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter custom track name'**
+  String get customTrackRequired;
+
+  /// Field label
+  ///
+  /// In en, this message translates to:
+  /// **'Group Description (Optional)'**
+  String get groupDescriptionOptional;
+
+  /// Field hint
+  ///
+  /// In en, this message translates to:
+  /// **'Group goals, meeting times, etc...'**
+  String get groupDescriptionHint;
+
+  /// Switch label
+  ///
+  /// In en, this message translates to:
+  /// **'Allow Previous Content for New Students'**
+  String get allowPreviousContentTitle;
+
+  /// Switch subtitle on
+  ///
+  /// In en, this message translates to:
+  /// **'New students can see content published before joining'**
+  String get allowPreviousContentDesc;
+
+  /// Switch subtitle off
+  ///
+  /// In en, this message translates to:
+  /// **'Students only see content published after joining'**
+  String get denyPreviousContentDesc;
+
+  /// Snackbar message
+  ///
+  /// In en, this message translates to:
+  /// **'Student added to group successfully'**
+  String get studentAddedToGroupSuccess;
+
+  /// Dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Add Student to Group'**
+  String get addStudentToGroupTitle;
+
+  /// Dialog helper text
+  ///
+  /// In en, this message translates to:
+  /// **'Enter student ID to add them directly to this group and enable authorized content access.'**
+  String get addStudentToGroupDesc;
+
+  /// Field label
+  ///
+  /// In en, this message translates to:
+  /// **'Student ID (UUID)'**
+  String get studentIdLabel;
+
+  /// Field hint
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 550e8400-e29b-41d4-a716-446655440000'**
+  String get studentIdHint;
+
+  /// Validation error
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter student ID'**
+  String get studentIdRequired;
+
+  /// Validation error
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid student ID'**
+  String get invalidStudentId;
+
+  /// Button text
+  ///
+  /// In en, this message translates to:
+  /// **'Add Student'**
+  String get addStudentSubmit;
+
+  /// Dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Removal'**
+  String get confirmRemoveMemberTitle;
+
+  /// Dialog content
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to remove student \"{name}\" from this group?'**
+  String confirmRemoveMemberBody(String name);
+
+  /// Button text
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Student'**
+  String get removeStudentConfirmAction;
+
+  /// Loading message
+  ///
+  /// In en, this message translates to:
+  /// **'Loading group details and members...'**
+  String get loadingGroupDetail;
+
+  /// App bar title
+  ///
+  /// In en, this message translates to:
+  /// **'Group Details'**
+  String get groupDetailTitle;
+
+  /// Error message
+  ///
+  /// In en, this message translates to:
+  /// **'Group not found'**
+  String get groupNotFound;
+
+  /// Tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Groups'**
+  String get backToGroups;
+
+  /// Label
+  ///
+  /// In en, this message translates to:
+  /// **'Previous Content Policy:'**
+  String get previousContentPolicy;
+
+  /// Badge label
+  ///
+  /// In en, this message translates to:
+  /// **'Allowed for new students (Allow)'**
+  String get previousContentAllowedLabel;
+
+  /// Badge label
+  ///
+  /// In en, this message translates to:
+  /// **'Denied for new students (Deny)'**
+  String get previousContentDeniedLabel;
+
+  /// Card header
+  ///
+  /// In en, this message translates to:
+  /// **'Group Services & Tools'**
+  String get groupServicesAndTools;
+
+  /// Button label
+  ///
+  /// In en, this message translates to:
+  /// **'Content & Notes'**
+  String get contentAndMaterials;
+
+  /// Button label
+  ///
+  /// In en, this message translates to:
+  /// **'Exams Bank'**
+  String get examsBank;
+
+  /// Button label
+  ///
+  /// In en, this message translates to:
+  /// **'Send Announcement to Group'**
+  String get sendGroupAnnouncement;
+
+  /// Header title with count
+  ///
+  /// In en, this message translates to:
+  /// **'Group Members ({count})'**
+  String groupMembersCountHeader(int count);
+
+  /// Button label
+  ///
+  /// In en, this message translates to:
+  /// **'Record Attendance'**
+  String get recordAttendanceAction;
+
+  /// Search hint
+  ///
+  /// In en, this message translates to:
+  /// **'Search enrolled students...'**
+  String get searchEnrolledStudentsHint;
+
+  /// Empty message
+  ///
+  /// In en, this message translates to:
+  /// **'No students enrolled in this group yet'**
+  String get noStudentsInGroupYet;
+
+  /// Empty action
+  ///
+  /// In en, this message translates to:
+  /// **'Add First Student'**
+  String get addFirstStudent;
+
+  /// Empty message
+  ///
+  /// In en, this message translates to:
+  /// **'No students match your search'**
+  String get noStudentsMatchSearch;
+
+  /// Tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from group'**
+  String get removeFromGroupTooltip;
+
+  /// Engagement quality active
+  ///
+  /// In en, this message translates to:
+  /// **'Active & Engaged'**
+  String get qualityActive;
+
+  /// Engagement quality moderate
+  ///
+  /// In en, this message translates to:
+  /// **'Moderate Engagement'**
+  String get qualityModerate;
+
+  /// Engagement quality ghost presence
+  ///
+  /// In en, this message translates to:
+  /// **'Ghost Presence / Idle'**
+  String get qualityGhostPresence;
+
+  /// Engagement quality no data
+  ///
+  /// In en, this message translates to:
+  /// **'No Login Today'**
+  String get qualityNoData;
+
+  /// Telemetry card title
+  ///
+  /// In en, this message translates to:
+  /// **'Smart Engagement Telemetry'**
+  String get smartTelemetryTitle;
+
+  /// Telemetry card description
+  ///
+  /// In en, this message translates to:
+  /// **'Distinguish between active study time and idle background sessions'**
+  String get smartTelemetryDesc;
+
+  /// Active minutes and percentage
+  ///
+  /// In en, this message translates to:
+  /// **'Active: {mins} min ({ratio}%)'**
+  String activeMinutesWithRatio(int mins, int ratio);
+
+  /// Idle minutes count
+  ///
+  /// In en, this message translates to:
+  /// **'Idle: {mins} min'**
+  String idleMinutesWithCount(int mins);
+
+  /// Metric label
+  ///
+  /// In en, this message translates to:
+  /// **'Active Today'**
+  String get activeTodayLabel;
+
+  /// Metric label
+  ///
+  /// In en, this message translates to:
+  /// **'Idle Today'**
+  String get idleTodayLabel;
+
+  /// Metric label
+  ///
+  /// In en, this message translates to:
+  /// **'First Login'**
+  String get firstLoginLabel;
+
+  /// Metric label
+  ///
+  /// In en, this message translates to:
+  /// **'7-Day Active'**
+  String get active7DaysLabel;
+
+  /// Short minutes format
+  ///
+  /// In en, this message translates to:
+  /// **'{mins}m'**
+  String minutesShort(int mins);
+
+  /// Morning time period
+  ///
+  /// In en, this message translates to:
+  /// **'AM'**
+  String get amPeriod;
+
+  /// Evening time period
+  ///
+  /// In en, this message translates to:
+  /// **'PM'**
+  String get pmPeriod;
+
+  /// Video integrity section title
+  ///
+  /// In en, this message translates to:
+  /// **'Video Watch Integrity'**
+  String get videoIntegrityTitle;
+
+  /// Fast-forward warning badge
+  ///
+  /// In en, this message translates to:
+  /// **'Fast-forwarded ⚠️'**
+  String get videoFastForwardWarning;
+
+  /// Completed verified badge
+  ///
+  /// In en, this message translates to:
+  /// **'Completed & Verified ✅'**
+  String get videoCompletedHonest;
+
+  /// Percentage completed badge
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% completed'**
+  String videoPercentageCompleted(String percent);
+
+  /// Actual watch time vs duration
+  ///
+  /// In en, this message translates to:
+  /// **'Actual watch: {actual} of {total} min'**
+  String actualWatchMinutesRatio(int actual, int total);
+
+  /// Last watched date label
+  ///
+  /// In en, this message translates to:
+  /// **'Last watched: {date}'**
+  String lastWatchedLabel(String date);
+
+  /// Timeline section title
+  ///
+  /// In en, this message translates to:
+  /// **'Activity Timeline'**
+  String get activityTimelineTitle;
+
+  /// Activity event type
+  ///
+  /// In en, this message translates to:
+  /// **'Platform login'**
+  String get eventLogin;
+
+  /// Activity event type
+  ///
+  /// In en, this message translates to:
+  /// **'Opened material or lesson'**
+  String get eventContentOpened;
+
+  /// Activity event type
+  ///
+  /// In en, this message translates to:
+  /// **'Started lecture video'**
+  String get eventVideoStarted;
+
+  /// Activity event type
+  ///
+  /// In en, this message translates to:
+  /// **'Finished lecture video'**
+  String get eventVideoCompleted;
+
+  /// Activity event type
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted assignment'**
+  String get eventAssignmentSubmitted;
+
+  /// Activity event type
+  ///
+  /// In en, this message translates to:
+  /// **'Started exam session'**
+  String get eventExamStarted;
+
+  /// Activity event type
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted exam'**
+  String get eventExamSubmitted;
+
+  /// Relative time in minutes
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes}m ago'**
+  String minutesAgo(int minutes);
+
+  /// Relative time in hours
+  ///
+  /// In en, this message translates to:
+  /// **'{hours}h ago'**
+  String hoursAgo(int hours);
+
+  /// Relative time in days
+  ///
+  /// In en, this message translates to:
+  /// **'{days}d ago'**
+  String daysAgo(int days);
+
+  /// Relative time just now
+  ///
+  /// In en, this message translates to:
+  /// **'Just now'**
+  String get justNow;
+
+  /// Notification type label
+  ///
+  /// In en, this message translates to:
+  /// **'New Content'**
+  String get notificationTypeNewContent;
+
+  /// Notification type label
+  ///
+  /// In en, this message translates to:
+  /// **'New Assignment'**
+  String get notificationTypeAssignmentCreated;
+
+  /// Notification type label
+  ///
+  /// In en, this message translates to:
+  /// **'Assignment Due Reminder'**
+  String get notificationTypeAssignmentDue;
+
+  /// Notification type label
+  ///
+  /// In en, this message translates to:
+  /// **'Assignment Graded'**
+  String get notificationTypeAssignmentReviewed;
+
+  /// Notification type label
+  ///
+  /// In en, this message translates to:
+  /// **'New Exam'**
+  String get notificationTypeExamPublished;
+
+  /// Notification type label
+  ///
+  /// In en, this message translates to:
+  /// **'Exam Result'**
+  String get notificationTypeExamResult;
+
+  /// Notification type label
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance Marked'**
+  String get notificationTypeAttendanceMarked;
+
+  /// Notification type label
+  ///
+  /// In en, this message translates to:
+  /// **'Important Announcement'**
+  String get notificationTypeImportantAnnouncement;
+
+  /// Button to mark all as read
+  ///
+  /// In en, this message translates to:
+  /// **'Mark All as Read'**
+  String get markAllAsRead;
+
+  /// Search field hint
+  ///
+  /// In en, this message translates to:
+  /// **'Search notifications and alerts...'**
+  String get searchNotificationsHint;
+
+  /// Filter chip all
+  ///
+  /// In en, this message translates to:
+  /// **'All ({count})'**
+  String allNotificationsFilter(int count);
+
+  /// Filter chip unread
+  ///
+  /// In en, this message translates to:
+  /// **'Unread ({count})'**
+  String unreadNotificationsFilter(int count);
+
+  /// Empty state search
+  ///
+  /// In en, this message translates to:
+  /// **'No notifications match your search'**
+  String get noNotificationsMatchingSearch;
+
+  /// Empty state unread
+  ///
+  /// In en, this message translates to:
+  /// **'No unread notifications at this time.'**
+  String get noUnreadNotifications;
+
+  /// Empty state notifications
+  ///
+  /// In en, this message translates to:
+  /// **'No incoming notifications yet.'**
+  String get noNotificationsYet;
+
+  /// Tooltip for notification icon
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notificationsTooltip;
+
+  /// Card title
+  ///
+  /// In en, this message translates to:
+  /// **'Instant Academic Alert'**
+  String get instantAcademicAlertTitle;
+
+  /// Card description
+  ///
+  /// In en, this message translates to:
+  /// **'This announcement will be delivered directly to targeted students\' notification centers to encourage study and task completion.'**
+  String get instantAcademicAlertDesc;
+
+  /// Dropdown item
+  ///
+  /// In en, this message translates to:
+  /// **'All Enrolled Students'**
+  String get allPlatformStudents;
+
+  /// Pill text
+  ///
+  /// In en, this message translates to:
+  /// **'Notification scope: All enrolled students'**
+  String get audienceScopeGeneral;
+
+  /// Pill text with group name and count
+  ///
+  /// In en, this message translates to:
+  /// **'Notification scope: {groupName} ({count} students)'**
+  String audienceScopeGroup(String groupName, int count);
+
+  /// Section title
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested Quick Templates:'**
+  String get quickTemplatesTitle;
+
+  /// Template chip label
+  ///
+  /// In en, this message translates to:
+  /// **'📌 Session Reminder'**
+  String get templateSessionReminderLabel;
+
+  /// Template title
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming Session Reminder'**
+  String get templateSessionReminderTitle;
+
+  /// Template body
+  ///
+  /// In en, this message translates to:
+  /// **'Looking forward to seeing you at our next scheduled class. Please prepare your notebooks and review assigned problems.'**
+  String get templateSessionReminderBody;
+
+  /// Template chip label
+  ///
+  /// In en, this message translates to:
+  /// **'📝 Assignment Due'**
+  String get templateAssignmentReminderLabel;
+
+  /// Template title
+  ///
+  /// In en, this message translates to:
+  /// **'Assignment Submission Reminder'**
+  String get templateAssignmentReminderTitle;
+
+  /// Template body
+  ///
+  /// In en, this message translates to:
+  /// **'A friendly reminder to all students to submit assignment solutions before the deadline on the platform.'**
+  String get templateAssignmentReminderBody;
+
+  /// Template chip label
+  ///
+  /// In en, this message translates to:
+  /// **'⚠️ Exam Alert'**
+  String get templateExamAlertLabel;
+
+  /// Template title
+  ///
+  /// In en, this message translates to:
+  /// **'Important Notice: Upcoming Exam'**
+  String get templateExamAlertTitle;
+
+  /// Template body
+  ///
+  /// In en, this message translates to:
+  /// **'Please review all lessons and practice exercises in preparation for the upcoming exam. Best of luck!'**
+  String get templateExamAlertBody;
+
+  /// Template chip label
+  ///
+  /// In en, this message translates to:
+  /// **'🎉 Praise & Honor'**
+  String get templateExcellencePraiseLabel;
+
+  /// Template title
+  ///
+  /// In en, this message translates to:
+  /// **'Congratulations on Outstanding Performance'**
+  String get templateExcellencePraiseTitle;
+
+  /// Template body
+  ///
+  /// In en, this message translates to:
+  /// **'Congratulations to all high-achieving students on the latest assessment. Keep up the phenomenal work!'**
+  String get templateExcellencePraiseBody;
+
+  /// Field hint
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., Next session schedule, Important review...'**
+  String get announcementTitleHint;
+
+  /// Validation error
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter announcement title'**
+  String get announcementTitleRequired;
+
+  /// Field hint
+  ///
+  /// In en, this message translates to:
+  /// **'Write alert details or instructions for students...'**
+  String get announcementBodyHint;
+
+  /// Validation error
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter announcement content'**
+  String get announcementBodyRequired;
+
+  /// Preview header
+  ///
+  /// In en, this message translates to:
+  /// **'Live student notification preview:'**
+  String get liveNotificationPreview;
+
+  /// Preview title placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'Announcement title will appear here...'**
+  String get previewTitlePlaceholder;
+
+  /// Preview body placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'Announcement text and instructions will appear here clearly...'**
+  String get previewBodyPlaceholder;
+
+  /// Submit button
+  ///
+  /// In en, this message translates to:
+  /// **'Send Announcement Now'**
+  String get sendAnnouncementNow;
+
+  /// Relationship label
+  ///
+  /// In en, this message translates to:
+  /// **'Relationship: {relation}'**
+  String relationshipLabel(String relation);
+
+  /// Badge for current selected student
+  ///
+  /// In en, this message translates to:
+  /// **'Current Student'**
+  String get currentStudentBadge;
+
+  /// Header title for child selector
+  ///
+  /// In en, this message translates to:
+  /// **'Select Student to Monitor'**
+  String get selectChildToMonitor;
+
+  /// Enrolled children count badge
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Enrolled Children'**
+  String enrolledChildrenCount(int count);
+
+  /// Attended classes ratio description
+  ///
+  /// In en, this message translates to:
+  /// **'Attended {present} of {total} classes'**
+  String attendedClassesRatio(int present, int total);
+
+  /// Label for exams average score
+  ///
+  /// In en, this message translates to:
+  /// **'Exams Average'**
+  String get examsAverageLabel;
+
+  /// Count of graded exams
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Graded Exams'**
+  String verifiedExamsCount(int count);
+
+  /// Empty state for graded exams
+  ///
+  /// In en, this message translates to:
+  /// **'No graded exams yet'**
+  String get noVerifiedExamsYet;
+
+  /// Header for attendance breakdown card
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance Breakdown'**
+  String get attendanceBreakdownTitle;
+
+  /// Error title when device is offline
+  ///
+  /// In en, this message translates to:
+  /// **'No Internet Connection'**
+  String get errorNoInternetTitle;
+
+  /// Error message when device is offline
+  ///
+  /// In en, this message translates to:
+  /// **'Please check your Wi-Fi or mobile data connection and try again.'**
+  String get errorNoInternetMessage;
+
+  /// Hint for offline error
+  ///
+  /// In en, this message translates to:
+  /// **'Ensure your internet connection is active, then tap Retry.'**
+  String get errorNoInternetHint;
+
+  /// Error title for request timeout
+  ///
+  /// In en, this message translates to:
+  /// **'Request Timed Out'**
+  String get errorTimeoutTitle;
+
+  /// Error message for request timeout
+  ///
+  /// In en, this message translates to:
+  /// **'The server took too long to respond due to poor connection.'**
+  String get errorTimeoutMessage;
+
+  /// Hint for request timeout
+  ///
+  /// In en, this message translates to:
+  /// **'Please tap Retry or verify your network stability.'**
+  String get errorTimeoutHint;
+
+  /// Error title for invalid login credentials
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid Credentials'**
+  String get errorInvalidCredentialsTitle;
+
+  /// Error message for invalid login credentials
+  ///
+  /// In en, this message translates to:
+  /// **'The email or password you entered does not match our records.'**
+  String get errorInvalidCredentialsMessage;
+
+  /// Hint for invalid credentials
+  ///
+  /// In en, this message translates to:
+  /// **'Please double-check your email and password, then try again.'**
+  String get errorInvalidCredentialsHint;
+
+  /// Error title when auth session expired
+  ///
+  /// In en, this message translates to:
+  /// **'Session Expired'**
+  String get errorSessionExpiredTitle;
+
+  /// Error message when auth session expired
+  ///
+  /// In en, this message translates to:
+  /// **'Your login session has expired for security reasons.'**
+  String get errorSessionExpiredMessage;
+
+  /// Hint for expired session
+  ///
+  /// In en, this message translates to:
+  /// **'Please sign in again to continue where you left off.'**
+  String get errorSessionExpiredHint;
+
+  /// Error title for unauthorized or forbidden access
+  ///
+  /// In en, this message translates to:
+  /// **'Access Denied'**
+  String get errorAccessDeniedTitle;
+
+  /// Error message for access denied
+  ///
+  /// In en, this message translates to:
+  /// **'You do not have permission to view this content or perform this action.'**
+  String get errorAccessDeniedMessage;
+
+  /// Hint for access denied
+  ///
+  /// In en, this message translates to:
+  /// **'If you believe this is a mistake, please contact your teacher or administrator.'**
+  String get errorAccessDeniedHint;
+
+  /// Error title when account or tenant is suspended
+  ///
+  /// In en, this message translates to:
+  /// **'Account Suspended'**
+  String get errorAccountSuspendedTitle;
+
+  /// Hint for suspended account
+  ///
+  /// In en, this message translates to:
+  /// **'Please contact the platform administrator or teacher for reactivation.'**
+  String get errorAccountSuspendedHint;
+
+  /// Error title when video is still being transcoded
+  ///
+  /// In en, this message translates to:
+  /// **'Video is Processing'**
+  String get errorVideoProcessingTitle;
+
+  /// Error message when video is transcoding
+  ///
+  /// In en, this message translates to:
+  /// **'The video is currently being processed and prepared for smooth streaming.'**
+  String get errorVideoProcessingMessage;
+
+  /// Hint for video processing
+  ///
+  /// In en, this message translates to:
+  /// **'This might take a few minutes. Please check back shortly.'**
+  String get errorVideoProcessingHint;
+
+  /// Error title when exam time has elapsed
+  ///
+  /// In en, this message translates to:
+  /// **'Exam Time Expired'**
+  String get errorExamExpiredTitle;
+
+  /// Error message when exam time has elapsed
+  ///
+  /// In en, this message translates to:
+  /// **'The allowed time window for this exam has ended.'**
+  String get errorExamExpiredMessage;
+
+  /// Hint for expired exam
+  ///
+  /// In en, this message translates to:
+  /// **'Your submitted answers were saved automatically. You can review your score or contact your teacher.'**
+  String get errorExamExpiredHint;
+
+  /// Error title when student already submitted exam
+  ///
+  /// In en, this message translates to:
+  /// **'Exam Already Submitted'**
+  String get errorExamAlreadySubmittedTitle;
+
+  /// Error message when student already submitted exam
+  ///
+  /// In en, this message translates to:
+  /// **'You have already submitted your answers for this exam.'**
+  String get errorExamAlreadySubmittedMessage;
+
+  /// Hint for already submitted exam
+  ///
+  /// In en, this message translates to:
+  /// **'You cannot submit this exam again unless permitted by your teacher.'**
+  String get errorExamAlreadySubmittedHint;
+
+  /// Error title when max exam attempts reached
+  ///
+  /// In en, this message translates to:
+  /// **'Attempt Limit Reached'**
+  String get errorAttemptsLimitReachedTitle;
+
+  /// Error message when max exam attempts reached
+  ///
+  /// In en, this message translates to:
+  /// **'You have reached the maximum allowed attempts for this exam.'**
+  String get errorAttemptsLimitReachedMessage;
+
+  /// Hint for max attempts reached
+  ///
+  /// In en, this message translates to:
+  /// **'Please contact your teacher if you require an additional attempt.'**
+  String get errorAttemptsLimitReachedHint;
+
+  /// Error title when content is draft
+  ///
+  /// In en, this message translates to:
+  /// **'Content Not Published'**
+  String get errorContentNotPublishedTitle;
+
+  /// Error message when content is draft
+  ///
+  /// In en, this message translates to:
+  /// **'This content is still a draft and has not been published to students yet.'**
+  String get errorContentNotPublishedMessage;
+
+  /// Hint when content is unpublished
+  ///
+  /// In en, this message translates to:
+  /// **'Please return to the main feed and wait for publication.'**
+  String get errorContentNotPublishedHint;
+
+  /// Error title for 500 or backend failure
+  ///
+  /// In en, this message translates to:
+  /// **'Server Connection Error'**
+  String get errorServerTitle;
+
+  /// Error message for server error
+  ///
+  /// In en, this message translates to:
+  /// **'We are experiencing temporary difficulties communicating with the server.'**
+  String get errorServerMessage;
+
+  /// Hint for server error
+  ///
+  /// In en, this message translates to:
+  /// **'Please try again shortly; our systems are working to restore service.'**
+  String get errorServerHint;
+
+  /// Error title when resource not found
+  ///
+  /// In en, this message translates to:
+  /// **'Item Not Found'**
+  String get errorNotFoundTitle;
+
+  /// Error message when resource not found
+  ///
+  /// In en, this message translates to:
+  /// **'The requested item could not be found. It may have been moved or removed.'**
+  String get errorNotFoundMessage;
+
+  /// Hint when item is not found
+  ///
+  /// In en, this message translates to:
+  /// **'Please verify the link or return to the previous page.'**
+  String get errorNotFoundHint;
+
+  /// Error title for form validation errors
+  ///
+  /// In en, this message translates to:
+  /// **'Incomplete Data'**
+  String get errorValidationTitle;
+
+  /// Error message for form validation errors
+  ///
+  /// In en, this message translates to:
+  /// **'Please check the required fields and ensure all inputs are valid.'**
+  String get errorValidationMessage;
+
+  /// Hint for form validation errors
+  ///
+  /// In en, this message translates to:
+  /// **'Correct any fields highlighted in red to proceed.'**
+  String get errorValidationHint;
+
+  /// Label displaying error code
+  ///
+  /// In en, this message translates to:
+  /// **'Error Code: {code}'**
+  String errorCodeLabel(String code);
+
+  /// Button label to copy error details for support
+  ///
+  /// In en, this message translates to:
+  /// **'Copy Error Details'**
+  String get copyErrorDetails;
+
+  /// Snackbar confirming error details copied
+  ///
+  /// In en, this message translates to:
+  /// **'Error details copied to clipboard successfully'**
+  String get errorDetailsCopied;
+
+  /// Button to go back
+  ///
+  /// In en, this message translates to:
+  /// **'Go Back'**
+  String get goBack;
+
+  /// Button to sign in again after session expiry
+  ///
+  /// In en, this message translates to:
+  /// **'Sign In Again'**
+  String get signInAgain;
+
+  /// Section header for actionable error tips
+  ///
+  /// In en, this message translates to:
+  /// **'What you can do:'**
+  String get actionTip;
+
+  /// Title in app bar for video lesson
+  ///
+  /// In en, this message translates to:
+  /// **'Watch Educational Lesson'**
+  String get watchLessonTitle;
+
+  /// Badge showing secure CDN provider
+  ///
+  /// In en, this message translates to:
+  /// **'Secure Bunny CDN'**
+  String get secureCdnBadge;
+
+  /// Loading video text
+  ///
+  /// In en, this message translates to:
+  /// **'Loading video...'**
+  String get loadingVideo;
+
+  /// Keyboard spacebar key label
+  ///
+  /// In en, this message translates to:
+  /// **'Space'**
+  String get keySpace;
+
+  /// Play pause shortcut label
+  ///
+  /// In en, this message translates to:
+  /// **'Play / Pause'**
+  String get playPauseAction;
+
+  /// Forward/backward 10s shortcut
+  ///
+  /// In en, this message translates to:
+  /// **'Seek 10 seconds'**
+  String get seek10Seconds;
+
+  /// Toggle fullscreen action
+  ///
+  /// In en, this message translates to:
+  /// **'Fullscreen'**
+  String get fullscreenAction;
+
+  /// Title for lesson academic stats
+  ///
+  /// In en, this message translates to:
+  /// **'Lesson Academic Progress'**
+  String get lessonAcademicProgress;
+
+  /// Completed status badge
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get statusCompleted;
+
+  /// In progress status badge
+  ///
+  /// In en, this message translates to:
+  /// **'In Progress'**
+  String get statusInProgress;
+
+  /// Not started status badge
+  ///
+  /// In en, this message translates to:
+  /// **'Not Started'**
+  String get statusNotStarted;
+
+  /// Completion rate with percentage
+  ///
+  /// In en, this message translates to:
+  /// **'Completion: {percent}%'**
+  String completionPercentage(int percent);
+
+  /// Progress in minutes ratio
+  ///
+  /// In en, this message translates to:
+  /// **'{current} / {total} min'**
+  String minutesRatio(int current, int total);
+
+  /// Academic milestones title
+  ///
+  /// In en, this message translates to:
+  /// **'Academic Milestones:'**
+  String get academicMilestonesTitle;
+
+  /// 25% milestone
+  ///
+  /// In en, this message translates to:
+  /// **'Foundational Concepts'**
+  String get milestoneConcepts;
+
+  /// 50% milestone
+  ///
+  /// In en, this message translates to:
+  /// **'Solved Examples & Application'**
+  String get milestoneExamples;
+
+  /// 75% milestone
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced Problems'**
+  String get milestoneAdvanced;
+
+  /// 100% milestone
+  ///
+  /// In en, this message translates to:
+  /// **'Full Lesson Completion'**
+  String get milestoneCompletion;
+
+  /// Default title when video title is null
+  ///
+  /// In en, this message translates to:
+  /// **'Educational Lesson'**
+  String get defaultLessonTitle;
+
+  /// CDN streaming notice
+  ///
+  /// In en, this message translates to:
+  /// **'Protected stream via Bunny Stream CDN'**
+  String get protectedStreamCdnNotice;
+
+  /// Header for lesson notes
+  ///
+  /// In en, this message translates to:
+  /// **'Lesson Notes & Topics:'**
+  String get lessonNotesAndTopics;
+
+  /// Message while video is processing
+  ///
+  /// In en, this message translates to:
+  /// **'Processing video...'**
+  String get videoProcessingMessage;
+
+  /// Message when video processing fails
+  ///
+  /// In en, this message translates to:
+  /// **'Video processing failed'**
+  String get videoProcessingFailed;
+
+  /// Placeholder for untitled video
+  ///
+  /// In en, this message translates to:
+  /// **'Untitled Video Lesson'**
+  String get videoLessonUntitled;
+
+  /// Percentage watched text
+  ///
+  /// In en, this message translates to:
+  /// **'Watched {percent}%'**
+  String watchedPercentage(int percent);
+
+  /// Placeholder badge on thumbnail
+  ///
+  /// In en, this message translates to:
+  /// **'Video Lesson'**
+  String get videoLessonPlaceholder;
+
+  /// Error picking video
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to select video file: {error}'**
+  String videoPickFailed(String error);
+
+  /// Validation error when no file picked
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a video file first'**
+  String get videoPleaseSelectFile;
+
+  /// Toast on video upload success
+  ///
+  /// In en, this message translates to:
+  /// **'Video uploaded to Bunny Stream successfully and is processing!'**
+  String get videoUploadSuccessToast;
+
+  /// Title of video upload dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Upload New Lesson Video'**
+  String get uploadNewLessonVideo;
+
+  /// Subtitle in video upload dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Fast and encrypted hosting via Bunny CDN'**
+  String get fastEncryptedCdnHosting;
+
+  /// Picker loading state
+  ///
+  /// In en, this message translates to:
+  /// **'Opening file picker...'**
+  String get openingDocuments;
+
+  /// Picker placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'Click to select video file (MP4, MOV)'**
+  String get clickToPickVideo;
+
+  /// Transcoding hint
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic encryption & transcoding to 1080p, 720p, 480p'**
+  String get autoTranscodeHint;
+
+  /// Tooltip to change selected file
+  ///
+  /// In en, this message translates to:
+  /// **'Change file'**
+  String get changeFile;
+
+  /// Form label for video title
+  ///
+  /// In en, this message translates to:
+  /// **'Lesson Title *'**
+  String get lessonTitleLabel;
+
+  /// Form hint for video title
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Trigonometric Functions - Part 1'**
+  String get lessonTitleHint;
+
+  /// Validation error for video title
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter lesson title'**
+  String get lessonTitleRequired;
+
+  /// Form label for video description
+  ///
+  /// In en, this message translates to:
+  /// **'Lesson Topics & Notes (Optional)'**
+  String get lessonNotesLabel;
+
+  /// Form hint for video description
+  ///
+  /// In en, this message translates to:
+  /// **'Important takeaways, formulas, homework...'**
+  String get lessonNotesHint;
+
+  /// Status text while uploading
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading video to Bunny Stream...'**
+  String get uploadingVideoToCdn;
+
+  /// Button label while uploading
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading ({percent}%)...'**
+  String uploadingWithPercentage(int percent);
+
+  /// Button label to start upload
+  ///
+  /// In en, this message translates to:
+  /// **'Start Upload'**
+  String get startUpload;
+
+  /// Player error message
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to play video, please check your internet connection.'**
+  String get videoPlaybackError;
+
+  /// Retry button label
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retryAction;
+
+  /// Cancel button label
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancelAction;
+
+  /// Loading adaptive player text
+  ///
+  /// In en, this message translates to:
+  /// **'Loading adaptive stream...'**
+  String get loadingAdaptiveStream;
+
+  /// Resume banner text
+  ///
+  /// In en, this message translates to:
+  /// **'Resume from minute {time}?'**
+  String resumeFromMinute(String time);
+
+  /// Resume button label
+  ///
+  /// In en, this message translates to:
+  /// **'Resume'**
+  String get resumeAction;
 }
 
 class _AppLocalizationsDelegate

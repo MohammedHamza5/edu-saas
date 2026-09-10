@@ -316,15 +316,29 @@ begin
 end;
 $$;
 
--- منع تعديل الحقول المحمية يدويًا (role / tenant_id / id) عبر Update مباشر
+-- منع تعديل الحقول المحمية يدويًا (role / tenant_id / id) وحماية حالة الحساب status من التفعيل الذاتي
 create or replace function public.prevent_identity_change()
 returns trigger language plpgsql security definer set search_path = public as $$
 begin
-  if new.id      is distinct from old.id or
-     new.role    is distinct from old.role or
+  -- منع العبث بالهوية الأساسية والمستأجر والدور نهائياً
+  if new.id is distinct from old.id or
+     new.role is distinct from old.role or
      new.tenant_id is distinct from old.tenant_id then
     raise exception 'identity fields (id, role, tenant_id) cannot be changed directly';
   end if;
+
+  -- منع المستخدم من تفعيل أو تغيير حالة حسابه بنفسه (Self-Activation Guard)
+  if new.status is distinct from old.status then
+    if auth.uid() = old.id then
+      raise exception 'users are not allowed to modify their own status';
+    end if;
+
+    -- لا يسمح بتغيير حالة المستخدم إلا لمدرس معتمد ينتمي لنفس الـ Tenant
+    if not (public.has_role('teacher') and public.user_belongs_to_my_tenant(old.id)) then
+      raise exception 'only authorized teachers within the same tenant can update user status';
+    end if;
+  end if;
+
   return new;
 end $$;
 
@@ -436,7 +450,33 @@ create trigger trg_users_prevent_identity_change
 -- إنشاء بروفايل المستخدم تلقائيًا عند تسجيل الدخول أو الاشتراك من Supabase Auth
 create or replace function public.handle_new_auth_user()
 returns trigger language plpgsql security definer set search_path = public as $$
+declare
+  v_role text;
+  v_status text;
+  v_tenant_id uuid;
 begin
+  -- تحصين أمني حاسم ضد تصعيد الصلاحيات (Anti-Privilege Escalation):
+  -- التسجيل الذاتي العام يُنشئ حصراً دور طالب أو ولي أمر، ويمنع تماماً ادعاء دور مدرس
+  if new.raw_user_meta_data->>'role' in ('student', 'parent') then
+    v_role := new.raw_user_meta_data->>'role';
+  else
+    v_role := 'student';
+  end if;
+
+  -- الحالة دائماً pending للتسجيل العام (المدرس يراجع ويعتمد حصراً)
+  v_status := 'pending';
+
+  -- التحقق من معرف المستأجر المطلوب
+  begin
+    v_tenant_id := (new.raw_user_meta_data->>'tenant_id')::uuid;
+  exception when others then
+    v_tenant_id := '11111111-1111-1111-1111-111111111111'::uuid;
+  end;
+
+  if v_tenant_id is null or not exists (select 1 from public.tenants where id = v_tenant_id) then
+    v_tenant_id := '11111111-1111-1111-1111-111111111111'::uuid;
+  end if;
+
   insert into public.users (
     id,
     tenant_id,
@@ -447,12 +487,12 @@ begin
     status
   ) values (
     new.id,
-    coalesce((new.raw_user_meta_data->>'tenant_id')::uuid, '11111111-1111-1111-1111-111111111111'::uuid),
-    coalesce(new.raw_user_meta_data->>'role', 'student'),
-    coalesce(new.raw_user_meta_data->>'full_name', 'Student User'),
+    v_tenant_id,
+    v_role,
+    coalesce(nullif(trim(new.raw_user_meta_data->>'full_name'), ''), 'طالب جديد'),
     new.email,
     new.raw_user_meta_data->>'phone',
-    coalesce(new.raw_user_meta_data->>'status', 'pending')
+    v_status
   )
   on conflict (id) do nothing;
   return new;
@@ -535,7 +575,8 @@ create policy users_own_update on public.users for update to authenticated
 
 -- groups
 create policy groups_teacher_all on public.groups for all to authenticated
-  using (public.has_role('teacher') and public.tenant_is_active() and tenant_id = public.my_tenant_id());
+  using (public.has_role('teacher') and public.tenant_is_active() and tenant_id = public.my_tenant_id())
+  with check (public.has_role('teacher') and public.tenant_is_active() and tenant_id = public.my_tenant_id());
 create policy groups_student_read_member on public.groups for select to authenticated
   using (public.has_role('student') and public.tenant_is_active() and public.is_member_of_group(groups.id, auth.uid()));
 create policy groups_parent_read_children on public.groups for select to authenticated
@@ -543,7 +584,12 @@ create policy groups_parent_read_children on public.groups for select to authent
 
 -- group_members
 create policy gm_teacher_all on public.group_members for all to authenticated
-  using (public.has_role('teacher') and public.tenant_is_active() and public.group_belongs_to_my_tenant(group_members.group_id));
+  using (public.has_role('teacher') and public.tenant_is_active() 
+         and public.group_belongs_to_my_tenant(group_members.group_id)
+         and public.user_belongs_to_my_tenant(group_members.student_id))
+  with check (public.has_role('teacher') and public.tenant_is_active() 
+              and public.group_belongs_to_my_tenant(group_members.group_id)
+              and public.user_belongs_to_my_tenant(group_members.student_id));
 create policy gm_student_read_own on public.group_members for select to authenticated
   using (student_id = auth.uid() and public.tenant_is_active());
 create policy gm_parent_read_children on public.group_members for select to authenticated
@@ -551,7 +597,12 @@ create policy gm_parent_read_children on public.group_members for select to auth
 
 -- parent_students
 create policy ps_teacher_all on public.parent_students for all to authenticated
-  using (public.has_role('teacher') and public.tenant_is_active() and public.user_belongs_to_my_tenant(parent_students.parent_id));
+  using (public.has_role('teacher') and public.tenant_is_active() 
+         and public.user_belongs_to_my_tenant(parent_students.parent_id)
+         and public.user_belongs_to_my_tenant(parent_students.student_id))
+  with check (public.has_role('teacher') and public.tenant_is_active() 
+              and public.user_belongs_to_my_tenant(parent_students.parent_id)
+              and public.user_belongs_to_my_tenant(parent_students.student_id));
 create policy ps_parent_read_own on public.parent_students for select to authenticated
   using (parent_id = auth.uid() and public.tenant_is_active());
 create policy ps_student_read_own on public.parent_students for select to authenticated
@@ -577,8 +628,11 @@ create policy files_teacher_all on public.files for all to authenticated
   using (public.has_role('teacher') and public.tenant_is_active() and tenant_id = public.my_tenant_id());
 create policy files_student_read_authorized on public.files for select to authenticated
   using (public.has_role('student') and public.tenant_is_active() and exists (
-    select 1 from public.content c where c.id = files.content_id and c.status = 'published' and exists (
-      select 1 from public.group_members gm where gm.student_id = auth.uid() and gm.group_id = c.group_id)));
+    select 1 from public.content c 
+    join public.group_members gm on gm.group_id = c.group_id
+    where c.id = files.content_id and c.status = 'published' and gm.student_id = auth.uid() and gm.status = 'active'
+      and (gm.joined_at <= c.published_at or (
+        select g.previous_content_access from public.groups g where g.id = c.group_id) = 'allow')));
 
 -- videos
 create policy videos_teacher_all on public.videos for all to authenticated
@@ -586,16 +640,22 @@ create policy videos_teacher_all on public.videos for all to authenticated
     select 1 from public.content c where c.id = videos.content_id and c.tenant_id = public.my_tenant_id()));
 create policy videos_student_read_ready on public.videos for select to authenticated
   using (public.has_role('student') and public.tenant_is_active() and status = 'ready' and exists (
-    select 1 from public.content c where c.id = videos.content_id and c.status = 'published' and exists (
-      select 1 from public.group_members gm where gm.student_id = auth.uid() and gm.group_id = c.group_id)));
+    select 1 from public.content c 
+    join public.group_members gm on gm.group_id = c.group_id
+    where c.id = videos.content_id and c.status = 'published' and gm.student_id = auth.uid() and gm.status = 'active'
+      and (gm.joined_at <= c.published_at or (
+        select g.previous_content_access from public.groups g where g.id = c.group_id) = 'allow')));
 
 -- assignments
 create policy assignments_teacher_all on public.assignments for all to authenticated
   using (public.has_role('teacher') and public.tenant_is_active() and tenant_id = public.my_tenant_id());
 create policy assignments_student_read_group on public.assignments for select to authenticated
   using (public.has_role('student') and public.tenant_is_active() and exists (
-    select 1 from public.content c where c.id = assignments.content_id and c.status = 'published' and exists (
-      select 1 from public.group_members gm where gm.student_id = auth.uid() and gm.group_id = c.group_id)));
+    select 1 from public.content c 
+    join public.group_members gm on gm.group_id = c.group_id
+    where c.id = assignments.content_id and c.status = 'published' and gm.student_id = auth.uid() and gm.status = 'active'
+      and (gm.joined_at <= c.published_at or (
+        select g.previous_content_access from public.groups g where g.id = c.group_id) = 'allow')));
 create policy assignments_parent_read_children on public.assignments for select to authenticated
   using (public.has_role('parent') and public.tenant_is_active() and exists (
     select 1 from public.content c join public.group_members gm on gm.group_id = c.group_id
@@ -626,8 +686,11 @@ create policy exams_teacher_all on public.exams for all to authenticated
   using (public.has_role('teacher') and public.tenant_is_active() and tenant_id = public.my_tenant_id());
 create policy exams_student_read_published on public.exams for select to authenticated
   using (public.has_role('student') and public.tenant_is_active() and exists (
-    select 1 from public.content c where c.id = exams.content_id and c.status = 'published' and exists (
-      select 1 from public.group_members gm where gm.student_id = auth.uid() and gm.group_id = c.group_id)));
+    select 1 from public.content c 
+    join public.group_members gm on gm.group_id = c.group_id
+    where c.id = exams.content_id and c.status = 'published' and gm.student_id = auth.uid() and gm.status = 'active'
+      and (gm.joined_at <= c.published_at or (
+        select g.previous_content_access from public.groups g where g.id = c.group_id) = 'allow')));
 create policy exams_parent_read_children on public.exams for select to authenticated
   using (public.has_role('parent') and public.tenant_is_active() and exists (
     select 1 from public.content c join public.group_members gm on gm.group_id = c.group_id
@@ -642,7 +705,9 @@ create policy ev_student_read_published on public.exam_versions for select to au
   using (status = 'published' and exists (
     select 1 from public.exams e where e.id = exam_versions.exam_id and exists (
       select 1 from public.content c where c.id = e.content_id and c.status = 'published' and exists (
-        select 1 from public.group_members gm where gm.student_id = auth.uid() and gm.group_id = c.group_id))));
+        select 1 from public.group_members gm where gm.student_id = auth.uid() and gm.group_id = c.group_id
+          and (gm.joined_at <= c.published_at or (
+            select g.previous_content_access from public.groups g where g.id = c.group_id) = 'allow')))));
 
 -- exam_questions
 create policy eq_teacher_all on public.exam_questions for all to authenticated
@@ -650,7 +715,18 @@ create policy eq_teacher_all on public.exam_questions for all to authenticated
     select 1 from public.exam_versions v join public.exams e on e.id = v.exam_id
     where v.id = exam_questions.exam_version_id and e.tenant_id = public.my_tenant_id()));
 create policy eq_student_read_published on public.exam_questions for select to authenticated
-  using (exists (select 1 from public.exam_versions v where v.id = exam_questions.exam_version_id and v.status = 'published'));
+  using (public.has_role('student') and public.tenant_is_active() and exists (
+    select 1 from public.exam_versions v
+    join public.exams e on e.id = v.exam_id
+    join public.content c on c.id = e.content_id
+    join public.group_members gm on gm.group_id = c.group_id
+    where v.id = exam_questions.exam_version_id
+      and v.status = 'published'
+      and c.status = 'published'
+      and gm.student_id = auth.uid()
+      and gm.status = 'active'
+      and (gm.joined_at <= c.published_at or (
+        select g.previous_content_access from public.groups g where g.id = c.group_id) = 'allow')));
 
 -- question_options
 create policy qo_teacher_all on public.question_options for all to authenticated
@@ -680,7 +756,14 @@ create policy answers_teacher_read on public.exam_answers for select to authenti
 
 -- attendance
 create policy attendance_teacher_all on public.attendance for all to authenticated
-  using (public.has_role('teacher') and public.tenant_is_active() and tenant_id = public.my_tenant_id());
+  using (public.has_role('teacher') and public.tenant_is_active() 
+         and tenant_id = public.my_tenant_id()
+         and public.group_belongs_to_my_tenant(attendance.group_id)
+         and public.user_belongs_to_my_tenant(attendance.student_id))
+  with check (public.has_role('teacher') and public.tenant_is_active() 
+              and tenant_id = public.my_tenant_id()
+              and public.group_belongs_to_my_tenant(attendance.group_id)
+              and public.user_belongs_to_my_tenant(attendance.student_id));
 create policy attendance_student_read_own on public.attendance for select to authenticated
   using (student_id = auth.uid() and public.tenant_is_active());
 create policy attendance_parent_read_children on public.attendance for select to authenticated
@@ -698,7 +781,16 @@ create policy activity_parent_read_children on public.activity_events for select
 
 -- video_progress
 create policy vp_student_own_all on public.video_progress for all to authenticated
-  using (student_id = auth.uid() and public.tenant_is_active());
+  using (student_id = auth.uid() and public.tenant_is_active() and exists (
+    select 1 from public.videos v
+    join public.content c on c.id = v.content_id
+    join public.group_members gm on gm.group_id = c.group_id
+    where v.id = video_progress.video_id and gm.student_id = auth.uid() and gm.status = 'active'))
+  with check (student_id = auth.uid() and public.tenant_is_active() and exists (
+    select 1 from public.videos v
+    join public.content c on c.id = v.content_id
+    join public.group_members gm on gm.group_id = c.group_id
+    where v.id = video_progress.video_id and gm.student_id = auth.uid() and gm.status = 'active'));
 create policy vp_teacher_read_tenant on public.video_progress for select to authenticated
   using (public.has_role('teacher') and public.tenant_is_active() and tenant_id = public.my_tenant_id());
 create policy vp_parent_read_children on public.video_progress for select to authenticated
@@ -720,6 +812,17 @@ create policy nr_teacher_read on public.notification_recipients for select to au
     select 1 from public.notifications n where n.id = notification_recipients.notification_id and n.tenant_id = public.my_tenant_id()));
 create policy nr_own_update_read on public.notification_recipients for update to authenticated
   using (user_id = auth.uid() and public.tenant_is_active());
+create policy nr_teacher_insert on public.notification_recipients for insert to authenticated
+  with check (
+    public.has_role('teacher')
+    and public.tenant_is_active()
+    and exists (
+      select 1 from public.notifications n
+      where n.id = notification_recipients.notification_id
+        and n.tenant_id = public.my_tenant_id()
+    )
+    and public.user_belongs_to_my_tenant(notification_recipients.user_id)
+  );
 
 -- user_devices
 create policy devices_own_all on public.user_devices for all to authenticated

@@ -210,7 +210,7 @@ void main() {
 
       expect(find.text('يرجى إدخال اسم المركز التعليمي'), findsOneWidget);
       expect(find.text('يرجى إدخال اسم المعلم'), findsOneWidget);
-      expect(find.text('يرجى إدخال البريد الإلكتروني'), findsOneWidget);
+      expect(find.text('يرجى إدخال بريد إلكتروني صحيح'), findsOneWidget);
     });
 
     testWidgets('shows success card when provisioning succeeds',

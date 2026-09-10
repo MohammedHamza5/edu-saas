@@ -82,26 +82,32 @@ class AttendanceRemoteDataSourceImpl implements AttendanceRemoteDataSource {
 
       final existingRecord = existingMap[studentId];
       if (existingRecord != null) {
-        result.add(StudentAttendanceItem(
-          studentId: studentId,
-          studentName: studentName,
-          avatarUrl: avatarUrl,
-          phone: phone,
-          status: AttendanceStatus.fromString(existingRecord['status'] as String?),
-          note: existingRecord['note'] as String?,
-          existingAttendanceId: existingRecord['id'] as String?,
-        ));
+        result.add(
+          StudentAttendanceItem(
+            studentId: studentId,
+            studentName: studentName,
+            avatarUrl: avatarUrl,
+            phone: phone,
+            status: AttendanceStatus.fromString(
+              existingRecord['status'] as String?,
+            ),
+            note: existingRecord['note'] as String?,
+            existingAttendanceId: existingRecord['id'] as String?,
+          ),
+        );
       } else {
         // Default to present if not marked yet
-        result.add(StudentAttendanceItem(
-          studentId: studentId,
-          studentName: studentName,
-          avatarUrl: avatarUrl,
-          phone: phone,
-          status: AttendanceStatus.present,
-          note: null,
-          existingAttendanceId: null,
-        ));
+        result.add(
+          StudentAttendanceItem(
+            studentId: studentId,
+            studentName: studentName,
+            avatarUrl: avatarUrl,
+            phone: phone,
+            status: AttendanceStatus.present,
+            note: null,
+            existingAttendanceId: null,
+          ),
+        );
       }
     }
 
@@ -161,7 +167,7 @@ class AttendanceRemoteDataSourceImpl implements AttendanceRemoteDataSource {
   }) async {
     var query = _safeClient
         .from('attendance')
-        .select('*, groups(name), users(full_name)')
+        .select('*, groups(name), users!student_id(full_name)')
         .eq('student_id', studentId);
 
     if (groupId != null && groupId.isNotEmpty) {

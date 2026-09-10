@@ -13,7 +13,7 @@ class GroupMemberModel extends GroupMemberEntity {
   });
 
   factory GroupMemberModel.fromJson(Map<String, dynamic> json) {
-    String studentName = 'طالب';
+    String studentName = '';
     String? email;
     String? phone;
 

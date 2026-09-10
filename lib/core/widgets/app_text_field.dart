@@ -4,6 +4,7 @@ import '../theme/app_colors.dart';
 class AppTextField extends StatefulWidget {
   final TextEditingController? controller;
   final String? labelText;
+  final String? label;
   final String? hintText;
   final String? errorText;
   final Widget? prefixIcon;
@@ -14,11 +15,13 @@ class AppTextField extends StatefulWidget {
   final FormFieldValidator<String>? validator;
   final bool enabled;
   final int maxLines;
+  final TextStyle? style;
 
   const AppTextField({
     super.key,
     this.controller,
     this.labelText,
+    this.label,
     this.hintText,
     this.errorText,
     this.prefixIcon,
@@ -29,6 +32,7 @@ class AppTextField extends StatefulWidget {
     this.validator,
     this.enabled = true,
     this.maxLines = 1,
+    this.style,
   });
 
   @override
@@ -50,9 +54,10 @@ class _AppTextFieldState extends State<AppTextField> {
 
     if (widget.isPassword) {
       effectiveSuffixIcon = IconButton(
+        mouseCursor: SystemMouseCursors.click,
         icon: Icon(
           _obscureText ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-          color: AppColors.textMuted,
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
           size: 20,
         ),
         onPressed: () {
@@ -63,6 +68,11 @@ class _AppTextFieldState extends State<AppTextField> {
       );
     }
 
+    final textColor = widget.style?.color ??
+        (Theme.of(context).brightness == Brightness.dark
+            ? Colors.white
+            : AppColors.textPrimary);
+
     return TextFormField(
       controller: widget.controller,
       obscureText: _obscureText,
@@ -71,12 +81,11 @@ class _AppTextFieldState extends State<AppTextField> {
       validator: widget.validator,
       enabled: widget.enabled,
       maxLines: widget.isPassword ? 1 : widget.maxLines,
-      style: const TextStyle(
-        color: AppColors.textPrimary,
-        fontSize: 14,
+      style: (widget.style ?? const TextStyle(fontSize: 14)).copyWith(
+        color: textColor,
       ),
       decoration: InputDecoration(
-        labelText: widget.labelText,
+        labelText: widget.labelText ?? widget.label,
         hintText: widget.hintText,
         errorText: widget.errorText,
         prefixIcon: widget.prefixIcon,

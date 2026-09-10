@@ -9,18 +9,18 @@ enum AttendanceStatus {
   excused;
 
   String get labelAr => switch (this) {
-        AttendanceStatus.present => 'حاضر',
-        AttendanceStatus.absent => 'غائب',
-        AttendanceStatus.late => 'متأخر',
-        AttendanceStatus.excused => 'معذور',
-      };
+    AttendanceStatus.present => 'حاضر',
+    AttendanceStatus.absent => 'غائب',
+    AttendanceStatus.late => 'متأخر',
+    AttendanceStatus.excused => 'معذور',
+  };
 
   String get labelEn => switch (this) {
-        AttendanceStatus.present => 'Present',
-        AttendanceStatus.absent => 'Absent',
-        AttendanceStatus.late => 'Late',
-        AttendanceStatus.excused => 'Excused',
-      };
+    AttendanceStatus.present => 'Present',
+    AttendanceStatus.absent => 'Absent',
+    AttendanceStatus.late => 'Late',
+    AttendanceStatus.excused => 'Excused',
+  };
 
   static AttendanceStatus fromString(String? value) {
     return switch (value?.toLowerCase()) {
@@ -63,18 +63,18 @@ class AttendanceEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        tenantId,
-        groupId,
-        studentId,
-        date,
-        status,
-        markedAt,
-        markedBy,
-        note,
-        studentName,
-        groupName,
-      ];
+    id,
+    tenantId,
+    groupId,
+    studentId,
+    date,
+    status,
+    markedAt,
+    markedBy,
+    note,
+    studentName,
+    groupName,
+  ];
 }
 
 /// Item representing a student row in the teacher's attendance sheet
@@ -119,14 +119,14 @@ class StudentAttendanceItem extends Equatable {
 
   @override
   List<Object?> get props => [
-        studentId,
-        studentName,
-        avatarUrl,
-        phone,
-        status,
-        note,
-        existingAttendanceId,
-      ];
+    studentId,
+    studentName,
+    avatarUrl,
+    phone,
+    status,
+    note,
+    existingAttendanceId,
+  ];
 }
 
 /// Academic attendance statistics (percentages, counts)
@@ -146,11 +146,11 @@ class AttendanceStats extends Equatable {
   });
 
   const AttendanceStats.empty()
-      : totalSessions = 0,
-        presentCount = 0,
-        absentCount = 0,
-        lateCount = 0,
-        excusedCount = 0;
+    : totalSessions = 0,
+      presentCount = 0,
+      absentCount = 0,
+      lateCount = 0,
+      excusedCount = 0;
 
   double get attendancePercentage {
     if (totalSessions == 0) return 0.0;
@@ -166,10 +166,10 @@ class AttendanceStats extends Equatable {
 
   @override
   List<Object?> get props => [
-        totalSessions,
-        presentCount,
-        absentCount,
-        lateCount,
-        excusedCount,
-      ];
+    totalSessions,
+    presentCount,
+    absentCount,
+    lateCount,
+    excusedCount,
+  ];
 }

@@ -62,20 +62,22 @@ class GroupsRemoteDataSourceImpl implements GroupsRemoteDataSource {
     String? description,
     required String previousContentAccess,
   }) async {
-    // Determine tenant_id from current session or fallback
     final currentUserId = _safeClient.auth.currentUser?.id;
-    String tenantId = '11111111-1111-1111-1111-111111111111';
-
-    if (currentUserId != null) {
-      final userProfile = await _safeClient
-          .from('users')
-          .select('tenant_id')
-          .eq('id', currentUserId)
-          .maybeSingle();
-      if (userProfile != null && userProfile['tenant_id'] != null) {
-        tenantId = userProfile['tenant_id'] as String;
-      }
+    if (currentUserId == null) {
+      throw const AuthException('AUTH_REQUIRED: User not authenticated');
     }
+
+    final userProfile = await _safeClient
+        .from('users')
+        .select('tenant_id')
+        .eq('id', currentUserId)
+        .maybeSingle();
+
+    if (userProfile == null || userProfile['tenant_id'] == null) {
+      throw const AuthException('TEACHER_PROFILE_NOT_FOUND');
+    }
+
+    final tenantId = userProfile['tenant_id'] as String;
 
     final response = await _safeClient
         .from('groups')

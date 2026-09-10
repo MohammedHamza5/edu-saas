@@ -2,6 +2,7 @@ import 'package:edu_saas/core/errors/failures.dart';
 import 'package:edu_saas/core/errors/result.dart';
 import 'package:edu_saas/core/localization/generated/app_localizations.dart';
 import 'package:edu_saas/core/theme/app_theme.dart';
+import 'package:edu_saas/core/utils/cache_manager.dart';
 import 'package:edu_saas/features/groups/domain/entities/group_entity.dart';
 import 'package:edu_saas/features/groups/domain/entities/group_member_entity.dart';
 import 'package:edu_saas/features/groups/domain/repositories/groups_repository.dart';
@@ -153,6 +154,7 @@ void main() {
   ];
 
   setUp(() {
+    AppCache.clearAll();
     fakeRepo = FakeGroupsRepository();
     fakeRepo.groups = List.from(sampleGroups);
     groupsCubit = GroupsCubit(repository: fakeRepo);
@@ -313,17 +315,20 @@ void main() {
       expect(find.text('الكل'), findsOneWidget);
       expect(find.text('SAT'), findsWidgets);
       expect(find.text('EST'), findsWidgets);
-      expect(find.text('ACT'), findsOneWidget);
+      expect(find.text('ACT'), findsWidgets);
     });
 
     testWidgets('renders empty view when groups list is empty', (tester) async {
+      AppCache.clearAll();
       fakeRepo.groups = [];
       final emptyCubit = GroupsCubit(repository: fakeRepo);
+      await emptyCubit.loadGroups();
 
       await tester.pumpWidget(createWidgetUnderTest(emptyCubit));
       await tester.pumpAndSettle();
 
-      expect(find.text('لا توجد مجموعات دراسية مطابقة حالياً'), findsOneWidget);
+      expect(find.text('لا توجد مجموعات دراسية حتى الآن'), findsOneWidget);
+      expect(find.text('إنشاء أول مجموعة'), findsOneWidget);
       await emptyCubit.close();
     });
   });

@@ -2,6 +2,7 @@ import 'package:edu_saas/core/errors/failures.dart';
 import 'package:edu_saas/core/errors/result.dart';
 import 'package:edu_saas/core/localization/generated/app_localizations.dart';
 import 'package:edu_saas/core/theme/app_theme.dart';
+import 'package:edu_saas/core/widgets/app_button.dart';
 import 'package:edu_saas/features/auth/domain/entities/user_entity.dart';
 import 'package:edu_saas/features/auth/domain/repositories/auth_repository.dart';
 import 'package:edu_saas/features/auth/presentation/cubit/auth_cubit.dart';
@@ -157,14 +158,16 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(TextFormField), findsNWidgets(2));
-      expect(find.text('دخول'), findsOneWidget);
+      expect(find.byType(AppButton), findsOneWidget);
     });
 
     testWidgets('shows validation error when fields are empty on login submit', (tester) async {
       await tester.pumpWidget(createWidgetUnderTest());
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('دخول'));
+      final appButton = find.byType(AppButton);
+      await tester.ensureVisible(appButton);
+      await tester.tap(appButton);
       await tester.pumpAndSettle();
 
       expect(find.text('يرجى إدخال بريد إلكتروني صحيح'), findsOneWidget);

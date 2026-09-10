@@ -7,8 +7,8 @@ class AttendanceCubit extends Cubit<AttendanceState> {
   final AttendanceRepository _repository;
 
   AttendanceCubit({required AttendanceRepository repository})
-      : _repository = repository,
-        super(const AttendanceInitial());
+    : _repository = repository,
+      super(const AttendanceInitial());
 
   /// Loads the students and attendance records for a specific group and date
   Future<void> loadGroupAttendance({
@@ -22,16 +22,22 @@ class AttendanceCubit extends Cubit<AttendanceState> {
       date: date,
     );
 
+    if (isClosed) return;
+
     result.when(
       onSuccess: (students) {
-        emit(TeacherAttendanceLoaded(
-          groupId: groupId,
-          selectedDate: date,
-          students: students,
-        ));
+        if (!isClosed) {
+          emit(
+            TeacherAttendanceLoaded(
+              groupId: groupId,
+              selectedDate: date,
+              students: students,
+            ),
+          );
+        }
       },
       onFailure: (failure) {
-        emit(AttendanceError(failure.message));
+        if (!isClosed) emit(AttendanceError(failure.message));
       },
     );
   }
@@ -47,18 +53,12 @@ class AttendanceCubit extends Cubit<AttendanceState> {
 
     final updatedStudents = currentState.students.map((student) {
       if (student.studentId == studentId) {
-        return student.copyWith(
-          status: status,
-          note: note ?? student.note,
-        );
+        return student.copyWith(status: status, note: note ?? student.note);
       }
       return student;
     }).toList();
 
-    emit(currentState.copyWith(
-      students: updatedStudents,
-      saveSuccess: false,
-    ));
+    emit(currentState.copyWith(students: updatedStudents, saveSuccess: false));
   }
 
   /// Quickly marks all students with the given status (e.g., "Mark All Present")
@@ -70,10 +70,7 @@ class AttendanceCubit extends Cubit<AttendanceState> {
       return student.copyWith(status: status);
     }).toList();
 
-    emit(currentState.copyWith(
-      students: updatedStudents,
-      saveSuccess: false,
-    ));
+    emit(currentState.copyWith(students: updatedStudents, saveSuccess: false));
   }
 
   /// Commits the attendance sheet to Supabase atomically (upsert)
@@ -89,20 +86,30 @@ class AttendanceCubit extends Cubit<AttendanceState> {
       items: currentState.students,
     );
 
+    if (isClosed) return;
+
     result.when(
       onSuccess: (_) {
-        emit(currentState.copyWith(
-          isSaving: false,
-          saveSuccess: true,
-          message: 'تم حفظ سجل الحضور بنجاح',
-        ));
+        if (!isClosed) {
+          emit(
+            currentState.copyWith(
+              isSaving: false,
+              saveSuccess: true,
+              message: 'تم حفظ سجل الحضور بنجاح',
+            ),
+          );
+        }
       },
       onFailure: (failure) {
-        emit(currentState.copyWith(
-          isSaving: false,
-          saveSuccess: false,
-          message: failure.message,
-        ));
+        if (!isClosed) {
+          emit(
+            currentState.copyWith(
+              isSaving: false,
+              saveSuccess: false,
+              message: failure.message,
+            ),
+          );
+        }
       },
     );
   }
@@ -119,22 +126,31 @@ class AttendanceCubit extends Cubit<AttendanceState> {
       groupId: groupId,
     );
 
+    if (isClosed) return;
+
     final statsResult = await _repository.getStudentAttendanceStats(
       studentId: studentId,
       groupId: groupId,
     );
 
+    if (isClosed) return;
+
     if (historyResult.isSuccess && statsResult.isSuccess) {
-      emit(StudentAttendanceLoaded(
-        records: historyResult.dataOrNull ?? [],
-        stats: statsResult.dataOrNull ?? const AttendanceStats.empty(),
-        selectedGroupId: groupId,
-      ));
+      if (!isClosed) {
+        emit(
+          StudentAttendanceLoaded(
+            records: historyResult.dataOrNull ?? [],
+            stats: statsResult.dataOrNull ?? const AttendanceStats.empty(),
+            selectedGroupId: groupId,
+          ),
+        );
+      }
     } else {
-      final error = historyResult.failureOrNull?.message ??
+      final error =
+          historyResult.failureOrNull?.message ??
           statsResult.failureOrNull?.message ??
           'فشل تحميل سجل الحضور';
-      emit(AttendanceError(error));
+      if (!isClosed) emit(AttendanceError(error));
     }
   }
 }

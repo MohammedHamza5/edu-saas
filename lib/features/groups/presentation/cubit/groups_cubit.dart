@@ -1,35 +1,69 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/utils/cache_manager.dart';
+import '../../domain/entities/group_entity.dart';
 import '../../domain/repositories/groups_repository.dart';
 import 'groups_state.dart';
 
 class GroupsCubit extends Cubit<GroupsState> {
   final GroupsRepository _repository;
 
+  // ── Cache keys ──────────────────────────────────────────────────────────
+  static const _cacheKeyGroups = 'groups_all';
+
   GroupsCubit({required GroupsRepository repository})
-      : _repository = repository,
-        super(const GroupsInitial());
+    : _repository = repository,
+      super(const GroupsInitial());
 
   Future<void> loadGroups() async {
-    emit(const GroupsLoading());
+    // ── Stale-While-Revalidate: show cached data instantly ──────────────
+    final cached = AppCache.groups.getStale(_cacheKeyGroups);
+    if (cached is List<GroupEntity>) {
+      emit(GroupsLoaded(groups: cached));
+      // If still fresh, skip network
+      if (AppCache.groups.has(_cacheKeyGroups)) return;
+      // Otherwise continue to refresh silently (no loading state)
+    } else {
+      emit(const GroupsLoading());
+    }
+
     final result = await _repository.getGroups();
+    if (isClosed) return;
 
     result.when(
       onSuccess: (groups) {
-        emit(GroupsLoaded(groups: groups));
+        if (!isClosed) {
+          AppCache.groups.put(_cacheKeyGroups, groups);
+          emit(GroupsLoaded(groups: groups));
+        }
       },
       onFailure: (failure) {
-        emit(GroupsError(failure.message));
+        if (!isClosed) emit(GroupsError(failure.message));
       },
+    );
+  }
+
+  /// Silently refreshes groups in the background without showing loading.
+  Future<void> silentRefresh() async {
+    if (AppCache.groups.has(_cacheKeyGroups)) return; // Still fresh
+
+    final result = await _repository.getGroups();
+    if (isClosed) return;
+
+    result.when(
+      onSuccess: (groups) {
+        if (!isClosed) {
+          AppCache.groups.put(_cacheKeyGroups, groups);
+          emit(GroupsLoaded(groups: groups));
+        }
+      },
+      onFailure: (_) {}, // Silent
     );
   }
 
   void setFilterLevel(String? level) {
     if (state is GroupsLoaded) {
       final current = state as GroupsLoaded;
-      emit(current.copyWith(
-        filterLevel: level,
-        clearFilter: level == null,
-      ));
+      emit(current.copyWith(filterLevel: level, clearFilter: level == null));
     }
   }
 
@@ -46,43 +80,73 @@ class GroupsCubit extends Cubit<GroupsState> {
       previousContentAccess: previousContentAccess,
     );
 
+    if (isClosed) return false;
+
     return result.when(
       onSuccess: (newGroup) {
+        // Invalidate cache after write
+        AppCache.groups.invalidate(_cacheKeyGroups);
+
         if (state is GroupsLoaded) {
           final current = state as GroupsLoaded;
-          emit(current.copyWith(
-            groups: [newGroup, ...current.groups],
-          ));
+          if (!isClosed) {
+            final updatedGroups = [newGroup, ...current.groups];
+            // Update cache with fresh data
+            AppCache.groups.put(_cacheKeyGroups, updatedGroups);
+            emit(current.copyWith(groups: updatedGroups));
+          }
         } else {
           loadGroups();
         }
         return true;
       },
       onFailure: (failure) {
-        emit(GroupsError(failure.message));
+        if (!isClosed) emit(GroupsError(failure.message));
         return false;
       },
     );
   }
 
   Future<void> loadGroupDetail(String groupId) async {
+    if (state is! GroupsLoaded) {
+      await loadGroups();
+    }
+    if (isClosed) return;
+
     if (state is GroupsLoaded) {
       final current = state as GroupsLoaded;
-      final group = current.groups.firstWhere(
-        (g) => g.id == groupId,
-        orElse: () => current.groups.first,
-      );
+      GroupEntity? group;
+      for (final g in current.groups) {
+        if (g.id == groupId) {
+          group = g;
+          break;
+        }
+      }
+      group ??= current.groups.isNotEmpty ? current.groups.first : null;
+      if (group == null) return;
+
+      // Check members cache
+      final membersCacheKey = 'members_$groupId';
+      final cachedMembers = AppCache.groups.getStale(membersCacheKey);
+      if (cachedMembers != null) {
+        emit(current.copyWith(selectedGroup: group, groupMembers: (cachedMembers as List).cast()));
+        if (AppCache.groups.has(membersCacheKey)) return;
+      }
 
       final membersResult = await _repository.getGroupMembers(groupId);
+      if (isClosed) return;
+
       membersResult.when(
         onSuccess: (members) {
-          emit(current.copyWith(
-            selectedGroup: group,
-            groupMembers: members,
-          ));
+          if (!isClosed) {
+            AppCache.groups.put(membersCacheKey, members);
+            emit(current.copyWith(selectedGroup: group, groupMembers: members));
+          }
         },
         onFailure: (failure) {
-          emit(current.copyWith(selectedGroup: group));
+          if (!isClosed) {
+            emit(current.copyWith(selectedGroup: group));
+          }
         },
       );
     }
@@ -97,8 +161,13 @@ class GroupsCubit extends Cubit<GroupsState> {
       studentId: studentId,
     );
 
+    if (isClosed) return false;
+
     return result.when(
       onSuccess: (newMember) {
+        // Invalidate members cache
+        AppCache.groups.invalidate('members_$groupId');
+
         if (state is GroupsLoaded) {
           final current = state as GroupsLoaded;
           final updatedMembers = [newMember, ...current.groupMembers];
@@ -110,15 +179,22 @@ class GroupsCubit extends Cubit<GroupsState> {
             return g;
           }).toList();
 
-          emit(current.copyWith(
-            groups: updatedGroups,
-            groupMembers: updatedMembers,
-          ));
+          // Update groups cache
+          AppCache.groups.put(_cacheKeyGroups, updatedGroups);
+
+          if (!isClosed) {
+            emit(
+              current.copyWith(
+                groups: updatedGroups,
+                groupMembers: updatedMembers,
+              ),
+            );
+          }
         }
         return true;
       },
       onFailure: (failure) {
-        emit(GroupsError(failure.message));
+        if (!isClosed) emit(GroupsError(failure.message));
         return false;
       },
     );
@@ -133,8 +209,13 @@ class GroupsCubit extends Cubit<GroupsState> {
       studentId: studentId,
     );
 
+    if (isClosed) return false;
+
     return result.when(
       onSuccess: (_) {
+        // Invalidate members cache
+        AppCache.groups.invalidate('members_$groupId');
+
         if (state is GroupsLoaded) {
           final current = state as GroupsLoaded;
           final updatedMembers = current.groupMembers
@@ -150,15 +231,22 @@ class GroupsCubit extends Cubit<GroupsState> {
             return g;
           }).toList();
 
-          emit(current.copyWith(
-            groups: updatedGroups,
-            groupMembers: updatedMembers,
-          ));
+          // Update groups cache
+          AppCache.groups.put(_cacheKeyGroups, updatedGroups);
+
+          if (!isClosed) {
+            emit(
+              current.copyWith(
+                groups: updatedGroups,
+                groupMembers: updatedMembers,
+              ),
+            );
+          }
         }
         return true;
       },
       onFailure: (failure) {
-        emit(GroupsError(failure.message));
+        if (!isClosed) emit(GroupsError(failure.message));
         return false;
       },
     );

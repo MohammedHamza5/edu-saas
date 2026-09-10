@@ -9,8 +9,7 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
   final AttendanceRemoteDataSource _remoteDataSource;
 
   AttendanceRepositoryImpl({AttendanceRemoteDataSource? remoteDataSource})
-      : _remoteDataSource =
-            remoteDataSource ?? AttendanceRemoteDataSourceImpl();
+    : _remoteDataSource = remoteDataSource ?? AttendanceRemoteDataSourceImpl();
 
   @override
   Future<Result<List<StudentAttendanceItem>>> getGroupStudentsWithAttendance({

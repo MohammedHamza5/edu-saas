@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/network/supabase_service.dart';
+import '../../domain/entities/user_entity.dart';
 import '../models/user_model.dart';
 
 abstract interface class AuthRemoteDataSource {
@@ -72,7 +73,22 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       throw const AuthException('Registration succeeded but user ID is missing.');
     }
 
-    return await _fetchUserProfile(userId);
+    try {
+      return await _fetchUserProfile(userId);
+    } catch (_) {
+      // If email confirmation is required or session is not established immediately,
+      // the newly created user in public.users has status = 'pending' and is shielded
+      // by RLS from unauthenticated requests. We construct the pending UserModel directly.
+      return UserModel(
+        id: userId,
+        tenantId: tenantId,
+        role: UserRole.student,
+        status: UserStatus.pending,
+        fullName: fullName.trim(),
+        email: email.trim(),
+        phone: phone.trim(),
+      );
+    }
   }
 
   @override
@@ -93,9 +109,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   Future<UserModel> _fetchUserProfile(String userId) async {
+    // ⚡ Performance: استعلام JOIN واحد بدلاً من استعلامين متتاليين
+    // يجلب بيانات المستخدم + حالة الـ Tenant في رحلة HTTP واحدة
     final data = await _safeClient
         .from('users')
-        .select('id, tenant_id, role, status, full_name, email, phone')
+        .select('id, tenant_id, role, status, full_name, email, phone, tenants!inner(status)')
         .eq('id', userId)
         .maybeSingle();
 
@@ -104,14 +122,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     }
 
     // Check if tenant is suspended (Rule 2.6: tenant.status = suspended -> complete block)
-    final tenantId = data['tenant_id'] as String;
-    final tenantData = await _safeClient
-        .from('tenants')
-        .select('status')
-        .eq('id', tenantId)
-        .maybeSingle();
-
-    if (tenantData != null && tenantData['status'] == 'suspended') {
+    final tenantInfo = data['tenants'] as Map<String, dynamic>?;
+    if (tenantInfo != null && tenantInfo['status'] == 'suspended') {
       throw const AuthException('TENANT_SUSPENDED');
     }
 

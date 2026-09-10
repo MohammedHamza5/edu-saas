@@ -15,7 +15,7 @@ final class OnboardingInitial extends OnboardingState {
 
 final class OnboardingLoading extends OnboardingState {
   final String message;
-  const OnboardingLoading({this.message = 'جارٍ تهيئة المستأجر وحساب المعلم...'});
+  const OnboardingLoading({this.message = 'Initializing tenant and instructor account...'});
 
   @override
   List<Object?> get props => [message];

@@ -31,7 +31,7 @@ final class GroupsLoaded extends GroupsState {
   });
 
   List<GroupEntity> get filteredGroups {
-    if (filterLevel == null || filterLevel == 'الكل') {
+    if (filterLevel == null || filterLevel == 'ALL') {
       return groups;
     }
     return groups.where((g) => g.level == filterLevel).toList();
@@ -53,12 +53,7 @@ final class GroupsLoaded extends GroupsState {
   }
 
   @override
-  List<Object?> get props => [
-        groups,
-        filterLevel,
-        selectedGroup,
-        groupMembers,
-      ];
+  List<Object?> get props => [groups, filterLevel, selectedGroup, groupMembers];
 }
 
 final class GroupsError extends GroupsState {

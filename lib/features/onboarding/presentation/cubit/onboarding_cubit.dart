@@ -28,7 +28,7 @@ class OnboardingCubit extends Cubit<OnboardingState> {
   }
 
   Future<void> loadTenants() async {
-    emit(const OnboardingLoading(message: 'جارٍ تحميل المستأجرين...'));
+    emit(const OnboardingLoading(message: 'Loading tenants...'));
 
     final result = await _repository.listTenants();
 

@@ -46,7 +46,8 @@ class GroupEntity extends Equatable {
       name: name ?? this.name,
       level: level ?? this.level,
       description: description ?? this.description,
-      previousContentAccess: previousContentAccess ?? this.previousContentAccess,
+      previousContentAccess:
+          previousContentAccess ?? this.previousContentAccess,
       status: status ?? this.status,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -56,15 +57,15 @@ class GroupEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        tenantId,
-        name,
-        level,
-        description,
-        previousContentAccess,
-        status,
-        createdAt,
-        updatedAt,
-        membersCount,
-      ];
+    id,
+    tenantId,
+    name,
+    level,
+    description,
+    previousContentAccess,
+    status,
+    createdAt,
+    updatedAt,
+    membersCount,
+  ];
 }

@@ -25,13 +25,13 @@ class GroupMemberEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        groupId,
-        studentId,
-        studentName,
-        studentEmail,
-        studentPhone,
-        joinedAt,
-        status,
-      ];
+    id,
+    groupId,
+    studentId,
+    studentName,
+    studentEmail,
+    studentPhone,
+    joinedAt,
+    status,
+  ];
 }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html dir="rtl" lang="ar">
 <head>
   <!--
     If you are serving your web app in a path other than the root, change the
@@ -7,32 +7,223 @@
 
     The path provided below has to start and end with a slash "/" in order for
     it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
   -->
   <base href="$FLUTTER_BASE_HREF">
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="منصة التعليم والرياضيات الأكاديمية - White-label Education SaaS">
+
+  <!-- Preconnect & Load Google Fonts (Cairo: Primary Arabic Typeface) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="edu_saas">
+  <meta name="apple-mobile-web-app-title" content="منصة التعليم الرياضي">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>edu_saas</title>
+  <title>منصة الرياضيات الأكاديمية | EduSaaS</title>
   <link rel="manifest" href="manifest.json">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #0F172A;
+      font-family: 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif;
+      direction: rtl;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       PRESTIGIOUS MATHEMATICAL ACADEMIC PRELOADER
+       Prevents Flash of Unstyled Text / Tofu Glyphs during boot
+       ═══════════════════════════════════════════════════════ */
+    #flutter-preloader {
+      position: fixed;
+      inset: 0;
+      z-index: 999999;
+      background: radial-gradient(circle at 50% 32%, #1E1B4B 0%, #0F172A 68%, #080C1A 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.5s;
+      user-select: none;
+    }
+
+    .preloader-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 32px;
+      max-width: 440px;
+    }
+
+    .preloader-logo-wrap {
+      position: relative;
+      margin-bottom: 24px;
+    }
+
+    .preloader-logo {
+      width: 76px;
+      height: 76px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #5B4FE0 0%, #3B82F6 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 14px 30px -6px rgba(91, 79, 224, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.18) inset;
+      position: relative;
+      z-index: 2;
+      animation: logoFloat 3s ease-in-out infinite alternate;
+    }
+
+    .math-symbol {
+      font-size: 40px;
+      font-weight: 800;
+      color: #FFFFFF;
+      line-height: 1;
+      font-family: 'Cambria Math', 'Times New Roman', serif, 'Cairo';
+    }
+
+    .preloader-glow {
+      position: absolute;
+      inset: -14px;
+      border-radius: 32px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.45) 0%, transparent 70%);
+      z-index: 1;
+      filter: blur(10px);
+      animation: glowPulse 3s ease-in-out infinite alternate;
+    }
+
+    .preloader-title {
+      color: #F8FAFC;
+      font-size: 24px;
+      font-weight: 800;
+      margin: 0 0 8px 0;
+      letter-spacing: -0.3px;
+    }
+
+    .preloader-subtitle {
+      color: #94A3B8;
+      font-size: 13px;
+      font-weight: 500;
+      margin: 0 0 28px 0;
+      line-height: 1.5;
+    }
+
+    .preloader-progress-track {
+      width: 220px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.10);
+      border-radius: 999px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .preloader-progress-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 40%;
+      background: linear-gradient(90deg, #5B4FE0, #38BDF8, #818CF8);
+      border-radius: 999px;
+      animation: progressSlide 1.6s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+    }
+
+    .preloader-status {
+      color: #64748B;
+      font-size: 12px;
+      margin-top: 14px;
+      font-weight: 500;
+    }
+
+    @keyframes logoFloat {
+      0% { transform: translateY(0px) scale(1); }
+      100% { transform: translateY(-5px) scale(1.03); }
+    }
+
+    @keyframes glowPulse {
+      0% { opacity: 0.35; transform: scale(0.95); }
+      100% { opacity: 0.85; transform: scale(1.15); }
+    }
+
+    @keyframes progressSlide {
+      0% { left: -40%; width: 40%; }
+      50% { left: 30%; width: 50%; }
+      100% { left: 100%; width: 40%; }
+    }
+  </style>
 </head>
 <body>
+  <!-- High-end Academic Mathematical Preloader -->
+  <div id="flutter-preloader">
+    <div class="preloader-card">
+      <div class="preloader-logo-wrap">
+        <div class="preloader-logo">
+          <span class="math-symbol">&sum;</span>
+        </div>
+        <div class="preloader-glow"></div>
+      </div>
+      <h1 class="preloader-title">منصة الرياضيات الأكاديمية</h1>
+      <p class="preloader-subtitle">Education SaaS &bull; SAT / EST / ACT &bull; نظام المجموعات</p>
+      
+      <div class="preloader-progress-track">
+        <div class="preloader-progress-bar"></div>
+      </div>
+      <p class="preloader-status">جاري تهيئة المنصة التعليمية...</p>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      function dismissPreloader() {
+        var el = document.getElementById('flutter-preloader');
+        if (el && !el.classList.contains('dismissed')) {
+          el.classList.add('dismissed');
+          el.style.opacity = '0';
+          el.style.visibility = 'hidden';
+          setTimeout(function() {
+            if (el.parentNode) el.parentNode.removeChild(el);
+          }, 520);
+        }
+      }
+
+      // Check when flutter is attached to DOM
+      var observer = new MutationObserver(function(mutations, obs) {
+        var view = document.querySelector('flutter-view') || 
+                   document.querySelector('flt-glass-pane') ||
+                   document.querySelector('flt-scene');
+        if (view) {
+          // Canvas attached to DOM - dismiss preloader immediately
+          setTimeout(dismissPreloader, 50);
+          obs.disconnect();
+        }
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+
+      // Fallback timer ensures preloader never gets stuck indefinitely
+      setTimeout(dismissPreloader, 4000);
+      window.dismissFlutterPreloader = dismissPreloader;
+    })();
+  </script>
+
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

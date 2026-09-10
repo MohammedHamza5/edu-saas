@@ -54,7 +54,8 @@ class AttendanceModel extends AttendanceEntity {
       'tenant_id': tenantId,
       'group_id': groupId,
       'student_id': studentId,
-      'date': "${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}",
+      'date':
+          "${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}",
       'status': status.name,
       'marked_at': markedAt.toIso8601String(),
       'marked_by': markedBy,

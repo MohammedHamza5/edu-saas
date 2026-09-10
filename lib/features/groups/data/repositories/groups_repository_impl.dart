@@ -10,13 +10,13 @@ class GroupsRepositoryImpl implements GroupsRepository {
   final GroupsRemoteDataSource _remoteDataSource;
 
   GroupsRepositoryImpl({GroupsRemoteDataSource? remoteDataSource})
-      : _remoteDataSource = remoteDataSource ?? GroupsRemoteDataSourceImpl();
+    : _remoteDataSource = remoteDataSource ?? GroupsRemoteDataSourceImpl();
 
   @override
   Future<Result<List<GroupEntity>>> getGroups() async {
     try {
       final groups = await _remoteDataSource.getGroups();
-      return Success(groups);
+      return Success(List<GroupEntity>.from(groups));
     } on PostgrestException catch (e) {
       return FailureResult(ServerFailure(e.message, code: e.code));
     } catch (e) {
@@ -73,7 +73,9 @@ class GroupsRepositoryImpl implements GroupsRepository {
   }
 
   @override
-  Future<Result<List<GroupMemberEntity>>> getGroupMembers(String groupId) async {
+  Future<Result<List<GroupMemberEntity>>> getGroupMembers(
+    String groupId,
+  ) async {
     try {
       final members = await _remoteDataSource.getGroupMembers(groupId);
       return Success(members);

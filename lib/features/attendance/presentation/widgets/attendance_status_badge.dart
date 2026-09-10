@@ -17,51 +17,54 @@ class AttendanceStatusBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final (bg, fg, icon) = switch (status) {
       AttendanceStatus.present => (
-          AppColors.success.withAlpha(30),
-          AppColors.success,
-          Icons.check_circle_rounded,
-        ),
+        AppColors.success.withValues(alpha: 0.12),
+        AppColors.success,
+        Icons.check_circle_rounded,
+      ),
       AttendanceStatus.absent => (
-          AppColors.error.withAlpha(30),
-          AppColors.error,
-          Icons.cancel_rounded,
-        ),
+        AppColors.error.withValues(alpha: 0.12),
+        AppColors.error,
+        Icons.cancel_rounded,
+      ),
       AttendanceStatus.late => (
-          AppColors.warning.withAlpha(30),
-          AppColors.warning,
-          Icons.access_time_filled_rounded,
-        ),
+        AppColors.warning.withValues(alpha: 0.12),
+        AppColors.warning,
+        Icons.access_time_filled_rounded,
+      ),
       AttendanceStatus.excused => (
-          AppColors.info.withAlpha(30),
-          AppColors.info,
-          Icons.info_rounded,
-        ),
+        AppColors.info.withValues(alpha: 0.12),
+        AppColors.info,
+        Icons.info_rounded,
+      ),
     };
 
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: compact ? AppSpacing.s8 : AppSpacing.s12,
-        vertical: compact ? AppSpacing.s4 : AppSpacing.s6,
-      ),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-        border: Border.all(color: fg.withAlpha(50)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: compact ? 12 : 14, color: fg),
-          const SizedBox(width: AppSpacing.s4),
-          Text(
-            status.labelAr,
-            style: TextStyle(
-              fontSize: compact ? 11 : 12,
-              fontWeight: FontWeight.w700,
-              color: fg,
+    return RepaintBoundary(
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: compact ? AppSpacing.s8 : AppSpacing.s12,
+          vertical: compact ? AppSpacing.s4 : AppSpacing.s6,
+        ),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+          border: Border.all(color: fg.withValues(alpha: 0.28), width: 1),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: compact ? 12 : 14, color: fg),
+            const SizedBox(width: AppSpacing.s4),
+            Text(
+              status.labelAr,
+              style: TextStyle(
+                fontSize: compact ? 11 : 12,
+                fontWeight: FontWeight.w700,
+                color: fg,
+                height: 1.2,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
