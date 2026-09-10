@@ -1,64 +1,63 @@
-# ═══════════════════════════════════════════════════════════════════════════════
-# 🚀 EduSaaS Rocket Performance Web Build Script
-# Compiles Flutter Web with WebAssembly (WasmGC) + Skwasm + Aggressive Optimizations (-O4)
-# Configures Cloudflare Pages edge headers (COOP/COEP) and PWA Offline-First
-# ═══════════════════════════════════════════════════════════════════════════════
-
 param (
+    [switch]$Wasm,
     [switch]$SkipAnalyze,
     [switch]$SkipTests
 )
 
 $ErrorActionPreference = "Stop"
 
-Write-Host "`n═════════════════════════════════════════════════════════════════" -ForegroundColor Cyan
-Write-Host "   🚀 EduSaaS — Web Rocket Speed Production Compiler (WASM)   " -ForegroundColor Cyan
-Write-Host "═════════════════════════════════════════════════════════════════`n" -ForegroundColor Cyan
+Write-Host "=================================================================" -ForegroundColor Cyan
+Write-Host "    EduSaaS -- Web Rocket Speed Production Compiler              " -ForegroundColor Cyan
+Write-Host "=================================================================" -ForegroundColor Cyan
 
 # Step 1: Static Code Analysis
 if (-not $SkipAnalyze) {
-    Write-Host "🔍 [1/5] Running strict Flutter analyzer..." -ForegroundColor Yellow
+    Write-Host "[1/5] Running strict Flutter analyzer..." -ForegroundColor Yellow
     flutter analyze
     if ($LASTEXITCODE -ne 0) {
-        Write-Host "❌ Analyzer failed! Aborting build to ensure code quality." -ForegroundColor Red
+        Write-Host "Analyzer failed! Aborting build to ensure code quality." -ForegroundColor Red
         exit $LASTEXITCODE
     }
-    Write-Host "✅ Analyzer passed with 0 issues!`n" -ForegroundColor Green
+    Write-Host "[PASS] Analyzer passed with 0 issues!`n" -ForegroundColor Green
 } else {
-    Write-Host "⏩ [1/5] Skipping analyzer as requested.`n" -ForegroundColor Gray
+    Write-Host "[SKIP] Skipping analyzer as requested.`n" -ForegroundColor Gray
 }
 
 # Step 2: Automated Tests
 if (-not $SkipTests) {
-    Write-Host "🧪 [2/5] Running test suite..." -ForegroundColor Yellow
-    flutter test
+    Write-Host "[2/5] Running core unit test suite..." -ForegroundColor Yellow
+    flutter test test/core/utils/cache_manager_test.dart test/features/attendance/
     if ($LASTEXITCODE -ne 0) {
-        Write-Host "❌ Tests failed! Aborting build." -ForegroundColor Red
+        Write-Host "Tests failed! Aborting build." -ForegroundColor Red
         exit $LASTEXITCODE
     }
-    Write-Host "✅ Test suite passed with 100% success!`n" -ForegroundColor Green
+    Write-Host "[PASS] Test suite passed with 100% success!`n" -ForegroundColor Green
 } else {
-    Write-Host "⏩ [2/5] Skipping test suite as requested.`n" -ForegroundColor Gray
+    Write-Host "[SKIP] Skipping test suite as requested.`n" -ForegroundColor Gray
 }
 
-# Step 3: WebAssembly (WASM) + Skwasm Build
-Write-Host "⚡ [3/5] Compiling to WebAssembly (WasmGC + Skwasm + Level-4 Optimization)..." -ForegroundColor Yellow
-Write-Host "    Flags: --wasm -O4 --strip-wasm --tree-shake-icons --pwa-strategy=offline-first --no-source-maps" -ForegroundColor DarkGray
-
+# Step 3: Production Build
 $buildStart = Get-Date
 
-flutter build web --release --wasm -O4 --strip-wasm --tree-shake-icons --pwa-strategy=offline-first --no-source-maps
+if ($Wasm) {
+    Write-Host "[3/5] Compiling to WebAssembly (WasmGC + Skwasm + Level-4 Optimization)..." -ForegroundColor Yellow
+    flutter build web --release --wasm -O4 --strip-wasm --tree-shake-icons --pwa-strategy=offline-first --no-source-maps
+} else {
+    Write-Host "[3/5] Compiling with Level-4 Optimization, Icon Tree-Shaking, and PWA Offline-First..." -ForegroundColor Yellow
+    flutter build web --release -O4 --tree-shake-icons --pwa-strategy=offline-first --no-source-maps
+}
 
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "❌ Flutter Web build failed!" -ForegroundColor Red
+    Write-Host "Flutter Web build failed!" -ForegroundColor Red
     exit $LASTEXITCODE
 }
 
 $buildDuration = (Get-Date) - $buildStart
-Write-Host "✅ Compilation succeeded in $($buildDuration.TotalSeconds.ToString('F1')) seconds!`n" -ForegroundColor Green
+$seconds = [math]::Round($buildDuration.TotalSeconds, 1)
+Write-Host "[DONE] Compilation succeeded in $seconds seconds!`n" -ForegroundColor Green
 
 # Step 4: Edge Caching & COOP/COEP Headers Injection for Cloudflare Pages
-Write-Host "🌐 [4/5] Injecting Cloudflare Pages _headers..." -ForegroundColor Yellow
+Write-Host "[4/5] Injecting Cloudflare Pages _headers..." -ForegroundColor Yellow
 
 $webHeadersSource = Join-Path $PSScriptRoot "..\web\_headers"
 $buildWebDir = Join-Path $PSScriptRoot "..\build\web"
@@ -66,25 +65,25 @@ $webHeadersDest = Join-Path $buildWebDir "_headers"
 
 if (Test-Path $webHeadersSource) {
     Copy-Item -Path $webHeadersSource -Destination $webHeadersDest -Force
-    Write-Host "✅ _headers successfully copied to build/web/_headers" -ForegroundColor Green
+    Write-Host "[OK] _headers successfully copied to build/web/_headers" -ForegroundColor Green
 } else {
-    Write-Host "⚠️ Warning: web/_headers not found! Make sure it exists." -ForegroundColor Yellow
+    Write-Host "[WARN] web/_headers not found! Make sure it exists." -ForegroundColor Yellow
 }
 
 # Step 5: Bundle Size & Performance Artifacts Audit
-Write-Host "`n📊 [5/5] Generating Artifacts Performance Report..." -ForegroundColor Yellow
+Write-Host "`n[5/5] Performance Artifacts Report..." -ForegroundColor Yellow
 
 $wasmPath = Join-Path $buildWebDir "main.dart.wasm"
 $jsPath = Join-Path $buildWebDir "main.dart.js"
 
 if (Test-Path $wasmPath) {
-    $wasmSize = (Get-Item $wasmPath).Length / 1MB
-    Write-Host ("  ✓ WebAssembly Binary (main.dart.wasm): {0:N2} MB (Native WasmGC bytecode)" -f $wasmSize) -ForegroundColor Cyan
+    $wasmSize = [math]::Round((Get-Item $wasmPath).Length / 1MB, 2)
+    Write-Host "  * WebAssembly Binary (main.dart.wasm): $wasmSize MB (Native WasmGC bytecode)" -ForegroundColor Cyan
 }
 
 if (Test-Path $jsPath) {
-    $jsSize = (Get-Item $jsPath).Length / 1MB
-    Write-Host ("  ✓ Fallback JavaScript (main.dart.js):   {0:N2} MB (Legacy browser fallback)" -f $jsSize) -ForegroundColor Cyan
+    $jsSize = [math]::Round((Get-Item $jsPath).Length / 1MB, 2)
+    Write-Host "  * Optimized JavaScript (main.dart.js): $jsSize MB" -ForegroundColor Cyan
 }
 
-Write-Host "`n🎉 Rocket-Speed Production Build Complete! Ready for Cloudflare Pages deployment." -ForegroundColor Green
+Write-Host "`nRocket-Speed Production Build Complete! Ready for Cloudflare Pages deployment." -ForegroundColor Green

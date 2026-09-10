@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
+import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/services/student_activity_tracker.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -107,7 +108,7 @@ class _AppVideoPlayerState extends State<AppVideoPlayer> {
       if (!mounted) return;
       setState(() {
         _hasError = true;
-        _errorMessage = 'تعذر تشغيل الفيديو، يرجى التحقق من الاتصال بالإنترنت.';
+        _errorMessage = '';
       });
     }
   }
@@ -264,7 +265,7 @@ class _AppVideoPlayerState extends State<AppVideoPlayer> {
               const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 44),
               const SizedBox(height: AppSpacing.s12),
               Text(
-                _errorMessage,
+                _errorMessage.isNotEmpty ? _errorMessage : context.l10n.videoPlaybackError,
                 textAlign: TextAlign.center,
                 style: const TextStyle(color: Colors.white, fontSize: 13),
               ),
@@ -281,7 +282,7 @@ class _AppVideoPlayerState extends State<AppVideoPlayer> {
                   _initializePlayer();
                 },
                 icon: const Icon(Icons.refresh_rounded, size: 16),
-                label: const Text('إعادة المحاولة'),
+                label: Text(context.l10n.retryAction),
               ),
             ],
           ),
@@ -296,8 +297,8 @@ class _AppVideoPlayerState extends State<AppVideoPlayer> {
           color: Colors.black,
           borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
         ),
-        child: const Center(
-          child: AppLoadingView(message: 'جاري تحميل البث التكيفي...'),
+        child: Center(
+          child: AppLoadingView(message: context.l10n.loadingAdaptiveStream),
         ),
       );
     }
@@ -413,7 +414,7 @@ class _AppVideoPlayerState extends State<AppVideoPlayer> {
                               const Icon(Icons.history_rounded, color: AppColors.primaryLight, size: 16),
                               const SizedBox(width: AppSpacing.s8),
                               Text(
-                                'المتابعة من دقيقة ${_formatDuration(Duration(seconds: widget.initialProgressSeconds))}؟',
+                                context.l10n.resumeFromMinute(_formatDuration(Duration(seconds: widget.initialProgressSeconds))),
                                 style: const TextStyle(color: Colors.white, fontSize: 12),
                               ),
                               const SizedBox(width: AppSpacing.s12),
@@ -424,9 +425,9 @@ class _AppVideoPlayerState extends State<AppVideoPlayer> {
                                   minimumSize: Size.zero,
                                 ),
                                 onPressed: _resumeFromSavedProgress,
-                                child: const Text(
-                                  'استئناف',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                child: Text(
+                                  context.l10n.resumeAction,
+                                  style: const TextStyle(fontWeight: FontWeight.bold),
                                 ),
                               ),
                               IconButton(

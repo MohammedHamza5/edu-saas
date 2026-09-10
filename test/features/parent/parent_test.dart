@@ -359,7 +359,7 @@ void main() {
         ),
       );
 
-      expect(find.text('اختر الطالب للمتابعة (P-02)'), findsOneWidget);
+      expect(find.text('اختر الطالب للمتابعة'), findsOneWidget);
       expect(find.text('عمر أحمد'), findsOneWidget);
       expect(find.text('مريم أحمد'), findsOneWidget);
 
@@ -384,7 +384,7 @@ void main() {
       expect(find.text('حضر 9 من 10 حصة'), findsOneWidget);
       expect(find.text('متوسط الامتحانات'), findsOneWidget);
       expect(find.text('88.5%'), findsOneWidget);
-      expect(find.text('المجموعات الدراسية المسجل بها'), findsOneWidget);
+      expect(find.text('المجموعات المسجل بها'), findsOneWidget);
       expect(find.text('SAT Math Basics (SAT)'), findsOneWidget);
     });
 
