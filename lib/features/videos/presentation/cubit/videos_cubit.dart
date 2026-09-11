@@ -15,7 +15,7 @@ class VideosCubit extends Cubit<VideosState> {
         super(const VideosInitial());
 
   Future<void> loadVideosForGroup(String groupId) async {
-    emit(const VideosLoading(message: 'جاري تحميل قائمة الفيديوهات...'));
+    emit(const VideosLoading());
 
     final result = await _repository.getVideosForGroup(groupId);
 
@@ -33,7 +33,7 @@ class VideosCubit extends Cubit<VideosState> {
     required String videoId,
     required String studentId,
   }) async {
-    emit(const VideosLoading(message: 'جاري تجهيز مشغل الفيديو الآمن...'));
+    emit(const VideosLoading());
 
     // 1. Fetch video record
     final videoResult = await _repository.getVideoById(videoId);

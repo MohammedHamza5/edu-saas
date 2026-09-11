@@ -5,10 +5,10 @@ import '../../../../core/config/tenant_registry.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/math_tokens.dart';
 import '../../../../core/theme/tenant_theme_cubit.dart';
 import '../../../../core/widgets/academic_auth_scaffold.dart';
 import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_logo.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/language_switcher_button.dart';
 import '../../../../core/utils/app_feedback.dart';
@@ -45,9 +45,6 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    final mathTokens =
-        Theme.of(context).extension<MathTokens>() ?? MathTokens.light;
-
     final branding = (() {
       try {
         return context.watch<TenantThemeCubit>().state;
@@ -92,32 +89,10 @@ class _LoginPageState extends State<LoginPage> {
                 const SizedBox(height: AppSpacing.s8),
 
                 // ── 1. Brand Emblem ──────────────────────────────────────────
-                Center(
-                  child: Container(
-                    width: 72,
-                    height: 72,
-                    decoration: BoxDecoration(
-                      gradient: mathTokens.primaryButtonGradient,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: branding.primaryColor.withValues(alpha: 0.35),
-                          blurRadius: 18,
-                          offset: const Offset(0, 6),
-                        ),
-                      ],
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      branding.signatureSymbol,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 38,
-                        fontWeight: FontWeight.w900,
-                        fontFamily: 'serif',
-                        height: 1.0,
-                      ),
-                    ),
+                const Center(
+                  child: AppLogo.hero(
+                    size: 80,
+                    withGlow: true,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.s16),
@@ -159,7 +134,7 @@ class _LoginPageState extends State<LoginPage> {
                         const SizedBox(width: 8),
                         Flexible(
                           child: Text(
-                            branding.academicTrack,
+                            branding.localizedAcademicTrack(context),
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               color: branding.primaryLight,
@@ -176,7 +151,7 @@ class _LoginPageState extends State<LoginPage> {
 
                 // ── 3. Brand Title & Welcoming Subtitle ────────────────────────
                 Text(
-                  branding.brandName,
+                  branding.localizedBrandName(context),
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontSize: 22,

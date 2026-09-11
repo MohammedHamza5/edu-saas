@@ -6,10 +6,12 @@ import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/responsive_breakpoints.dart';
 import '../../../../core/widgets/app_badge.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_empty_view.dart';
 import '../../../../core/widgets/app_error_view.dart';
+import '../../../../core/widgets/app_loading_view.dart';
 import '../../../../core/widgets/responsive_container.dart';
 import '../../domain/entities/student_entity.dart';
 import '../cubit/students_cubit.dart';
@@ -32,19 +34,7 @@ class _PendingStudentsPageState extends State<PendingStudentsPage> {
   }
 
   Widget _buildSkeletonLoading() {
-    return ListView.separated(
-      padding: const EdgeInsets.all(AppSpacing.s16),
-      itemCount: 4,
-      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.s12),
-      itemBuilder: (_, __) => Container(
-        height: 120,
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-          border: Border.all(color: AppColors.border),
-        ),
-      ),
-    );
+    return const AppLoadingView.list(count: 4);
   }
 
   @override
@@ -68,6 +58,14 @@ class _PendingStudentsPageState extends State<PendingStudentsPage> {
         ],
       ),
       body: BlocConsumer<StudentsCubit, StudentsState>(
+        buildWhen: (previous, current) =>
+            current is PendingStudentsLoaded ||
+            current is StudentsLoading ||
+            current is StudentsError ||
+            current is StudentActionInProgress ||
+            current is StudentActionSuccess,
+        listenWhen: (previous, current) =>
+            current is StudentsError || current is StudentActionSuccess,
         listener: (context, state) {
           if (state is StudentsError) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -110,7 +108,7 @@ class _PendingStudentsPageState extends State<PendingStudentsPage> {
             }
 
             return ResponsiveContainer(
-              maxWidth: 900,
+              maxWidth: ResponsiveBreakpoints.maxContentWidth,
               child: ListView.separated(
                 padding: const EdgeInsets.all(AppSpacing.s16),
                 itemCount: state.pending.length + 1,
@@ -164,7 +162,12 @@ class _PendingStudentsPageState extends State<PendingStudentsPage> {
             );
           }
 
-          return const SizedBox.shrink();
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              context.read<StudentsCubit>().loadPendingStudents();
+            }
+          });
+          return _buildSkeletonLoading();
         },
       ),
     );

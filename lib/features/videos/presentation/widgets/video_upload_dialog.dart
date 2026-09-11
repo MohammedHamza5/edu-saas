@@ -8,6 +8,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_card.dart';
+import '../../../../core/widgets/app_loading_view.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../cubit/videos_cubit.dart';
 import '../cubit/videos_state.dart';
@@ -347,11 +348,7 @@ class _VideoUploadDialogState extends State<VideoUploadDialog> {
                         children: [
                           Row(
                             children: [
-                              const SizedBox(
-                                width: 14,
-                                height: 14,
-                                child: CircularProgressIndicator(strokeWidth: 2),
-                              ),
+                              const AppLoadingView.compact(size: 14),
                               const SizedBox(width: AppSpacing.s8),
                               Text(
                                 context.l10n.uploadingVideoToCdn,

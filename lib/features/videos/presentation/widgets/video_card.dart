@@ -3,6 +3,7 @@ import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_card.dart';
+import '../../../../core/widgets/app_loading_view.dart';
 import '../../domain/entities/video_entity.dart';
 import '../../domain/entities/video_progress_entity.dart';
 
@@ -124,13 +125,9 @@ class VideoCard extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             if (video.status.isProcessing) ...[
-                              const SizedBox(
-                                width: 22,
-                                height: 22,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2.5,
-                                  color: Colors.white,
-                                ),
+                              const AppLoadingView.compact(
+                                size: 22,
+                                color: Colors.white,
                               ),
                               const SizedBox(height: AppSpacing.s6),
                               Text(

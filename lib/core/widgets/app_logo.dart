@@ -1,33 +1,85 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../config/tenant_registry.dart';
 import '../theme/tenant_theme_cubit.dart';
 
-/// The platform's Venn Diagram logo mark.
+/// The platform's prestige Mathematical Academic logo mark.
 ///
-/// Two overlapping circles representing the intersection of knowledge,
-/// with an academic signature symbol (e.g. ∑, ∫, Δ) in the intersection area.
+/// Features the signature geometric emblem (Sigma ∑ & coordinate curves)
+/// inside a luxury squircle badge with ambient glow.
 /// Automatically adapts to the active teacher / tenant's visual branding.
 class AppLogo extends StatelessWidget {
   final double size;
   final bool showName;
   final String? platformName;
+  final String? subtitle;
   final Color? nameColor;
   final Color? primaryColor;
   final Color? secondaryColor;
   final String? symbol;
+  final bool withGlow;
+  final bool useAsset;
+  final bool isHorizontal;
 
   const AppLogo({
     super.key,
     this.size = 64,
     this.showName = false,
     this.platformName,
+    this.subtitle,
     this.nameColor,
     this.primaryColor,
     this.secondaryColor,
     this.symbol,
+    this.withGlow = true,
+    this.useAsset = true,
+    this.isHorizontal = false,
   });
+
+  /// Hero emblem for Login, Splash, and Landing headers
+  const AppLogo.hero({
+    super.key,
+    this.size = 80,
+    this.showName = false,
+    this.platformName,
+    this.subtitle,
+    this.nameColor,
+    this.primaryColor,
+    this.secondaryColor,
+    this.symbol,
+    this.withGlow = true,
+    this.useAsset = true,
+  }) : isHorizontal = false;
+
+  /// Compact horizontal layout for AppBars, Sidebar headers, and Drawers
+  const AppLogo.compact({
+    super.key,
+    this.size = 42,
+    this.showName = true,
+    this.platformName,
+    this.subtitle,
+    this.nameColor,
+    this.primaryColor,
+    this.secondaryColor,
+    this.symbol,
+    this.withGlow = false,
+    this.useAsset = true,
+  }) : isHorizontal = true;
+
+  /// Minimal icon-only badge for list tiles and metric cards
+  const AppLogo.badge({
+    super.key,
+    this.size = 32,
+    this.primaryColor,
+    this.secondaryColor,
+    this.symbol,
+    this.withGlow = false,
+    this.useAsset = true,
+  })  : showName = false,
+        platformName = null,
+        subtitle = null,
+        nameColor = null,
+        isHorizontal = false;
 
   @override
   Widget build(BuildContext context) {
@@ -46,197 +98,178 @@ class AppLogo extends StatelessWidget {
     final effectivePrimary = primaryColor ?? colorScheme.primary;
     final effectiveSecondary = secondaryColor ?? branding.primaryLight;
     final effectiveSymbol = symbol ?? branding.signatureSymbol;
-    final effectiveName = platformName ?? branding.brandName;
-    final effectiveNameColor = nameColor ?? effectivePrimary;
+    final effectiveName = platformName ?? branding.localizedBrandName(context);
+    final effectiveNameColor = nameColor ?? (theme.brightness == Brightness.dark ? Colors.white : effectivePrimary);
+
+    final emblem = _buildEmblem(
+      effectivePrimary: effectivePrimary,
+      effectiveSecondary: effectiveSecondary,
+      effectiveSymbol: effectiveSymbol,
+    );
 
     if (!showName) {
-      return SizedBox(
-        width: size,
-        height: size * 0.65, // aspect ratio of the venn diagram
-        child: CustomPaint(
-          painter: _VennPainter(
-            primary: effectivePrimary,
-            secondary: effectiveSecondary,
-            symbol: effectiveSymbol,
+      return emblem;
+    }
+
+    if (isHorizontal) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          emblem,
+          const SizedBox(width: 12),
+          Flexible(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  effectiveName,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: effectiveNameColor,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.3,
+                    height: 1.2,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle!,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.7) ??
+                          effectivePrimary.withValues(alpha: 0.7),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ],
+            ),
           ),
-        ),
+        ],
       );
     }
 
     return Column(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        SizedBox(
-          width: size,
-          height: size * 0.65,
-          child: CustomPaint(
-            painter: _VennPainter(
-              primary: effectivePrimary,
-              secondary: effectiveSecondary,
-              symbol: effectiveSymbol,
-            ),
-          ),
-        ),
-        SizedBox(height: size * 0.14),
+        emblem,
+        SizedBox(height: size * 0.16),
         Text(
           effectiveName,
+          textAlign: TextAlign.center,
           style: TextStyle(
             color: effectiveNameColor,
-            fontSize: size * 0.28,
+            fontSize: size * 0.26,
             fontWeight: FontWeight.w800,
             letterSpacing: -0.5,
-            height: 1.0,
+            height: 1.1,
           ),
         ),
+        if (subtitle != null) ...[
+          const SizedBox(height: 4),
+          Text(
+            subtitle!,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: effectivePrimary.withValues(alpha: 0.75),
+              fontSize: size * 0.16,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
       ],
     );
   }
-}
 
-/// CustomPainter that draws the Venn Diagram mark.
-///
-/// Layout (normalized to a 100×65 canvas):
-///   Left circle  center: (33, 32.5) radius 28  — Deep Indigo stroke
-///   Right circle center: (67, 32.5) radius 28  — Royal Blue stroke
-///   Intersection lens filled with indigo→blue gradient
-///   Σ character drawn in the center of the lens
-class _VennPainter extends CustomPainter {
-  final Color primary;
-  final Color secondary;
-  final String symbol;
+  Widget _buildEmblem({
+    required Color effectivePrimary,
+    required Color effectiveSecondary,
+    required String effectiveSymbol,
+  }) {
+    final borderRadius = BorderRadius.circular(size * 0.28);
 
-  const _VennPainter({
-    required this.primary,
-    required this.secondary,
-    required this.symbol,
-  });
-
-  static const double _strokeWidth = 2.4;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    // --- Coordinate system (normalized units → pixels) ---
-    final scaleX = size.width / 100.0;
-    final scaleY = size.height / 65.0;
-    final scale = math.min(scaleX, scaleY);
-
-    // Center the drawing
-    final dx = (size.width - 100 * scale) / 2;
-    final dy = (size.height - 65 * scale) / 2;
-    canvas.translate(dx, dy);
-    canvas.scale(scale);
-
-    const Offset leftCenter = Offset(33, 32.5);
-    const Offset rightCenter = Offset(67, 32.5);
-    const double r = 28.0;
-
-    // --- 1. Clip to left circle and fill gradient in lens region ---
-    _drawLensFill(canvas, leftCenter, rightCenter, r);
-
-    // --- 2. Left circle stroke (Teacher Primary) ---
-    final leftPaint = Paint()
-      ..color = primary
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = _strokeWidth
-      ..isAntiAlias = true;
-    canvas.drawCircle(leftCenter, r, leftPaint);
-
-    // --- 3. Right circle stroke (Teacher Secondary) ---
-    final rightPaint = Paint()
-      ..color = secondary
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = _strokeWidth
-      ..isAntiAlias = true;
-    canvas.drawCircle(rightCenter, r, rightPaint);
-
-    // --- 4. Symbol in intersection ---
-    _drawSymbol(canvas, const Offset(50, 32.5), r * 0.55);
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        borderRadius: borderRadius,
+        boxShadow: withGlow
+            ? [
+                BoxShadow(
+                  color: effectivePrimary.withValues(alpha: 0.40),
+                  blurRadius: size * 0.38,
+                  offset: Offset(0, size * 0.08),
+                  spreadRadius: -1,
+                ),
+                BoxShadow(
+                  color: effectiveSecondary.withValues(alpha: 0.20),
+                  blurRadius: size * 0.65,
+                  offset: Offset(0, size * 0.14),
+                ),
+              ]
+            : null,
+      ),
+      child: ClipRRect(
+        borderRadius: borderRadius,
+        child: useAsset
+            ? Image.asset(
+                'assets/images/brand_logo.png',
+                width: size,
+                height: size,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => _buildVectorFallback(
+                  effectivePrimary: effectivePrimary,
+                  effectiveSecondary: effectiveSecondary,
+                  effectiveSymbol: effectiveSymbol,
+                ),
+              )
+            : _buildVectorFallback(
+                effectivePrimary: effectivePrimary,
+                effectiveSecondary: effectiveSecondary,
+                effectiveSymbol: effectiveSymbol,
+              ),
+      ),
+    );
   }
 
-  void _drawLensFill(
-      Canvas canvas, Offset left, Offset right, double r) {
-    final d = (right - left).distance;
-    final halfAngle = math.acos(d / (2 * r));
-
-    final path = Path();
-    final leftToRight = math.atan2(
-        right.dy - left.dy, right.dx - left.dx);
-
-    path.moveTo(
-      left.dx + r * math.cos(leftToRight - halfAngle),
-      left.dy + r * math.sin(leftToRight - halfAngle),
-    );
-
-    path.arcToPoint(
-      Offset(
-        left.dx + r * math.cos(leftToRight + halfAngle),
-        left.dy + r * math.sin(leftToRight + halfAngle),
-      ),
-      radius: Radius.circular(r),
-      clockwise: true,
-    );
-
-    path.arcToPoint(
-      Offset(
-        left.dx + r * math.cos(leftToRight - halfAngle),
-        left.dy + r * math.sin(leftToRight - halfAngle),
-      ),
-      radius: Radius.circular(r),
-      clockwise: false,
-    );
-
-    path.close();
-
-    final lensCenter = Offset((left.dx + right.dx) / 2, (left.dy + right.dy) / 2);
-    final fillPaint = Paint()
-      ..shader = LinearGradient(
-        colors: [
-          primary.withValues(alpha: 0.28),
-          secondary.withValues(alpha: 0.22),
-        ],
-        begin: Alignment.centerLeft,
-        end: Alignment.centerRight,
-      ).createShader(Rect.fromCenter(
-        center: lensCenter,
-        width: r * 0.9,
-        height: r * 1.6,
-      ))
-      ..style = PaintingStyle.fill
-      ..isAntiAlias = true;
-
-    canvas.drawPath(path, fillPaint);
-
-    final borderPaint = Paint()
-      ..color = primary.withValues(alpha: 0.18)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.8
-      ..isAntiAlias = true;
-    canvas.drawPath(path, borderPaint);
-  }
-
-  void _drawSymbol(Canvas canvas, Offset center, double fontSize) {
-    final textPainter = TextPainter(
-      text: TextSpan(
-        text: symbol,
-        style: TextStyle(
-          color: primary.withValues(alpha: 0.85),
-          fontSize: fontSize,
-          fontWeight: FontWeight.w700,
-          height: 1.0,
+  Widget _buildVectorFallback({
+    required Color effectivePrimary,
+    required Color effectiveSecondary,
+    required String effectiveSymbol,
+  }) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [effectivePrimary, effectiveSecondary],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.22),
+          width: 1.0,
         ),
       ),
-      textDirection: TextDirection.ltr,
-    )..layout();
-
-    textPainter.paint(
-      canvas,
-      center - Offset(textPainter.width / 2, textPainter.height / 2),
+      child: Center(
+        child: Text(
+          effectiveSymbol,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: size * 0.52,
+            fontWeight: FontWeight.w900,
+            fontFamily: 'serif',
+            height: 1.0,
+          ),
+        ),
+      ),
     );
   }
-
-  @override
-  bool shouldRepaint(covariant _VennPainter oldDelegate) =>
-      oldDelegate.primary != primary ||
-      oldDelegate.secondary != secondary ||
-      oldDelegate.symbol != symbol;
 }

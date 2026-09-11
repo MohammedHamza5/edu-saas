@@ -212,7 +212,7 @@ class _RegisterStudentPageState extends State<RegisterStudentPage> {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  '${branding.teacherName} • ${branding.academicTrack}',
+                  '${branding.localizedTeacherName(context)} • ${branding.localizedAcademicTrack(context)}',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontSize: 13,

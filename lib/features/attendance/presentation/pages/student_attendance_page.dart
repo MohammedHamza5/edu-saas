@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/di/injection_container.dart';
+import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -10,6 +11,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_empty_view.dart';
 import '../../../../core/widgets/app_error_view.dart';
+import '../../../../core/widgets/app_skeleton.dart';
 import '../../../auth/presentation/cubit/auth_cubit.dart';
 import '../../../auth/presentation/cubit/auth_state.dart';
 import '../../domain/entities/attendance_entity.dart';
@@ -79,7 +81,7 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
         appBar: AppBar(
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_rounded),
-            tooltip: 'الرجوع للرئيسية',
+            tooltip: context.l10n.backTooltip,
             onPressed: () {
               if (Navigator.of(context).canPop()) {
                 Navigator.of(context).pop();
@@ -88,11 +90,11 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
               }
             },
           ),
-          title: const Text('سجل الحضور والغياب'),
+          title: Text(context.l10n.attendanceHistoryTitle),
           actions: [
             IconButton(
               icon: const Icon(Icons.refresh_rounded),
-              tooltip: 'تحديث',
+              tooltip: context.l10n.refreshDashboard,
               onPressed: _loadData,
             ),
           ],
@@ -112,9 +114,8 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
               final stats = state.stats;
 
               if (records.isEmpty) {
-                return const AppEmptyView(
-                  message:
-                      'لا يوجد سجلات حضور\nلم يتم تسجيل أي حضور أو غياب لك في المجموعات حتى الآن.',
+                return AppEmptyView(
+                  message: context.l10n.noAttendanceRecordsMessage,
                   icon: Icons.event_available_rounded,
                 );
               }
@@ -147,25 +148,25 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
                           runSpacing: AppSpacing.s8,
                           children: [
                             AttendanceStatCard(
-                              title: 'حاضر',
+                              title: context.l10n.attendanceStatusPresent,
                               value: '${stats.presentCount}',
                               color: AppColors.success,
                               icon: Icons.check_circle_rounded,
                             ),
                             AttendanceStatCard(
-                              title: 'غياب',
+                              title: context.l10n.attendanceStatusAbsent,
                               value: '${stats.absentCount}',
                               color: AppColors.error,
                               icon: Icons.cancel_rounded,
                             ),
                             AttendanceStatCard(
-                              title: 'تأخير',
+                              title: context.l10n.attendanceStatusLate,
                               value: '${stats.lateCount}',
                               color: AppColors.warning,
                               icon: Icons.access_time_filled_rounded,
                             ),
                             AttendanceStatCard(
-                              title: 'معذور',
+                              title: context.l10n.attendanceStatusExcused,
                               value: '${stats.excusedCount}',
                               color: AppColors.info,
                               icon: Icons.info_rounded,
@@ -178,16 +179,16 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
-                              'سجل الجلسات السابقة',
-                              style: TextStyle(
+                            Text(
+                              context.l10n.previousSessionsTitle,
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w800,
                                 color: AppColors.textPrimary,
                               ),
                             ),
                             Text(
-                              'إجمالي ${records.length} جلسة',
+                              context.l10n.totalSessionsCount(records.length),
                               style: const TextStyle(
                                 fontSize: 12,
                                 color: AppColors.textSecondary,
@@ -204,7 +205,7 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
                             scrollDirection: Axis.horizontal,
                             children: [
                               FilterChip(
-                                label: Text('الكل (${records.length})'),
+                                label: Text(context.l10n.filterAllCount(records.length)),
                                 selected: _historyFilter == null,
                                 selectedColor: AppColors.primaryLight
                                     .withValues(alpha: 0.25),
@@ -223,7 +224,7 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
                               ),
                               const SizedBox(width: AppSpacing.s8),
                               FilterChip(
-                                label: Text('حاضر (${stats.presentCount})'),
+                                label: Text(context.l10n.filterPresentCount(stats.presentCount)),
                                 selected:
                                     _historyFilter == AttendanceStatus.present,
                                 selectedColor: AppColors.success.withValues(
@@ -250,7 +251,7 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
                               ),
                               const SizedBox(width: AppSpacing.s8),
                               FilterChip(
-                                label: Text('غياب (${stats.absentCount})'),
+                                label: Text(context.l10n.filterAbsentCount(stats.absentCount)),
                                 selected:
                                     _historyFilter == AttendanceStatus.absent,
                                 selectedColor: AppColors.error.withValues(
@@ -277,7 +278,7 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
                               ),
                               const SizedBox(width: AppSpacing.s8),
                               FilterChip(
-                                label: Text('تأخير (${stats.lateCount})'),
+                                label: Text(context.l10n.filterLateCount(stats.lateCount)),
                                 selected:
                                     _historyFilter == AttendanceStatus.late,
                                 selectedColor: AppColors.warning.withValues(
@@ -303,7 +304,7 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
                               ),
                               const SizedBox(width: AppSpacing.s8),
                               FilterChip(
-                                label: Text('معذور (${stats.excusedCount})'),
+                                label: Text(context.l10n.filterExcusedCount(stats.excusedCount)),
                                 selected:
                                     _historyFilter == AttendanceStatus.excused,
                                 selectedColor: AppColors.info.withValues(
@@ -341,9 +342,9 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
                             ),
                             child: AppEmptyView(
                               message: _historyFilter == AttendanceStatus.absent
-                                  ? 'سجل ممتاز! لا توجد أي حالات غياب مسجلة 👏'
-                                  : 'لا توجد جلسات مطابقة لخيار التصفية المحدد',
-                              actionText: 'عرض جميع الجلسات',
+                                  ? context.l10n.excellentAttendanceNoAbsence
+                                  : context.l10n.noSessionsMatchFilter,
+                              actionText: context.l10n.viewAllSessionsAction,
                               onAction: () =>
                                   setState(() => _historyFilter = null),
                             ),
@@ -377,36 +378,38 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
       children: [
         AppCard(
           padding: const EdgeInsets.all(AppSpacing.s20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 140,
-                height: 16,
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceVariant,
-                  borderRadius: BorderRadius.circular(4),
+          child: AcademicShimmer(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 140,
+                  height: 16,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE2E8F0),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
                 ),
-              ),
-              const SizedBox(height: AppSpacing.s12),
-              Container(
-                width: 80,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceVariant,
-                  borderRadius: BorderRadius.circular(4),
+                const SizedBox(height: AppSpacing.s12),
+                Container(
+                  width: 80,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE2E8F0),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
                 ),
-              ),
-              const SizedBox(height: AppSpacing.s16),
-              Container(
-                width: double.infinity,
-                height: 8,
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceVariant,
-                  borderRadius: BorderRadius.circular(4),
+                const SizedBox(height: AppSpacing.s16),
+                Container(
+                  width: double.infinity,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE2E8F0),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
         const SizedBox(height: AppSpacing.s16),
@@ -420,27 +423,29 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
             4,
             (_) => AppCard(
               padding: const EdgeInsets.all(AppSpacing.s16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 50,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: AppColors.surfaceVariant,
-                      borderRadius: BorderRadius.circular(4),
+              child: AcademicShimmer(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 50,
+                      height: 12,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE2E8F0),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    width: 30,
-                    height: 20,
-                    decoration: BoxDecoration(
-                      color: AppColors.surfaceVariant,
-                      borderRadius: BorderRadius.circular(4),
+                    const SizedBox(height: 8),
+                    Container(
+                      width: 30,
+                      height: 20,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE2E8F0),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -512,9 +517,9 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
                                     ),
                                   ),
                                   const SizedBox(width: AppSpacing.s8),
-                                  const Text(
-                                    'نسبة الالتزام بالحضور',
-                                    style: TextStyle(
+                                  Text(
+                                    context.l10n.attendanceCommitmentRate,
+                                    style: const TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.bold,
                                       color: AppColors.textSecondary,
@@ -534,10 +539,10 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
                               const SizedBox(height: AppSpacing.s4),
                               Text(
                                 isHigh
-                                    ? 'ممتاز! التزامك عالي بحضور الجلسات التعليمية.'
+                                    ? context.l10n.highAttendanceNote
                                     : isMedium
-                                    ? 'جيد، يرجى الحرص على عدم تكرار الغياب.'
-                                    : 'تنبيه: نسبة حضورك منخفضة، راجع مدرسك.',
+                                    ? context.l10n.mediumAttendanceNote
+                                    : context.l10n.lowAttendanceNote,
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
@@ -616,9 +621,10 @@ class _AttendanceHistoryItemCardState
   @override
   Widget build(BuildContext context) {
     final record = widget.record;
+    final locale = Localizations.localeOf(context).languageCode;
     final formattedDate = DateFormat(
-      'EEEE، d MMMM yyyy',
-      'ar',
+      'EEEE, d MMMM yyyy',
+      locale,
     ).format(record.date);
 
     final statusColor = switch (record.status) {
@@ -674,7 +680,7 @@ class _AttendanceHistoryItemCardState
                 child: Column(
                   children: [
                     Text(
-                      DateFormat('d', 'ar').format(record.date),
+                      DateFormat('d', locale).format(record.date),
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w900,
@@ -682,7 +688,7 @@ class _AttendanceHistoryItemCardState
                       ),
                     ),
                     Text(
-                      DateFormat('MMM', 'ar').format(record.date),
+                      DateFormat('MMM', locale).format(record.date),
                       style: const TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
@@ -710,7 +716,7 @@ class _AttendanceHistoryItemCardState
                     if (record.groupName != null) ...[
                       const SizedBox(height: AppSpacing.s4),
                       Text(
-                        'المجموعة: ${record.groupName}',
+                        context.l10n.groupWithColon(record.groupName!),
                         style: const TextStyle(
                           fontSize: 12,
                           color: AppColors.textSecondary,
@@ -731,7 +737,7 @@ class _AttendanceHistoryItemCardState
                           ),
                         ),
                         child: Text(
-                          'ملاحظة: ${record.note}',
+                          context.l10n.noteWithColon(record.note!),
                           style: const TextStyle(
                             fontSize: 11,
                             color: AppColors.textSecondary,

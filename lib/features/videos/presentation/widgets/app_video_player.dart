@@ -162,7 +162,9 @@ class _AppVideoPlayerState extends State<AppVideoPlayer> {
       _controller!.seekTo(target);
     }
 
-    _showSeekFeedback(seconds > 0 ? '+$secondsث' : '$secondsث');
+    final isAr = Localizations.maybeLocaleOf(context)?.languageCode == 'ar';
+    final unit = isAr ? 'ث' : 's';
+    _showSeekFeedback(seconds > 0 ? '+$seconds$unit' : '$seconds$unit');
     _resetControlsTimer();
   }
 
@@ -382,9 +384,9 @@ class _AppVideoPlayerState extends State<AppVideoPlayer> {
 
                     // ── Buffering Indicator ───────────────────────────
                     if (_controller!.value.isBuffering)
-                      const CircularProgressIndicator(
-                        strokeWidth: 3,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      const AppLoadingView.compact(
+                        size: 32,
+                        color: Colors.white,
                       ),
 
                     // ── Resume Banner ─────────────────────────────────

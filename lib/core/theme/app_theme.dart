@@ -173,9 +173,9 @@ class AppTheme {
         style: OutlinedButton.styleFrom(
           enabledMouseCursor: SystemMouseCursors.click,
           disabledMouseCursor: SystemMouseCursors.basic,
-          foregroundColor: branding.primaryColor,
+          foregroundColor: const Color(0xFF38BDF8),
           minimumSize: const Size(64, 48),
-          side: const BorderSide(color: AppColors.border, width: 1.5),
+          side: const BorderSide(color: Color(0xFF38BDF8), width: 1.5),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
           ),
@@ -189,7 +189,7 @@ class AppTheme {
         style: TextButton.styleFrom(
           enabledMouseCursor: SystemMouseCursors.click,
           disabledMouseCursor: SystemMouseCursors.basic,
-          foregroundColor: branding.primaryColor,
+          foregroundColor: const Color(0xFF38BDF8),
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
@@ -284,12 +284,16 @@ class AppTheme {
         ),
       ),
       chipTheme: ChipThemeData(
-        backgroundColor: AppColors.surfaceVariant,
+        backgroundColor: const Color(0xFF1E293B),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-          side: const BorderSide(color: AppColors.border),
+          side: const BorderSide(color: Color(0xFF334155)),
         ),
-        labelStyle: const TextStyle(fontSize: 12),
+        labelStyle: const TextStyle(
+          fontSize: 12,
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
+        ),
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.s8,
           vertical: AppSpacing.s4,

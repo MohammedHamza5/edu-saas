@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 
 enum SubmissionStatus {
@@ -20,6 +21,17 @@ enum SubmissionStatus {
   }
 
   String get value => name;
+
+  String localizedLabel(BuildContext context) {
+    switch (this) {
+      case SubmissionStatus.submitted:
+        return context.l10n.submissionStatusSubmitted;
+      case SubmissionStatus.reviewed:
+        return context.l10n.submissionStatusReviewed;
+      case SubmissionStatus.late:
+        return context.l10n.submissionStatusLate;
+    }
+  }
 
   String get labelAr {
     switch (this) {

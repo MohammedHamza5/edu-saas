@@ -238,26 +238,38 @@ class _AnimatedMathPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (size.width <= 0 || size.height <= 0) return;
 
+    // Major grid lines paint (every 4th line, like engineering graphing paper)
+    final majorPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..color = gridColor.withValues(alpha: (opacity * 1.6).clamp(0.0, 1.0))
+      ..strokeWidth = 1.0;
+
     _basePaint
       ..color = gridColor.withValues(alpha: opacity)
-      ..strokeWidth = 0.7;
+      ..strokeWidth = 0.75;
 
     // ── 1. Drifting Cartesian Coordinate Grid ──────────────────────────────
     final offsetX = (progress * spacing) % spacing;
     final offsetY = (progress * spacing * 0.5) % spacing;
 
     // Vertical Lines
+    int colIndex = 0;
     for (double x = -spacing + offsetX; x <= size.width + spacing; x += spacing) {
       if (x >= 0 && x <= size.width) {
-        canvas.drawLine(Offset(x, 0), Offset(x, size.height), _basePaint);
+        final isMajor = (colIndex % 4 == 0);
+        canvas.drawLine(Offset(x, 0), Offset(x, size.height), isMajor ? majorPaint : _basePaint);
       }
+      colIndex++;
     }
 
     // Horizontal Lines
+    int rowIndex = 0;
     for (double y = -spacing + offsetY; y <= size.height + spacing; y += spacing) {
       if (y >= 0 && y <= size.height) {
-        canvas.drawLine(Offset(0, y), Offset(size.width, y), _basePaint);
+        final isMajor = (rowIndex % 4 == 0);
+        canvas.drawLine(Offset(0, y), Offset(size.width, y), isMajor ? majorPaint : _basePaint);
       }
+      rowIndex++;
     }
 
     // ── 2. Pulsing Coordinate Nodes (Intersection Points) ──────────────────

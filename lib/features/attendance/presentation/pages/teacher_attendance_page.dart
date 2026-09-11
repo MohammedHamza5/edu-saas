@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/di/injection_container.dart';
+import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_empty_view.dart';
 import '../../../../core/widgets/app_error_view.dart';
+import '../../../../core/widgets/app_skeleton.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../../groups/presentation/cubit/groups_cubit.dart';
 import '../../../groups/presentation/cubit/groups_state.dart';
@@ -147,7 +148,7 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
       initialDate: _selectedDate,
       firstDate: DateTime(2020),
       lastDate: DateTime.now().add(const Duration(days: 30)),
-      locale: const Locale('ar'),
+      locale: Localizations.localeOf(context),
     );
     if (picked != null && picked != _selectedDate) {
       _onDatePicked(picked);
@@ -162,18 +163,18 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
       builder: (dialogCtx) {
         return AlertDialog(
           title: Text(
-            'ملاحظة للطالب: ${student.studentName}',
+            context.l10n.noteForStudentTitle(student.studentName),
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           content: AppTextField(
             controller: controller,
-            hintText: 'اكتب ملاحظة (مثال: تأخر بعذر مسبق، استئذان مبكر...)',
+            hintText: context.l10n.attendanceNoteHint,
             maxLines: 3,
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogCtx).pop(),
-              child: const Text('إلغاء'),
+              child: Text(context.l10n.cancel),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -187,9 +188,9 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
                 );
                 Navigator.of(dialogCtx).pop();
               },
-              child: const Text(
-                'حفظ الملاحظة',
-                style: TextStyle(color: Colors.white),
+              child: Text(
+                context.l10n.save,
+                style: const TextStyle(color: Colors.white),
               ),
             ),
           ],
@@ -200,7 +201,8 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
 
   @override
   Widget build(BuildContext context) {
-    final dateStr = DateFormat('yyyy/MM/dd - EEEE', 'ar').format(_selectedDate);
+    final locale = Localizations.localeOf(context).languageCode;
+    final dateStr = DateFormat('yyyy/MM/dd - EEEE', locale).format(_selectedDate);
 
     return BlocProvider.value(
       value: _attendanceCubit,
@@ -210,7 +212,7 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
             if (state is TeacherAttendanceLoaded && state.saveSuccess) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(state.message ?? 'تم حفظ كشف الحضور بنجاح'),
+                  content: Text(state.message ?? context.l10n.attendanceSavedSuccess),
                   backgroundColor: AppColors.success,
                   behavior: SnackBarBehavior.floating,
                 ),
@@ -311,9 +313,9 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
                   runSpacing: 4,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    const Text(
-                      'رصد الحضور والغياب',
-                      style: TextStyle(
+                    Text(
+                      context.l10n.takeAttendanceTitle,
+                      style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w800,
                         color: AppColors.textPrimary,
@@ -332,9 +334,9 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
                           color: AppColors.primary.withValues(alpha: 0.25),
                         ),
                       ),
-                      child: const Text(
-                        '🎥 متابعة المحاضرات المسجلة',
-                        style: TextStyle(
+                      child: Text(
+                        context.l10n.recordedLecturesTrackingBadge,
+                        style: const TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
                           color: AppColors.primary,
@@ -344,9 +346,9 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
                   ],
                 ),
                 const SizedBox(height: 3),
-                const Text(
-                  'رصد إتمام ومشاهدة الطلاب للمحاضرات المسجلة ونسب الالتزام الأكاديمي',
-                  style: TextStyle(
+                Text(
+                  context.l10n.takeAttendanceSubtitle,
+                  style: const TextStyle(
                     fontSize: 12,
                     color: AppColors.textSecondary,
                     fontWeight: FontWeight.w500,
@@ -359,7 +361,7 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
           ),
           IconButton.filledTonal(
             icon: const Icon(Icons.refresh_rounded, size: 20),
-            tooltip: 'تحديث كشف المشاهدات',
+            tooltip: context.l10n.refreshAttendanceSheetTooltip,
             onPressed: _loadAttendance,
           ),
         ],
@@ -381,13 +383,13 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Row(
+                Row(
                   children: [
-                    Icon(Icons.video_library_rounded, color: AppColors.primary, size: 22),
-                    SizedBox(width: AppSpacing.s8),
+                    const Icon(Icons.video_library_rounded, color: AppColors.primary, size: 22),
+                    const SizedBox(width: AppSpacing.s8),
                     Text(
-                      'اختر المحاضرة المسجلة',
-                      style: TextStyle(
+                      context.l10n.selectRecordedLectureTitle,
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: AppColors.textPrimary,
@@ -472,7 +474,7 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
             isExpanded: true,
             value: _selectedGroupId,
             decoration: InputDecoration(
-              labelText: 'المجموعة الدراسية',
+              labelText: context.l10n.studyGroupLabel,
               prefixIcon: const Icon(
                 Icons.groups_rounded,
                 color: AppColors.primary,
@@ -501,12 +503,12 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
             onChanged: _onGroupChanged,
           );
         }
-        return const SizedBox(
+        return SizedBox(
           height: 48,
           child: Center(
             child: Text(
-              'جارٍ تحميل المجموعات...',
-              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+              context.l10n.loadingGroups,
+              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
             ),
           ),
         );
@@ -531,7 +533,7 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
               size: 22,
               color: AppColors.primary,
             ),
-            tooltip: 'المحاضرة السابقة',
+            tooltip: context.l10n.prevLectureTooltip,
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
             onPressed: _selectedLectureIndex > 0 ? _prevLecture : null,
@@ -590,7 +592,7 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
               size: 22,
               color: AppColors.primary,
             ),
-            tooltip: 'المحاضرة التالية',
+            tooltip: context.l10n.nextLectureTooltip,
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
             onPressed: _selectedLectureIndex < _lectures.length - 1 ? _nextLecture : null,
@@ -601,7 +603,7 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
               size: 18,
               color: AppColors.textSecondary,
             ),
-            tooltip: 'اختيار تاريخ محدد',
+            tooltip: context.l10n.pickDateTooltip,
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 32, minHeight: 34),
             onPressed: () => _selectDate(context),
@@ -639,9 +641,8 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
     AttendanceState attendanceState,
   ) {
     if (_selectedGroupId == null) {
-      return const AppEmptyView(
-        message:
-            'اختر مجموعة دراسية\nيرجى اختيار مجموعة من القائمة بالأعلى لعرض الطلاب ورصد الحضور.',
+      return AppEmptyView(
+        message: context.l10n.selectGroupToViewAttendanceMessage,
         icon: Icons.groups_rounded,
       );
     }
@@ -661,9 +662,8 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
     if (attendanceState is TeacherAttendanceLoaded) {
       final students = attendanceState.students;
       if (students.isEmpty) {
-        return const AppEmptyView(
-          message:
-              'لا يوجد طلاب في هذه المجموعة\nلم يتم إضافة أي طالب نشط إلى هذه المجموعة بعد.',
+        return AppEmptyView(
+          message: context.l10n.noStudentsInGroupMessage,
           icon: Icons.person_off_rounded,
         );
       }
@@ -696,116 +696,36 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
               runSpacing: AppSpacing.s8,
               children: [
                 AttendanceStatCard(
-                  title: 'حضروا المحاضرة',
+                  title: context.l10n.attendedLectureTitle,
                   value: '${stats.presentCount}',
-                  subtitle: 'أتموا المشاهدة (${stats.totalSessions} طلاب)',
+                  subtitle: context.l10n.completedWatchSubtitle(stats.totalSessions),
                   color: AppColors.success,
                   icon: Icons.check_circle_rounded,
                 ),
                 AttendanceStatCard(
-                  title: 'لم يشاهدوا بعد',
+                  title: context.l10n.notWatchedYetTitle,
                   value: '${stats.absentCount}',
-                  subtitle: 'غائب عن المحاضرة',
+                  subtitle: context.l10n.absentFromLectureSubtitle,
                   color: AppColors.error,
                   icon: Icons.cancel_rounded,
                 ),
                 AttendanceStatCard(
-                  title: 'قيد المشاهدة',
+                  title: context.l10n.inProgressWatchTitle,
                   value: '${stats.lateCount}',
-                  subtitle: 'مشاهدة جزئية',
+                  subtitle: context.l10n.partialWatchSubtitle,
                   color: AppColors.warning,
                   icon: Icons.play_circle_filled_rounded,
                 ),
                 AttendanceStatCard(
-                  title: 'نسبة الحضور',
+                  title: context.l10n.attendanceRateTitle,
                   value: '${stats.attendancePercentage.toStringAsFixed(0)}%',
-                  subtitle: 'معدل التزام المجموعة',
+                  subtitle: context.l10n.groupCommitmentRateSubtitle,
                   color: AppColors.primary,
                   icon: Icons.analytics_rounded,
                 ),
               ],
             ),
           ),
-
-          // Action Toolbar: Fast Mark All & Save (Stacked on narrow screens)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16),
-            child: context.screenWidth < 360
-                ? Column(
-                    children: [
-                      OutlinedButton.icon(
-                        icon: const Icon(Icons.done_all_rounded, size: 16),
-                        label: const Text('تحضير الكل حاضر'),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.success,
-                          side: BorderSide(
-                            color: AppColors.success.withValues(alpha: 0.6),
-                          ),
-                          backgroundColor: AppColors.success.withValues(
-                            alpha: 0.05,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                              AppSpacing.radiusMedium,
-                            ),
-                          ),
-                          minimumSize: const Size(double.infinity, 44),
-                        ),
-                        onPressed: () =>
-                            _attendanceCubit.markAll(AttendanceStatus.present),
-                      ),
-                      const SizedBox(height: AppSpacing.s8),
-                      AppButton(
-                        text: 'حفظ كشف الحضور',
-                        icon: Icons.save_rounded,
-                        isLoading: attendanceState.isSaving,
-                        onPressed: attendanceState.isSaving
-                            ? null
-                            : () => _attendanceCubit.saveAttendance(),
-                      ),
-                    ],
-                  )
-                : Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          icon: const Icon(Icons.done_all_rounded, size: 16),
-                          label: const Text('تحضير الكل حاضر'),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: AppColors.success,
-                            side: BorderSide(
-                              color: AppColors.success.withValues(alpha: 0.6),
-                            ),
-                            backgroundColor: AppColors.success.withValues(
-                              alpha: 0.05,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                AppSpacing.radiusMedium,
-                              ),
-                            ),
-                            minimumSize: const Size(0, 44),
-                          ),
-                          onPressed: () => _attendanceCubit.markAll(
-                            AttendanceStatus.present,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.s12),
-                      Expanded(
-                        child: AppButton(
-                          text: 'حفظ كشف الحضور',
-                          icon: Icons.save_rounded,
-                          isLoading: attendanceState.isSaving,
-                          onPressed: attendanceState.isSaving
-                              ? null
-                              : () => _attendanceCubit.saveAttendance(),
-                        ),
-                      ),
-                    ],
-                  ),
-          ),
-          const SizedBox(height: AppSpacing.s12),
 
           // Live Search & Status Filters Bar
           Padding(
@@ -815,7 +735,7 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
                 TextField(
                   controller: _searchController,
                   decoration: InputDecoration(
-                    hintText: 'بحث سريع باسم الطالب أو رقم الهاتف...',
+                    hintText: context.l10n.searchStudentOrPhoneHint,
                     prefixIcon: const Icon(Icons.search_rounded, size: 20),
                     suffixIcon: _searchQuery.isNotEmpty
                         ? IconButton(
@@ -845,7 +765,7 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
                     scrollDirection: Axis.horizontal,
                     children: [
                       FilterChip(
-                        label: Text('الكل (${students.length})'),
+                        label: Text(context.l10n.filterAllCount(students.length)),
                         selected: _statusFilter == null,
                         selectedColor: AppColors.primaryLight.withValues(
                           alpha: 0.25,
@@ -864,7 +784,7 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
                       ),
                       const SizedBox(width: AppSpacing.s8),
                       FilterChip(
-                        label: Text('حاضر (${stats.presentCount})'),
+                        label: Text(context.l10n.filterPresentCount(stats.presentCount)),
                         selected: _statusFilter == AttendanceStatus.present,
                         selectedColor: AppColors.success.withValues(alpha: 0.2),
                         checkmarkColor: AppColors.success,
@@ -886,29 +806,7 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
                       ),
                       const SizedBox(width: AppSpacing.s8),
                       FilterChip(
-                        label: Text('غائب (${stats.absentCount})'),
-                        selected: _statusFilter == AttendanceStatus.absent,
-                        selectedColor: AppColors.error.withValues(alpha: 0.2),
-                        checkmarkColor: AppColors.error,
-                        labelStyle: TextStyle(
-                          color: _statusFilter == AttendanceStatus.absent
-                              ? AppColors.error
-                              : AppColors.textPrimary,
-                          fontWeight: _statusFilter == AttendanceStatus.absent
-                              ? FontWeight.bold
-                              : FontWeight.normal,
-                          fontSize: 12,
-                        ),
-                        onSelected: (_) => setState(
-                          () => _statusFilter =
-                              _statusFilter == AttendanceStatus.absent
-                              ? null
-                              : AttendanceStatus.absent,
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.s8),
-                      FilterChip(
-                        label: Text('قيد المشاهدة (${stats.lateCount})'),
+                        label: Text(context.l10n.filterLateCount(stats.lateCount)),
                         selected: _statusFilter == AttendanceStatus.late,
                         selectedColor: AppColors.warning.withValues(alpha: 0.2),
                         checkmarkColor: AppColors.warning,
@@ -930,24 +828,24 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
                       ),
                       const SizedBox(width: AppSpacing.s8),
                       FilterChip(
-                        label: Text('معذور (${stats.excusedCount})'),
-                        selected: _statusFilter == AttendanceStatus.excused,
-                        selectedColor: AppColors.info.withValues(alpha: 0.2),
-                        checkmarkColor: AppColors.info,
+                        label: Text(context.l10n.filterAbsentCount(stats.absentCount)),
+                        selected: _statusFilter == AttendanceStatus.absent,
+                        selectedColor: AppColors.error.withValues(alpha: 0.2),
+                        checkmarkColor: AppColors.error,
                         labelStyle: TextStyle(
-                          color: _statusFilter == AttendanceStatus.excused
-                              ? AppColors.info
+                          color: _statusFilter == AttendanceStatus.absent
+                              ? AppColors.error
                               : AppColors.textPrimary,
-                          fontWeight: _statusFilter == AttendanceStatus.excused
+                          fontWeight: _statusFilter == AttendanceStatus.absent
                               ? FontWeight.bold
                               : FontWeight.normal,
                           fontSize: 12,
                         ),
                         onSelected: (_) => setState(
                           () => _statusFilter =
-                              _statusFilter == AttendanceStatus.excused
+                              _statusFilter == AttendanceStatus.absent
                               ? null
-                              : AttendanceStatus.excused,
+                              : AttendanceStatus.absent,
                         ),
                       ),
                     ],
@@ -962,8 +860,8 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
           Expanded(
             child: displayedStudents.isEmpty
                 ? AppEmptyView(
-                    message: 'لا يوجد طلاب يطابقون خيارات البحث أو التصفية',
-                    actionText: 'إعادة ضبط الفلاتر',
+                    message: context.l10n.noStudentsMatchFilterMessage,
+                    actionText: context.l10n.resetFiltersAction,
                     onAction: () {
                       setState(() {
                         _searchController.clear();
@@ -1004,27 +902,29 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
             4,
             (_) => AppCard(
               padding: const EdgeInsets.all(AppSpacing.s16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 60,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: AppColors.surfaceVariant,
-                      borderRadius: BorderRadius.circular(4),
+              child: AcademicShimmer(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 60,
+                      height: 12,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE2E8F0),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: AppSpacing.s8),
-                  Container(
-                    width: 40,
-                    height: 24,
-                    decoration: BoxDecoration(
-                      color: AppColors.surfaceVariant,
-                      borderRadius: BorderRadius.circular(4),
+                    const SizedBox(height: AppSpacing.s8),
+                    Container(
+                      width: 40,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE2E8F0),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -1036,38 +936,40 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
             padding: const EdgeInsets.only(bottom: AppSpacing.s8),
             child: AppCard(
               padding: const EdgeInsets.all(AppSpacing.s16),
-              child: Row(
-                children: [
-                  const CircleAvatar(
-                    radius: 18,
-                    backgroundColor: AppColors.surfaceVariant,
-                  ),
-                  const SizedBox(width: AppSpacing.s12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          width: 120,
-                          height: 14,
-                          decoration: BoxDecoration(
-                            color: AppColors.surfaceVariant,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Container(
-                          width: 80,
-                          height: 10,
-                          decoration: BoxDecoration(
-                            color: AppColors.surfaceVariant,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
-                      ],
+              child: AcademicShimmer(
+                child: Row(
+                  children: [
+                    const CircleAvatar(
+                      radius: 18,
+                      backgroundColor: Color(0xFFE2E8F0),
                     ),
-                  ),
-                ],
+                    const SizedBox(width: AppSpacing.s12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: 120,
+                            height: 14,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE2E8F0),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Container(
+                            width: 80,
+                            height: 10,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE2E8F0),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

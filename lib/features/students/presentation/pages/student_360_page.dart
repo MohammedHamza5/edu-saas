@@ -10,7 +10,9 @@ import '../../../../core/widgets/app_badge.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_empty_view.dart';
 import '../../../../core/widgets/app_error_view.dart';
+import '../../../../core/widgets/app_loading_view.dart';
 import '../../../../core/extensions/responsive_context_extension.dart';
+import '../../../../core/theme/responsive_breakpoints.dart';
 import '../../../../core/widgets/responsive_container.dart';
 import '../../../../core/widgets/responsive_grid.dart';
 import '../../../../core/utils/whatsapp_report_generator.dart';
@@ -43,54 +45,7 @@ class _Student360PageState extends State<Student360Page> {
   }
 
   Widget _buildSkeletonLoading() {
-    return SingleChildScrollView(
-      padding: context.responsivePagePadding,
-      child: ResponsiveContainer(
-        maxWidth: 1000,
-        child: Column(
-          children: [
-            Container(
-              height: 100,
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                border: Border.all(color: AppColors.border),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.s16),
-            ResponsiveGrid(
-              mobileColumns: 2,
-              tabletColumns: 2,
-              desktopColumns: 4,
-              spacing: AppSpacing.s12,
-              runSpacing: AppSpacing.s12,
-              children: List.generate(
-                4,
-                (_) => Container(
-                  height: 100,
-                  decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(
-                      AppSpacing.radiusMedium,
-                    ),
-                    border: Border.all(color: AppColors.border),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.s20),
-            Container(
-              height: 140,
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                border: Border.all(color: AppColors.border),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+    return const AppLoadingView.profile();
   }
 
   @override
@@ -146,7 +101,7 @@ class _Student360PageState extends State<Student360Page> {
             return SingleChildScrollView(
               padding: context.responsivePagePadding,
               child: ResponsiveContainer(
-                maxWidth: 1000,
+                maxWidth: ResponsiveBreakpoints.maxContentWidth,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

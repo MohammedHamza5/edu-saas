@@ -719,7 +719,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get contentLibraryTitle => 'Content & Library';
 
   @override
-  String get addContentAction => 'Upload Material';
+  String get addContentAction => 'Add Material';
 
   @override
   String get contentTitleLabel => 'Material Title';
@@ -814,7 +814,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get submissionsTitle => 'Student Submissions';
 
   @override
-  String get submissionStatusSubmitted => 'Submitted';
+  String get submissionStatusSubmitted => 'Pending Grading';
 
   @override
   String get submissionStatusNotSubmitted => 'Not Submitted';
@@ -832,7 +832,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get submissionNotesLabel => 'Student Notes (Optional)';
 
   @override
-  String get assignmentSubmittedSuccess => 'Homework submitted successfully!';
+  String get assignmentSubmittedSuccess => 'Assignment submitted successfully!';
 
   @override
   String get gradeSubmissionTitle => 'Grade Student Submission';
@@ -847,7 +847,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get saveGradeAction => 'Record Grade';
 
   @override
-  String get gradeSavedSuccess => 'Grade and feedback recorded successfully';
+  String get gradeSavedSuccess => 'Grade saved successfully';
 
   @override
   String get examsListTitle => 'Exams & Quizzes';
@@ -859,7 +859,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get examTitleLabel => 'Exam Title';
 
   @override
-  String get examDurationLabel => 'Duration';
+  String get examDurationLabel => 'Exam Duration';
 
   @override
   String examDurationMinutes(int minutes) {
@@ -1019,10 +1019,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get markAllPresentAction => 'Mark All Present';
 
   @override
-  String get saveAttendanceAction => 'Save Attendance Record';
+  String get saveAttendanceAction => 'Save Attendance Sheet';
 
   @override
-  String get attendanceSavedSuccess => 'Attendance records saved successfully';
+  String get attendanceSavedSuccess => 'Attendance sheet saved successfully';
 
   @override
   String get statusPresent => 'Present';
@@ -2731,4 +2731,1265 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get resumeAction => 'Resume';
+
+  @override
+  String groupContentPrefix(String groupName) {
+    return 'Content: $groupName';
+  }
+
+  @override
+  String get groupContentDefault => 'Group Study Materials';
+
+  @override
+  String get backToStudentDashboard => 'Back to student dashboard';
+
+  @override
+  String get refreshContent => 'Refresh content';
+
+  @override
+  String get searchContentPlaceholder =>
+      'Search notes, summaries, or videos...';
+
+  @override
+  String filterAllWithCount(int count) {
+    return 'All ($count)';
+  }
+
+  @override
+  String filterPdfsWithCount(int count) {
+    return 'Notes ($count)';
+  }
+
+  @override
+  String filterImagesWithCount(int count) {
+    return 'Images ($count)';
+  }
+
+  @override
+  String filterVideosWithCount(int count) {
+    return 'Videos ($count)';
+  }
+
+  @override
+  String get noContentPublishedYet =>
+      'No educational materials published in this group yet.\nNotes and lessons will appear here once published by the teacher.';
+
+  @override
+  String noMatchingContentFound(String query) {
+    return 'No study materials match your search \"$query\"';
+  }
+
+  @override
+  String get contentCreatedToast =>
+      'Educational material created and published successfully';
+
+  @override
+  String get contentUpdatedToast => 'Educational material updated successfully';
+
+  @override
+  String get videoProcessingStartedToast =>
+      'Lecture video processing and upload started successfully';
+
+  @override
+  String get backTooltip => 'Back';
+
+  @override
+  String get teacherContentLibraryTitle => 'Educational Content Library';
+
+  @override
+  String get refreshTooltip => 'Refresh';
+
+  @override
+  String get totalMaterials => 'Total Materials';
+
+  @override
+  String get publishedToStudents => 'Published';
+
+  @override
+  String get draftsInProgress => 'Drafts';
+
+  @override
+  String get searchContentTeacherHint => 'Search group materials and notes...';
+
+  @override
+  String filterPublishedWithCount(int count) {
+    return 'Published ($count)';
+  }
+
+  @override
+  String filterDraftsWithCount(int count) {
+    return 'Drafts ($count)';
+  }
+
+  @override
+  String filterArchivedWithCount(int count) {
+    return 'Archived ($count)';
+  }
+
+  @override
+  String get emptyContentCategory =>
+      'No educational content in this category yet';
+
+  @override
+  String get addFirstContent => 'Add First Material';
+
+  @override
+  String get noMaterialsMatchFilter =>
+      'No study materials match the selected criteria';
+
+  @override
+  String get deleteConfirmTitle => 'Confirm Deletion';
+
+  @override
+  String deleteItemConfirmMessage(String title) {
+    return 'Are you sure you want to permanently delete \"$title\"?';
+  }
+
+  @override
+  String get deleteAction => 'Delete';
+
+  @override
+  String get editContentDialogTitle => 'Edit Educational Material';
+
+  @override
+  String get newContentDialogTitle => 'Add New Educational Material';
+
+  @override
+  String get contentTitleInputLabel => 'Content Title *';
+
+  @override
+  String get contentTitleInputHint =>
+      'e.g. Geometry & Trigonometry Formulas Sheet';
+
+  @override
+  String get contentTitleRequired => 'Please enter content title';
+
+  @override
+  String get contentDescInputLabel =>
+      'Description or Instructions for Students (Optional)';
+
+  @override
+  String get contentDescInputHint => 'Important takeaways or attached notes…';
+
+  @override
+  String get materialTypeLabel => 'Material Type:';
+
+  @override
+  String get publicationStatusLabel => 'Publication Status:';
+
+  @override
+  String get draftPrivateNotice => 'Private draft (hidden from students)';
+
+  @override
+  String get publishImmediateNotice => 'Immediate publication for students';
+
+  @override
+  String get attachMaterialFile =>
+      'Attach educational file (PDF / Image / Document)';
+
+  @override
+  String get attachedFileNameLabel => 'Attached File Name *';
+
+  @override
+  String get attachedFileNameHint => 'e.g. Calculus_Formulas_Sheet.pdf';
+
+  @override
+  String get fileNameRequired => 'Please enter or select a file name';
+
+  @override
+  String get browseFileAction => 'Browse';
+
+  @override
+  String get saveChanges => 'Save Changes';
+
+  @override
+  String get createAndSave => 'Create & Save';
+
+  @override
+  String fileSizeLabel(String size) {
+    return 'File Size: $size';
+  }
+
+  @override
+  String fileTypeLabel(String type) {
+    return 'Type: $type';
+  }
+
+  @override
+  String get preparingSecureUrl => 'Preparing secure file link...';
+
+  @override
+  String get secureUrlErrorFallback =>
+      'Unable to generate secure file link at this time';
+
+  @override
+  String get secureUrlGenericError =>
+      'An error occurred while preparing the secure link';
+
+  @override
+  String get secureUrlCopied => 'Secure link copied to clipboard successfully';
+
+  @override
+  String get copySecureUrlAction => 'Copy Secure Link';
+
+  @override
+  String get downloadOrOpenFile => 'Download / Open File';
+
+  @override
+  String get contentSecurityDisclaimer =>
+      'Content is encrypted and designated for authorized students only. Links expire within 60 minutes for security.';
+
+  @override
+  String get closeTooltip => 'Close';
+
+  @override
+  String publishedDatePrefix(String date) {
+    return 'Published: $date';
+  }
+
+  @override
+  String createdDatePrefix(String date) {
+    return 'Created: $date';
+  }
+
+  @override
+  String get uploadVideoAction => 'Upload Video';
+
+  @override
+  String get publishedTooltip => 'Published (click to make draft)';
+
+  @override
+  String get draftTooltip => 'Draft (click to publish)';
+
+  @override
+  String get uploadUpdateLectureVideo => 'Upload / Update Lecture Video';
+
+  @override
+  String get downloadOrOpenAction => 'Download / Open File';
+
+  @override
+  String get editMetadataAction => 'Edit Details';
+
+  @override
+  String get convertToDraft => 'Make Draft';
+
+  @override
+  String get publishToStudents => 'Publish to Students';
+
+  @override
+  String get unarchiveMaterial => 'Unarchive';
+
+  @override
+  String get archiveMaterial => 'Archive Material';
+
+  @override
+  String get permanentDelete => 'Permanent Delete';
+
+  @override
+  String get previewAndDownloadNote => 'Preview and download note';
+
+  @override
+  String get contentTypeImage => 'Diagram / Image';
+
+  @override
+  String get contentTypeAssignment => 'Assignment';
+
+  @override
+  String get contentTypeExam => 'Exam / Quiz';
+
+  @override
+  String get statusArchived => 'Archived';
+
+  @override
+  String get loadingContent => 'Loading educational content...';
+
+  @override
+  String groupColon(String name) {
+    return 'Group: $name';
+  }
+
+  @override
+  String minutesDuration(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String scorePoints(int points) {
+    return '$points pts';
+  }
+
+  @override
+  String passingScoreLabel(int score) {
+    return 'Passing: $score';
+  }
+
+  @override
+  String examVersionAttempts(int version, int count) {
+    return 'Version: v$version | Attempts: $count';
+  }
+
+  @override
+  String get availableToStart => 'Available to Start';
+
+  @override
+  String get inProgressResume => 'In Progress (Resume)';
+
+  @override
+  String get passed => 'Passed';
+
+  @override
+  String get notPassed => 'Did Not Pass';
+
+  @override
+  String get publishedBadge => 'Published';
+
+  @override
+  String get draftBadge => 'Draft';
+
+  @override
+  String get satReferenceSheetTitle => 'SAT Official Reference Sheet';
+
+  @override
+  String get satCalculatorTitle => 'Digital SAT Scientific Calculator';
+
+  @override
+  String get areaCircumferenceSection =>
+      'Area & Circumference of Plane Figures';
+
+  @override
+  String get circleArea => 'Circle Area';
+
+  @override
+  String get circleCircumference => 'Circle Circumference';
+
+  @override
+  String get rectangleArea => 'Rectangle Area';
+
+  @override
+  String get triangleArea => 'Triangle Area';
+
+  @override
+  String get volumesSection => '3D Volumes';
+
+  @override
+  String get rectangularPrismVolume => 'Rectangular Prism Volume';
+
+  @override
+  String get cylinderVolume => 'Right Cylinder Volume';
+
+  @override
+  String get sphereVolume => 'Sphere Volume';
+
+  @override
+  String get coneVolume => 'Right Cone Volume';
+
+  @override
+  String get pyramidVolume => 'Right Pyramid Volume';
+
+  @override
+  String get rightTrianglesSection => 'Right & Special Triangles';
+
+  @override
+  String get pythagoreanTheorem => 'Pythagorean Theorem';
+
+  @override
+  String get triangle306090 => '30° - 60° - 90° Triangle';
+
+  @override
+  String get triangle306090Sides => 'Sides: x, x√3, 2x';
+
+  @override
+  String get triangle454590 => '45° - 45° - 90° Triangle';
+
+  @override
+  String get triangle454590Sides => 'Sides: s, s, s√2';
+
+  @override
+  String get degreesRadiansSection => 'Degrees & Radians';
+
+  @override
+  String get triangleAnglesSum => 'Sum of Triangle Angles';
+
+  @override
+  String get fullCircleRadians => 'Full Rotation in Radians';
+
+  @override
+  String get degreesToRadians => 'Degrees to Radians Conversion';
+
+  @override
+  String get teacherExamsTitle => 'Exam Management';
+
+  @override
+  String groupExamsTitle(String groupName) {
+    return 'Exams: $groupName';
+  }
+
+  @override
+  String examDetailsVersionFrozen(int version, int count) {
+    return 'Version: v$version (Frozen) • Attempts: $count';
+  }
+
+  @override
+  String createNewVersionButton(int version) {
+    return 'Create New Version v$version';
+  }
+
+  @override
+  String get newVersionCreatedSuccess =>
+      'New draft version created and previous version frozen';
+
+  @override
+  String get noAttemptsYet => 'No submissions yet';
+
+  @override
+  String get noAttemptsYetSubtitle =>
+      'Student attempts and scores will appear here once they finish their exams';
+
+  @override
+  String get studentInitialFallback => 'S';
+
+  @override
+  String get studentFallbackName => 'Student';
+
+  @override
+  String startedDatePrefix(String date) {
+    return 'Started: $date';
+  }
+
+  @override
+  String get noExamsForGroup => 'No exams added to this group';
+
+  @override
+  String get noExamsForGroupSubtitle =>
+      'Start building the first digital exam for students with frozen snapshots and automatic grading';
+
+  @override
+  String get buildFirstExam => 'Build First Exam';
+
+  @override
+  String get buildExamAction => 'Build Exam';
+
+  @override
+  String get myExamsTitle => 'My Exams & Assessments';
+
+  @override
+  String get backToHomeTooltip => 'Back to Home';
+
+  @override
+  String get filterAvailable => 'Available';
+
+  @override
+  String get filterInProgress => 'In Progress';
+
+  @override
+  String get filterCompleted => 'Completed';
+
+  @override
+  String get noExamsInFilter => 'No exams in this category';
+
+  @override
+  String get noExamsInFilterSubtitle =>
+      'Try switching to another filter to view exams';
+
+  @override
+  String get noPublishedExams =>
+      'No exams published for your study groups currently';
+
+  @override
+  String get examRulesAndGuidelines => 'Exam Rules & Instructions';
+
+  @override
+  String get maxScoreLabel => 'Max Score';
+
+  @override
+  String get passingScoreTitle => 'Passing Score';
+
+  @override
+  String get notSpecified => 'Not specified';
+
+  @override
+  String get retakePolicy => 'Retake Policy';
+
+  @override
+  String get allowedHighestScore => 'Allowed (Highest Score Recorded)';
+
+  @override
+  String get notAllowed => 'Not Allowed';
+
+  @override
+  String get importantInstructionsBeforeStart =>
+      'Important Guidelines Before Starting:';
+
+  @override
+  String get ruleTimerStartsImmediately =>
+      'The timer starts immediately upon clicking \'Start Exam\' synchronized with platform servers.';
+
+  @override
+  String get ruleAutoSaveAnswers =>
+      'Your answers are automatically saved as you navigate between questions to protect against connection loss.';
+
+  @override
+  String get ruleAutoSubmitOnTimeout =>
+      'When the time expires, your exam will automatically submit and calculate your grade immediately.';
+
+  @override
+  String get ruleDoNotCloseWindow =>
+      'Please do not close or refresh the exam window until confirmation of successful submission appears.';
+
+  @override
+  String get resumeCurrentExam => 'Resume In-Progress Exam';
+
+  @override
+  String get startExamNow => 'Start Exam Now';
+
+  @override
+  String examAlreadyCompletedNoRetake(int score, int maxScore) {
+    return 'You have already completed this exam with score: $score/$maxScore. Retakes are not permitted.';
+  }
+
+  @override
+  String get examCannotBeTaken => 'This exam cannot be taken at this time.';
+
+  @override
+  String get confirmSubmitExamTitle => 'Confirm Exam Submission';
+
+  @override
+  String answeredQuestionsCount(int answered, int total) {
+    return 'You answered $answered out of $total questions.';
+  }
+
+  @override
+  String unansweredWarning(int count) {
+    return 'Warning: There are $count unanswered questions!';
+  }
+
+  @override
+  String get confirmSubmitQuestion =>
+      'Are you sure you want to finish and submit your exam now?';
+
+  @override
+  String get continueSolving => 'Continue Solving';
+
+  @override
+  String get yesSubmitExam => 'Yes, Submit Exam';
+
+  @override
+  String questionProgress(int current, int total) {
+    return 'Question $current of $total';
+  }
+
+  @override
+  String solvedCount(int answered, int total) {
+    return 'Solved: $answered/$total';
+  }
+
+  @override
+  String get chooseCorrectAnswer => 'Select the correct answer:';
+
+  @override
+  String get previousQuestion => 'Previous';
+
+  @override
+  String get nextQuestion => 'Next';
+
+  @override
+  String get submitExamNow => 'Submit Exam Now';
+
+  @override
+  String get referenceSheetTooltip => 'Reference Sheet (SAT Formulas)';
+
+  @override
+  String get calculatorTooltip => 'Scientific Calculator';
+
+  @override
+  String get examResultTitle => 'Exam Results';
+
+  @override
+  String get congratulationsPassed =>
+      'Congratulations! You passed the exam successfully';
+
+  @override
+  String get sorryNotPassed =>
+      'Unfortunately, you did not reach the passing score';
+
+  @override
+  String percentageLabel(String percentage) {
+    return 'Percentage: $percentage%';
+  }
+
+  @override
+  String requiredPassingScore(int passing, int max) {
+    return 'Required Passing Score: $passing out of $max';
+  }
+
+  @override
+  String get examSubmissionDateTitle => 'Submission Date';
+
+  @override
+  String get attemptStatusLabel => 'Attempt Status';
+
+  @override
+  String get retakePolicyLabel => 'Retake Policy';
+
+  @override
+  String get retakeAllowedBestScore => 'Allowed (Highest score retained)';
+
+  @override
+  String get backToExamsList => 'Back to Exams List';
+
+  @override
+  String get createExamTitle => 'Build New Exam';
+
+  @override
+  String get examGeneralSettings => 'Basic Exam Configuration';
+
+  @override
+  String get examTitleField => 'Exam Title *';
+
+  @override
+  String get examTitleHint => 'e.g., Comprehensive Exam on Limits & Continuity';
+
+  @override
+  String get examTitleRequired => 'Please enter exam title';
+
+  @override
+  String get durationMinutesField => 'Duration (minutes)';
+
+  @override
+  String get positiveNumberRequired => 'Positive number';
+
+  @override
+  String get maxScoreField => 'Max Score';
+
+  @override
+  String get passingScoreField => 'Passing Score (Optional)';
+
+  @override
+  String get shuffleQuestionsTitle =>
+      'Shuffle questions randomly for each student';
+
+  @override
+  String get shuffleQuestionsSubtitle =>
+      'Locks randomized order per attempt upon starting';
+
+  @override
+  String get showResultTitle =>
+      'Show result to student immediately upon submission';
+
+  @override
+  String get showResultSubtitle =>
+      'Displays server-graded score and percentage';
+
+  @override
+  String get allowRetakeTitle => 'Allow Exam Retakes';
+
+  @override
+  String get allowRetakeSubtitle =>
+      'The platform retains the highest score achieved in student record';
+
+  @override
+  String questionsSectionTitle(int count) {
+    return 'Questions ($count)';
+  }
+
+  @override
+  String questionNumberTitle(int number) {
+    return 'Question #$number';
+  }
+
+  @override
+  String get questionTextField => 'Question Prompt *';
+
+  @override
+  String get questionTextHint => 'Type the mathematical problem here...';
+
+  @override
+  String get questionTypeField => 'Question Type';
+
+  @override
+  String get pointsField => 'Points';
+
+  @override
+  String get optionsSelectCorrectPrompt =>
+      'Options (select the correct choice):';
+
+  @override
+  String optionNumberHint(int number) {
+    return 'Option $number';
+  }
+
+  @override
+  String get saveAndPublishExam => 'Save & Publish Exam (Freeze v1)';
+
+  @override
+  String get examBuiltAndPublishedSuccess =>
+      'Exam created and published successfully as frozen version';
+
+  @override
+  String fillQuestionTextError(int number) {
+    return 'Please enter text for question #$number';
+  }
+
+  @override
+  String selectCorrectOptionError(int number) {
+    return 'Please select and fill the correct option for question #$number';
+  }
+
+  @override
+  String get optionTrue => 'True';
+
+  @override
+  String get optionFalse => 'False';
+
+  @override
+  String get questionTypeMultipleChoice => 'Multiple Choice';
+
+  @override
+  String get questionTypeTrueFalse => 'True or False';
+
+  @override
+  String get attemptStatusInProgress => 'In Progress';
+
+  @override
+  String get attemptStatusSubmitted => 'Submitted';
+
+  @override
+  String get attemptStatusExpired => 'Expired';
+
+  @override
+  String get examStatusDraft => 'Draft';
+
+  @override
+  String get examStatusPublished => 'Published (Frozen)';
+
+  @override
+  String get submissionStatusReviewed => 'Graded';
+
+  @override
+  String get submissionStatusLate => 'Late Submission';
+
+  @override
+  String groupLabelPrefix(String groupName) {
+    return 'Group: $groupName';
+  }
+
+  @override
+  String dueAtPrefix(String date) {
+    return 'Due: $date';
+  }
+
+  @override
+  String deadlinePrefix(String date) {
+    return 'Deadline: $date';
+  }
+
+  @override
+  String get noDueDate => 'No due date';
+
+  @override
+  String get noDueDateSpecified => 'No specific deadline set';
+
+  @override
+  String maxScorePoints(String score) {
+    return '$score Points';
+  }
+
+  @override
+  String teacherAssignmentStats(String submissions, String reviewed) {
+    return 'Submissions: $submissions | Reviewed: $reviewed';
+  }
+
+  @override
+  String get pendingReview => 'Pending Review';
+
+  @override
+  String get pastDue => 'Past Due';
+
+  @override
+  String get actionRequired => 'Submission Required';
+
+  @override
+  String attemptNumberLabel(String number) {
+    return 'Attempt #$number';
+  }
+
+  @override
+  String attachedFilesCount(String count) {
+    return '$count attached files';
+  }
+
+  @override
+  String get myHomeworkTitle => 'My Assignments';
+
+  @override
+  String get noAssignmentsInGroup =>
+      'No homework assignments due for your groups currently';
+
+  @override
+  String get filterPendingSubmission => 'Pending';
+
+  @override
+  String get filterSubmitted => 'Submitted';
+
+  @override
+  String get filterReviewed => 'Graded';
+
+  @override
+  String get noAssignmentsInFilter => 'No assignments in this category';
+
+  @override
+  String get noAssignmentsInFilterSubtitle =>
+      'Try switching to another filter to view your homework';
+
+  @override
+  String filePickFailed(String error) {
+    return 'Failed to select files: $error';
+  }
+
+  @override
+  String get attachAtLeastOneFile =>
+      'Please attach at least one file before submitting';
+
+  @override
+  String get assignmentDetailsTitle => 'Assignment Details & Submission';
+
+  @override
+  String get lateSubmissionAllowedNotice =>
+      'Late submission is allowed after deadline';
+
+  @override
+  String get instructionsAndProblemsTitle => 'Instructions & Required Problems';
+
+  @override
+  String get submissionStatusCardTitle => 'Your Submission Status';
+
+  @override
+  String gradeScorePrefix(String score, String maxScore) {
+    return 'Score: $score / $maxScore';
+  }
+
+  @override
+  String submittedAtDateAttempt(String date, String attempt) {
+    return 'Submitted: $date (Attempt #$attempt)';
+  }
+
+  @override
+  String get teacherFeedbackTitle => 'Teacher\'s Feedback:';
+
+  @override
+  String get resubmitNewAttemptTitle => 'Resubmit (New Attempt)';
+
+  @override
+  String get uploadSolutionFilesTitle => 'Upload Solution Files';
+
+  @override
+  String get selectFilesBtn => 'Select Files';
+
+  @override
+  String get tapToPickFilesHint => 'Tap to select answer files (PDF or Images)';
+
+  @override
+  String get maxFileSizeNotice => 'Maximum file size: 20 MB';
+
+  @override
+  String get submitNewAttemptBtn => 'Submit New Attempt';
+
+  @override
+  String get submitAssignmentNowBtn => 'Submit Assignment Now';
+
+  @override
+  String get deadlinePassedNoLateNotice =>
+      'The submission deadline has passed and late submissions are not allowed.';
+
+  @override
+  String get createNewAssignment => 'Create New Assignment';
+
+  @override
+  String get assignmentTitleField => 'Assignment Title *';
+
+  @override
+  String get assignmentTitleHint => 'e.g., Quadratic Equations Practice';
+
+  @override
+  String get assignmentTitleRequired => 'Please enter assignment title';
+
+  @override
+  String get instructionsField => 'Instructions & Guidelines for Students';
+
+  @override
+  String get instructionsHint =>
+      'Write the problems or instructions to follow...';
+
+  @override
+  String get fieldRequired => 'Required';
+
+  @override
+  String get submissionDueDateField => 'Submission Due Date';
+
+  @override
+  String get allowLateSubmission => 'Allow Late Submission';
+
+  @override
+  String get allowLateSubmissionSubtitle =>
+      'Students can submit even after the deadline has passed';
+
+  @override
+  String get publishAssignmentBtn => 'Publish Assignment';
+
+  @override
+  String get assignmentPublishedSuccess =>
+      'Assignment created and published successfully';
+
+  @override
+  String submissionsCountWithReviewed(String submissions, String reviewed) {
+    return 'Submissions ($submissions) • Graded ($reviewed)';
+  }
+
+  @override
+  String get noSubmissionsYetTitle => 'No submissions yet';
+
+  @override
+  String get noSubmissionsYetSubtitle =>
+      'Students who submit this homework will appear here';
+
+  @override
+  String get manageAssignmentsTitle => 'Manage Assignments';
+
+  @override
+  String groupAssignmentsTitle(String groupName) {
+    return 'Assignments: $groupName';
+  }
+
+  @override
+  String get createAssignmentFab => 'Create Assignment';
+
+  @override
+  String get noAssignmentsForGroupTitle =>
+      'No assignments added for this group';
+
+  @override
+  String get noAssignmentsForGroupSubtitle =>
+      'Start by creating the first assignment for students to track and grade their work';
+
+  @override
+  String get createFirstAssignmentBtn => 'Create First Assignment';
+
+  @override
+  String get fileOpenFailed => 'Unable to open file right now';
+
+  @override
+  String get secureFileUrlNotice => 'Secure File URL (valid for 1 hour):';
+
+  @override
+  String get closeBtn => 'Close';
+
+  @override
+  String studentSubmittedAt(String date) {
+    return 'Submitted At: $date';
+  }
+
+  @override
+  String studentAttemptNumber(String number) {
+    return 'Attempt #$number';
+  }
+
+  @override
+  String get attachedFilesTitle => 'Student Attached Files';
+
+  @override
+  String get noFilesUploadedNotice =>
+      'The student did not attach any files with this submission';
+
+  @override
+  String get viewFileTooltip => 'View File';
+
+  @override
+  String get gradingSectionTitle => 'Enter Score & Feedback';
+
+  @override
+  String scoreFieldLabel(String maxScore) {
+    return 'Earned Score (out of $maxScore)';
+  }
+
+  @override
+  String get scoreFieldHint => 'e.g., 85';
+
+  @override
+  String get scoreFieldRequired => 'Please enter the score';
+
+  @override
+  String get scoreMustBeInteger => 'Please enter a valid integer';
+
+  @override
+  String scoreRangeError(String maxScore) {
+    return 'Score must be between 0 and $maxScore';
+  }
+
+  @override
+  String get teacherFeedbackField => 'Teacher Feedback & Guidance (Optional)';
+
+  @override
+  String get teacherFeedbackHint =>
+      'Add strengths and areas for improvement...';
+
+  @override
+  String get saveGradeAndNotifyBtn => 'Save Grade & Notify Student';
+
+  @override
+  String get studentInitialDefault => 'S';
+
+  @override
+  String get attendanceStatusPresent => 'Present';
+
+  @override
+  String get attendanceStatusAbsent => 'Absent';
+
+  @override
+  String get attendanceStatusLate => 'Late';
+
+  @override
+  String get attendanceStatusExcused => 'Excused';
+
+  @override
+  String get attendanceRateFull => 'Completed lecture watch (100% • Present)';
+
+  @override
+  String get attendanceRatePartial =>
+      'Watching in progress (Partial attendance • 45%)';
+
+  @override
+  String get attendanceRateNone => 'Did not watch lecture yet (Absent)';
+
+  @override
+  String get attendanceRateExcused => 'Excused / Approved exception';
+
+  @override
+  String get attendanceHistoryTitle => 'Attendance Record';
+
+  @override
+  String get noAttendanceRecordsMessage =>
+      'No attendance records\nNo attendance or absence has been recorded for you yet.';
+
+  @override
+  String get previousSessionsTitle => 'Previous Sessions Record';
+
+  @override
+  String totalSessionsCount(int count) {
+    return 'Total $count sessions';
+  }
+
+  @override
+  String get attendanceCommitmentRate => 'Attendance Commitment Rate';
+
+  @override
+  String get highAttendanceNote =>
+      'Excellent! Your attendance commitment is outstanding.';
+
+  @override
+  String get mediumAttendanceNote =>
+      'Good, please make sure not to repeat absences.';
+
+  @override
+  String get lowAttendanceNote =>
+      'Warning: Your attendance rate is low, consult your teacher.';
+
+  @override
+  String get excellentAttendanceNoAbsence =>
+      'Excellent record! No absences recorded 👏';
+
+  @override
+  String get noSessionsMatchFilter => 'No sessions match the selected filter';
+
+  @override
+  String get viewAllSessionsAction => 'View All Sessions';
+
+  @override
+  String groupWithColon(String groupName) {
+    return 'Group: $groupName';
+  }
+
+  @override
+  String noteWithColon(String note) {
+    return 'Note: $note';
+  }
+
+  @override
+  String get takeAttendanceTitle => 'Lecture Attendance Monitoring';
+
+  @override
+  String get recordedLecturesTrackingBadge => '🎥 Recorded Lectures Engagement';
+
+  @override
+  String get takeAttendanceSubtitle =>
+      'Monitor student completion of recorded lectures and academic commitment rates';
+
+  @override
+  String get refreshAttendanceSheetTooltip => 'Refresh Watch Records';
+
+  @override
+  String get selectRecordedLectureTitle => 'Select Recorded Lecture';
+
+  @override
+  String get studyGroupLabel => 'Study Group';
+
+  @override
+  String get loadingGroups => 'Loading groups...';
+
+  @override
+  String get prevLectureTooltip => 'Previous Lecture';
+
+  @override
+  String get nextLectureTooltip => 'Next Lecture';
+
+  @override
+  String get pickDateTooltip => 'Pick Specific Date';
+
+  @override
+  String get selectGroupToViewAttendanceMessage =>
+      'Select a Study Group\nPlease choose a group from the list above to view students and monitor lecture completion.';
+
+  @override
+  String get noStudentsInGroupMessage =>
+      'No students in this group\nNo active students have been added to this group yet.';
+
+  @override
+  String get attendedLectureTitle => 'Completed (Present)';
+
+  @override
+  String completedWatchSubtitle(int count) {
+    return 'Completed watching ($count students)';
+  }
+
+  @override
+  String get notWatchedYetTitle => 'Not Watched (Absent)';
+
+  @override
+  String get absentFromLectureSubtitle => 'Has not started watching';
+
+  @override
+  String get inProgressWatchTitle => 'Watching in Progress';
+
+  @override
+  String get partialWatchSubtitle => 'Partial watch';
+
+  @override
+  String get attendanceRateTitle => 'Completion Rate';
+
+  @override
+  String get groupCommitmentRateSubtitle => 'Watch commitment rate';
+
+  @override
+  String get searchStudentOrPhoneHint =>
+      'Quick search by student name or phone...';
+
+  @override
+  String get noStudentsMatchFilterMessage =>
+      'No students match your search or filter';
+
+  @override
+  String get resetFiltersAction => 'Reset Filters';
+
+  @override
+  String noteForStudentTitle(String name) {
+    return 'Note for Student: $name';
+  }
+
+  @override
+  String get attendanceNoteHint =>
+      'Write a note (e.g., excused late, left early...)';
+
+  @override
+  String filterAllCount(int count) {
+    return 'All ($count)';
+  }
+
+  @override
+  String filterPresentCount(int count) {
+    return 'Present ($count)';
+  }
+
+  @override
+  String filterAbsentCount(int count) {
+    return 'Absent ($count)';
+  }
+
+  @override
+  String filterLateCount(int count) {
+    return 'Late ($count)';
+  }
+
+  @override
+  String filterExcusedCount(int count) {
+    return 'Excused ($count)';
+  }
+
+  @override
+  String get noGroupsCreatedYetDesc =>
+      'No study groups created yet. Create a group first to get started.';
+
+  @override
+  String get groupColonLabel => 'Group:';
+
+  @override
+  String get settingsTitle => 'Platform & Academy Settings';
+
+  @override
+  String get settingsSubtitle =>
+      'Manage your academy profile, academic contact info, and language preferences';
+
+  @override
+  String get settingsAcademySection => 'Academy & Platform Profile';
+
+  @override
+  String get settingsAcademyNameLabel => 'Platform Name';
+
+  @override
+  String get settingsSubjectLabel => 'Specialization & Track';
+
+  @override
+  String get settingsTaglineLabel => 'Academic Tagline';
+
+  @override
+  String get settingsSupportPhoneLabel => 'Support & WhatsApp Phone';
+
+  @override
+  String get settingsSupportEmailLabel => 'Support Email';
+
+  @override
+  String get settingsLanguageSection => 'Platform Language';
+
+  @override
+  String get settingsLanguageDesc =>
+      'Choose the primary display language for the platform interface';
+
+  @override
+  String get settingsLangArabic => 'العربية (Arabic)';
+
+  @override
+  String get settingsLangEnglish => 'English';
+
+  @override
+  String get settingsAccountSection => 'Teacher Account & Security';
+
+  @override
+  String get settingsTeacherNameLabel => 'Teacher Name';
+
+  @override
+  String get settingsTeacherEmailLabel => 'Login Email';
+
+  @override
+  String get settingsChangePasswordBtn => 'Change Password';
+
+  @override
+  String get settingsSignOutBtn => 'Sign Out';
+
+  @override
+  String get settingsSavedSuccess => 'Settings updated successfully';
+
+  @override
+  String get settingsServiceCardTitle => 'Platform & Academy Settings';
+
+  @override
+  String get settingsServiceCardDesc =>
+      'Academy profile, WhatsApp support, and language';
 }

@@ -23,7 +23,7 @@ class ContentCubit extends Cubit<ContentState> {
     bool isStudent = false,
   }) async {
     _currentGroupId = groupId;
-    emit(const ContentLoading(message: 'جاري تحميل المحتوى التعليمي…'));
+    emit(const ContentLoading());
 
     final filter = isStudent ? ContentStatus.published : statusFilter;
     final result = await _repository.getGroupContent(

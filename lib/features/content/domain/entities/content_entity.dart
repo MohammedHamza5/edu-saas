@@ -1,6 +1,9 @@
 import 'package:equatable/equatable.dart';
 import 'file_attachment_entity.dart';
 
+import 'package:flutter/widgets.dart';
+import '../../../../core/extensions/localized_context_extension.dart';
+
 /// Supported types of content in Educational SaaS V1
 enum ContentType {
   video,
@@ -31,6 +34,16 @@ enum ContentType {
       ContentType.exam => 'امتحان تقييمي',
     };
   }
+
+  String localizedLabel(BuildContext context) {
+    return switch (this) {
+      ContentType.video => context.l10n.contentTypeVideo,
+      ContentType.pdf => context.l10n.contentTypePdf,
+      ContentType.image => context.l10n.contentTypeImage,
+      ContentType.assignment => context.l10n.contentTypeAssignment,
+      ContentType.exam => context.l10n.contentTypeExam,
+    };
+  }
 }
 
 /// Lifecycle status of content
@@ -54,6 +67,14 @@ enum ContentStatus {
       ContentStatus.draft => 'مسودة',
       ContentStatus.published => 'منشور',
       ContentStatus.archived => 'مؤرشف',
+    };
+  }
+
+  String localizedLabel(BuildContext context) {
+    return switch (this) {
+      ContentStatus.draft => context.l10n.draftBadge,
+      ContentStatus.published => context.l10n.publishedBadge,
+      ContentStatus.archived => context.l10n.statusArchived,
     };
   }
 }

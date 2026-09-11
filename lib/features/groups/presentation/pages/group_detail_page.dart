@@ -5,6 +5,7 @@ import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/responsive_breakpoints.dart';
 import '../../../../core/theme/math_tokens.dart';
 import '../../../../core/widgets/app_badge.dart';
 import '../../../../core/widgets/app_card.dart';
@@ -93,10 +94,8 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
     return BlocBuilder<GroupsCubit, GroupsState>(
       builder: (context, state) {
         if (state is GroupsLoading) {
-          return Scaffold(
-            body: AppLoadingView(
-              message: context.l10n.loadingGroupDetail,
-            ),
+          return const Scaffold(
+            body: AppLoadingView.profile(),
           );
         }
 
@@ -150,7 +149,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
             ],
           ),
           body: ResponsiveContainer(
-            maxWidth: 1000,
+            maxWidth: ResponsiveBreakpoints.maxContentWidth,
             padding: const EdgeInsets.all(AppSpacing.s16),
             child: SingleChildScrollView(
               child: Column(

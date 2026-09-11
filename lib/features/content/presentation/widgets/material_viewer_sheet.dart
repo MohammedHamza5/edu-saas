@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_badge.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_card.dart';
+import '../../../../core/widgets/app_loading_view.dart';
 import '../../domain/entities/content_entity.dart';
 
 /// An academic, highly polished modal sheet or dialog to view and download
@@ -86,7 +88,7 @@ class _MaterialViewerSheetState extends State<MaterialViewerSheet> {
           _isLoadingUrl = false;
           _signedUrl = url;
           if (url == null) {
-            _errorMessage = 'تعذر إنشاء الرابط الآمن للملف حالياً';
+            _errorMessage = context.l10n.secureUrlErrorFallback;
           }
         });
       }
@@ -94,7 +96,7 @@ class _MaterialViewerSheetState extends State<MaterialViewerSheet> {
       if (mounted) {
         setState(() {
           _isLoadingUrl = false;
-          _errorMessage = 'حدث خطأ أثناء إعداد الرابط الآمن للملف';
+          _errorMessage = context.l10n.secureUrlGenericError;
         });
       }
     }
@@ -105,10 +107,10 @@ class _MaterialViewerSheetState extends State<MaterialViewerSheet> {
     await Clipboard.setData(ClipboardData(text: _signedUrl!));
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           backgroundColor: AppColors.success,
-          content: Text('تم نسخ الرابط الآمن بنجاح إلى الحافظة'),
-          duration: Duration(seconds: 2),
+          content: Text(context.l10n.secureUrlCopied),
+          duration: const Duration(seconds: 2),
         ),
       );
     }
@@ -196,7 +198,7 @@ class _MaterialViewerSheetState extends State<MaterialViewerSheet> {
                       runSpacing: AppSpacing.s4,
                       children: [
                         AppBadge(
-                          label: widget.content.type.labelAr,
+                          label: widget.content.type.localizedLabel(context),
                           variant: AppBadgeVariant.neutral,
                         ),
                         if (file != null)
@@ -212,7 +214,7 @@ class _MaterialViewerSheetState extends State<MaterialViewerSheet> {
               IconButton(
                 icon: const Icon(Icons.close_rounded),
                 onPressed: () => Navigator.of(context).pop(),
-                tooltip: 'إغلاق',
+                tooltip: context.l10n.closeTooltip,
               ),
             ],
           ),
@@ -250,8 +252,8 @@ class _MaterialViewerSheetState extends State<MaterialViewerSheet> {
                         isPdf
                             ? Icons.description_rounded
                             : isImage
-                                ? Icons.photo_library_rounded
-                                : Icons.file_present_rounded,
+                            ? Icons.photo_library_rounded
+                            : Icons.file_present_rounded,
                         color: color,
                         size: 20,
                       ),
@@ -276,14 +278,16 @@ class _MaterialViewerSheetState extends State<MaterialViewerSheet> {
                     runSpacing: 4,
                     children: [
                       Text(
-                        'حجم الملف: ${file.formattedFileSize}',
+                        context.l10n.fileSizeLabel(file.formattedFileSize),
                         style: const TextStyle(
                           fontSize: 11,
                           color: AppColors.textMuted,
                         ),
                       ),
                       Text(
-                        'النوع: ${file.mimeType.split('/').last.toUpperCase()}',
+                        context.l10n.fileTypeLabel(
+                          file.mimeType.split('/').last.toUpperCase(),
+                        ),
                         style: const TextStyle(
                           fontSize: 11,
                           color: AppColors.textMuted,
@@ -300,23 +304,21 @@ class _MaterialViewerSheetState extends State<MaterialViewerSheet> {
 
           // State of URL loading or action
           if (_isLoadingUrl) ...[
-            const Center(
+            Center(
               child: Padding(
-                padding: EdgeInsets.symmetric(vertical: AppSpacing.s12),
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.s12),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                    SizedBox(width: AppSpacing.s8),
+                    const AppLoadingView.compact(size: 18),
+                    const SizedBox(width: AppSpacing.s8),
                     Flexible(
                       child: Text(
-                        'جارٍ تجهيز الرابط الآمن للملف...',
-                        style: TextStyle(
-                            fontSize: 12, color: AppColors.textSecondary),
+                        context.l10n.preparingSecureUrl,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -333,8 +335,11 @@ class _MaterialViewerSheetState extends State<MaterialViewerSheet> {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.error_outline_rounded,
-                      color: AppColors.error, size: 18),
+                  const Icon(
+                    Icons.error_outline_rounded,
+                    color: AppColors.error,
+                    size: 18,
+                  ),
                   const SizedBox(width: AppSpacing.s8),
                   Expanded(
                     child: Text(
@@ -348,7 +353,7 @@ class _MaterialViewerSheetState extends State<MaterialViewerSheet> {
                   IconButton(
                     icon: const Icon(Icons.refresh_rounded, size: 18),
                     onPressed: _fetchUrl,
-                    tooltip: 'إعادة المحاولة',
+                    tooltip: context.l10n.retryAction,
                   ),
                 ],
               ),
@@ -362,13 +367,13 @@ class _MaterialViewerSheetState extends State<MaterialViewerSheet> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       AppButton(
-                        text: 'تنزيل / فتح الملف',
+                        text: context.l10n.downloadOrOpenFile,
                         icon: Icons.open_in_new_rounded,
                         onPressed: _copyUrl,
                       ),
                       const SizedBox(height: AppSpacing.s8),
                       AppButton(
-                        text: 'نسخ الرابط الآمن',
+                        text: context.l10n.copySecureUrlAction,
                         icon: Icons.copy_rounded,
                         variant: AppButtonVariant.secondary,
                         onPressed: _copyUrl,
@@ -380,7 +385,7 @@ class _MaterialViewerSheetState extends State<MaterialViewerSheet> {
                   children: [
                     Expanded(
                       child: AppButton(
-                        text: 'نسخ الرابط الآمن',
+                        text: context.l10n.copySecureUrlAction,
                         icon: Icons.copy_rounded,
                         variant: AppButtonVariant.secondary,
                         onPressed: _copyUrl,
@@ -389,7 +394,7 @@ class _MaterialViewerSheetState extends State<MaterialViewerSheet> {
                     const SizedBox(width: AppSpacing.s12),
                     Expanded(
                       child: AppButton(
-                        text: 'تنزيل / فتح الملف',
+                        text: context.l10n.downloadOrOpenFile,
                         icon: Icons.open_in_new_rounded,
                         onPressed: _copyUrl,
                       ),
@@ -413,14 +418,18 @@ class _MaterialViewerSheetState extends State<MaterialViewerSheet> {
               borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
               border: Border.all(color: AppColors.primary.withAlpha(25)),
             ),
-            child: const Row(
+            child: Row(
               children: [
-                Icon(Icons.shield_outlined, size: 14, color: AppColors.primary),
-                SizedBox(width: AppSpacing.s6),
+                const Icon(
+                  Icons.shield_outlined,
+                  size: 14,
+                  color: AppColors.primary,
+                ),
+                const SizedBox(width: AppSpacing.s6),
                 Expanded(
                   child: Text(
-                    'المحتوى مشفر ومخصص للطلاب المصرح لهم فقط. تنتهي صلاحية الرابط خلال 60 دقيقة للحماية.',
-                    style: TextStyle(
+                    context.l10n.contentSecurityDisclaimer,
+                    style: const TextStyle(
                       fontSize: 10,
                       color: AppColors.primary,
                       height: 1.3,

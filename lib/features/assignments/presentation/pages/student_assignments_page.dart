@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/responsive_breakpoints.dart';
 import '../../../../core/widgets/app_empty_view.dart';
 import '../../../../core/widgets/app_error_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
+import '../../../../core/widgets/responsive_container.dart';
+import '../../../../core/widgets/responsive_grid.dart';
 import '../../domain/entities/assignment_entity.dart';
 import '../cubit/assignments_cubit.dart';
 import '../cubit/assignments_state.dart';
@@ -54,7 +58,7 @@ class _StudentAssignmentsPageState extends State<StudentAssignmentsPage> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
-          tooltip: 'الرجوع للرئيسية',
+          tooltip: context.l10n.backToHomeTooltip,
           onPressed: () {
             if (Navigator.of(context).canPop()) {
               Navigator.of(context).pop();
@@ -63,12 +67,12 @@ class _StudentAssignmentsPageState extends State<StudentAssignmentsPage> {
             }
           },
         ),
-        title: const Text('واجباتي المدرسية'),
+        title: Text(context.l10n.myHomeworkTitle),
         centerTitle: true,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            tooltip: 'تحديث',
+            tooltip: context.l10n.refreshTooltip,
             onPressed: _loadAssignments,
           ),
         ],
@@ -76,7 +80,7 @@ class _StudentAssignmentsPageState extends State<StudentAssignmentsPage> {
       body: BlocBuilder<AssignmentsCubit, AssignmentsState>(
         builder: (context, state) {
           if (state is AssignmentsLoading) {
-            return const Center(child: AppLoadingView());
+            return const AppLoadingView.cardsGrid(count: 4, columns: 2);
           }
 
           if (state is AssignmentsError) {
@@ -92,7 +96,7 @@ class _StudentAssignmentsPageState extends State<StudentAssignmentsPage> {
             return Center(
               child: AppEmptyView(
                 message: state.message,
-                subtitle: 'لا توجد واجبات مطلوب تسليمها في مجموعاتك حالياً',
+                subtitle: context.l10n.noAssignmentsInGroup,
                 icon: Icons.assignment_turned_in_outlined,
               ),
             );
@@ -101,92 +105,104 @@ class _StudentAssignmentsPageState extends State<StudentAssignmentsPage> {
           if (state is StudentAssignmentsLoaded) {
             final filtered = _filterAssignments(state.assignments);
 
-            return Column(
-              children: [
-                // Filter chips
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.s16,
-                    vertical: AppSpacing.s8,
-                  ),
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        _buildFilterChip('الكل', StudentAssignmentFilter.all,
-                            state.assignments.length),
-                        const SizedBox(width: AppSpacing.s8),
-                        _buildFilterChip(
-                          'مطلوب تسليمها',
-                          StudentAssignmentFilter.pending,
-                          state.assignments.where((a) => !a.hasSubmitted).length,
+            return Center(
+              child: ResponsiveContainer(
+                maxWidth: ResponsiveBreakpoints.maxContentWidth,
+                child: Column(
+                  children: [
+                    // Filter chips
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.s16,
+                        vertical: AppSpacing.s8,
+                      ),
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            _buildFilterChip(
+                              context.l10n.filterAll,
+                              StudentAssignmentFilter.all,
+                              state.assignments.length,
+                            ),
+                            const SizedBox(width: AppSpacing.s8),
+                            _buildFilterChip(
+                              context.l10n.filterPendingSubmission,
+                              StudentAssignmentFilter.pending,
+                              state.assignments.where((a) => !a.hasSubmitted).length,
+                            ),
+                            const SizedBox(width: AppSpacing.s8),
+                            _buildFilterChip(
+                              context.l10n.filterSubmitted,
+                              StudentAssignmentFilter.submitted,
+                              state.assignments
+                                  .where((a) => a.hasSubmitted && !a.isReviewed)
+                                  .length,
+                            ),
+                            const SizedBox(width: AppSpacing.s8),
+                            _buildFilterChip(
+                              context.l10n.filterReviewed,
+                              StudentAssignmentFilter.reviewed,
+                              state.assignments.where((a) => a.isReviewed).length,
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: AppSpacing.s8),
-                        _buildFilterChip(
-                          'تم تسليمها',
-                          StudentAssignmentFilter.submitted,
-                          state.assignments
-                              .where((a) => a.hasSubmitted && !a.isReviewed)
-                              .length,
-                        ),
-                        const SizedBox(width: AppSpacing.s8),
-                        _buildFilterChip(
-                          'تم التصحيح',
-                          StudentAssignmentFilter.reviewed,
-                          state.assignments.where((a) => a.isReviewed).length,
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
-                const Divider(height: 1, color: AppColors.border),
+                    const Divider(height: 1, color: AppColors.border),
 
-                // Assignments List
-                Expanded(
-                  child: filtered.isEmpty
-                      ? const Center(
-                          child: AppEmptyView(
-                            message: 'لا توجد نتائج في هذا التصنيف',
-                            subtitle: 'جرب التبديل لتصنيف آخر لرؤية واجباتك',
-                            icon: Icons.filter_list_off_outlined,
-                          ),
-                        )
-                      : RefreshIndicator(
-                          onRefresh: () async => _loadAssignments(),
-                          child: ListView.separated(
-                            padding: const EdgeInsets.all(AppSpacing.s16),
-                            itemCount: filtered.length,
-                            separatorBuilder: (_, __) =>
-                                const SizedBox(height: AppSpacing.s12),
-                            itemBuilder: (context, index) {
-                              final assignment = filtered[index];
-                              return AssignmentCard(
-                                assignment: assignment,
-                                isTeacher: false,
-                                onTap: () {
-                                  Navigator.of(context)
-                                      .push<void>(
-                                    MaterialPageRoute<void>(
-                                      builder: (_) => BlocProvider.value(
-                                        value: context.read<AssignmentsCubit>(),
-                                        child: AssignmentSubmissionPage(
-                                          assignment: assignment,
-                                        ),
-                                      ),
-                                    ),
-                                  )
-                                      .then((_) {
-                                    if (context.mounted) {
-                                      _loadAssignments();
-                                    }
-                                  });
-                                },
-                              );
-                            },
-                          ),
-                        ),
+                    // Assignments List
+                    Expanded(
+                      child: filtered.isEmpty
+                          ? Center(
+                              child: AppEmptyView(
+                                message: context.l10n.noAssignmentsInFilter,
+                                subtitle: context.l10n.noAssignmentsInFilterSubtitle,
+                                icon: Icons.filter_list_off_outlined,
+                              ),
+                            )
+                          : RefreshIndicator(
+                              onRefresh: () async => _loadAssignments(),
+                              child: SingleChildScrollView(
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                padding: const EdgeInsets.all(AppSpacing.s16),
+                                child: ResponsiveGrid(
+                                  mobileColumns: 1,
+                                  tabletColumns: 2,
+                                  desktopColumns: 2,
+                                  spacing: AppSpacing.s16,
+                                  runSpacing: AppSpacing.s16,
+                                  children: filtered.map((assignment) {
+                                    return AssignmentCard(
+                                      assignment: assignment,
+                                      isTeacher: false,
+                                      onTap: () {
+                                        Navigator.of(context)
+                                            .push<void>(
+                                          MaterialPageRoute<void>(
+                                            builder: (_) => BlocProvider.value(
+                                              value: context.read<AssignmentsCubit>(),
+                                              child: AssignmentSubmissionPage(
+                                                assignment: assignment,
+                                              ),
+                                            ),
+                                          ),
+                                        )
+                                            .then((_) {
+                                          if (context.mounted) {
+                                            _loadAssignments();
+                                          }
+                                        });
+                                      },
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
+                            ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             );
           }
 

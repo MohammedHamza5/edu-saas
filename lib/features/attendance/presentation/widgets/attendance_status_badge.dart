@@ -55,7 +55,7 @@ class AttendanceStatusBadge extends StatelessWidget {
             Icon(icon, size: compact ? 12 : 14, color: fg),
             const SizedBox(width: AppSpacing.s4),
             Text(
-              status.labelAr,
+              status.localizedLabel(context),
               style: TextStyle(
                 fontSize: compact ? 11 : 12,
                 fontWeight: FontWeight.w700,

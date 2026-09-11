@@ -425,9 +425,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
       await tester.pump(const Duration(milliseconds: 300));
 
-      expect(find.text('رصد الحضور والغياب'), findsOneWidget);
-      expect(find.text('تحضير الكل حاضر'), findsOneWidget);
-      expect(find.text('حفظ كشف الحضور'), findsOneWidget);
+      expect(find.text('متابعة حضور المحاضرات'), findsOneWidget);
       expect(find.text('أحمد علي', skipOffstage: false), findsOneWidget);
       expect(find.text('سارة محمد', skipOffstage: false), findsOneWidget);
     });

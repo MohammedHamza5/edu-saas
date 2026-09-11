@@ -12,7 +12,7 @@ void main() {
       final branding = TenantBranding.defaultAcademic();
 
       expect(branding.tenantId, 'default');
-      expect(branding.brandName, 'EduSaaS');
+      expect(branding.brandName, 'منصة التعليم الأكاديمي');
       expect(branding.signatureSymbol, '∑');
       expect(branding.primaryColor, isA<Color>());
       expect(branding.gradientStart, isA<Color>());

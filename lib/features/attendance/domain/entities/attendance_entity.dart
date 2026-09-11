@@ -1,4 +1,6 @@
+import 'package:edu_saas/core/extensions/localized_context_extension.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/widgets.dart';
 
 /// Attendance status enum corresponding to Postgres check constraint:
 /// check (status in ('present','absent','late','excused'))
@@ -7,6 +9,13 @@ enum AttendanceStatus {
   absent,
   late,
   excused;
+
+  String localizedLabel(BuildContext context) => switch (this) {
+    AttendanceStatus.present => context.l10n.attendanceStatusPresent,
+    AttendanceStatus.absent => context.l10n.attendanceStatusAbsent,
+    AttendanceStatus.late => context.l10n.attendanceStatusLate,
+    AttendanceStatus.excused => context.l10n.attendanceStatusExcused,
+  };
 
   String get labelAr => switch (this) {
     AttendanceStatus.present => 'حاضر',

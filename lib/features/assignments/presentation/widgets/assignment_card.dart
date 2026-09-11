@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_card.dart';
@@ -24,7 +25,7 @@ class AssignmentCard extends StatelessWidget {
 
     return AppCard(
       onTap: onTap,
-      variant: AppCardVariant.standard,
+      variant: AppCardVariant.elevated,
       padding: const EdgeInsets.all(AppSpacing.s16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -63,7 +64,7 @@ class AssignmentCard extends StatelessWidget {
                     if (assignment.groupName != null) ...[
                       const SizedBox(height: AppSpacing.s4),
                       Text(
-                        'المجموعة: ${assignment.groupName}',
+                        context.l10n.groupLabelPrefix(assignment.groupName!),
                         style: const TextStyle(
                           fontSize: 12,
                           color: AppColors.textMuted,
@@ -74,7 +75,7 @@ class AssignmentCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.s8),
-              _buildStatusBadge(),
+              _buildStatusBadge(context),
             ],
           ),
 
@@ -109,8 +110,10 @@ class AssignmentCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   assignment.dueAt != null
-                      ? 'التسليم: ${dateFormat.format(assignment.dueAt!)}'
-                      : 'بدون موعد نهائي',
+                      ? context.l10n.dueAtPrefix(
+                          dateFormat.format(assignment.dueAt!),
+                        )
+                      : context.l10n.noDueDate,
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: isOverdue ? FontWeight.bold : FontWeight.normal,
@@ -131,7 +134,7 @@ class AssignmentCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
                 ),
                 child: Text(
-                  '${assignment.maxScore} درجة',
+                  context.l10n.maxScorePoints(assignment.maxScore.toString()),
                   style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
@@ -153,11 +156,18 @@ class AssignmentCard extends StatelessWidget {
                   color: AppColors.textSecondary,
                 ),
                 const SizedBox(width: AppSpacing.s4),
-                Text(
-                  'التسليمات: ${assignment.submissionsCount} | تم التصحيح: ${assignment.reviewedCount}',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textSecondary,
+                Expanded(
+                  child: Text(
+                    context.l10n.teacherAssignmentStats(
+                      assignment.submissionsCount.toString(),
+                      assignment.reviewedCount.toString(),
+                    ),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
@@ -168,7 +178,7 @@ class AssignmentCard extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusBadge() {
+  Widget _buildStatusBadge(BuildContext context) {
     if (isTeacher) {
       final hasPending = assignment.submissionsCount > assignment.reviewedCount;
       return Container(
@@ -183,7 +193,9 @@ class AssignmentCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
         ),
         child: Text(
-          hasPending ? 'بانتظار المراجعة' : 'مكتمل',
+          hasPending
+              ? context.l10n.pendingReview
+              : context.l10n.statusCompleted,
           style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w600,
@@ -209,7 +221,7 @@ class AssignmentCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
         ),
         child: Text(
-          isOverdue ? 'فات الموعد' : 'مطلوب التسليم',
+          isOverdue ? context.l10n.pastDue : context.l10n.actionRequired,
           style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w600,
@@ -236,7 +248,7 @@ class AssignmentCard extends StatelessWidget {
           Text(
             sub.isReviewed && sub.score != null
                 ? '${sub.score}/${assignment.maxScore}'
-                : sub.status.labelAr,
+                : sub.status.localizedLabel(context),
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.bold,

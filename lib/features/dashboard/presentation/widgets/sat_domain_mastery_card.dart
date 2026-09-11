@@ -414,7 +414,7 @@ class SatDomainMasteryCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            context.l10n.nextMissionWithTeacher(branding.teacherName),
+                            context.l10n.nextMissionWithTeacher(branding.localizedTeacherName(context)),
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 13,

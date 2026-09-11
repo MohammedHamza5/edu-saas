@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import '../extensions/localized_context_extension.dart';
 import '../router/app_router.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 import '../widgets/app_badge.dart';
 import '../widgets/app_card.dart';
+import 'app_loading_view.dart';
 import '../../features/groups/domain/entities/group_entity.dart';
 import '../../features/groups/presentation/cubit/groups_cubit.dart';
 import '../../features/groups/presentation/cubit/groups_state.dart';
@@ -53,13 +55,7 @@ class TeacherGroupFilterBar extends StatelessWidget {
               borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
               border: Border.all(color: AppColors.border),
             ),
-            child: const Center(
-              child: SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ),
-            ),
+            child: const Center(child: AppLoadingView.compact(size: 20)),
           );
         }
 
@@ -73,40 +69,48 @@ class TeacherGroupFilterBar extends StatelessWidget {
                 variant: AppCardVariant.standard,
                 padding: const EdgeInsets.all(AppSpacing.s12),
                 child: Row(
-                children: [
-                  const Icon(
-                    Icons.info_outline_rounded,
-                    color: AppColors.warning,
-                    size: 22,
-                  ),
-                  const SizedBox(width: AppSpacing.s12),
-                  const Expanded(
-                    child: Text(
-                      'لا توجد مجموعات دراسية حالياً. أنشئ مجموعة أولاً للبدء.',
-                      style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                  children: [
+                    const Icon(
+                      Icons.info_outline_rounded,
+                      color: AppColors.warning,
+                      size: 22,
                     ),
-                  ),
-                  ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.s12,
-                        vertical: AppSpacing.s8,
+                    const SizedBox(width: AppSpacing.s12),
+                    Expanded(
+                      child: Text(
+                        context.l10n.noGroupsCreatedYetDesc,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: AppColors.textSecondary,
+                        ),
                       ),
                     ),
-                    icon: const Icon(Icons.add, size: 16),
-                    label: const Text('إنشاء مجموعة', style: TextStyle(fontSize: 12)),
-                    onPressed: () => context.push(AppRouter.groupsList),
-                  ),
-                ],
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.s12,
+                          vertical: AppSpacing.s8,
+                        ),
+                      ),
+                      icon: const Icon(Icons.add, size: 16),
+                      label: Text(
+                        context.l10n.createNewGroup,
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      onPressed: () => context.push(AppRouter.groupsList),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          );
-        }
+            );
+          }
 
           // Auto-select first group if none selected or if selected is not found
-          final currentGroup = groups.where((g) => g.id == selectedGroupId).firstOrNull;
+          final currentGroup = groups
+              .where((g) => g.id == selectedGroupId)
+              .firstOrNull;
           if (currentGroup == null && groups.isNotEmpty) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               onGroupChanged(groups.first);
@@ -151,9 +155,9 @@ class TeacherGroupFilterBar extends StatelessWidget {
                 const SizedBox(width: AppSpacing.s12),
 
                 // Label
-                const Text(
-                  'المجموعة:',
-                  style: TextStyle(
+                Text(
+                  context.l10n.groupColonLabel,
+                  style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textSecondary,
@@ -178,7 +182,9 @@ class TeacherGroupFilterBar extends StatelessWidget {
                       ),
                       onChanged: (String? newId) {
                         if (newId == null || newId == effectiveGroup.id) return;
-                        final selected = groups.where((g) => g.id == newId).firstOrNull;
+                        final selected = groups
+                            .where((g) => g.id == newId)
+                            .firstOrNull;
                         if (selected != null) {
                           onGroupChanged(selected);
                         }
@@ -192,7 +198,9 @@ class TeacherGroupFilterBar extends StatelessWidget {
                                 child: Text(
                                   g.name,
                                   overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(fontWeight: FontWeight.w600),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: AppSpacing.s8),
@@ -213,9 +221,12 @@ class TeacherGroupFilterBar extends StatelessWidget {
                   const SizedBox(width: AppSpacing.s8),
                   IconButton(
                     icon: const Icon(Icons.refresh_rounded, size: 18),
-                    tooltip: 'تحديث المحتوى',
+                    tooltip: context.l10n.refreshContent,
                     padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                    constraints: const BoxConstraints(
+                      minWidth: 32,
+                      minHeight: 32,
+                    ),
                     onPressed: onRefresh,
                   ),
                 ],

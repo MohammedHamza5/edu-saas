@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
+import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 
@@ -49,12 +50,12 @@ class SatExamToolsSheet {
                     size: 22,
                   ),
                   const SizedBox(width: AppSpacing.s8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'ورقة قوانين الـ SAT المعتمدة (Reference Sheet)',
+                      ctx.l10n.satReferenceSheetTitle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
                         color: AppColors.textPrimary,
@@ -73,41 +74,41 @@ class SatExamToolsSheet {
                 child: ListView(
                   children: [
                     _buildFormulaGroup(
-                      title: 'مساحات ومحيط الأشكال المستوية (Area & Circumference)',
+                      title: ctx.l10n.areaCircumferenceSection,
                       formulas: [
-                        {'name': 'مساحة الدائرة', 'math': 'A = π r²'},
-                        {'name': 'محيط الدائرة', 'math': 'C = 2 π r'},
-                        {'name': 'مساحة المستطيل', 'math': 'A = l × w'},
-                        {'name': 'مساحة المثلث', 'math': 'A = ½ b × h'},
+                        {'name': ctx.l10n.circleArea, 'math': 'A = π r²'},
+                        {'name': ctx.l10n.circleCircumference, 'math': 'C = 2 π r'},
+                        {'name': ctx.l10n.rectangleArea, 'math': 'A = l × w'},
+                        {'name': ctx.l10n.triangleArea, 'math': 'A = ½ b × h'},
                       ],
                     ),
                     const SizedBox(height: AppSpacing.s16),
                     _buildFormulaGroup(
-                      title: 'الحجوم ثلاثية الأبعاد (Volumes)',
+                      title: ctx.l10n.volumesSection,
                       formulas: [
-                        {'name': 'حجم متوازي المستطيلات', 'math': 'V = l × w × h'},
-                        {'name': 'حجم الأسطوانة القائمة', 'math': 'V = π r² h'},
-                        {'name': 'حجم الكرة', 'math': 'V = (4/3) π r³'},
-                        {'name': 'حجم المخروط القائم', 'math': 'V = (1/3) π r² h'},
-                        {'name': 'حجم الهرم القائم', 'math': 'V = (1/3) l × w × h'},
+                        {'name': ctx.l10n.rectangularPrismVolume, 'math': 'V = l × w × h'},
+                        {'name': ctx.l10n.cylinderVolume, 'math': 'V = π r² h'},
+                        {'name': ctx.l10n.sphereVolume, 'math': 'V = (4/3) π r³'},
+                        {'name': ctx.l10n.coneVolume, 'math': 'V = (1/3) π r² h'},
+                        {'name': ctx.l10n.pyramidVolume, 'math': 'V = (1/3) l × w × h'},
                       ],
                     ),
                     const SizedBox(height: AppSpacing.s16),
                     _buildFormulaGroup(
-                      title: 'المثلثات القائمة والخاصة (Right Triangles)',
+                      title: ctx.l10n.rightTrianglesSection,
                       formulas: [
-                        {'name': 'نظرية فيثاغورس', 'math': 'a² + b² = c²'},
-                        {'name': 'مثلث 30° - 60° - 90°', 'math': 'الأضلاع: x, x√3, 2x'},
-                        {'name': 'مثلث 45° - 45° - 90°', 'math': 'الأضلاع: s, s, s√2'},
+                        {'name': ctx.l10n.pythagoreanTheorem, 'math': 'a² + b² = c²'},
+                        {'name': ctx.l10n.triangle306090, 'math': ctx.l10n.triangle306090Sides},
+                        {'name': ctx.l10n.triangle454590, 'math': ctx.l10n.triangle454590Sides},
                       ],
                     ),
                     const SizedBox(height: AppSpacing.s16),
                     _buildFormulaGroup(
-                      title: 'الدرجات والراديان (Degrees & Radians)',
+                      title: ctx.l10n.degreesRadiansSection,
                       formulas: [
-                        {'name': 'مجموع زوايا المثلث', 'math': '180°'},
-                        {'name': 'الدورة الكاملة بالراديان', 'math': '2π radians = 360°'},
-                        {'name': 'التحويل من درجات لراديان', 'math': 'Radians = Degrees × (π / 180°)'},
+                        {'name': ctx.l10n.triangleAnglesSum, 'math': '180°'},
+                        {'name': ctx.l10n.fullCircleRadians, 'math': '2π radians = 360°'},
+                        {'name': ctx.l10n.degreesToRadians, 'math': 'Radians = Degrees × (π / 180°)'},
                       ],
                     ),
                   ],
@@ -319,12 +320,12 @@ class _SatCalculatorDialogState extends State<_SatCalculatorDialog> {
               children: [
                 const Icon(Icons.calculate_rounded, color: AppColors.primary, size: 20),
                 const SizedBox(width: AppSpacing.s8),
-                const Expanded(
+                Expanded(
                   child: Text(
-                    'حاسبة الـ SAT المدمجة',
+                    context.l10n.satCalculatorTitle,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                   ),
                 ),
                 IconButton(

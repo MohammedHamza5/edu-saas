@@ -11,6 +11,7 @@ import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_error_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
+import '../../../../core/widgets/app_logo.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/language_switcher_button.dart';
 import '../../domain/entities/provision_tenant_params.dart';
@@ -248,6 +249,15 @@ class _PlatformOnboardingViewState extends State<_PlatformOnboardingView> {
                   ),
                   const SizedBox(height: AppSpacing.s16),
                 ],
+
+                // Platform Brand Header
+                const Center(
+                  child: AppLogo.hero(
+                    size: 72,
+                    withGlow: true,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.s20),
 
                 // Section 1: Tenant Information
                 AppCard(

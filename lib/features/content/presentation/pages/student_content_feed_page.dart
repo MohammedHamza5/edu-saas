@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/responsive_breakpoints.dart';
 import '../../../../core/widgets/app_empty_view.dart';
 import '../../../../core/widgets/app_error_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
@@ -62,14 +64,14 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final title = widget.groupName != null
-        ? 'محتوى: ${widget.groupName}'
-        : 'محتوى ومذكرات المجموعة';
+        ? context.l10n.groupContentPrefix(widget.groupName!)
+        : context.l10n.groupContentDefault;
 
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
-          tooltip: 'رجوع للوحة الطالب',
+          tooltip: context.l10n.backToStudentDashboard,
           onPressed: () => context.canPop()
               ? context.pop()
               : context.go(AppRouter.studentDashboard),
@@ -94,7 +96,7 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
-            tooltip: 'تحديث المحتوى',
+            tooltip: context.l10n.refreshContent,
             onPressed: () => context.read<ContentCubit>().loadGroupContent(
                   widget.groupId,
                   isStudent: true,
@@ -115,15 +117,7 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
         },
         builder: (context, state) {
           if (state is ContentLoading) {
-            return const Center(
-              child: ResponsiveContainer(
-                maxWidth: 900,
-                padding: EdgeInsets.all(AppSpacing.s16),
-                child: AppLoadingView(
-                  style: AppLoadingStyle.skeletonList,
-                ),
-              ),
-            );
+            return const AppLoadingView.cardsGrid(count: 4, columns: 2);
           }
 
           if (state is ContentError) {
@@ -166,7 +160,7 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
 
             return Center(
               child: ResponsiveContainer(
-                maxWidth: 1000,
+                maxWidth: ResponsiveBreakpoints.maxContentWidth,
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.s16,
                   vertical: AppSpacing.s12,
@@ -177,8 +171,7 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                     // Search Bar & Filter Chips
                     AppTextField(
                       controller: _searchController,
-                      hintText:
-                          'ابحث في المذكرات، الملخصات، أو الفيديوهات...',
+                      hintText: context.l10n.searchContentPlaceholder,
                       prefixIcon: const Icon(Icons.search_rounded,
                           color: AppColors.textSecondary, size: 20),
                       suffixIcon: _searchQuery.isNotEmpty
@@ -203,31 +196,31 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                       child: Row(
                         children: [
                           _buildFilterChip(
-                            label: 'الكل (${allPublished.length})',
+                            label: context.l10n.filterAllWithCount(allPublished.length),
                             isSelected: _selectedTypeFilter == null,
                             onSelected: () =>
                                 setState(() => _selectedTypeFilter = null),
                           ),
                           const SizedBox(width: AppSpacing.s8),
                           _buildFilterChip(
-                            label:
-                                'المذكرات (${allPublished.where((i) => i.type == ContentType.pdf).length})',
+                            label: context.l10n.filterPdfsWithCount(
+                                allPublished.where((i) => i.type == ContentType.pdf).length),
                             isSelected: _selectedTypeFilter == ContentType.pdf,
                             onSelected: () => setState(
                                 () => _selectedTypeFilter = ContentType.pdf),
                           ),
                           const SizedBox(width: AppSpacing.s8),
                           _buildFilterChip(
-                            label:
-                                'الصور (${allPublished.where((i) => i.type == ContentType.image).length})',
+                            label: context.l10n.filterImagesWithCount(
+                                allPublished.where((i) => i.type == ContentType.image).length),
                             isSelected: _selectedTypeFilter == ContentType.image,
                             onSelected: () => setState(
                                 () => _selectedTypeFilter = ContentType.image),
                           ),
                           const SizedBox(width: AppSpacing.s8),
                           _buildFilterChip(
-                            label:
-                                'الفيديوهات (${allPublished.where((i) => i.type == ContentType.video).length})',
+                            label: context.l10n.filterVideosWithCount(
+                                allPublished.where((i) => i.type == ContentType.video).length),
                             isSelected: _selectedTypeFilter == ContentType.video,
                             onSelected: () => setState(
                                 () => _selectedTypeFilter = ContentType.video),
@@ -241,9 +234,8 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                     // Content Feed List or Empty State
                     Expanded(
                       child: allPublished.isEmpty
-                          ? const AppEmptyView(
-                              message:
-                                  'لم يتم نشر أي محتوى دراسي في هذه المجموعة بعد\nستظهر المذكرات والدروس هنا فور نشر المعلم لها.',
+                          ? AppEmptyView(
+                              message: context.l10n.noContentPublishedYet,
                               icon: Icons.menu_book_rounded,
                             )
                           : items.isEmpty
@@ -258,7 +250,7 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                                       ),
                                       const SizedBox(height: AppSpacing.s12),
                                       Text(
-                                        'لا توجد مواد دراسية مطابقة لبحثك "$_searchQuery"',
+                                        context.l10n.noMatchingContentFound(_searchQuery),
                                         style: const TextStyle(
                                           fontWeight: FontWeight.bold,
                                           color: AppColors.textSecondary,

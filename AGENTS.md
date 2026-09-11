@@ -45,6 +45,7 @@ White-label **Education SaaS** للمدرسين (Multi-Tenant من اليوم ا
 6. **لا تعقيد بلا حاجة حقيقية** — كل جدول/باكدج/طبقة يجب أن يكون له سبب.
 7. **الذكاء الاصطناعي منفّذ، وليس مهندسًا معماريًا** (القسم 23).
 8. **لا وعود لا نقدر نفيها** — لا "Anti-Cheat 100%"، لا "منع تصوير الشاشة"، لا "Unlimited".
+9. **التعريب الفوري المتزامن (Zero Localization Debt):** ممنوع منعاً باتاً كتابة أي نص ثابت (Hardcoded String) في أي Widget أو Dialog أو رسالة. عند إضافة أو تعديل أي شاشة، يجب فوراً وفي نفس اللحظة إضافة المفتاح في `app_en.arb` وترجمته العربية المطابقة في `app_ar.arb` وتشغيل `flutter gen-l10n`. نسبة التطابق دائماً 100% وممنوع تأجيل الترجمة نهائياً.
 
 ## ممنوعات أمنية (الأخطر — القسم 23.3)
 - تعطيل RLS أو `using (true)` على بيانات المستخدمين.
@@ -57,11 +58,12 @@ White-label **Education SaaS** للمدرسين (Multi-Tenant من اليوم ا
 ## الحلقة الإلزامية قبل قول "تم" (القسم 21 + 04-workflow)
 ```text
 اقرأ الملف أولًا → خطة قصيرة (≤7 أسطر) لو المهمة تلمس >3 ملفات → أصغر تغيير →
+تعريب متزامن فوري (app_en.arb + app_ar.arb) → flutter gen-l10n (تطابق 100% وصفر مفاتيح ناقصة) →
 dart run build_runner build --delete-conflicting-outputs (عند أي codegen) →
 flutter analyze → flutter test → flutter build (web/apk حقيقي، ليس analyze فقط) →
 شغّل الشاشة/الفلو فعليًا وتحقق من الـdebug console → حدّث memory/
 ```
-- أي خطأ في الـanalyzer/test = **فشل**. لا "تم" قبل رؤية الإشارة.
+- أي خطأ في الـanalyzer/test أو وجود مفاتيح غير مترجمة = **فشل**. لا "تم" قبل رؤية الإشارة.
 - الحالات الثلاث إلزامية في كل شاشة تجلب بيانات: **loading / empty / error**.
 - `context.mounted` بعد أي await، و`mounted` قبل setState، وDispose لكل Controller/Subscription.
 

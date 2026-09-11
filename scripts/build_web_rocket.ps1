@@ -1,7 +1,8 @@
 param (
     [switch]$Wasm,
     [switch]$SkipAnalyze,
-    [switch]$SkipTests
+    [switch]$SkipTests,
+    [switch]$DeployFirebase
 )
 
 $ErrorActionPreference = "Stop"
@@ -41,10 +42,10 @@ $buildStart = Get-Date
 
 if ($Wasm) {
     Write-Host "[3/5] Compiling to WebAssembly (WasmGC + Skwasm + Level-4 Optimization)..." -ForegroundColor Yellow
-    flutter build web --release --wasm -O4 --strip-wasm --tree-shake-icons --pwa-strategy=offline-first --no-source-maps
+    flutter build web --release --wasm -O4 --strip-wasm --tree-shake-icons --pwa-strategy=offline-first --no-source-maps --dart-define-from-file=.env
 } else {
     Write-Host "[3/5] Compiling with Level-4 Optimization, Icon Tree-Shaking, and PWA Offline-First..." -ForegroundColor Yellow
-    flutter build web --release -O4 --tree-shake-icons --pwa-strategy=offline-first --no-source-maps
+    flutter build web --release -O4 --tree-shake-icons --pwa-strategy=offline-first --no-source-maps --dart-define-from-file=.env
 }
 
 if ($LASTEXITCODE -ne 0) {
@@ -86,4 +87,19 @@ if (Test-Path $jsPath) {
     Write-Host "  * Optimized JavaScript (main.dart.js): $jsSize MB" -ForegroundColor Cyan
 }
 
-Write-Host "`nRocket-Speed Production Build Complete! Ready for Cloudflare Pages deployment." -ForegroundColor Green
+Write-Host "`nRocket-Speed Production Build Complete! Ready for deployment." -ForegroundColor Green
+
+# Step 6: Deploy to Firebase Hosting (Optional)
+if ($DeployFirebase) {
+    Write-Host "`n=================================================================" -ForegroundColor Cyan
+    Write-Host "    Deploying to Firebase Hosting (site: antounios) ...           " -ForegroundColor Cyan
+    Write-Host "=================================================================" -ForegroundColor Cyan
+    $env:NODE_OPTIONS = "--dns-result-order=ipv4first"
+    firebase deploy --only hosting
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "`n[SUCCESS] Successfully deployed to: https://antounios.web.app" -ForegroundColor Green
+    } else {
+        Write-Host "`n[ERROR] Firebase deploy failed!" -ForegroundColor Red
+        exit $LASTEXITCODE
+    }
+}

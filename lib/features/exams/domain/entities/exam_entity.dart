@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 
 enum QuestionType {
@@ -22,6 +23,15 @@ enum QuestionType {
         return 'multiple_choice';
       case QuestionType.trueFalse:
         return 'true_false';
+    }
+  }
+
+  String localizedLabel(BuildContext context) {
+    switch (this) {
+      case QuestionType.multipleChoice:
+        return context.l10n.questionTypeMultipleChoice;
+      case QuestionType.trueFalse:
+        return context.l10n.questionTypeTrueFalse;
     }
   }
 
@@ -53,6 +63,17 @@ enum ExamStatus {
   }
 
   String get value => name;
+
+  String localizedLabel(BuildContext context) {
+    switch (this) {
+      case ExamStatus.draft:
+        return context.l10n.examStatusDraft;
+      case ExamStatus.published:
+        return context.l10n.examStatusPublished;
+      case ExamStatus.archived:
+        return context.l10n.statusArchived;
+    }
+  }
 
   String get labelAr {
     switch (this) {
@@ -102,6 +123,17 @@ enum AttemptStatus {
         return 'submitted';
       case AttemptStatus.expired:
         return 'expired';
+    }
+  }
+
+  String localizedLabel(BuildContext context) {
+    switch (this) {
+      case AttemptStatus.inProgress:
+        return context.l10n.attemptStatusInProgress;
+      case AttemptStatus.submitted:
+        return context.l10n.attemptStatusSubmitted;
+      case AttemptStatus.expired:
+        return context.l10n.attemptStatusExpired;
     }
   }
 

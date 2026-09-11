@@ -2,6 +2,7 @@ import 'package:edu_saas/core/errors/failures.dart';
 import 'package:edu_saas/core/errors/result.dart';
 import 'package:edu_saas/core/localization/generated/app_localizations.dart';
 import 'package:edu_saas/core/theme/app_theme.dart';
+import 'package:edu_saas/core/utils/cache_manager.dart';
 import 'package:edu_saas/features/attendance/domain/entities/attendance_entity.dart';
 import 'package:edu_saas/features/auth/domain/entities/user_entity.dart';
 import 'package:edu_saas/features/auth/domain/repositories/auth_repository.dart';
@@ -187,6 +188,7 @@ void main() {
   late AuthCubit authCubit;
 
   setUp(() {
+    AppCache.clearAll();
     fakeRepo = FakeParentRepository();
     parentCubit = ParentCubit(repository: fakeRepo);
     fakeNotificationsRepo = FakeNotificationsRepository();

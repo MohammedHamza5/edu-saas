@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_badge.dart';
@@ -128,12 +129,12 @@ class ContentItemCard extends StatelessWidget {
                   runSpacing: AppSpacing.s4,
                   children: [
                     AppBadge(
-                      label: content.type.labelAr,
+                      label: content.type.localizedLabel(context),
                       variant: AppBadgeVariant.neutral,
                     ),
                     if (isTeacher)
                       AppBadge(
-                        label: content.status.labelAr,
+                        label: content.status.localizedLabel(context),
                         variant: switch (content.status) {
                           ContentStatus.published => AppBadgeVariant.active,
                           ContentStatus.draft => AppBadgeVariant.pending,
@@ -211,8 +212,8 @@ class ContentItemCard extends StatelessWidget {
                           ],
                           Text(
                             content.publishedAt != null
-                                ? 'نُشر: ${_formatDate(content.publishedAt!)}'
-                                : 'أُنشئ: ${_formatDate(content.createdAt)}',
+                                ? context.l10n.publishedDatePrefix(_formatDate(content.publishedAt!))
+                                : context.l10n.createdDatePrefix(_formatDate(content.createdAt)),
                             style: const TextStyle(
                               fontSize: 11,
                               color: AppColors.textMuted,
@@ -236,7 +237,7 @@ class ContentItemCard extends StatelessWidget {
                                 textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
                               ),
                               icon: const Icon(Icons.cloud_upload_rounded, size: 16),
-                              label: const Text('رفع الفيديو'),
+                              label: Text(context.l10n.uploadVideoAction),
                             ),
                             const SizedBox(width: AppSpacing.s4),
                           ],
@@ -252,8 +253,8 @@ class ContentItemCard extends StatelessWidget {
                                     : AppColors.warning,
                               ),
                               tooltip: content.isPublished
-                                  ? 'منشور (انقر للتحويل لمسودة)'
-                                  : 'مسودة (انقر للنشر)',
+                                  ? context.l10n.publishedTooltip
+                                  : context.l10n.draftTooltip,
                               onPressed: onTogglePublish,
                             ),
                           PopupMenuButton<String>(
@@ -282,34 +283,37 @@ class ContentItemCard extends StatelessWidget {
                             },
                             itemBuilder: (ctx) => [
                               if (content.type == ContentType.video && onUploadVideo != null)
-                                const PopupMenuItem(
+                                PopupMenuItem(
                                   value: 'upload_video',
                                   child: Row(
                                     children: [
-                                      Icon(Icons.cloud_upload_rounded, size: 16, color: AppColors.primary),
-                                      SizedBox(width: 8),
-                                      Text('رفع / تحديث فيديو المحاضرة', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600)),
+                                      const Icon(Icons.cloud_upload_rounded, size: 16, color: AppColors.primary),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        ctx.l10n.uploadUpdateLectureVideo,
+                                        style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600),
+                                      ),
                                     ],
                                   ),
                                 ),
                               if (hasFile)
-                                const PopupMenuItem(
+                                PopupMenuItem(
                                   value: 'open_file',
                                   child: Row(
                                     children: [
-                                      Icon(Icons.download_rounded, size: 16),
-                                      SizedBox(width: 8),
-                                      Text('تنزيل / فتح الملف'),
+                                      const Icon(Icons.download_rounded, size: 16),
+                                      const SizedBox(width: 8),
+                                      Text(ctx.l10n.downloadOrOpenAction),
                                     ],
                                   ),
                                 ),
-                              const PopupMenuItem(
+                              PopupMenuItem(
                                 value: 'edit',
                                 child: Row(
                                   children: [
-                                    Icon(Icons.edit_outlined, size: 16),
-                                    SizedBox(width: 8),
-                                    Text('تعديل البيانات'),
+                                    const Icon(Icons.edit_outlined, size: 16),
+                                    const SizedBox(width: 8),
+                                    Text(ctx.l10n.editMetadataAction),
                                   ],
                                 ),
                               ),
@@ -325,8 +329,8 @@ class ContentItemCard extends StatelessWidget {
                                     ),
                                     const SizedBox(width: 8),
                                     Text(content.isPublished
-                                        ? 'تحويل لمسودة'
-                                        : 'نشر للطلاب'),
+                                        ? ctx.l10n.convertToDraft
+                                        : ctx.l10n.publishToStudents),
                                   ],
                                 ),
                               ),
@@ -342,22 +346,23 @@ class ContentItemCard extends StatelessWidget {
                                     ),
                                     const SizedBox(width: 8),
                                     Text(content.isArchived
-                                        ? 'إلغاء الأرشفة'
-                                        : 'أرشفة المادة'),
+                                        ? ctx.l10n.unarchiveMaterial
+                                        : ctx.l10n.archiveMaterial),
                                   ],
                                 ),
                               ),
                               const PopupMenuDivider(),
-                              const PopupMenuItem(
+                              PopupMenuItem(
                                 value: 'delete',
                                 child: Row(
                                   children: [
-                                    Icon(Icons.delete_outline,
+                                    const Icon(Icons.delete_outline,
                                         size: 16, color: AppColors.error),
-                                    SizedBox(width: 8),
-                                    Text('حذف نهائي',
-                                        style:
-                                            TextStyle(color: AppColors.error)),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      ctx.l10n.permanentDelete,
+                                      style: const TextStyle(color: AppColors.error),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -372,7 +377,7 @@ class ContentItemCard extends StatelessWidget {
                           size: 14,
                           color: AppColors.primary,
                         ),
-                        tooltip: 'معاينة وتحميل المذكرة',
+                        tooltip: context.l10n.previewAndDownloadNote,
                         onPressed: onOpenFile != null
                             ? () => onOpenFile!(content.file!.storagePath)
                             : onTap,

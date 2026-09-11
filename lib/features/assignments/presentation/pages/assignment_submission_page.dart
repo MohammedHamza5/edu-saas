@@ -2,6 +2,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_button.dart';
@@ -43,7 +44,7 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('تعذر اختيار الملفات: $e'),
+            content: Text(context.l10n.filePickFailed(e.toString())),
             backgroundColor: AppColors.error,
           ),
         );
@@ -60,8 +61,8 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
   Future<void> _submitAssignment() async {
     if (_selectedFiles.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('يرجى إرفاق ملف واحد على الأقل قبل التسليم'),
+        SnackBar(
+          content: Text(context.l10n.attachAtLeastOneFile),
           backgroundColor: AppColors.warning,
         ),
       );
@@ -82,6 +83,7 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
       );
     }).toList();
 
+    final successMsg = context.l10n.assignmentSubmittedSuccess;
     final success = await context.read<AssignmentsCubit>().submitAssignment(
           assignmentId: widget.assignment.id,
           files: filesToUpload,
@@ -89,8 +91,8 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
 
     if (mounted && success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('تم تسليم الواجب بنجاح!'),
+        SnackBar(
+          content: Text(successMsg),
           backgroundColor: AppColors.success,
         ),
       );
@@ -110,7 +112,7 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('تفاصيل وتسليم الواجب'),
+        title: Text(context.l10n.assignmentDetailsTitle),
         centerTitle: true,
       ),
       body: BlocBuilder<AssignmentsCubit, AssignmentsState>(
@@ -147,7 +149,7 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
                                 if (assignment.groupName != null) ...[
                                   const SizedBox(height: AppSpacing.s4),
                                   Text(
-                                    'المجموعة: ${assignment.groupName}',
+                                    context.l10n.groupLabelPrefix(assignment.groupName!),
                                     style: const TextStyle(
                                       fontSize: 13,
                                       color: AppColors.textMuted,
@@ -167,7 +169,7 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
                               borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
                             ),
                             child: Text(
-                              '${assignment.maxScore} درجة',
+                              context.l10n.maxScorePoints(assignment.maxScore.toString()),
                               style: const TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
@@ -192,8 +194,8 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
                           Expanded(
                             child: Text(
                               assignment.dueAt != null
-                                  ? 'الموعد النهائي: ${dateFormat.format(assignment.dueAt!)}'
-                                  : 'لا يوجد موعد نهائي محدد',
+                                  ? context.l10n.deadlinePrefix(dateFormat.format(assignment.dueAt!))
+                                  : context.l10n.noDueDateSpecified,
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: isOverdue ? FontWeight.bold : FontWeight.normal,
@@ -206,13 +208,13 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
 
                       if (assignment.allowLateSubmission) ...[
                         const SizedBox(height: AppSpacing.s6),
-                        const Row(
+                        Row(
                           children: [
-                            Icon(Icons.info_outline, size: 14, color: AppColors.info),
-                            SizedBox(width: AppSpacing.s6),
+                            const Icon(Icons.info_outline, size: 14, color: AppColors.info),
+                            const SizedBox(width: AppSpacing.s6),
                             Text(
-                              'التسليم المتأخر متاح بعد الموعد',
-                              style: TextStyle(fontSize: 12, color: AppColors.info),
+                              context.l10n.lateSubmissionAllowedNotice,
+                              style: const TextStyle(fontSize: 12, color: AppColors.info),
                             ),
                           ],
                         ),
@@ -226,9 +228,9 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
                 // Instructions Card
                 if (assignment.instructions != null &&
                     assignment.instructions!.trim().isNotEmpty) ...[
-                  const Text(
-                    'التعليمات والأسئلة المطلوبة',
-                    style: TextStyle(
+                  Text(
+                    context.l10n.instructionsAndProblemsTitle,
+                    style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimary,
@@ -251,9 +253,9 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
 
                 // Previous Submission / Feedback Card
                 if (isSubmitted) ...[
-                  const Text(
-                    'حالة تسليمك للواجب',
-                    style: TextStyle(
+                  Text(
+                    context.l10n.submissionStatusCardTitle,
+                    style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimary,
@@ -277,7 +279,7 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
                                 Icon(mySub.status.icon, color: mySub.status.color, size: 20),
                                 const SizedBox(width: AppSpacing.s8),
                                 Text(
-                                  mySub.status.labelAr,
+                                  mySub.status.localizedLabel(context),
                                   style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.bold,
@@ -298,7 +300,10 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
                                       BorderRadius.circular(AppSpacing.radiusSmall),
                                 ),
                                 child: Text(
-                                  'الدرجة: ${mySub.score} / ${assignment.maxScore}',
+                                  context.l10n.gradeScorePrefix(
+                                    mySub.score.toString(),
+                                    assignment.maxScore.toString(),
+                                  ),
                                   style: const TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.bold,
@@ -311,7 +316,10 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
                         ),
                         const SizedBox(height: AppSpacing.s8),
                         Text(
-                          'تاريخ التسليم: ${dateFormat.format(mySub.submittedAt)} (محاولة ${mySub.attemptNumber})',
+                          context.l10n.submittedAtDateAttempt(
+                            dateFormat.format(mySub.submittedAt),
+                            mySub.attemptNumber.toString(),
+                          ),
                           style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
                         ),
 
@@ -321,14 +329,14 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
                           const SizedBox(height: AppSpacing.s12),
                           const Divider(height: 1, color: AppColors.border),
                           const SizedBox(height: AppSpacing.s12),
-                          const Row(
+                          Row(
                             children: [
-                              Icon(Icons.rate_review_outlined,
+                              const Icon(Icons.rate_review_outlined,
                                   size: 16, color: AppColors.primary),
-                              SizedBox(width: AppSpacing.s6),
+                              const SizedBox(width: AppSpacing.s6),
                               Text(
-                                'ملاحظات المعلم:',
-                                style: TextStyle(
+                                context.l10n.teacherFeedbackTitle,
+                                style: const TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.bold,
                                   color: AppColors.primary,
@@ -358,7 +366,9 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        isSubmitted ? 'إعادة التسليم (محاولة جديدة)' : 'رفع ملفات الحل',
+                        isSubmitted
+                            ? context.l10n.resubmitNewAttemptTitle
+                            : context.l10n.uploadSolutionFilesTitle,
                         style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
@@ -368,7 +378,7 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
                       TextButton.icon(
                         onPressed: _pickFiles,
                         icon: const Icon(Icons.add_photo_alternate_outlined, size: 18),
-                        label: const Text('اختيار ملفات'),
+                        label: Text(context.l10n.selectFilesBtn),
                       ),
                     ],
                   ),
@@ -392,26 +402,26 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
                             style: BorderStyle.solid,
                           ),
                         ),
-                        child: const Column(
+                        child: Column(
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.cloud_upload_outlined,
                               size: 44,
                               color: AppColors.primary,
                             ),
-                            SizedBox(height: AppSpacing.s12),
+                            const SizedBox(height: AppSpacing.s12),
                             Text(
-                              'اضغط لاختيار ملفات الإجابة (PDF أو صور)',
-                              style: TextStyle(
+                              context.l10n.tapToPickFilesHint,
+                              style: const TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.textPrimary,
                               ),
                             ),
-                            SizedBox(height: AppSpacing.s4),
+                            const SizedBox(height: AppSpacing.s4),
                             Text(
-                              'الحد الأقصى للملف 20 ميجابايت',
-                              style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+                              context.l10n.maxFileSizeNotice,
+                              style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
                             ),
                           ],
                         ),
@@ -476,7 +486,9 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
                   const SizedBox(height: AppSpacing.s24),
 
                   AppButton(
-                    text: isSubmitted ? 'إرسال المحاولة الجديدة' : 'تسليم الواجب الآن',
+                    text: isSubmitted
+                        ? context.l10n.submitNewAttemptBtn
+                        : context.l10n.submitAssignmentNowBtn,
                     onPressed: isSubmitting ? null : _submitAssignment,
                     isLoading: isSubmitting,
                     variant: AppButtonVariant.primary,
@@ -491,14 +503,14 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
                       borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
                       border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
                     ),
-                    child: const Row(
+                    child: Row(
                       children: [
-                        Icon(Icons.error_outline, color: AppColors.error),
-                        SizedBox(width: AppSpacing.s12),
+                        const Icon(Icons.error_outline, color: AppColors.error),
+                        const SizedBox(width: AppSpacing.s12),
                         Expanded(
                           child: Text(
-                            'انتهى موعد تسليم هذا الواجب ولا يُسمح بالتسليم المتأخر.',
-                            style: TextStyle(
+                            context.l10n.deadlinePassedNoLateNotice,
+                            style: const TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
                               color: AppColors.error,

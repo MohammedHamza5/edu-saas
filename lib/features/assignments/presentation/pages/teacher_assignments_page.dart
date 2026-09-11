@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/responsive_breakpoints.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_empty_view.dart';
 import '../../../../core/widgets/app_error_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
 import '../../../../core/widgets/app_text_field.dart';
+import '../../../../core/widgets/responsive_container.dart';
+import '../../../../core/widgets/responsive_grid.dart';
 import '../../domain/entities/assignment_entity.dart';
 import '../cubit/assignments_cubit.dart';
 import '../cubit/assignments_state.dart';
@@ -100,9 +104,9 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
-                            'إنشاء واجب جديد',
-                            style: TextStyle(
+                          Text(
+                            context.l10n.createNewAssignment,
+                            style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: AppColors.textPrimary,
@@ -118,12 +122,12 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
 
                       AppTextField(
                         controller: titleController,
-                        labelText: 'عنوان الواجب *',
-                        hintText: 'مثال: تمارين حل معادلات الدرجة الثانية',
+                        labelText: context.l10n.assignmentTitleField,
+                        hintText: context.l10n.assignmentTitleHint,
                         prefixIcon: const Icon(Icons.title),
                         validator: (val) {
                           if (val == null || val.trim().isEmpty) {
-                            return 'يرجى إدخال عنوان الواجب';
+                            return context.l10n.assignmentTitleRequired;
                           }
                           return null;
                         },
@@ -132,8 +136,8 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
 
                       AppTextField(
                         controller: instructionsController,
-                        labelText: 'التعليمات والإرشادات للطلاب',
-                        hintText: 'اكتب الأسئلة أو التعليمات المطلوب اتباعها...',
+                        labelText: context.l10n.instructionsField,
+                        hintText: context.l10n.instructionsHint,
                         maxLines: 3,
                         prefixIcon: const Icon(Icons.notes),
                       ),
@@ -144,16 +148,16 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
                           Expanded(
                             child: AppTextField(
                               controller: maxScoreController,
-                              labelText: 'الدرجة القصوى',
+                              labelText: context.l10n.maxScoreField,
                               keyboardType: TextInputType.number,
                               prefixIcon: const Icon(Icons.grade),
                               validator: (val) {
                                 if (val == null || val.trim().isEmpty) {
-                                  return 'مطلوب';
+                                  return context.l10n.fieldRequired;
                                 }
                                 final numVal = int.tryParse(val.trim());
                                 if (numVal == null || numVal <= 0) {
-                                  return 'رقم موجب';
+                                  return context.l10n.positiveNumberRequired;
                                 }
                                 return null;
                               },
@@ -204,7 +208,7 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
                                       child: Text(
                                         selectedDueDate != null
                                             ? '${selectedDueDate!.month}/${selectedDueDate!.day}'
-                                            : 'موعد التسليم',
+                                            : context.l10n.submissionDueDateField,
                                         style: TextStyle(
                                           fontSize: 13,
                                           color: selectedDueDate != null
@@ -224,13 +228,13 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
                       const SizedBox(height: AppSpacing.s12),
 
                       SwitchListTile(
-                        title: const Text(
-                          'السماح بالتسليم المتأخر',
-                          style: TextStyle(fontSize: 14, color: AppColors.textPrimary),
+                        title: Text(
+                          context.l10n.allowLateSubmission,
+                          style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
                         ),
-                        subtitle: const Text(
-                          'يمكن للطلاب إرسال الحل حتى بعد انقضاء الموعد',
-                          style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+                        subtitle: Text(
+                          context.l10n.allowLateSubmissionSubtitle,
+                          style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
                         ),
                         value: allowLate,
                         activeColor: AppColors.primary,
@@ -244,7 +248,7 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
                       const SizedBox(height: AppSpacing.s20),
 
                       AppButton(
-                        text: 'نشر الواجب للطلاب',
+                        text: context.l10n.publishAssignmentBtn,
                         icon: Icons.send_rounded,
                         onPressed: () async {
                           if (!formKey.currentState!.validate()) return;
@@ -254,6 +258,7 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
 
                           Navigator.of(ctx).pop();
 
+                          final successMsg = context.l10n.assignmentPublishedSuccess;
                           final success = await context.read<AssignmentsCubit>().createAssignment(
                                 groupId: _selectedGroupId!,
                                 title: title,
@@ -265,8 +270,8 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
 
                           if (mounted && success) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('تم إنشاء الواجب ونشره بنجاح'),
+                              SnackBar(
+                                content: Text(successMsg),
                                 backgroundColor: AppColors.success,
                               ),
                             );
@@ -304,7 +309,7 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
             return BlocBuilder<AssignmentsCubit, AssignmentsState>(
               builder: (context, state) {
                 if (state is! TeacherAssignmentsLoaded) {
-                  return const Center(child: AppLoadingView());
+                  return const AppLoadingView.list(count: 3);
                 }
 
                 final submissions = state.submissions;
@@ -351,7 +356,10 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
                             ],
                           ),
                           Text(
-                            'التسليمات (${submissions.length}) • تم التصحيح (${assignment.reviewedCount})',
+                            context.l10n.submissionsCountWithReviewed(
+                              submissions.length.toString(),
+                              assignment.reviewedCount.toString(),
+                            ),
                             style: const TextStyle(
                               fontSize: 13,
                               color: AppColors.textMuted,
@@ -365,12 +373,12 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
                     // Submissions List
                     Expanded(
                       child: isLoading
-                          ? const Center(child: AppLoadingView())
+                          ? const AppLoadingView.list(count: 3)
                           : submissions.isEmpty
-                              ? const Center(
+                              ? Center(
                                   child: AppEmptyView(
-                                    message: 'لا توجد تسليمات حتى الآن',
-                                    subtitle: 'سيظهر هنا الطلاب الذين قاموا بتسليم هذا الواجب',
+                                    message: context.l10n.noSubmissionsYetTitle,
+                                    subtitle: context.l10n.noSubmissionsYetSubtitle,
                                     icon: Icons.assignment_turned_in_outlined,
                                   ),
                                 )
@@ -418,19 +426,19 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
-          tooltip: 'رجوع',
+          tooltip: context.l10n.backToHomeTooltip,
           onPressed: () => context.canPop()
               ? context.pop()
               : context.go(AppRouter.teacherDashboard),
         ),
         title: Text(_selectedGroupName != null
-            ? 'واجبات: $_selectedGroupName'
-            : 'إدارة الواجبات'),
+            ? context.l10n.groupAssignmentsTitle(_selectedGroupName!)
+            : context.l10n.manageAssignmentsTitle),
         centerTitle: true,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            tooltip: 'تحديث',
+            tooltip: context.l10n.refreshTooltip,
             onPressed: _loadAssignments,
           ),
         ],
@@ -441,73 +449,81 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
               onPressed: _showCreateAssignmentDialog,
               backgroundColor: AppColors.primary,
               icon: const Icon(Icons.add, color: Colors.white),
-              label: const Text(
-                'إنشاء واجب',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              label: Text(
+                context.l10n.createAssignmentFab,
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
               ),
             ),
-      body: Padding(
-        padding: const EdgeInsets.all(AppSpacing.s16),
-        child: Column(
-          children: [
-            TeacherGroupFilterBar(
-              selectedGroupId: _selectedGroupId,
-              onGroupChanged: _onGroupChanged,
-              onRefresh: _loadAssignments,
-            ),
-            Expanded(
-              child: BlocBuilder<AssignmentsCubit, AssignmentsState>(
-                builder: (context, state) {
-                  if (state is AssignmentsLoading) {
-                    return const Center(child: AppLoadingView());
-                  }
+      body: Center(
+        child: ResponsiveContainer(
+          maxWidth: ResponsiveBreakpoints.maxContentWidth,
+          padding: const EdgeInsets.all(AppSpacing.s16),
+          child: Column(
+            children: [
+              TeacherGroupFilterBar(
+                selectedGroupId: _selectedGroupId,
+                onGroupChanged: _onGroupChanged,
+                onRefresh: _loadAssignments,
+              ),
+              Expanded(
+                child: BlocBuilder<AssignmentsCubit, AssignmentsState>(
+                  builder: (context, state) {
+                    if (state is AssignmentsLoading) {
+                      return const AppLoadingView.cardsGrid(count: 4, columns: 2);
+                    }
 
-                  if (state is AssignmentsError) {
-                    return Center(
-                      child: AppErrorView(
-                        message: state.message,
-                        onRetry: _loadAssignments,
-                      ),
-                    );
-                  }
-
-                  if (state is TeacherAssignmentsLoaded) {
-                    final assignments = state.assignments;
-
-                    if (assignments.isEmpty) {
+                    if (state is AssignmentsError) {
                       return Center(
-                        child: AppEmptyView(
-                          message: 'لا توجد واجبات مضافة لهذه المجموعة',
-                          subtitle: 'ابدأ بإنشاء أول واجب للطلاب لمتابعة تسليماتهم وتقييمها',
-                          actionText: _selectedGroupId != null ? 'إنشاء أول واجب' : null,
-                          onAction: _selectedGroupId == null ? null : _showCreateAssignmentDialog,
-                          icon: Icons.assignment_outlined,
+                        child: AppErrorView(
+                          message: state.message,
+                          onRetry: _loadAssignments,
                         ),
                       );
                     }
 
-                    return RefreshIndicator(
-                      onRefresh: () async => _loadAssignments(),
-                      child: ListView.separated(
-                        itemCount: assignments.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.s12),
-                        itemBuilder: (context, index) {
-                          final assignment = assignments[index];
-                          return AssignmentCard(
-                            assignment: assignment,
-                            isTeacher: true,
-                            onTap: () => _showSubmissionsSheet(assignment),
-                          );
-                        },
-                      ),
-                    );
-                  }
+                    if (state is TeacherAssignmentsLoaded) {
+                      final assignments = state.assignments;
 
-                  return const SizedBox.shrink();
-                },
+                      if (assignments.isEmpty) {
+                        return Center(
+                          child: AppEmptyView(
+                            message: context.l10n.noAssignmentsForGroupTitle,
+                            subtitle: context.l10n.noAssignmentsForGroupSubtitle,
+                            actionText: _selectedGroupId != null ? context.l10n.createFirstAssignmentBtn : null,
+                            onAction: _selectedGroupId == null ? null : _showCreateAssignmentDialog,
+                            icon: Icons.assignment_outlined,
+                          ),
+                        );
+                      }
+
+                      return RefreshIndicator(
+                        onRefresh: () async => _loadAssignments(),
+                        child: SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          child: ResponsiveGrid(
+                            mobileColumns: 1,
+                            tabletColumns: 2,
+                            desktopColumns: 2,
+                            spacing: AppSpacing.s16,
+                            runSpacing: AppSpacing.s16,
+                            children: assignments.map((assignment) {
+                              return AssignmentCard(
+                                assignment: assignment,
+                                isTeacher: true,
+                                onTap: () => _showSubmissionsSheet(assignment),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      );
+                    }
+
+                    return const SizedBox.shrink();
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

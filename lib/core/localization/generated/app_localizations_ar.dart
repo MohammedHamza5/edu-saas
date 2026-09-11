@@ -13,7 +13,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get advancedMathEducationPlatform =>
-      'Advanced Mathematics & Education Platform';
+      'المنصة المتقدمة لتعليم الرياضيات';
 
   @override
   String get loading => 'جارٍ التحميل...';
@@ -67,37 +67,37 @@ class AppLocalizationsAr extends AppLocalizations {
   String get more => 'المزيد';
 
   @override
-  String get allScreensAndSections => 'All Screens & Sections';
+  String get allScreensAndSections => 'جميع الشاشات والأقسام';
 
   @override
-  String get success => 'Success';
+  String get success => 'نجاح';
 
   @override
-  String get warning => 'Warning';
+  String get warning => 'تحذير';
 
   @override
-  String get info => 'Information';
+  String get info => 'معلومات';
 
   @override
-  String get date => 'Date';
+  String get date => 'التاريخ';
 
   @override
-  String get time => 'Time';
+  String get time => 'الوقت';
 
   @override
-  String get duration => 'Duration';
+  String get duration => 'المدة';
 
   @override
-  String get minutes => 'Minutes';
+  String get minutes => 'دقائق';
 
   @override
-  String get questions => 'Questions';
+  String get questions => 'الأسئلة';
 
   @override
-  String get total => 'Total';
+  String get total => 'الإجمالي';
 
   @override
-  String get details => 'Details';
+  String get details => 'التفاصيل';
 
   @override
   String get logout => 'تسجيل الخروج';
@@ -112,22 +112,22 @@ class AppLocalizationsAr extends AppLocalizations {
   String get arabic => 'العربية';
 
   @override
-  String get select => 'Select';
+  String get select => 'تحديد';
 
   @override
-  String get submit => 'Submit';
+  String get submit => 'إرسال';
 
   @override
-  String get view => 'View';
+  String get view => 'عرض';
 
   @override
   String get refresh => 'تحديث';
 
   @override
-  String get noResultsFound => 'No matching results found';
+  String get noResultsFound => 'لم يتم العثور على نتائج مطابقة';
 
   @override
-  String get underDevelopment => 'Feature under development';
+  String get underDevelopment => 'الميزة قيد التطوير';
 
   @override
   String get active => 'نشط';
@@ -145,25 +145,25 @@ class AppLocalizationsAr extends AppLocalizations {
   String get rejected => 'مرفوض';
 
   @override
-  String get notAvailable => 'N/A';
+  String get notAvailable => 'غير متوفر';
 
   @override
-  String get copy => 'Copy';
+  String get copy => 'نسخ';
 
   @override
-  String get copied => 'Copied to clipboard';
+  String get copied => 'تم النسخ إلى الحافظة';
 
   @override
-  String get download => 'Download';
+  String get download => 'تنزيل';
 
   @override
-  String get upload => 'Upload';
+  String get upload => 'رفع';
 
   @override
   String get loginTitle => 'تسجيل الدخول';
 
   @override
-  String get loginSubtitle => 'Access your mathematical learning workspace';
+  String get loginSubtitle => 'الدخول إلى مساحة تعلم الرياضيات الخاصة بك';
 
   @override
   String get emailLabel => 'البريد الإلكتروني';
@@ -175,19 +175,19 @@ class AppLocalizationsAr extends AppLocalizations {
   String get passwordLabel => 'كلمة المرور';
 
   @override
-  String get passwordHint => 'Enter your password';
+  String get passwordHint => 'أدخل كلمة المرور';
 
   @override
   String get loginButton => 'دخول';
 
   @override
-  String get loggingIn => 'Signing in...';
+  String get loggingIn => 'جارٍ تسجيل الدخول...';
 
   @override
-  String get invalidCredentials => 'Invalid email or password';
+  String get invalidCredentials => 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
 
   @override
-  String get forgotPassword => 'Forgot Password?';
+  String get forgotPassword => 'هل نسيت كلمة المرور؟';
 
   @override
   String get roleTeacher => 'معلم';
@@ -199,73 +199,73 @@ class AppLocalizationsAr extends AppLocalizations {
   String get roleParent => 'ولي أمر';
 
   @override
-  String get selectRole => 'Select Role';
+  String get selectRole => 'اختر الدور';
 
   @override
-  String get registerStudentTitle => 'Student Registration';
+  String get registerStudentTitle => 'تسجيل طالب جديد';
 
   @override
   String get registerStudentSubtitle =>
-      'Create your account to join your teacher\'s study groups';
+      'أنشئ حسابك للانضمام إلى مجموعات مدرسك الدراسية';
 
   @override
-  String get fullNameLabel => 'Full Name';
+  String get fullNameLabel => 'الاسم الرباعي';
 
   @override
-  String get fullNameHint => 'Enter student full name';
+  String get fullNameHint => 'أدخل الاسم الرباعي للطالب';
 
   @override
-  String get phoneLabel => 'Student Phone Number';
+  String get phoneLabel => 'رقم هاتف الطالب';
 
   @override
   String get phoneHint => '01xxxxxxxxx';
 
   @override
-  String get parentPhoneLabel => 'Parent Phone Number';
+  String get parentPhoneLabel => 'رقم هاتف ولي الأمر';
 
   @override
   String get parentPhoneHint => '01xxxxxxxxx';
 
   @override
-  String get targetExamLabel => 'Target Exam';
+  String get targetExamLabel => 'الامتحان المستهدف';
 
   @override
-  String get selectTargetExam => 'Select target standardized exam';
+  String get selectTargetExam => 'اختر الامتحان المعياري المستهدف';
 
   @override
-  String get registerSubmitButton => 'Create Account';
+  String get registerSubmitButton => 'إنشاء الحساب';
 
   @override
-  String get registeringStudent => 'Creating account...';
+  String get registeringStudent => 'جارٍ إنشاء الحساب...';
 
   @override
-  String get registrationSuccessTitle => 'Registration Submitted';
+  String get registrationSuccessTitle => 'تم تقديم طلب التسجيل';
 
   @override
   String get registrationSuccessBody =>
-      'Your account request was submitted. Awaiting teacher review and approval.';
+      'تم إرسال طلب تسجيل حسابك بنجاح. في انتظار مراجعة واعتماد المدرس.';
 
   @override
-  String get alreadyHaveAccount => 'Already have an account? Sign in';
+  String get alreadyHaveAccount => 'هل لديك حساب بالفعل؟ تسجيل الدخول';
 
   @override
-  String get dontHaveAccount => 'Don\'t have an account? Register as a student';
+  String get dontHaveAccount => 'ليس لديك حساب؟ سجل كطالب الآن';
 
   @override
-  String get studentPendingTitle => 'Account Pending Approval';
+  String get studentPendingTitle => 'الحساب قيد المراجعة والاعتماد';
 
   @override
-  String get studentPendingSubtitle => 'Your application has been received';
+  String get studentPendingSubtitle => 'تم استلام طلب تسجيلك بنجاح';
 
   @override
   String get studentPendingDescription =>
-      'Your registration request is currently under review by the teacher. You will gain full platform access once approved.';
+      'طلب تسجيلك قيد مراجعة المدرس حالياً. ستتمكن من الوصول الكامل للمنصة فور اعتماده.';
 
   @override
-  String get checkStatusButton => 'Check Status';
+  String get checkStatusButton => 'التحقق من حالة الحساب';
 
   @override
-  String get tenantSuspendedTitle => 'Account Suspended';
+  String get tenantSuspendedTitle => 'الحساب معلق';
 
   @override
   String get tenantSuspendedMessage =>
@@ -273,116 +273,116 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get tenantSuspendedHelp =>
-      'If you believe this is in error, please reach out to your instructor or support team.';
+      'إذا كنت تعتقد أن هناك خطأ، يرجى التواصل مع مدرسك أو فريق الدعم الفني.';
 
   @override
-  String get platformOnboardingTitle => 'Platform Provisioning';
+  String get platformOnboardingTitle => 'تهيئة المنصة';
 
   @override
-  String get createTenantTitle => 'Provision New Teacher Workspace';
+  String get createTenantTitle => 'تهيئة مساحة عمل جديدة للمدرس';
 
   @override
-  String get tenantNameLabel => 'Platform / Academy Name';
+  String get tenantNameLabel => 'اسم المنصة / الأكاديمية';
 
   @override
-  String get tenantNameHint => 'e.g. Newton Math Academy';
+  String get tenantNameHint => 'مثال: أكاديمية نيوتن للرياضيات';
 
   @override
-  String get tenantSubdomainLabel => 'Workspace Subdomain';
+  String get tenantSubdomainLabel => 'النطاق الفرعي للمساحة';
 
   @override
-  String get tenantSubdomainHint => 'e.g. newton-math';
+  String get tenantSubdomainHint => 'مثال: newton-math';
 
   @override
-  String get teacherNameLabel => 'Lead Teacher Name';
+  String get teacherNameLabel => 'اسم المدرس الأساسي';
 
   @override
-  String get teacherNameHint => 'Dr. Full Name';
+  String get teacherNameHint => 'د. الاسم الكامل';
 
   @override
-  String get adminEmailLabel => 'Teacher Account Email';
+  String get adminEmailLabel => 'البريد الإلكتروني لحساب المدرس';
 
   @override
   String get adminEmailHint => 'teacher@domain.com';
 
   @override
-  String get createTenantButton => 'Provision Workspace';
+  String get createTenantButton => 'تهيئة مساحة العمل';
 
   @override
-  String get creatingTenant => 'Provisioning workspace...';
+  String get creatingTenant => 'جارٍ تهيئة مساحة العمل...';
 
   @override
-  String get tenantCreatedSuccess => 'Workspace provisioned successfully!';
+  String get tenantCreatedSuccess => 'تمت تهيئة مساحة العمل بنجاح!';
 
   @override
-  String get navDashboard => 'Dashboard';
+  String get navDashboard => 'لوحة التحكم';
 
   @override
-  String get navStudents => 'Students';
+  String get navStudents => 'الطلاب';
 
   @override
-  String get navGroups => 'Study Groups';
+  String get navGroups => 'المجموعات الدراسية';
 
   @override
-  String get navContent => 'Content Library';
+  String get navContent => 'مكتبة المحتوى';
 
   @override
-  String get navAssignments => 'Assignments';
+  String get navAssignments => 'الواجبات والتكليفات';
 
   @override
-  String get navExams => 'Exams & Tests';
+  String get navExams => 'الامتحانات والاختبارات';
 
   @override
-  String get navAttendance => 'Attendance';
+  String get navAttendance => 'كشف الحضور';
 
   @override
   String get navNotifications => 'التنبيهات';
 
   @override
-  String get navVideos => 'Video Library';
+  String get navVideos => 'مكتبة الفيديو';
 
   @override
-  String get navReports => 'Analytics';
+  String get navReports => 'التحليلات والتقارير';
 
   @override
-  String get navSettings => 'Settings';
+  String get navSettings => 'الإعدادات';
 
   @override
-  String get navSectionStudents => 'Student Management';
+  String get navSectionStudents => 'إدارة الطلاب';
 
   @override
-  String get navSectionAcademic => 'Academic Engine';
+  String get navSectionAcademic => 'المحرك الأكاديمي';
 
   @override
-  String get navSectionSystem => 'System & Tools';
+  String get navSectionSystem => 'النظام والأدوات';
 
   @override
-  String get teacherPortal => 'Teacher Operations Hub';
+  String get teacherPortal => 'مركز عمليات المدرس';
 
   @override
-  String get studentPortal => 'Student Learning Portal';
+  String get studentPortal => 'بوابة تعلم الطالب';
 
   @override
-  String get academicMathematics => 'Academic Mathematics';
+  String get academicMathematics => 'الرياضيات الأكاديمية';
 
   @override
-  String get selectSubjectGroup => 'Select Study Group';
+  String get selectSubjectGroup => 'اختر المجموعة الدراسية';
 
   @override
   String createGroupFirstNotice(String feature) {
-    return 'Please create a study group first to access $feature';
+    return 'يرجى إنشاء مجموعة دراسية أولاً للوصول إلى $feature';
   }
 
   @override
-  String get createGroup => 'Create Group';
+  String get createGroup => 'إنشاء مجموعة';
 
   @override
   String selectGroupForFeature(String feature) {
-    return 'Select Group â€¢ $feature';
+    return 'اختر المجموعة • $feature';
   }
 
   @override
-  String get sendAnnouncementNav => 'Broadcast Announcement';
+  String get sendAnnouncementNav => 'بث تعميم / إشعار';
 
   @override
   String get logoutDialogTitle => 'تسجيل الخروج';
@@ -392,147 +392,146 @@ class AppLocalizationsAr extends AppLocalizations {
       'هل أنت متأكد من رغبتك في إنهاء الجلسة الحالية؟';
 
   @override
-  String get studentNavDashboard => 'Home';
+  String get studentNavDashboard => 'الرئيسية';
 
   @override
-  String get studentNavNotifications => 'Alerts';
+  String get studentNavNotifications => 'التنبيهات';
 
   @override
-  String get studentNavContent => 'Study Materials';
+  String get studentNavContent => 'المواد الدراسية';
 
   @override
-  String get studentNavAssignments => 'Assignments';
+  String get studentNavAssignments => 'الواجبات';
 
   @override
-  String get studentNavExams => 'Exams';
+  String get studentNavExams => 'الامتحانات';
 
   @override
-  String get studentNavAttendance => 'Attendance';
+  String get studentNavAttendance => 'سجل الحضور';
 
   @override
   String get studentNoGroupsAssigned =>
-      'You are not enrolled in any study group yet. Please contact your instructor.';
+      'لست مسجلاً في أي مجموعة دراسية بعد. يرجى التواصل مع مدرسك.';
 
   @override
-  String get studentSelectGroup => 'Select Study Group';
+  String get studentSelectGroup => 'اختر المجموعة الدراسية';
 
   @override
-  String get studentChangeGroup => 'Switch Group';
+  String get studentChangeGroup => 'تبديل المجموعة';
 
   @override
   String get studentGroupsBottomSheetTitle =>
-      'Choose a Study Group to view its materials';
+      'اختر مجموعة دراسية لعرض محتواها التعليمي';
 
   @override
-  String get teacherDashboardTitle => 'Teacher Operations Hub';
+  String get teacherDashboardTitle => 'مركز عمليات المدرس';
 
   @override
-  String get teacherActionRadarTitle => 'Teacher Action Radar';
+  String get teacherActionRadarTitle => 'رادار المتابعة والتدخل الأكاديمي';
 
   @override
   String get teacherActionRadarSubtitle =>
-      'Priority pending operations requiring your review';
+      'العمليات العاجلة التي تتطلب تدخلك ومراجعتك';
 
   @override
   String pendingApprovalsCount(int count) {
-    return '$count Students Pending Approval';
+    return '$count طلاب بانتظار الاعتماد';
   }
 
   @override
-  String get attendanceReviewTitle => 'Attendance Records';
+  String get attendanceReviewTitle => 'سجلات الحضور والمتابعة';
 
   @override
-  String get attendanceReviewSubtitle =>
-      'Track and record daily group attendance';
+  String get attendanceReviewSubtitle => 'تسجيل ومتابعة حضور المجموعات يومياً';
 
   @override
-  String get gradingQueueTitle => 'Assignments Requiring Grading';
+  String get gradingQueueTitle => 'واجبات بانتظار التصحيح والتقييم';
 
   @override
-  String get gradingQueueSubtitle => 'Student submissions awaiting assessment';
+  String get gradingQueueSubtitle => 'تسليمات الطلاب التي تنتظر رصد الدرجة';
 
   @override
-  String get recentActivityTitle => 'Recent Platform Activity';
+  String get recentActivityTitle => 'أحدث الأنشطة على المنصة';
 
   @override
-  String get quickStatsTitle => 'Academic Overview';
+  String get quickStatsTitle => 'نظرة عامة على الأداء الأكاديمي';
 
   @override
-  String get activeStudentsCount => 'Active Students';
+  String get activeStudentsCount => 'الطلاب النشطون';
 
   @override
-  String get totalGroupsCount => 'Active Study Groups';
+  String get totalGroupsCount => 'المجموعات الدراسية النشطة';
 
   @override
-  String get scheduledExamsCount => 'Active Exams';
+  String get scheduledExamsCount => 'الامتحانات المجدولة';
 
   @override
-  String get publishedMaterialsCount => 'Published Materials';
+  String get publishedMaterialsCount => 'المواد المنشورة';
 
   @override
-  String get studentDashboardTitle => 'Student Learning Dashboard';
+  String get studentDashboardTitle => 'لوحة تعلم الطالب';
 
   @override
   String studentWelcomeGreeting(String name) {
-    return 'Welcome back, $name';
+    return 'مرحباً بعودتك، $name';
   }
 
   @override
-  String get satMasteryTitle => 'SAT Math Domain Mastery';
+  String get satMasteryTitle => 'إتقان مجالات رياضيات SAT';
 
   @override
-  String get satScoreProjection => 'SAT Projected Math Score';
+  String get satScoreProjection => 'الدرجة المتوقعة في رياضيات SAT';
 
   @override
-  String get satMathDomain => 'Math Domain';
+  String get satMathDomain => 'المجال الرياضي';
 
   @override
-  String get heartOfAlgebra => 'Heart of Algebra';
+  String get heartOfAlgebra => 'أساسيات الجبر (Heart of Algebra)';
 
   @override
-  String get problemSolvingDataAnalysis => 'Problem Solving & Data Analysis';
+  String get problemSolvingDataAnalysis => 'حل المشكلات وتحليل البيانات';
 
   @override
-  String get passportToAdvancedMath => 'Passport to Advanced Math';
+  String get passportToAdvancedMath => 'جواز العبور للرياضيات المتقدمة';
 
   @override
-  String get additionalTopicsMath => 'Additional Topics in Math';
+  String get additionalTopicsMath => 'موضوعات إضافية في الرياضيات';
 
   @override
-  String get upcomingExamsTitle => 'Upcoming Tests & Quizzes';
+  String get upcomingExamsTitle => 'الاختبارات والامتحانات القادمة';
 
   @override
-  String get recentAssignmentsTitle => 'Pending Assignments';
+  String get recentAssignmentsTitle => 'الواجبات المطلوب تسليمها';
 
   @override
-  String get continueLearning => 'Continue Learning';
+  String get continueLearning => 'مواصلة التعلم';
 
   @override
   String get parentDashboardTitle => 'لوحة متابعة ولي الأمر';
 
   @override
-  String get parentSelectChild => 'Select Student';
+  String get parentSelectChild => 'اختر الابن / الطالب';
 
   @override
-  String get academicOverviewTitle => 'Academic Performance Overview';
+  String get academicOverviewTitle => 'نظرة عامة على التحصيل الأكاديمي';
 
   @override
-  String get childAttendanceRate => 'Attendance Rate';
+  String get childAttendanceRate => 'نسبة الحضور';
 
   @override
-  String get childExamAverage => 'Exam Score Average';
+  String get childExamAverage => 'متوسط درجات الامتحانات';
 
   @override
-  String get childPendingAssignments => 'Pending Assignments';
+  String get childPendingAssignments => 'الواجبات قيد التسليم';
 
   @override
-  String get childRecentActivity => 'Child\'s Recent Activity';
+  String get childRecentActivity => 'أحدث أنشطة الطالب';
 
   @override
-  String get callTeacherAction => 'Call Instructor';
+  String get callTeacherAction => 'اتصال بالمدرس';
 
   @override
-  String get messageTeacherAction => 'Contact Instructor';
+  String get messageTeacherAction => 'مراسلة المدرس';
 
   @override
   String get studentsListTitle => 'إدارة الطلاب';
@@ -541,17 +540,17 @@ class AppLocalizationsAr extends AppLocalizations {
   String get searchStudentsHint => 'ابحث بالاسم أو البريد الإلكتروني…';
 
   @override
-  String get allGroupsFilter => 'All Study Groups';
+  String get allGroupsFilter => 'جميع المجموعات الدراسية';
 
   @override
-  String get allStatusesFilter => 'All Statuses';
+  String get allStatusesFilter => 'جميع الحالات';
 
   @override
-  String get pendingStudentsTitle => 'Pending Student Approvals';
+  String get pendingStudentsTitle => 'طلبات تسجيل الطلاب المعلقة';
 
   @override
   String pendingStudentsCount(int count) {
-    return '$count pending applications';
+    return '$count طلبات تسجيل بانتظار المراجعة';
   }
 
   @override
@@ -561,19 +560,19 @@ class AppLocalizationsAr extends AppLocalizations {
   String get rejectStudentAction => 'رفض';
 
   @override
-  String get approveStudentConfirmTitle => 'Approve Student Registration';
+  String get approveStudentConfirmTitle => 'اعتماد تسجيل الطالب';
 
   @override
   String approveStudentConfirmBody(String name) {
-    return 'Are you sure you want to approve $name? They will gain immediate access to their student portal.';
+    return 'هل أنت متأكد من رغبتك في اعتماد $name؟ سيحصل فوراً على حق الوصول لبوابة الطالب.';
   }
 
   @override
-  String get rejectStudentConfirmTitle => 'Reject Student Registration';
+  String get rejectStudentConfirmTitle => 'رفض طلب تسجيل الطالب';
 
   @override
   String rejectStudentConfirmBody(String name) {
-    return 'Are you sure you want to reject the application for $name?';
+    return 'هل أنت متأكد من رغبتك في رفض طلب تسجيل $name؟';
   }
 
   @override
@@ -590,48 +589,48 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String assignGroupsSubtitle(String name) {
-    return 'Select groups for $name';
+    return 'تحديد المجموعات للطالب $name';
   }
 
   @override
   String get selectGroupsInstruction =>
-      'Check the groups this student should be enrolled in:';
+      'حدد المجموعات الدراسية التي سينضم إليها هذا الطالب:';
 
   @override
-  String get groupsAssignedSuccess => 'Group assignments updated successfully';
+  String get groupsAssignedSuccess => 'تم تحديث تعيينات المجموعات بنجاح';
 
   @override
-  String get student360Title => 'Student 360Â° Profile';
+  String get student360Title => 'الملف الشامل للطالب (360°)';
 
   @override
-  String get tabOverview => 'Overview';
+  String get tabOverview => 'نظرة عامة';
 
   @override
-  String get tabAcademicHistory => 'Exams & Scores';
+  String get tabAcademicHistory => 'الامتحانات والدرجات';
 
   @override
-  String get tabAttendance => 'Attendance';
+  String get tabAttendance => 'سجل الحضور';
 
   @override
-  String get tabAssignments => 'Assignments';
+  String get tabAssignments => 'الواجبات';
 
   @override
-  String get tabParentContact => 'Parent Contact';
+  String get tabParentContact => 'بيانات ولي الأمر';
 
   @override
-  String get studentPhoneTitle => 'Student Phone';
+  String get studentPhoneTitle => 'هاتف الطالب';
 
   @override
-  String get parentPhoneTitle => 'Parent Phone';
+  String get parentPhoneTitle => 'هاتف ولي الأمر';
 
   @override
-  String get enrollmentDateTitle => 'Enrolled Date';
+  String get enrollmentDateTitle => 'تاريخ الانضمام';
 
   @override
-  String get currentGroupsTitle => 'Enrolled Groups';
+  String get currentGroupsTitle => 'المجموعات المسجل بها';
 
   @override
-  String get overallExamAverage => 'Average Score';
+  String get overallExamAverage => 'المعدل العام للامتحانات';
 
   @override
   String get attendanceRateLabel => 'نسبة الحضور';
@@ -640,7 +639,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get groupsListTitle => 'المجموعات الدراسية';
 
   @override
-  String get createGroupAction => 'Create Group';
+  String get createGroupAction => 'إنشاء مجموعة';
 
   @override
   String get groupNameLabel => 'اسم المجموعة';
@@ -649,380 +648,379 @@ class AppLocalizationsAr extends AppLocalizations {
   String get groupNameHint => 'مثال: أساسيات SAT - المجموعة الأولى';
 
   @override
-  String get groupDescriptionLabel => 'Description';
+  String get groupDescriptionLabel => 'الوصف';
 
   @override
-  String get groupGradeLevelLabel => 'Academic Level';
+  String get groupGradeLevelLabel => 'المستوى الأكاديمي';
 
   @override
-  String get groupTargetExamLabel => 'Target Exam';
+  String get groupTargetExamLabel => 'الامتحان المستهدف';
 
   @override
-  String get groupCapacityLabel => 'Capacity (Students)';
+  String get groupCapacityLabel => 'السعة الاستيعابية (عدد الطلاب)';
 
   @override
-  String get groupScheduleLabel => 'Meeting Schedule';
+  String get groupScheduleLabel => 'مواعيد اللقاءات والدروس';
 
   @override
-  String get groupScheduleHint => 'e.g. Sundays & Tuesdays @ 5:00 PM';
+  String get groupScheduleHint => 'مثال: الأحد والثلاثاء الساعة 5:00 مساءً';
 
   @override
-  String get groupCreatedSuccess => 'Study group created successfully';
+  String get groupCreatedSuccess => 'تم إنشاء المجموعة الدراسية بنجاح';
 
   @override
-  String get groupUpdatedSuccess => 'Group details updated';
+  String get groupUpdatedSuccess => 'تم تحديث بيانات المجموعة بنجاح';
 
   @override
-  String get groupDeleteConfirmTitle => 'Delete Study Group';
+  String get groupDeleteConfirmTitle => 'حذف المجموعة الدراسية';
 
   @override
   String get groupDeleteConfirmBody =>
-      'Are you sure you want to delete this group? All enrolled memberships will be revoked.';
+      'هل أنت متأكد من حذف هذه المجموعة؟ سيتم إلغاء عضوية جميع الطلاب المسجلين بها.';
 
   @override
-  String get groupMembersTab => 'Students';
+  String get groupMembersTab => 'الطلاب';
 
   @override
-  String get groupContentTab => 'Materials';
+  String get groupContentTab => 'المواد التعليمية';
 
   @override
-  String get groupAssignmentsTab => 'Assignments';
+  String get groupAssignmentsTab => 'الواجبات';
 
   @override
-  String get groupExamsTab => 'Exams';
+  String get groupExamsTab => 'الامتحانات';
 
   @override
-  String get addMemberAction => 'Add Student';
+  String get addMemberAction => 'إضافة طالب';
 
   @override
-  String get removeMemberAction => 'Remove';
+  String get removeMemberAction => 'إزالة';
 
   @override
-  String get searchMembersHint => 'Search group students...';
+  String get searchMembersHint => 'بحث في طلاب المجموعة...';
 
   @override
-  String get addMemberTitle => 'Add Student to Group';
+  String get addMemberTitle => 'إضافة طالب إلى المجموعة';
 
   @override
-  String get selectStudentToAdd => 'Select an active student:';
+  String get selectStudentToAdd => 'اختر طالباً نشطاً:';
 
   @override
-  String get memberAddedSuccess => 'Student added to group';
+  String get memberAddedSuccess => 'تمت إضافة الطالب إلى المجموعة';
 
   @override
-  String get memberRemovedSuccess => 'Student removed from group';
+  String get memberRemovedSuccess => 'تمت إزالة الطالب من المجموعة';
 
   @override
-  String get emptyMembersMessage => 'No students enrolled in this group yet.';
+  String get emptyMembersMessage => 'لا يوجد طلاب مسجلون في هذه المجموعة بعد.';
 
   @override
-  String get contentLibraryTitle => 'Content & Library';
+  String get contentLibraryTitle => 'المحتوى والمكتبة الأكاديمية';
 
   @override
-  String get addContentAction => 'Upload Material';
+  String get addContentAction => 'إضافة محتوى';
 
   @override
-  String get contentTitleLabel => 'Material Title';
+  String get contentTitleLabel => 'عنوان المادة التعليمية';
 
   @override
-  String get contentDescriptionLabel => 'Summary / Description';
+  String get contentDescriptionLabel => 'الملخص / الوصف';
 
   @override
-  String get contentTypeLabel => 'Content Type';
+  String get contentTypeLabel => 'نوع المحتوى';
 
   @override
-  String get contentTypeVideo => 'Recorded Video';
+  String get contentTypeVideo => 'فيديو مسجل';
 
   @override
-  String get contentTypePdf => 'PDF Document';
+  String get contentTypePdf => 'مستند PDF';
 
   @override
-  String get contentTypeDocument => 'Worksheet / Notes';
+  String get contentTypeDocument => 'ورقة عمل / مذكرات';
 
   @override
-  String get contentTypeLink => 'Web Resource Link';
+  String get contentTypeLink => 'رابط مورد خارجي';
 
   @override
-  String get contentUrlLabel => 'Resource URL';
+  String get contentUrlLabel => 'رابط المورد';
 
   @override
-  String get isDownloadableLabel => 'Allow Offline Download';
+  String get isDownloadableLabel => 'السماح بالتنزيل للعرض بدون إنترنت';
 
   @override
-  String get publishStatusLabel => 'Publication Status';
+  String get publishStatusLabel => 'حالة النشر';
 
   @override
-  String get statusDraft => 'Draft';
+  String get statusDraft => 'مسودة';
 
   @override
-  String get statusPublished => 'Published';
+  String get statusPublished => 'منشور';
 
   @override
-  String get uploadFileAction => 'Select File to Upload';
+  String get uploadFileAction => 'اختر ملفاً لرفعه';
 
   @override
   String fileSelectedNotice(String fileName) {
-    return 'Selected: $fileName';
+    return 'الملف المحدد: $fileName';
   }
 
   @override
-  String get contentCreatedSuccess =>
-      'Material uploaded and saved successfully';
+  String get contentCreatedSuccess => 'تم رفع وحفظ المادة التعليمية بنجاح';
 
   @override
-  String get deleteContentConfirmTitle => 'Delete Material';
+  String get deleteContentConfirmTitle => 'حذف المادة التعليمية';
 
   @override
   String get deleteContentConfirmBody =>
-      'Are you sure you want to delete this educational material?';
+      'هل أنت متأكد من حذف هذه المادة التعليمية نهائياً؟';
 
   @override
-  String get materialViewerTitle => 'Study Material';
+  String get materialViewerTitle => 'المادة التعليمية';
 
   @override
-  String get downloadMaterialAction => 'Download Resource';
+  String get downloadMaterialAction => 'تنزيل المورد';
 
   @override
-  String get viewMaterialAction => 'Open Resource';
+  String get viewMaterialAction => 'فتح المورد';
 
   @override
   String get previousContentNotice =>
-      'Includes access to materials published prior to group enrollment.';
+      'يتضمن صلاحية الوصول للمواد المنشورة قبل تاريخ الانضمام للمجموعة.';
 
   @override
-  String get assignmentsListTitle => 'Assignments & Homework';
+  String get assignmentsListTitle => 'الواجبات والتكليفات المنزلية';
 
   @override
-  String get createAssignmentAction => 'New Assignment';
+  String get createAssignmentAction => 'واجب جديد';
 
   @override
-  String get assignmentTitleLabel => 'Assignment Title';
+  String get assignmentTitleLabel => 'عنوان الواجب';
 
   @override
-  String get assignmentDueDateLabel => 'Due Date & Time';
+  String get assignmentDueDateLabel => 'تاريخ ووقت التسليم النهائي';
 
   @override
-  String get assignmentMaxScoreLabel => 'Maximum Score';
+  String get assignmentMaxScoreLabel => 'الدرجة العظمى';
 
   @override
-  String get assignmentDescriptionLabel => 'Instructions & Requirements';
+  String get assignmentDescriptionLabel => 'التعليمات والمتطلبات';
 
   @override
-  String get assignmentCreatedSuccess => 'Assignment published successfully';
+  String get assignmentCreatedSuccess => 'تم نشر الواجب بنجاح';
 
   @override
-  String get submissionsTitle => 'Student Submissions';
+  String get submissionsTitle => 'تسليمات الطلاب';
 
   @override
-  String get submissionStatusSubmitted => 'Submitted';
+  String get submissionStatusSubmitted => 'بانتظار التصحيح';
 
   @override
-  String get submissionStatusNotSubmitted => 'Not Submitted';
+  String get submissionStatusNotSubmitted => 'لم يسلم بعد';
 
   @override
-  String get submissionStatusGraded => 'Graded';
+  String get submissionStatusGraded => 'تم التقييم ورصد الدرجة';
 
   @override
-  String get submitAssignmentAction => 'Submit Solution';
+  String get submitAssignmentAction => 'تسليم الحل';
 
   @override
-  String get submissionFileLabel => 'Attach Solution File';
+  String get submissionFileLabel => 'إرفاق ملف الحل';
 
   @override
-  String get submissionNotesLabel => 'Student Notes (Optional)';
+  String get submissionNotesLabel => 'ملاحظات الطالب (اختياري)';
 
   @override
-  String get assignmentSubmittedSuccess => 'Homework submitted successfully!';
+  String get assignmentSubmittedSuccess => 'تم تسليم الواجب بنجاح!';
 
   @override
-  String get gradeSubmissionTitle => 'Grade Student Submission';
+  String get gradeSubmissionTitle => 'تقييم تسليم الطالب';
 
   @override
-  String get scoreEarnedLabel => 'Score Awarded';
+  String get scoreEarnedLabel => 'الدرجة المستحقة';
 
   @override
-  String get teacherFeedbackLabel => 'Instructor Feedback & Comments';
+  String get teacherFeedbackLabel => 'ملاحظات وتعليقات المدرس';
 
   @override
-  String get saveGradeAction => 'Record Grade';
+  String get saveGradeAction => 'رصد الدرجة';
 
   @override
-  String get gradeSavedSuccess => 'Grade and feedback recorded successfully';
+  String get gradeSavedSuccess => 'تم حفظ التقييم بنجاح';
 
   @override
-  String get examsListTitle => 'Exams & Quizzes';
+  String get examsListTitle => 'الامتحانات والاختبارات';
 
   @override
-  String get createExamAction => 'Create Exam';
+  String get createExamAction => 'إنشاء امتحان';
 
   @override
-  String get examTitleLabel => 'Exam Title';
+  String get examTitleLabel => 'عنوان الامتحان';
 
   @override
-  String get examDurationLabel => 'Duration';
+  String get examDurationLabel => 'مدة الامتحان';
 
   @override
   String examDurationMinutes(int minutes) {
-    return '$minutes mins';
+    return '$minutes دقيقة';
   }
 
   @override
-  String get examPassingScoreLabel => 'Passing Score (%)';
+  String get examPassingScoreLabel => 'درجة النجاح (%)';
 
   @override
-  String get examInstructionsLabel => 'Exam Guidelines';
+  String get examInstructionsLabel => 'إرشادات وتعليمات الامتحان';
 
   @override
-  String get examTargetGroupLabel => 'Assigned Study Group';
+  String get examTargetGroupLabel => 'المجموعة الدراسية المعنية';
 
   @override
   String questionsCountLabel(int count) {
-    return '$count Questions';
+    return '$count أسئلة';
   }
 
   @override
-  String get addQuestionAction => 'Add Question';
+  String get addQuestionAction => 'إضافة سؤال';
 
   @override
-  String get questionTextLabel => 'Question Prompt';
+  String get questionTextLabel => 'نص السؤال';
 
   @override
-  String get questionPointsLabel => 'Point Value';
+  String get questionPointsLabel => 'قيمة الدرجة';
 
   @override
   String optionTextLabel(String letter) {
-    return 'Option $letter';
+    return 'الخيار $letter';
   }
 
   @override
-  String get markAsCorrectOption => 'Mark as Correct Answer';
+  String get markAsCorrectOption => 'تحديد كإجابة صحيحة';
 
   @override
   String get atLeastOneCorrectWarning =>
-      'Each question must have at least one correct answer option.';
+      'يجب أن يحتوي كل سؤال على إجابة صحيحة واحدة على الأقل.';
 
   @override
-  String get examCreatedSuccess => 'Exam created and scheduled successfully';
+  String get examCreatedSuccess => 'تم إنشاء الامتحان وجدولته بنجاح';
 
   @override
-  String get studentExamsTitle => 'Standardized Tests & Quizzes';
+  String get studentExamsTitle => 'الاختبارات والامتحانات المعيارية';
 
   @override
-  String get availableExamsTitle => 'Available Exams';
+  String get availableExamsTitle => 'الامتحانات المتاحة';
 
   @override
-  String get completedExamsTitle => 'Completed Exams';
+  String get completedExamsTitle => 'الامتحانات المكتملة';
 
   @override
-  String get startExamAction => 'Take Exam';
+  String get startExamAction => 'بدء الامتحان';
 
   @override
-  String get examIntroTitle => 'Exam Overview & Guidelines';
+  String get examIntroTitle => 'نظرة عامة وإرشادات الامتحان';
 
   @override
   String get examImmutabilityWarning =>
-      'Once an exam session is submitted, responses become immutable and cannot be re-taken.';
+      'فور تسليم جلسة الامتحان، تصبح الإجابات نهائية ومجمدة ولا يمكن إعادة الامتحان.';
 
   @override
   String examDurationInfo(int duration) {
-    return 'Total Time Limit: $duration minutes';
+    return 'الوقت المحدد: $duration دقيقة';
   }
 
   @override
   String examTotalQuestionsInfo(int count) {
-    return 'Total Questions: $count';
+    return 'إجمالي عدد الأسئلة: $count';
   }
 
   @override
-  String get beginExamButton => 'Begin Exam Session';
+  String get beginExamButton => 'بدء جلسة الامتحان';
 
   @override
-  String get examTakingTitle => 'Active Exam Session';
+  String get examTakingTitle => 'جلسة الامتحان النشطة';
 
   @override
-  String get timeRemainingLabel => 'Time Left';
+  String get timeRemainingLabel => 'الوقت المتبقي';
 
   @override
   String questionProgressLabel(int current, int total) {
-    return 'Question $current of $total';
+    return 'السؤال $current من $total';
   }
 
   @override
-  String get previousQuestionAction => 'Previous';
+  String get previousQuestionAction => 'السابق';
 
   @override
-  String get nextQuestionAction => 'Next';
+  String get nextQuestionAction => 'التالي';
 
   @override
-  String get flagQuestionAction => 'Flag for Review';
+  String get flagQuestionAction => 'تعليم السؤال للمراجعة';
 
   @override
-  String get unflagQuestionAction => 'Remove Flag';
+  String get unflagQuestionAction => 'إلغاء التعليم';
 
   @override
-  String get reviewSubmitAction => 'Submit Exam';
+  String get reviewSubmitAction => 'تسليم الامتحان';
 
   @override
-  String get submitExamDialogTitle => 'Submit Exam Final Responses';
+  String get submitExamDialogTitle => 'تسليم الإجابات النهائية للامتحان';
 
   @override
   String get submitExamDialogBody =>
-      'Are you sure you want to finish and submit your exam? All responses will be graded atomically.';
+      'هل أنت متأكد من إنهاء وتسليم امتحانك؟ سيتم تصحيح جميع إجاباتك فورياً وبشكل نهائي.';
 
   @override
-  String get submittingExam => 'Submitting exam...';
+  String get submittingExam => 'جارٍ تسليم الامتحان...';
 
   @override
-  String get examSubmittedSuccess => 'Exam submitted and graded successfully!';
+  String get examSubmittedSuccess => 'تم تسليم الامتحان وتصحيحه بنجاح!';
 
   @override
   String get examResultsTitle => 'نتائج الاختبارات والامتحانات (P-05)';
 
   @override
-  String get examScoreLabel => 'Score Achieved';
+  String get examScoreLabel => 'الدرجة المحققة';
 
   @override
-  String get examPercentageLabel => 'Percentage';
+  String get examPercentageLabel => 'النسبة المئوية';
 
   @override
-  String get examPassedStatus => 'PASSED';
+  String get examPassedStatus => 'ناجح';
 
   @override
-  String get examFailedStatus => 'NEEDS IMPROVEMENT';
+  String get examFailedStatus => 'يحتاج إلى تحسين';
 
   @override
-  String get backToExamsAction => 'Return to Exams';
+  String get backToExamsAction => 'العودة لقائمة الامتحانات';
 
   @override
-  String get satToolsTitle => 'SAT Mathematics Reference Tools';
+  String get satToolsTitle => 'أدوات ومراجع رياضيات SAT';
 
   @override
-  String get satDesmosCalculator => 'Desmos Scientific Calculator';
+  String get satDesmosCalculator => 'آلة ديسموس الحاسبة العلمية (Desmos)';
 
   @override
-  String get satReferenceSheet => 'SAT Math Reference Formulas';
+  String get satReferenceSheet => 'ورقة القوانين والمراجع الرياضية لـ SAT';
 
   @override
   String get satFormulaSheet =>
-      'Area, Volume & Special Right Triangles (30-60-90 & 45-45-90)';
+      'المساحة والحجم والمثلثات الخاصة (30-60-90 و 45-45-90)';
 
   @override
-  String get satCountdownTimer => 'Timer Running';
+  String get satCountdownTimer => 'المؤقت يعمل';
 
   @override
   String get attendanceTitle => 'حضور المحاضرات';
 
   @override
-  String get selectDateLabel => 'Select Date';
+  String get selectDateLabel => 'اختر التاريخ';
 
   @override
-  String get markAllPresentAction => 'Mark All Present';
+  String get markAllPresentAction => 'تحضير الكل حاضر';
 
   @override
-  String get saveAttendanceAction => 'Save Attendance Record';
+  String get saveAttendanceAction => 'حفظ كشف الحضور';
 
   @override
-  String get attendanceSavedSuccess => 'Attendance records saved successfully';
+  String get attendanceSavedSuccess => 'تم تحديث سجل المتابعة بنجاح';
 
   @override
   String get statusPresent => 'حاضر';
@@ -1037,81 +1035,81 @@ class AppLocalizationsAr extends AppLocalizations {
   String get statusExcused => 'عذر';
 
   @override
-  String get attendanceSummaryTitle => 'Attendance Summary';
+  String get attendanceSummaryTitle => 'ملخص الحضور';
 
   @override
   String presentCountLabel(int count) {
-    return '$count Present';
+    return '$count حاضر';
   }
 
   @override
   String absentCountLabel(int count) {
-    return '$count Absent';
+    return '$count غائب';
   }
 
   @override
-  String get studentAttendanceTitle => 'My Attendance Record';
+  String get studentAttendanceTitle => 'سجل حضوري';
 
   @override
-  String get studentAttendanceHistory => 'Recorded Sessions History';
+  String get studentAttendanceHistory => 'سجل الجلسات المسجلة';
 
   @override
-  String get videoPlayerTitle => 'Lecture Video Player';
+  String get videoPlayerTitle => 'مشغل الفيديو التعليمي';
 
   @override
-  String get videoUploadTitle => 'Upload Lecture Video';
+  String get videoUploadTitle => 'رفع محاضرة فيديو';
 
   @override
-  String get videoTitleLabel => 'Video Title';
+  String get videoTitleLabel => 'عنوان الفيديو';
 
   @override
-  String get selectVideoFileAction => 'Choose Video File (MP4, MOV)';
+  String get selectVideoFileAction => 'اختر ملف الفيديو (MP4, MOV)';
 
   @override
-  String get uploadingVideoNotice => 'Uploading video to Bunny Stream...';
+  String get uploadingVideoNotice => 'جارٍ رفع الفيديو إلى Bunny Stream...';
 
   @override
   String get processingVideoNotice =>
-      'Transcoding & encoding multi-resolution stream...';
+      'جارٍ معالجة الفيديو وتجهيز البث التكيفي متعدد الجودات...';
 
   @override
-  String get videoReadyStatus => 'Ready for Streaming';
+  String get videoReadyStatus => 'جاهز للبث والمشاهدة';
 
   @override
-  String get videoFailedStatus => 'Video Processing Failed';
+  String get videoFailedStatus => 'فشلت معالجة الفيديو';
 
   @override
-  String get playbackSpeedLabel => 'Speed';
+  String get playbackSpeedLabel => 'السرعة';
 
   @override
-  String get qualityAuto => 'Auto (HLS adaptive)';
+  String get qualityAuto => 'تلقائي (HLS تكيفي)';
 
   @override
-  String get bufferingNotice => 'Buffering high quality video stream...';
+  String get bufferingNotice => 'جارٍ تحميل البث بجودة عالية...';
 
   @override
   String resumeVideoPrompt(String timestamp) {
-    return 'Resume from previous position at $timestamp?';
+    return 'هل ترغب في المتابعة من النقطة السابقة عند $timestamp؟';
   }
 
   @override
-  String get resumeVideoAction => 'Resume';
+  String get resumeVideoAction => 'متابعة';
 
   @override
-  String get startOverAction => 'Start from Beginning';
+  String get startOverAction => 'البدء من البداية';
 
   @override
   String get notificationsCenterTitle => 'مركز الإشعارات';
 
   @override
-  String get markAllReadAction => 'Mark All as Read';
+  String get markAllReadAction => 'تحديد الكل كمقروء';
 
   @override
-  String get noNotificationsTitle => 'All caught up!';
+  String get noNotificationsTitle => 'أنت على اطلاع بكل جديد!';
 
   @override
   String get noNotificationsBody =>
-      'You have no unread notifications or announcements at this time.';
+      'ليس لديك أي إشعارات أو تعميمات غير مقروءة في الوقت الحالي.';
 
   @override
   String get sendAnnouncementTitle => 'إرسال إعلان وتنبيه';
@@ -1126,19 +1124,19 @@ class AppLocalizationsAr extends AppLocalizations {
   String get targetAudienceLabel => 'الفئة المستهدفة';
 
   @override
-  String get audienceAllStudents => 'All Enrolled Students';
+  String get audienceAllStudents => 'جميع الطلاب المسجلين';
 
   @override
-  String get audienceSpecificGroup => 'Specific Study Group';
+  String get audienceSpecificGroup => 'مجموعة دراسية محددة';
 
   @override
-  String get sendAnnouncementAction => 'Broadcast Message';
+  String get sendAnnouncementAction => 'بث الرسالة';
 
   @override
   String get announcementSentSuccess => 'تم إرسال الإعلان بنجاح';
 
   @override
-  String get newNotificationToast => 'New notification received';
+  String get newNotificationToast => 'وصلك إشعار جديد';
 
   @override
   String get customTrack => 'مخصص';
@@ -1147,69 +1145,69 @@ class AppLocalizationsAr extends AppLocalizations {
   String get customTrackHint => 'مثال: AP Calculus, الأولمبياد...';
 
   @override
-  String get targetAcademicTrack => 'Target Academic Track:';
+  String get targetAcademicTrack => 'المسار الأكاديمي المستهدف:';
 
   @override
-  String get studentRegistrationBadge => 'Enroll in New Academic Cohort';
+  String get studentRegistrationBadge => 'التسجيل في دفعة أكاديمية جديدة';
 
   @override
-  String get fullNameInputHint => 'Full Name (as on student ID)';
+  String get fullNameInputHint => 'الاسم الكامل (كما هو في البطاقة/الهوية)';
 
   @override
-  String get pleaseEnterFullName => 'Please enter student name';
+  String get pleaseEnterFullName => 'يرجى إدخال اسم الطالب';
 
   @override
   String get pleaseEnterValidFullName =>
-      'Please enter at least first and last name';
+      'يرجى إدخال الاسم الأول واسم العائلة على الأقل';
 
   @override
   String get pleaseEnterValidEmail => 'يرجى إدخال بريد إلكتروني صحيح';
 
   @override
-  String get studentWhatsappPhone => 'Phone Number (Student WhatsApp)';
+  String get studentWhatsappPhone => 'رقم الهاتف (واتساب الطالب)';
 
   @override
   String get pleaseEnterValidPhone =>
-      'Please enter a valid phone number (at least 10 digits)';
+      'يرجى إدخال رقم هاتف صحيح (10 أرقام على الأقل)';
 
   @override
-  String get passwordFieldHint => 'Password (at least 6 characters)';
+  String get passwordFieldHint => 'كلمة المرور (6 خانات على الأقل)';
 
   @override
   String get pleaseEnterPasswordMin =>
-      'Please enter password (at least 6 characters)';
+      'يرجى إدخال كلمة المرور (6 خانات على الأقل)';
 
   @override
-  String get registerAndStartLearning => 'Create Account & Start Learning â†’';
+  String get registerAndStartLearning => 'إنشاء الحساب وبدء التعلم ←';
 
   @override
-  String get alreadyRegisteredPrompt => 'Already registered?';
+  String get alreadyRegisteredPrompt => 'هل سجلت حساباً من قبل؟';
 
   @override
-  String get signInNowLink => 'Sign In Now â†’';
+  String get signInNowLink => 'سجل دخولك الآن ←';
 
   @override
   String get registrationApprovalNotice =>
-      'Your application will be reviewed and approved by the teacher upon submission';
+      'سيتم فحص طلبك واعتماده بواسطة المدرس فور إرساله';
 
   @override
-  String get newStudentCohortPrompt => 'New student to the cohort?';
+  String get newStudentCohortPrompt => 'طالب جديد في الدفعة؟';
 
   @override
-  String get registerNewStudentLink => 'Register as New Student Now â†’';
+  String get registerNewStudentLink => 'سجل كطالب جديد الآن ←';
 
   @override
   String get secureAcademicEncrypted =>
-      'Encrypted & secure academic platform for cohort students';
+      'منصة أكاديمية مؤمنة ومشفرة لطلاب الدفعة';
 
   @override
-  String get backToHome => 'Return to Home';
+  String get backToHome => 'العودة للرئيسية';
 
   @override
-  String get backToLogin => 'Return to Sign In';
+  String get backToLogin => 'العودة لتسجيل الدخول';
 
   @override
-  String get dearStudent => 'Dear Student';
+  String get dearStudent => 'عزيزي الطالب';
 
   @override
   String studentPendingGreeting(
@@ -1218,7 +1216,7 @@ class AppLocalizationsAr extends AppLocalizations {
     String teacherName,
     String track,
   ) {
-    return 'Hello $name, your registration details have been received at $brandName.\nYour account is pending review by $teacherName to assign you to your designated study group ($track).';
+    return 'أهلاً بك $name، لقد تم استلام بيانات تسجيلك في منصة $brandName.\nحسابك قيد المراجعة والاعتماد بواسطة $teacherName لتعيينك في مجموعتك المحددة ($track).';
   }
 
   @override
@@ -1237,13 +1235,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get centerNameRequiredError => 'يرجى إدخال اسم المركز التعليمي';
 
   @override
-  String get centerEmailOptional => 'Center Email (Optional)';
+  String get centerEmailOptional => 'البريد الإلكتروني للمركز (اختياري)';
 
   @override
-  String get centerPhoneOptional => 'Center Phone Number (Optional)';
+  String get centerPhoneOptional => 'رقم هاتف المركز (اختياري)';
 
   @override
-  String get centerLogoUrlOptional => 'Logo URL (Optional)';
+  String get centerLogoUrlOptional => 'رابط شعار المركز (اختياري)';
 
   @override
   String get leadTeacherDataHeader => 'بيانات حساب المعلم الأول';
@@ -1265,10 +1263,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get leadTeacherPasswordRequiredError =>
-      'Password must be at least 6 characters';
+      'كلمة المرور يجب أن تكون 6 أحرف على الأقل';
 
   @override
-  String get leadTeacherPhoneOptional => 'Teacher Phone (Optional)';
+  String get leadTeacherPhoneOptional => 'هاتف المدرس (اختياري)';
 
   @override
   String get createAndProvisionCenter => 'إنشاء وتهيئة المركز التعليمي';
@@ -1292,144 +1290,144 @@ class AppLocalizationsAr extends AppLocalizations {
   String get activeAndReadyStatus => 'نشط وجاهز للعمل';
 
   @override
-  String get radarNoDelays => 'Great! No delays currently in this item ðŸŽ‰';
+  String get radarNoDelays => 'رائع! لا يوجد أي تأخير حالياً في هذا البند 🎉';
 
   @override
   String get radarInstantTitle => 'رادار المتابعة والتدخل الفوري';
 
   @override
   String get radarInstantSubtitle =>
-      'Real-time tracking of lecture views, drill submissions, and exam scores';
+      'متابعة فورية لمشاهدات المحاضرات، تسليمات التدريبات، ودرجات الامتحانات';
 
   @override
   String get radarLectureViewsTitle => 'مشاهدات الحصة';
 
   @override
-  String get radarLectureViewsSubtitle => 'Students incomplete';
+  String get radarLectureViewsSubtitle => 'طلاب لم يكملوا المشاهدة';
 
   @override
-  String get radarLectureModalTitle => 'Recent Lecture Watch Time';
+  String get radarLectureModalTitle => 'متابعة وقت مشاهدة المحاضرة الأخيرة';
 
   @override
   String get radarLectureModalSubtitle =>
-      'Students who have watched less than 50% of recorded session';
+      'الطلاب الذين شاهدوا أقل من 50% من المحاضرة المسجلة';
 
   @override
-  String get radarSendWatchAlert => 'Send Watch Reminder to Students â†’';
+  String get radarSendWatchAlert => 'إرسال تنبيه بالمشاهدة للطلاب ←';
 
   @override
   String get radarDrillSubmissionsTitle => 'تسليم الـ Drill';
 
   @override
-  String get radarDrillSubmissionsSubtitle => 'Overdue homework';
+  String get radarDrillSubmissionsSubtitle => 'واجبات متأخرة';
 
   @override
-  String get radarDrillModalTitle => 'Follow up Overdue Drill Homework';
+  String get radarDrillModalTitle => 'متابعة تسليم واجبات التدريبات المتأخرة';
 
   @override
   String get radarDrillModalSubtitle =>
-      'Students who have not uploaded required screenshot or homework file';
+      'الطلاب الذين لم يرفعوا لقطة الشاشة أو ملف الواجب المطلوب';
 
   @override
-  String get radarOpenHomeworkList => 'Open Homework & Submissions â†’';
+  String get radarOpenHomeworkList => 'فتح قائمة الواجبات والتسليمات ←';
 
   @override
   String get radarScoreWarningTitle => 'إنذار السكور';
 
   @override
-  String get radarScoreWarningSubtitle => 'Under 600 in exam';
+  String get radarScoreWarningSubtitle => 'أقل من 600 في الامتحان';
 
   @override
-  String get radarScoreModalTitle => 'Academic Score Alert';
+  String get radarScoreModalTitle => 'إنذار الدرجات الأكاديمية';
 
   @override
   String get radarScoreModalSubtitle =>
-      'Students who scored low on last quiz requiring extra support';
+      'الطلاب الحاصلون على درجات منخفضة في آخر كويز ويحتاجون دعماً إضافياً';
 
   @override
-  String get radarReviewPerformance => 'Review Student Performance & Exams â†’';
+  String get radarReviewPerformance => 'مراجعة أداء الطلاب والامتحانات ←';
 
   @override
   String get radarPendingJoinTitle => 'طلبات الانضمام';
 
   @override
-  String get radarPendingStudentsCount => 'Students pending approval';
+  String get radarPendingStudentsCount => 'طلاب بانتظار الاعتماد';
 
   @override
-  String get radarNoPendingRequests => 'No pending requests';
+  String get radarNoPendingRequests => 'لا توجد طلبات معلقة';
 
   @override
-  String get radarUrgentAlert => 'Urgent Alert';
+  String get radarUrgentAlert => 'تنبيه عاجل';
 
   @override
   String get testPrepCohortsTitle => 'المجموعات التدريبية المعتمدة';
 
   @override
   String get testPrepCohortsSubtitle =>
-      'Distribution of students in target 5-student cohorts for SAT / EST / ACT';
+      'توزيع الطلاب في مجموعات مستهدفة من 5 طلاب لاختبارات SAT / EST / ACT';
 
   @override
-  String get academicFocusLabel => 'Academic Focus: ';
+  String get academicFocusLabel => 'التركيز الأكاديمي: ';
 
   @override
-  String get averageScoreLabel => 'Average Score: ';
+  String get averageScoreLabel => 'متوسط الدرجات: ';
 
   @override
-  String get chipHandoutsPdfs => 'Handouts & PDFs';
+  String get chipHandoutsPdfs => 'المذكرات والـ PDFs';
 
   @override
-  String get chipDrillHomework => 'Drill Homework';
+  String get chipDrillHomework => 'واجبات التدريبات';
 
   @override
-  String get chipExamsSimulations => 'Exams & Simulations';
+  String get chipExamsSimulations => 'الامتحانات والمحاكاة';
 
   @override
-  String get chipRecordAttendance => 'Record Attendance';
+  String get chipRecordAttendance => 'تسجيل الحضور';
 
   @override
-  String get libraryAndAcademicContent => 'Library & Academic Content';
+  String get libraryAndAcademicContent => 'المكتبة والمحتوى الأكاديمي';
 
   @override
   String get chooseGroupForLibrary =>
-      'Select study group to view and manage its materials and files:';
+      'اختر المجموعة لعرض وإدارة مذكراتها وملفاتها التعليمية:';
 
   @override
   String get assignmentsAndSubmissions => 'الواجبات والتسليمات';
 
   @override
   String get chooseGroupForAssignments =>
-      'Select study group to view assignments and grade students:';
+      'اختر المجموعة لعرض واجباتها وتصحيح حلول الطلاب:';
 
   @override
-  String get questionBankAndExams => 'Question Bank & Exams';
+  String get questionBankAndExams => 'بنك الأسئلة والامتحانات';
 
   @override
   String get chooseGroupForExams =>
-      'Select study group to create and manage interactive exams:';
+      'اختر المجموعة لإنشاء وإدارة الامتحانات التفاعلية:';
 
   @override
-  String get selectGroupModalTitle => 'Select Group';
+  String get selectGroupModalTitle => 'اختيار المجموعة';
 
   @override
-  String get selectGroupModalSubtitle => 'Choose study group to proceed:';
+  String get selectGroupModalSubtitle => 'حدد المجموعة الدراسية للمتابعة:';
 
   @override
-  String get noGroupsCreatedYet => 'No study groups created yet.';
+  String get noGroupsCreatedYet => 'لم يتم إنشاء أي مجموعة دراسية بعد.';
 
   @override
   String get mustCreateGroupFirst =>
-      'A study group must be created first before adding exams and content.';
+      'يجب إنشاء مجموعة دراسية أولاً قبل إضافة الامتحانات والمحتوى.';
 
   @override
-  String get createNewGroupNow => 'Create New Group Now';
+  String get createNewGroupNow => 'إنشاء مجموعة جديدة الآن';
 
   @override
   String groupLevelLabel(String level) {
-    return 'Level: $level';
+    return 'المستوى: $level';
   }
 
   @override
-  String get enterAction => 'Enter â†’';
+  String get enterAction => 'دخول ←';
 
   @override
   String get confirmLogoutTeacher =>
@@ -1437,7 +1435,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String teacherDashboardHeader(String brandName) {
-    return '$brandName â€¢ Teacher Operations Hub';
+    return '$brandName • مركز عمليات المدرس';
   }
 
   @override
@@ -1455,47 +1453,47 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String welcomeTeacherTitle(String brandName, String teacherName) {
-    return 'Welcome to $brandName • $teacherName';
+    return 'مرحباً بك في $brandName • $teacherName';
   }
 
   @override
   String get welcomeTeacherSubtitle =>
-      'Comprehensive tracking for US curriculum students (SAT / EST / ACT), monitoring attendance and lecture views, and analyzing solution speed & accuracy';
+      'متابعة شاملة لطلاب المناهج الأمريكية (SAT / EST / ACT)، رصد الحضور ونسب مشاهدة المحاضرات، وتحليل دقة وسرعة الحل';
 
   @override
-  String get createNewGroup => 'Create New Group';
+  String get createNewGroup => 'إنشاء مجموعة جديدة';
 
   @override
-  String get sendAnnouncementToStudents => 'Send Announcement to Students';
+  String get sendAnnouncementToStudents => 'إرسال تعميم للطلاب';
 
   @override
-  String get groupsAndStudentsOverview => 'Groups & Students Overview';
+  String get groupsAndStudentsOverview => 'نظرة عامة على المجموعات والطلاب';
 
   @override
   String pendingLabel(int count) {
-    return '+$count Pending';
+    return '+$count معلق';
   }
 
   @override
-  String get allActive => '100% Active';
+  String get allActive => '100% نشط';
 
   @override
   String get totalStudents => 'إجمالي الطلاب';
 
   @override
-  String get viewStudentsAndApprovals => 'View Student Lists & Approvals â†’';
+  String get viewStudentsAndApprovals => 'عرض قوائم الطلاب والاعتمادات ←';
 
   @override
   String get activeGroups => 'المجموعات النشطة';
 
   @override
-  String get clickToManageAndControl => 'Click to Manage & Control â†’';
+  String get clickToManageAndControl => 'اضغط للإدارة والتحكم ←';
 
   @override
   String get excellentStatus => 'ممتاز';
 
   @override
-  String get cumulativeAttendanceRate => 'Cumulative Attendance Rate';
+  String get cumulativeAttendanceRate => 'نسبة الحضور التراكمية';
 
   @override
   String newNotificationsCount(int count) {
@@ -1506,51 +1504,49 @@ class AppLocalizationsAr extends AppLocalizations {
   String get notificationsCenter => 'مركز الإشعارات';
 
   @override
-  String get studentAnnouncementsAndUpdates =>
-      'Student Announcements & Updates â†’';
+  String get studentAnnouncementsAndUpdates => 'تعميمات وتحديثات الطلاب ←';
 
   @override
-  String get academicServicesAndSections =>
-      'Academic Platform Services & Sections';
+  String get academicServicesAndSections => 'خدمات وأقسام المنصة الأكاديمية';
 
   @override
   String get directAccessAllTools =>
-      'Direct instant access to all administrative and academic tools for the instructor';
+      'وصول مباشر وفوري لكافة الأدوات الإدارية والأكاديمية للمدرس';
 
   @override
   String get manageStudentsAndApprovals => 'إدارة الطلاب وطلبات الاعتماد';
 
   @override
   String get manageStudentsDesc =>
-      'Review registration requests, approve/reject students, and academic profiles';
+      'مراجعة طلبات التسجيل، اعتماد/رفض الطلاب، وملفات الطلاب الأكاديمية';
 
   @override
-  String get manageStudyGroups => 'Manage Study Groups (SAT / EST)';
+  String get manageStudyGroups => 'إدارة المجموعات الدراسية (SAT / EST)';
 
   @override
   String get manageGroupsDesc =>
-      'Create new groups, assign tracks, and configure previous content policy';
+      'إنشاء مجموعات جديدة، تخصيص المسارات، وضبط سياسة المحتوى السابق';
 
   @override
   String get recordDailyAttendance => 'رصد الحضور والغياب اليومي';
 
   @override
   String get recordAttendanceDesc =>
-      'Record student attendance/absence in groups and track commitment statistics';
+      'تسجيل حضور وغياب الطلاب في المجموعات ومتابعة إحصائيات الالتزام';
 
   @override
   String get sendNoticeOrBroadcast => 'إرسال تنبيه أو إعلان عام';
 
   @override
   String get sendNoticeDesc =>
-      'Publish an announcement to a specific group or all students with instant push notification';
+      'نشر إشعار لمجموعة محددة أو للجميع مع تنبيه فوري';
 
   @override
-  String get interactiveExamsBank => 'Question Bank & Interactive Exams';
+  String get interactiveExamsBank => 'بنك الأسئلة والامتحانات التفاعلية';
 
   @override
   String get interactiveExamsDesc =>
-      'Create and grade online exams, monitor student scores and attempts';
+      'إنشاء وتصحيح الامتحانات أونلاين ومتابعة درجات ومحاولات الطلاب';
 
   @override
   String get confirmLogoutStudent =>
@@ -1697,37 +1693,37 @@ class AppLocalizationsAr extends AppLocalizations {
   String get uploadHomeworkSolutionNow => 'رفع حل الواجب الآن ←';
 
   @override
-  String get currentlyActiveStudyGroups => 'Currently Active Study Groups';
+  String get currentlyActiveStudyGroups => 'المجموعات الدراسية النشطة حالياً';
 
   @override
-  String get addGroup => 'Add Group';
+  String get addGroup => 'إضافة مجموعة';
 
   @override
-  String get chipContentAndHandouts => 'Content & Handouts';
+  String get chipContentAndHandouts => 'المحتوى والمذكرات';
 
   @override
-  String get groupDetailsAction => 'Group Details â†’';
+  String get groupDetailsAction => 'تفاصيل المجموعة ←';
 
   @override
   String get uploadPdfHandoutsDesc =>
-      'Upload PDFs, lecture notes, and organize academic content per group';
+      'رفع ملفات PDF، مذكرات الشرح، وتنظيم المحتوى الأكاديمي لكل مجموعة';
 
   @override
-  String get selectGroupBadge => 'Select Group';
+  String get selectGroupBadge => 'اختر المجموعة';
 
   @override
-  String get assignmentsAndGradingTitle => 'Homework, Submissions & Grading';
+  String get assignmentsAndGradingTitle => 'الواجبات والتسليمات والتصحيح';
 
   @override
   String get assignmentsAndGradingDesc =>
-      'Assign weekly homework, review solutions, and grade submissions';
+      'تعيين الواجبات الأسبوعية، مراجعة الحلول، وتقييم تسليمات الطلاب';
 
   @override
-  String get academyOnboardingWizardTitle => 'Academy Setup & Tracks Wizard';
+  String get academyOnboardingWizardTitle => 'معالج إعداد الأكاديمية والمسارات';
 
   @override
   String get academyOnboardingWizardDesc =>
-      'Configure instructor and academy profiles, configure American curriculum tracks';
+      'تجهيز بيانات المدرس والأكاديمية، وضبط مسارات المناهج الأمريكية';
 
   @override
   String get assignments => 'الواجبات';
@@ -2723,4 +2719,1249 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get resumeAction => 'استئناف';
+
+  @override
+  String groupContentPrefix(String groupName) {
+    return 'محتوى: $groupName';
+  }
+
+  @override
+  String get groupContentDefault => 'محتوى ومذكرات المجموعة';
+
+  @override
+  String get backToStudentDashboard => 'رجوع للوحة الطالب';
+
+  @override
+  String get refreshContent => 'تحديث المحتوى';
+
+  @override
+  String get searchContentPlaceholder =>
+      'ابحث في المذكرات، الملخصات، أو الفيديوهات...';
+
+  @override
+  String filterAllWithCount(int count) {
+    return 'الكل ($count)';
+  }
+
+  @override
+  String filterPdfsWithCount(int count) {
+    return 'المذكرات ($count)';
+  }
+
+  @override
+  String filterImagesWithCount(int count) {
+    return 'الصور ($count)';
+  }
+
+  @override
+  String filterVideosWithCount(int count) {
+    return 'الفيديوهات ($count)';
+  }
+
+  @override
+  String get noContentPublishedYet =>
+      'لم يتم نشر أي محتوى دراسي في هذه المجموعة بعد\nستظهر المذكرات والدروس هنا فور نشر المعلم لها.';
+
+  @override
+  String noMatchingContentFound(String query) {
+    return 'لا توجد مواد دراسية مطابقة لبحثك \"$query\"';
+  }
+
+  @override
+  String get contentCreatedToast => 'تم إنشاء ونشر المحتوى التعليمي بنجاح';
+
+  @override
+  String get contentUpdatedToast => 'تم تحديث المحتوى التعليمي بنجاح';
+
+  @override
+  String get videoProcessingStartedToast =>
+      'تم بدء معالجة ورفع فيديو المحاضرة بنجاح';
+
+  @override
+  String get backTooltip => 'رجوع';
+
+  @override
+  String get teacherContentLibraryTitle => 'مكتبة المحتوى التعليمي';
+
+  @override
+  String get refreshTooltip => 'تحديث';
+
+  @override
+  String get totalMaterials => 'إجمالي المواد';
+
+  @override
+  String get publishedToStudents => 'منشور للطلاب';
+
+  @override
+  String get draftsInProgress => 'مسودات';
+
+  @override
+  String get searchContentTeacherHint => 'البحث في مذكرات ومستندات المجموعة...';
+
+  @override
+  String filterPublishedWithCount(int count) {
+    return 'المنشور ($count)';
+  }
+
+  @override
+  String filterDraftsWithCount(int count) {
+    return 'المسودات ($count)';
+  }
+
+  @override
+  String filterArchivedWithCount(int count) {
+    return 'المؤرشف ($count)';
+  }
+
+  @override
+  String get emptyContentCategory =>
+      'لا يوجد محتوى تعليمي في هذا التصنيف حتى الآن';
+
+  @override
+  String get addFirstContent => 'إضافة أول محتوى';
+
+  @override
+  String get noMaterialsMatchFilter =>
+      'لا توجد مذكرات أو ملفات تطابق معايير البحث المحددة';
+
+  @override
+  String get deleteConfirmTitle => 'تأكيد الحذف';
+
+  @override
+  String deleteItemConfirmMessage(String title) {
+    return 'هل أنت متأكد من رغبتك في حذف \"$title\" نهائياً؟';
+  }
+
+  @override
+  String get deleteAction => 'حذف';
+
+  @override
+  String get editContentDialogTitle => 'تعديل المحتوى التعليمي';
+
+  @override
+  String get newContentDialogTitle => 'إضافة محتوى تعليمي جديد';
+
+  @override
+  String get contentTitleInputLabel => 'عنوان المحتوى التعليمي *';
+
+  @override
+  String get contentTitleInputHint =>
+      'مثال: ورقة قوانين الهندسة وحساب المثلثات';
+
+  @override
+  String get contentTitleRequired => 'يرجى إدخال عنوان المحتوى';
+
+  @override
+  String get contentDescInputLabel => 'وصف أو تعليمات للطلاب (اختياري)';
+
+  @override
+  String get contentDescInputHint =>
+      'أبرز النقاط، إرشادات المذاكرة، أو تفاصيل المرفق...';
+
+  @override
+  String get materialTypeLabel => 'نوع المحتوى التعليمي:';
+
+  @override
+  String get publicationStatusLabel => 'حالة النشر:';
+
+  @override
+  String get draftPrivateNotice => 'مسودة خاصة (مخفي عن الطلاب)';
+
+  @override
+  String get publishImmediateNotice => 'نشر فوري للطلاب المصرح لهم';
+
+  @override
+  String get attachMaterialFile => 'إرفاق ملف تعليمي (PDF / صورة / مستند)';
+
+  @override
+  String get attachedFileNameLabel => 'اسم الملف المرفق *';
+
+  @override
+  String get attachedFileNameHint => 'مثال: Calculus_Formulas_Sheet.pdf';
+
+  @override
+  String get fileNameRequired => 'يرجى إدخال أو اختيار اسم الملف';
+
+  @override
+  String get browseFileAction => 'استعراض';
+
+  @override
+  String get saveChanges => 'حفظ التعديلات';
+
+  @override
+  String get createAndSave => 'إنشاء وحفظ';
+
+  @override
+  String fileSizeLabel(String size) {
+    return 'حجم الملف: $size';
+  }
+
+  @override
+  String fileTypeLabel(String type) {
+    return 'النوع: $type';
+  }
+
+  @override
+  String get preparingSecureUrl => 'جاري تجهيز الرابط الآمن للملف...';
+
+  @override
+  String get secureUrlErrorFallback =>
+      'تعذر توليد رابط الوصول الآمن في الوقت الحالي';
+
+  @override
+  String get secureUrlGenericError => 'حدث خطأ أثناء تجهيز الرابط الآمن';
+
+  @override
+  String get secureUrlCopied => 'تم نسخ الرابط الآمن للحافظة بنجاح';
+
+  @override
+  String get copySecureUrlAction => 'نسخ الرابط الآمن';
+
+  @override
+  String get downloadOrOpenFile => 'تنزيل / فتح الملف';
+
+  @override
+  String get contentSecurityDisclaimer =>
+      'المحتوى مشفر ومخصص للطلاب المصرح لهم فقط. تنتهي صلاحية الروابط خلال 60 دقيقة لأسباب أمنية.';
+
+  @override
+  String get closeTooltip => 'إغلاق';
+
+  @override
+  String publishedDatePrefix(String date) {
+    return 'تاريخ النشر: $date';
+  }
+
+  @override
+  String createdDatePrefix(String date) {
+    return 'تاريخ الإنشاء: $date';
+  }
+
+  @override
+  String get uploadVideoAction => 'رفع فيديو';
+
+  @override
+  String get publishedTooltip => 'منشور (انقر لتحويله لمسودة)';
+
+  @override
+  String get draftTooltip => 'مسودة (انقر للنشر)';
+
+  @override
+  String get uploadUpdateLectureVideo => 'رفع / تحديث فيديو المحاضرة';
+
+  @override
+  String get downloadOrOpenAction => 'تنزيل / فتح الملف';
+
+  @override
+  String get editMetadataAction => 'تعديل البيانات';
+
+  @override
+  String get convertToDraft => 'تحويل إلى مسودة';
+
+  @override
+  String get publishToStudents => 'نشر للطلاب';
+
+  @override
+  String get unarchiveMaterial => 'إلغاء الأرشفة';
+
+  @override
+  String get archiveMaterial => 'أرشفة المحتوى';
+
+  @override
+  String get permanentDelete => 'حذف نهائي';
+
+  @override
+  String get previewAndDownloadNote => 'معاينة وتحميل المذكرة';
+
+  @override
+  String get contentTypeImage => 'رسم بياني / صورة';
+
+  @override
+  String get contentTypeAssignment => 'واجب منزلي';
+
+  @override
+  String get contentTypeExam => 'اختبار / تدريب';
+
+  @override
+  String get statusArchived => 'مؤرشف';
+
+  @override
+  String get loadingContent => 'جاري تحميل المحتوى التعليمي...';
+
+  @override
+  String groupColon(String name) {
+    return 'المجموعة: $name';
+  }
+
+  @override
+  String minutesDuration(int minutes) {
+    return '$minutes دقيقة';
+  }
+
+  @override
+  String scorePoints(int points) {
+    return '$points درجة';
+  }
+
+  @override
+  String passingScoreLabel(int score) {
+    return 'النجاح: $score';
+  }
+
+  @override
+  String examVersionAttempts(int version, int count) {
+    return 'النسخة: v$version | المحاولات: $count';
+  }
+
+  @override
+  String get availableToStart => 'متاح للبدء';
+
+  @override
+  String get inProgressResume => 'قيد الأداء (استئناف)';
+
+  @override
+  String get passed => 'ناجح';
+
+  @override
+  String get notPassed => 'لم يجتز';
+
+  @override
+  String get publishedBadge => 'منشور';
+
+  @override
+  String get draftBadge => 'مسودة';
+
+  @override
+  String get satReferenceSheetTitle =>
+      'ورقة قوانين الـ SAT المعتمدة (Reference Sheet)';
+
+  @override
+  String get satCalculatorTitle => 'حاسبة الـ SAT المدمجة';
+
+  @override
+  String get areaCircumferenceSection =>
+      'مساحات ومحيط الأشكال المستوية (Area & Circumference)';
+
+  @override
+  String get circleArea => 'مساحة الدائرة';
+
+  @override
+  String get circleCircumference => 'محيط الدائرة';
+
+  @override
+  String get rectangleArea => 'مساحة المستطيل';
+
+  @override
+  String get triangleArea => 'مساحة المثلث';
+
+  @override
+  String get volumesSection => 'الحجوم ثلاثية الأبعاد (Volumes)';
+
+  @override
+  String get rectangularPrismVolume => 'حجم متوازي المستطيلات';
+
+  @override
+  String get cylinderVolume => 'حجم الأسطوانة القائمة';
+
+  @override
+  String get sphereVolume => 'حجم الكرة';
+
+  @override
+  String get coneVolume => 'حجم المخروط القائم';
+
+  @override
+  String get pyramidVolume => 'حجم الهرم القائم';
+
+  @override
+  String get rightTrianglesSection =>
+      'المثلثات القائمة والخاصة (Right Triangles)';
+
+  @override
+  String get pythagoreanTheorem => 'نظرية فيثاغورس';
+
+  @override
+  String get triangle306090 => 'مثلث 30° - 60° - 90°';
+
+  @override
+  String get triangle306090Sides => 'الأضلاع: x, x√3, 2x';
+
+  @override
+  String get triangle454590 => 'مثلث 45° - 45° - 90°';
+
+  @override
+  String get triangle454590Sides => 'الأضلاع: s, s, s√2';
+
+  @override
+  String get degreesRadiansSection => 'الدرجات والراديان (Degrees & Radians)';
+
+  @override
+  String get triangleAnglesSum => 'مجموع زوايا المثلث';
+
+  @override
+  String get fullCircleRadians => 'الدورة الكاملة بالراديان';
+
+  @override
+  String get degreesToRadians => 'التحويل من درجات لراديان';
+
+  @override
+  String get teacherExamsTitle => 'إدارة الامتحانات';
+
+  @override
+  String groupExamsTitle(String groupName) {
+    return 'امتحانات: $groupName';
+  }
+
+  @override
+  String examDetailsVersionFrozen(int version, int count) {
+    return 'النسخة: v$version (مجمدة) • عدد المحاولات: $count';
+  }
+
+  @override
+  String createNewVersionButton(int version) {
+    return 'إنشاء نسخة جديدة v$version';
+  }
+
+  @override
+  String get newVersionCreatedSuccess =>
+      'تم إنشاء مسودة جديدة مع تجميد النسخة السابقة';
+
+  @override
+  String get noAttemptsYet => 'لا توجد محاولات تسليم حتى الآن';
+
+  @override
+  String get noAttemptsYetSubtitle =>
+      'ستظهر هنا درجات ومحاولات الطلاب فور انتهائهم من الامتحان';
+
+  @override
+  String get studentInitialFallback => 'ط';
+
+  @override
+  String get studentFallbackName => 'طالب';
+
+  @override
+  String startedDatePrefix(String date) {
+    return 'بدأ: $date';
+  }
+
+  @override
+  String get noExamsForGroup => 'لا توجد امتحانات مضافة لهذه المجموعة';
+
+  @override
+  String get noExamsForGroupSubtitle =>
+      'ابدأ ببناء أول امتحان رقمي للطلاب مع النسخ المجمدة والتصحيح الآلي';
+
+  @override
+  String get buildFirstExam => 'بناء أول امتحان';
+
+  @override
+  String get buildExamAction => 'بناء امتحان';
+
+  @override
+  String get myExamsTitle => 'امتحاناتي واختباراتي';
+
+  @override
+  String get backToHomeTooltip => 'الرجوع للرئيسية';
+
+  @override
+  String get filterAvailable => 'المتاحة';
+
+  @override
+  String get filterInProgress => 'قيد الأداء';
+
+  @override
+  String get filterCompleted => 'المكتملة';
+
+  @override
+  String get noExamsInFilter => 'لا توجد نتائج في هذا التصنيف';
+
+  @override
+  String get noExamsInFilterSubtitle =>
+      'جرب التبديل لتصنيف آخر لرؤية الامتحانات';
+
+  @override
+  String get noPublishedExams =>
+      'لا توجد امتحانات منشورة لمجموعاتك الدراسية حالياً';
+
+  @override
+  String get examRulesAndGuidelines => 'تعليمات وقواعد الامتحان';
+
+  @override
+  String get maxScoreLabel => 'الدرجة العظمى';
+
+  @override
+  String get passingScoreTitle => 'درجة النجاح';
+
+  @override
+  String get notSpecified => 'غير محددة';
+
+  @override
+  String get retakePolicy => 'إعادة المحاولة';
+
+  @override
+  String get allowedHighestScore => 'مسموحة (أعلى درجة)';
+
+  @override
+  String get notAllowed => 'غير مسموحة';
+
+  @override
+  String get importantInstructionsBeforeStart => 'تعليمات هامة قبل البدء:';
+
+  @override
+  String get ruleTimerStartsImmediately =>
+      'يبدأ احتساب الوقت فور الضغط على زر \"بدء الامتحان\" عبر خوادم المنصة.';
+
+  @override
+  String get ruleAutoSaveAnswers =>
+      'يتم حفظ إجاباتك تلقائياً أثناء التنقل بين الأسئلة تحسباً لأي انقطاع في الاتصال.';
+
+  @override
+  String get ruleAutoSubmitOnTimeout =>
+      'عند انتهاء الوقت سيتم تسليم إجاباتك تلقائياً واحتساب النتيجة فوراً.';
+
+  @override
+  String get ruleDoNotCloseWindow =>
+      'يُرجى عدم إغلاق نافذة الامتحان حتى ظهور رسالة التسليم بنجاح.';
+
+  @override
+  String get resumeCurrentExam => 'استئناف الامتحان الحالي';
+
+  @override
+  String get startExamNow => 'بدء الامتحان الآن';
+
+  @override
+  String examAlreadyCompletedNoRetake(int score, int maxScore) {
+    return 'لقد أنهيت هذا الامتحان مسبقاً بنتيجة: $score/$maxScore ولا يُسمح بالإعادة.';
+  }
+
+  @override
+  String get examCannotBeTaken => 'لا يمكن تقديم هذا الامتحان حالياً.';
+
+  @override
+  String get confirmSubmitExamTitle => 'تأكيد تسليم الامتحان';
+
+  @override
+  String answeredQuestionsCount(int answered, int total) {
+    return 'لقد قمت بالإجابة على $answered من $total سؤال.';
+  }
+
+  @override
+  String unansweredWarning(int count) {
+    return 'تنبيه: هناك $count أسئلة لم تقم بالإجابة عليها بعد!';
+  }
+
+  @override
+  String get confirmSubmitQuestion =>
+      'هل أنت متأكد من رغبتك في إنهاء الامتحان وتسليمه الآن؟';
+
+  @override
+  String get continueSolving => 'متابعة الحل';
+
+  @override
+  String get yesSubmitExam => 'نعم، تسليم الامتحان';
+
+  @override
+  String questionProgress(int current, int total) {
+    return 'السؤال $current من $total';
+  }
+
+  @override
+  String solvedCount(int answered, int total) {
+    return 'تم حل: $answered/$total';
+  }
+
+  @override
+  String get chooseCorrectAnswer => 'اختر الإجابة الصحيحة:';
+
+  @override
+  String get previousQuestion => 'السابق';
+
+  @override
+  String get nextQuestion => 'التالي';
+
+  @override
+  String get submitExamNow => 'تسليم الامتحان الآن';
+
+  @override
+  String get referenceSheetTooltip => 'ورقة القوانين (Reference Sheet)';
+
+  @override
+  String get calculatorTooltip => 'الحاسبة العلمية (Calculator)';
+
+  @override
+  String get examResultTitle => 'نتيجة الامتحان';
+
+  @override
+  String get congratulationsPassed => 'تهانينا! لقد اجتزت الامتحان بنجاح';
+
+  @override
+  String get sorryNotPassed => 'للأسف لم تتجاوز درجة النجاح';
+
+  @override
+  String percentageLabel(String percentage) {
+    return 'النسبة المئوية: $percentage%';
+  }
+
+  @override
+  String requiredPassingScore(int passing, int max) {
+    return 'درجة النجاح المطلوبة: $passing من $max';
+  }
+
+  @override
+  String get examSubmissionDateTitle => 'تاريخ التسليم';
+
+  @override
+  String get attemptStatusLabel => 'حالة المحاولة';
+
+  @override
+  String get retakePolicyLabel => 'سياسة إعادة الامتحان';
+
+  @override
+  String get retakeAllowedBestScore => 'مسموحة (يتم اعتماد أعلى درجة)';
+
+  @override
+  String get backToExamsList => 'العودة لقائمة الامتحانات';
+
+  @override
+  String get createExamTitle => 'بناء امتحان جديد';
+
+  @override
+  String get examGeneralSettings => 'الإعدادات الأساسية للامتحان';
+
+  @override
+  String get examTitleField => 'عنوان الامتحان *';
+
+  @override
+  String get examTitleHint => 'مثال: الاختبار الشامل على النهايات والاتصال';
+
+  @override
+  String get examTitleRequired => 'يرجى إدخال عنوان الامتحان';
+
+  @override
+  String get durationMinutesField => 'المدة (بالدقائق)';
+
+  @override
+  String get positiveNumberRequired => 'رقم موجب';
+
+  @override
+  String get maxScoreField => 'الدرجة العظمى';
+
+  @override
+  String get passingScoreField => 'درجة النجاح (اختياري)';
+
+  @override
+  String get shuffleQuestionsTitle => 'خلط ترتيب الأسئلة عشوائياً لكل طالب';
+
+  @override
+  String get shuffleQuestionsSubtitle => 'يثبّت الترتيب لكل محاولة عند البدء';
+
+  @override
+  String get showResultTitle => 'إظهار النتيجة للطالب فور التسليم';
+
+  @override
+  String get showResultSubtitle =>
+      'عرض الدرجة المحسوبة خادمياً والنسبة المئوية';
+
+  @override
+  String get allowRetakeTitle => 'السماح بإعادة المحاولة (Retake)';
+
+  @override
+  String get allowRetakeSubtitle =>
+      'تعتمد المنصة أعلى درجة محققة في سجل الطالب';
+
+  @override
+  String questionsSectionTitle(int count) {
+    return 'الأسئلة ($count)';
+  }
+
+  @override
+  String questionNumberTitle(int number) {
+    return 'السؤال رقم $number';
+  }
+
+  @override
+  String get questionTextField => 'نص السؤال *';
+
+  @override
+  String get questionTextHint => 'اكتب نص السؤال الرياضي هنا...';
+
+  @override
+  String get questionTypeField => 'نوع السؤال';
+
+  @override
+  String get pointsField => 'الدرجات';
+
+  @override
+  String get optionsSelectCorrectPrompt => 'الخيارات (حدد الخيار الصحيح):';
+
+  @override
+  String optionNumberHint(int number) {
+    return 'الخيار $number';
+  }
+
+  @override
+  String get saveAndPublishExam => 'حفظ ونشر الامتحان (تجميد v1)';
+
+  @override
+  String get examBuiltAndPublishedSuccess =>
+      'تم بناء ونشر الامتحان بنجاح كنسخة مجمدة';
+
+  @override
+  String fillQuestionTextError(int number) {
+    return 'يرجى كتابة نص السؤال رقم $number';
+  }
+
+  @override
+  String selectCorrectOptionError(int number) {
+    return 'يرجى تحديد الإجابة الصحيحة للسؤال رقم $number وتعبئة نصها';
+  }
+
+  @override
+  String get optionTrue => 'صواب';
+
+  @override
+  String get optionFalse => 'خطأ';
+
+  @override
+  String get questionTypeMultipleChoice => 'اختيار من متعدد';
+
+  @override
+  String get questionTypeTrueFalse => 'صواب أو خطأ';
+
+  @override
+  String get attemptStatusInProgress => 'قيد الأداء';
+
+  @override
+  String get attemptStatusSubmitted => 'تم التسليم';
+
+  @override
+  String get attemptStatusExpired => 'انتهى الوقت';
+
+  @override
+  String get examStatusDraft => 'مسودة';
+
+  @override
+  String get examStatusPublished => 'منشور (مجمد)';
+
+  @override
+  String get submissionStatusReviewed => 'تم التصحيح والتقييم';
+
+  @override
+  String get submissionStatusLate => 'تسليم متأخر';
+
+  @override
+  String groupLabelPrefix(String groupName) {
+    return 'المجموعة: $groupName';
+  }
+
+  @override
+  String dueAtPrefix(String date) {
+    return 'التسليم: $date';
+  }
+
+  @override
+  String deadlinePrefix(String date) {
+    return 'الموعد النهائي: $date';
+  }
+
+  @override
+  String get noDueDate => 'بدون موعد نهائي';
+
+  @override
+  String get noDueDateSpecified => 'لا يوجد موعد نهائي محدد';
+
+  @override
+  String maxScorePoints(String score) {
+    return '$score درجة';
+  }
+
+  @override
+  String teacherAssignmentStats(String submissions, String reviewed) {
+    return 'التسليمات: $submissions | تم التصحيح: $reviewed';
+  }
+
+  @override
+  String get pendingReview => 'بانتظار المراجعة';
+
+  @override
+  String get pastDue => 'فات الموعد';
+
+  @override
+  String get actionRequired => 'مطلوب التسليم';
+
+  @override
+  String attemptNumberLabel(String number) {
+    return 'محاولة $number';
+  }
+
+  @override
+  String attachedFilesCount(String count) {
+    return '$count ملفات مرفقة';
+  }
+
+  @override
+  String get myHomeworkTitle => 'واجباتي المدرسية';
+
+  @override
+  String get noAssignmentsInGroup =>
+      'لا توجد واجبات مطلوب تسليمها في مجموعاتك حالياً';
+
+  @override
+  String get filterPendingSubmission => 'مطلوب تسليمها';
+
+  @override
+  String get filterSubmitted => 'تم تسليمها';
+
+  @override
+  String get filterReviewed => 'تم التصحيح';
+
+  @override
+  String get noAssignmentsInFilter => 'لا توجد نتائج في هذا التصنيف';
+
+  @override
+  String get noAssignmentsInFilterSubtitle =>
+      'جرب التبديل لتصنيف آخر لرؤية واجباتك';
+
+  @override
+  String filePickFailed(String error) {
+    return 'تعذر اختيار الملفات: $error';
+  }
+
+  @override
+  String get attachAtLeastOneFile =>
+      'يرجى إرفاق ملف واحد على الأقل قبل التسليم';
+
+  @override
+  String get assignmentDetailsTitle => 'تفاصيل وتسليم الواجب';
+
+  @override
+  String get lateSubmissionAllowedNotice => 'التسليم المتأخر متاح بعد الموعد';
+
+  @override
+  String get instructionsAndProblemsTitle => 'التعليمات والأسئلة المطلوبة';
+
+  @override
+  String get submissionStatusCardTitle => 'حالة تسليمك للواجب';
+
+  @override
+  String gradeScorePrefix(String score, String maxScore) {
+    return 'الدرجة: $score / $maxScore';
+  }
+
+  @override
+  String submittedAtDateAttempt(String date, String attempt) {
+    return 'تاريخ التسليم: $date (محاولة $attempt)';
+  }
+
+  @override
+  String get teacherFeedbackTitle => 'ملاحظات المعلم:';
+
+  @override
+  String get resubmitNewAttemptTitle => 'إعادة التسليم (محاولة جديدة)';
+
+  @override
+  String get uploadSolutionFilesTitle => 'رفع ملفات الحل';
+
+  @override
+  String get selectFilesBtn => 'اختيار ملفات';
+
+  @override
+  String get tapToPickFilesHint => 'اضغط لاختيار ملفات الإجابة (PDF أو صور)';
+
+  @override
+  String get maxFileSizeNotice => 'الحد الأقصى للملف 20 ميجابايت';
+
+  @override
+  String get submitNewAttemptBtn => 'إرسال المحاولة الجديدة';
+
+  @override
+  String get submitAssignmentNowBtn => 'تسليم الواجب الآن';
+
+  @override
+  String get deadlinePassedNoLateNotice =>
+      'انتهى موعد تسليم هذا الواجب ولا يُسمح بالتسليم المتأخر.';
+
+  @override
+  String get createNewAssignment => 'إنشاء واجب جديد';
+
+  @override
+  String get assignmentTitleField => 'عنوان الواجب *';
+
+  @override
+  String get assignmentTitleHint => 'مثال: تمارين حل معادلات الدرجة الثانية';
+
+  @override
+  String get assignmentTitleRequired => 'يرجى إدخال عنوان الواجب';
+
+  @override
+  String get instructionsField => 'التعليمات والإرشادات للطلاب';
+
+  @override
+  String get instructionsHint => 'اكتب الأسئلة أو التعليمات المطلوب اتباعها...';
+
+  @override
+  String get fieldRequired => 'مطلوب';
+
+  @override
+  String get submissionDueDateField => 'موعد التسليم';
+
+  @override
+  String get allowLateSubmission => 'السماح بالتسليم المتأخر';
+
+  @override
+  String get allowLateSubmissionSubtitle =>
+      'يمكن للطلاب إرسال الحل حتى بعد انقضاء الموعد';
+
+  @override
+  String get publishAssignmentBtn => 'نشر الواجب للطلاب';
+
+  @override
+  String get assignmentPublishedSuccess => 'تم إنشاء الواجب ونشره بنجاح';
+
+  @override
+  String submissionsCountWithReviewed(String submissions, String reviewed) {
+    return 'التسليمات ($submissions) • تم التصحيح ($reviewed)';
+  }
+
+  @override
+  String get noSubmissionsYetTitle => 'لا توجد تسليمات حتى الآن';
+
+  @override
+  String get noSubmissionsYetSubtitle =>
+      'سيظهر هنا الطلاب الذين قاموا بتسليم هذا الواجب';
+
+  @override
+  String get manageAssignmentsTitle => 'إدارة الواجبات';
+
+  @override
+  String groupAssignmentsTitle(String groupName) {
+    return 'واجبات: $groupName';
+  }
+
+  @override
+  String get createAssignmentFab => 'إنشاء واجب';
+
+  @override
+  String get noAssignmentsForGroupTitle => 'لا توجد واجبات مضافة لهذه المجموعة';
+
+  @override
+  String get noAssignmentsForGroupSubtitle =>
+      'ابدأ بإنشاء أول واجب للطلاب لمتابعة تسليماتهم وتقييمها';
+
+  @override
+  String get createFirstAssignmentBtn => 'إنشاء أول واجب';
+
+  @override
+  String get fileOpenFailed => 'تعذر فتح الملف حالياً';
+
+  @override
+  String get secureFileUrlNotice => 'رابط الملف الآمن (صالح لمدة ساعة):';
+
+  @override
+  String get closeBtn => 'إغلاق';
+
+  @override
+  String studentSubmittedAt(String date) {
+    return 'تاريخ التسليم: $date';
+  }
+
+  @override
+  String studentAttemptNumber(String number) {
+    return 'المحاولة رقم: $number';
+  }
+
+  @override
+  String get attachedFilesTitle => 'الملفات المرفقة من الطالب';
+
+  @override
+  String get noFilesUploadedNotice => 'لم يقم الطالب برفع ملفات مع هذا التسليم';
+
+  @override
+  String get viewFileTooltip => 'عرض الملف';
+
+  @override
+  String get gradingSectionTitle => 'رصد الدرجة والتقييم';
+
+  @override
+  String scoreFieldLabel(String maxScore) {
+    return 'الدرجة المستحقة (من $maxScore)';
+  }
+
+  @override
+  String get scoreFieldHint => 'مثال: 85';
+
+  @override
+  String get scoreFieldRequired => 'يرجى إدخال الدرجة';
+
+  @override
+  String get scoreMustBeInteger => 'يرجى إدخال رقم صحيح';
+
+  @override
+  String scoreRangeError(String maxScore) {
+    return 'الدرجة يجب أن تكون بين 0 و $maxScore';
+  }
+
+  @override
+  String get teacherFeedbackField => 'ملاحظات وتوجيهات للمعلم (اختياري)';
+
+  @override
+  String get teacherFeedbackHint =>
+      'أضف نقاط القوة والمجالات التي تحتاج لتحسين...';
+
+  @override
+  String get saveGradeAndNotifyBtn => 'حفظ التقييم وإشعار الطالب';
+
+  @override
+  String get studentInitialDefault => 'ط';
+
+  @override
+  String get attendanceStatusPresent => 'حاضر';
+
+  @override
+  String get attendanceStatusAbsent => 'غائب';
+
+  @override
+  String get attendanceStatusLate => 'متأخر';
+
+  @override
+  String get attendanceStatusExcused => 'معذور';
+
+  @override
+  String get attendanceRateFull => 'أتم مشاهدة المحاضرة (100% • حاضر)';
+
+  @override
+  String get attendanceRatePartial => 'قيد المشاهدة (حضور جزئي • 45%)';
+
+  @override
+  String get attendanceRateNone => 'لم يشاهد المحاضرة بعد (غائب)';
+
+  @override
+  String get attendanceRateExcused => 'معذور / استثناء معتمد';
+
+  @override
+  String get attendanceHistoryTitle => 'سجل الحضور والغياب';
+
+  @override
+  String get noAttendanceRecordsMessage =>
+      'لا يوجد سجلات حضور\nلم يتم تسجيل أي حضور أو غياب لك في المجموعات حتى الآن.';
+
+  @override
+  String get previousSessionsTitle => 'سجل الجلسات السابقة';
+
+  @override
+  String totalSessionsCount(int count) {
+    return 'إجمالي $count جلسة';
+  }
+
+  @override
+  String get attendanceCommitmentRate => 'نسبة الالتزام بالحضور';
+
+  @override
+  String get highAttendanceNote =>
+      'ممتاز! التزامك عالي بحضور الجلسات التعليمية.';
+
+  @override
+  String get mediumAttendanceNote => 'جيد، يرجى الحرص على عدم تكرار الغياب.';
+
+  @override
+  String get lowAttendanceNote => 'تنبيه: نسبة حضورك منخفضة، راجع مدرسك.';
+
+  @override
+  String get excellentAttendanceNoAbsence =>
+      'سجل ممتاز! لا توجد أي حالات غياب مسجلة 👏';
+
+  @override
+  String get noSessionsMatchFilter =>
+      'لا توجد جلسات مطابقة لخيار التصفية المحدد';
+
+  @override
+  String get viewAllSessionsAction => 'عرض جميع الجلسات';
+
+  @override
+  String groupWithColon(String groupName) {
+    return 'المجموعة: $groupName';
+  }
+
+  @override
+  String noteWithColon(String note) {
+    return 'ملاحظة: $note';
+  }
+
+  @override
+  String get takeAttendanceTitle => 'متابعة حضور المحاضرات';
+
+  @override
+  String get recordedLecturesTrackingBadge => '🎥 تفاعل المحاضرات المسجلة';
+
+  @override
+  String get takeAttendanceSubtitle =>
+      'متابعة إتمام ومشاهدة الطلاب للمحاضرات المسجلة ونسب الالتزام الأكاديمي';
+
+  @override
+  String get refreshAttendanceSheetTooltip => 'تحديث كشف المشاهدات';
+
+  @override
+  String get selectRecordedLectureTitle => 'اختر المحاضرة المسجلة';
+
+  @override
+  String get studyGroupLabel => 'المجموعة الدراسية';
+
+  @override
+  String get loadingGroups => 'جارٍ تحميل المجموعات...';
+
+  @override
+  String get prevLectureTooltip => 'المحاضرة السابقة';
+
+  @override
+  String get nextLectureTooltip => 'المحاضرة التالية';
+
+  @override
+  String get pickDateTooltip => 'اختيار تاريخ محدد';
+
+  @override
+  String get selectGroupToViewAttendanceMessage =>
+      'اختر مجموعة دراسية\nيرجى اختيار مجموعة من القائمة بالأعلى لعرض الطلاب ومتابعة إتمام المشاهدة.';
+
+  @override
+  String get noStudentsInGroupMessage =>
+      'لا يوجد طلاب في هذه المجموعة\nلم يتم إضافة أي طالب نشط إلى هذه المجموعة بعد.';
+
+  @override
+  String get attendedLectureTitle => 'أتموا المشاهدة (حاضر)';
+
+  @override
+  String completedWatchSubtitle(int count) {
+    return 'أتموا المشاهدة ($count طلاب)';
+  }
+
+  @override
+  String get notWatchedYetTitle => 'لم يشاهدوا بعد (غائب)';
+
+  @override
+  String get absentFromLectureSubtitle => 'لم يبدأوا المشاهدة';
+
+  @override
+  String get inProgressWatchTitle => 'قيد المشاهدة';
+
+  @override
+  String get partialWatchSubtitle => 'مشاهدة جزئية';
+
+  @override
+  String get attendanceRateTitle => 'نسبة إتمام الحضور';
+
+  @override
+  String get groupCommitmentRateSubtitle => 'معدل الالتزام بالمشاهدة';
+
+  @override
+  String get searchStudentOrPhoneHint =>
+      'بحث سريع باسم الطالب أو رقم الهاتف...';
+
+  @override
+  String get noStudentsMatchFilterMessage =>
+      'لا يوجد طلاب يطابقون خيارات البحث أو التصفية';
+
+  @override
+  String get resetFiltersAction => 'إعادة ضبط الفلاتر';
+
+  @override
+  String noteForStudentTitle(String name) {
+    return 'ملاحظة أكاديمية للطالب: $name';
+  }
+
+  @override
+  String get attendanceNoteHint =>
+      'اكتب ملاحظة لمتابعة الطالب بخصوص مشاهدة المحاضرة...';
+
+  @override
+  String filterAllCount(int count) {
+    return 'الكل ($count)';
+  }
+
+  @override
+  String filterPresentCount(int count) {
+    return 'أتموا المشاهدة ($count)';
+  }
+
+  @override
+  String filterAbsentCount(int count) {
+    return 'لم يشاهدوا ($count)';
+  }
+
+  @override
+  String filterLateCount(int count) {
+    return 'قيد المشاهدة ($count)';
+  }
+
+  @override
+  String filterExcusedCount(int count) {
+    return 'معذور ($count)';
+  }
+
+  @override
+  String get noGroupsCreatedYetDesc =>
+      'لم يتم إنشاء أي مجموعات دراسية بعد. أنشئ مجموعة أولاً للبدء.';
+
+  @override
+  String get groupColonLabel => 'المجموعة:';
+
+  @override
+  String get settingsTitle => 'إعدادات المنصة والأكاديمية';
+
+  @override
+  String get settingsSubtitle =>
+      'إدارة الملف التعريفي للأكاديمية، بيانات التواصل الأكاديمي، ولغة المنصة';
+
+  @override
+  String get settingsAcademySection => 'بيانات الأكاديمية والمنصة';
+
+  @override
+  String get settingsAcademyNameLabel => 'اسم المنصة';
+
+  @override
+  String get settingsSubjectLabel => 'التخصص والمسار التعليمي';
+
+  @override
+  String get settingsTaglineLabel => 'شعار الأكاديمية';
+
+  @override
+  String get settingsSupportPhoneLabel => 'هاتف الدعم والواتساب للطلاب';
+
+  @override
+  String get settingsSupportEmailLabel => 'بريد الدعم الأكاديمي';
+
+  @override
+  String get settingsLanguageSection => 'لغة المنصة';
+
+  @override
+  String get settingsLanguageDesc => 'اختر لغة عرض واجهة المنصة المفضلة';
+
+  @override
+  String get settingsLangArabic => 'العربية (Arabic)';
+
+  @override
+  String get settingsLangEnglish => 'English';
+
+  @override
+  String get settingsAccountSection => 'حساب المعلم والأمان';
+
+  @override
+  String get settingsTeacherNameLabel => 'اسم المعلم';
+
+  @override
+  String get settingsTeacherEmailLabel => 'البريد الإلكتروني للدخول';
+
+  @override
+  String get settingsChangePasswordBtn => 'تغيير كلمة المرور';
+
+  @override
+  String get settingsSignOutBtn => 'تسجيل الخروج';
+
+  @override
+  String get settingsSavedSuccess => 'تم حفظ وتحديث الإعدادات بنجاح';
+
+  @override
+  String get settingsServiceCardTitle => 'إعدادات المنصة والأكاديمية';
+
+  @override
+  String get settingsServiceCardDesc =>
+      'بيانات الأكاديمية، التواصل، ولغة المنصة';
 }

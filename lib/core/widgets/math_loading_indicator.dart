@@ -3,14 +3,18 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 
-/// A premium mathematical loading indicator.
-/// Traces a continuous sinusoidal function f(x) across a coordinate grid with an animated glowing tracer point.
+/// A premium mathematical loading indicator for the EduSaaS academic platform.
+///
+/// Modes:
+/// 1. Standard (wave): Traces a continuous sinusoidal function f(x) across a coordinate grid with an animated glowing tracer point.
+/// 2. Compact (compass): A precision mathematical compass/coordinate reticle spinner for inline buttons and chips.
 class MathLoadingIndicator extends StatefulWidget {
   final double size;
   final String? message;
   final Color? color;
   final Color? textColor;
   final bool showAxes;
+  final bool isCompact;
 
   const MathLoadingIndicator({
     super.key,
@@ -19,7 +23,16 @@ class MathLoadingIndicator extends StatefulWidget {
     this.color,
     this.textColor,
     this.showAxes = true,
-  });
+  }) : isCompact = false;
+
+  const MathLoadingIndicator.compact({
+    super.key,
+    this.size = 20,
+    this.color,
+  })  : message = null,
+        textColor = null,
+        showAxes = false,
+        isCompact = true;
 
   @override
   State<MathLoadingIndicator> createState() => _MathLoadingIndicatorState();
@@ -34,10 +47,11 @@ class _MathLoadingIndicatorState extends State<MathLoadingIndicator>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2200),
+      duration: Duration(milliseconds: widget.isCompact ? 1000 : 2200),
     );
 
-    final isTest = WidgetsBinding.instance.runtimeType.toString().contains('Test');
+    final isTest =
+        WidgetsBinding.instance.runtimeType.toString().contains('Test');
     if (!isTest) {
       _controller.repeat();
     } else {
@@ -55,40 +69,145 @@ class _MathLoadingIndicatorState extends State<MathLoadingIndicator>
   Widget build(BuildContext context) {
     final primaryColor = widget.color ?? AppColors.primary;
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        AnimatedBuilder(
-          animation: _controller,
-          builder: (context, child) {
-            return CustomPaint(
-              size: Size(widget.size, widget.size * 0.65),
-              painter: _MathFunctionCurvePainter(
-                progress: _controller.value,
-                primaryColor: primaryColor,
-                accentColor: AppColors.primaryLight,
-                axisColor: AppColors.border,
-                showAxes: widget.showAxes,
-              ),
-            );
-          },
-        ),
-        if (widget.message != null && widget.message!.isNotEmpty) ...[
-          const SizedBox(height: AppSpacing.s16),
-          Text(
-            widget.message!,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: widget.textColor ?? AppColors.textSecondary,
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              letterSpacing: 0.2,
-            ),
+    if (widget.isCompact) {
+      return RepaintBoundary(
+        child: SizedBox(
+          width: widget.size,
+          height: widget.size,
+          child: AnimatedBuilder(
+            animation: _controller,
+            builder: (context, child) {
+              return CustomPaint(
+                painter: _MathematicalCompassPainter(
+                  progress: _controller.value,
+                  color: primaryColor,
+                ),
+              );
+            },
           ),
+        ),
+      );
+    }
+
+    return RepaintBoundary(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          AnimatedBuilder(
+            animation: _controller,
+            builder: (context, child) {
+              return CustomPaint(
+                size: Size(widget.size, widget.size * 0.65),
+                painter: _MathFunctionCurvePainter(
+                  progress: _controller.value,
+                  primaryColor: primaryColor,
+                  accentColor: AppColors.primaryLight,
+                  axisColor: AppColors.border,
+                  showAxes: widget.showAxes,
+                ),
+              );
+            },
+          ),
+          if (widget.message != null && widget.message!.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.s16),
+            Text(
+              widget.message!,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: widget.textColor ?? AppColors.textSecondary,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                letterSpacing: 0.2,
+              ),
+            ),
+          ],
         ],
-      ],
+      ),
     );
+  }
+}
+
+/// Compact mathematical compass spinner.
+/// Draws a coordinate ring with 4 reticle ticks, a smooth rotating arc, and a glowing center dot.
+class _MathematicalCompassPainter extends CustomPainter {
+  final double progress;
+  final Color color;
+
+  const _MathematicalCompassPainter({
+    required this.progress,
+    required this.color,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = (size.width / 2) - 1.5;
+
+    // 1. Outer faint coordinate ring
+    final ringPaint = Paint()
+      ..color = color.withValues(alpha: 0.2)
+      ..strokeWidth = 1.2
+      ..style = PaintingStyle.stroke;
+    canvas.drawCircle(center, radius, ringPaint);
+
+    // 2. 4 Subtle Coordinate Crosshair Ticks (0, 90, 180, 270 deg)
+    final tickPaint = Paint()
+      ..color = color.withValues(alpha: 0.4)
+      ..strokeWidth = 1.0;
+    const tickLen = 2.0;
+    // Top tick
+    canvas.drawLine(
+      Offset(center.dx, center.dy - radius),
+      Offset(center.dx, center.dy - radius + tickLen),
+      tickPaint,
+    );
+    // Bottom tick
+    canvas.drawLine(
+      Offset(center.dx, center.dy + radius),
+      Offset(center.dx, center.dy + radius - tickLen),
+      tickPaint,
+    );
+    // Left tick
+    canvas.drawLine(
+      Offset(center.dx - radius, center.dy),
+      Offset(center.dx - radius + tickLen, center.dy),
+      tickPaint,
+    );
+    // Right tick
+    canvas.drawLine(
+      Offset(center.dx + radius, center.dy),
+      Offset(center.dx + radius - tickLen, center.dy),
+      tickPaint,
+    );
+
+    // 3. Rotating Compass Arc (~120 degrees)
+    final arcPaint = Paint()
+      ..color = color
+      ..strokeWidth = 2.0
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.stroke;
+
+    final startAngle = progress * 2 * math.pi;
+    const sweepAngle = math.pi * 0.7; // ~126 degrees arc
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      startAngle,
+      sweepAngle,
+      false,
+      arcPaint,
+    );
+
+    // 4. Center mathematical coordinate point
+    final dotPaint = Paint()
+      ..color = color.withValues(alpha: 0.7)
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(center, 1.5, dotPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _MathematicalCompassPainter oldDelegate) {
+    return oldDelegate.progress != progress || oldDelegate.color != color;
   }
 }
 

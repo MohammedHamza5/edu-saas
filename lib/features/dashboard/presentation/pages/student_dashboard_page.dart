@@ -12,7 +12,6 @@ import '../../../../core/theme/responsive_breakpoints.dart';
 import '../../../../core/theme/tenant_theme_cubit.dart';
 import '../../../../core/widgets/academic_hero_banner.dart';
 import '../../../../core/widgets/app_card.dart';
-import '../../../../core/widgets/math_grid_background.dart';
 import '../../../../core/widgets/responsive_container.dart';
 import '../../../../core/widgets/responsive_grid.dart';
 import '../../../auth/presentation/cubit/auth_cubit.dart';
@@ -100,10 +99,8 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
           ),
         ],
       ),
-      body: MathGridBackground(
-        opacity: 0.032,
-        gridSpacing: 32,
-        child: TweenAnimationBuilder<double>(
+      backgroundColor: Colors.transparent,
+      body: TweenAnimationBuilder<double>(
           tween: Tween(begin: 0.0, end: 1.0),
           duration: const Duration(milliseconds: 500),
           curve: Curves.easeOutCubic,
@@ -125,12 +122,12 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
                 children: [
                   // 1. Academic Hero Banner
                   AcademicHeroBanner(
-                    title: context.l10n.welcomeStudentHeader(branding.brandName),
+                    title: context.l10n.welcomeStudentHeader(branding.localizedBrandName(context)),
                     subtitle: context.l10n.studentHeroSubtitle(
-                      branding.teacherName,
-                      branding.academicTrack,
+                      branding.localizedTeacherName(context),
+                      branding.localizedAcademicTrack(context),
                     ),
-                    academicTrack: branding.academicTrack,
+                    academicTrack: branding.localizedAcademicTrack(context),
                     badgeText: context.l10n.americanMathAcademy,
                   ),
                 const SizedBox(height: AppSpacing.s24),
@@ -461,7 +458,6 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
           ),
         ),
       ),
-    ),
-  );
+    );
 }
 }

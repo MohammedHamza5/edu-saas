@@ -45,7 +45,7 @@ void main() {
         ),
       );
 
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byType(AppLoadingView), findsOneWidget);
       expect(find.text('Submit'), findsNothing);
     });
 

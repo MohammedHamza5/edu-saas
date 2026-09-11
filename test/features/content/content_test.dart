@@ -13,6 +13,8 @@ import 'package:edu_saas/features/content/presentation/cubit/content_cubit.dart'
 import 'package:edu_saas/features/content/presentation/cubit/content_state.dart';
 import 'package:edu_saas/features/content/presentation/pages/student_content_feed_page.dart';
 import 'package:edu_saas/features/content/presentation/pages/teacher_content_library_page.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:edu_saas/core/localization/generated/app_localizations.dart';
 import 'package:edu_saas/features/content/presentation/widgets/content_item_card.dart';
 import 'package:edu_saas/features/content/presentation/widgets/material_viewer_sheet.dart';
 
@@ -351,6 +353,10 @@ void main() {
   group('Content UI Widget Tests', () {
     testWidgets('TeacherContentLibraryPage renders list of items and filter chips',
         (tester) async {
+      tester.view.physicalSize = const Size(1200, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
       final repo = _FakeContentRepository(items: List.from(mockContentList));
 
       await tester.pumpWidget(
@@ -371,7 +377,7 @@ void main() {
       expect(find.text('المؤرشف (1)'), findsOneWidget);
       expect(find.text('مذكرة الهندسة الفراغية'), findsOneWidget);
       expect(find.text('فيديو شرح المتجهات'), findsOneWidget);
-      expect(find.byType(ContentItemCard), findsNWidgets(3));
+      expect(find.byType(ContentItemCard, skipOffstage: false), findsNWidgets(3));
       expect(find.byType(FloatingActionButton), findsOneWidget);
     });
 
@@ -387,7 +393,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('لا يوجد محتوى تعليمي في هذا التصنيف بعد'), findsOneWidget);
+      expect(find.text('لا يوجد محتوى تعليمي في هذا التصنيف حتى الآن'), findsOneWidget);
     });
 
     testWidgets('StudentContentFeedPage renders published content feed and type chips',
@@ -484,6 +490,14 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.lightTheme,
+          locale: const Locale('ar'),
+          supportedLocales: const [Locale('ar'), Locale('en')],
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
           home: Scaffold(
             body: MaterialViewerSheet(
               content: sampleItem,
@@ -494,7 +508,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('تعذر إنشاء الرابط الآمن للملف حالياً'), findsOneWidget);
+      expect(find.text('تعذر توليد رابط الوصول الآمن في الوقت الحالي'), findsOneWidget);
     });
   });
 }

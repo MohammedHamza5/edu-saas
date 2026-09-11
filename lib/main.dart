@@ -143,7 +143,7 @@ class EduSaaSApp extends StatelessWidget {
           return BlocBuilder<LocaleCubit, Locale>(
             builder: (context, activeLocale) {
               return MaterialApp.router(
-                title: branding.brandName,
+                title: branding.getBrandNameForLocale(activeLocale),
                 theme: AppTheme.fromBranding(branding),
                 routerConfig: AppRouter.router,
                 debugShowCheckedModeBanner: false,

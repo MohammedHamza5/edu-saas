@@ -9,6 +9,8 @@ import 'package:edu_saas/features/content/domain/repositories/content_repository
 import 'package:edu_saas/features/content/presentation/cubit/content_cubit.dart';
 import 'package:edu_saas/features/content/presentation/pages/student_content_feed_page.dart';
 import 'package:edu_saas/features/content/presentation/pages/teacher_content_library_page.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:edu_saas/core/localization/generated/app_localizations.dart';
 import 'package:edu_saas/features/content/presentation/widgets/content_item_card.dart';
 import 'package:edu_saas/features/content/presentation/widgets/material_viewer_sheet.dart';
 
@@ -186,8 +188,8 @@ void main() {
         // Check AppBar & Stat cards
         expect(find.text('محتوى: SAT Math Advanced'), findsOneWidget);
         expect(find.text('إجمالي المواد'), findsOneWidget);
-        expect(find.text('المنشور للطلاب'), findsOneWidget);
-        expect(find.text('مسودات قيد الإعداد'), findsOneWidget);
+        expect(find.text('منشور للطلاب'), findsOneWidget);
+        expect(find.text('مسودات'), findsOneWidget);
 
         // Check Content items
         expect(find.text(sampleItems[0].title), findsOneWidget);
@@ -236,6 +238,14 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.lightTheme,
+          locale: const Locale('ar'),
+          supportedLocales: const [Locale('ar'), Locale('en')],
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
           home: Scaffold(
             body: Center(
               child: SizedBox(

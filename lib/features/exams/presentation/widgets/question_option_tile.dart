@@ -21,8 +21,11 @@ class QuestionOptionTile extends StatelessWidget {
     this.isWrongReview = false,
   });
 
-  String get _optionLabel {
-    const labels = ['أ', 'ب', 'ج', 'د', 'هـ', 'و'];
+  String _getOptionLabel(BuildContext context) {
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
+    final labels = isAr
+        ? const ['أ', 'ب', 'ج', 'د', 'هـ', 'و']
+        : const ['A', 'B', 'C', 'D', 'E', 'F'];
     if (index >= 0 && index < labels.length) {
       return labels[index];
     }
@@ -82,7 +85,7 @@ class QuestionOptionTile extends StatelessWidget {
               ),
               child: Center(
                 child: Text(
-                  _optionLabel,
+                  _getOptionLabel(context),
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,

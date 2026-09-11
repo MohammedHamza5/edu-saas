@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_card.dart';
@@ -34,8 +35,8 @@ class SubmissionTile extends StatelessWidget {
             backgroundColor: AppColors.primary.withValues(alpha: 0.1),
             child: Text(
               submission.studentName.isNotEmpty
-                  ? submission.studentName.characters.first
-                  : 'ط',
+                  ? submission.studentName.characters.first.toUpperCase()
+                  : context.l10n.studentInitialDefault,
               style: const TextStyle(
                 color: AppColors.primary,
                 fontWeight: FontWeight.bold,
@@ -76,7 +77,7 @@ class SubmissionTile extends StatelessWidget {
                           borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
                         ),
                         child: Text(
-                          'محاولة ${submission.attemptNumber}',
+                          context.l10n.attemptNumberLabel(submission.attemptNumber.toString()),
                           style: const TextStyle(
                             fontSize: 10,
                             color: AppColors.textSecondary,
@@ -105,7 +106,7 @@ class SubmissionTile extends StatelessWidget {
                       ),
                       const SizedBox(width: 2),
                       Text(
-                        '${submission.files.length} ملفات مرفقة',
+                        context.l10n.attachedFilesCount(submission.files.length.toString()),
                         style: const TextStyle(
                           fontSize: 11,
                           color: AppColors.textSecondary,
@@ -134,7 +135,7 @@ class SubmissionTile extends StatelessWidget {
                   borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
                 ),
                 child: Text(
-                  submission.status.labelAr,
+                  submission.status.localizedLabel(context),
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
@@ -158,7 +159,7 @@ class SubmissionTile extends StatelessWidget {
 
           const SizedBox(width: AppSpacing.s4),
           const Icon(
-            Icons.chevron_left,
+            Icons.chevron_right_rounded,
             color: AppColors.textMuted,
             size: 20,
           ),

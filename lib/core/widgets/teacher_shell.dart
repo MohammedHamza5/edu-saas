@@ -7,16 +7,14 @@ import '../network/supabase_service.dart';
 import '../router/app_router.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
-import '../theme/math_tokens.dart';
 import '../theme/tenant_theme_cubit.dart';
 import 'language_switcher_button.dart';
-import '../../features/groups/presentation/cubit/groups_cubit.dart';
 import '../../features/notifications/presentation/cubit/notifications_cubit.dart';
 import '../../features/notifications/presentation/cubit/notifications_state.dart';
 import '../../features/students/presentation/cubit/students_cubit.dart';
 import '../../features/students/presentation/cubit/students_state.dart';
-import '../utils/prefetch_service.dart';
 import 'adaptive_scaffold.dart';
+import 'app_logo.dart';
 
 /// Permanent application shell for Teacher role screens.
 /// Features a comprehensive, categorized, mathematical sidebar that stays pinned.
@@ -45,7 +43,7 @@ class TeacherShell extends StatelessWidget {
     if (path.contains('/assignments')) return 7;
     if (path.contains('/exams')) return 8;
     if (path.startsWith('/teacher/announcements')) return 9;
-    if (path.startsWith('/platform')) return 10;
+    if (path.startsWith('/teacher/settings')) return 10;
     if (path.startsWith('/teacher/groups/')) return 4; // Group detail fallback
     return 0;
   }
@@ -126,7 +124,6 @@ class TeacherShell extends StatelessWidget {
             selectedIcon: Icons.dashboard_rounded,
             label: context.l10n.navDashboard,
             tooltip: context.l10n.navDashboard,
-            onHover: () => PrefetchService.prefetchTeacherData(context),
           ),
           AdaptiveDestination(
             icon: Icons.notifications_outlined,
@@ -134,7 +131,6 @@ class TeacherShell extends StatelessWidget {
             label: context.l10n.navNotifications,
             tooltip: context.l10n.notificationsCenterTitle,
             badgeCount: unreadNotifications,
-            onHover: () => context.read<NotificationsCubit>().silentRefresh(),
           ),
         ],
       ),
@@ -148,7 +144,6 @@ class TeacherShell extends StatelessWidget {
             selectedIcon: Icons.school_rounded,
             label: context.l10n.studentsListTitle,
             tooltip: context.l10n.studentsListTitle,
-            onHover: () => context.read<StudentsCubit>().silentRefresh(),
           ),
           AdaptiveDestination(
             icon: Icons.person_add_outlined,
@@ -156,14 +151,12 @@ class TeacherShell extends StatelessWidget {
             label: context.l10n.pendingStudentsTitle,
             tooltip: context.l10n.pendingStudentsTitle,
             badgeCount: pendingCount,
-            onHover: () => context.read<StudentsCubit>().loadPendingStudents(),
           ),
           AdaptiveDestination(
             icon: Icons.groups_outlined,
             selectedIcon: Icons.groups_rounded,
             label: context.l10n.groupsListTitle,
             tooltip: context.l10n.groupsListTitle,
-            onHover: () => context.read<GroupsCubit>().silentRefresh(),
           ),
           AdaptiveDestination(
             icon: Icons.play_circle_outline_rounded,
@@ -230,9 +223,6 @@ class TeacherShell extends StatelessWidget {
   }
 
   Widget _buildSidebarHeader(BuildContext context) {
-    final theme = Theme.of(context);
-    final mathTokens = theme.extension<MathTokens>() ?? MathTokens.light;
-
     // Resolve active branding (from TenantThemeCubit or default registry)
     final branding = (() {
       try {
@@ -246,65 +236,12 @@ class TeacherShell extends StatelessWidget {
       onTap: () => context.go(AppRouter.teacherDashboard),
       mouseCursor: SystemMouseCursors.click,
       borderRadius: BorderRadius.circular(12),
-      child: Row(
-        children: [
-          Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              gradient: mathTokens.primaryButtonGradient,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: branding.primaryColor.withValues(alpha: 0.35),
-                  blurRadius: 10,
-                  offset: const Offset(0, 3),
-                ),
-              ],
-            ),
-            child: Center(
-              child: Text(
-                branding.signatureSymbol,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                  fontFamily: 'serif',
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: AppSpacing.s12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  branding.brandName,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.3,
-                    color: Colors.white,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  '${branding.teacherName} • ${branding.academicTrack}',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: const Color(0xFF94A3B8),
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-        ],
+      child: AppLogo.compact(
+        size: 42,
+        showName: true,
+        platformName: branding.localizedBrandName(context),
+        subtitle: '${branding.localizedTeacherName(context)} • ${branding.localizedAcademicTrack(context)}',
+        nameColor: Colors.white,
       ),
     );
   }

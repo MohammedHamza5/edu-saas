@@ -1,11 +1,11 @@
 {
-    "name": "edu_saas",
-    "short_name": "edu_saas",
+    "name": "EduSaaS - Academic Mathematics Platform",
+    "short_name": "EduSaaS",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#0F172A",
+    "theme_color": "#5B4FE0",
+    "description": "White-label Education SaaS for American Curriculum Mathematics.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

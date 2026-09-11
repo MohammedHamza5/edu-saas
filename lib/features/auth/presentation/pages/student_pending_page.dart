@@ -79,9 +79,9 @@ class StudentPendingPage extends StatelessWidget {
           Text(
             context.l10n.studentPendingGreeting(
               effectiveName,
-              branding.brandName,
-              branding.teacherName,
-              branding.academicTrack,
+              branding.localizedBrandName(context),
+              branding.localizedTeacherName(context),
+              branding.localizedAcademicTrack(context),
             ),
             textAlign: TextAlign.center,
             style: const TextStyle(

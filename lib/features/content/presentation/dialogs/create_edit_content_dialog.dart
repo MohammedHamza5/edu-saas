@@ -1,5 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_button.dart';
@@ -191,8 +192,8 @@ class _CreateEditContentDialogState extends State<CreateEditContentDialog> {
                     Expanded(
                       child: Text(
                         isEdit
-                            ? 'تعديل المحتوى التعليمي'
-                            : 'إضافة محتوى تعليمي جديد',
+                            ? context.l10n.editContentDialogTitle
+                            : context.l10n.newContentDialogTitle,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -210,12 +211,12 @@ class _CreateEditContentDialogState extends State<CreateEditContentDialog> {
                 // Title Field
                 AppTextField(
                   controller: _titleController,
-                  labelText: 'عنوان المحتوى *',
-                  hintText: 'مثال: مذكرة قوانين الهندسة وحساب المثلثات',
+                  labelText: context.l10n.contentTitleInputLabel,
+                  hintText: context.l10n.contentTitleInputHint,
                   prefixIcon: const Icon(Icons.title_rounded),
                   validator: (val) {
                     if (val == null || val.trim().isEmpty) {
-                      return 'يرجى إدخال عنوان المحتوى';
+                      return context.l10n.contentTitleRequired;
                     }
                     return null;
                   },
@@ -226,8 +227,8 @@ class _CreateEditContentDialogState extends State<CreateEditContentDialog> {
                 // Description Field
                 AppTextField(
                   controller: _descriptionController,
-                  labelText: 'وصف إضافي أو تعليمات للطلاب (اختياري)',
-                  hintText: 'توضيح النقاط المهمة أو الملاحظات المرفقة…',
+                  labelText: context.l10n.contentDescInputLabel,
+                  hintText: context.l10n.contentDescInputHint,
                   maxLines: 2,
                   prefixIcon: const Icon(Icons.notes_rounded),
                 ),
@@ -236,7 +237,7 @@ class _CreateEditContentDialogState extends State<CreateEditContentDialog> {
 
                 // Type Selection
                 Text(
-                  'نوع المادة التعليمية:',
+                  context.l10n.materialTypeLabel,
                   style: theme.textTheme.labelMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
@@ -249,7 +250,7 @@ class _CreateEditContentDialogState extends State<CreateEditContentDialog> {
                   children: ContentType.values.map((type) {
                     final isSelected = _selectedType == type;
                     return ChoiceChip(
-                      label: Text(type.labelAr),
+                      label: Text(type.localizedLabel(context)),
                       selected: isSelected,
                       selectedColor: AppColors.primary.withAlpha(30),
                       onSelected: (selected) {
@@ -271,7 +272,7 @@ class _CreateEditContentDialogState extends State<CreateEditContentDialog> {
 
                 // Publication Status Selection
                 Text(
-                  'حالة النشر:',
+                  context.l10n.publicationStatusLabel,
                   style: theme.textTheme.labelMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
@@ -283,13 +284,13 @@ class _CreateEditContentDialogState extends State<CreateEditContentDialog> {
                   runSpacing: AppSpacing.s6,
                   children: [
                     ChoiceChip(
-                      label: const Row(
+                      label: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.edit_note_rounded,
+                          const Icon(Icons.edit_note_rounded,
                               size: 14, color: AppColors.warning),
-                          SizedBox(width: 4),
-                          Text('مسودة خاصة (لا تظهر للطلاب)'),
+                          const SizedBox(width: 4),
+                          Text(context.l10n.draftPrivateNotice),
                         ],
                       ),
                       selected: _selectedStatus == ContentStatus.draft,
@@ -302,13 +303,13 @@ class _CreateEditContentDialogState extends State<CreateEditContentDialog> {
                       },
                     ),
                     ChoiceChip(
-                      label: const Row(
+                      label: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.check_circle_rounded,
+                          const Icon(Icons.check_circle_rounded,
                               size: 14, color: AppColors.success),
-                          SizedBox(width: 4),
-                          Text('نشر فوري للطلاب'),
+                          const SizedBox(width: 4),
+                          Text(context.l10n.publishImmediateNotice),
                         ],
                       ),
                       selected: _selectedStatus == ContentStatus.published,
@@ -333,9 +334,9 @@ class _CreateEditContentDialogState extends State<CreateEditContentDialog> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       CheckboxListTile(
-                        title: const Text(
-                          'إرفاق ملف تعليمي (PDF / صورة / مستند)',
-                          style: TextStyle(
+                        title: Text(
+                          context.l10n.attachMaterialFile,
+                          style: const TextStyle(
                               fontSize: 13, fontWeight: FontWeight.bold),
                         ),
                         value: _hasAttachment,
@@ -352,14 +353,14 @@ class _CreateEditContentDialogState extends State<CreateEditContentDialog> {
                             Expanded(
                               child: AppTextField(
                                 controller: _fileNameController,
-                                labelText: 'اسم الملف المرفق *',
-                                hintText: 'مثال: Calculus_Formulas_Sheet.pdf',
+                                labelText: context.l10n.attachedFileNameLabel,
+                                hintText: context.l10n.attachedFileNameHint,
                                 prefixIcon:
                                     const Icon(Icons.attach_file_rounded),
                                 validator: (val) {
                                   if (_hasAttachment &&
                                       (val == null || val.trim().isEmpty)) {
-                                    return 'يرجى إدخال أو اختيار اسم الملف';
+                                    return context.l10n.fileNameRequired;
                                   }
                                   return null;
                                 },
@@ -374,7 +375,7 @@ class _CreateEditContentDialogState extends State<CreateEditContentDialog> {
                               onPressed: _pickFile,
                               icon: const Icon(Icons.folder_open_rounded,
                                   size: 18),
-                              label: const Text('تصفح'),
+                              label: Text(context.l10n.browseFileAction),
                             ),
                           ],
                         ),
@@ -393,11 +394,11 @@ class _CreateEditContentDialogState extends State<CreateEditContentDialog> {
                       onPressed: _isLoading
                           ? null
                           : () => Navigator.of(context).pop(false),
-                      child: const Text('إلغاء'),
+                      child: Text(context.l10n.cancel),
                     ),
                     const SizedBox(width: AppSpacing.s12),
                     AppButton(
-                      text: isEdit ? 'حفظ التعديلات' : 'إنشاء وحفظ',
+                      text: isEdit ? context.l10n.saveChanges : context.l10n.createAndSave,
                       isLoading: _isLoading,
                       onPressed: _handleSubmit,
                     ),

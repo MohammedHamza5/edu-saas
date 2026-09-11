@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/responsive_breakpoints.dart';
 import '../../../../core/widgets/app_empty_view.dart';
 import '../../../../core/widgets/app_error_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
+import '../../../../core/widgets/responsive_container.dart';
+import '../../../../core/widgets/responsive_grid.dart';
 import '../../domain/entities/exam_entity.dart';
 import '../cubit/exams_cubit.dart';
 import '../cubit/exams_state.dart';
@@ -54,7 +58,7 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
-          tooltip: 'الرجوع للرئيسية',
+          tooltip: context.l10n.backToHomeTooltip,
           onPressed: () {
             if (Navigator.of(context).canPop()) {
               Navigator.of(context).pop();
@@ -63,12 +67,12 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
             }
           },
         ),
-        title: const Text('امتحاناتي واختباراتي'),
+        title: Text(context.l10n.myExamsTitle),
         centerTitle: true,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            tooltip: 'تحديث',
+            tooltip: context.l10n.refreshTooltip,
             onPressed: _loadExams,
           ),
         ],
@@ -76,7 +80,7 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
       body: BlocBuilder<ExamsCubit, ExamsState>(
         builder: (context, state) {
           if (state is ExamsLoading) {
-            return const Center(child: AppLoadingView());
+            return const AppLoadingView.cardsGrid(count: 4, columns: 2);
           }
 
           if (state is ExamsError) {
@@ -92,7 +96,7 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
             return Center(
               child: AppEmptyView(
                 message: state.message,
-                subtitle: 'لا توجد امتحانات منشورة لمجموعاتك الدراسية حالياً',
+                subtitle: context.l10n.noPublishedExams,
                 icon: Icons.quiz_outlined,
               ),
             );
@@ -101,87 +105,96 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
           if (state is StudentExamsLoaded) {
             final filtered = _filterExams(state.exams);
 
-            return Column(
-              children: [
-                // Filter chips
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.s16,
-                    vertical: AppSpacing.s8,
-                  ),
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        _buildFilterChip('الكل', StudentExamFilter.all, state.exams.length),
-                        const SizedBox(width: AppSpacing.s8),
-                        _buildFilterChip(
-                          'المتاحة',
-                          StudentExamFilter.available,
-                          state.exams.where((e) => !e.hasAttempted || e.canTakeExam).length,
+            return Center(
+              child: ResponsiveContainer(
+                maxWidth: ResponsiveBreakpoints.maxContentWidth,
+                child: Column(
+                  children: [
+                    // Filter chips
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.s16,
+                        vertical: AppSpacing.s8,
+                      ),
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            _buildFilterChip(context.l10n.filterAll, StudentExamFilter.all, state.exams.length),
+                            const SizedBox(width: AppSpacing.s8),
+                            _buildFilterChip(
+                              context.l10n.filterAvailable,
+                              StudentExamFilter.available,
+                              state.exams.where((e) => !e.hasAttempted || e.canTakeExam).length,
+                            ),
+                            const SizedBox(width: AppSpacing.s8),
+                            _buildFilterChip(
+                              context.l10n.filterInProgress,
+                              StudentExamFilter.inProgress,
+                              state.exams.where((e) => e.hasActiveAttempt).length,
+                            ),
+                            const SizedBox(width: AppSpacing.s8),
+                            _buildFilterChip(
+                              context.l10n.filterCompleted,
+                              StudentExamFilter.completed,
+                              state.exams.where((e) => e.hasAttempted && !e.hasActiveAttempt).length,
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: AppSpacing.s8),
-                        _buildFilterChip(
-                          'قيد الأداء',
-                          StudentExamFilter.inProgress,
-                          state.exams.where((e) => e.hasActiveAttempt).length,
-                        ),
-                        const SizedBox(width: AppSpacing.s8),
-                        _buildFilterChip(
-                          'المكتملة',
-                          StudentExamFilter.completed,
-                          state.exams.where((e) => e.hasAttempted && !e.hasActiveAttempt).length,
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
-                const Divider(height: 1, color: AppColors.border),
+                    const Divider(height: 1, color: AppColors.border),
 
-                // Exams List
-                Expanded(
-                  child: filtered.isEmpty
-                      ? const Center(
-                          child: AppEmptyView(
-                            message: 'لا توجد نتائج في هذا التصنيف',
-                            subtitle: 'جرب التبديل لتصنيف آخر لرؤية الامتحانات',
-                            icon: Icons.filter_list_off_outlined,
-                          ),
-                        )
-                      : RefreshIndicator(
-                          onRefresh: () async => _loadExams(),
-                          child: ListView.separated(
-                            padding: const EdgeInsets.all(AppSpacing.s16),
-                            itemCount: filtered.length,
-                            separatorBuilder: (_, __) =>
-                                const SizedBox(height: AppSpacing.s12),
-                            itemBuilder: (context, index) {
-                              final exam = filtered[index];
-                              return ExamCard(
-                                exam: exam,
-                                isTeacher: false,
-                                onTap: () {
-                                  Navigator.of(context)
-                                      .push<void>(
-                                    MaterialPageRoute<void>(
-                                      builder: (_) => BlocProvider.value(
-                                        value: context.read<ExamsCubit>(),
-                                        child: ExamIntroPage(exam: exam),
-                                      ),
-                                    ),
-                                  )
-                                      .then((_) {
-                                    if (context.mounted) {
-                                      _loadExams();
-                                    }
-                                  });
-                                },
-                              );
-                            },
-                          ),
-                        ),
+                    // Exams List
+                    Expanded(
+                      child: filtered.isEmpty
+                          ? Center(
+                              child: AppEmptyView(
+                                message: context.l10n.noExamsInFilter,
+                                subtitle: context.l10n.noExamsInFilterSubtitle,
+                                icon: Icons.filter_list_off_outlined,
+                              ),
+                            )
+                          : RefreshIndicator(
+                              onRefresh: () async => _loadExams(),
+                              child: SingleChildScrollView(
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                padding: const EdgeInsets.all(AppSpacing.s16),
+                                child: ResponsiveGrid(
+                                  mobileColumns: 1,
+                                  tabletColumns: 2,
+                                  desktopColumns: 2,
+                                  spacing: AppSpacing.s16,
+                                  runSpacing: AppSpacing.s16,
+                                  children: filtered.map((exam) {
+                                    return ExamCard(
+                                      exam: exam,
+                                      isTeacher: false,
+                                      onTap: () {
+                                        Navigator.of(context)
+                                            .push<void>(
+                                          MaterialPageRoute<void>(
+                                            builder: (_) => BlocProvider.value(
+                                              value: context.read<ExamsCubit>(),
+                                              child: ExamIntroPage(exam: exam),
+                                            ),
+                                          ),
+                                        )
+                                            .then((_) {
+                                          if (context.mounted) {
+                                            _loadExams();
+                                          }
+                                        });
+                                      },
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
+                            ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             );
           }
 

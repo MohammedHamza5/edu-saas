@@ -9,11 +9,11 @@ import '../router/app_router.dart';
 import '../extensions/localized_context_extension.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
-import '../theme/math_tokens.dart';
 import '../theme/tenant_theme_cubit.dart';
 import '../../features/notifications/presentation/cubit/notifications_cubit.dart';
 import '../../features/notifications/presentation/cubit/notifications_state.dart';
 import 'adaptive_scaffold.dart';
+import 'app_logo.dart';
 import 'language_switcher_button.dart';
 
 /// Permanent application shell for Student role screens.
@@ -246,9 +246,6 @@ class StudentShell extends StatelessWidget {
   }
 
   Widget _buildSidebarHeader(BuildContext context) {
-    final theme = Theme.of(context);
-    final mathTokens = theme.extension<MathTokens>() ?? MathTokens.light;
-
     // Resolve active branding (from TenantThemeCubit or default registry)
     final branding = (() {
       try {
@@ -262,65 +259,12 @@ class StudentShell extends StatelessWidget {
       onTap: () => context.go(AppRouter.studentDashboard),
       mouseCursor: SystemMouseCursors.click,
       borderRadius: BorderRadius.circular(12),
-      child: Row(
-        children: [
-          Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              gradient: mathTokens.primaryButtonGradient,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: branding.primaryColor.withValues(alpha: 0.35),
-                  blurRadius: 10,
-                  offset: const Offset(0, 3),
-                ),
-              ],
-            ),
-            child: const Center(
-              child: Text(
-                '∑',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w900,
-                  fontFamily: 'serif',
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: AppSpacing.s12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  context.l10n.studentPortal,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.3,
-                    color: Colors.white,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  '${branding.brandName} • ${context.l10n.academicMathematics}',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: const Color(0xFF94A3B8),
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-        ],
+      child: AppLogo.compact(
+        size: 42,
+        showName: true,
+        platformName: context.l10n.studentPortal,
+        subtitle: '${branding.localizedBrandName(context)} • ${context.l10n.academicMathematics}',
+        nameColor: Colors.white,
       ),
     );
   }

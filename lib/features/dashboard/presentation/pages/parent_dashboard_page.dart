@@ -8,11 +8,13 @@ import '../../../../core/extensions/responsive_context_extension.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/responsive_breakpoints.dart';
 import '../../../../core/widgets/academic_hero_banner.dart';
 import '../../../../core/widgets/animated_math_background.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_empty_view.dart';
 import '../../../../core/widgets/app_error_view.dart';
+import '../../../../core/widgets/app_loading_view.dart';
 import '../../../../core/widgets/responsive_container.dart';
 import '../../../attendance/presentation/widgets/attendance_status_badge.dart';
 import '../../../auth/presentation/cubit/auth_cubit.dart';
@@ -69,78 +71,7 @@ class _ParentDashboardViewState extends State<_ParentDashboardView> {
   }
 
   Widget _buildSkeletonLoading() {
-    return SingleChildScrollView(
-      physics: const NeverScrollableScrollPhysics(),
-      padding: context.responsivePagePadding,
-      child: ResponsiveContainer(
-        maxWidth: 1000,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Selector bar skeleton
-            Container(
-              height: 60,
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                border: Border.all(color: AppColors.border),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.s16),
-            // Stat cards row skeleton
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    height: 120,
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(
-                        AppSpacing.radiusMedium,
-                      ),
-                      border: Border.all(color: AppColors.border),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.s12),
-                Expanded(
-                  child: Container(
-                    height: 120,
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(
-                        AppSpacing.radiusMedium,
-                      ),
-                      border: Border.all(color: AppColors.border),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.s20),
-            // Attendance section skeleton
-            Container(
-              height: 180,
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                border: Border.all(color: AppColors.border),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.s20),
-            // Exams section skeleton
-            Container(
-              height: 180,
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                border: Border.all(color: AppColors.border),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+    return const AppLoadingView.dashboard();
   }
 
   @override
@@ -190,14 +121,16 @@ class _ParentDashboardViewState extends State<_ParentDashboardView> {
                   icon: Icons.family_restroom_rounded,
                   message: context.l10n.parentNoChildrenLinked,
                   actionText: context.l10n.refreshDashboardButton,
-                  onAction: () => context.read<ParentCubit>().loadParentDashboard(),
+                  onAction: () =>
+                      context.read<ParentCubit>().loadParentDashboard(),
                 );
               }
 
               if (state is ParentError) {
                 return AppErrorView(
                   message: state.message,
-                  onRetry: () => context.read<ParentCubit>().loadParentDashboard(),
+                  onRetry: () =>
+                      context.read<ParentCubit>().loadParentDashboard(),
                 );
               }
 
@@ -208,7 +141,7 @@ class _ParentDashboardViewState extends State<_ParentDashboardView> {
                     physics: const AlwaysScrollableScrollPhysics(),
                     padding: context.responsivePagePadding,
                     child: ResponsiveContainer(
-                      maxWidth: 1000,
+                      maxWidth: ResponsiveBreakpoints.maxContentWidth,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -236,7 +169,9 @@ class _ParentDashboardViewState extends State<_ParentDashboardView> {
                               padding: EdgeInsets.symmetric(
                                 vertical: AppSpacing.s32,
                               ),
-                              child: Center(child: CircularProgressIndicator()),
+                              child: Center(
+                                child: AppLoadingView.signature(size: 60),
+                              ),
                             )
                           else if (state.summary != null) ...[
                             // P-01 & P-03: Academic Overview Cards
@@ -274,7 +209,8 @@ class _ParentDashboardViewState extends State<_ParentDashboardView> {
                                   const SizedBox(width: AppSpacing.s12),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           context.l10n.parentNoticeTitle,

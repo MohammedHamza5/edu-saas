@@ -11,14 +11,13 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/theme/responsive_breakpoints.dart';
 import '../../../../core/theme/tenant_theme_cubit.dart';
 import '../../../../core/widgets/academic_hero_banner.dart';
-import '../../../../core/widgets/app_badge.dart';
 import '../../../../core/widgets/app_card.dart';
-import '../../../../core/widgets/math_grid_background.dart';
 import '../../../../core/widgets/responsive_container.dart';
 import '../../../../core/widgets/responsive_grid.dart';
 import '../../../groups/presentation/cubit/groups_cubit.dart';
 import '../../../groups/presentation/cubit/groups_state.dart';
 import '../../../groups/presentation/widgets/create_group_dialog.dart';
+import '../../../groups/presentation/widgets/interactive_group_card.dart';
 import '../../../notifications/presentation/cubit/notifications_cubit.dart';
 import '../../../notifications/presentation/cubit/notifications_state.dart';
 import '../../../students/presentation/cubit/students_cubit.dart';
@@ -144,10 +143,8 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
     })();
 
     return Scaffold(
-      body: MathGridBackground(
-        opacity: 0.032,
-        gridSpacing: 32,
-        child: SingleChildScrollView(
+      backgroundColor: Colors.transparent,
+      body: SingleChildScrollView(
           padding: context.responsivePagePadding,
           child: ResponsiveContainer(
             maxWidth: ResponsiveBreakpoints.maxContentWidth,
@@ -157,10 +154,10 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                 // 1. Academic Command Center Header (No AppBar - Web SaaS Style)
                 AcademicHeroBanner(
                   title:
-                      '${context.l10n.academicDashboardTitle} • ${branding.teacherName}',
+                      '${context.l10n.academicDashboardTitle} • ${branding.localizedTeacherName(context)}',
                   subtitle: context.l10n.teacherDashboardSubtitle,
-                  academicTrack: branding.academicTrack,
-                  badgeText: branding.tagline,
+                  academicTrack: branding.localizedAcademicTrack(context),
+                  badgeText: branding.localizedTagline(context),
                 ),
 
                 const SizedBox(height: AppSpacing.s12),
@@ -193,8 +190,8 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                       icon: const Icon(Icons.campaign_rounded, size: 18),
                       label: Text(context.l10n.sendAnnouncementToStudents),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.primary,
-                        side: const BorderSide(color: AppColors.primary),
+                        foregroundColor: const Color(0xFF38BDF8),
+                        side: const BorderSide(color: Color(0xFF38BDF8)),
                         padding: const EdgeInsets.symmetric(
                           horizontal: AppSpacing.s16,
                           vertical: AppSpacing.s12,
@@ -323,7 +320,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                           Text(
                             context.l10n.viewStudentsAndApprovals,
                             style: const TextStyle(
-                              color: AppColors.primary,
+                              color: Color(0xFF38BDF8),
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
                             ),
@@ -392,7 +389,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                           Text(
                             context.l10n.clickToManageAndControl,
                             style: const TextStyle(
-                              color: AppColors.primary,
+                              color: Color(0xFF38BDF8),
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
                             ),
@@ -469,7 +466,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                           Text(
                             context.l10n.lectureWatchingAnalytics,
                             style: const TextStyle(
-                              color: AppColors.primary,
+                              color: Color(0xFF38BDF8),
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
                             ),
@@ -544,7 +541,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                           Text(
                             context.l10n.studentAnnouncementsAndUpdates,
                             style: const TextStyle(
-                              color: AppColors.primary,
+                              color: Color(0xFF38BDF8),
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
                             ),
@@ -937,7 +934,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                       ),
                     ),
 
-                    // Service 8: Platform Onboarding
+                    // Service 8: Platform & Academy Settings
                     AppCard(
                       variant: AppCardVariant.elevated,
                       onTap: () => context.push(AppRouter.platformOnboarding),
@@ -946,7 +943,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                           const CircleAvatar(
                             backgroundColor: AppColors.primaryLight,
                             child: Icon(
-                              Icons.school_rounded,
+                              Icons.settings_suggest_rounded,
                               color: AppColors.primary,
                             ),
                           ),
@@ -956,7 +953,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  context.l10n.academyOnboardingWizardTitle,
+                                  context.l10n.settingsServiceCardTitle,
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 15,
@@ -965,7 +962,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  context.l10n.academyOnboardingWizardDesc,
+                                  context.l10n.settingsServiceCardDesc,
                                   style: const TextStyle(
                                     fontSize: 12,
                                     color: AppColors.textSecondary,
@@ -1069,142 +1066,23 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                     },
                   ),
                   const SizedBox(height: AppSpacing.s12),
-                  ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: groupsState.groups.length,
-                    separatorBuilder: (_, __) =>
-                        const SizedBox(height: AppSpacing.s12),
-                    itemBuilder: (context, idx) {
-                      final group = groupsState.groups[idx];
-                      final encodedName = Uri.encodeComponent(group.name);
-                      return AppCard(
-                        variant: AppCardVariant.elevated,
-                        padding: const EdgeInsets.all(AppSpacing.s16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                CircleAvatar(
-                                  backgroundColor: AppColors.primaryLight,
-                                  child: Text(
-                                    group.name.isNotEmpty ? group.name[0] : 'G',
-                                    style: const TextStyle(
-                                      color: AppColors.primary,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: AppSpacing.s12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        group.name,
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColors.textPrimary,
-                                        ),
-                                      ),
-                                      if (group.description != null &&
-                                          group.description!.isNotEmpty)
-                                        Text(
-                                          group.description!,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
-                                            fontSize: 12,
-                                            color: AppColors.textSecondary,
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                ),
-                                AppBadge(
-                                  label: group.level,
-                                  variant: AppBadgeVariant.active,
-                                ),
-                              ],
+                  ResponsiveGrid(
+                    mobileColumns: 1,
+                    tabletColumns: 2,
+                    desktopColumns: 3,
+                    spacing: AppSpacing.s16,
+                    runSpacing: AppSpacing.s16,
+                    children: groupsState.groups
+                        .map(
+                          (group) => InteractiveGroupCard(
+                            group: group,
+                            onTap: () => context.push(
+                              '${AppRouter.groupsList}/${group.id}',
+                              extra: group,
                             ),
-                            const SizedBox(height: AppSpacing.s12),
-                            const Divider(height: 1),
-                            const SizedBox(height: AppSpacing.s8),
-                            Wrap(
-                              spacing: AppSpacing.s8,
-                              runSpacing: AppSpacing.s8,
-                              children: [
-                                ActionChip(
-                                  avatar: const Icon(
-                                    Icons.folder_shared_rounded,
-                                    size: 16,
-                                    color: AppColors.primary,
-                                  ),
-                                  label: Text(
-                                    context.l10n.chipContentAndHandouts,
-                                  ),
-                                  onPressed: () => context.push(
-                                    '${AppRouter.teacherGroupContent.replaceAll(':groupId', group.id)}?name=$encodedName',
-                                  ),
-                                ),
-                                ActionChip(
-                                  avatar: const Icon(
-                                    Icons.assignment_rounded,
-                                    size: 16,
-                                    color: AppColors.warning,
-                                  ),
-                                  label: Text(
-                                    context.l10n.assignmentsListTitle,
-                                  ),
-                                  onPressed: () => context.push(
-                                    '${AppRouter.teacherGroupAssignments.replaceAll(':groupId', group.id)}?name=$encodedName',
-                                  ),
-                                ),
-                                ActionChip(
-                                  avatar: const Icon(
-                                    Icons.quiz_rounded,
-                                    size: 16,
-                                    color: AppColors.primary,
-                                  ),
-                                  label: Text(context.l10n.examsListTitle),
-                                  onPressed: () => context.push(
-                                    '${AppRouter.teacherGroupExams.replaceAll(':groupId', group.id)}?name=$encodedName',
-                                  ),
-                                ),
-                                ActionChip(
-                                  avatar: const Icon(
-                                    Icons.fact_check_rounded,
-                                    size: 16,
-                                    color: AppColors.success,
-                                  ),
-                                  label: Text(
-                                    context.l10n.chipRecordAttendance,
-                                  ),
-                                  onPressed: () => context.push(
-                                    '${AppRouter.teacherAttendance}?groupId=${group.id}',
-                                  ),
-                                ),
-                                ActionChip(
-                                  avatar: const Icon(
-                                    Icons.arrow_forward_rounded,
-                                    size: 16,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                  label: Text(context.l10n.groupDetailsAction),
-                                  onPressed: () => context.push(
-                                    '${AppRouter.groupsList}/${group.id}',
-                                    extra: group,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      );
-                    },
+                          ),
+                        )
+                        .toList(),
                   ),
                 ],
 
@@ -1213,7 +1091,6 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
             ),
           ),
         ),
-      ),
     );
   }
 }

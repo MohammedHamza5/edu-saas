@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_button.dart';
@@ -25,7 +26,7 @@ class ExamResultPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('نتيجة الامتحان'),
+        title: Text(context.l10n.examResultTitle),
         centerTitle: true,
         automaticallyImplyLeading: false,
       ),
@@ -57,7 +58,7 @@ class ExamResultPage extends StatelessWidget {
                   const SizedBox(height: AppSpacing.s16),
 
                   Text(
-                    isPassed ? 'تهانينا! لقد اجتزت الامتحان بنجاح' : 'للأسف لم تتجاوز درجة النجاح',
+                    isPassed ? context.l10n.congratulationsPassed : context.l10n.sorryNotPassed,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 18,
@@ -105,7 +106,7 @@ class ExamResultPage extends StatelessWidget {
                     ],
                   ),
                   Text(
-                    'النسبة المئوية: ${percentage.toStringAsFixed(1)}%',
+                    context.l10n.percentageLabel(percentage.toStringAsFixed(1)),
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
@@ -115,7 +116,7 @@ class ExamResultPage extends StatelessWidget {
                   if (exam.passingScore != null) ...[
                     const SizedBox(height: AppSpacing.s6),
                     Text(
-                      'درجة النجاح المطلوبة: ${exam.passingScore} من ${exam.maxScore}',
+                      context.l10n.requiredPassingScore(exam.passingScore!, exam.maxScore),
                       style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
                     ),
                   ],
@@ -131,20 +132,20 @@ class ExamResultPage extends StatelessWidget {
               child: Column(
                 children: [
                   _buildDetailRow(
-                    'تاريخ التسليم',
-                    attempt.submittedAt != null ? dateFormat.format(attempt.submittedAt!) : 'الآن',
+                    context.l10n.examSubmissionDateTitle,
+                    attempt.submittedAt != null ? dateFormat.format(attempt.submittedAt!) : context.l10n.justNow,
                   ),
                   const Divider(height: AppSpacing.s16, color: AppColors.border),
                   _buildDetailRow(
-                    'حالة المحاولة',
-                    attempt.status.labelAr,
+                    context.l10n.attemptStatusLabel,
+                    attempt.status.localizedLabel(context),
                     valueColor: attempt.status.color,
                   ),
                   if (exam.allowRetake) ...[
                     const Divider(height: AppSpacing.s16, color: AppColors.border),
                     _buildDetailRow(
-                      'سياسة إعادة الامتحان',
-                      'مسموحة (يتم اعتماد أعلى درجة)',
+                      context.l10n.retakePolicyLabel,
+                      context.l10n.retakeAllowedBestScore,
                     ),
                   ],
                 ],
@@ -154,7 +155,7 @@ class ExamResultPage extends StatelessWidget {
             const SizedBox(height: AppSpacing.s32),
 
             AppButton(
-              text: 'العودة لقائمة الامتحانات',
+              text: context.l10n.backToExamsList,
               icon: Icons.home_outlined,
               onPressed: () {
                 Navigator.of(context).pop();

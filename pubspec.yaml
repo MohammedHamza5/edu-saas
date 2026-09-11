@@ -55,6 +55,7 @@ flutter:
   generate: true
   assets:
     - .env
+    - assets/images/
   fonts:
     - family: Cairo
       fonts:

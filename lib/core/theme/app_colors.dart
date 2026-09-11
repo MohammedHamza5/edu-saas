@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
-  // Primary palette: Deep Mathematical Indigo & Cyan Electric Accents
-  static const Color primary = Color(0xFF4F46E5); // Vibrant Indigo
+  // Primary palette: Luminous Mathematical Indigo & Cyan Electric Accents
+  static const Color primary = Color(0xFF6366F1); // Vibrant Indigo 500 (luminous on dark)
   static const Color primaryDark = Color(0xFF1E1B4B);
   static const Color primaryLight = Color(0xFF38BDF8); // Cyan Accent
 
@@ -28,11 +28,11 @@ class AppColors {
   static const Color surfaceVariantDark = Color(0xFF1E293B);
   static const Color surfaceElevated = Color(0xFF111827); // Elevated Card Glass
 
-  // Text colors (Dark Canvas Ergonomics)
-  static const Color textPrimary = Color(0xFFFFFFFF);   // High Contrast Crisp White
-  static const Color textSecondary = Color(0xFF94A3B8); // Sleek Slate 400
-  static const Color textSecondaryDark = Color(0xFF94A3B8);
-  static const Color textMuted = Color(0xFF64748B);     // Slate 500
+  // Text colors (Dark Canvas Ergonomics — High Contrast AAA)
+  static const Color textPrimary = Color(0xFFFFFFFF);   // High Contrast Crisp White (100% luminance)
+  static const Color textSecondary = Color(0xFFE2E8F0); // Bright Slate 200 (crystal clear on dark)
+  static const Color textSecondaryDark = Color(0xFFE2E8F0);
+  static const Color textMuted = Color(0xFF94A3B8);     // Slate 400 (secondary helper captions)
 
   // Semantic borders & dividers
   static const Color border = Color(0xFF1E293B);        // Slate 800

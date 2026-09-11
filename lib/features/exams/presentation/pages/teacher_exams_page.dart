@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/responsive_breakpoints.dart';
 import '../../../../core/widgets/app_empty_view.dart';
 import '../../../../core/widgets/app_error_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
+import '../../../../core/widgets/responsive_container.dart';
+import '../../../../core/widgets/responsive_grid.dart';
 import '../../domain/entities/exam_entity.dart';
 import '../cubit/exams_cubit.dart';
 import '../cubit/exams_state.dart';
@@ -85,7 +89,7 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
             return BlocBuilder<ExamsCubit, ExamsState>(
               builder: (context, state) {
                 if (state is! TeacherExamsLoaded) {
-                  return const Center(child: AppLoadingView());
+                  return const AppLoadingView.list(count: 3);
                 }
 
                 final attempts = state.attempts;
@@ -132,7 +136,10 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
                             ],
                           ),
                           Text(
-                            'النسخة: v${exam.activeVersion?.versionNumber ?? 1} (مجمدة) • عدد المحاولات: ${attempts.length}',
+                            context.l10n.examDetailsVersionFrozen(
+                              exam.activeVersion?.versionNumber ?? 1,
+                              attempts.length,
+                            ),
                             style: const TextStyle(
                               fontSize: 12,
                               color: AppColors.textMuted,
@@ -145,16 +152,19 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
                             children: [
                               OutlinedButton.icon(
                                 icon: const Icon(Icons.copy_outlined, size: 16),
-                                label: Text('إنشاء نسخة جديدة v${(exam.activeVersion?.versionNumber ?? 1) + 1}'),
+                                label: Text(context.l10n.createNewVersionButton(
+                                  (exam.activeVersion?.versionNumber ?? 1) + 1,
+                                )),
                                 onPressed: () async {
                                   final cubit = context.read<ExamsCubit>();
                                   final messenger = ScaffoldMessenger.of(context);
+                                  final successMsg = context.l10n.newVersionCreatedSuccess;
                                   Navigator.of(ctx).pop();
                                   final success = await cubit.createNewVersion(exam.id);
                                   if (mounted && success) {
                                     messenger.showSnackBar(
-                                      const SnackBar(
-                                        content: Text('تم إنشاء مسودة جديدة مع تجميد النسخة السابقة'),
+                                      SnackBar(
+                                        content: Text(successMsg),
                                         backgroundColor: AppColors.success,
                                       ),
                                     );
@@ -171,12 +181,12 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
                     // Attempts List
                     Expanded(
                       child: isLoading
-                          ? const Center(child: AppLoadingView())
+                          ? const AppLoadingView.list(count: 3)
                           : attempts.isEmpty
-                              ? const Center(
+                              ? Center(
                                   child: AppEmptyView(
-                                    message: 'لا توجد محاولات تسليم حتى الآن',
-                                    subtitle: 'ستظهر هنا درجات ومحاولات الطلاب فور انتهائهم من الامتحان',
+                                    message: context.l10n.noAttemptsYet,
+                                    subtitle: context.l10n.noAttemptsYetSubtitle,
                                     icon: Icons.quiz_outlined,
                                   ),
                                 )
@@ -207,7 +217,7 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
                                             child: Text(
                                               att.studentName != null && att.studentName!.isNotEmpty
                                                   ? att.studentName!.characters.first
-                                                  : 'ط',
+                                                  : context.l10n.studentInitialFallback,
                                               style: const TextStyle(
                                                 color: AppColors.primary,
                                                 fontWeight: FontWeight.bold,
@@ -221,7 +231,7 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
                                               crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
                                                 Text(
-                                                  att.studentName ?? 'طالب',
+                                                  att.studentName ?? context.l10n.studentFallbackName,
                                                   style: const TextStyle(
                                                     fontSize: 14,
                                                     fontWeight: FontWeight.bold,
@@ -232,7 +242,7 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
                                                 Text(
                                                   att.submittedAt != null
                                                       ? dateFormat.format(att.submittedAt!)
-                                                      : 'بدأ: ${dateFormat.format(att.startedAt)}',
+                                                      : context.l10n.startedDatePrefix(dateFormat.format(att.startedAt)),
                                                   style: const TextStyle(
                                                     fontSize: 11,
                                                     color: AppColors.textMuted,
@@ -256,7 +266,7 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
                                                       AppSpacing.radiusSmall),
                                                 ),
                                                 child: Text(
-                                                  att.status.labelAr,
+                                                  att.status.localizedLabel(context),
                                                   style: TextStyle(
                                                     fontSize: 10,
                                                     fontWeight: FontWeight.bold,
@@ -301,19 +311,19 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
-          tooltip: 'رجوع',
+          tooltip: context.l10n.backTooltip,
           onPressed: () => context.canPop()
               ? context.pop()
               : context.go(AppRouter.teacherDashboard),
         ),
         title: Text(_selectedGroupName != null
-            ? 'امتحانات: $_selectedGroupName'
-            : 'إدارة الامتحانات'),
+            ? context.l10n.groupExamsTitle(_selectedGroupName!)
+            : context.l10n.teacherExamsTitle),
         centerTitle: true,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            tooltip: 'تحديث',
+            tooltip: context.l10n.refreshTooltip,
             onPressed: _loadExams,
           ),
         ],
@@ -342,89 +352,95 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
               },
               backgroundColor: AppColors.primary,
               icon: const Icon(Icons.add, color: Colors.white),
-              label: const Text(
-                'بناء امتحان',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              label: Text(
+                context.l10n.buildExamAction,
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
               ),
             ),
-      body: Padding(
-        padding: const EdgeInsets.all(AppSpacing.s16),
-        child: Column(
-          children: [
-            TeacherGroupFilterBar(
-              selectedGroupId: _selectedGroupId,
-              onGroupChanged: _onGroupChanged,
-              onRefresh: _loadExams,
-            ),
-            Expanded(
-              child: BlocBuilder<ExamsCubit, ExamsState>(
-                builder: (context, state) {
-                  if (state is ExamsLoading) {
-                    return const Center(child: AppLoadingView());
-                  }
+      body: Center(
+        child: ResponsiveContainer(
+          maxWidth: ResponsiveBreakpoints.maxContentWidth,
+          padding: const EdgeInsets.all(AppSpacing.s16),
+          child: Column(
+            children: [
+              TeacherGroupFilterBar(
+                selectedGroupId: _selectedGroupId,
+                onGroupChanged: _onGroupChanged,
+                onRefresh: _loadExams,
+              ),
+              Expanded(
+                child: BlocBuilder<ExamsCubit, ExamsState>(
+                  builder: (context, state) {
+                    if (state is ExamsLoading) {
+                      return const AppLoadingView.cardsGrid(count: 4, columns: 2);
+                    }
 
-                  if (state is ExamsError) {
-                    return Center(
-                      child: AppErrorView(
-                        message: state.message,
-                        onRetry: _loadExams,
-                      ),
-                    );
-                  }
-
-                  if (state is TeacherExamsLoaded) {
-                    final exams = state.exams;
-
-                    if (exams.isEmpty) {
+                    if (state is ExamsError) {
                       return Center(
-                        child: AppEmptyView(
-                          message: 'لا توجد امتحانات مضافة لهذه المجموعة',
-                          subtitle:
-                              'ابدأ ببناء أول امتحان رقمي للطلاب مع النسخ المجمدة والتصحيح الآلي',
-                          actionText: _selectedGroupId != null ? 'بناء أول امتحان' : null,
-                          onAction: _selectedGroupId == null
-                              ? null
-                              : () {
-                                  Navigator.of(context).push<void>(
-                                    MaterialPageRoute<void>(
-                                      builder: (_) => BlocProvider.value(
-                                        value: context.read<ExamsCubit>(),
-                                        child: CreateExamPage(
-                                          groupId: _selectedGroupId!,
-                                          groupName: _selectedGroupName,
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                },
-                          icon: Icons.quiz_outlined,
+                        child: AppErrorView(
+                          message: state.message,
+                          onRetry: _loadExams,
                         ),
                       );
                     }
 
-                    return RefreshIndicator(
-                      onRefresh: () async => _loadExams(),
-                      child: ListView.separated(
-                        itemCount: exams.length,
-                        separatorBuilder: (_, __) =>
-                            const SizedBox(height: AppSpacing.s12),
-                        itemBuilder: (context, index) {
-                          final exam = exams[index];
-                          return ExamCard(
-                            exam: exam,
-                            isTeacher: true,
-                            onTap: () => _showExamDetailsSheet(exam),
-                          );
-                        },
-                      ),
-                    );
-                  }
+                    if (state is TeacherExamsLoaded) {
+                      final exams = state.exams;
 
-                  return const SizedBox.shrink();
-                },
+                      if (exams.isEmpty) {
+                        return Center(
+                          child: AppEmptyView(
+                            message: context.l10n.noExamsForGroup,
+                            subtitle: context.l10n.noExamsForGroupSubtitle,
+                            actionText: _selectedGroupId != null ? context.l10n.buildFirstExam : null,
+                            onAction: _selectedGroupId == null
+                                ? null
+                                : () {
+                                    Navigator.of(context).push<void>(
+                                      MaterialPageRoute<void>(
+                                        builder: (_) => BlocProvider.value(
+                                          value: context.read<ExamsCubit>(),
+                                          child: CreateExamPage(
+                                            groupId: _selectedGroupId!,
+                                            groupName: _selectedGroupName,
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                            icon: Icons.quiz_outlined,
+                          ),
+                        );
+                      }
+
+                      return RefreshIndicator(
+                        onRefresh: () async => _loadExams(),
+                        child: SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          child: ResponsiveGrid(
+                            mobileColumns: 1,
+                            tabletColumns: 2,
+                            desktopColumns: 2,
+                            spacing: AppSpacing.s16,
+                            runSpacing: AppSpacing.s16,
+                            children: exams.map((exam) {
+                              return ExamCard(
+                                exam: exam,
+                                isTeacher: true,
+                                onTap: () => _showExamDetailsSheet(exam),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      );
+                    }
+
+                    return const SizedBox.shrink();
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

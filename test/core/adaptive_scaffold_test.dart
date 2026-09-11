@@ -42,7 +42,7 @@ void main() {
   }
 
   group('AdaptiveScaffold Responsive Layout Tests', () {
-    testWidgets('Renders NavigationBar on compact mobile (<600dp)', (tester) async {
+    testWidgets('Renders Mobile Web TopBar and Drawer on compact mobile (<600dp)', (tester) async {
       tester.view.physicalSize = const Size(390, 844);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -50,9 +50,52 @@ void main() {
       await tester.pumpWidget(buildTestWidget(screenSize: const Size(390, 844)));
       await tester.pumpAndSettle();
 
-      expect(find.byType(NavigationBar), findsOneWidget);
+      // Ensure NO bottom NavigationBar on mobile web
+      expect(find.byType(NavigationBar), findsNothing);
       expect(find.byType(NavigationRail), findsNothing);
       expect(find.text('Body Content'), findsOneWidget);
+
+      // Verify Mobile Web Header with menu button and branding
+      expect(find.byIcon(Icons.menu_rounded), findsOneWidget);
+      expect(find.text('Edu SaaS Platform'), findsOneWidget);
+
+      // Tap menu button to open drawer
+      await tester.tap(find.byIcon(Icons.menu_rounded));
+      await tester.pumpAndSettle();
+
+      // Drawer is open with all destinations and footer
+      expect(find.byType(Drawer), findsOneWidget);
+      expect(find.text('الرئيسية'), findsOneWidget);
+      expect(find.text('المجموعات'), findsOneWidget);
+      expect(find.text('الطلاب'), findsOneWidget);
+      expect(find.text('Logout'), findsOneWidget);
+    });
+
+    testWidgets('Tapping destination in Mobile Drawer navigates and closes drawer', (tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      int? selectedIndex;
+      await tester.pumpWidget(
+        buildTestWidget(
+          screenSize: const Size(390, 844),
+          onNavigationIndexChanged: (idx) => selectedIndex = idx,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Open drawer
+      await tester.tap(find.byIcon(Icons.menu_rounded));
+      await tester.pumpAndSettle();
+
+      // Tap 'المجموعات'
+      await tester.tap(find.text('المجموعات'));
+      await tester.pumpAndSettle();
+
+      // Drawer is closed and callback received index 1
+      expect(selectedIndex, 1);
+      expect(find.byType(Drawer), findsNothing);
     });
 
     testWidgets('Renders NavigationRail on medium tablet (600-839dp)', (tester) async {

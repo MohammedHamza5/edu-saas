@@ -1,0 +1,19 @@
+# Dr. Antounios Ashraf Platform - EduSaaS
+
+> EduSaaS is a multi-tenant American High School Mathematics platform designed for SAT, EST, and ACT test preparation, structured group learning, and academic tracking.
+
+## Overview
+- Platform Name: Dr. Antounios Ashraf Platform (EduSaaS)
+- Purpose: High-school mathematics education, automated quizzes, timed exams, video lectures, and student performance metrics.
+- Primary Language: Arabic (RTL) with English (LTR) mathematical terminology.
+- Technology Stack: Flutter Web (CanvasKit / Wasm), Supabase PostgreSQL, Row Level Security (RLS), Cloudflare Pages / Firebase CDN.
+
+## Key Portals
+- Teacher Portal: `/teacher` - Management of student groups, academic content, assignments, attendance, and exam grades.
+- Student Portal: `/student` - Access to assigned mathematical study groups, interactive practice, video materials, and results.
+- Parent Portal: `/parent` - Real-time monitoring of attendance, exam scores, and student domain mastery.
+
+## Standards & Security
+- Isolation: Multi-Tenant database isolation enforced strictly via PostgreSQL Row Level Security (RLS).
+- Integrity: Immutable historical academic snapshots for exams and submissions.
+- Performance: WebAssembly-ready client runtime with responsive desktop, tablet, and mobile layouts.

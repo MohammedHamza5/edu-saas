@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../theme/app_colors.dart';
 
 import 'animated_math_background.dart';
 
@@ -19,10 +18,10 @@ class MathGridBackground extends StatelessWidget {
     super.key,
     required this.child,
     this.gridColor,
-    this.gridSpacing = 32.0,
-    this.opacity = 0.045,
-    this.showCartesianAxes = false,
-    this.showFormulas = false,
+    this.gridSpacing = 36.0,
+    this.opacity = 0.18,
+    this.showCartesianAxes = true,
+    this.showFormulas = true,
     this.animated = true,
   });
 
@@ -30,7 +29,7 @@ class MathGridBackground extends StatelessWidget {
   Widget build(BuildContext context) {
     if (animated) {
       return AnimatedMathBackground(
-        gridColor: gridColor,
+        gridColor: gridColor ?? const Color(0xFF38BDF8),
         gridSpacing: gridSpacing,
         opacity: opacity,
         showAxes: showCartesianAxes,
@@ -39,7 +38,7 @@ class MathGridBackground extends StatelessWidget {
       );
     }
 
-    final effectiveColor = gridColor ?? AppColors.primary;
+    final effectiveColor = gridColor ?? const Color(0xFF38BDF8);
 
     return Stack(
       children: [

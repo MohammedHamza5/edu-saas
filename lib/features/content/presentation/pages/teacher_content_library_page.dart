@@ -2,9 +2,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/responsive_breakpoints.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_empty_view.dart';
 import '../../../../core/widgets/app_error_view.dart';
@@ -108,9 +110,9 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
     ).then((created) {
       if (created == true && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             backgroundColor: AppColors.success,
-            content: Text('تم إنشاء ونشر المحتوى التعليمي بنجاح'),
+            content: Text(context.l10n.contentCreatedToast),
           ),
         );
       }
@@ -147,7 +149,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
     ).then((updated) {
       if (updated == true && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('تم تحديث المحتوى التعليمي بنجاح')),
+          SnackBar(content: Text(context.l10n.contentUpdatedToast)),
         );
       }
     });
@@ -169,9 +171,9 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
       onUploadSuccess: () {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               backgroundColor: AppColors.success,
-              content: Text('تم بدء معالجة ورفع فيديو المحاضرة بنجاح'),
+              content: Text(context.l10n.videoProcessingStartedToast),
             ),
           );
           _loadContent();
@@ -184,14 +186,14 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final title = _selectedGroupName != null
-        ? 'محتوى: $_selectedGroupName'
-        : 'مكتبة المحتوى التعليمي';
+        ? context.l10n.groupContentPrefix(_selectedGroupName!)
+        : context.l10n.teacherContentLibraryTitle;
 
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
-          tooltip: 'رجوع',
+          tooltip: context.l10n.backTooltip,
           onPressed: () => context.canPop()
               ? context.pop()
               : context.go(AppRouter.teacherDashboard),
@@ -219,7 +221,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
-            tooltip: 'تحديث',
+            tooltip: context.l10n.refreshTooltip,
             onPressed: _loadContent,
           ),
         ],
@@ -229,13 +231,13 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
           : FloatingActionButton.extended(
               onPressed: _openCreateDialog,
               icon: const Icon(Icons.add_rounded),
-              label: const Text('إضافة محتوى'),
+              label: Text(context.l10n.addContentAction),
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
             ),
       body: Center(
         child: ResponsiveContainer(
-          maxWidth: 1000,
+          maxWidth: ResponsiveBreakpoints.maxContentWidth,
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.s16,
             vertical: AppSpacing.s12,
@@ -262,11 +264,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                   },
                   builder: (context, state) {
                     if (state is ContentLoading) {
-                      return const Center(
-                        child: AppLoadingView(
-                          style: AppLoadingStyle.skeletonList,
-                        ),
-                      );
+                      return const AppLoadingView.cardsGrid(count: 4, columns: 2);
                     }
 
                     if (state is ContentError) {
@@ -321,7 +319,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                       SizedBox(
                                         width: 140,
                                         child: _buildStatMiniCard(
-                                          label: 'إجمالي المواد',
+                                          label: context.l10n.totalMaterials,
                                           count: state.items.length,
                                           color: AppColors.primary,
                                           icon: Icons.layers_rounded,
@@ -331,7 +329,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                       SizedBox(
                                         width: 140,
                                         child: _buildStatMiniCard(
-                                          label: 'المنشور للطلاب',
+                                          label: context.l10n.publishedToStudents,
                                           count: state.publishedCount,
                                           color: AppColors.success,
                                           icon: Icons
@@ -342,7 +340,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                       SizedBox(
                                         width: 150,
                                         child: _buildStatMiniCard(
-                                          label: 'مسودات قيد الإعداد',
+                                          label: context.l10n.draftsInProgress,
                                           count: state.draftCount,
                                           color: AppColors.warning,
                                           icon: Icons.edit_note_rounded,
@@ -357,7 +355,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                 children: [
                                   Expanded(
                                     child: _buildStatMiniCard(
-                                      label: 'إجمالي المواد',
+                                      label: context.l10n.totalMaterials,
                                       count: state.items.length,
                                       color: AppColors.primary,
                                       icon: Icons.layers_rounded,
@@ -366,7 +364,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                   const SizedBox(width: AppSpacing.s8),
                                   Expanded(
                                     child: _buildStatMiniCard(
-                                      label: 'المنشور للطلاب',
+                                      label: context.l10n.publishedToStudents,
                                       count: state.publishedCount,
                                       color: AppColors.success,
                                       icon: Icons.check_circle_outline_rounded,
@@ -375,7 +373,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                   const SizedBox(width: AppSpacing.s8),
                                   Expanded(
                                     child: _buildStatMiniCard(
-                                      label: 'مسودات قيد الإعداد',
+                                      label: context.l10n.draftsInProgress,
                                       count: state.draftCount,
                                       color: AppColors.warning,
                                       icon: Icons.edit_note_rounded,
@@ -391,7 +389,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                           // Search Field
                           AppTextField(
                             controller: _searchController,
-                            hintText: 'ابحث في محتويات ومذكرات المجموعة...',
+                            hintText: context.l10n.searchContentTeacherHint,
                             prefixIcon: const Icon(
                               Icons.search_rounded,
                               color: AppColors.textSecondary,
@@ -422,7 +420,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                             child: Row(
                               children: [
                                 _buildFilterChip(
-                                  label: 'الكل (${state.items.length})',
+                                  label: context.l10n.filterAllWithCount(state.items.length),
                                   isSelected: _activeFilter == null,
                                   onSelected: () {
                                     setState(() => _activeFilter = null);
@@ -433,7 +431,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                 ),
                                 const SizedBox(width: AppSpacing.s8),
                                 _buildFilterChip(
-                                  label: 'المنشور (${state.publishedCount})',
+                                  label: context.l10n.filterPublishedWithCount(state.publishedCount),
                                   isSelected:
                                       _activeFilter == ContentStatus.published,
                                   onSelected: () {
@@ -448,7 +446,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                 ),
                                 const SizedBox(width: AppSpacing.s8),
                                 _buildFilterChip(
-                                  label: 'المسودات (${state.draftCount})',
+                                  label: context.l10n.filterDraftsWithCount(state.draftCount),
                                   isSelected:
                                       _activeFilter == ContentStatus.draft,
                                   onSelected: () {
@@ -462,7 +460,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                 ),
                                 const SizedBox(width: AppSpacing.s8),
                                 _buildFilterChip(
-                                  label: 'المؤرشف (${state.archivedCount})',
+                                  label: context.l10n.filterArchivedWithCount(state.archivedCount),
                                   isSelected:
                                       _activeFilter == ContentStatus.archived,
                                   onSelected: () {
@@ -487,26 +485,26 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                 ? Center(
                                     child: AppEmptyView(
                                       message:
-                                          'لا يوجد محتوى تعليمي في هذا التصنيف بعد',
+                                          context.l10n.emptyContentCategory,
                                       icon: Icons.folder_open_rounded,
-                                      actionText: 'إضافة أول محتوى',
+                                      actionText: context.l10n.addFirstContent,
                                       onAction: _openCreateDialog,
                                     ),
                                   )
                                 : items.isEmpty
-                                ? const Center(
+                                ? Center(
                                     child: Column(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Icon(
+                                        const Icon(
                                           Icons.search_off_rounded,
                                           size: 48,
                                           color: AppColors.textMuted,
                                         ),
-                                        SizedBox(height: AppSpacing.s12),
+                                        const SizedBox(height: AppSpacing.s12),
                                         Text(
-                                          'لا توجد مواد تطابق المعايير المختارة',
-                                          style: TextStyle(
+                                          context.l10n.noMaterialsMatchFilter,
+                                          style: const TextStyle(
                                             fontWeight: FontWeight.bold,
                                             color: AppColors.textSecondary,
                                           ),
@@ -518,10 +516,10 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                     padding: const EdgeInsets.only(bottom: 24),
                                     itemCount: items.length,
                                     buildDefaultDragHandles: false,
-                                    onReorder: (oldIndex, newIndex) {
+                                    onReorder: (oldIdx, newIdx) {
                                       context.read<ContentCubit>().reorderItems(
-                                        oldIndex,
-                                        newIndex,
+                                        oldIdx,
+                                        newIdx,
                                       );
                                     },
                                     itemBuilder: (context, index) {
@@ -529,7 +527,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                       return Padding(
                                         key: ValueKey(item.id),
                                         padding: const EdgeInsets.only(
-                                          bottom: AppSpacing.s8,
+                                          bottom: AppSpacing.s10,
                                         ),
                                         child: ContentItemCard(
                                           content: item,
@@ -554,7 +552,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                                 : ContentStatus.published;
                                             context
                                                 .read<ContentCubit>()
-                                                .updateStatus(
+                                                .updateContent(
                                                   contentId: item.id,
                                                   status: newStatus,
                                                 );
@@ -565,7 +563,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                                 : ContentStatus.archived;
                                             context
                                                 .read<ContentCubit>()
-                                                .updateStatus(
+                                                .updateContent(
                                                   contentId: item.id,
                                                   status: newStatus,
                                                 );
@@ -576,11 +574,11 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                             final confirm = await showDialog<bool>(
                                               context: context,
                                               builder: (ctx) => AlertDialog(
-                                                title: const Text(
-                                                  'تأكيد الحذف',
+                                                title: Text(
+                                                  ctx.l10n.deleteConfirmTitle,
                                                 ),
                                                 content: Text(
-                                                  'هل أنت متأكد من حذف "${item.title}" نهائياً؟',
+                                                  ctx.l10n.deleteItemConfirmMessage(item.title),
                                                 ),
                                                 actions: [
                                                   TextButton(
@@ -588,7 +586,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                                         Navigator.of(
                                                           ctx,
                                                         ).pop(false),
-                                                    child: const Text('إلغاء'),
+                                                    child: Text(ctx.l10n.cancel),
                                                   ),
                                                   TextButton(
                                                     onPressed: () =>
@@ -599,7 +597,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                                       foregroundColor:
                                                           AppColors.error,
                                                     ),
-                                                    child: const Text('حذف'),
+                                                    child: Text(ctx.l10n.deleteAction),
                                                   ),
                                                 ],
                                               ),

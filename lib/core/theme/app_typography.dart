@@ -20,7 +20,7 @@ class AppTypography {
     fontFamilyFallback: fontFamilyFallback,
     fontSize: 32,
     fontWeight: FontWeight.w800,
-    color: AppColors.primary,
+    color: Color(0xFF38BDF8),
     height: 1.1,
   );
 

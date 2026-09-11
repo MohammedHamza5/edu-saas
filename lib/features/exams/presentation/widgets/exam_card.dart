@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_card.dart';
@@ -20,7 +21,7 @@ class ExamCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppCard(
       onTap: onTap,
-      variant: AppCardVariant.standard,
+      variant: AppCardVariant.elevated,
       padding: const EdgeInsets.all(AppSpacing.s16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,7 +60,7 @@ class ExamCard extends StatelessWidget {
                     if (exam.groupName != null) ...[
                       const SizedBox(height: AppSpacing.s4),
                       Text(
-                        'المجموعة: ${exam.groupName}',
+                        context.l10n.groupColon(exam.groupName!),
                         style: const TextStyle(
                           fontSize: 12,
                           color: AppColors.textMuted,
@@ -70,7 +71,7 @@ class ExamCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.s8),
-              _buildStatusBadge(),
+              _buildStatusBadge(context),
             ],
           ),
 
@@ -79,24 +80,23 @@ class ExamCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.s12),
 
           // Meta tags row: Duration, Max score, Passing score
-          Row(
+          Wrap(
+            spacing: AppSpacing.s8,
+            runSpacing: AppSpacing.s6,
             children: [
               _buildMetaTag(
                 Icons.timer_outlined,
-                '${exam.durationMinutes} دقيقة',
+                context.l10n.minutesDuration(exam.durationMinutes),
               ),
-              const SizedBox(width: AppSpacing.s8),
               _buildMetaTag(
                 Icons.grade_outlined,
-                '${exam.maxScore} درجة',
+                context.l10n.scorePoints(exam.maxScore),
               ),
-              if (exam.passingScore != null) ...[
-                const SizedBox(width: AppSpacing.s8),
+              if (exam.passingScore != null)
                 _buildMetaTag(
                   Icons.verified_outlined,
-                  'النجاح: ${exam.passingScore}',
+                  context.l10n.passingScoreLabel(exam.passingScore!),
                 ),
-              ],
             ],
           ),
 
@@ -111,11 +111,18 @@ class ExamCard extends StatelessWidget {
                   color: AppColors.textSecondary,
                 ),
                 const SizedBox(width: AppSpacing.s4),
-                Text(
-                  'النسخة: v${exam.activeVersion?.versionNumber ?? 1} | المحاولات: ${exam.attemptsCount}',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textSecondary,
+                Expanded(
+                  child: Text(
+                    context.l10n.examVersionAttempts(
+                      exam.activeVersion?.versionNumber ?? 1,
+                      exam.attemptsCount,
+                    ),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
@@ -154,7 +161,7 @@ class ExamCard extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusBadge() {
+  Widget _buildStatusBadge(BuildContext context) {
     if (isTeacher) {
       final isPublished = exam.activeVersion?.isPublished ?? true;
       return Container(
@@ -168,7 +175,7 @@ class ExamCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
         ),
         child: Text(
-          isPublished ? 'منشور' : 'مسودة',
+          isPublished ? context.l10n.publishedBadge : context.l10n.draftBadge,
           style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.bold,
@@ -190,9 +197,9 @@ class ExamCard extends StatelessWidget {
           color: AppColors.primary.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
         ),
-        child: const Text(
-          'متاح للبدء',
-          style: TextStyle(
+        child: Text(
+          context.l10n.availableToStart,
+          style: const TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.bold,
             color: AppColors.primary,
@@ -211,9 +218,9 @@ class ExamCard extends StatelessWidget {
           color: AppColors.warning.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
         ),
-        child: const Text(
-          'قيد الأداء (استئناف)',
-          style: TextStyle(
+        child: Text(
+          context.l10n.inProgressResume,
+          style: const TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.bold,
             color: AppColors.warning,
@@ -237,7 +244,7 @@ class ExamCard extends StatelessWidget {
       child: Text(
         attempt.score != null
             ? '${attempt.score}/${exam.maxScore}'
-            : (isPassed ? 'ناجح' : 'لم يجتز'),
+            : (isPassed ? context.l10n.passed : context.l10n.notPassed),
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.bold,

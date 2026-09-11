@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_empty_view.dart';
 import '../../../../core/widgets/app_error_view.dart';
+import '../../../../core/widgets/app_loading_view.dart';
 import '../../../../core/widgets/responsive_container.dart';
 import '../../domain/entities/notification_entity.dart';
 import '../cubit/notifications_cubit.dart';
@@ -155,59 +156,7 @@ class _NotificationsCenterPageState extends State<NotificationsCenterPage> {
   }
 
   Widget _buildSkeletonLoading() {
-    return ListView.builder(
-      padding: const EdgeInsets.all(AppSpacing.s16),
-      itemCount: 4,
-      itemBuilder: (_, __) => Padding(
-        padding: const EdgeInsets.only(bottom: AppSpacing.s8),
-        child: Container(
-          padding: const EdgeInsets.all(AppSpacing.s16),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            border: Border.all(color: AppColors.border),
-            borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceVariant,
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.s12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: 120,
-                      height: 14,
-                      color: AppColors.surfaceVariant,
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      width: double.infinity,
-                      height: 12,
-                      color: AppColors.surfaceVariant,
-                    ),
-                    const SizedBox(height: 4),
-                    Container(
-                      width: 180,
-                      height: 12,
-                      color: AppColors.surfaceVariant,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+    return const AppLoadingView.list(count: 6, hasBadge: false);
   }
 
   @override

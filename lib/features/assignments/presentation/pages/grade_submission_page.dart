@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_button.dart';
@@ -55,6 +56,7 @@ class _GradeSubmissionPageState extends State<GradeSubmissionPage> {
         ? _feedbackController.text.trim()
         : null;
 
+    final successMsg = context.l10n.gradeSavedSuccess;
     final success = await context.read<AssignmentsCubit>().gradeSubmission(
           submissionId: widget.submission.id,
           score: score,
@@ -63,8 +65,8 @@ class _GradeSubmissionPageState extends State<GradeSubmissionPage> {
 
     if (mounted && success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('تم حفظ التقييم بنجاح'),
+        SnackBar(
+          content: Text(successMsg),
           backgroundColor: AppColors.success,
         ),
       );
@@ -88,9 +90,9 @@ class _GradeSubmissionPageState extends State<GradeSubmissionPage> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('حجم الملف: ${file.formattedSize}'),
+              Text(context.l10n.fileSizeLabel(file.formattedSize)),
               const SizedBox(height: AppSpacing.s8),
-              const Text('رابط الملف الآمن (صالح لمدة ساعة):'),
+              Text(context.l10n.secureFileUrlNotice),
               const SizedBox(height: AppSpacing.s4),
               SelectableText(
                 signedUrl,
@@ -101,15 +103,15 @@ class _GradeSubmissionPageState extends State<GradeSubmissionPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('إغلاق'),
+              child: Text(context.l10n.closeBtn),
             ),
           ],
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('تعذر فتح الملف حالياً'),
+        SnackBar(
+          content: Text(context.l10n.fileOpenFailed),
           backgroundColor: AppColors.error,
         ),
       );
@@ -122,7 +124,7 @@ class _GradeSubmissionPageState extends State<GradeSubmissionPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('تقييم تسليم الطالب'),
+        title: Text(context.l10n.gradeSubmissionTitle),
         centerTitle: true,
       ),
       body: BlocBuilder<AssignmentsCubit, AssignmentsState>(
@@ -151,8 +153,8 @@ class _GradeSubmissionPageState extends State<GradeSubmissionPage> {
                                   AppColors.primary.withValues(alpha: 0.1),
                               child: Text(
                                 widget.submission.studentName.isNotEmpty
-                                    ? widget.submission.studentName.characters.first
-                                    : 'ط',
+                                    ? widget.submission.studentName.characters.first.toUpperCase()
+                                    : context.l10n.studentInitialDefault,
                                 style: const TextStyle(
                                   color: AppColors.primary,
                                   fontWeight: FontWeight.bold,
@@ -198,7 +200,7 @@ class _GradeSubmissionPageState extends State<GradeSubmissionPage> {
                                     AppSpacing.radiusSmall),
                               ),
                               child: Text(
-                                widget.submission.status.labelAr,
+                                widget.submission.status.localizedLabel(context),
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
@@ -215,14 +217,14 @@ class _GradeSubmissionPageState extends State<GradeSubmissionPage> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'تاريخ التسليم: ${dateFormat.format(widget.submission.submittedAt)}',
+                              context.l10n.studentSubmittedAt(dateFormat.format(widget.submission.submittedAt)),
                               style: const TextStyle(
                                 fontSize: 12,
                                 color: AppColors.textSecondary,
                               ),
                             ),
                             Text(
-                              'المحاولة رقم: ${widget.submission.attemptNumber}',
+                              context.l10n.studentAttemptNumber(widget.submission.attemptNumber.toString()),
                               style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
@@ -238,9 +240,9 @@ class _GradeSubmissionPageState extends State<GradeSubmissionPage> {
                   const SizedBox(height: AppSpacing.s20),
 
                   // Submitted Files section
-                  const Text(
-                    'الملفات المرفقة من الطالب',
-                    style: TextStyle(
+                  Text(
+                    context.l10n.attachedFilesTitle,
+                    style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimary,
@@ -257,10 +259,10 @@ class _GradeSubmissionPageState extends State<GradeSubmissionPage> {
                         borderRadius:
                             BorderRadius.circular(AppSpacing.radiusMedium),
                       ),
-                      child: const Center(
+                      child: Center(
                         child: Text(
-                          'لم يقم الطالب برفع ملفات مع هذا التسليم',
-                          style: TextStyle(
+                          context.l10n.noFilesUploadedNotice,
+                          style: const TextStyle(
                             fontSize: 13,
                             color: AppColors.textMuted,
                           ),
@@ -314,7 +316,7 @@ class _GradeSubmissionPageState extends State<GradeSubmissionPage> {
                               ),
                               IconButton(
                                 icon: const Icon(Icons.visibility_outlined),
-                                tooltip: 'عرض الملف',
+                                tooltip: context.l10n.viewFileTooltip,
                                 color: AppColors.primary,
                                 onPressed: () => _openFile(file),
                               ),
@@ -327,9 +329,9 @@ class _GradeSubmissionPageState extends State<GradeSubmissionPage> {
                   const SizedBox(height: AppSpacing.s24),
 
                   // Grading Form
-                  const Text(
-                    'رصد الدرجة والتقييم',
-                    style: TextStyle(
+                  Text(
+                    context.l10n.gradingSectionTitle,
+                    style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimary,
@@ -339,20 +341,20 @@ class _GradeSubmissionPageState extends State<GradeSubmissionPage> {
 
                   AppTextField(
                     controller: _scoreController,
-                    labelText: 'الدرجة المستحقة (من ${widget.assignment.maxScore})',
-                    hintText: 'مثال: 85',
+                    labelText: context.l10n.scoreFieldLabel(widget.assignment.maxScore.toString()),
+                    hintText: context.l10n.scoreFieldHint,
                     keyboardType: TextInputType.number,
                     prefixIcon: const Icon(Icons.grade_outlined),
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'يرجى إدخال الدرجة';
+                        return context.l10n.scoreFieldRequired;
                       }
                       final val = int.tryParse(value.trim());
                       if (val == null) {
-                        return 'يرجى إدخال رقم صحيح';
+                        return context.l10n.scoreMustBeInteger;
                       }
                       if (val < 0 || val > widget.assignment.maxScore) {
-                        return 'الدرجة يجب أن تكون بين 0 و ${widget.assignment.maxScore}';
+                        return context.l10n.scoreRangeError(widget.assignment.maxScore.toString());
                       }
                       return null;
                     },
@@ -362,8 +364,8 @@ class _GradeSubmissionPageState extends State<GradeSubmissionPage> {
 
                   AppTextField(
                     controller: _feedbackController,
-                    labelText: 'ملاحظات وتوجيهات للمعلم (اختياري)',
-                    hintText: 'أضف نقاط القوة والمجالات التي تحتاج لتحسين...',
+                    labelText: context.l10n.teacherFeedbackField,
+                    hintText: context.l10n.teacherFeedbackHint,
                     maxLines: 4,
                     prefixIcon: const Icon(Icons.comment_outlined),
                   ),
@@ -371,7 +373,7 @@ class _GradeSubmissionPageState extends State<GradeSubmissionPage> {
                   const SizedBox(height: AppSpacing.s32),
 
                   AppButton(
-                    text: 'حفظ التقييم وإشعار الطالب',
+                    text: context.l10n.saveGradeAndNotifyBtn,
                     onPressed: isGrading ? null : _submitGrade,
                     isLoading: isGrading,
                     variant: AppButtonVariant.primary,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_button.dart';
@@ -23,7 +24,7 @@ class ExamIntroPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('تعليمات وقواعد الامتحان'),
+        title: Text(context.l10n.examRulesAndGuidelines),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -61,7 +62,7 @@ class ExamIntroPage extends StatelessWidget {
                   if (exam.groupName != null) ...[
                     const SizedBox(height: AppSpacing.s6),
                     Text(
-                      'المجموعة: ${exam.groupName}',
+                      context.l10n.groupColon(exam.groupName!),
                       style: const TextStyle(
                         fontSize: 13,
                         color: AppColors.textMuted,
@@ -80,16 +81,16 @@ class ExamIntroPage extends StatelessWidget {
                 Expanded(
                   child: _buildInfoTile(
                     Icons.timer_outlined,
-                    'مدة الامتحان',
-                    '${exam.durationMinutes} دقيقة',
+                    context.l10n.examDurationLabel,
+                    context.l10n.minutesDuration(exam.durationMinutes),
                   ),
                 ),
                 const SizedBox(width: AppSpacing.s12),
                 Expanded(
                   child: _buildInfoTile(
                     Icons.grade_outlined,
-                    'الدرجة العظمى',
-                    '${exam.maxScore} درجة',
+                    context.l10n.maxScoreLabel,
+                    context.l10n.scorePoints(exam.maxScore),
                   ),
                 ),
               ],
@@ -100,16 +101,16 @@ class ExamIntroPage extends StatelessWidget {
                 Expanded(
                   child: _buildInfoTile(
                     Icons.verified_outlined,
-                    'درجة النجاح',
-                    exam.passingScore != null ? '${exam.passingScore} درجة' : 'غير محددة',
+                    context.l10n.passingScoreTitle,
+                    exam.passingScore != null ? context.l10n.scorePoints(exam.passingScore!) : context.l10n.notSpecified,
                   ),
                 ),
                 const SizedBox(width: AppSpacing.s12),
                 Expanded(
                   child: _buildInfoTile(
                     Icons.replay_outlined,
-                    'إعادة المحاولة',
-                    exam.allowRetake ? 'مسموحة (أعلى درجة)' : 'غير مسموحة',
+                    context.l10n.retakePolicy,
+                    exam.allowRetake ? context.l10n.allowedHighestScore : context.l10n.notAllowed,
                   ),
                 ),
               ],
@@ -118,9 +119,9 @@ class ExamIntroPage extends StatelessWidget {
             const SizedBox(height: AppSpacing.s24),
 
             // Instructions Box
-            const Text(
-              'تعليمات هامة قبل البدء:',
-              style: TextStyle(
+            Text(
+              context.l10n.importantInstructionsBeforeStart,
+              style: const TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textPrimary,
@@ -134,16 +135,16 @@ class ExamIntroPage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
                 border: Border.all(color: AppColors.border),
               ),
-              child: const Column(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _RuleItem(text: 'يبدأ احتساب الوقت فور الضغط على زر "بدء الامتحان" عبر خوادم المنصة.'),
-                  SizedBox(height: AppSpacing.s8),
-                  _RuleItem(text: 'يتم حفظ إجاباتك تلقائياً أثناء التنقل بين الأسئلة تحسباً لأي انقطاع في الاتصال.'),
-                  SizedBox(height: AppSpacing.s8),
-                  _RuleItem(text: 'عند انتهاء الوقت سيتم تسليم إجاباتك تلقائياً واحتساب النتيجة فوراً.'),
-                  SizedBox(height: AppSpacing.s8),
-                  _RuleItem(text: 'يُرجى عدم إغلاق نافذة الامتحان حتى ظهور رسالة التسليم بنجاح.'),
+                  _RuleItem(text: context.l10n.ruleTimerStartsImmediately),
+                  const SizedBox(height: AppSpacing.s8),
+                  _RuleItem(text: context.l10n.ruleAutoSaveAnswers),
+                  const SizedBox(height: AppSpacing.s8),
+                  _RuleItem(text: context.l10n.ruleAutoSubmitOnTimeout),
+                  const SizedBox(height: AppSpacing.s8),
+                  _RuleItem(text: context.l10n.ruleDoNotCloseWindow),
                 ],
               ),
             ),
@@ -153,7 +154,7 @@ class ExamIntroPage extends StatelessWidget {
             // Action Button
             if (canTake) ...[
               AppButton(
-                text: hasActive ? 'استئناف الامتحان الحالي' : 'بدء الامتحان الآن',
+                text: hasActive ? context.l10n.resumeCurrentExam : context.l10n.startExamNow,
                 icon: hasActive ? Icons.play_arrow : Icons.rocket_launch_outlined,
                 onPressed: () async {
                   final cubit = context.read<ExamsCubit>();
@@ -183,8 +184,8 @@ class ExamIntroPage extends StatelessWidget {
                 child: Center(
                   child: Text(
                     exam.myBestScore != null
-                        ? 'لقد أنهيت هذا الامتحان مسبقاً بنتيجة: ${exam.myBestScore}/${exam.maxScore} ولا يُسمح بالإعادة.'
-                        : 'لا يمكن تقديم هذا الامتحان حالياً.',
+                        ? context.l10n.examAlreadyCompletedNoRetake(exam.myBestScore!, exam.maxScore)
+                        : context.l10n.examCannotBeTaken,
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       fontSize: 13,

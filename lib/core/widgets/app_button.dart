@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 import '../theme/math_tokens.dart';
+import 'app_loading_view.dart';
 
 enum AppButtonVariant { primary, secondary, outlined, text }
 
@@ -80,15 +81,11 @@ class _AppButtonState extends State<AppButton>
         (widget.onPressed != null && !widget.isLoading) ? _handlePress : null;
 
     final childWidget = widget.isLoading
-        ? SizedBox(
-            height: 20,
-            width: 20,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              color: widget.variant == AppButtonVariant.primary
-                  ? Colors.white
-                  : AppColors.primary,
-            ),
+        ? AppLoadingView.compact(
+            size: 20,
+            color: widget.variant == AppButtonVariant.primary
+                ? Colors.white
+                : AppColors.primary,
           )
         : Row(
             mainAxisSize: MainAxisSize.min,

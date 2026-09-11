@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_button.dart';
@@ -82,7 +83,7 @@ class _CreateExamPageState extends State<CreateExamPage> {
       if (q.text.trim().isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('يرجى كتابة نص السؤال رقم ${i + 1}'),
+            content: Text(context.l10n.fillQuestionTextError(i + 1)),
             backgroundColor: AppColors.error,
           ),
         );
@@ -93,7 +94,7 @@ class _CreateExamPageState extends State<CreateExamPage> {
       if (!hasCorrect) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('يرجى تحديد الإجابة الصحيحة للسؤال رقم ${i + 1} وتعبئة نصها'),
+            content: Text(context.l10n.selectCorrectOptionError(i + 1)),
             backgroundColor: AppColors.error,
           ),
         );
@@ -145,8 +146,8 @@ class _CreateExamPageState extends State<CreateExamPage> {
 
     if (mounted && success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('تم بناء ونشر الامتحان بنجاح كنسخة مجمدة'),
+        SnackBar(
+          content: Text(context.l10n.examBuiltAndPublishedSuccess),
           backgroundColor: AppColors.success,
         ),
       );
@@ -158,7 +159,7 @@ class _CreateExamPageState extends State<CreateExamPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('بناء امتحان جديد'),
+        title: Text(context.l10n.createExamTitle),
         centerTitle: true,
       ),
       body: BlocBuilder<ExamsCubit, ExamsState>(
@@ -178,9 +179,9 @@ class _CreateExamPageState extends State<CreateExamPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'الإعدادات الأساسية للامتحان',
-                          style: TextStyle(
+                        Text(
+                          context.l10n.examGeneralSettings,
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                             color: AppColors.textPrimary,
@@ -190,12 +191,12 @@ class _CreateExamPageState extends State<CreateExamPage> {
 
                         AppTextField(
                           controller: _titleController,
-                          labelText: 'عنوان الامتحان *',
-                          hintText: 'مثال: الاختبار الشامل على النهايات والاتصال',
+                          labelText: context.l10n.examTitleField,
+                          hintText: context.l10n.examTitleHint,
                           prefixIcon: const Icon(Icons.assignment_outlined),
                           validator: (v) {
                             if (v == null || v.trim().isEmpty) {
-                              return 'يرجى إدخال عنوان الامتحان';
+                              return context.l10n.examTitleRequired;
                             }
                             return null;
                           },
@@ -207,12 +208,12 @@ class _CreateExamPageState extends State<CreateExamPage> {
                             Expanded(
                               child: AppTextField(
                                 controller: _durationController,
-                                labelText: 'المدة (بالدقائق)',
+                                labelText: context.l10n.durationMinutesField,
                                 keyboardType: TextInputType.number,
                                 prefixIcon: const Icon(Icons.timer_outlined),
                                 validator: (v) {
                                   final num = int.tryParse(v ?? '');
-                                  if (num == null || num <= 0) return 'رقم موجب';
+                                  if (num == null || num <= 0) return context.l10n.positiveNumberRequired;
                                   return null;
                                 },
                               ),
@@ -221,7 +222,7 @@ class _CreateExamPageState extends State<CreateExamPage> {
                             Expanded(
                               child: AppTextField(
                                 controller: _maxScoreController,
-                                labelText: 'الدرجة العظمى',
+                                labelText: context.l10n.maxScoreField,
                                 keyboardType: TextInputType.number,
                                 prefixIcon: const Icon(Icons.grade_outlined),
                               ),
@@ -232,8 +233,8 @@ class _CreateExamPageState extends State<CreateExamPage> {
 
                         AppTextField(
                           controller: _passingScoreController,
-                          labelText: 'درجة النجاح (اختياري)',
-                          hintText: 'مثال: 60',
+                          labelText: context.l10n.passingScoreField,
+                          hintText: '60',
                           keyboardType: TextInputType.number,
                           prefixIcon: const Icon(Icons.verified_outlined),
                         ),
@@ -241,24 +242,24 @@ class _CreateExamPageState extends State<CreateExamPage> {
 
                         // Toggles
                         SwitchListTile(
-                          title: const Text('خلط ترتيب الأسئلة عشوائياً لكل طالب'),
-                          subtitle: const Text('يثبّت الترتيب لكل محاولة عند البدء'),
+                          title: Text(context.l10n.shuffleQuestionsTitle),
+                          subtitle: Text(context.l10n.shuffleQuestionsSubtitle),
                           value: _shuffle,
                           activeColor: AppColors.primary,
                           contentPadding: EdgeInsets.zero,
                           onChanged: (v) => setState(() => _shuffle = v),
                         ),
                         SwitchListTile(
-                          title: const Text('إظهار النتيجة للطالب فور التسليم'),
-                          subtitle: const Text('عرض الدرجة المحسوبة خادمياً والنسبة المئوية'),
+                          title: Text(context.l10n.showResultTitle),
+                          subtitle: Text(context.l10n.showResultSubtitle),
                           value: _showResult,
                           activeColor: AppColors.primary,
                           contentPadding: EdgeInsets.zero,
                           onChanged: (v) => setState(() => _showResult = v),
                         ),
                         SwitchListTile(
-                          title: const Text('السماح بإعادة المحاولة (Retake)'),
-                          subtitle: const Text('تعتمد المنصة أعلى درجة محققة في سجل الطالب'),
+                          title: Text(context.l10n.allowRetakeTitle),
+                          subtitle: Text(context.l10n.allowRetakeSubtitle),
                           value: _allowRetake,
                           activeColor: AppColors.primary,
                           contentPadding: EdgeInsets.zero,
@@ -275,7 +276,7 @@ class _CreateExamPageState extends State<CreateExamPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'الأسئلة (${_questions.length})',
+                        context.l10n.questionsSectionTitle(_questions.length),
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -285,7 +286,7 @@ class _CreateExamPageState extends State<CreateExamPage> {
                       TextButton.icon(
                         onPressed: _addQuestion,
                         icon: const Icon(Icons.add_circle_outline),
-                        label: const Text('إضافة سؤال'),
+                        label: Text(context.l10n.addQuestionAction),
                       ),
                     ],
                   ),
@@ -307,7 +308,7 @@ class _CreateExamPageState extends State<CreateExamPage> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  'السؤال رقم ${qIndex + 1}',
+                                  context.l10n.questionNumberTitle(qIndex + 1),
                                   style: const TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.bold,
@@ -326,9 +327,9 @@ class _CreateExamPageState extends State<CreateExamPage> {
 
                             TextFormField(
                               initialValue: q.text,
-                              decoration: const InputDecoration(
-                                labelText: 'نص السؤال *',
-                                hintText: 'اكتب نص السؤال الرياضي هنا...',
+                              decoration: InputDecoration(
+                                labelText: context.l10n.questionTextField,
+                                hintText: context.l10n.questionTextHint,
                               ),
                               maxLines: 2,
                               onChanged: (v) => q.text = v,
@@ -340,17 +341,17 @@ class _CreateExamPageState extends State<CreateExamPage> {
                                 Expanded(
                                   child: DropdownButtonFormField<QuestionType>(
                                     value: q.type,
-                                    decoration: const InputDecoration(
-                                      labelText: 'نوع السؤال',
+                                    decoration: InputDecoration(
+                                      labelText: context.l10n.questionTypeField,
                                     ),
                                     items: [
                                       DropdownMenuItem(
                                         value: QuestionType.multipleChoice,
-                                        child: Text(QuestionType.multipleChoice.labelAr),
+                                        child: Text(QuestionType.multipleChoice.localizedLabel(context)),
                                       ),
                                       DropdownMenuItem(
                                         value: QuestionType.trueFalse,
-                                        child: Text(QuestionType.trueFalse.labelAr),
+                                        child: Text(QuestionType.trueFalse.localizedLabel(context)),
                                       ),
                                     ],
                                     onChanged: (t) {
@@ -359,8 +360,8 @@ class _CreateExamPageState extends State<CreateExamPage> {
                                           q.type = t;
                                           if (t == QuestionType.trueFalse) {
                                             q.options = [
-                                              (text: 'صواب', isCorrect: true),
-                                              (text: 'خطأ', isCorrect: false),
+                                              (text: context.l10n.optionTrue, isCorrect: true),
+                                              (text: context.l10n.optionFalse, isCorrect: false),
                                             ];
                                           } else {
                                             q.options = [
@@ -381,8 +382,8 @@ class _CreateExamPageState extends State<CreateExamPage> {
                                   child: TextFormField(
                                     initialValue: q.points.toString(),
                                     keyboardType: TextInputType.number,
-                                    decoration: const InputDecoration(
-                                      labelText: 'الدرجات',
+                                    decoration: InputDecoration(
+                                      labelText: context.l10n.pointsField,
                                     ),
                                     onChanged: (v) {
                                       q.points = int.tryParse(v) ?? 1;
@@ -393,9 +394,9 @@ class _CreateExamPageState extends State<CreateExamPage> {
                             ),
                             const SizedBox(height: AppSpacing.s16),
 
-                            const Text(
-                              'الخيارات (حدد الخيار الصحيح):',
-                              style: TextStyle(
+                            Text(
+                              context.l10n.optionsSelectCorrectPrompt,
+                              style: const TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.textSecondary,
@@ -431,7 +432,7 @@ class _CreateExamPageState extends State<CreateExamPage> {
                                         initialValue: opt.text,
                                         readOnly: q.type == QuestionType.trueFalse,
                                         decoration: InputDecoration(
-                                          hintText: 'الخيار ${optIdx + 1}',
+                                          hintText: context.l10n.optionNumberHint(optIdx + 1),
                                           isDense: true,
                                         ),
                                         onChanged: (v) {
@@ -455,7 +456,7 @@ class _CreateExamPageState extends State<CreateExamPage> {
                   const SizedBox(height: AppSpacing.s24),
 
                   AppButton(
-                    text: 'حفظ ونشر الامتحان (تجميد v1)',
+                    text: context.l10n.saveAndPublishExam,
                     icon: Icons.publish_outlined,
                     onPressed: isCreating ? null : _submitExam,
                     isLoading: isCreating,

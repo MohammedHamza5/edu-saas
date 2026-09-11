@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 import '../theme/math_tokens.dart';
 
@@ -121,9 +120,9 @@ class AcademicHeroBanner extends StatelessWidget {
                               child: Text(
                                 badgeText!,
                                 style: const TextStyle(
-                                  color: AppColors.borderPremium,
+                                  color: Colors.white,
                                   fontSize: 11,
-                                  fontWeight: FontWeight.w500,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ),

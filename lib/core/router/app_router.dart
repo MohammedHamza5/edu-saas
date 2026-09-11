@@ -90,6 +90,9 @@ class AppRouter {
   // Feature: Platform Onboarding
   static const String platformOnboarding = '/platform/onboarding';
 
+  // Feature: Settings
+  static const String teacherSettings = '/teacher/settings';
+
   // Feature: Videos routes
   static const String videoPlayer = '/videos/player';
 

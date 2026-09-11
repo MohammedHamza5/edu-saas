@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_card.dart';
@@ -25,16 +26,16 @@ class ExamTakingPage extends StatelessWidget {
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('تأكيد تسليم الامتحان'),
+        title: Text(context.l10n.confirmSubmitExamTitle),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('لقد قمت بالإجابة على ${state.answeredCount} من ${state.totalQuestions} سؤال.'),
+            Text(context.l10n.answeredQuestionsCount(state.answeredCount, state.totalQuestions)),
             if (unanswered > 0) ...[
               const SizedBox(height: AppSpacing.s8),
               Text(
-                'تنبيه: هناك $unanswered أسئلة لم تقم بالإجابة عليها بعد!',
+                context.l10n.unansweredWarning(unanswered),
                 style: const TextStyle(
                   color: AppColors.error,
                   fontWeight: FontWeight.bold,
@@ -42,13 +43,13 @@ class ExamTakingPage extends StatelessWidget {
               ),
             ],
             const SizedBox(height: AppSpacing.s12),
-            const Text('هل أنت متأكد من رغبتك في إنهاء الامتحان وتسليمه الآن؟'),
+            Text(context.l10n.confirmSubmitQuestion),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('متابعة الحل'),
+            child: Text(context.l10n.continueSolving),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
@@ -56,7 +57,7 @@ class ExamTakingPage extends StatelessWidget {
               Navigator.of(ctx).pop();
               context.read<ExamsCubit>().submitExam();
             },
-            child: const Text('نعم، تسليم الامتحان', style: TextStyle(color: Colors.white)),
+            child: Text(context.l10n.yesSubmitExam, style: const TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -93,7 +94,7 @@ class ExamTakingPage extends StatelessWidget {
       builder: (context, state) {
         if (state is! ExamTakingState) {
           return const Scaffold(
-            body: Center(child: AppLoadingView()),
+            body: Center(child: AppLoadingView.signature()),
           );
         }
 
@@ -116,13 +117,13 @@ class ExamTakingPage extends StatelessWidget {
                 // SAT Reference Formulas Sheet
                 IconButton(
                   icon: const Icon(Icons.menu_book_rounded),
-                  tooltip: 'ورقة القوانين (Reference Sheet)',
+                  tooltip: context.l10n.referenceSheetTooltip,
                   onPressed: () => SatExamToolsSheet.showReferenceSheet(context),
                 ),
                 // Built-in SAT Calculator
                 IconButton(
                   icon: const Icon(Icons.calculate_rounded),
-                  tooltip: 'الحاسبة العلمية (Calculator)',
+                  tooltip: context.l10n.calculatorTooltip,
                   onPressed: () => SatExamToolsSheet.showCalculator(context),
                 ),
                 // Timer badge
@@ -185,7 +186,7 @@ class ExamTakingPage extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'السؤال ${qIndex + 1} من ${state.totalQuestions}',
+                        context.l10n.questionProgress(qIndex + 1, state.totalQuestions),
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
@@ -193,7 +194,7 @@ class ExamTakingPage extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        'تم حل: ${state.answeredCount}/${state.totalQuestions}',
+                        context.l10n.solvedCount(state.answeredCount, state.totalQuestions),
                         style: const TextStyle(
                           fontSize: 12,
                           color: AppColors.textMuted,
@@ -231,7 +232,7 @@ class ExamTakingPage extends StatelessWidget {
                                           BorderRadius.circular(AppSpacing.radiusSmall),
                                     ),
                                     child: Text(
-                                      question.questionType.labelAr,
+                                      question.questionType.localizedLabel(context),
                                       style: const TextStyle(
                                         fontSize: 11,
                                         color: AppColors.textSecondary,
@@ -239,7 +240,7 @@ class ExamTakingPage extends StatelessWidget {
                                     ),
                                   ),
                                   Text(
-                                    '${question.points} درجات',
+                                    context.l10n.scorePoints(question.points),
                                     style: const TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.bold,
@@ -265,9 +266,9 @@ class ExamTakingPage extends StatelessWidget {
                         const SizedBox(height: AppSpacing.s20),
 
                         // Options list
-                        const Text(
-                          'اختر الإجابة الصحيحة:',
-                          style: TextStyle(
+                        Text(
+                          context.l10n.chooseCorrectAnswer,
+                          style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
                             color: AppColors.textPrimary,
@@ -323,7 +324,7 @@ class ExamTakingPage extends StatelessWidget {
                               context.read<ExamsCubit>().goToQuestion(qIndex - 1);
                             },
                             icon: const Icon(Icons.arrow_forward, size: 16),
-                            label: const Text('السابق'),
+                            label: Text(context.l10n.previousQuestion),
                           ),
                         )
                       else
@@ -343,7 +344,7 @@ class ExamTakingPage extends StatelessWidget {
                               context.read<ExamsCubit>().goToQuestion(qIndex + 1);
                             },
                             icon: const Icon(Icons.arrow_back, size: 16),
-                            label: const Text('التالي'),
+                            label: Text(context.l10n.nextQuestion),
                           ),
                         )
                       else
@@ -358,15 +359,11 @@ class ExamTakingPage extends StatelessWidget {
                                 : () => _confirmSubmit(context, state),
                             icon: const Icon(Icons.check_circle_outline, size: 16),
                             label: state.isSubmitting
-                                ? const SizedBox(
-                                    width: 16,
-                                    height: 16,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
+                                ? const AppLoadingView.compact(
+                                    size: 16,
+                                    color: Colors.white,
                                   )
-                                : const Text('تسليم الامتحان الآن'),
+                                : Text(context.l10n.submitExamNow),
                           ),
                         ),
                     ],

@@ -50,6 +50,7 @@ class AdaptiveScaffold extends StatelessWidget {
   final Widget? sidebarFooter;
   final PreferredSizeWidget? appBar;
   final Widget? floatingActionButton;
+  final List<Widget>? actions;
   final Widget body;
 
   const AdaptiveScaffold({
@@ -63,6 +64,7 @@ class AdaptiveScaffold extends StatelessWidget {
     this.sidebarFooter,
     this.appBar,
     this.floatingActionButton,
+    this.actions,
   }) : assert(
           destinations != null || sections != null,
           'Either destinations or sections must be provided',
@@ -79,7 +81,7 @@ class AdaptiveScaffold extends StatelessWidget {
   static const Color _sidebarBg = Color(0xFF0F172A);
   static const Color _sidebarBorder = Color(0xFF1E293B);
   static const Color _sidebarDivider = Color(0xFF1E293B);
-  static const Color _sidebarSectionTitle = Color(0xFF64748B);
+  static const Color _sidebarSectionTitle = Color(0xFF94A3B8);
   static const Color _workspaceBg = AppColors.background;
 
   @override
@@ -99,70 +101,48 @@ class AdaptiveScaffold extends StatelessWidget {
   }
 
   Widget _buildMobileScaffold(BuildContext context) {
-    final all = resolvedDestinations;
-    final hasManyDestinations = all.length > 5;
-
-    // Show up to 4 items + "More" drawer trigger if > 5 items
-    final visibleDestinations = hasManyDestinations ? all.take(4).toList() : all;
-
     return Scaffold(
-      appBar: appBar,
+      appBar: appBar ?? _buildMobileWebHeader(context),
       body: _buildWorkspaceBody(context),
       floatingActionButton: floatingActionButton,
       drawer: _buildMobileDrawer(context),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: currentIndex < visibleDestinations.length ? currentIndex : 0,
-        onDestinationSelected: (idx) {
-          if (hasManyDestinations && idx == 4) {
-            Scaffold.of(context).openDrawer();
-          } else {
-            onNavigationIndexChanged?.call(idx);
-          }
-        },
-        destinations: [
-          ...visibleDestinations.map((d) {
-            Widget iconWidget = Icon(d.icon);
-            if (d.badge != null) {
-              iconWidget = Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  iconWidget,
-                  Positioned(top: -4, right: -4, child: d.badge!),
-                ],
-              );
-            } else if (d.badgeCount != null && d.badgeCount! > 0) {
-              iconWidget = Badge(label: Text('${d.badgeCount}'), child: iconWidget);
-            }
+    );
+  }
 
-            Widget selectedIconWidget = Icon(d.selectedIcon ?? d.icon);
-            if (d.badge != null) {
-              selectedIconWidget = Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  selectedIconWidget,
-                  Positioned(top: -4, right: -4, child: d.badge!),
-                ],
-              );
-            } else if (d.badgeCount != null && d.badgeCount! > 0) {
-              selectedIconWidget = Badge(label: Text('${d.badgeCount}'), child: selectedIconWidget);
-            }
-
-            return NavigationDestination(
-              icon: iconWidget,
-              selectedIcon: selectedIconWidget,
-              label: d.label,
-              tooltip: d.tooltip,
-            );
-          }),
-          if (hasManyDestinations)
-            NavigationDestination(
-              icon: const Icon(Icons.menu_rounded),
-              selectedIcon: const Icon(Icons.menu_open_rounded),
-              label: AppLocalizations.of(context)?.more ?? 'More',
-              tooltip: AppLocalizations.of(context)?.allScreensAndSections ?? 'All screens & sections',
-            ),
-        ],
+  PreferredSizeWidget _buildMobileWebHeader(BuildContext context) {
+    return AppBar(
+      backgroundColor: _sidebarBg,
+      foregroundColor: Colors.white,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      titleSpacing: 0,
+      shape: const Border(
+        bottom: BorderSide(color: _sidebarBorder, width: 1),
       ),
+      leading: Builder(
+        builder: (ctx) => IconButton(
+          icon: const Icon(Icons.menu_rounded, color: Colors.white, size: 24),
+          tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
+          onPressed: () => Scaffold.of(ctx).openDrawer(),
+        ),
+      ),
+      title: sidebarHeader != null
+          ? Padding(
+              padding: const EdgeInsetsDirectional.only(end: AppSpacing.s16),
+              child: SizedBox(
+                height: 42,
+                child: Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: AlignmentDirectional.centerStart,
+                    child: sidebarHeader,
+                  ),
+                ),
+              ),
+            )
+          : null,
+      actions: actions,
     );
   }
 
@@ -173,11 +153,36 @@ class AdaptiveScaffold extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (sidebarHeader != null)
-              Padding(
-                padding: const EdgeInsets.all(AppSpacing.s16),
-                child: sidebarHeader!,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.s16,
+                AppSpacing.s12,
+                AppSpacing.s8,
+                AppSpacing.s12,
               ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: sidebarHeader ??
+                        Text(
+                          AppLocalizations.of(context)?.appTitle ?? 'EduSaaS',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                  ),
+                  Builder(
+                    builder: (ctx) => IconButton(
+                      icon: const Icon(Icons.close_rounded, color: Color(0xFF94A3B8), size: 22),
+                      tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+                      onPressed: () => Navigator.of(ctx).pop(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
             const Divider(height: 1, color: _sidebarDivider),
             Expanded(
               child: _buildCategorizedItems(context, isDrawer: true),
@@ -352,15 +357,15 @@ class AdaptiveScaffold extends StatelessWidget {
     return Container(
       color: _workspaceBg,
       child: AnimatedMathBackground(
-        opacity: 0.08,
-        gridColor: const Color(0xFF1E293B),
+        opacity: 0.18,
+        gridColor: const Color(0xFF38BDF8),
         waveColor: const Color(0xFF38BDF8),
-        gridSpacing: 40,
-        showAxes: false,
+        gridSpacing: 36,
+        showAxes: true,
         showWave: true,
-        showFormulas: false,
-        showNodes: false,
-        cycleDuration: const Duration(seconds: 32),
+        showFormulas: true,
+        showNodes: true,
+        cycleDuration: const Duration(seconds: 30),
         child: Theme(
           data: Theme.of(context).copyWith(
             scaffoldBackgroundColor: Colors.transparent,
@@ -478,9 +483,9 @@ class _DesktopNavTile extends StatelessWidget {
     final bgColor = isSelected
         ? const Color(0xFF1E293B)
         : Colors.transparent;
-    final fgColor = isSelected ? const Color(0xFF38BDF8) : const Color(0xFF94A3B8);
+    final fgColor = isSelected ? const Color(0xFF38BDF8) : const Color(0xFFCBD5E1);
     const textColor = Colors.white;
-    const inactiveTextColor = Color(0xFFCBD5E1);
+    const inactiveTextColor = Color(0xFFE2E8F0);
 
     return Material(
       color: Colors.transparent,

@@ -6,11 +6,13 @@ import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/responsive_breakpoints.dart';
 import '../../../../core/utils/app_feedback.dart';
 import '../../../../core/widgets/app_badge.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_empty_view.dart';
 import '../../../../core/widgets/app_error_view.dart';
+import '../../../../core/widgets/app_loading_view.dart';
 import '../../../../core/widgets/responsive_container.dart';
 import '../../domain/entities/student_entity.dart';
 import '../cubit/students_cubit.dart';
@@ -76,19 +78,7 @@ class _StudentsListPageState extends State<StudentsListPage> {
   }
 
   Widget _buildSkeletonLoading() {
-    return ListView.separated(
-      padding: const EdgeInsets.all(AppSpacing.s16),
-      itemCount: 5,
-      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.s12),
-      itemBuilder: (_, __) => Container(
-        height: 90,
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-          border: Border.all(color: AppColors.border),
-        ),
-      ),
-    );
+    return const AppLoadingView.list(count: 6);
   }
 
   @override
@@ -147,7 +137,7 @@ class _StudentsListPageState extends State<StudentsListPage> {
         ],
       ),
       body: ResponsiveContainer(
-        maxWidth: 1100,
+        maxWidth: ResponsiveBreakpoints.maxContentWidth,
         child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -235,6 +225,13 @@ class _StudentsListPageState extends State<StudentsListPage> {
               // ── List ────────────────────────────────────────────────────────
               Expanded(
                 child: BlocConsumer<StudentsCubit, StudentsState>(
+                  buildWhen: (previous, current) =>
+                      current is StudentsLoaded ||
+                      current is StudentsLoading ||
+                      current is StudentsError,
+                  listenWhen: (previous, current) =>
+                      current is StudentsError ||
+                      current is StudentActionSuccess,
                   listener: (context, state) {
                     if (state is StudentsError) {
                       AppFeedback.showError(context, state.message);
@@ -298,13 +295,7 @@ class _StudentsListPageState extends State<StudentsListPage> {
                             return const Padding(
                               padding: EdgeInsets.all(AppSpacing.s16),
                               child: Center(
-                                child: SizedBox(
-                                  width: 24,
-                                  height: 24,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                ),
+                                child: AppLoadingView.compact(size: 24),
                               ),
                             );
                           }
@@ -377,7 +368,15 @@ class _StudentsListPageState extends State<StudentsListPage> {
                         },
                       );
                     }
-                    return const SizedBox.shrink();
+                    // Resilient auto-recovery: If cubit is in an unexpected state, reload students
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted) {
+                        context.read<StudentsCubit>().loadStudents(
+                              status: _selectedStatus,
+                            );
+                      }
+                    });
+                    return _buildSkeletonLoading();
                   },
                 ),
               ),

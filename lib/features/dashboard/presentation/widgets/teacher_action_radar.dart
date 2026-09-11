@@ -462,15 +462,17 @@ class TeacherActionRadar extends StatelessWidget {
           Text(
             title,
             style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textSecondary,
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
             ),
           ),
           const SizedBox(height: 2),
           Text(
             count,
-            style: AppTypography.statFigureLarge.copyWith(color: color),
+            style: AppTypography.statFigureLarge.copyWith(
+              color: isCritical ? color : const Color(0xFF38BDF8),
+            ),
           ),
           const SizedBox(height: 2),
           Text(
@@ -478,8 +480,9 @@ class TeacherActionRadar extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
-              fontSize: 10,
-              color: AppColors.textSecondary,
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFFCBD5E1),
             ),
           ),
         ],
@@ -497,7 +500,7 @@ class TeacherActionRadar extends StatelessWidget {
         'members': '5 Students',
         'score': '740 / 800',
         'focus': 'Desmos Shortcuts + Advanced Quadratics & Circles',
-        'color': AppColors.primary,
+        'color': const Color(0xFF818CF8),
       },
       {
         'title': 'EST I & EST II Intensive',
@@ -506,7 +509,7 @@ class TeacherActionRadar extends StatelessWidget {
         'members': '5 Students',
         'score': '690 / 800',
         'focus': 'Coordinate Geometry & Exponential Modeling',
-        'color': const Color(0xFF0D9488), // Teal
+        'color': const Color(0xFF2DD4BF),
       },
       {
         'title': 'ACT Math Sprint Drills',
@@ -515,7 +518,7 @@ class TeacherActionRadar extends StatelessWidget {
         'members': '5 Students',
         'score': '32 / 36',
         'focus': 'Trigonometry & Rapid Problem Solving',
-        'color': const Color(0xFFE11D48), // Rose
+        'color': const Color(0xFFFB7185),
       },
       {
         'title': 'Advanced Math & Problem Solving',
@@ -524,7 +527,7 @@ class TeacherActionRadar extends StatelessWidget {
         'members': '5 Students',
         'score': '88% Mastery',
         'focus': 'Nonlinear equations & Systems',
-        'color': const Color(0xFF7C3AED), // Violet
+        'color': const Color(0xFFA78BFA),
       },
       {
         'title': 'Basics & Foundations Cohort',
@@ -533,7 +536,7 @@ class TeacherActionRadar extends StatelessWidget {
         'members': '5 Students',
         'score': '82% Mastery',
         'focus': 'Linear Equations, Ratios, & Percentages',
-        'color': const Color(0xFFD97706), // Amber
+        'color': const Color(0xFFFBBF24),
       },
     ];
 
@@ -599,8 +602,9 @@ class TeacherActionRadar extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        fontSize: 11,
-                        color: AppColors.textSecondary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFFCBD5E1),
                       ),
                     ),
                     Wrap(
@@ -664,8 +668,9 @@ class TeacherActionRadar extends StatelessWidget {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
-                                  fontSize: 11,
-                                  color: AppColors.textSecondary,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                  color: Color(0xFFCBD5E1),
                                 ),
                               ),
                             ],
@@ -701,23 +706,31 @@ class TeacherActionRadar extends StatelessWidget {
                 runSpacing: AppSpacing.s8,
                 children: [
                   ActionChip(
-                    avatar: const Icon(Icons.folder_shared_rounded, size: 14, color: AppColors.primary),
-                    label: Text(context.l10n.chipHandoutsPdfs, style: const TextStyle(fontSize: 11)),
+                    avatar: const Icon(Icons.folder_shared_rounded, size: 14, color: Color(0xFF38BDF8)),
+                    label: Text(context.l10n.chipHandoutsPdfs, style: const TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.w600)),
+                    backgroundColor: const Color(0xFF1E293B),
+                    side: const BorderSide(color: Color(0xFF334155)),
                     onPressed: () => context.push(AppRouter.groupsList),
                   ),
                   ActionChip(
-                    avatar: const Icon(Icons.assignment_rounded, size: 14, color: AppColors.warning),
-                    label: Text(context.l10n.chipDrillHomework, style: const TextStyle(fontSize: 11)),
+                    avatar: const Icon(Icons.assignment_rounded, size: 14, color: Color(0xFFFBBF24)),
+                    label: Text(context.l10n.chipDrillHomework, style: const TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.w600)),
+                    backgroundColor: const Color(0xFF1E293B),
+                    side: const BorderSide(color: Color(0xFF334155)),
                     onPressed: () => context.push(AppRouter.groupsList),
                   ),
                   ActionChip(
-                    avatar: const Icon(Icons.quiz_rounded, size: 14, color: AppColors.primary),
-                    label: Text(context.l10n.chipExamsSimulations, style: const TextStyle(fontSize: 11)),
+                    avatar: const Icon(Icons.quiz_rounded, size: 14, color: Color(0xFFA78BFA)),
+                    label: Text(context.l10n.chipExamsSimulations, style: const TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.w600)),
+                    backgroundColor: const Color(0xFF1E293B),
+                    side: const BorderSide(color: Color(0xFF334155)),
                     onPressed: () => context.push(AppRouter.groupsList),
                   ),
                   ActionChip(
-                    avatar: const Icon(Icons.fact_check_rounded, size: 14, color: AppColors.success),
-                    label: Text(context.l10n.chipRecordAttendance, style: const TextStyle(fontSize: 11)),
+                    avatar: const Icon(Icons.fact_check_rounded, size: 14, color: Color(0xFF34D399)),
+                    label: Text(context.l10n.chipRecordAttendance, style: const TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.w600)),
+                    backgroundColor: const Color(0xFF1E293B),
+                    side: const BorderSide(color: Color(0xFF334155)),
                     onPressed: () => context.push(AppRouter.teacherAttendance),
                   ),
                 ],

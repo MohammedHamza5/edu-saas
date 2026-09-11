@@ -13,13 +13,18 @@ class TenantRegistry {
   static final TenantBranding drAntouniosBranding = TenantBranding.fromPrimary(
     tenantId: 'd3b07384-d113-460b-8d14-04666f77ecfa',
     brandName: 'منصة د. أنطونيوس أشرف',
+    brandNameEn: 'Dr. Antounios Ashraf Platform',
     teacherName: 'د. أنطونيوس أشرف',
+    teacherNameEn: 'Dr. Antounios Ashraf',
     subjectTitle: 'رياضيات النظام الأمريكي • SAT · EST · ACT',
+    subjectTitleEn: 'American High School Math • SAT · EST · ACT',
     academicTrack: 'النظام الأمريكي • Grade 10-12',
+    academicTrackEn: 'American Curriculum • Grade 10-12',
     tagline: 'Concept • Speed • Strategy • Accuracy (Target 800)',
+    taglineEn: 'Concept • Speed • Strategy • Accuracy (Target 800)',
     welcomeMessage: 'مرحباً بك في منصة د. أنطونيوس أشرف الخاصة برياضيات الدبلومة الأمريكية',
-    primaryColor: const Color(0xFF1E3A8A), // Deep Academic Navy/Indigo
-    secondaryColor: const Color(0xFF2563EB), // Royal Mathematical Blue
+    primaryColor: const Color(0xFF6366F1), // Luminous Mathematical Indigo 500
+    secondaryColor: const Color(0xFF38BDF8), // Electric Cyan 400
     accentGlow: const Color(0xFF38BDF8), // Electric Cyan highlight for SAT precision
     signatureSymbol: '∑',
     supportPhone: '+201000000000',

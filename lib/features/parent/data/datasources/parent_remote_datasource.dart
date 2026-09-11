@@ -122,7 +122,7 @@ class ParentRemoteDataSourceImpl implements ParentRemoteDataSource {
       final examData = map['exams'] as Map<String, dynamic>? ?? {};
       final contentData = examData['content'] as Map<String, dynamic>? ?? {};
 
-      final examTitle = contentData['title'] as String? ?? 'امتحان أكاديمي';
+      final examTitle = contentData['title'] as String? ?? 'Academic Exam';
       final score = (map['score'] as num?)?.toDouble() ?? 0.0;
       final maxScore = (examData['max_score'] as num?)?.toDouble() ?? 100.0;
       final percentage =

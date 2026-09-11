@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
+import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../domain/entities/attendance_entity.dart';
 
 class StudentAttendanceRowCard extends StatefulWidget {
   final StudentAttendanceItem student;
-  final ValueChanged<AttendanceStatus> onStatusChanged;
+  final ValueChanged<AttendanceStatus>? onStatusChanged;
   final VoidCallback onNoteTap;
 
   const StudentAttendanceRowCard({
     super.key,
     required this.student,
-    required this.onStatusChanged,
+    this.onStatusChanged,
     required this.onNoteTap,
   });
 
@@ -96,7 +97,7 @@ class _StudentAttendanceRowCardState extends State<StudentAttendanceRowCard> {
                       child: Text(
                         student.studentName.isNotEmpty
                             ? student.studentName.characters.first
-                            : 'ط',
+                            : context.l10n.studentInitialDefault,
                         style: TextStyle(
                           color: statusColor,
                           fontWeight: FontWeight.w800,
@@ -172,82 +173,90 @@ class _StudentAttendanceRowCardState extends State<StudentAttendanceRowCard> {
                 // Lecture Watch Progress Tracker
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.s10,
-                    vertical: AppSpacing.s6,
+                    horizontal: AppSpacing.s12,
+                    vertical: AppSpacing.s10,
                   ),
                   decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.06),
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                    color: statusColor.withValues(alpha: 0.05),
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
                     border: Border.all(
-                      color: statusColor.withValues(alpha: 0.20),
+                      color: statusColor.withValues(alpha: 0.18),
                     ),
                   ),
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(
-                        switch (student.status) {
-                          AttendanceStatus.present => Icons.check_circle_rounded,
-                          AttendanceStatus.late => Icons.play_circle_filled_rounded,
-                          AttendanceStatus.absent => Icons.remove_circle_outline_rounded,
-                          AttendanceStatus.excused => Icons.info_rounded,
-                        },
-                        size: 14,
-                        color: statusColor,
-                      ),
-                      const SizedBox(width: AppSpacing.s6),
-                      Text(
-                        switch (student.status) {
-                          AttendanceStatus.present => 'أتم مشاهدة المحاضرة (100% • حاضر)',
-                          AttendanceStatus.late => 'قيد المشاهدة (حضور جزئي • 45%)',
-                          AttendanceStatus.absent => 'لم يشاهد المحاضرة بعد (غائب)',
-                          AttendanceStatus.excused => 'معذور / استثناء معتمد',
-                        },
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: statusColor,
-                        ),
-                      ),
-                      const Spacer(),
-                      // Miniature Progress Bar
-                      SizedBox(
-                        width: 65,
-                        height: 6,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(3),
-                          child: LinearProgressIndicator(
-                            value: switch (student.status) {
-                              AttendanceStatus.present => 1.0,
-                              AttendanceStatus.late => 0.45,
-                              AttendanceStatus.absent => 0.0,
-                              AttendanceStatus.excused => 1.0,
+                      Row(
+                        children: [
+                          Icon(
+                            switch (student.status) {
+                              AttendanceStatus.present => Icons.check_circle_rounded,
+                              AttendanceStatus.late => Icons.play_circle_filled_rounded,
+                              AttendanceStatus.absent => Icons.cancel_outlined,
+                              AttendanceStatus.excused => Icons.info_outline_rounded,
                             },
-                            backgroundColor: AppColors.border,
-                            valueColor: AlwaysStoppedAnimation<Color>(statusColor),
+                            size: 16,
+                            color: statusColor,
                           ),
+                          const SizedBox(width: AppSpacing.s8),
+                          Expanded(
+                            child: Text(
+                              switch (student.status) {
+                                AttendanceStatus.present => context.l10n.attendanceRateFull,
+                                AttendanceStatus.late => context.l10n.attendanceRatePartial,
+                                AttendanceStatus.absent => context.l10n.attendanceRateNone,
+                                AttendanceStatus.excused => context.l10n.attendanceRateExcused,
+                              },
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: statusColor,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.s8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: statusColor.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              switch (student.status) {
+                                AttendanceStatus.present => '100%',
+                                AttendanceStatus.late => '45%',
+                                AttendanceStatus.absent => '0%',
+                                AttendanceStatus.excused => '100%',
+                              },
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                color: statusColor,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.s8),
+                      // Progress Bar
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(3),
+                        child: LinearProgressIndicator(
+                          value: switch (student.status) {
+                            AttendanceStatus.present => 1.0,
+                            AttendanceStatus.late => 0.45,
+                            AttendanceStatus.absent => 0.0,
+                            AttendanceStatus.excused => 1.0,
+                          },
+                          backgroundColor: AppColors.border.withValues(alpha: 0.5),
+                          valueColor: AlwaysStoppedAnimation<Color>(statusColor),
+                          minHeight: 6,
                         ),
                       ),
                     ],
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.s10),
-
-                // Tactile Status Selector Pills
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  physics: const BouncingScrollPhysics(),
-                  child: Row(
-                    children: AttendanceStatus.values.map((status) {
-                      final isSelected = student.status == status;
-                      return Padding(
-                        padding: const EdgeInsets.only(left: AppSpacing.s8),
-                        child: _StatusSelectorPill(
-                          status: status,
-                          isSelected: isSelected,
-                          onTap: () => widget.onStatusChanged(status),
-                        ),
-                      );
-                    }).toList(),
                   ),
                 ),
 
@@ -295,112 +304,6 @@ class _StudentAttendanceRowCardState extends State<StudentAttendanceRowCard> {
                 ],
               ],
             ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _StatusSelectorPill extends StatefulWidget {
-  final AttendanceStatus status;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _StatusSelectorPill({
-    required this.status,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  State<_StatusSelectorPill> createState() => _StatusSelectorPillState();
-}
-
-class _StatusSelectorPillState extends State<_StatusSelectorPill> {
-  bool _isHovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final (pillColor, icon) = switch (widget.status) {
-      AttendanceStatus.present => (
-        AppColors.success,
-        Icons.check_circle_rounded,
-      ),
-      AttendanceStatus.absent => (AppColors.error, Icons.cancel_rounded),
-      AttendanceStatus.late => (
-        AppColors.warning,
-        Icons.access_time_filled_rounded,
-      ),
-      AttendanceStatus.excused => (AppColors.info, Icons.info_rounded),
-    };
-
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 140),
-          curve: Curves.easeOutCubic,
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.s12,
-            vertical: AppSpacing.s6,
-          ),
-          decoration: BoxDecoration(
-            color: widget.isSelected
-                ? pillColor
-                : _isHovered
-                ? pillColor.withValues(alpha: 0.12)
-                : AppColors.surfaceVariant,
-            borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-            border: Border.all(
-              color: widget.isSelected
-                  ? pillColor
-                  : _isHovered
-                  ? pillColor.withValues(alpha: 0.4)
-                  : AppColors.border,
-              width: 1,
-            ),
-            boxShadow: widget.isSelected
-                ? [
-                    BoxShadow(
-                      color: pillColor.withValues(alpha: 0.25),
-                      blurRadius: 4,
-                      offset: const Offset(0, 1.5),
-                    ),
-                  ]
-                : null,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                icon,
-                size: 13,
-                color: widget.isSelected
-                    ? Colors.white
-                    : _isHovered
-                    ? pillColor
-                    : AppColors.textSecondary,
-              ),
-              const SizedBox(width: AppSpacing.s4),
-              Text(
-                widget.status.labelAr,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: widget.isSelected
-                      ? FontWeight.w700
-                      : FontWeight.w600,
-                  color: widget.isSelected
-                      ? Colors.white
-                      : _isHovered
-                      ? pillColor
-                      : AppColors.textSecondary,
-                ),
-              ),
-            ],
           ),
         ),
       ),
