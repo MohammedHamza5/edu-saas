@@ -31,6 +31,7 @@ import '../../features/assignments/presentation/pages/teacher_assignments_page.d
 import '../../features/assignments/presentation/pages/student_assignments_page.dart';
 import '../../features/exams/presentation/pages/teacher_exams_page.dart';
 import '../../features/exams/presentation/pages/student_exams_page.dart';
+import '../../features/settings/presentation/pages/teacher_settings_page.dart';
 
 import '../network/supabase_service.dart';
 import '../widgets/student_shell.dart';
@@ -211,7 +212,12 @@ class AppRouter {
           GoRoute(
             path: teacherDashboard,
             pageBuilder: (BuildContext context, GoRouterState state) =>
-                const NoTransitionPage(child: TeacherDashboardPage()),
+                NoTransitionPage(
+              child: BlocProvider(
+                create: (_) => InjectionContainer.createTeacherDashboardCubit(),
+                child: const TeacherDashboardPage(),
+              ),
+            ),
           ),
           GoRoute(
             path: groupsList,
@@ -279,6 +285,13 @@ class AppRouter {
                 child: AssignGroupsPage(studentId: studentId),
               );
             },
+          ),
+          GoRoute(
+            path: teacherSettings,
+            pageBuilder: (BuildContext context, GoRouterState state) =>
+                const NoTransitionPage(
+              child: TeacherSettingsPage(),
+            ),
           ),
           GoRoute(
             path: platformOnboarding,
@@ -406,7 +419,12 @@ class AppRouter {
           GoRoute(
             path: studentDashboard,
             pageBuilder: (BuildContext context, GoRouterState state) =>
-                const NoTransitionPage(child: StudentDashboardPage()),
+                NoTransitionPage(
+              child: BlocProvider(
+                create: (_) => InjectionContainer.createStudentDashboardCubit(),
+                child: const StudentDashboardPage(),
+              ),
+            ),
           ),
           GoRoute(
             path: studentAssignments,

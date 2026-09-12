@@ -12,8 +12,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get appTitle => 'منصة التعليم الذكية';
 
   @override
-  String get advancedMathEducationPlatform =>
-      'المنصة المتقدمة لتعليم الرياضيات';
+  String get advancedMathEducationPlatform => 'المنصة المتقدمة للتعليم';
 
   @override
   String get loading => 'جارٍ التحميل...';
@@ -163,7 +162,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get loginTitle => 'تسجيل الدخول';
 
   @override
-  String get loginSubtitle => 'الدخول إلى مساحة تعلم الرياضيات الخاصة بك';
+  String get loginSubtitle => 'الدخول إلى مساحة التعلم الخاصة بك';
 
   @override
   String get emailLabel => 'البريد الإلكتروني';
@@ -221,7 +220,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get phoneHint => '01xxxxxxxxx';
 
   @override
-  String get parentPhoneLabel => 'رقم هاتف ولي الأمر';
+  String get parentPhoneLabel => 'هاتف ولي الأمر';
 
   @override
   String get parentPhoneHint => '01xxxxxxxxx';
@@ -285,13 +284,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get tenantNameLabel => 'اسم المنصة / الأكاديمية';
 
   @override
-  String get tenantNameHint => 'مثال: أكاديمية نيوتن للرياضيات';
+  String get tenantNameHint => 'مثال: أكاديمية نيوتن التعليمية';
 
   @override
   String get tenantSubdomainLabel => 'النطاق الفرعي للمساحة';
 
   @override
-  String get tenantSubdomainHint => 'مثال: newton-math';
+  String get tenantSubdomainHint => 'مثال: newton-academy';
 
   @override
   String get teacherNameLabel => 'اسم المدرس الأساسي';
@@ -363,7 +362,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get studentPortal => 'بوابة تعلم الطالب';
 
   @override
-  String get academicMathematics => 'الرياضيات الأكاديمية';
+  String get academicMathematics => 'المنصة الأكاديمية';
 
   @override
   String get selectSubjectGroup => 'اختر المجموعة الدراسية';
@@ -477,13 +476,13 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get satMasteryTitle => 'إتقان مجالات رياضيات SAT';
+  String get satMasteryTitle => 'إتقان مجالات SAT';
 
   @override
-  String get satScoreProjection => 'الدرجة المتوقعة في رياضيات SAT';
+  String get satScoreProjection => 'الدرجة المتوقعة في SAT';
 
   @override
-  String get satMathDomain => 'المجال الرياضي';
+  String get satMathDomain => 'المجال';
 
   @override
   String get heartOfAlgebra => 'أساسيات الجبر (Heart of Algebra)';
@@ -492,10 +491,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get problemSolvingDataAnalysis => 'حل المشكلات وتحليل البيانات';
 
   @override
-  String get passportToAdvancedMath => 'جواز العبور للرياضيات المتقدمة';
+  String get passportToAdvancedMath => 'جواز العبور للمراحل المتقدمة';
 
   @override
-  String get additionalTopicsMath => 'موضوعات إضافية في الرياضيات';
+  String get additionalTopicsMath => 'موضوعات إضافية';
 
   @override
   String get upcomingExamsTitle => 'الاختبارات والامتحانات القادمة';
@@ -992,7 +991,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get backToExamsAction => 'العودة لقائمة الامتحانات';
 
   @override
-  String get satToolsTitle => 'أدوات ومراجع رياضيات SAT';
+  String get satToolsTitle => 'أدوات ومراجع SAT';
 
   @override
   String get satDesmosCalculator => 'آلة ديسموس الحاسبة العلمية (Desmos)';
@@ -1165,6 +1164,16 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get studentWhatsappPhone => 'رقم الهاتف (واتساب الطالب)';
+
+  @override
+  String get parentWhatsappPhone =>
+      'رقم ولي الأمر (واتساب لاستلام التقارير والمتابعة)';
+
+  @override
+  String get pleaseEnterParentPhone => 'يرجى إدخال رقم هاتف ولي الأمر (واتساب)';
+
+  @override
+  String get studentPhoneLabel => 'هاتف الطالب';
 
   @override
   String get pleaseEnterValidPhone =>
@@ -1568,7 +1577,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get americanMathAcademy => 'أكاديمية الرياضيات الأمريكية';
+  String get americanMathAcademy => 'الأكاديمية الأمريكية';
 
   @override
   String get academicTrackLabel => 'المسار الدراسي';
@@ -1651,8 +1660,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get domainMastered => 'إتقان تام (Mastered)';
 
   @override
-  String get domainAdvancedMathTitle =>
-      'الدوال غير الخطية والتربيعية (Advanced Math)';
+  String get domainAdvancedMathTitle => 'الدوال غير الخطية والتربيعية';
 
   @override
   String get domainProficient => 'مستوى متقدم (Proficient)';

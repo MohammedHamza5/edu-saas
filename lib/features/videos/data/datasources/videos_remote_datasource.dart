@@ -83,7 +83,8 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
       final data = await _c
           .from('videos')
           .select('*, content(*)')
-          .eq('id', videoId)
+          .or('id.eq.$videoId,content_id.eq.$videoId')
+          .limit(1)
           .single();
 
       final model = VideoModel.fromJson(data);

@@ -12,8 +12,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appTitle => 'Smart Education Platform';
 
   @override
-  String get advancedMathEducationPlatform =>
-      'Advanced Mathematics & Education Platform';
+  String get advancedMathEducationPlatform => 'Advanced Education Platform';
 
   @override
   String get loading => 'Loading...';
@@ -163,7 +162,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginTitle => 'Sign In';
 
   @override
-  String get loginSubtitle => 'Access your mathematical learning workspace';
+  String get loginSubtitle => 'Access your learning workspace';
 
   @override
   String get emailLabel => 'Email Address';
@@ -221,7 +220,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get phoneHint => '01xxxxxxxxx';
 
   @override
-  String get parentPhoneLabel => 'Parent Phone Number';
+  String get parentPhoneLabel => 'Parent Phone';
 
   @override
   String get parentPhoneHint => '01xxxxxxxxx';
@@ -285,13 +284,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tenantNameLabel => 'Platform / Academy Name';
 
   @override
-  String get tenantNameHint => 'e.g. Newton Math Academy';
+  String get tenantNameHint => 'e.g. Newton Academy';
 
   @override
   String get tenantSubdomainLabel => 'Workspace Subdomain';
 
   @override
-  String get tenantSubdomainHint => 'e.g. newton-math';
+  String get tenantSubdomainHint => 'e.g. newton-academy';
 
   @override
   String get teacherNameLabel => 'Lead Teacher Name';
@@ -363,7 +362,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get studentPortal => 'Student Learning Portal';
 
   @override
-  String get academicMathematics => 'Academic Mathematics';
+  String get academicMathematics => 'Academic Platform';
 
   @override
   String get selectSubjectGroup => 'Select Study Group';
@@ -478,13 +477,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get satMasteryTitle => 'SAT Math Domain Mastery';
+  String get satMasteryTitle => 'SAT Domain Mastery';
 
   @override
-  String get satScoreProjection => 'SAT Projected Math Score';
+  String get satScoreProjection => 'SAT Projected Score';
 
   @override
-  String get satMathDomain => 'Math Domain';
+  String get satMathDomain => 'Domain';
 
   @override
   String get heartOfAlgebra => 'Heart of Algebra';
@@ -493,10 +492,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get problemSolvingDataAnalysis => 'Problem Solving & Data Analysis';
 
   @override
-  String get passportToAdvancedMath => 'Passport to Advanced Math';
+  String get passportToAdvancedMath => 'Passport to Advanced Topics';
 
   @override
-  String get additionalTopicsMath => 'Additional Topics in Math';
+  String get additionalTopicsMath => 'Additional Topics';
 
   @override
   String get upcomingExamsTitle => 'Upcoming Tests & Quizzes';
@@ -994,13 +993,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get backToExamsAction => 'Return to Exams';
 
   @override
-  String get satToolsTitle => 'SAT Mathematics Reference Tools';
+  String get satToolsTitle => 'SAT Reference Tools';
 
   @override
   String get satDesmosCalculator => 'Desmos Scientific Calculator';
 
   @override
-  String get satReferenceSheet => 'SAT Math Reference Formulas';
+  String get satReferenceSheet => 'SAT Reference Formulas';
 
   @override
   String get satFormulaSheet =>
@@ -1167,6 +1166,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get studentWhatsappPhone => 'Phone Number (Student WhatsApp)';
+
+  @override
+  String get parentWhatsappPhone =>
+      'Parent WhatsApp Number (Reports & Follow-up)';
+
+  @override
+  String get pleaseEnterParentPhone =>
+      'Please enter parent WhatsApp phone number';
+
+  @override
+  String get studentPhoneLabel => 'Student Phone';
 
   @override
   String get pleaseEnterValidPhone =>
@@ -1574,7 +1584,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get americanMathAcademy => 'American Mathematics Academy';
+  String get americanMathAcademy => 'American Academy';
 
   @override
   String get academicTrackLabel => 'Academic Track';
@@ -1659,7 +1669,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get domainAdvancedMathTitle =>
-      'Passport to Advanced Math (Nonlinear & Quadratics)';
+      'Passport to Advanced Topics (Nonlinear & Quadratics)';
 
   @override
   String get domainProficient => 'Proficient';
@@ -3401,7 +3411,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get questionTextField => 'Question Prompt *';
 
   @override
-  String get questionTextHint => 'Type the mathematical problem here...';
+  String get questionTextHint => 'Type the problem here...';
 
   @override
   String get questionTypeField => 'Question Type';

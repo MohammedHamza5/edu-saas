@@ -161,7 +161,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  context.l10n.loginSubtitle,
+                  branding.localizedWelcomeMessage(context),
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontSize: 13,

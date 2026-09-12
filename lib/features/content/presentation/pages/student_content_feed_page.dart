@@ -51,13 +51,27 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
     super.dispose();
   }
 
-  Future<void> _handleOpenFile(ContentEntity item) async {
-    await MaterialViewerSheet.show(
-      context,
-      content: item,
-      onGetSignedUrl: (storagePath) =>
-          context.read<ContentCubit>().getSignedUrl(storagePath),
-    );
+  Future<void> _handleContentTap(ContentEntity item) async {
+    switch (item.type) {
+      case ContentType.video:
+        await context.push('${AppRouter.videoPlayer}?id=${item.id}');
+        break;
+      case ContentType.assignment:
+        await context.push(AppRouter.studentAssignments);
+        break;
+      case ContentType.exam:
+        await context.push(AppRouter.studentExams);
+        break;
+      case ContentType.pdf:
+      case ContentType.image:
+        await MaterialViewerSheet.show(
+          context,
+          content: item,
+          onGetSignedUrl: (storagePath) =>
+              context.read<ContentCubit>().getSignedUrl(storagePath),
+        );
+        break;
+    }
   }
 
   @override
@@ -271,8 +285,8 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                                         content: item,
                                         isTeacher: false,
                                         onOpenFile: (_) =>
-                                            _handleOpenFile(item),
-                                        onTap: () => _handleOpenFile(item),
+                                            _handleContentTap(item),
+                                        onTap: () => _handleContentTap(item),
                                       ),
                                     );
                                   },

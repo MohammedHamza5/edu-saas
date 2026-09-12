@@ -178,10 +178,36 @@ class _Student360PageState extends State<Student360Page> {
                                       const SizedBox(width: 4),
                                       Expanded(
                                         child: Text(
-                                          student.phone!,
+                                          '${context.l10n.studentPhoneLabel}: ${student.phone!}',
                                           style: const TextStyle(
                                             fontSize: 12,
                                             color: AppColors.textSecondary,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                                if (student.parentPhone != null &&
+                                    student.parentPhone!.isNotEmpty) ...[
+                                  const SizedBox(height: 2),
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.family_restroom_rounded,
+                                        size: 13,
+                                        color: Color(0xFF25D366),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Expanded(
+                                        child: Text(
+                                          '${context.l10n.parentPhoneLabel}: ${student.parentPhone!}',
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            color: AppColors.textPrimary,
+                                            fontWeight: FontWeight.w600,
                                           ),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
@@ -281,7 +307,9 @@ class _Student360PageState extends State<Student360Page> {
                                         context,
                                         studentName: student.fullName,
                                         reportText: report,
-                                        phone: student.phone,
+                                        phone: (student.parentPhone != null && student.parentPhone!.isNotEmpty)
+                                            ? student.parentPhone
+                                            : student.phone,
                                       );
                                     },
                                   ),
@@ -359,7 +387,9 @@ class _Student360PageState extends State<Student360Page> {
                                     context,
                                     studentName: student.fullName,
                                     reportText: report,
-                                    phone: student.phone,
+                                    phone: (student.parentPhone != null && student.parentPhone!.isNotEmpty)
+                                        ? student.parentPhone
+                                        : student.phone,
                                   );
                                 },
                               ),

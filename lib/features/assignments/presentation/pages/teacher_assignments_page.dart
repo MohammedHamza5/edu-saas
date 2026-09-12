@@ -19,6 +19,7 @@ import '../cubit/assignments_state.dart';
 import '../../../../core/widgets/teacher_group_filter_bar.dart';
 import '../../../groups/domain/entities/group_entity.dart';
 import '../../../groups/presentation/cubit/groups_cubit.dart';
+import '../../../groups/presentation/cubit/groups_state.dart';
 import '../widgets/assignment_card.dart';
 import '../widgets/submission_tile.dart';
 import 'grade_submission_page.dart';
@@ -27,11 +28,7 @@ class TeacherAssignmentsPage extends StatefulWidget {
   final String? groupId;
   final String? groupName;
 
-  const TeacherAssignmentsPage({
-    super.key,
-    this.groupId,
-    this.groupName,
-  });
+  const TeacherAssignmentsPage({super.key, this.groupId, this.groupName});
 
   @override
   State<TeacherAssignmentsPage> createState() => _TeacherAssignmentsPageState();
@@ -44,8 +41,26 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
   @override
   void initState() {
     super.initState();
-    _selectedGroupId = widget.groupId;
-    _selectedGroupName = widget.groupName;
+    final initialId =
+        widget.groupId ?? TeacherGroupFilterBar.lastSelectedGroupId;
+    GroupsState? groupsState;
+    try {
+      groupsState = context.read<GroupsCubit>().state;
+    } catch (_) {}
+    if (initialId != null) {
+      _selectedGroupId = initialId;
+      _selectedGroupName = widget.groupName;
+      if (_selectedGroupName == null && groupsState is GroupsLoaded) {
+        _selectedGroupName = groupsState.groups
+            .where((g) => g.id == initialId)
+            .firstOrNull
+            ?.name;
+      }
+    } else if (groupsState is GroupsLoaded && groupsState.groups.isNotEmpty) {
+      _selectedGroupId = groupsState.groups.first.id;
+      _selectedGroupName = groupsState.groups.first.name;
+    }
+
     if (_selectedGroupId != null) {
       _loadAssignments();
     }
@@ -56,6 +71,7 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
 
   void _onGroupChanged(GroupEntity group) {
     if (_selectedGroupId == group.id) return;
+    TeacherGroupFilterBar.lastSelectedGroupId = group.id;
     setState(() {
       _selectedGroupId = group.id;
       _selectedGroupName = group.name;
@@ -82,7 +98,9 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
       isScrollControlled: true,
       backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppSpacing.radiusLarge)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppSpacing.radiusLarge),
+        ),
       ),
       builder: (sheetContext) {
         return StatefulBuilder(
@@ -169,14 +187,21 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
                               onTap: () async {
                                 final pickedDate = await showDatePicker(
                                   context: ctx,
-                                  initialDate: DateTime.now().add(const Duration(days: 3)),
+                                  initialDate: DateTime.now().add(
+                                    const Duration(days: 3),
+                                  ),
                                   firstDate: DateTime.now(),
-                                  lastDate: DateTime.now().add(const Duration(days: 365)),
+                                  lastDate: DateTime.now().add(
+                                    const Duration(days: 365),
+                                  ),
                                 );
                                 if (pickedDate != null && ctx.mounted) {
                                   final pickedTime = await showTimePicker(
                                     context: ctx,
-                                    initialTime: const TimeOfDay(hour: 23, minute: 59),
+                                    initialTime: const TimeOfDay(
+                                      hour: 23,
+                                      minute: 59,
+                                    ),
                                   );
                                   if (pickedTime != null) {
                                     setModalState(() {
@@ -198,17 +223,25 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
                                 ),
                                 decoration: BoxDecoration(
                                   border: Border.all(color: AppColors.border),
-                                  borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                                  borderRadius: BorderRadius.circular(
+                                    AppSpacing.radiusMedium,
+                                  ),
                                 ),
                                 child: Row(
                                   children: [
-                                    const Icon(Icons.event, size: 20, color: AppColors.primary),
+                                    const Icon(
+                                      Icons.event,
+                                      size: 20,
+                                      color: AppColors.primary,
+                                    ),
                                     const SizedBox(width: AppSpacing.s8),
                                     Expanded(
                                       child: Text(
                                         selectedDueDate != null
                                             ? '${selectedDueDate!.month}/${selectedDueDate!.day}'
-                                            : context.l10n.submissionDueDateField,
+                                            : context
+                                                  .l10n
+                                                  .submissionDueDateField,
                                         style: TextStyle(
                                           fontSize: 13,
                                           color: selectedDueDate != null
@@ -230,11 +263,17 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
                       SwitchListTile(
                         title: Text(
                           context.l10n.allowLateSubmission,
-                          style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: AppColors.textPrimary,
+                          ),
                         ),
                         subtitle: Text(
                           context.l10n.allowLateSubmissionSubtitle,
-                          style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textMuted,
+                          ),
                         ),
                         value: allowLate,
                         activeColor: AppColors.primary,
@@ -253,16 +292,24 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
                         onPressed: () async {
                           if (!formKey.currentState!.validate()) return;
                           final title = titleController.text.trim();
-                          final instructions = instructionsController.text.trim();
-                          final maxScore = int.parse(maxScoreController.text.trim());
+                          final instructions = instructionsController.text
+                              .trim();
+                          final maxScore = int.parse(
+                            maxScoreController.text.trim(),
+                          );
 
                           Navigator.of(ctx).pop();
 
-                          final successMsg = context.l10n.assignmentPublishedSuccess;
-                          final success = await context.read<AssignmentsCubit>().createAssignment(
+                          final successMsg =
+                              context.l10n.assignmentPublishedSuccess;
+                          final success = await context
+                              .read<AssignmentsCubit>()
+                              .createAssignment(
                                 groupId: _selectedGroupId!,
                                 title: title,
-                                instructions: instructions.isNotEmpty ? instructions : null,
+                                instructions: instructions.isNotEmpty
+                                    ? instructions
+                                    : null,
                                 dueAt: selectedDueDate,
                                 allowLateSubmission: allowLate,
                                 maxScore: maxScore,
@@ -297,7 +344,9 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
       isScrollControlled: true,
       backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppSpacing.radiusLarge)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppSpacing.radiusLarge),
+        ),
       ),
       builder: (sheetContext) {
         return DraggableScrollableSheet(
@@ -375,40 +424,41 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
                       child: isLoading
                           ? const AppLoadingView.list(count: 3)
                           : submissions.isEmpty
-                              ? Center(
-                                  child: AppEmptyView(
-                                    message: context.l10n.noSubmissionsYetTitle,
-                                    subtitle: context.l10n.noSubmissionsYetSubtitle,
-                                    icon: Icons.assignment_turned_in_outlined,
-                                  ),
-                                )
-                              : ListView.separated(
-                                  controller: scrollController,
-                                  padding: const EdgeInsets.all(AppSpacing.s16),
-                                  itemCount: submissions.length,
-                                  separatorBuilder: (_, __) =>
-                                      const SizedBox(height: AppSpacing.s8),
-                                  itemBuilder: (context, index) {
-                                    final sub = submissions[index];
-                                    return SubmissionTile(
-                                      submission: sub,
-                                      maxScore: assignment.maxScore,
-                                      onTap: () {
-                                        Navigator.of(ctx).push<void>(
-                                          MaterialPageRoute<void>(
-                                            builder: (_) => BlocProvider.value(
-                                              value: context.read<AssignmentsCubit>(),
-                                              child: GradeSubmissionPage(
-                                                assignment: assignment,
-                                                submission: sub,
-                                              ),
-                                            ),
+                          ? Center(
+                              child: AppEmptyView(
+                                message: context.l10n.noSubmissionsYetTitle,
+                                subtitle: context.l10n.noSubmissionsYetSubtitle,
+                                icon: Icons.assignment_turned_in_outlined,
+                              ),
+                            )
+                          : ListView.separated(
+                              controller: scrollController,
+                              padding: const EdgeInsets.all(AppSpacing.s16),
+                              itemCount: submissions.length,
+                              separatorBuilder: (_, __) =>
+                                  const SizedBox(height: AppSpacing.s8),
+                              itemBuilder: (context, index) {
+                                final sub = submissions[index];
+                                return SubmissionTile(
+                                  submission: sub,
+                                  maxScore: assignment.maxScore,
+                                  onTap: () {
+                                    Navigator.of(ctx).push<void>(
+                                      MaterialPageRoute<void>(
+                                        builder: (_) => BlocProvider.value(
+                                          value: context
+                                              .read<AssignmentsCubit>(),
+                                          child: GradeSubmissionPage(
+                                            assignment: assignment,
+                                            submission: sub,
                                           ),
-                                        );
-                                      },
+                                        ),
+                                      ),
                                     );
                                   },
-                                ),
+                                );
+                              },
+                            ),
                     ),
                   ],
                 );
@@ -431,9 +481,11 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
               ? context.pop()
               : context.go(AppRouter.teacherDashboard),
         ),
-        title: Text(_selectedGroupName != null
-            ? context.l10n.groupAssignmentsTitle(_selectedGroupName!)
-            : context.l10n.manageAssignmentsTitle),
+        title: Text(
+          _selectedGroupName != null
+              ? context.l10n.groupAssignmentsTitle(_selectedGroupName!)
+              : context.l10n.manageAssignmentsTitle,
+        ),
         centerTitle: true,
         actions: [
           IconButton(
@@ -451,7 +503,10 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
               icon: const Icon(Icons.add, color: Colors.white),
               label: Text(
                 context.l10n.createAssignmentFab,
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
       body: Center(
@@ -469,7 +524,10 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
                 child: BlocBuilder<AssignmentsCubit, AssignmentsState>(
                   builder: (context, state) {
                     if (state is AssignmentsLoading) {
-                      return const AppLoadingView.cardsGrid(count: 4, columns: 2);
+                      return const AppLoadingView.cardsGrid(
+                        count: 4,
+                        columns: 2,
+                      );
                     }
 
                     if (state is AssignmentsError) {
@@ -488,9 +546,14 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
                         return Center(
                           child: AppEmptyView(
                             message: context.l10n.noAssignmentsForGroupTitle,
-                            subtitle: context.l10n.noAssignmentsForGroupSubtitle,
-                            actionText: _selectedGroupId != null ? context.l10n.createFirstAssignmentBtn : null,
-                            onAction: _selectedGroupId == null ? null : _showCreateAssignmentDialog,
+                            subtitle:
+                                context.l10n.noAssignmentsForGroupSubtitle,
+                            actionText: _selectedGroupId != null
+                                ? context.l10n.createFirstAssignmentBtn
+                                : null,
+                            onAction: _selectedGroupId == null
+                                ? null
+                                : _showCreateAssignmentDialog,
                             icon: Icons.assignment_outlined,
                           ),
                         );

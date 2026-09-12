@@ -16,17 +16,18 @@ class TenantRegistry {
     brandNameEn: 'Dr. Antounios Ashraf Platform',
     teacherName: 'د. أنطونيوس أشرف',
     teacherNameEn: 'Dr. Antounios Ashraf',
-    subjectTitle: 'رياضيات النظام الأمريكي • SAT · EST · ACT',
-    subjectTitleEn: 'American High School Math • SAT · EST · ACT',
+    subjectTitle: 'SAT • ACT • MATH • MORE',
+    subjectTitleEn: 'SAT • ACT • MATH • MORE',
     academicTrack: 'النظام الأمريكي • Grade 10-12',
     academicTrackEn: 'American Curriculum • Grade 10-12',
-    tagline: 'Concept • Speed • Strategy • Accuracy (Target 800)',
-    taglineEn: 'Concept • Speed • Strategy • Accuracy (Target 800)',
-    welcomeMessage: 'مرحباً بك في منصة د. أنطونيوس أشرف الخاصة برياضيات الدبلومة الأمريكية',
+    tagline: 'Better Scores Bigger Dreams (EST. 2026)',
+    taglineEn: 'Better Scores Bigger Dreams (EST. 2026)',
+    welcomeMessage: 'مرحباً بك في منصة د. أنطونيوس أشرف',
     primaryColor: const Color(0xFF6366F1), // Luminous Mathematical Indigo 500
     secondaryColor: const Color(0xFF38BDF8), // Electric Cyan 400
     accentGlow: const Color(0xFF38BDF8), // Electric Cyan highlight for SAT precision
     signatureSymbol: '∑',
+    logoAsset: 'assets/images/dr_antounios_logo.png',
     supportPhone: '+201000000000',
     supportEmail: 'dr.antounios@math-academy.com',
   );

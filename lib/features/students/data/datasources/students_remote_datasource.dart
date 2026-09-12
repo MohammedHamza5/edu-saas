@@ -61,7 +61,7 @@ class StudentsRemoteDataSourceImpl implements StudentsRemoteDataSource {
     // Build query with filters BEFORE range() — PostgrestFilterBuilder needed
     var filterQuery = _c
         .from('users')
-        .select('id, tenant_id, full_name, email, phone, avatar_url, status, role, last_activity_at, created_at')
+        .select('id, tenant_id, full_name, email, phone, parent_phone, avatar_url, status, role, last_activity_at, created_at')
         .eq('role', 'student');
 
     if (status != null && status != 'all') {
@@ -88,7 +88,7 @@ class StudentsRemoteDataSourceImpl implements StudentsRemoteDataSource {
   Future<List<StudentModel>> getPendingStudents() async {
     final response = await _c
         .from('users')
-        .select('id, tenant_id, full_name, email, phone, avatar_url, status, role, last_activity_at, created_at')
+        .select('id, tenant_id, full_name, email, phone, parent_phone, avatar_url, status, role, last_activity_at, created_at')
         .eq('role', 'student')
         .eq('status', 'pending')
         .order('created_at', ascending: true); // oldest first for FIFO review
@@ -142,7 +142,7 @@ class StudentsRemoteDataSourceImpl implements StudentsRemoteDataSource {
   Future<StudentModel> getStudent(String studentId) async {
     final response = await _c
         .from('users')
-        .select('id, tenant_id, full_name, email, phone, avatar_url, status, role, last_activity_at, created_at')
+        .select('id, tenant_id, full_name, email, phone, parent_phone, avatar_url, status, role, last_activity_at, created_at')
         .eq('id', studentId)
         .single();
 

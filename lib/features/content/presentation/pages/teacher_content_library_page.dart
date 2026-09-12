@@ -22,6 +22,7 @@ import '../widgets/material_viewer_sheet.dart';
 import '../../../../core/widgets/teacher_group_filter_bar.dart';
 import '../../../groups/domain/entities/group_entity.dart';
 import '../../../groups/presentation/cubit/groups_cubit.dart';
+import '../../../groups/presentation/cubit/groups_state.dart';
 import '../../../videos/presentation/widgets/video_upload_dialog.dart';
 
 class TeacherContentLibraryPage extends StatefulWidget {
@@ -46,8 +47,22 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
   @override
   void initState() {
     super.initState();
-    _selectedGroupId = widget.groupId;
-    _selectedGroupName = widget.groupName;
+    final initialId = widget.groupId ?? TeacherGroupFilterBar.lastSelectedGroupId;
+    GroupsState? groupsState;
+    try {
+      groupsState = context.read<GroupsCubit>().state;
+    } catch (_) {}
+    if (initialId != null) {
+      _selectedGroupId = initialId;
+      _selectedGroupName = widget.groupName;
+      if (_selectedGroupName == null && groupsState is GroupsLoaded) {
+        _selectedGroupName = groupsState.groups.where((g) => g.id == initialId).firstOrNull?.name;
+      }
+    } else if (groupsState is GroupsLoaded && groupsState.groups.isNotEmpty) {
+      _selectedGroupId = groupsState.groups.first.id;
+      _selectedGroupName = groupsState.groups.first.name;
+    }
+
     if (_selectedGroupId != null) {
       context.read<ContentCubit>().loadGroupContent(_selectedGroupId!);
     }
@@ -58,6 +73,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
 
   void _onGroupChanged(GroupEntity group) {
     if (_selectedGroupId == group.id) return;
+    TeacherGroupFilterBar.lastSelectedGroupId = group.id;
     setState(() {
       _selectedGroupId = group.id;
       _selectedGroupName = group.name;

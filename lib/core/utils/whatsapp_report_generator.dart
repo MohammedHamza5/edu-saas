@@ -22,7 +22,7 @@ class WhatsAppReportGenerator {
     String? engagementQualityText,
     String? teacherNotes,
     String teacherName = 'د. أنطونيوس أشرف',
-    String platformName = 'منصة د. أنطونيوس أشرف للرياضيات الأمريكية',
+    String platformName = 'منصة د. أنطونيوس أشرف',
   }) {
     final attendancePercent = (attendanceRate * 100).round();
     final videoPercent = (videoWatchRate * 100).round();

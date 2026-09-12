@@ -5,9 +5,9 @@ import 'package:edu_saas/core/theme/app_theme.dart';
 import 'package:edu_saas/core/utils/whatsapp_report_generator.dart';
 import 'package:edu_saas/features/dashboard/presentation/widgets/teacher_action_radar.dart';
 import 'package:edu_saas/features/dashboard/presentation/widgets/sat_domain_mastery_card.dart';
+import 'package:edu_saas/features/dashboard/presentation/cubit/teacher_dashboard_state.dart';
+import 'package:edu_saas/features/dashboard/domain/entities/teacher_radar_alerts.dart';
 import 'package:edu_saas/features/exams/presentation/widgets/sat_exam_tools_sheet.dart';
-import 'package:edu_saas/features/groups/domain/entities/group_entity.dart';
-import 'package:edu_saas/features/students/domain/entities/student_entity.dart';
 
 void main() {
   group('Dr. Antounios Platform Specialized Widgets Tests', () {
@@ -35,36 +35,22 @@ void main() {
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
 
-      final dummyStudents = [
-        const StudentEntity(
-          id: 's-1',
-          tenantId: 't-1',
-          fullName: 'علي محمود',
-          email: 'ali@example.com',
-          status: 'active',
-        ),
-      ];
-
-      final dummyGroups = [
-        const GroupEntity(
-          id: 'g-1',
-          tenantId: 't-1',
-          name: 'Digital SAT Master',
-          level: 'Grade 11-12',
-        ),
-      ];
-
       await tester.pumpWidget(
         MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           locale: const Locale('ar'),
           theme: AppTheme.lightTheme,
-          home: Scaffold(
+          home: const Scaffold(
             body: SingleChildScrollView(
               child: TeacherActionRadar(
-                students: dummyStudents,
-                groups: dummyGroups,
+                alertsState: TeacherDashboardLoaded(
+                  alerts: TeacherRadarAlerts(
+                    lowScores: [],
+                    unwatchedVideos: [],
+                    overdueAssignments: [],
+                  ),
+                ),
                 pendingCount: 2,
               ),
             ),

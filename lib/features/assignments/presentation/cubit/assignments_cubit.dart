@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/utils/cache_manager.dart';
 import '../../domain/entities/assignment_entity.dart';
 import '../../domain/repositories/assignments_repository.dart';
 import 'assignments_state.dart';
@@ -10,21 +11,36 @@ class AssignmentsCubit extends Cubit<AssignmentsState> {
       : _repository = repository,
         super(const AssignmentsInitial());
 
-  /// Loads assignments for a specific group (Teacher flow)
+  /// Loads assignments for a specific group (Teacher flow) with instant SWR cache
   Future<void> loadGroupAssignments(String groupId) async {
-    emit(const AssignmentsLoading());
+    final cacheKey = 'teacher_group_$groupId';
+
+    // ── Stale-While-Revalidate: Instant display from memory cache ──────────
+    final cached = AppCache.assignments.getStale(cacheKey);
+    if (cached is List<AssignmentEntity>) {
+      emit(TeacherAssignmentsLoaded(
+        groupId: groupId,
+        assignments: cached,
+      ));
+      if (AppCache.assignments.has(cacheKey)) return; // Fresh cache, skip network
+    } else {
+      emit(const AssignmentsLoading());
+    }
 
     final result = await _repository.getGroupAssignments(groupId);
 
     result.when(
       onSuccess: (assignments) {
+        AppCache.assignments.put(cacheKey, assignments);
         emit(TeacherAssignmentsLoaded(
           groupId: groupId,
           assignments: assignments,
         ));
       },
       onFailure: (failure) {
-        emit(AssignmentsError(failure.message));
+        if (state is! TeacherAssignmentsLoaded) {
+          emit(AssignmentsError(failure.message));
+        }
       },
     );
   }
@@ -158,14 +174,28 @@ class AssignmentsCubit extends Cubit<AssignmentsState> {
     );
   }
 
-  /// Loads all assignments for the currently logged-in student (Student flow)
+  /// Loads all assignments for the currently logged-in student (Student flow) with instant SWR cache
   Future<void> loadStudentAssignments() async {
-    emit(const AssignmentsLoading());
+    const cacheKey = 'student_assignments_all';
+
+    // ── Stale-While-Revalidate: Instant display from memory cache ──────────
+    final cached = AppCache.assignments.getStale(cacheKey);
+    if (cached is List<AssignmentEntity>) {
+      if (cached.isEmpty) {
+        emit(const AssignmentsEmpty(message: 'لا توجد واجبات مطلوبة حالياً'));
+      } else {
+        emit(StudentAssignmentsLoaded(assignments: cached));
+      }
+      if (AppCache.assignments.has(cacheKey)) return; // Fresh cache, skip network
+    } else {
+      emit(const AssignmentsLoading());
+    }
 
     final result = await _repository.getStudentAssignments();
 
     result.when(
       onSuccess: (assignments) {
+        AppCache.assignments.put(cacheKey, assignments);
         if (assignments.isEmpty) {
           emit(const AssignmentsEmpty(message: 'لا توجد واجبات مطلوبة حالياً'));
         } else {
@@ -173,7 +203,9 @@ class AssignmentsCubit extends Cubit<AssignmentsState> {
         }
       },
       onFailure: (failure) {
-        emit(AssignmentsError(failure.message));
+        if (state is! StudentAssignmentsLoaded) {
+          emit(AssignmentsError(failure.message));
+        }
       },
     );
   }

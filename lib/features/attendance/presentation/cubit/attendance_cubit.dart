@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/utils/cache_manager.dart';
 import '../../domain/entities/attendance_entity.dart';
 import '../../domain/repositories/attendance_repository.dart';
 import 'attendance_state.dart';
@@ -10,12 +11,28 @@ class AttendanceCubit extends Cubit<AttendanceState> {
     : _repository = repository,
       super(const AttendanceInitial());
 
-  /// Loads the students and attendance records for a specific group and date
+  /// Loads the students and attendance records for a specific group and date with instant SWR cache
   Future<void> loadGroupAttendance({
     required String groupId,
     required DateTime date,
   }) async {
-    emit(const AttendanceLoading());
+    final dateKey = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+    final cacheKey = '${groupId}_$dateKey';
+
+    // ── Stale-While-Revalidate: Instant display from memory cache ──────────
+    final cached = AppCache.attendance.getStale(cacheKey);
+    if (cached is List<StudentAttendanceItem>) {
+      emit(
+        TeacherAttendanceLoaded(
+          groupId: groupId,
+          selectedDate: date,
+          students: cached,
+        ),
+      );
+      if (AppCache.attendance.has(cacheKey)) return; // Fresh cache, skip network
+    } else {
+      emit(const AttendanceLoading());
+    }
 
     final result = await _repository.getGroupStudentsWithAttendance(
       groupId: groupId,
@@ -27,6 +44,7 @@ class AttendanceCubit extends Cubit<AttendanceState> {
     result.when(
       onSuccess: (students) {
         if (!isClosed) {
+          AppCache.attendance.put(cacheKey, students);
           emit(
             TeacherAttendanceLoaded(
               groupId: groupId,
@@ -37,7 +55,9 @@ class AttendanceCubit extends Cubit<AttendanceState> {
         }
       },
       onFailure: (failure) {
-        if (!isClosed) emit(AttendanceError(failure.message));
+        if (!isClosed && state is! TeacherAttendanceLoaded) {
+          emit(AttendanceError(failure.message));
+        }
       },
     );
   }

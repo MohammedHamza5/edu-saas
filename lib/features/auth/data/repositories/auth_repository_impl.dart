@@ -56,6 +56,7 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
     required String fullName,
     required String phone,
+    String? parentPhone,
     required String tenantId,
   }) async {
     try {
@@ -64,6 +65,7 @@ class AuthRepositoryImpl implements AuthRepository {
         password: password,
         fullName: fullName,
         phone: phone,
+        parentPhone: parentPhone,
         tenantId: tenantId,
       );
       return Success(user);

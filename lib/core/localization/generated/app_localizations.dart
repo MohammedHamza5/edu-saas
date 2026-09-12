@@ -107,7 +107,7 @@ abstract class AppLocalizations {
   /// Splash subtitle
   ///
   /// In en, this message translates to:
-  /// **'Advanced Mathematics & Education Platform'**
+  /// **'Advanced Education Platform'**
   String get advancedMathEducationPlatform;
 
   /// Generic loading state
@@ -407,7 +407,7 @@ abstract class AppLocalizations {
   /// Login screen subtitle
   ///
   /// In en, this message translates to:
-  /// **'Access your mathematical learning workspace'**
+  /// **'Access your learning workspace'**
   String get loginSubtitle;
 
   /// Email field label
@@ -521,7 +521,7 @@ abstract class AppLocalizations {
   /// Parent phone label
   ///
   /// In en, this message translates to:
-  /// **'Parent Phone Number'**
+  /// **'Parent Phone'**
   String get parentPhoneLabel;
 
   /// Parent phone hint
@@ -641,7 +641,7 @@ abstract class AppLocalizations {
   /// Tenant name hint
   ///
   /// In en, this message translates to:
-  /// **'e.g. Newton Math Academy'**
+  /// **'e.g. Newton Academy'**
   String get tenantNameHint;
 
   /// Subdomain label
@@ -653,7 +653,7 @@ abstract class AppLocalizations {
   /// Subdomain hint
   ///
   /// In en, this message translates to:
-  /// **'e.g. newton-math'**
+  /// **'e.g. newton-academy'**
   String get tenantSubdomainHint;
 
   /// Lead teacher name
@@ -797,7 +797,7 @@ abstract class AppLocalizations {
   /// Academic mathematics subtitle
   ///
   /// In en, this message translates to:
-  /// **'Academic Mathematics'**
+  /// **'Academic Platform'**
   String get academicMathematics;
 
   /// Select study group title
@@ -1001,19 +1001,19 @@ abstract class AppLocalizations {
   /// SAT mastery card title
   ///
   /// In en, this message translates to:
-  /// **'SAT Math Domain Mastery'**
+  /// **'SAT Domain Mastery'**
   String get satMasteryTitle;
 
   /// SAT projected score title
   ///
   /// In en, this message translates to:
-  /// **'SAT Projected Math Score'**
+  /// **'SAT Projected Score'**
   String get satScoreProjection;
 
   /// Domain label
   ///
   /// In en, this message translates to:
-  /// **'Math Domain'**
+  /// **'Domain'**
   String get satMathDomain;
 
   /// SAT math domain 1
@@ -1031,13 +1031,13 @@ abstract class AppLocalizations {
   /// SAT math domain 3
   ///
   /// In en, this message translates to:
-  /// **'Passport to Advanced Math'**
+  /// **'Passport to Advanced Topics'**
   String get passportToAdvancedMath;
 
   /// SAT math domain 4
   ///
   /// In en, this message translates to:
-  /// **'Additional Topics in Math'**
+  /// **'Additional Topics'**
   String get additionalTopicsMath;
 
   /// Upcoming exams title
@@ -1973,7 +1973,7 @@ abstract class AppLocalizations {
   /// SAT tools sheet title
   ///
   /// In en, this message translates to:
-  /// **'SAT Mathematics Reference Tools'**
+  /// **'SAT Reference Tools'**
   String get satToolsTitle;
 
   /// Calculator tool
@@ -1985,7 +1985,7 @@ abstract class AppLocalizations {
   /// Reference sheet tool
   ///
   /// In en, this message translates to:
-  /// **'SAT Math Reference Formulas'**
+  /// **'SAT Reference Formulas'**
   String get satReferenceSheet;
 
   /// Formula sheet subtitle
@@ -2299,6 +2299,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Phone Number (Student WhatsApp)'**
   String get studentWhatsappPhone;
+
+  /// Parent phone label
+  ///
+  /// In en, this message translates to:
+  /// **'Parent WhatsApp Number (Reports & Follow-up)'**
+  String get parentWhatsappPhone;
+
+  /// Validation error
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter parent WhatsApp phone number'**
+  String get pleaseEnterParentPhone;
+
+  /// Student phone label
+  ///
+  /// In en, this message translates to:
+  /// **'Student Phone'**
+  String get studentPhoneLabel;
 
   /// Validation error
   ///
@@ -3016,7 +3034,7 @@ abstract class AppLocalizations {
   /// Badge
   ///
   /// In en, this message translates to:
-  /// **'American Mathematics Academy'**
+  /// **'American Academy'**
   String get americanMathAcademy;
 
   /// Label
@@ -3160,7 +3178,7 @@ abstract class AppLocalizations {
   /// Domain title
   ///
   /// In en, this message translates to:
-  /// **'Passport to Advanced Math (Nonlinear & Quadratics)'**
+  /// **'Passport to Advanced Topics (Nonlinear & Quadratics)'**
   String get domainAdvancedMathTitle;
 
   /// Domain status
@@ -6166,7 +6184,7 @@ abstract class AppLocalizations {
   /// Question prompt hint
   ///
   /// In en, this message translates to:
-  /// **'Type the mathematical problem here...'**
+  /// **'Type the problem here...'**
   String get questionTextHint;
 
   /// Question type field label

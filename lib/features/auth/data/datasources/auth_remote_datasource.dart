@@ -14,6 +14,7 @@ abstract interface class AuthRemoteDataSource {
     required String password,
     required String fullName,
     required String phone,
+    String? parentPhone,
     required String tenantId,
   });
 
@@ -55,6 +56,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String password,
     required String fullName,
     required String phone,
+    String? parentPhone,
     required String tenantId,
   }) async {
     final response = await _safeClient.auth.signUp(
@@ -63,6 +65,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       data: {
         'full_name': fullName.trim(),
         'phone': phone.trim(),
+        if (parentPhone != null && parentPhone.trim().isNotEmpty)
+          'parent_phone': parentPhone.trim(),
         'tenant_id': tenantId,
         'role': 'student',
       },
@@ -87,6 +91,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         fullName: fullName.trim(),
         email: email.trim(),
         phone: phone.trim(),
+        parentPhone: parentPhone?.trim(),
       );
     }
   }
@@ -113,7 +118,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     // يجلب بيانات المستخدم + حالة الـ Tenant في رحلة HTTP واحدة
     final data = await _safeClient
         .from('users')
-        .select('id, tenant_id, role, status, full_name, email, phone, tenants!inner(status)')
+        .select('id, tenant_id, role, status, full_name, email, phone, parent_phone, tenants!inner(status)')
         .eq('id', userId)
         .maybeSingle();
 

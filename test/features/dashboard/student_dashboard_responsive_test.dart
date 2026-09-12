@@ -6,11 +6,16 @@ import 'package:edu_saas/core/theme/app_theme.dart';
 import 'package:edu_saas/features/auth/domain/entities/user_entity.dart';
 import 'package:edu_saas/features/auth/domain/repositories/auth_repository.dart';
 import 'package:edu_saas/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:edu_saas/features/auth/presentation/cubit/auth_state.dart';
 import 'package:edu_saas/features/dashboard/presentation/pages/student_dashboard_page.dart';
 import 'package:edu_saas/core/localization/generated/app_localizations.dart';
 import 'package:edu_saas/features/notifications/domain/entities/notification_entity.dart';
 import 'package:edu_saas/features/notifications/domain/repositories/notifications_repository.dart';
 import 'package:edu_saas/features/notifications/presentation/cubit/notifications_cubit.dart';
+import 'package:edu_saas/features/dashboard/domain/entities/student_dashboard_stats.dart';
+import 'package:edu_saas/features/dashboard/domain/repositories/student_dashboard_repository.dart';
+import 'package:edu_saas/features/dashboard/presentation/cubit/student_dashboard_cubit.dart';
+import 'package:edu_saas/features/dashboard/presentation/cubit/student_dashboard_state.dart';
 
 class _FakeAuthRepository implements AuthRepository {
   @override
@@ -27,6 +32,7 @@ class _FakeAuthRepository implements AuthRepository {
     required String email,
     required String password,
     required String phone,
+    String? parentPhone,
     required String tenantId,
   }) async {
     throw UnimplementedError();
@@ -70,18 +76,55 @@ class _FakeNotificationsRepository implements NotificationsRepository {
   }
 }
 
+class _FakeStudentDashboardRepository implements StudentDashboardRepository {
+  @override
+  Future<Result<StudentDashboardStats>> getStudentDashboardStats(String studentId) async {
+    return const Success(StudentDashboardStats(
+      attendancePercentage: 100,
+      examAverage: 85,
+      assignmentsSubmitted: 4,
+      videoCompletionPercentage: 90,
+      activeGroupName: 'Digital SAT Master',
+      activeGroupLevel: 'SAT',
+    ));
+  }
+}
+
 void main() {
   late AuthCubit authCubit;
   late NotificationsCubit notificationsCubit;
+  late StudentDashboardCubit studentDashboardCubit;
 
   setUp(() {
-    authCubit = AuthCubit(repository: _FakeAuthRepository());
+    authCubit = AuthCubit(repository: _FakeAuthRepository())
+      ..emit(const AuthAuthenticated(
+        UserEntity(
+          id: 'student-1',
+          tenantId: 'tenant-1',
+          role: UserRole.student,
+          fullName: 'طالب تجريبي',
+          email: 'student@test.com',
+          status: UserStatus.active,
+        ),
+      ));
     notificationsCubit = NotificationsCubit(repository: _FakeNotificationsRepository());
+    studentDashboardCubit = StudentDashboardCubit(repository: _FakeStudentDashboardRepository())
+      ..emit(const StudentDashboardLoaded(
+        stats: StudentDashboardStats(
+          attendancePercentage: 100,
+          examAverage: 85,
+          assignmentsSubmitted: 4,
+          videoCompletionPercentage: 90,
+          activeGroupName: 'المسار الدراسي',
+          activeGroupLevel: 'SAT',
+        ),
+      ));
   });
 
   tearDown(() {
     authCubit.close();
     notificationsCubit.close();
+    studentDashboardCubit.close();
   });
 
   Widget buildStudentDashboardTestApp() {
@@ -89,6 +132,7 @@ void main() {
       providers: [
         BlocProvider<AuthCubit>.value(value: authCubit),
         BlocProvider<NotificationsCubit>.value(value: notificationsCubit),
+        BlocProvider<StudentDashboardCubit>.value(value: studentDashboardCubit),
       ],
       child: MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,

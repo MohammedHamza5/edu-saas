@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/config/tenant_registry.dart';
+import '../../../../core/network/supabase_service.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/extensions/responsive_context_extension.dart';
 import '../../../../core/router/app_router.dart';
@@ -22,6 +23,8 @@ import '../../../notifications/presentation/cubit/notifications_cubit.dart';
 import '../../../notifications/presentation/cubit/notifications_state.dart';
 import '../../../students/presentation/cubit/students_cubit.dart';
 import '../../../students/presentation/cubit/students_state.dart';
+import '../cubit/teacher_dashboard_cubit.dart';
+import '../cubit/teacher_dashboard_state.dart';
 import '../widgets/teacher_action_radar.dart';
 
 class TeacherDashboardPage extends StatefulWidget {
@@ -74,6 +77,18 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
         cubit.silentRefresh();
       } else {
         cubit.loadStudents();
+      }
+    } catch (_) {}
+
+    // 4. Teacher Radar Alerts
+    try {
+      final cubit = context.read<TeacherDashboardCubit>();
+      if (cubit.state is TeacherDashboardInitial) {
+        final authClient = SupabaseService.client.auth;
+        final teacherId = authClient.currentUser?.id;
+        if (teacherId != null) {
+          cubit.loadRadarAlerts(teacherId);
+        }
       }
     } catch (_) {}
   }
@@ -141,6 +156,15 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
         return TenantRegistry.defaultBranding;
       }
     })();
+    
+    // Dynamic Teacher Alerts
+    final alertsState = (() {
+      try {
+        return context.watch<TeacherDashboardCubit>().state;
+      } catch (_) {
+        return null;
+      }
+    })();
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -202,7 +226,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                           ),
                         ),
                       ),
-                      onPressed: () => context.push(AppRouter.sendAnnouncement),
+                      onPressed: () => context.go(AppRouter.sendAnnouncement),
                     ),
                   ],
                 ),
@@ -211,12 +235,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
 
                 // 2. Teacher Action Radar & Early Warning Alerts
                 TeacherActionRadar(
-                  students: studentsState is StudentsLoaded
-                      ? studentsState.students
-                      : const [],
-                  groups: groupsState is GroupsLoaded
-                      ? groupsState.groups
-                      : const [],
+                  alertsState: alertsState,
                   pendingCount: pendingStudentsCount,
                 ),
 
@@ -246,7 +265,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                     AppCard(
                       variant: AppCardVariant.elevated,
                       padding: const EdgeInsets.all(AppSpacing.s12),
-                      onTap: () => context.push(AppRouter.studentsList),
+                      onTap: () => context.go(AppRouter.studentsList),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -333,7 +352,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                     AppCard(
                       variant: AppCardVariant.elevated,
                       padding: const EdgeInsets.all(AppSpacing.s12),
-                      onTap: () => context.push(AppRouter.groupsList),
+                      onTap: () => context.go(AppRouter.groupsList),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -402,7 +421,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                     AppCard(
                       variant: AppCardVariant.elevated,
                       padding: const EdgeInsets.all(AppSpacing.s12),
-                      onTap: () => context.push(AppRouter.teacherAttendance),
+                      onTap: () => context.go(AppRouter.teacherAttendance),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -479,7 +498,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                     AppCard(
                       variant: AppCardVariant.elevated,
                       padding: const EdgeInsets.all(AppSpacing.s12),
-                      onTap: () => context.push(AppRouter.notificationsCenter),
+                      onTap: () => context.go(AppRouter.notificationsCenter),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -598,7 +617,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                     // Service 1: Students Management
                     AppCard(
                       variant: AppCardVariant.elevated,
-                      onTap: () => context.push(AppRouter.studentsList),
+                      onTap: () => context.go(AppRouter.studentsList),
                       child: Row(
                         children: [
                           const CircleAvatar(
@@ -644,7 +663,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                     // Service 2: Groups Management
                     AppCard(
                       variant: AppCardVariant.elevated,
-                      onTap: () => context.push(AppRouter.groupsList),
+                      onTap: () => context.go(AppRouter.groupsList),
                       child: Row(
                         children: [
                           const CircleAvatar(
@@ -690,7 +709,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                     // Service 3: Attendance
                     AppCard(
                       variant: AppCardVariant.elevated,
-                      onTap: () => context.push(AppRouter.teacherAttendance),
+                      onTap: () => context.go(AppRouter.teacherAttendance),
                       child: Row(
                         children: [
                           const CircleAvatar(
@@ -736,7 +755,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                     // Service 4: Announcement
                     AppCard(
                       variant: AppCardVariant.elevated,
-                      onTap: () => context.push(AppRouter.sendAnnouncement),
+                      onTap: () => context.go(AppRouter.sendAnnouncement),
                       child: Row(
                         children: [
                           const CircleAvatar(
@@ -782,7 +801,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                     // Service 5: Exams & Question Bank
                     AppCard(
                       variant: AppCardVariant.elevated,
-                      onTap: () => context.push(AppRouter.teacherExams),
+                      onTap: () => context.go(AppRouter.teacherExams),
                       child: Row(
                         children: [
                           Container(
@@ -833,7 +852,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                     // Service 6: Content Library
                     AppCard(
                       variant: AppCardVariant.elevated,
-                      onTap: () => context.push(AppRouter.teacherContent),
+                      onTap: () => context.go(AppRouter.teacherContent),
                       child: Row(
                         children: [
                           Container(
@@ -884,7 +903,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                     // Service 7: Assignments & Grading
                     AppCard(
                       variant: AppCardVariant.elevated,
-                      onTap: () => context.push(AppRouter.teacherAssignments),
+                      onTap: () => context.go(AppRouter.teacherAssignments),
                       child: Row(
                         children: [
                           Container(
@@ -937,7 +956,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                     // Service 8: Platform & Academy Settings
                     AppCard(
                       variant: AppCardVariant.elevated,
-                      onTap: () => context.push(AppRouter.platformOnboarding),
+                      onTap: () => context.go(AppRouter.teacherSettings),
                       child: Row(
                         children: [
                           const CircleAvatar(

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
@@ -359,6 +360,37 @@ class _MaterialViewerSheetState extends State<MaterialViewerSheet> {
               ),
             ),
           ] else if (_signedUrl != null) ...[
+            if (isImage) ...[
+              Container(
+                margin: const EdgeInsets.only(bottom: AppSpacing.s16),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                  child: CachedNetworkImage(
+                    imageUrl: _signedUrl!,
+                    fit: BoxFit.contain,
+                    maxHeightDiskCache: 1000,
+                    placeholder: (_, __) => const SizedBox(
+                      height: 180,
+                      child: Center(child: AppLoadingView.compact()),
+                    ),
+                    errorWidget: (_, __, ___) => const SizedBox(
+                      height: 120,
+                      child: Center(
+                        child: Icon(
+                          Icons.broken_image_rounded,
+                          size: 36,
+                          color: AppColors.textMuted,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
             LayoutBuilder(
               builder: (context, constraints) {
                 final isVeryNarrow = constraints.maxWidth < 340;

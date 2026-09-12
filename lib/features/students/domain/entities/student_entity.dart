@@ -8,6 +8,7 @@ class StudentEntity extends Equatable {
   final String fullName;
   final String email;
   final String? phone;
+  final String? parentPhone;
   final String? avatarUrl;
   final String status; // pending | active | rejected | suspended
   final String role; // always 'student' here
@@ -20,6 +21,7 @@ class StudentEntity extends Equatable {
     required this.fullName,
     required this.email,
     this.phone,
+    this.parentPhone,
     this.avatarUrl,
     this.status = 'pending',
     this.role = 'student',
@@ -46,6 +48,7 @@ class StudentEntity extends Equatable {
     String? fullName,
     String? email,
     String? phone,
+    String? parentPhone,
     String? avatarUrl,
     String? status,
     String? role,
@@ -58,6 +61,7 @@ class StudentEntity extends Equatable {
       fullName: fullName ?? this.fullName,
       email: email ?? this.email,
       phone: phone ?? this.phone,
+      parentPhone: parentPhone ?? this.parentPhone,
       avatarUrl: avatarUrl ?? this.avatarUrl,
       status: status ?? this.status,
       role: role ?? this.role,
@@ -73,6 +77,7 @@ class StudentEntity extends Equatable {
         fullName,
         email,
         phone,
+        parentPhone,
         avatarUrl,
         status,
         role,

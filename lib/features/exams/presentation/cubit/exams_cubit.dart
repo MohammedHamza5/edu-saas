@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/utils/cache_manager.dart';
 import '../../domain/entities/exam_entity.dart';
 import '../../domain/repositories/exams_repository.dart';
 import 'exams_state.dart';
@@ -20,21 +21,36 @@ class ExamsCubit extends Cubit<ExamsState> {
 
   // ── Teacher Flow ─────────────────────────────────────────────────────────
 
-  /// Loads all exams for a specific group (Teacher flow)
+  /// Loads all exams for a specific group (Teacher flow) with instant SWR cache
   Future<void> loadGroupExams(String groupId) async {
-    emit(const ExamsLoading());
+    final cacheKey = 'teacher_exams_$groupId';
+
+    // ── Stale-While-Revalidate: Instant display from memory cache ──────────
+    final cached = AppCache.exams.getStale(cacheKey);
+    if (cached is List<ExamEntity>) {
+      emit(TeacherExamsLoaded(
+        groupId: groupId,
+        exams: cached,
+      ));
+      if (AppCache.exams.has(cacheKey)) return; // Fresh cache, skip network
+    } else {
+      emit(const ExamsLoading());
+    }
 
     final result = await _repository.getGroupExams(groupId);
 
     result.when(
       onSuccess: (exams) {
+        AppCache.exams.put(cacheKey, exams);
         emit(TeacherExamsLoaded(
           groupId: groupId,
           exams: exams,
         ));
       },
       onFailure: (failure) {
-        emit(ExamsError(failure.message));
+        if (state is! TeacherExamsLoaded) {
+          emit(ExamsError(failure.message));
+        }
       },
     );
   }
@@ -167,14 +183,28 @@ class ExamsCubit extends Cubit<ExamsState> {
 
   // ── Student Flow ─────────────────────────────────────────────────────────
 
-  /// Loads all exams available for the currently logged-in student (Student flow)
+  /// Loads all exams available for the currently logged-in student (Student flow) with instant SWR cache
   Future<void> loadStudentExams() async {
-    emit(const ExamsLoading());
+    const cacheKey = 'student_exams_all';
+
+    // ── Stale-While-Revalidate: Instant display from memory cache ──────────
+    final cached = AppCache.exams.getStale(cacheKey);
+    if (cached is List<ExamEntity>) {
+      if (cached.isEmpty) {
+        emit(const ExamsEmpty(message: 'لا توجد امتحانات متاحة حالياً'));
+      } else {
+        emit(StudentExamsLoaded(exams: cached));
+      }
+      if (AppCache.exams.has(cacheKey)) return; // Fresh cache, skip network
+    } else {
+      emit(const ExamsLoading());
+    }
 
     final result = await _repository.getStudentExams();
 
     result.when(
       onSuccess: (exams) {
+        AppCache.exams.put(cacheKey, exams);
         if (exams.isEmpty) {
           emit(const ExamsEmpty(message: 'لا توجد امتحانات متاحة حالياً'));
         } else {
@@ -182,7 +212,9 @@ class ExamsCubit extends Cubit<ExamsState> {
         }
       },
       onFailure: (failure) {
-        emit(ExamsError(failure.message));
+        if (state is! StudentExamsLoaded) {
+          emit(ExamsError(failure.message));
+        }
       },
     );
   }

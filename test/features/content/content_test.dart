@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:edu_saas/core/errors/failures.dart';
 import 'package:edu_saas/core/errors/result.dart';
 import 'package:edu_saas/core/theme/app_theme.dart';
+import 'package:edu_saas/core/utils/cache_manager.dart';
 import 'package:edu_saas/features/content/data/models/content_model.dart';
 import 'package:edu_saas/features/content/data/models/file_attachment_model.dart';
 import 'package:edu_saas/features/content/domain/entities/content_entity.dart';
@@ -298,6 +299,10 @@ void main() {
   });
 
   group('ContentCubit Unit Tests', () {
+    setUp(() {
+      AppCache.content.clear();
+    });
+
     test('loadGroupContent emits Loading then Loaded with items', () async {
       final repo = _FakeContentRepository(items: List.from(mockContentList));
       final cubit = ContentCubit(repository: repo);

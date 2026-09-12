@@ -15,6 +15,9 @@ import '../../features/groups/presentation/cubit/groups_state.dart';
 /// Modern mathematical group filter bar.
 /// Allows instant switching between groups directly on the page without dialogs or modals.
 class TeacherGroupFilterBar extends StatelessWidget {
+  /// Session-wide remembered group ID for instant navigation across tabs
+  static String? lastSelectedGroupId;
+
   final String? selectedGroupId;
   final ValueChanged<GroupEntity> onGroupChanged;
   final VoidCallback? onRefresh;
@@ -113,6 +116,7 @@ class TeacherGroupFilterBar extends StatelessWidget {
               .firstOrNull;
           if (currentGroup == null && groups.isNotEmpty) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
+              lastSelectedGroupId = groups.first.id;
               onGroupChanged(groups.first);
             });
           }
@@ -186,6 +190,7 @@ class TeacherGroupFilterBar extends StatelessWidget {
                             .where((g) => g.id == newId)
                             .firstOrNull;
                         if (selected != null) {
+                          lastSelectedGroupId = selected.id;
                           onGroupChanged(selected);
                         }
                       },

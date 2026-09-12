@@ -3,6 +3,7 @@ import 'package:edu_saas/core/errors/failures.dart';
 import 'package:edu_saas/core/errors/result.dart';
 import 'package:edu_saas/core/localization/generated/app_localizations.dart';
 import 'package:edu_saas/core/theme/app_theme.dart';
+import 'package:edu_saas/core/utils/cache_manager.dart';
 import 'package:edu_saas/features/assignments/data/models/assignment_model.dart';
 import 'package:edu_saas/features/assignments/data/models/assignment_submission_model.dart';
 import 'package:edu_saas/features/assignments/domain/entities/assignment_entity.dart';
@@ -323,12 +324,14 @@ void main() {
     late AssignmentsCubit cubit;
 
     setUp(() {
+      AppCache.assignments.clear();
       fakeRepo = FakeAssignmentsRepository();
       cubit = AssignmentsCubit(repository: fakeRepo);
     });
 
     tearDown(() {
       cubit.close();
+      AppCache.assignments.clear();
     });
 
     test(
@@ -498,6 +501,10 @@ void main() {
   });
 
   group('Assignment Presentation Widget Tests', () {
+    setUp(() {
+      AppCache.assignments.clear();
+    });
+
     testWidgets('AssignmentCard displays title, group, score, and badges', (
       tester,
     ) async {

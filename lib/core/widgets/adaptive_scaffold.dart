@@ -3,7 +3,7 @@ import '../localization/generated/app_localizations.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 import '../theme/responsive_breakpoints.dart';
-import 'animated_math_background.dart';
+import 'math_grid_background.dart';
 
 /// Destination item representation for [AdaptiveScaffold].
 class AdaptiveDestination {
@@ -356,16 +356,13 @@ class AdaptiveScaffold extends StatelessWidget {
   Widget _buildWorkspaceBody(BuildContext context) {
     return Container(
       color: _workspaceBg,
-      child: AnimatedMathBackground(
-        opacity: 0.18,
+      child: MathGridBackground(
+        animated: false,
+        opacity: 0.14,
         gridColor: const Color(0xFF38BDF8),
-        waveColor: const Color(0xFF38BDF8),
         gridSpacing: 36,
-        showAxes: true,
-        showWave: true,
+        showCartesianAxes: true,
         showFormulas: true,
-        showNodes: true,
-        cycleDuration: const Duration(seconds: 30),
         child: Theme(
           data: Theme.of(context).copyWith(
             scaffoldBackgroundColor: Colors.transparent,

@@ -21,6 +21,7 @@ import '../cubit/attendance_cubit.dart';
 import '../cubit/attendance_state.dart';
 import '../widgets/attendance_stat_card.dart';
 import '../widgets/student_attendance_row_card.dart';
+import '../../../../core/widgets/teacher_group_filter_bar.dart';
 
 class TeacherAttendancePage extends StatefulWidget {
   final String? initialGroupId;
@@ -100,7 +101,14 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
     super.initState();
     _attendanceCubit =
         widget.attendanceCubit ?? InjectionContainer.createAttendanceCubit();
-    _selectedGroupId = widget.initialGroupId;
+
+    final initialId = widget.initialGroupId ?? TeacherGroupFilterBar.lastSelectedGroupId;
+    final groupsState = context.read<GroupsCubit>().state;
+    if (initialId != null) {
+      _selectedGroupId = initialId;
+    } else if (groupsState is GroupsLoaded && groupsState.groups.isNotEmpty) {
+      _selectedGroupId = groupsState.groups.first.id;
+    }
 
     if (_selectedGroupId != null) {
       _loadAttendance();
@@ -121,6 +129,7 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
 
   void _onGroupChanged(String? newGroupId) {
     if (newGroupId == null || newGroupId == _selectedGroupId) return;
+    TeacherGroupFilterBar.lastSelectedGroupId = newGroupId;
     setState(() {
       _selectedGroupId = newGroupId;
     });

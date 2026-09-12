@@ -11,6 +11,8 @@ import '../../../../core/widgets/math_loading_indicator.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/cubit/auth_cubit.dart';
 import '../../../auth/presentation/cubit/auth_state.dart';
+import '../../../../core/theme/tenant_theme_cubit.dart';
+import '../../../../core/config/tenant_registry.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -121,7 +123,19 @@ class _SplashPageState extends State<SplashPage>
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final title = l10n != null ? l10n.appTitle : 'Edu SaaS';
+    
+    // Dynamic Tenant Branding
+    final branding = (() {
+      try {
+        return context.watch<TenantThemeCubit>().state;
+      } catch (_) {
+        return TenantRegistry.defaultBranding;
+      }
+    })();
+
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    final title = isArabic ? branding.brandName : (branding.brandNameEn ?? branding.brandName);
+    final subtitle = isArabic ? branding.tagline : (branding.taglineEn ?? branding.tagline);
 
     return Scaffold(
       backgroundColor: const Color(0xFF080C16),
@@ -218,7 +232,7 @@ class _SplashPageState extends State<SplashPage>
                                   ),
                                 ),
                                 child: Text(
-                                  l10n?.advancedMathEducationPlatform ?? 'Advanced Mathematics & Education Platform',
+                                  subtitle,
                                   style: const TextStyle(
                                     color: Color(0xFF38BDF8),
                                     fontSize: 13,

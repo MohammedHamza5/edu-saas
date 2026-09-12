@@ -1,3 +1,4 @@
+import 'package:edu_saas/features/groups/presentation/cubit/groups_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -26,11 +27,7 @@ class TeacherExamsPage extends StatefulWidget {
   final String? groupId;
   final String? groupName;
 
-  const TeacherExamsPage({
-    super.key,
-    this.groupId,
-    this.groupName,
-  });
+  const TeacherExamsPage({super.key, this.groupId, this.groupName});
 
   @override
   State<TeacherExamsPage> createState() => _TeacherExamsPageState();
@@ -43,8 +40,26 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
   @override
   void initState() {
     super.initState();
-    _selectedGroupId = widget.groupId;
-    _selectedGroupName = widget.groupName;
+    final initialId =
+        widget.groupId ?? TeacherGroupFilterBar.lastSelectedGroupId;
+    GroupsState? groupsState;
+    try {
+      groupsState = context.read<GroupsCubit>().state;
+    } catch (_) {}
+    if (initialId != null) {
+      _selectedGroupId = initialId;
+      _selectedGroupName = widget.groupName;
+      if (_selectedGroupName == null && groupsState is GroupsLoaded) {
+        _selectedGroupName = groupsState.groups
+            .where((g) => g.id == initialId)
+            .firstOrNull
+            ?.name;
+      }
+    } else if (groupsState is GroupsLoaded && groupsState.groups.isNotEmpty) {
+      _selectedGroupId = groupsState.groups.first.id;
+      _selectedGroupName = groupsState.groups.first.name;
+    }
+
     if (_selectedGroupId != null) {
       _loadExams();
     }
@@ -55,6 +70,7 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
 
   void _onGroupChanged(GroupEntity group) {
     if (_selectedGroupId == group.id) return;
+    TeacherGroupFilterBar.lastSelectedGroupId = group.id;
     setState(() {
       _selectedGroupId = group.id;
       _selectedGroupName = group.name;
@@ -77,7 +93,9 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
       isScrollControlled: true,
       backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppSpacing.radiusLarge)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppSpacing.radiusLarge),
+        ),
       ),
       builder: (sheetContext) {
         return DraggableScrollableSheet(
@@ -152,15 +170,23 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
                             children: [
                               OutlinedButton.icon(
                                 icon: const Icon(Icons.copy_outlined, size: 16),
-                                label: Text(context.l10n.createNewVersionButton(
-                                  (exam.activeVersion?.versionNumber ?? 1) + 1,
-                                )),
+                                label: Text(
+                                  context.l10n.createNewVersionButton(
+                                    (exam.activeVersion?.versionNumber ?? 1) +
+                                        1,
+                                  ),
+                                ),
                                 onPressed: () async {
                                   final cubit = context.read<ExamsCubit>();
-                                  final messenger = ScaffoldMessenger.of(context);
-                                  final successMsg = context.l10n.newVersionCreatedSuccess;
+                                  final messenger = ScaffoldMessenger.of(
+                                    context,
+                                  );
+                                  final successMsg =
+                                      context.l10n.newVersionCreatedSuccess;
                                   Navigator.of(ctx).pop();
-                                  final success = await cubit.createNewVersion(exam.id);
+                                  final success = await cubit.createNewVersion(
+                                    exam.id,
+                                  );
                                   if (mounted && success) {
                                     messenger.showSnackBar(
                                       SnackBar(
@@ -183,117 +209,142 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
                       child: isLoading
                           ? const AppLoadingView.list(count: 3)
                           : attempts.isEmpty
-                              ? Center(
-                                  child: AppEmptyView(
-                                    message: context.l10n.noAttemptsYet,
-                                    subtitle: context.l10n.noAttemptsYetSubtitle,
-                                    icon: Icons.quiz_outlined,
-                                  ),
-                                )
-                              : ListView.separated(
-                                  controller: scrollController,
-                                  padding: const EdgeInsets.all(AppSpacing.s16),
-                                  itemCount: attempts.length,
-                                  separatorBuilder: (_, __) =>
-                                      const SizedBox(height: AppSpacing.s8),
-                                  itemBuilder: (context, index) {
-                                    final att = attempts[index];
-                                    final isPassed = att.isPassed(exam.passingScore);
+                          ? Center(
+                              child: AppEmptyView(
+                                message: context.l10n.noAttemptsYet,
+                                subtitle: context.l10n.noAttemptsYetSubtitle,
+                                icon: Icons.quiz_outlined,
+                              ),
+                            )
+                          : ListView.separated(
+                              controller: scrollController,
+                              padding: const EdgeInsets.all(AppSpacing.s16),
+                              itemCount: attempts.length,
+                              separatorBuilder: (_, __) =>
+                                  const SizedBox(height: AppSpacing.s8),
+                              itemBuilder: (context, index) {
+                                final att = attempts[index];
+                                final isPassed = att.isPassed(
+                                  exam.passingScore,
+                                );
 
-                                    return Container(
-                                      padding: const EdgeInsets.all(AppSpacing.s12),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.surface,
-                                        borderRadius:
-                                            BorderRadius.circular(AppSpacing.radiusMedium),
-                                        border: Border.all(color: AppColors.border),
+                                return Container(
+                                  padding: const EdgeInsets.all(AppSpacing.s12),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.surface,
+                                    borderRadius: BorderRadius.circular(
+                                      AppSpacing.radiusMedium,
+                                    ),
+                                    border: Border.all(color: AppColors.border),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      CircleAvatar(
+                                        radius: 18,
+                                        backgroundColor: AppColors.primary
+                                            .withValues(alpha: 0.1),
+                                        child: Text(
+                                          att.studentName != null &&
+                                                  att.studentName!.isNotEmpty
+                                              ? att
+                                                    .studentName!
+                                                    .characters
+                                                    .first
+                                              : context
+                                                    .l10n
+                                                    .studentInitialFallback,
+                                          style: const TextStyle(
+                                            color: AppColors.primary,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14,
+                                          ),
+                                        ),
                                       ),
-                                      child: Row(
-                                        children: [
-                                          CircleAvatar(
-                                            radius: 18,
-                                            backgroundColor: AppColors.primary
-                                                .withValues(alpha: 0.1),
-                                            child: Text(
-                                              att.studentName != null && att.studentName!.isNotEmpty
-                                                  ? att.studentName!.characters.first
-                                                  : context.l10n.studentInitialFallback,
+                                      const SizedBox(width: AppSpacing.s12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              att.studentName ??
+                                                  context
+                                                      .l10n
+                                                      .studentFallbackName,
                                               style: const TextStyle(
-                                                color: AppColors.primary,
-                                                fontWeight: FontWeight.bold,
                                                 fontSize: 14,
+                                                fontWeight: FontWeight.bold,
+                                                color: AppColors.textPrimary,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              att.submittedAt != null
+                                                  ? dateFormat.format(
+                                                      att.submittedAt!,
+                                                    )
+                                                  : context.l10n
+                                                        .startedDatePrefix(
+                                                          dateFormat.format(
+                                                            att.startedAt,
+                                                          ),
+                                                        ),
+                                              style: const TextStyle(
+                                                fontSize: 11,
+                                                color: AppColors.textMuted,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
+                                        children: [
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: AppSpacing.s8,
+                                              vertical: 2,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: att.status.color
+                                                  .withValues(alpha: 0.15),
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                    AppSpacing.radiusSmall,
+                                                  ),
+                                            ),
+                                            child: Text(
+                                              att.status.localizedLabel(
+                                                context,
+                                              ),
+                                              style: TextStyle(
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.bold,
+                                                color: att.status.color,
                                               ),
                                             ),
                                           ),
-                                          const SizedBox(width: AppSpacing.s12),
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  att.studentName ?? context.l10n.studentFallbackName,
-                                                  style: const TextStyle(
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: AppColors.textPrimary,
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 2),
-                                                Text(
-                                                  att.submittedAt != null
-                                                      ? dateFormat.format(att.submittedAt!)
-                                                      : context.l10n.startedDatePrefix(dateFormat.format(att.startedAt)),
-                                                  style: const TextStyle(
-                                                    fontSize: 11,
-                                                    color: AppColors.textMuted,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          Column(
-                                            crossAxisAlignment: CrossAxisAlignment.end,
-                                            children: [
-                                              Container(
-                                                padding: const EdgeInsets.symmetric(
-                                                  horizontal: AppSpacing.s8,
-                                                  vertical: 2,
-                                                ),
-                                                decoration: BoxDecoration(
-                                                  color: att.status.color
-                                                      .withValues(alpha: 0.15),
-                                                  borderRadius: BorderRadius.circular(
-                                                      AppSpacing.radiusSmall),
-                                                ),
-                                                child: Text(
-                                                  att.status.localizedLabel(context),
-                                                  style: TextStyle(
-                                                    fontSize: 10,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: att.status.color,
-                                                  ),
-                                                ),
+                                          if (att.score != null) ...[
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              '${att.score}/${exam.maxScore} (${att.percentage?.toStringAsFixed(1)}%)',
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.bold,
+                                                color: isPassed
+                                                    ? AppColors.success
+                                                    : AppColors.error,
                                               ),
-                                              if (att.score != null) ...[
-                                                const SizedBox(height: 2),
-                                                Text(
-                                                  '${att.score}/${exam.maxScore} (${att.percentage?.toStringAsFixed(1)}%)',
-                                                  style: TextStyle(
-                                                    fontSize: 12,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: isPassed
-                                                        ? AppColors.success
-                                                        : AppColors.error,
-                                                  ),
-                                                ),
-                                              ],
-                                            ],
-                                          ),
+                                            ),
+                                          ],
                                         ],
                                       ),
-                                    );
-                                  },
-                                ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
                     ),
                   ],
                 );
@@ -316,9 +367,11 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
               ? context.pop()
               : context.go(AppRouter.teacherDashboard),
         ),
-        title: Text(_selectedGroupName != null
-            ? context.l10n.groupExamsTitle(_selectedGroupName!)
-            : context.l10n.teacherExamsTitle),
+        title: Text(
+          _selectedGroupName != null
+              ? context.l10n.groupExamsTitle(_selectedGroupName!)
+              : context.l10n.teacherExamsTitle,
+        ),
         centerTitle: true,
         actions: [
           IconButton(
@@ -334,27 +387,30 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
               onPressed: () {
                 Navigator.of(context)
                     .push<void>(
-                  MaterialPageRoute<void>(
-                    builder: (_) => BlocProvider.value(
-                      value: context.read<ExamsCubit>(),
-                      child: CreateExamPage(
-                        groupId: _selectedGroupId!,
-                        groupName: _selectedGroupName,
+                      MaterialPageRoute<void>(
+                        builder: (_) => BlocProvider.value(
+                          value: context.read<ExamsCubit>(),
+                          child: CreateExamPage(
+                            groupId: _selectedGroupId!,
+                            groupName: _selectedGroupName,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                )
+                    )
                     .then((_) {
-                  if (context.mounted) {
-                    _loadExams();
-                  }
-                });
+                      if (context.mounted) {
+                        _loadExams();
+                      }
+                    });
               },
               backgroundColor: AppColors.primary,
               icon: const Icon(Icons.add, color: Colors.white),
               label: Text(
                 context.l10n.buildExamAction,
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
       body: Center(
@@ -372,7 +428,10 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
                 child: BlocBuilder<ExamsCubit, ExamsState>(
                   builder: (context, state) {
                     if (state is ExamsLoading) {
-                      return const AppLoadingView.cardsGrid(count: 4, columns: 2);
+                      return const AppLoadingView.cardsGrid(
+                        count: 4,
+                        columns: 2,
+                      );
                     }
 
                     if (state is ExamsError) {
@@ -392,7 +451,9 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
                           child: AppEmptyView(
                             message: context.l10n.noExamsForGroup,
                             subtitle: context.l10n.noExamsForGroupSubtitle,
-                            actionText: _selectedGroupId != null ? context.l10n.buildFirstExam : null,
+                            actionText: _selectedGroupId != null
+                                ? context.l10n.buildFirstExam
+                                : null,
                             onAction: _selectedGroupId == null
                                 ? null
                                 : () {

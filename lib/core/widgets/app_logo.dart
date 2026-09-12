@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../config/tenant_registry.dart';
+import '../theme/tenant_branding.dart';
 import '../theme/tenant_theme_cubit.dart';
 
 /// The platform's prestige Mathematical Academic logo mark.
@@ -105,6 +106,7 @@ class AppLogo extends StatelessWidget {
       effectivePrimary: effectivePrimary,
       effectiveSecondary: effectiveSecondary,
       effectiveSymbol: effectiveSymbol,
+      branding: branding,
     );
 
     if (!showName) {
@@ -192,6 +194,7 @@ class AppLogo extends StatelessWidget {
     required Color effectivePrimary,
     required Color effectiveSecondary,
     required String effectiveSymbol,
+    required TenantBranding branding,
   }) {
     final borderRadius = BorderRadius.circular(size * 0.28);
 
@@ -220,7 +223,7 @@ class AppLogo extends StatelessWidget {
         borderRadius: borderRadius,
         child: useAsset
             ? Image.asset(
-                'assets/images/brand_logo.png',
+                branding.logoAsset ?? 'assets/images/brand_logo.png',
                 width: size,
                 height: size,
                 fit: BoxFit.cover,

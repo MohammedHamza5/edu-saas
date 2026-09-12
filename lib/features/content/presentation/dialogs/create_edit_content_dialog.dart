@@ -120,7 +120,11 @@ class _CreateEditContentDialogState extends State<CreateEditContentDialog> {
           ? 'application/pdf'
           : _selectedType == ContentType.image
               ? 'image/jpeg'
-              : 'application/octet-stream';
+              : (_selectedType == ContentType.video ||
+                      fileName.toLowerCase().endsWith('.mp4') ||
+                      fileName.toLowerCase().endsWith('.mov'))
+                  ? 'video/mp4'
+                  : 'application/octet-stream';
       fileSize = _pickedFileSize ?? (1024 * 500); // 500KB fallback
     }
 
@@ -399,6 +403,9 @@ class _CreateEditContentDialogState extends State<CreateEditContentDialog> {
                     const SizedBox(width: AppSpacing.s12),
                     AppButton(
                       text: isEdit ? context.l10n.saveChanges : context.l10n.createAndSave,
+                      icon: isEdit
+                          ? Icons.check_circle_outline_rounded
+                          : Icons.add_circle_outline_rounded,
                       isLoading: _isLoading,
                       onPressed: _handleSubmit,
                     ),

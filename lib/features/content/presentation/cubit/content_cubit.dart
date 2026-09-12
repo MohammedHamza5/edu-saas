@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/errors/result.dart';
+import '../../../../core/utils/cache_manager.dart';
 import '../../domain/entities/content_entity.dart';
 import '../../domain/repositories/content_repository.dart';
 import 'content_state.dart';
@@ -15,7 +16,7 @@ class ContentCubit extends Cubit<ContentState> {
 
   String? get currentGroupId => _currentGroupId;
 
-  /// Loads content for a group.
+  /// Loads content for a group with instant SWR caching.
   /// If [isStudent] is true, only published content is retrieved.
   Future<void> loadGroupContent(
     String groupId, {
@@ -23,7 +24,16 @@ class ContentCubit extends Cubit<ContentState> {
     bool isStudent = false,
   }) async {
     _currentGroupId = groupId;
-    emit(const ContentLoading());
+    final cacheKey = '${groupId}_${statusFilter?.name ?? 'all'}_$isStudent';
+
+    // ── Stale-While-Revalidate: Instant display from memory cache ──────────
+    final cached = AppCache.content.getStale(cacheKey);
+    if (cached is List<ContentEntity>) {
+      emit(ContentLoaded(items: cached, activeFilter: statusFilter));
+      if (AppCache.content.has(cacheKey)) return; // Fresh cache, skip network
+    } else {
+      emit(const ContentLoading());
+    }
 
     final filter = isStudent ? ContentStatus.published : statusFilter;
     final result = await _repository.getGroupContent(
@@ -33,9 +43,12 @@ class ContentCubit extends Cubit<ContentState> {
 
     switch (result) {
       case Success(:final data):
+        AppCache.content.put(cacheKey, data);
         emit(ContentLoaded(items: data, activeFilter: statusFilter));
       case FailureResult(:final failure):
-        emit(ContentError(failure.message));
+        if (state is! ContentLoaded) {
+          emit(ContentError(failure.message));
+        }
     }
   }
 

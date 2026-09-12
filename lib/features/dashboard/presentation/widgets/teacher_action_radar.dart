@@ -8,8 +8,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_badge.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/responsive_grid.dart';
-import '../../../groups/domain/entities/group_entity.dart';
-import '../../../students/domain/entities/student_entity.dart';
+import '../../../dashboard/presentation/cubit/teacher_dashboard_state.dart';
 
 /// رادار المتابعة والإنذار المبكر لدكتور أنطونيوس أشرف
 /// يجيب عن الأسئلة الأربعة المصيرية بنظرة واحدة:
@@ -18,15 +17,13 @@ import '../../../students/domain/entities/student_entity.dart';
 /// 3. مين محتاج تدخل لضعف السكور في الكويز؟
 /// 4. مين بانتظار القبول في المجموعات؟
 class TeacherActionRadar extends StatelessWidget {
-  final List<StudentEntity> students;
-  final List<GroupEntity> groups;
+  final TeacherDashboardState? alertsState;
   final int pendingCount;
   final VoidCallback? onRefresh;
 
   const TeacherActionRadar({
     super.key,
-    required this.students,
-    required this.groups,
+    required this.alertsState,
     this.pendingCount = 0,
     this.onRefresh,
   });
@@ -215,29 +212,32 @@ class TeacherActionRadar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Computed simulation metrics tailored for Dr. Antounios
-    final activeStudents = students.where((s) => s.isActive).toList();
-
-    // 1. Lecture Watch Deficit (Students who haven't completed the latest video session)
-    final unwatchedStudents = activeStudents.take(2).map((s) => {
-      'name': s.fullName,
-      'group': 'Digital SAT Master • Group A',
-      'detail': 'Watched 25% only',
-    }).toList();
+    // 1. Unwatched Videos
+    final unwatchedStudents = alertsState is TeacherDashboardLoaded
+        ? (alertsState as TeacherDashboardLoaded).alerts.unwatchedVideos.map((s) => {
+            'name': s.name,
+            'group': s.group,
+            'detail': s.detail,
+          }).toList()
+        : <Map<String, String>>[];
 
     // 2. Unsubmitted Drill Homework
-    final unsubmittedHomework = activeStudents.skip(2).take(3).map((s) => {
-      'name': s.fullName,
-      'group': 'EST Intensive • Group B',
-      'detail': '24h overdue',
-    }).toList();
+    final unsubmittedHomework = alertsState is TeacherDashboardLoaded
+        ? (alertsState as TeacherDashboardLoaded).alerts.overdueAssignments.map((s) => {
+            'name': s.name,
+            'group': s.group,
+            'detail': s.detail,
+          }).toList()
+        : <Map<String, String>>[];
 
-    // 3. Needs Academic Intervention (Mock score < 600)
-    final lowScoreAlerts = activeStudents.skip(5).take(2).map((s) => {
-      'name': s.fullName,
-      'group': 'Digital SAT • Target 800',
-      'detail': 'Score: 540 / 800',
-    }).toList();
+    // 3. Needs Academic Intervention (Low Scores)
+    final lowScoreAlerts = alertsState is TeacherDashboardLoaded
+        ? (alertsState as TeacherDashboardLoaded).alerts.lowScores.map((s) => {
+            'name': s.name,
+            'group': s.group,
+            'detail': s.detail,
+          }).toList()
+        : <Map<String, String>>[];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

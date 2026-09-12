@@ -48,6 +48,14 @@ import '../../features/exams/data/datasources/exams_remote_datasource.dart';
 import '../../features/exams/data/repositories/exams_repository_impl.dart';
 import '../../features/exams/domain/repositories/exams_repository.dart';
 import '../../features/exams/presentation/cubit/exams_cubit.dart';
+import '../../features/dashboard/data/datasources/student_dashboard_remote_datasource.dart';
+import '../../features/dashboard/data/datasources/teacher_dashboard_remote_datasource.dart';
+import '../../features/dashboard/data/repositories/student_dashboard_repository_impl.dart';
+import '../../features/dashboard/data/repositories/teacher_dashboard_repository_impl.dart';
+import '../../features/dashboard/domain/repositories/student_dashboard_repository.dart';
+import '../../features/dashboard/domain/repositories/teacher_dashboard_repository.dart';
+import '../../features/dashboard/presentation/cubit/student_dashboard_cubit.dart';
+import '../../features/dashboard/presentation/cubit/teacher_dashboard_cubit.dart';
 
 /// Pure Dart Dependency Injection Container (Composition Root)
 /// Enforces Constructor Injection, Inversion of Control, and Zero-Package DI.
@@ -102,6 +110,14 @@ class InjectionContainer {
   static late final ExamsRemoteDataSource examsRemoteDataSource;
   static late final ExamsRepository examsRepository;
 
+  // Feature: Student Dashboard
+  static late final StudentDashboardRemoteDataSource studentDashboardRemoteDataSource;
+  static late final StudentDashboardRepository studentDashboardRepository;
+
+  // Feature: Teacher Dashboard
+  static late final TeacherDashboardRemoteDataSource teacherDashboardRemoteDataSource;
+  static late final TeacherDashboardRepository teacherDashboardRepository;
+
   // Factory methods for Cubits
   static AuthCubit createAuthCubit() => AuthCubit(repository: authRepository);
   static GroupsCubit createGroupsCubit() => GroupsCubit(repository: groupsRepository);
@@ -123,6 +139,10 @@ class InjectionContainer {
       AssignmentsCubit(repository: assignmentsRepository);
   static ExamsCubit createExamsCubit() =>
       ExamsCubit(repository: examsRepository);
+  static StudentDashboardCubit createStudentDashboardCubit() =>
+      StudentDashboardCubit(repository: studentDashboardRepository);
+  static TeacherDashboardCubit createTeacherDashboardCubit() =>
+      TeacherDashboardCubit(repository: teacherDashboardRepository);
   static TenantThemeCubit createTenantThemeCubit() => TenantThemeCubit();
   static LocaleCubit createLocaleCubit() => LocaleCubit();
 
@@ -189,6 +209,16 @@ class InjectionContainer {
     examsRepository = ExamsRepositoryImpl(remoteDataSource: examsRemoteDataSource);
     AppLogger.i('DI', '✅ Exams layer ready');
 
-    AppLogger.s('DI', '🎉 All 12 dependency layers initialized successfully');
+    // 13. Student Dashboard Dependencies
+    studentDashboardRemoteDataSource = StudentDashboardRemoteDataSourceImpl(customClient ?? SupabaseService.client);
+    studentDashboardRepository = StudentDashboardRepositoryImpl(remoteDataSource: studentDashboardRemoteDataSource);
+    AppLogger.i('DI', '✅ Student Dashboard layer ready');
+
+    // 14. Teacher Dashboard Dependencies
+    teacherDashboardRemoteDataSource = TeacherDashboardRemoteDataSourceImpl(client: customClient);
+    teacherDashboardRepository = TeacherDashboardRepositoryImpl(teacherDashboardRemoteDataSource);
+    AppLogger.i('DI', '✅ Teacher Dashboard layer ready');
+
+    AppLogger.s('DI', '🎉 All dependency layers initialized successfully');
   }
 }

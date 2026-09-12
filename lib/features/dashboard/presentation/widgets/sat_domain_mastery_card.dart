@@ -12,7 +12,7 @@ import '../../../../core/widgets/app_badge.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/responsive_grid.dart';
 
-/// كارت إتقان مجالات الرياضيات الأربعة المعتمدة من الـ College Board
+/// كارت إتقان مجالات SAT الأربعة المعتمدة من الـ College Board
 /// (Heart of Algebra, Advanced Math, Problem-Solving & Data Analysis, Geometry & Trigonometry)
 class SatDomainMasteryCard extends StatelessWidget {
   final int projectedScore;

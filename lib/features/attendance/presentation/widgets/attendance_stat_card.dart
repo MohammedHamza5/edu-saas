@@ -82,12 +82,13 @@ class _AttendanceStatCardState extends State<AttendanceStatCard> {
                             Expanded(
                               child: Text(
                                 widget.title,
-                                maxLines: 1,
+                                maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
                                   color: AppColors.textSecondary,
+                                  height: 1.2,
                                 ),
                               ),
                             ),

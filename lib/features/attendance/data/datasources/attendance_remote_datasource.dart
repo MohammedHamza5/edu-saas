@@ -41,23 +41,22 @@ class AttendanceRemoteDataSourceImpl implements AttendanceRemoteDataSource {
     final formattedDate =
         "${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
 
-    // 1. Fetch active group members with user details
-    final membersResponse = await _safeClient
-        .from('group_members')
-        .select('student_id, users(id, full_name, phone, avatar_url, status)')
-        .eq('group_id', groupId)
-        .eq('status', 'active');
+    // 1 & 2. Fetch active group members and attendance records concurrently
+    final responses = await Future.wait([
+      _safeClient
+          .from('group_members')
+          .select('student_id, users(id, full_name, phone, avatar_url, status)')
+          .eq('group_id', groupId)
+          .eq('status', 'active'),
+      _safeClient
+          .from('attendance')
+          .select('id, student_id, status, note')
+          .eq('group_id', groupId)
+          .eq('date', formattedDate),
+    ]);
 
-    final membersList = membersResponse as List<dynamic>;
-
-    // 2. Fetch any existing attendance records for this group and date
-    final existingRecordsResponse = await _safeClient
-        .from('attendance')
-        .select('id, student_id, status, note')
-        .eq('group_id', groupId)
-        .eq('date', formattedDate);
-
-    final existingRecordsList = existingRecordsResponse as List<dynamic>;
+    final membersList = responses[0] as List<dynamic>;
+    final existingRecordsList = responses[1] as List<dynamic>;
     final existingMap = <String, Map<String, dynamic>>{};
     for (final record in existingRecordsList) {
       final studentId = record['student_id'] as String;

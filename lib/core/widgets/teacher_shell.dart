@@ -81,7 +81,7 @@ class TeacherShell extends StatelessWidget {
         context.go(AppRouter.sendAnnouncement);
         break;
       case 10:
-        context.go(AppRouter.platformOnboarding);
+        context.go(AppRouter.teacherSettings);
         break;
     }
   }

@@ -237,6 +237,7 @@ class FakeAuthRepository implements AuthRepository {
     required String password,
     required String fullName,
     required String phone,
+    String? parentPhone,
     required String tenantId,
   }) async =>
       const Success(

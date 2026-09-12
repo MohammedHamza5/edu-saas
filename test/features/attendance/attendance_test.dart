@@ -190,7 +190,7 @@ class FakeAuthRepository implements AuthRepository {
   Future<Result<UserEntity>> signInWithEmail({required String email, required String password}) async =>
       throw UnimplementedError();
   @override
-  Future<Result<UserEntity>> signUpStudent({required String email, required String password, required String fullName, required String phone, required String tenantId}) async =>
+  Future<Result<UserEntity>> signUpStudent({required String email, required String password, required String fullName, required String phone, String? parentPhone, required String tenantId}) async =>
       throw UnimplementedError();
   @override
   Future<Result<void>> signOut() async => const Success(null);

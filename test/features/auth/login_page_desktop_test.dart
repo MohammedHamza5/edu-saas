@@ -18,7 +18,7 @@ class MockAuthRepository implements AuthRepository {
     return const FailureResult(AuthFailure('test'));
   }
   @override
-  Future<Result<UserEntity>> signUpStudent({required String email, required String password, required String fullName, required String phone, required String tenantId}) async {
+  Future<Result<UserEntity>> signUpStudent({required String email, required String password, required String fullName, required String phone, String? parentPhone, required String tenantId}) async {
     return const FailureResult(AuthFailure('test'));
   }
   @override

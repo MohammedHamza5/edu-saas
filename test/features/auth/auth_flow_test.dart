@@ -47,6 +47,7 @@ class FakeAuthRepository implements AuthRepository {
     required String password,
     required String fullName,
     required String phone,
+    String? parentPhone,
     required String tenantId,
   }) async {
     final user = UserEntity(
@@ -56,6 +57,7 @@ class FakeAuthRepository implements AuthRepository {
       fullName: fullName,
       email: email,
       phone: phone,
+      parentPhone: parentPhone,
       status: UserStatus.pending,
     );
     return Success(user);

@@ -49,6 +49,28 @@ void main() {
       expect(find.text('Submit'), findsNothing);
     });
 
+    testWidgets('AppButton renders safely inside unconstrained Row with TextButton', (tester) async {
+      await tester.pumpWidget(
+        createTestWidget(
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton(onPressed: () {}, child: const Text('Cancel')),
+              const SizedBox(width: 12),
+              AppButton(
+                text: 'Save & Publish',
+                onPressed: () {},
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(find.text('Cancel'), findsOneWidget);
+      expect(find.text('Save & Publish'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('AppTextField toggles password visibility', (tester) async {
       await tester.pumpWidget(
         createTestWidget(

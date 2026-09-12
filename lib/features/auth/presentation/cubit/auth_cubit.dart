@@ -91,12 +91,14 @@ class AuthCubit extends Cubit<AuthState> {
     required String password,
     required String fullName,
     required String phone,
+    String? parentPhone,
     required String tenantId,
   }) async {
     AppLogger.i(_tag, 'Student registration attempt', data: {
       'email': email,
       'fullName': fullName,
       'tenantId': tenantId,
+      if (parentPhone != null) 'parentPhone': parentPhone,
     });
     emit(const AuthLoading());
     final result = await _repository.signUpStudent(
@@ -104,6 +106,7 @@ class AuthCubit extends Cubit<AuthState> {
       password: password,
       fullName: fullName,
       phone: phone,
+      parentPhone: parentPhone,
       tenantId: tenantId,
     );
 

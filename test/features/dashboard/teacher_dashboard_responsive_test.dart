@@ -27,6 +27,7 @@ class _FakeAuthRepository implements AuthRepository {
     required String email,
     required String password,
     required String phone,
+    String? parentPhone,
     required String tenantId,
   }) async {
     throw UnimplementedError();

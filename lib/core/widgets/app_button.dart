@@ -14,6 +14,8 @@ class AppButton extends StatefulWidget {
   final AppButtonVariant variant;
   final IconData? icon;
   final double? width;
+  final bool isFullWidth;
+  final EdgeInsetsGeometry? padding;
 
   const AppButton({
     super.key,
@@ -23,6 +25,8 @@ class AppButton extends StatefulWidget {
     this.variant = AppButtonVariant.primary,
     this.icon,
     this.width,
+    this.isFullWidth = false,
+    this.padding,
   });
 
   @override
@@ -106,6 +110,8 @@ class _AppButtonState extends State<AppButton>
           );
 
     final isDisabled = effectiveOnPressed == null;
+    final double? effectiveWidth =
+        widget.width ?? (widget.isFullWidth ? double.infinity : null);
 
     Widget button;
 
@@ -121,8 +127,14 @@ class _AppButtonState extends State<AppButton>
           ),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            height: 50,
-            width: double.infinity,
+            height: 48,
+            width: effectiveWidth,
+            alignment: Alignment.center,
+            padding: widget.padding ??
+                const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.s20,
+                  vertical: 0,
+                ),
             decoration: BoxDecoration(
               gradient: isDisabled
                   ? null
@@ -151,7 +163,7 @@ class _AppButtonState extends State<AppButton>
               ),
               child: IconTheme(
                 data: const IconThemeData(color: Colors.white, size: 18),
-                child: Center(child: childWidget),
+                child: childWidget,
               ),
             ),
           ),
@@ -167,7 +179,12 @@ class _AppButtonState extends State<AppButton>
               disabledMouseCursor: SystemMouseCursors.basic,
               backgroundColor: AppColors.surfaceVariant,
               foregroundColor: AppColors.textPrimary,
-              minimumSize: const Size(double.infinity, 50),
+              minimumSize: Size(effectiveWidth ?? 0, 48),
+              padding: widget.padding ??
+                  const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.s20,
+                    vertical: 0,
+                  ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
                 side: const BorderSide(color: AppColors.border),
@@ -181,7 +198,12 @@ class _AppButtonState extends State<AppButton>
             style: OutlinedButton.styleFrom(
               enabledMouseCursor: SystemMouseCursors.click,
               disabledMouseCursor: SystemMouseCursors.basic,
-              minimumSize: const Size(double.infinity, 50),
+              minimumSize: Size(effectiveWidth ?? 0, 48),
+              padding: widget.padding ??
+                  const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.s20,
+                    vertical: 0,
+                  ),
             ),
             child: childWidget,
           ),
@@ -191,6 +213,11 @@ class _AppButtonState extends State<AppButton>
               enabledMouseCursor: SystemMouseCursors.click,
               disabledMouseCursor: SystemMouseCursors.basic,
               foregroundColor: AppColors.primary,
+              padding: widget.padding ??
+                  const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.s16,
+                    vertical: 0,
+                  ),
             ),
             child: childWidget,
           ),
@@ -207,10 +234,6 @@ class _AppButtonState extends State<AppButton>
       );
     }
 
-    final sizedButton = widget.width != null
-        ? SizedBox(width: widget.width, child: button)
-        : button;
-
     return MouseRegion(
       cursor: isDisabled ? SystemMouseCursors.basic : SystemMouseCursors.click,
       onEnter: (_) {
@@ -219,7 +242,7 @@ class _AppButtonState extends State<AppButton>
       onExit: (_) {
         if (!isDisabled && mounted) setState(() => _isHovered = false);
       },
-      child: sizedButton,
+      child: button,
     );
   }
 }

@@ -12,6 +12,7 @@ class UserEntity extends Equatable {
   final String fullName;
   final String email;
   final String? phone;
+  final String? parentPhone;
 
   const UserEntity({
     required this.id,
@@ -21,6 +22,7 @@ class UserEntity extends Equatable {
     required this.fullName,
     required this.email,
     this.phone,
+    this.parentPhone,
   });
 
   bool get isActive => status == UserStatus.active;
@@ -38,5 +40,6 @@ class UserEntity extends Equatable {
         fullName,
         email,
         phone,
+        parentPhone,
       ];
 }

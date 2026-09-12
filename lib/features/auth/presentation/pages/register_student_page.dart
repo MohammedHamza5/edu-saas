@@ -29,6 +29,7 @@ class _RegisterStudentPageState extends State<RegisterStudentPage> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
+  final _parentPhoneController = TextEditingController();
   final _passwordController = TextEditingController();
   final _customTrackController = TextEditingController();
 
@@ -48,6 +49,7 @@ class _RegisterStudentPageState extends State<RegisterStudentPage> {
     _nameController.dispose();
     _emailController.dispose();
     _phoneController.dispose();
+    _parentPhoneController.dispose();
     _passwordController.dispose();
     _customTrackController.dispose();
     super.dispose();
@@ -74,6 +76,7 @@ class _RegisterStudentPageState extends State<RegisterStudentPage> {
       password: _passwordController.text,
       fullName: displayName,
       phone: _phoneController.text.trim(),
+      parentPhone: _parentPhoneController.text.trim(),
       tenantId: tenantId,
     );
   }
@@ -254,7 +257,7 @@ class _RegisterStudentPageState extends State<RegisterStudentPage> {
                 ),
                 const SizedBox(height: AppSpacing.s16),
 
-                // ── 6. WhatsApp Phone Number ─────────────────────────────────
+                // ── 6. WhatsApp Phone Number (Student) ───────────────────────
                 AppTextField(
                   controller: _phoneController,
                   labelText: context.l10n.studentWhatsappPhone,
@@ -263,6 +266,21 @@ class _RegisterStudentPageState extends State<RegisterStudentPage> {
                   validator: (val) {
                     if (val == null || val.trim().length < 10) {
                       return context.l10n.pleaseEnterValidPhone;
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: AppSpacing.s16),
+
+                // ── 6.5. Parent WhatsApp Phone Number (for Reports) ───────────
+                AppTextField(
+                  controller: _parentPhoneController,
+                  labelText: context.l10n.parentWhatsappPhone,
+                  keyboardType: TextInputType.phone,
+                  prefixIcon: const Icon(Icons.family_restroom_rounded, size: 20),
+                  validator: (val) {
+                    if (val == null || val.trim().length < 10) {
+                      return context.l10n.pleaseEnterParentPhone;
                     }
                     return null;
                   },

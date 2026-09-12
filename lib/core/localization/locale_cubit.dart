@@ -12,7 +12,7 @@ class LocaleCubit extends Cubit<Locale> {
 
   LocaleCubit({FlutterSecureStorage? storage})
       : _storage = storage ?? const FlutterSecureStorage(),
-        super(const Locale('en')) {
+        super(const Locale('ar')) {
     _loadSavedLocale();
   }
 
@@ -23,7 +23,7 @@ class LocaleCubit extends Cubit<Locale> {
         emit(Locale(savedCode));
         AppLogger.i('LocaleCubit', 'Loaded saved locale: $savedCode');
       } else {
-        AppLogger.i('LocaleCubit', 'No saved locale found. Defaulting to: en');
+        AppLogger.i('LocaleCubit', 'No saved locale found. Defaulting to: ar');
       }
     } catch (e) {
       AppLogger.w('LocaleCubit', 'Failed to read locale from storage', data: e);
