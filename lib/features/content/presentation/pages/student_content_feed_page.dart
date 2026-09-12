@@ -177,122 +177,179 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                 maxWidth: ResponsiveBreakpoints.maxContentWidth,
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.s16,
-                  vertical: AppSpacing.s12,
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Search Bar & Filter Chips
-                    AppTextField(
-                      controller: _searchController,
-                      hintText: context.l10n.searchContentPlaceholder,
-                      prefixIcon: const Icon(Icons.search_rounded,
-                          color: AppColors.textSecondary, size: 20),
-                      suffixIcon: _searchQuery.isNotEmpty
-                          ? IconButton(
-                              icon: const Icon(Icons.clear_rounded, size: 18),
-                              onPressed: () {
-                                _searchController.clear();
-                                setState(() => _searchQuery = '');
-                              },
-                            )
-                          : null,
-                      onChanged: (val) {
-                        setState(() => _searchQuery = val.trim());
-                      },
-                    ),
-
-                    const SizedBox(height: AppSpacing.s12),
-
-                    // Type Filter Chips Row
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          _buildFilterChip(
-                            label: context.l10n.filterAllWithCount(allPublished.length),
-                            isSelected: _selectedTypeFilter == null,
-                            onSelected: () =>
-                                setState(() => _selectedTypeFilter = null),
+                child: RefreshIndicator(
+                  onRefresh: () async =>
+                      context.read<ContentCubit>().loadGroupContent(
+                            widget.groupId,
+                            isStudent: true,
                           ),
-                          const SizedBox(width: AppSpacing.s8),
-                          _buildFilterChip(
-                            label: context.l10n.filterPdfsWithCount(
-                                allPublished.where((i) => i.type == ContentType.pdf).length),
-                            isSelected: _selectedTypeFilter == ContentType.pdf,
-                            onSelected: () => setState(
-                                () => _selectedTypeFilter = ContentType.pdf),
+                  child: CustomScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    slivers: [
+                      // 1. Search Bar (Scrolls away with the page)
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: AppSpacing.s12),
+                          child: AppTextField(
+                            controller: _searchController,
+                            hintText: context.l10n.searchContentPlaceholder,
+                            prefixIcon: const Icon(
+                              Icons.search_rounded,
+                              color: AppColors.textSecondary,
+                              size: 20,
+                            ),
+                            suffixIcon: _searchQuery.isNotEmpty
+                                ? IconButton(
+                                    icon: const Icon(
+                                      Icons.clear_rounded,
+                                      size: 18,
+                                    ),
+                                    onPressed: () {
+                                      _searchController.clear();
+                                      setState(() => _searchQuery = '');
+                                    },
+                                  )
+                                : null,
+                            onChanged: (val) {
+                              setState(() => _searchQuery = val.trim());
+                            },
                           ),
-                          const SizedBox(width: AppSpacing.s8),
-                          _buildFilterChip(
-                            label: context.l10n.filterImagesWithCount(
-                                allPublished.where((i) => i.type == ContentType.image).length),
-                            isSelected: _selectedTypeFilter == ContentType.image,
-                            onSelected: () => setState(
-                                () => _selectedTypeFilter = ContentType.image),
-                          ),
-                          const SizedBox(width: AppSpacing.s8),
-                          _buildFilterChip(
-                            label: context.l10n.filterVideosWithCount(
-                                allPublished.where((i) => i.type == ContentType.video).length),
-                            isSelected: _selectedTypeFilter == ContentType.video,
-                            onSelected: () => setState(
-                                () => _selectedTypeFilter = ContentType.video),
-                          ),
-                        ],
+                        ),
                       ),
-                    ),
 
-                    const SizedBox(height: AppSpacing.s12),
-
-                    // Content Feed List or Empty State
-                    Expanded(
-                      child: allPublished.isEmpty
-                          ? AppEmptyView(
-                              message: context.l10n.noContentPublishedYet,
-                              icon: Icons.menu_book_rounded,
-                            )
-                          : items.isEmpty
-                              ? Center(
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      const Icon(
-                                        Icons.search_off_rounded,
-                                        size: 48,
-                                        color: AppColors.textMuted,
-                                      ),
-                                      const SizedBox(height: AppSpacing.s12),
-                                      Text(
-                                        context.l10n.noMatchingContentFound(_searchQuery),
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColors.textSecondary,
-                                        ),
-                                      ),
-                                    ],
+                      // 2. Type Filter Chips Row
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: AppSpacing.s8,
+                          ),
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: [
+                                _buildFilterChip(
+                                  label: context.l10n
+                                      .filterAllWithCount(allPublished.length),
+                                  isSelected: _selectedTypeFilter == null,
+                                  onSelected: () => setState(
+                                    () => _selectedTypeFilter = null,
                                   ),
-                                )
-                              : ListView.builder(
-                                  padding: const EdgeInsets.only(bottom: 24),
-                                  itemCount: items.length,
-                                  itemBuilder: (context, index) {
-                                    final item = items[index];
-                                    return Padding(
-                                      padding: const EdgeInsets.only(
-                                          bottom: AppSpacing.s10),
-                                      child: ContentItemCard(
-                                        content: item,
-                                        isTeacher: false,
-                                        onOpenFile: (_) =>
-                                            _handleContentTap(item),
-                                        onTap: () => _handleContentTap(item),
-                                      ),
-                                    );
-                                  },
                                 ),
-                    ),
-                  ],
+                                const SizedBox(width: AppSpacing.s8),
+                                _buildFilterChip(
+                                  label: context.l10n.filterPdfsWithCount(
+                                    allPublished
+                                        .where((i) => i.type == ContentType.pdf)
+                                        .length,
+                                  ),
+                                  isSelected:
+                                      _selectedTypeFilter == ContentType.pdf,
+                                  onSelected: () => setState(
+                                    () => _selectedTypeFilter = ContentType.pdf,
+                                  ),
+                                ),
+                                const SizedBox(width: AppSpacing.s8),
+                                _buildFilterChip(
+                                  label: context.l10n.filterImagesWithCount(
+                                    allPublished
+                                        .where(
+                                          (i) => i.type == ContentType.image,
+                                        )
+                                        .length,
+                                  ),
+                                  isSelected:
+                                      _selectedTypeFilter == ContentType.image,
+                                  onSelected: () => setState(
+                                    () =>
+                                        _selectedTypeFilter = ContentType.image,
+                                  ),
+                                ),
+                                const SizedBox(width: AppSpacing.s8),
+                                _buildFilterChip(
+                                  label: context.l10n.filterVideosWithCount(
+                                    allPublished
+                                        .where(
+                                          (i) => i.type == ContentType.video,
+                                        )
+                                        .length,
+                                  ),
+                                  isSelected:
+                                      _selectedTypeFilter == ContentType.video,
+                                  onSelected: () => setState(
+                                    () =>
+                                        _selectedTypeFilter = ContentType.video,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // 3. Content Feed List or Empty State
+                      if (allPublished.isEmpty)
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 48),
+                            child: Center(
+                              child: AppEmptyView(
+                                message: context.l10n.noContentPublishedYet,
+                                icon: Icons.menu_book_rounded,
+                              ),
+                            ),
+                          ),
+                        )
+                      else if (items.isEmpty)
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 48),
+                            child: Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.search_off_rounded,
+                                    size: 48,
+                                    color: AppColors.textMuted,
+                                  ),
+                                  const SizedBox(height: AppSpacing.s12),
+                                  Text(
+                                    context.l10n
+                                        .noMatchingContentFound(_searchQuery),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        )
+                      else
+                        SliverPadding(
+                          padding: const EdgeInsets.only(bottom: 32),
+                          sliver: SliverList.builder(
+                            itemCount: items.length,
+                            itemBuilder: (context, index) {
+                              final item = items[index];
+                              return Padding(
+                                padding: const EdgeInsets.only(
+                                  bottom: AppSpacing.s10,
+                                ),
+                                child: ContentItemCard(
+                                  content: item,
+                                  isTeacher: false,
+                                  onOpenFile: (_) => _handleContentTap(item),
+                                  onTap: () => _handleContentTap(item),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               ),
             );

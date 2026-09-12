@@ -5,7 +5,6 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/responsive_breakpoints.dart';
 import '../../../../core/widgets/app_card.dart';
-import '../../../../core/widgets/app_error_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
 import '../../../../core/widgets/responsive_container.dart';
 import '../../../auth/presentation/cubit/auth_cubit.dart';
@@ -15,6 +14,7 @@ import '../../domain/entities/video_progress_entity.dart';
 import '../cubit/videos_cubit.dart';
 import '../cubit/videos_state.dart';
 import '../widgets/app_video_player.dart';
+import '../widgets/video_upload_dialog.dart';
 import '../../../../core/services/student_activity_tracker.dart';
 
 class VideoPlayerPage extends StatefulWidget {
@@ -112,9 +112,64 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
           }
 
           if (state is VideosError) {
-            return AppErrorView(
-              message: state.message,
-              onRetry: _loadVideo,
+            final authState = context.read<AuthCubit>().state;
+            final isTeacher =
+                authState is AuthAuthenticated && authState.user.isTeacher;
+
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.s24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.video_camera_back_outlined,
+                      size: 64,
+                      color: AppColors.textMuted,
+                    ),
+                    const SizedBox(height: AppSpacing.s16),
+                    Text(
+                      state.message,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.s20),
+                    if (isTeacher) ...[
+                      ElevatedButton.icon(
+                        icon: const Icon(Icons.cloud_upload_rounded),
+                        label: Text(context.l10n.uploadVideoAction),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.s20,
+                            vertical: AppSpacing.s12,
+                          ),
+                        ),
+                        onPressed: () {
+                          VideoUploadDialog.show(
+                            context,
+                            contentId: widget.videoId,
+                            onUploadSuccess: () {
+                              _loadVideo();
+                            },
+                          );
+                        },
+                      ),
+                      const SizedBox(height: AppSpacing.s12),
+                    ],
+                    OutlinedButton.icon(
+                      icon: const Icon(Icons.refresh_rounded),
+                      label: Text(context.l10n.retryAction),
+                      onPressed: _loadVideo,
+                    ),
+                  ],
+                ),
+              ),
             );
           }
 

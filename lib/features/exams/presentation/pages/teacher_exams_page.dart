@@ -417,37 +417,56 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
         child: ResponsiveContainer(
           maxWidth: ResponsiveBreakpoints.maxContentWidth,
           padding: const EdgeInsets.all(AppSpacing.s16),
-          child: Column(
-            children: [
-              TeacherGroupFilterBar(
+          child: BlocBuilder<ExamsCubit, ExamsState>(
+            builder: (context, state) {
+              final groupFilterBar = TeacherGroupFilterBar(
                 selectedGroupId: _selectedGroupId,
                 onGroupChanged: _onGroupChanged,
                 onRefresh: _loadExams,
-              ),
-              Expanded(
-                child: BlocBuilder<ExamsCubit, ExamsState>(
-                  builder: (context, state) {
-                    if (state is ExamsLoading) {
-                      return const AppLoadingView.cardsGrid(
+              );
+
+              if (state is ExamsLoading) {
+                return Column(
+                  children: [
+                    groupFilterBar,
+                    const SizedBox(height: AppSpacing.s16),
+                    const Expanded(
+                      child: AppLoadingView.cardsGrid(
                         count: 4,
                         columns: 2,
-                      );
-                    }
+                      ),
+                    ),
+                  ],
+                );
+              }
 
-                    if (state is ExamsError) {
-                      return Center(
+              if (state is ExamsError) {
+                return Column(
+                  children: [
+                    groupFilterBar,
+                    const SizedBox(height: AppSpacing.s16),
+                    Expanded(
+                      child: Center(
                         child: AppErrorView(
                           message: state.message,
                           onRetry: _loadExams,
                         ),
-                      );
-                    }
+                      ),
+                    ),
+                  ],
+                );
+              }
 
-                    if (state is TeacherExamsLoaded) {
-                      final exams = state.exams;
+              if (state is TeacherExamsLoaded) {
+                final exams = state.exams;
 
-                      if (exams.isEmpty) {
-                        return Center(
+                if (exams.isEmpty) {
+                  return Column(
+                    children: [
+                      groupFilterBar,
+                      const SizedBox(height: AppSpacing.s16),
+                      Expanded(
+                        child: Center(
                           child: AppEmptyView(
                             message: context.l10n.noExamsForGroup,
                             subtitle: context.l10n.noExamsForGroupSubtitle,
@@ -471,36 +490,44 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
                                   },
                             icon: Icons.quiz_outlined,
                           ),
-                        );
-                      }
-
-                      return RefreshIndicator(
-                        onRefresh: () async => _loadExams(),
-                        child: SingleChildScrollView(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          child: ResponsiveGrid(
-                            mobileColumns: 1,
-                            tabletColumns: 2,
-                            desktopColumns: 2,
-                            spacing: AppSpacing.s16,
-                            runSpacing: AppSpacing.s16,
-                            children: exams.map((exam) {
-                              return ExamCard(
-                                exam: exam,
-                                isTeacher: true,
-                                onTap: () => _showExamDetailsSheet(exam),
-                              );
-                            }).toList(),
-                          ),
                         ),
-                      );
-                    }
+                      ),
+                    ],
+                  );
+                }
 
-                    return const SizedBox.shrink();
-                  },
-                ),
-              ),
-            ],
+                return RefreshIndicator(
+                  onRefresh: () async => _loadExams(),
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.only(bottom: 96),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        groupFilterBar,
+                        const SizedBox(height: AppSpacing.s16),
+                        ResponsiveGrid(
+                          mobileColumns: 1,
+                          tabletColumns: 2,
+                          desktopColumns: 2,
+                          spacing: AppSpacing.s16,
+                          runSpacing: AppSpacing.s16,
+                          children: exams.map((exam) {
+                            return ExamCard(
+                              exam: exam,
+                              isTeacher: true,
+                              onTap: () => _showExamDetailsSheet(exam),
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+
+              return const SizedBox.shrink();
+            },
           ),
         ),
       ),

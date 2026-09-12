@@ -198,6 +198,43 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
     );
   }
 
+  Future<void> _handleItemTap(ContentEntity item) async {
+    if (item.type == ContentType.video) {
+      await context.push('${AppRouter.videoPlayer}?id=${item.id}');
+    } else if (item.file != null) {
+      await _handleOpenFile(item);
+    } else {
+      _openEditDialog(item);
+    }
+  }
+
+  Future<void> _confirmDelete(ContentEntity item) async {
+    final cubit = context.read<ContentCubit>();
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(ctx.l10n.deleteConfirmTitle),
+        content: Text(ctx.l10n.deleteItemConfirmMessage(item.title)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(ctx.l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.error,
+            ),
+            child: Text(ctx.l10n.deleteAction),
+          ),
+        ],
+      ),
+    );
+    if (confirm == true) {
+      unawaited(cubit.deleteContent(item.id));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -256,77 +293,132 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
           maxWidth: ResponsiveBreakpoints.maxContentWidth,
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.s16,
-            vertical: AppSpacing.s12,
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              TeacherGroupFilterBar(
-                selectedGroupId: _selectedGroupId,
-                onGroupChanged: _onGroupChanged,
-                onRefresh: _loadContent,
-              ),
-              Expanded(
-                child: BlocConsumer<ContentCubit, ContentState>(
-                  listener: (context, state) {
-                    if (state is ContentError) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(state.message),
-                          backgroundColor: AppColors.error,
+          child: BlocConsumer<ContentCubit, ContentState>(
+            listener: (context, state) {
+              if (state is ContentError) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: AppColors.error,
+                  ),
+                );
+              }
+            },
+            builder: (context, state) {
+              if (state is ContentLoading) {
+                return RefreshIndicator(
+                  onRefresh: () async => _loadContent(),
+                  child: CustomScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    slivers: [
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: AppSpacing.s12),
+                          child: TeacherGroupFilterBar(
+                            selectedGroupId: _selectedGroupId,
+                            onGroupChanged: _onGroupChanged,
+                            onRefresh: _loadContent,
+                          ),
                         ),
-                      );
-                    }
-                  },
-                  builder: (context, state) {
-                    if (state is ContentLoading) {
-                      return const AppLoadingView.cardsGrid(count: 4, columns: 2);
-                    }
+                      ),
+                      const SliverToBoxAdapter(
+                        child: Padding(
+                          padding: EdgeInsets.only(top: AppSpacing.s16),
+                          child: AppLoadingView.cardsGrid(count: 4, columns: 2),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
 
-                    if (state is ContentError) {
-                      return AppErrorView(
-                        message: state.message,
-                        onRetry: _loadContent,
-                      );
-                    }
+              if (state is ContentError) {
+                return RefreshIndicator(
+                  onRefresh: () async => _loadContent(),
+                  child: CustomScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    slivers: [
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: AppSpacing.s12),
+                          child: TeacherGroupFilterBar(
+                            selectedGroupId: _selectedGroupId,
+                            onGroupChanged: _onGroupChanged,
+                            onRefresh: _loadContent,
+                          ),
+                        ),
+                      ),
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 48),
+                          child: Center(
+                            child: AppErrorView(
+                              message: state.message,
+                              onRetry: _loadContent,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
 
-                    if (state is ContentLoaded) {
-                      var items = state.filteredItems;
+              if (state is ContentLoaded) {
+                var items = state.filteredItems;
 
-                      // Secondary filter by type
-                      if (_activeTypeFilter != null) {
-                        items = items
-                            .where((i) => i.type == _activeTypeFilter)
-                            .toList();
-                      }
+                // Secondary filter by type
+                if (_activeTypeFilter != null) {
+                  items = items
+                      .where((i) => i.type == _activeTypeFilter)
+                      .toList();
+                }
 
-                      // Filter by live search query
-                      if (_searchQuery.isNotEmpty) {
-                        items = items
-                            .where(
-                              (i) =>
-                                  i.title.toLowerCase().contains(
-                                    _searchQuery.toLowerCase(),
-                                  ) ||
-                                  (i.description?.toLowerCase().contains(
-                                        _searchQuery.toLowerCase(),
-                                      ) ??
-                                      false) ||
-                                  (i.file?.fileName.toLowerCase().contains(
-                                        _searchQuery.toLowerCase(),
-                                      ) ??
-                                      false),
-                            )
-                            .toList();
-                      }
+                // Filter by live search query
+                if (_searchQuery.isNotEmpty) {
+                  items = items
+                      .where(
+                        (i) =>
+                            i.title.toLowerCase().contains(
+                              _searchQuery.toLowerCase(),
+                            ) ||
+                            (i.description?.toLowerCase().contains(
+                                  _searchQuery.toLowerCase(),
+                                ) ??
+                                false) ||
+                            (i.file?.fileName.toLowerCase().contains(
+                                  _searchQuery.toLowerCase(),
+                                ) ??
+                                false),
+                      )
+                      .toList();
+                }
 
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          // Summary Stat Cards Row
-                          LayoutBuilder(
-                            builder: (context, constraints) {
-                              final isCompact = constraints.maxWidth < 480;
+                return RefreshIndicator(
+                  onRefresh: () async => _loadContent(),
+                  child: CustomScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    slivers: [
+                      // 1. Group Selector Bar (Scrolls away with the page)
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: AppSpacing.s12),
+                          child: TeacherGroupFilterBar(
+                            selectedGroupId: _selectedGroupId,
+                            onGroupChanged: _onGroupChanged,
+                            onRefresh: _loadContent,
+                          ),
+                        ),
+                      ),
+
+                      // 2. Summary Stat Cards Row
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: AppSpacing.s12),
+                          child: Builder(
+                            builder: (context) {
+                              final isCompact = MediaQuery.sizeOf(context).width < 600;
                               if (isCompact) {
                                 return SingleChildScrollView(
                                   scrollDirection: Axis.horizontal,
@@ -399,11 +491,14 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                               );
                             },
                           ),
+                        ),
+                      ),
 
-                          const SizedBox(height: AppSpacing.s12),
-
-                          // Search Field
-                          AppTextField(
+                      // 3. Search Field
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: AppSpacing.s12),
+                          child: AppTextField(
                             controller: _searchController,
                             hintText: context.l10n.searchContentTeacherHint,
                             prefixIcon: const Icon(
@@ -427,11 +522,14 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                               setState(() => _searchQuery = val.trim());
                             },
                           ),
+                        ),
+                      ),
 
-                          const SizedBox(height: AppSpacing.s8),
-
-                          // Status Filter Chips Header
-                          SingleChildScrollView(
+                      // 4. Status Filter Chips
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: AppSpacing.s8),
+                          child: SingleChildScrollView(
                             scrollDirection: Axis.horizontal,
                             child: Row(
                               children: [
@@ -492,152 +590,111 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                               ],
                             ),
                           ),
+                        ),
+                      ),
 
-                          const SizedBox(height: AppSpacing.s8),
-
-                          // Content List or Empty State
-                          Expanded(
-                            child: state.items.isEmpty
-                                ? Center(
-                                    child: AppEmptyView(
-                                      message:
-                                          context.l10n.emptyContentCategory,
-                                      icon: Icons.folder_open_rounded,
-                                      actionText: context.l10n.addFirstContent,
-                                      onAction: _openCreateDialog,
-                                    ),
-                                  )
-                                : items.isEmpty
-                                ? Center(
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        const Icon(
-                                          Icons.search_off_rounded,
-                                          size: 48,
-                                          color: AppColors.textMuted,
-                                        ),
-                                        const SizedBox(height: AppSpacing.s12),
-                                        Text(
-                                          context.l10n.noMaterialsMatchFilter,
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color: AppColors.textSecondary,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  )
-                                : ReorderableListView.builder(
-                                    padding: const EdgeInsets.only(bottom: 24),
-                                    itemCount: items.length,
-                                    buildDefaultDragHandles: false,
-                                    onReorder: (oldIdx, newIdx) {
-                                      context.read<ContentCubit>().reorderItems(
-                                        oldIdx,
-                                        newIdx,
-                                      );
-                                    },
-                                    itemBuilder: (context, index) {
-                                      final item = items[index];
-                                      return Padding(
-                                        key: ValueKey(item.id),
-                                        padding: const EdgeInsets.only(
-                                          bottom: AppSpacing.s10,
-                                        ),
-                                        child: ContentItemCard(
-                                          content: item,
-                                          isTeacher: true,
-                                          index: index,
-                                          onEdit: () => _openEditDialog(item),
-                                          onOpenFile: (_) =>
-                                              _handleOpenFile(item),
-                                          onUploadVideo: () =>
-                                              _handleUploadVideo(item),
-                                          onTap: () {
-                                            if (item.type ==
-                                                ContentType.video) {
-                                              _handleUploadVideo(item);
-                                            } else {
-                                              _handleOpenFile(item);
-                                            }
-                                          },
-                                          onTogglePublish: () {
-                                            final newStatus = item.isPublished
-                                                ? ContentStatus.draft
-                                                : ContentStatus.published;
-                                            context
-                                                .read<ContentCubit>()
-                                                .updateContent(
-                                                  contentId: item.id,
-                                                  status: newStatus,
-                                                );
-                                          },
-                                          onToggleArchive: () {
-                                            final newStatus = item.isArchived
-                                                ? ContentStatus.draft
-                                                : ContentStatus.archived;
-                                            context
-                                                .read<ContentCubit>()
-                                                .updateContent(
-                                                  contentId: item.id,
-                                                  status: newStatus,
-                                                );
-                                          },
-                                          onDelete: () async {
-                                            final cubit = context
-                                                .read<ContentCubit>();
-                                            final confirm = await showDialog<bool>(
-                                              context: context,
-                                              builder: (ctx) => AlertDialog(
-                                                title: Text(
-                                                  ctx.l10n.deleteConfirmTitle,
-                                                ),
-                                                content: Text(
-                                                  ctx.l10n.deleteItemConfirmMessage(item.title),
-                                                ),
-                                                actions: [
-                                                  TextButton(
-                                                    onPressed: () =>
-                                                        Navigator.of(
-                                                          ctx,
-                                                        ).pop(false),
-                                                    child: Text(ctx.l10n.cancel),
-                                                  ),
-                                                  TextButton(
-                                                    onPressed: () =>
-                                                        Navigator.of(
-                                                          ctx,
-                                                        ).pop(true),
-                                                    style: TextButton.styleFrom(
-                                                      foregroundColor:
-                                                          AppColors.error,
-                                                    ),
-                                                    child: Text(ctx.l10n.deleteAction),
-                                                  ),
-                                                ],
-                                              ),
-                                            );
-                                            if (confirm == true) {
-                                              unawaited(
-                                                cubit.deleteContent(item.id),
-                                              );
-                                            }
-                                          },
-                                        ),
-                                      );
-                                    },
-                                  ),
+                      // 5. Content List / Empty States
+                      if (state.items.isEmpty)
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 48),
+                            child: Center(
+                              child: AppEmptyView(
+                                message: context.l10n.emptyContentCategory,
+                                icon: Icons.folder_open_rounded,
+                                actionText: context.l10n.addFirstContent,
+                                onAction: _openCreateDialog,
+                              ),
+                            ),
                           ),
-                        ],
-                      );
-                    }
+                        )
+                      else if (items.isEmpty)
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 48),
+                            child: Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.search_off_rounded,
+                                    size: 48,
+                                    color: AppColors.textMuted,
+                                  ),
+                                  const SizedBox(height: AppSpacing.s12),
+                                  Text(
+                                    context.l10n.noMaterialsMatchFilter,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        )
+                      else
+                        SliverPadding(
+                          padding: const EdgeInsets.only(bottom: 96),
+                          sliver: SliverReorderableList(
+                            itemCount: items.length,
+                            onReorder: (oldIdx, newIdx) {
+                              context.read<ContentCubit>().reorderItems(
+                                oldIdx,
+                                newIdx,
+                              );
+                            },
+                            itemBuilder: (context, index) {
+                              final item = items[index];
+                              return Padding(
+                                key: ValueKey(item.id),
+                                padding: const EdgeInsets.only(
+                                  bottom: AppSpacing.s10,
+                                ),
+                                child: ContentItemCard(
+                                  content: item,
+                                  isTeacher: true,
+                                  index: index,
+                                  onEdit: () => _openEditDialog(item),
+                                  onOpenFile: (_) => _handleOpenFile(item),
+                                  onUploadVideo: () => _handleUploadVideo(item),
+                                  onTap: () => _handleItemTap(item),
+                                  onTogglePublish: () {
+                                    final newStatus = item.isPublished
+                                        ? ContentStatus.draft
+                                        : ContentStatus.published;
+                                    context
+                                        .read<ContentCubit>()
+                                        .updateContent(
+                                          contentId: item.id,
+                                          status: newStatus,
+                                        );
+                                  },
+                                  onToggleArchive: () {
+                                    final newStatus = item.isArchived
+                                        ? ContentStatus.draft
+                                        : ContentStatus.archived;
+                                    context
+                                        .read<ContentCubit>()
+                                        .updateContent(
+                                          contentId: item.id,
+                                          status: newStatus,
+                                        );
+                                  },
+                                  onDelete: () => _confirmDelete(item),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                    ],
+                  ),
+                );
+              }
 
-                    return const SizedBox.shrink();
-                  },
-                ),
-              ),
-            ],
+              return const SizedBox.shrink();
+            },
           ),
         ),
       ),

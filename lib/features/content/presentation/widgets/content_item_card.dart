@@ -162,108 +162,118 @@ class ContentItemCard extends StatelessWidget {
 
                 const SizedBox(height: AppSpacing.s10),
 
-                // Footer Row: Attachment indicator, date, and actions
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Wrap(
-                        spacing: AppSpacing.s12,
-                        runSpacing: 4,
-                        crossAxisAlignment: WrapCrossAlignment.center,
+                // Attachment File Link (if attached)
+                if (hasFile) ...[
+                  const SizedBox(height: AppSpacing.s6),
+                  InkWell(
+                    onTap: onOpenFile != null
+                        ? () => onOpenFile!(content.file!.storagePath)
+                        : null,
+                    borderRadius: BorderRadius.circular(4),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 2),
+                      child: Row(
                         children: [
-                          if (hasFile) ...[
-                            InkWell(
-                              onTap: onOpenFile != null
-                                  ? () => onOpenFile!(content.file!.storagePath)
-                                  : null,
-                              borderRadius: BorderRadius.circular(4),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 4,
-                                  vertical: 2,
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(
-                                      Icons.attach_file_rounded,
-                                      size: 14,
-                                      color: AppColors.primary,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Flexible(
-                                      child: Text(
-                                        '${content.file!.fileName} (${content.file!.formattedFileSize})',
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
-                                          color: AppColors.primary,
-                                          decoration: TextDecoration.underline,
-                                        ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                          const Icon(
+                            Icons.attach_file_rounded,
+                            size: 14,
+                            color: AppColors.primary,
+                          ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              '${content.file!.fileName} (${content.file!.formattedFileSize})',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.primary,
+                                decoration: TextDecoration.underline,
                               ),
-                            ),
-                          ],
-                          Text(
-                            content.publishedAt != null
-                                ? context.l10n.publishedDatePrefix(_formatDate(content.publishedAt!))
-                                : context.l10n.createdDatePrefix(_formatDate(content.createdAt)),
-                            style: const TextStyle(
-                              fontSize: 11,
-                              color: AppColors.textMuted,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],
                       ),
                     ),
+                  ),
+                ],
 
-                    // Actions Slot
-                    if (isTeacher)
-                      Row(
+                // Video Upload Action Pill for Teacher
+                if (isTeacher &&
+                    content.type == ContentType.video &&
+                    onUploadVideo != null) ...[
+                  const SizedBox(height: AppSpacing.s8),
+                  InkWell(
+                    onTap: onUploadVideo,
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withAlpha(20),
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                        border: Border.all(color: AppColors.primary.withAlpha(60)),
+                      ),
+                      child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          if (content.type == ContentType.video && onUploadVideo != null) ...[
-                            FilledButton.tonalIcon(
-                              onPressed: onUploadVideo,
-                              style: FilledButton.styleFrom(
-                                visualDensity: VisualDensity.compact,
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                                textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                          const Icon(
+                            Icons.cloud_upload_rounded,
+                            size: 16,
+                            color: AppColors.primary,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            context.l10n.uploadVideoAction,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+
+                const SizedBox(height: AppSpacing.s8),
+
+                // Footer Row: Clean Date on left, 3-dots Menu on right (No eye icon, no crushing)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        content.publishedAt != null
+                            ? context.l10n.publishedDatePrefix(
+                                _formatDate(content.publishedAt!),
+                              )
+                            : context.l10n.createdDatePrefix(
+                                _formatDate(content.createdAt),
                               ),
-                              icon: const Icon(Icons.cloud_upload_rounded, size: 16),
-                              label: Text(context.l10n.uploadVideoAction),
-                            ),
-                            const SizedBox(width: AppSpacing.s4),
-                          ],
-                          if (onTogglePublish != null)
-                            IconButton(
-                              icon: Icon(
-                                content.isPublished
-                                    ? Icons.visibility_rounded
-                                    : Icons.visibility_off_rounded,
-                                size: 18,
-                                color: content.isPublished
-                                    ? AppColors.success
-                                    : AppColors.warning,
-                              ),
-                              tooltip: content.isPublished
-                                  ? context.l10n.publishedTooltip
-                                  : context.l10n.draftTooltip,
-                              onPressed: onTogglePublish,
-                            ),
-                          PopupMenuButton<String>(
-                            icon: const Icon(
-                              Icons.more_vert_rounded,
-                              size: 18,
-                              color: AppColors.textSecondary,
-                            ),
-                            onSelected: (value) {
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textMuted,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        softWrap: false,
+                      ),
+                    ),
+
+                    // Actions: Only the 3-dots menu (Clean & uncluttered)
+                    if (isTeacher)
+                      PopupMenuButton<String>(
+                        icon: const Icon(
+                          Icons.more_vert_rounded,
+                          size: 20,
+                          color: AppColors.textSecondary,
+                        ),
+                        onSelected: (value) {
                               switch (value) {
                                 case 'upload_video':
                                   onUploadVideo?.call();
@@ -367,9 +377,7 @@ class ContentItemCard extends StatelessWidget {
                                 ),
                               ),
                             ],
-                          ),
-                        ],
-                      )
+                          )
                     else if (hasFile)
                       IconButton(
                         icon: const Icon(
