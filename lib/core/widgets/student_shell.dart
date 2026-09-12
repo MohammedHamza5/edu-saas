@@ -6,6 +6,7 @@ import '../config/tenant_registry.dart';
 import '../di/injection_container.dart';
 import '../network/supabase_service.dart';
 import '../router/app_router.dart';
+import '../utils/group_slug_resolver.dart';
 import '../extensions/localized_context_extension.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
@@ -79,8 +80,10 @@ class StudentShell extends StatelessWidget {
 
     if (groups.length == 1) {
       final g = groups.first;
+      final slug = GroupSlugResolver.toSlug(g.id, g.name);
       context.go(
-        '${AppRouter.studentGroupContent.replaceAll(':groupId', g.id)}?name=${Uri.encodeComponent(g.name)}',
+        AppRouter.studentGroupContent.replaceAll(':groupId', slug),
+        extra: g.name,
       );
       return;
     }
@@ -141,8 +144,10 @@ class StudentShell extends StatelessWidget {
                         ),
                         onTap: () {
                           Navigator.of(sheetContext).pop();
+                          final slug = GroupSlugResolver.toSlug(group.id, group.name);
                           context.go(
-                            '${AppRouter.studentGroupContent.replaceAll(':groupId', group.id)}?name=${Uri.encodeComponent(group.name)}',
+                            AppRouter.studentGroupContent.replaceAll(':groupId', slug),
+                            extra: group.name,
                           );
                         },
                       );

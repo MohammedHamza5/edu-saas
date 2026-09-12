@@ -1,11 +1,11 @@
 {
-    "name": "EduSaaS - Academic Mathematics Platform",
-    "short_name": "EduSaaS",
+    "name": "منصة د. أنطونيوس أشرف | Dr. Antounios Ashraf Platform",
+    "short_name": "د. أنطونيوس",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0F172A",
     "theme_color": "#5B4FE0",
-    "description": "White-label Education SaaS for American Curriculum Mathematics.",
+    "description": "منصة دكتور أنطونيوس أشرف لطلاب الدبلومة الأمريكية - Official Dr. Antounios Ashraf American Diploma Platform (SAT / EST / ACT).",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

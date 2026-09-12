@@ -15,6 +15,7 @@ import 'core/theme/tenant_theme_cubit.dart';
 import 'core/utils/app_bloc_observer.dart';
 import 'core/utils/app_logger.dart';
 import 'core/utils/ui_error_tracker.dart';
+import 'core/utils/url_strategy.dart';
 import 'core/widgets/app_ui_error_widget.dart';
 import 'core/widgets/global_activity_listener.dart';
 import 'features/auth/presentation/cubit/auth_cubit.dart';
@@ -29,8 +30,9 @@ Future<void> main() async {
     () async {
       // ── 1. Flutter engine binding (داخل الـ Zone) ──────────────────────────
       WidgetsFlutterBinding.ensureInitialized();
+      configureUrlStrategy();
       AppLogger.separator('🚀 EduSaaS App Startup');
-      AppLogger.i('Main', 'Flutter binding initialized');
+      AppLogger.i('Main', 'Flutter binding initialized & Clean Path URLs enabled');
 
       // ── 2. Register global BlocObserver ─────────────────────────────────────
       Bloc.observer = const AppBlocObserver();
@@ -143,7 +145,9 @@ class EduSaaSApp extends StatelessWidget {
           return BlocBuilder<LocaleCubit, Locale>(
             builder: (context, activeLocale) {
               return MaterialApp.router(
-                title: branding.getBrandNameForLocale(activeLocale),
+                title: activeLocale.languageCode == 'ar'
+                    ? '${branding.brandName} | SAT • EST • ACT'
+                    : '${branding.brandNameEn ?? branding.brandName} | American Curriculum SAT • EST • ACT',
                 theme: AppTheme.fromBranding(branding),
                 routerConfig: AppRouter.router,
                 debugShowCheckedModeBanner: false,

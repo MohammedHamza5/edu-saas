@@ -81,8 +81,19 @@ class _SplashPageState extends State<SplashPage>
 
     _animController.forward();
 
-    // Fallback timer if auth check is delayed
-    _fallbackTimer = Timer(const Duration(seconds: 3), () {
+    // ⚡ Instant Navigation: If AuthCubit has already resolved the state (e.g. unauthenticated)
+    // on application startup, navigate immediately on the first frame without any delay!
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        final state = context.read<AuthCubit>().state;
+        if (state is! AuthInitial && state is! AuthLoading) {
+          _navigateByState(state);
+        }
+      }
+    });
+
+    // Safety fallback timer if auth check is genuinely in-flight
+    _fallbackTimer = Timer(const Duration(milliseconds: 1200), () {
       if (mounted) {
         final state = context.read<AuthCubit>().state;
         _navigateByState(state);

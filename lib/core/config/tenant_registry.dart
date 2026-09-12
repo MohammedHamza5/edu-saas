@@ -16,30 +16,32 @@ class TenantRegistry {
     brandNameEn: 'Dr. Antounios Ashraf Platform',
     teacherName: 'د. أنطونيوس أشرف',
     teacherNameEn: 'Dr. Antounios Ashraf',
-    subjectTitle: 'SAT • ACT • MATH • MORE',
-    subjectTitleEn: 'SAT • ACT • MATH • MORE',
+    subjectTitle: 'SAT • ACT • EST • MORE',
+    subjectTitleEn: 'SAT • ACT • EST • MORE',
     academicTrack: 'النظام الأمريكي • Grade 10-12',
     academicTrackEn: 'American Curriculum • Grade 10-12',
     tagline: 'Better Scores Bigger Dreams (EST. 2026)',
     taglineEn: 'Better Scores Bigger Dreams (EST. 2026)',
     welcomeMessage: 'مرحباً بك في منصة د. أنطونيوس أشرف',
-    primaryColor: const Color(0xFF6366F1), // Luminous Mathematical Indigo 500
+    primaryColor: const Color(0xFF6366F1), // Luminous Indigo 500
     secondaryColor: const Color(0xFF38BDF8), // Electric Cyan 400
-    accentGlow: const Color(0xFF38BDF8), // Electric Cyan highlight for SAT precision
+    accentGlow: const Color(0xFF38BDF8), // Electric Cyan highlight
     signatureSymbol: '∑',
     logoAsset: 'assets/images/dr_antounios_logo.png',
     supportPhone: '+201000000000',
-    supportEmail: 'dr.antounios@math-academy.com',
+    supportEmail: 'contact@antounios.edsentre.com',
   );
 
   /// Default Platform Branding (Set to Dr. Antounios Ashraf)
   static TenantBranding get defaultBranding => drAntouniosBranding;
 
-  /// Map of registered tenants by UUID / identifier
+  /// Map of registered tenants by UUID / identifier / domain
   static final Map<String, TenantBranding> _registeredTenants = {
     'default': drAntouniosBranding,
     'd3b07384-d113-460b-8d14-04666f77ecfa': drAntouniosBranding,
     'teacher-1-slot': drAntouniosBranding,
+    'antounios': drAntouniosBranding,
+    'antounios.edsentre.com': drAntouniosBranding,
   };
 
   /// Registers or updates a teacher branding in the runtime registry

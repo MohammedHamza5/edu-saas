@@ -34,6 +34,7 @@ import '../../features/exams/presentation/pages/student_exams_page.dart';
 import '../../features/settings/presentation/pages/teacher_settings_page.dart';
 
 import '../network/supabase_service.dart';
+import '../utils/group_slug_resolver.dart';
 import '../widgets/student_shell.dart';
 import '../widgets/teacher_shell.dart';
 import 'app_route_observer.dart';
@@ -265,6 +266,10 @@ class AppRouter {
                 const NoTransitionPage(child: PendingStudentsPage()),
           ),
           GoRoute(
+            path: '/teacher/pending-approvals',
+            redirect: (BuildContext context, GoRouterState state) => pendingStudents,
+          ),
+          GoRoute(
             path: student360,
             pageBuilder: (BuildContext context, GoRouterState state) {
               final studentId = state.uri.queryParameters['id']!;
@@ -322,8 +327,9 @@ class AppRouter {
           GoRoute(
             path: teacherGroupContent,
             pageBuilder: (BuildContext context, GoRouterState state) {
-              final groupId = state.pathParameters['groupId'];
-              final groupName = state.uri.queryParameters['name'];
+              final rawGroupId = state.pathParameters['groupId'];
+              final groupId = rawGroupId != null ? GroupSlugResolver.toId(rawGroupId) : null;
+              final groupName = (state.extra as String?) ?? state.uri.queryParameters['name'];
               return NoTransitionPage(
                 child: BlocProvider(
                   create: (_) => InjectionContainer.createContentCubit(),
@@ -354,8 +360,9 @@ class AppRouter {
           GoRoute(
             path: teacherGroupAssignments,
             pageBuilder: (BuildContext context, GoRouterState state) {
-              final groupId = state.pathParameters['groupId'];
-              final groupName = state.uri.queryParameters['name'];
+              final rawGroupId = state.pathParameters['groupId'];
+              final groupId = rawGroupId != null ? GroupSlugResolver.toId(rawGroupId) : null;
+              final groupName = (state.extra as String?) ?? state.uri.queryParameters['name'];
               return NoTransitionPage(
                 child: BlocProvider(
                   create: (_) => InjectionContainer.createAssignmentsCubit(),
@@ -386,8 +393,9 @@ class AppRouter {
           GoRoute(
             path: teacherGroupExams,
             pageBuilder: (BuildContext context, GoRouterState state) {
-              final groupId = state.pathParameters['groupId'];
-              final groupName = state.uri.queryParameters['name'];
+              final rawGroupId = state.pathParameters['groupId'];
+              final groupId = rawGroupId != null ? GroupSlugResolver.toId(rawGroupId) : null;
+              final groupName = (state.extra as String?) ?? state.uri.queryParameters['name'];
               return NoTransitionPage(
                 child: BlocProvider(
                   create: (_) => InjectionContainer.createExamsCubit(),
@@ -458,8 +466,9 @@ class AppRouter {
           GoRoute(
             path: studentGroupContent,
             pageBuilder: (BuildContext context, GoRouterState state) {
-              final groupId = state.pathParameters['groupId']!;
-              final groupName = state.uri.queryParameters['name'];
+              final rawGroupId = state.pathParameters['groupId']!;
+              final groupId = GroupSlugResolver.toId(rawGroupId);
+              final groupName = (state.extra as String?) ?? state.uri.queryParameters['name'];
               return NoTransitionPage(
                 child: BlocProvider(
                   create: (_) => InjectionContainer.createContentCubit(),

@@ -42,10 +42,10 @@ $buildStart = Get-Date
 
 if ($Wasm) {
     Write-Host "[3/5] Compiling to WebAssembly (WasmGC + Skwasm + Level-4 Optimization)..." -ForegroundColor Yellow
-    flutter build web --release --wasm -O4 --strip-wasm --tree-shake-icons --pwa-strategy=offline-first --no-source-maps --dart-define-from-file=.env
+    flutter build web --release --wasm -O4 --strip-wasm --tree-shake-icons --pwa-strategy=none --base-href=/ --no-source-maps --dart-define-from-file=.env
 } else {
-    Write-Host "[3/5] Compiling with Level-4 Optimization, Icon Tree-Shaking, and PWA Offline-First..." -ForegroundColor Yellow
-    flutter build web --release -O4 --tree-shake-icons --pwa-strategy=offline-first --no-source-maps --dart-define-from-file=.env
+    Write-Host "[3/5] Compiling with Level-4 Optimization, Icon Tree-Shaking, and Clean Reload Strategy..." -ForegroundColor Yellow
+    flutter build web --release -O4 --tree-shake-icons --pwa-strategy=none --base-href=/ --no-source-maps --dart-define-from-file=.env
 }
 
 if ($LASTEXITCODE -ne 0) {

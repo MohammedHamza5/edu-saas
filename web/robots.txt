@@ -1,0 +1,9 @@
+# Robots.txt for Dr. Antounios Ashraf Educational Platform (antounios.edsentre.com)
+User-agent: *
+Allow: /
+
+# Disallow internal build artifacts
+Disallow: /version.json
+
+# Primary XML Sitemap
+Sitemap: https://antounios.edsentre.com/sitemap.xml
