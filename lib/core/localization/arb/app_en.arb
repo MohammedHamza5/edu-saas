@@ -2962,6 +2962,8 @@
   "settingsServiceCardTitle": "Platform & Academy Settings",
   "@settingsServiceCardTitle": { "description": "Settings dashboard card title" },
   "settingsServiceCardDesc": "Academy profile, WhatsApp support, and language",
-  "@settingsServiceCardDesc": { "description": "Settings dashboard card description" }
+  "@settingsServiceCardDesc": { "description": "Settings dashboard card description" },
+  "videoStreamingNotice": "Video files will be uploaded and streamed via high-speed Bunny Stream CDN after creating the item using the 'Upload Video' action.",
+  "@videoStreamingNotice": { "description": "Notice in create content dialog for video items" }
 }
 

@@ -190,8 +190,7 @@ class ContentCubit extends Cubit<ContentState> {
     switch (result) {
       case Success(:final data):
         return data;
-      case FailureResult(:final failure):
-        emit(ContentError(failure.message));
+      case FailureResult():
         return null;
     }
   }

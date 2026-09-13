@@ -58,7 +58,7 @@ class ContentItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasFile = content.file != null;
+    final hasFile = content.type != ContentType.video && content.file != null;
 
     return AppCard(
       variant: AppCardVariant.elevated,

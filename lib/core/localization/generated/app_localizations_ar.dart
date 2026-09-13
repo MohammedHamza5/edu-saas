@@ -3972,4 +3972,8 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get settingsServiceCardDesc =>
       'بيانات الأكاديمية، التواصل، ولغة المنصة';
+
+  @override
+  String get videoStreamingNotice =>
+      'ملفات الفيديو يتم رفعها وبثها تلقائياً عبر شبكة Bunny Stream فائقة السرعة فور إنشاء العنصر عبر زر \'رفع فيديو\'.';
 }

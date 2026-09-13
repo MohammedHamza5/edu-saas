@@ -7188,6 +7188,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Academy profile, WhatsApp support, and language'**
   String get settingsServiceCardDesc;
+
+  /// Notice in create content dialog for video items
+  ///
+  /// In en, this message translates to:
+  /// **'Video files will be uploaded and streamed via high-speed Bunny Stream CDN after creating the item using the \'Upload Video\' action.'**
+  String get videoStreamingNotice;
 }
 
 class _AppLocalizationsDelegate

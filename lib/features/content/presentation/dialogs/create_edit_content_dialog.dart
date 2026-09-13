@@ -110,7 +110,9 @@ class _CreateEditContentDialogState extends State<CreateEditContentDialog> {
     String? mimeType;
     int? fileSize;
 
-    if (_hasAttachment && _fileNameController.text.trim().isNotEmpty) {
+    if (_selectedType != ContentType.video &&
+        _hasAttachment &&
+        _fileNameController.text.trim().isNotEmpty) {
       fileName = _fileNameController.text.trim();
       final sanitizedName =
           fileName.toLowerCase().replaceAll(RegExp(r'[^a-z0-9_.-]'), '_');
@@ -120,11 +122,7 @@ class _CreateEditContentDialogState extends State<CreateEditContentDialog> {
           ? 'application/pdf'
           : _selectedType == ContentType.image
               ? 'image/jpeg'
-              : (_selectedType == ContentType.video ||
-                      fileName.toLowerCase().endsWith('.mp4') ||
-                      fileName.toLowerCase().endsWith('.mov'))
-                  ? 'video/mp4'
-                  : 'application/octet-stream';
+              : 'application/octet-stream';
       fileSize = _pickedFileSize ?? (1024 * 500); // 500KB fallback
     }
 
@@ -330,63 +328,91 @@ class _CreateEditContentDialogState extends State<CreateEditContentDialog> {
 
                 const SizedBox(height: AppSpacing.s16),
 
-                // Attachment Section
-                AppCard(
-                  variant: AppCardVariant.standard,
-                  padding: const EdgeInsets.all(AppSpacing.s12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      CheckboxListTile(
-                        title: Text(
-                          context.l10n.attachMaterialFile,
-                          style: const TextStyle(
-                              fontSize: 13, fontWeight: FontWeight.bold),
+                // Attachment Section (for non-video content)
+                if (_selectedType != ContentType.video) ...[
+                  AppCard(
+                    variant: AppCardVariant.standard,
+                    padding: const EdgeInsets.all(AppSpacing.s12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        CheckboxListTile(
+                          title: Text(
+                            context.l10n.attachMaterialFile,
+                            style: const TextStyle(
+                                fontSize: 13, fontWeight: FontWeight.bold),
+                          ),
+                          value: _hasAttachment,
+                          activeColor: AppColors.primary,
+                          contentPadding: EdgeInsets.zero,
+                          onChanged: (val) {
+                            setState(() => _hasAttachment = val ?? false);
+                          },
                         ),
-                        value: _hasAttachment,
-                        activeColor: AppColors.primary,
-                        contentPadding: EdgeInsets.zero,
-                        onChanged: (val) {
-                          setState(() => _hasAttachment = val ?? false);
-                        },
-                      ),
-                      if (_hasAttachment) ...[
-                        const SizedBox(height: AppSpacing.s6),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: AppTextField(
-                                controller: _fileNameController,
-                                labelText: context.l10n.attachedFileNameLabel,
-                                hintText: context.l10n.attachedFileNameHint,
-                                prefixIcon:
-                                    const Icon(Icons.attach_file_rounded),
-                                validator: (val) {
-                                  if (_hasAttachment &&
-                                      (val == null || val.trim().isEmpty)) {
-                                    return context.l10n.fileNameRequired;
-                                  }
-                                  return null;
-                                },
+                        if (_hasAttachment) ...[
+                          const SizedBox(height: AppSpacing.s6),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: AppTextField(
+                                  controller: _fileNameController,
+                                  labelText: context.l10n.attachedFileNameLabel,
+                                  hintText: context.l10n.attachedFileNameHint,
+                                  prefixIcon:
+                                      const Icon(Icons.attach_file_rounded),
+                                  validator: (val) {
+                                    if (_hasAttachment &&
+                                        (val == null || val.trim().isEmpty)) {
+                                      return context.l10n.fileNameRequired;
+                                    }
+                                    return null;
+                                  },
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: AppSpacing.s8),
-                            OutlinedButton.icon(
-                              style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 14),
+                              const SizedBox(width: AppSpacing.s8),
+                              OutlinedButton.icon(
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 14),
+                                ),
+                                onPressed: _pickFile,
+                                icon: const Icon(Icons.folder_open_rounded,
+                                    size: 18),
+                                label: Text(context.l10n.browseFileAction),
                               ),
-                              onPressed: _pickFile,
-                              icon: const Icon(Icons.folder_open_rounded,
-                                  size: 18),
-                              label: Text(context.l10n.browseFileAction),
-                            ),
-                          ],
+                            ],
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ] else ...[
+                  Container(
+                    padding: const EdgeInsets.all(AppSpacing.s12),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withAlpha(15),
+                      borderRadius:
+                          BorderRadius.circular(AppSpacing.radiusSmall),
+                      border: Border.all(color: AppColors.primary.withAlpha(40)),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.info_outline_rounded,
+                            size: 20, color: AppColors.primary),
+                        const SizedBox(width: AppSpacing.s10),
+                        Expanded(
+                          child: Text(
+                            context.l10n.videoStreamingNotice,
+                            style: const TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textSecondary,
+                                height: 1.4),
+                          ),
                         ),
                       ],
-                    ],
+                    ),
                   ),
-                ),
+                ],
 
                 const SizedBox(height: AppSpacing.s24),
 

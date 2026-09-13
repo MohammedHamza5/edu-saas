@@ -4002,4 +4002,8 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settingsServiceCardDesc =>
       'Academy profile, WhatsApp support, and language';
+
+  @override
+  String get videoStreamingNotice =>
+      'Video files will be uploaded and streamed via high-speed Bunny Stream CDN after creating the item using the \'Upload Video\' action.';
 }
