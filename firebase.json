@@ -14,7 +14,10 @@
           { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
           { "key": "Cross-Origin-Embedder-Policy", "value": "credentialless" },
           { "key": "X-Content-Type-Options", "value": "nosniff" },
-          { "key": "X-Frame-Options", "value": "SAMEORIGIN" }
+          { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+          { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate, max-age=0" },
+          { "key": "Pragma", "value": "no-cache" },
+          { "key": "Expires", "value": "0" }
         ]
       },
       {
@@ -38,7 +41,7 @@
         ]
       },
       {
-        "source": "/@(index.html|version.json|flutter_service_worker.js|flutter_bootstrap.js|main.dart.js|flutter.js)",
+        "source": "**/*.@(html|js|json)",
         "headers": [
           { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate, max-age=0" },
           { "key": "Pragma", "value": "no-cache" },

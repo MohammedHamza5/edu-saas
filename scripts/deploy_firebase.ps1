@@ -1,5 +1,5 @@
 param (
-    [switch]$BuildFirst,
+    [switch]$SkipBuild,
     [switch]$Wasm
 )
 
@@ -11,8 +11,8 @@ Write-Host "=================================================================" -
 
 $buildWebDir = Join-Path $PSScriptRoot "..\build\web"
 
-if ($BuildFirst -or (-not (Test-Path (Join-Path $buildWebDir "index.html")))) {
-    Write-Host "`n[1/2] Building web release..." -ForegroundColor Yellow
+if (-not $SkipBuild) {
+    Write-Host "`n[1/2] Compiling fresh production web build..." -ForegroundColor Yellow
     $buildScript = Join-Path $PSScriptRoot "build_web_rocket.ps1"
     if ($Wasm) {
         & $buildScript -Wasm -SkipAnalyze -SkipTests
@@ -20,12 +20,12 @@ if ($BuildFirst -or (-not (Test-Path (Join-Path $buildWebDir "index.html")))) {
         & $buildScript -SkipAnalyze -SkipTests
     }
 } else {
-    Write-Host "`n[1/2] Found existing build in build/web. Skipping rebuild." -ForegroundColor Green
+    Write-Host "`n[1/2] Skipping rebuild as requested (-SkipBuild). Deploying existing build in build/web..." -ForegroundColor Yellow
 }
 
-Write-Host "`n[2/2] Deploying to Firebase Hosting..." -ForegroundColor Yellow
+Write-Host "`n[2/2] Deploying to Firebase Hosting (site: antounios)..." -ForegroundColor Yellow
 $env:NODE_OPTIONS = "--dns-result-order=ipv4first"
-firebase deploy --only hosting
+firebase deploy --only hosting:antounios
 
 if ($LASTEXITCODE -eq 0) {
     Write-Host "`n=================================================================" -ForegroundColor Green

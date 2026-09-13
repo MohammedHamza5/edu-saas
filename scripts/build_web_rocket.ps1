@@ -58,13 +58,28 @@ $seconds = [math]::Round($buildDuration.TotalSeconds, 1)
 Write-Host "[DONE] Compilation succeeded in $seconds seconds!`n" -ForegroundColor Green
 
 $buildWebDir = Join-Path $PSScriptRoot "..\build\web"
+$buildId = (Get-Date -Format "yyyyMMddHHmmss")
 
-# Neutralize any Service Worker settings in flutter_bootstrap.js
+# Neutralize Service Worker & inject unique cache-busting timestamp into flutter_bootstrap.js
 $bootstrapPath = Join-Path $buildWebDir "flutter_bootstrap.js"
 if (Test-Path $bootstrapPath) {
-    (Get-Content $bootstrapPath -Raw) -replace 'serviceWorkerSettings:\s*\{[^}]*\}', 'serviceWorkerSettings: null' | Set-Content $bootstrapPath -NoNewline
-    Write-Host "[OK] Neutralized serviceWorkerSettings in flutter_bootstrap.js" -ForegroundColor Green
+    $bootstrapContent = Get-Content $bootstrapPath -Raw
+    $bootstrapContent = $bootstrapContent -replace 'serviceWorkerSettings:\s*\{[^}]*\}', 'serviceWorkerSettings: null'
+    $bootstrapContent = $bootstrapContent -replace '"mainJsPath":\s*"main\.dart\.js"', ('"mainJsPath":"main.dart.js?v=' + $buildId + '"')
+    $bootstrapContent = $bootstrapContent -replace '"mainWasmPath":\s*"main\.dart\.wasm"', ('"mainWasmPath":"main.dart.wasm?v=' + $buildId + '"')
+    $bootstrapContent | Set-Content $bootstrapPath -NoNewline
+    Write-Host "[OK] Neutralized serviceWorkerSettings & injected cache-busting (v=$buildId) into flutter_bootstrap.js" -ForegroundColor Green
 }
+
+# Update version.json with buildId
+$versionPath = Join-Path $buildWebDir "version.json"
+@{
+    app_name = "edu_saas"
+    version = "1.0.0"
+    build_number = $buildId
+    package_name = "edu_saas"
+} | ConvertTo-Json -Compress | Set-Content $versionPath -NoNewline
+Write-Host "[OK] Generated version.json with build_number $buildId" -ForegroundColor Green
 
 # Step 4: Edge Caching & COOP/COEP Headers Injection for Cloudflare Pages
 Write-Host "[4/5] Injecting Cloudflare Pages _headers..." -ForegroundColor Yellow

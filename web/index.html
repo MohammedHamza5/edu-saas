@@ -6,6 +6,34 @@
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
 
+  <!-- Guarantee immediate updates across all browsers: prevent HTML disk caching -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+
+  <!-- Execute ServiceWorker & CacheStorage exterminator immediately before any resource is requested -->
+  <script>
+    (function() {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register = function() {
+          return Promise.reject(new Error('Service workers permanently disabled for instant updates'));
+        };
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          for (var i = 0; i < registrations.length; i++) {
+            registrations[i].unregister();
+          }
+        });
+      }
+      if ('caches' in window) {
+        caches.keys().then(function(cacheNames) {
+          for (var j = 0; j < cacheNames.length; j++) {
+            caches.delete(cacheNames[j]);
+          }
+        });
+      }
+    })();
+  </script>
+
   <!-- Primary SEO Metadata -->
   <title>منصة دكتور أنطونيوس أشرف | Dr. Antounios Ashraf - SAT / EST / ACT American Platform</title>
   <meta name="title" content="منصة دكتور أنطونيوس أشرف | Dr. Antounios Ashraf - SAT / EST / ACT American Platform">
