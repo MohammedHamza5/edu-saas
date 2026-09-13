@@ -57,11 +57,19 @@ $buildDuration = (Get-Date) - $buildStart
 $seconds = [math]::Round($buildDuration.TotalSeconds, 1)
 Write-Host "[DONE] Compilation succeeded in $seconds seconds!`n" -ForegroundColor Green
 
+$buildWebDir = Join-Path $PSScriptRoot "..\build\web"
+
+# Neutralize any Service Worker settings in flutter_bootstrap.js
+$bootstrapPath = Join-Path $buildWebDir "flutter_bootstrap.js"
+if (Test-Path $bootstrapPath) {
+    (Get-Content $bootstrapPath -Raw) -replace 'serviceWorkerSettings:\s*\{[^}]*\}', 'serviceWorkerSettings: null' | Set-Content $bootstrapPath -NoNewline
+    Write-Host "[OK] Neutralized serviceWorkerSettings in flutter_bootstrap.js" -ForegroundColor Green
+}
+
 # Step 4: Edge Caching & COOP/COEP Headers Injection for Cloudflare Pages
 Write-Host "[4/5] Injecting Cloudflare Pages _headers..." -ForegroundColor Yellow
 
 $webHeadersSource = Join-Path $PSScriptRoot "..\web\_headers"
-$buildWebDir = Join-Path $PSScriptRoot "..\build\web"
 $webHeadersDest = Join-Path $buildWebDir "_headers"
 
 if (Test-Path $webHeadersSource) {
@@ -95,7 +103,7 @@ if ($DeployFirebase) {
     Write-Host "    Deploying to Firebase Hosting (site: antounios) ...           " -ForegroundColor Cyan
     Write-Host "=================================================================" -ForegroundColor Cyan
     $env:NODE_OPTIONS = "--dns-result-order=ipv4first"
-    firebase deploy --only hosting
+    firebase deploy --only hosting:antounios
     if ($LASTEXITCODE -eq 0) {
         Write-Host "`n[SUCCESS] Successfully deployed to: https://antounios.web.app" -ForegroundColor Green
     } else {

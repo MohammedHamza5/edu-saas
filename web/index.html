@@ -304,6 +304,13 @@
 
   <script>
     (function() {
+      // 1. Auto-migrate legacy hash URLs (e.g. /#/teacher or /login#/teacher) to clean HTML5 pushState paths
+      if (window.location.hash && window.location.hash.startsWith('#/')) {
+        var cleanPath = window.location.hash.substring(1);
+        window.history.replaceState(null, '', cleanPath);
+      }
+
+      // 2. Preloader dismissal logic
       function dismissPreloader() {
         var el = document.getElementById('flutter-preloader');
         if (el && !el.classList.contains('dismissed')) {
@@ -316,28 +323,23 @@
         }
       }
 
-      // 1. Listen for Flutter engine's official first-frame rendered event
-      window.addEventListener('flutter-first-frame', dismissPreloader);
-
-      // 2. Check when Flutter canvas element is attached to DOM
-      var observer = new MutationObserver(function(mutations, obs) {
-        var view = document.querySelector('flutter-view') || 
-                   document.querySelector('flt-glass-pane') ||
-                   document.querySelector('flt-scene');
-        if (view) {
-          setTimeout(dismissPreloader, 40);
-          obs.disconnect();
-        }
-      });
-      observer.observe(document.body, { childList: true, subtree: true });
-
-      // 3. Fast fallback timer ensures preloader never hangs or delays reload
-      setTimeout(dismissPreloader, 900);
+      // Expose to window so Flutter can call it directly on first frame
       window.dismissFlutterPreloader = dismissPreloader;
 
-      // 4. Proactively purge all stale Service Workers and CacheStorage
+      // Listen for Flutter engine's official first-frame rendered event
+      window.addEventListener('flutter-first-frame', dismissPreloader);
+
+      // Safe emergency timeout: preloader never hangs permanently even if network fails (15 seconds)
+      setTimeout(dismissPreloader, 15000);
+
+      // 3. Proactively block and purge Service Workers and CacheStorage
       // This guarantees users immediately receive new updates without manually clearing Chrome cache
       if ('serviceWorker' in navigator) {
+        // Prevent flutter_bootstrap.js from registering any new service worker
+        navigator.serviceWorker.register = function() {
+          return Promise.reject(new Error('Service workers disabled for instant updates'));
+        };
+        // Unregister any existing service workers
         navigator.serviceWorker.getRegistrations().then(function(registrations) {
           for (var i = 0; i < registrations.length; i++) {
             registrations[i].unregister();
@@ -354,6 +356,14 @@
     })();
   </script>
 
-  <script src="flutter_bootstrap.js" async></script>
+  <!-- Cache-busting script loader for flutter_bootstrap.js ensures instant updates -->
+  <script>
+    (function() {
+      var s = document.createElement('script');
+      s.src = 'flutter_bootstrap.js?v=' + Date.now();
+      s.async = true;
+      document.body.appendChild(s);
+    })();
+  </script>
 </body>
 </html>

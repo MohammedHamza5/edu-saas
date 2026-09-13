@@ -24,13 +24,15 @@ import 'features/notifications/presentation/cubit/notifications_cubit.dart';
 import 'features/students/presentation/cubit/students_cubit.dart';
 
 Future<void> main() async {
+  // ── 0. Enable HTML5 Clean Path URLs before engine binding initializes ────────
+  configureUrlStrategy();
+
   // ── runZonedGuarded يجب أن يغلف كل شيء بما فيه ensureInitialized ─────────
   // السبب: Flutter يشترط أن يكون ensureInitialized و runApp في نفس الـ Zone.
   await runZonedGuarded(
     () async {
       // ── 1. Flutter engine binding (داخل الـ Zone) ──────────────────────────
       WidgetsFlutterBinding.ensureInitialized();
-      configureUrlStrategy();
       AppLogger.separator('🚀 EduSaaS App Startup');
       AppLogger.i('Main', 'Flutter binding initialized & Clean Path URLs enabled');
 
