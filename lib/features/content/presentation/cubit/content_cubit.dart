@@ -71,6 +71,7 @@ class ContentCubit extends Cubit<ContentState> {
     String? storagePath,
     String? mimeType,
     int? fileSize,
+    List<int>? fileBytes,
   }) async {
     final result = await _repository.createContent(
       groupId: groupId,
@@ -82,6 +83,7 @@ class ContentCubit extends Cubit<ContentState> {
       storagePath: storagePath,
       mimeType: mimeType,
       fileSize: fileSize,
+      fileBytes: fileBytes,
     );
 
     switch (result) {

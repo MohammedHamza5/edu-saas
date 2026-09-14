@@ -109,6 +109,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
               storagePath,
               mimeType,
               fileSize,
+              fileBytes,
             }) {
               return context.read<ContentCubit>().createContent(
                 groupId: _selectedGroupId!,
@@ -120,6 +121,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                 storagePath: storagePath,
                 mimeType: mimeType,
                 fileSize: fileSize,
+                fileBytes: fileBytes,
               );
             },
       ),
@@ -152,6 +154,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
               storagePath,
               mimeType,
               fileSize,
+              fileBytes,
             }) {
               return context.read<ContentCubit>().updateContent(
                 contentId: content.id,
@@ -294,18 +297,17 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.s16,
           ),
-          child: BlocConsumer<ContentCubit, ContentState>(
-            listener: (context, state) {
-              if (state is ContentError) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(state.message),
-                    backgroundColor: AppColors.error,
-                  ),
-                );
+          child: Builder(
+            builder: (context) {
+              GroupsCubit? groupsCubit;
+              try {
+                groupsCubit = context.read<GroupsCubit>();
+              } catch (_) {
+                groupsCubit = null;
               }
-            },
-            builder: (context, state) {
+
+              Widget bodyContent = BlocBuilder<ContentCubit, ContentState>(
+                builder: (context, state) {
               if (state is ContentLoading) {
                 return RefreshIndicator(
                   onRefresh: () async => _loadContent(),
@@ -693,12 +695,78 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                 );
               }
 
-              return const SizedBox.shrink();
+              return RefreshIndicator(
+                onRefresh: () async {
+                  await context.read<GroupsCubit>().loadGroups();
+                  _loadContent();
+                },
+                child: CustomScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: AppSpacing.s12),
+                        child: TeacherGroupFilterBar(
+                          selectedGroupId: _selectedGroupId,
+                          onGroupChanged: _onGroupChanged,
+                          onRefresh: _loadContent,
+                        ),
+                      ),
+                    ),
+                    const SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.only(top: AppSpacing.s16),
+                        child: AppLoadingView.cardsGrid(count: 4, columns: 2),
+                      ),
+                    ),
+                  ],
+                ),
+              );
             },
-          ),
+          );
+
+            if (groupsCubit != null) {
+              bodyContent = BlocListener<GroupsCubit, GroupsState>(
+                bloc: groupsCubit,
+                listener: (context, groupsState) {
+                  if (groupsState is GroupsLoaded && groupsState.groups.isNotEmpty) {
+                    if (_selectedGroupId == null ||
+                        !groupsState.groups.any((g) => g.id == _selectedGroupId)) {
+                      final targetGroup = (widget.groupId != null &&
+                              groupsState.groups.any((g) => g.id == widget.groupId))
+                          ? groupsState.groups.firstWhere((g) => g.id == widget.groupId)
+                          : groupsState.groups.first;
+                      TeacherGroupFilterBar.lastSelectedGroupId = targetGroup.id;
+                      setState(() {
+                        _selectedGroupId = targetGroup.id;
+                        _selectedGroupName = targetGroup.name;
+                      });
+                      _loadContent();
+                    }
+                  }
+                },
+                child: bodyContent,
+              );
+            }
+
+            return BlocListener<ContentCubit, ContentState>(
+              listener: (context, state) {
+                if (state is ContentError) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(state.message),
+                      backgroundColor: AppColors.error,
+                    ),
+                  );
+                }
+              },
+              child: bodyContent,
+            );
+          },
         ),
       ),
-    );
+    ),
+  );
   }
 
   Widget _buildStatMiniCard({

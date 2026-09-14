@@ -56,6 +56,7 @@ class _FakeContentRepository implements ContentRepository {
     String? storagePath,
     String? mimeType,
     int? fileSize,
+    List<int>? fileBytes,
   }) async {
     if (shouldFail) {
       return const FailureResult(ServerFailure('Failed to create content'));

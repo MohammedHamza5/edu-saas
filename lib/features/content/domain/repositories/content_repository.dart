@@ -23,6 +23,7 @@ abstract class ContentRepository {
     String? storagePath,
     String? mimeType,
     int? fileSize,
+    List<int>? fileBytes,
   });
 
   /// Updates an existing content item's metadata

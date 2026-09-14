@@ -49,7 +49,7 @@ class TeacherGroupFilterBar extends StatelessWidget {
     return BlocBuilder<GroupsCubit, GroupsState>(
       bloc: cubit,
       builder: (context, state) {
-        if (state is GroupsLoading && selectedGroupId == null) {
+        if ((state is GroupsLoading || state is GroupsInitial) && selectedGroupId == null) {
           return Container(
             height: 52,
             margin: const EdgeInsets.only(bottom: AppSpacing.s16),

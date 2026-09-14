@@ -1308,5 +1308,8 @@
   "settingsSavedSuccess": "تم حفظ وتحديث الإعدادات بنجاح",
   "settingsServiceCardTitle": "إعدادات المنصة والأكاديمية",
   "settingsServiceCardDesc": "بيانات الأكاديمية، التواصل، ولغة المنصة",
-  "videoStreamingNotice": "ملفات الفيديو يتم رفعها وبثها تلقائياً عبر شبكة Bunny Stream فائقة السرعة فور إنشاء العنصر عبر زر 'رفع فيديو'."
+  "videoStreamingNotice": "ملفات الفيديو يتم رفعها وبثها تلقائياً عبر شبكة Bunny Stream فائقة السرعة فور إنشاء العنصر عبر زر 'رفع فيديو'.",
+  "uploadingFileKeepPageOpen": "جاري رفع الملف إلى السحابة...",
+  "doNotClosePageWarning": "برجاء إبقاء هذه الصفحة مفتوحة حتى اكتمال الرفع بنجاح.",
+  "videoUploadDoNotCloseWarning": "جاري رفع وتشفير الفيديو سحابياً... برجاء إبقاء هذه الصفحة مفتوحة حتى اكتمال الرفع إلى 100%."
 }

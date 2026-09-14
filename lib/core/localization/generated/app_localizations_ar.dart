@@ -3999,4 +3999,15 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get videoStreamingNotice =>
       'ملفات الفيديو يتم رفعها وبثها تلقائياً عبر شبكة Bunny Stream فائقة السرعة فور إنشاء العنصر عبر زر \'رفع فيديو\'.';
+
+  @override
+  String get uploadingFileKeepPageOpen => 'جاري رفع الملف إلى السحابة...';
+
+  @override
+  String get doNotClosePageWarning =>
+      'برجاء إبقاء هذه الصفحة مفتوحة حتى اكتمال الرفع بنجاح.';
+
+  @override
+  String get videoUploadDoNotCloseWarning =>
+      'جاري رفع وتشفير الفيديو سحابياً... برجاء إبقاء هذه الصفحة مفتوحة حتى اكتمال الرفع إلى 100%.';
 }

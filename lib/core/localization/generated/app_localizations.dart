@@ -7236,6 +7236,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Video files will be uploaded and streamed via high-speed Bunny Stream CDN after creating the item using the \'Upload Video\' action.'**
   String get videoStreamingNotice;
+
+  /// Notice while uploading file
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading file to cloud storage...'**
+  String get uploadingFileKeepPageOpen;
+
+  /// Warning not to close page during file upload
+  ///
+  /// In en, this message translates to:
+  /// **'Please keep this page open until the upload is completely finished.'**
+  String get doNotClosePageWarning;
+
+  /// Warning not to close page during video upload
+  ///
+  /// In en, this message translates to:
+  /// **'Video is being uploaded and encrypted on the CDN. Please stay on this page until upload reaches 100%.'**
+  String get videoUploadDoNotCloseWarning;
 }
 
 class _AppLocalizationsDelegate

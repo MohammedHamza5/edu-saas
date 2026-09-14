@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/network/supabase_service.dart';
 import '../models/content_model.dart';
@@ -22,6 +23,7 @@ abstract interface class ContentRemoteDataSource {
     String? storagePath,
     String? mimeType,
     int? fileSize,
+    List<int>? fileBytes,
   });
 
   /// Updates content metadata
@@ -98,6 +100,7 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     String? storagePath,
     String? mimeType,
     int? fileSize,
+    List<int>? fileBytes,
   }) async {
     final currentUserId = _safeClient.auth.currentUser?.id;
     if (currentUserId == null) {
@@ -128,6 +131,7 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
         storagePath: storagePath,
         mimeType: mimeType,
         fileSize: fileSize,
+        fileBytes: fileBytes,
         tenantId: resolvedTenantId,
       );
     }
@@ -143,6 +147,7 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
       storagePath: storagePath,
       mimeType: mimeType,
       fileSize: fileSize,
+      fileBytes: fileBytes,
       tenantId: tenantId,
     );
   }
@@ -158,6 +163,7 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     String? storagePath,
     String? mimeType,
     int? fileSize,
+    List<int>? fileBytes,
     required String tenantId,
   }) async {
 
@@ -202,13 +208,22 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
 
     FileAttachmentModel? attachedFile;
     if (storagePath != null && fileName != null && mimeType != null) {
+      // ⚡ Actually upload the binary file to Supabase Storage 'group-content' bucket
+      if (fileBytes != null && fileBytes.isNotEmpty) {
+        await _safeClient.storage.from('group-content').uploadBinary(
+          storagePath,
+          Uint8List.fromList(fileBytes),
+          fileOptions: FileOptions(contentType: mimeType, upsert: true),
+        );
+      }
+
       final filePayload = {
         'tenant_id': tenantId,
         'content_id': contentId,
         'storage_path': storagePath,
         'file_name': fileName,
         'mime_type': mimeType,
-        'file_size': fileSize ?? 0,
+        'file_size': fileSize ?? (fileBytes?.length ?? 0),
         'created_at': now,
       };
 

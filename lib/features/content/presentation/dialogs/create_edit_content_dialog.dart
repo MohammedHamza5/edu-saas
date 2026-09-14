@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
@@ -20,6 +21,7 @@ class CreateEditContentDialog extends StatefulWidget {
     String? storagePath,
     String? mimeType,
     int? fileSize,
+    List<int>? fileBytes,
   }) onSave;
 
   const CreateEditContentDialog({
@@ -45,6 +47,7 @@ class _CreateEditContentDialogState extends State<CreateEditContentDialog> {
   bool _isLoading = false;
   bool _hasAttachment = false;
   int? _pickedFileSize;
+  Uint8List? _pickedFileBytes;
 
   @override
   void initState() {
@@ -78,6 +81,7 @@ class _CreateEditContentDialogState extends State<CreateEditContentDialog> {
                 ? FileType.image
                 : FileType.any,
         allowedExtensions: _selectedType == ContentType.pdf ? ['pdf'] : null,
+        withData: true,
       );
 
       if (result != null && result.files.isNotEmpty) {
@@ -86,6 +90,7 @@ class _CreateEditContentDialogState extends State<CreateEditContentDialog> {
           _hasAttachment = true;
           _fileNameController.text = file.name;
           _pickedFileSize = file.size;
+          _pickedFileBytes = file.bytes;
           if (_titleController.text.trim().isEmpty) {
             final cleanName = file.name
                 .replaceAll(RegExp(r'\.[a-zA-Z0-9]+$'), '')
@@ -137,6 +142,7 @@ class _CreateEditContentDialogState extends State<CreateEditContentDialog> {
       storagePath: storagePath,
       mimeType: mimeType,
       fileSize: fileSize,
+      fileBytes: _pickedFileBytes,
     );
 
     if (mounted) {
@@ -152,7 +158,9 @@ class _CreateEditContentDialogState extends State<CreateEditContentDialog> {
     final theme = Theme.of(context);
     final isEdit = widget.initialContent != null;
 
-    return Dialog(
+    return PopScope(
+      canPop: !_isLoading,
+      child: Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
       ),
@@ -203,7 +211,7 @@ class _CreateEditContentDialogState extends State<CreateEditContentDialog> {
                     ),
                     IconButton(
                       icon: const Icon(Icons.close_rounded),
-                      onPressed: () => Navigator.of(context).pop(false),
+                      onPressed: _isLoading ? null : () => Navigator.of(context).pop(false),
                     ),
                   ],
                 ),
@@ -416,6 +424,58 @@ class _CreateEditContentDialogState extends State<CreateEditContentDialog> {
 
                 const SizedBox(height: AppSpacing.s24),
 
+                if (_isLoading) ...[
+                  Container(
+                    padding: const EdgeInsets.all(AppSpacing.s12),
+                    decoration: BoxDecoration(
+                      color: AppColors.warning.withAlpha(20),
+                      borderRadius:
+                          BorderRadius.circular(AppSpacing.radiusSmall),
+                      border: Border.all(color: AppColors.warning.withAlpha(80)),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.warning_amber_rounded,
+                            size: 20, color: AppColors.warning),
+                        const SizedBox(width: AppSpacing.s10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                context.l10n.uploadingFileKeepPageOpen,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                context.l10n.doNotClosePageWarning,
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: AppColors.textSecondary,
+                                  height: 1.4,
+                                ),
+                              ),
+                              const SizedBox(height: AppSpacing.s8),
+                              const LinearProgressIndicator(
+                                minHeight: 4,
+                                backgroundColor: AppColors.surfaceVariant,
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(AppColors.primary),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.s16),
+                ],
+
                 // Action Buttons
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -443,6 +503,7 @@ class _CreateEditContentDialogState extends State<CreateEditContentDialog> {
         ),
       ),
     ),
-  );
+  ),
+);
   }
 }

@@ -2978,6 +2978,12 @@
   "settingsServiceCardDesc": "Academy profile, WhatsApp support, and language",
   "@settingsServiceCardDesc": { "description": "Settings dashboard card description" },
   "videoStreamingNotice": "Video files will be uploaded and streamed via high-speed Bunny Stream CDN after creating the item using the 'Upload Video' action.",
-  "@videoStreamingNotice": { "description": "Notice in create content dialog for video items" }
+  "@videoStreamingNotice": { "description": "Notice in create content dialog for video items" },
+  "uploadingFileKeepPageOpen": "Uploading file to cloud storage...",
+  "@uploadingFileKeepPageOpen": { "description": "Notice while uploading file" },
+  "doNotClosePageWarning": "Please keep this page open until the upload is completely finished.",
+  "@doNotClosePageWarning": { "description": "Warning not to close page during file upload" },
+  "videoUploadDoNotCloseWarning": "Video is being uploaded and encrypted on the CDN. Please stay on this page until upload reaches 100%.",
+  "@videoUploadDoNotCloseWarning": { "description": "Warning not to close page during video upload" }
 }
 

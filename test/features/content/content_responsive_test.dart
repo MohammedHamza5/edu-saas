@@ -43,6 +43,7 @@ class _FakeContentRepository implements ContentRepository {
     String? storagePath,
     String? mimeType,
     int? fileSize,
+    List<int>? fileBytes,
   }) async {
     final entity = ContentEntity(
       id: 'c-new',

@@ -216,48 +216,84 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
     return BlocProvider.value(
       value: _attendanceCubit,
       child: Scaffold(
-        body: BlocConsumer<AttendanceCubit, AttendanceState>(
-          listener: (context, state) {
-            if (state is TeacherAttendanceLoaded && state.saveSuccess) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.message ?? context.l10n.attendanceSavedSuccess),
-                  backgroundColor: AppColors.success,
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
-            } else if (state is TeacherAttendanceLoaded &&
-                state.message != null &&
-                !state.saveSuccess) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.message!),
-                  backgroundColor: AppColors.error,
-                  behavior: SnackBarBehavior.floating,
-                ),
+        body: Builder(
+          builder: (context) {
+            GroupsCubit? groupsCubit;
+            try {
+              groupsCubit = context.read<GroupsCubit>();
+            } catch (_) {
+              groupsCubit = null;
+            }
+
+            Widget bodyContent = BlocConsumer<AttendanceCubit, AttendanceState>(
+              listener: (context, state) {
+                if (state is TeacherAttendanceLoaded && state.saveSuccess) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(state.message ?? context.l10n.attendanceSavedSuccess),
+                      backgroundColor: AppColors.success,
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                } else if (state is TeacherAttendanceLoaded &&
+                    state.message != null &&
+                    !state.saveSuccess) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(state.message!),
+                      backgroundColor: AppColors.error,
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                }
+              },
+              builder: (context, attendanceState) {
+                return Center(
+                  child: ResponsiveContainer(
+                    maxWidth: ResponsiveBreakpoints.maxContentWidth,
+                    child: Column(
+                      children: [
+                        // Modern Web SaaS Hero Header (Zero AppBar!)
+                        _buildHeroHeader(context),
+
+                        // Top Filter Header: Group & Lecture Selector
+                        _buildHeaderBar(context, dateStr),
+
+                        // Main Content
+                        Expanded(
+                          child: _buildAttendanceContent(context, attendanceState),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+
+            if (groupsCubit != null) {
+              bodyContent = BlocListener<GroupsCubit, GroupsState>(
+                bloc: groupsCubit,
+                listener: (context, groupsState) {
+                  if (groupsState is GroupsLoaded && groupsState.groups.isNotEmpty) {
+                    if (_selectedGroupId == null ||
+                        !groupsState.groups.any((g) => g.id == _selectedGroupId)) {
+                      final targetGroup = (widget.initialGroupId != null &&
+                              groupsState.groups.any((g) => g.id == widget.initialGroupId))
+                          ? groupsState.groups.firstWhere((g) => g.id == widget.initialGroupId)
+                          : groupsState.groups.first;
+                      TeacherGroupFilterBar.lastSelectedGroupId = targetGroup.id;
+                      setState(() {
+                        _selectedGroupId = targetGroup.id;
+                      });
+                      _loadAttendance();
+                    }
+                  }
+                },
+                child: bodyContent,
               );
             }
-          },
-          builder: (context, attendanceState) {
-            return Center(
-              child: ResponsiveContainer(
-                maxWidth: ResponsiveBreakpoints.maxContentWidth,
-                child: Column(
-                  children: [
-                    // Modern Web SaaS Hero Header (Zero AppBar!)
-                    _buildHeroHeader(context),
 
-                    // Top Filter Header: Group & Lecture Selector
-                    _buildHeaderBar(context, dateStr),
-
-                    // Main Content
-                    Expanded(
-                      child: _buildAttendanceContent(context, attendanceState),
-                    ),
-                  ],
-                ),
-              ),
-            );
+            return bodyContent;
           },
         ),
       ),
@@ -650,6 +686,10 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
     AttendanceState attendanceState,
   ) {
     if (_selectedGroupId == null) {
+      final groupsState = context.read<GroupsCubit>().state;
+      if (groupsState is GroupsLoading || groupsState is GroupsInitial) {
+        return _buildSkeletonLoading();
+      }
       return AppEmptyView(
         message: context.l10n.selectGroupToViewAttendanceMessage,
         icon: Icons.groups_rounded,

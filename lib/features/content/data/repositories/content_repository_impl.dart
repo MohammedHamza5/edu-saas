@@ -41,6 +41,7 @@ class ContentRepositoryImpl implements ContentRepository {
     String? storagePath,
     String? mimeType,
     int? fileSize,
+    List<int>? fileBytes,
   }) async {
     try {
       final model = await _remoteDataSource.createContent(
@@ -54,6 +55,7 @@ class ContentRepositoryImpl implements ContentRepository {
         storagePath: storagePath,
         mimeType: mimeType,
         fileSize: fileSize,
+        fileBytes: fileBytes,
       );
       return Success(model);
     } catch (e) {

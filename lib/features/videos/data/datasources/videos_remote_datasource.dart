@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -268,13 +269,15 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
       }
 
       // 2. Direct Binary Upload to Bunny Stream
+      final payloadBytes = videoBytes is Uint8List ? videoBytes : Uint8List.fromList(videoBytes);
       await _dio.put<void>(
         'https://video.bunnycdn.com/library/$libraryId/videos/$videoGuid',
-        data: Stream.fromIterable([videoBytes]),
+        data: payloadBytes,
         options: Options(
           headers: {
             'AccessKey': apiKey,
             'Content-Type': 'application/octet-stream',
+            'Content-Length': payloadBytes.length.toString(),
           },
         ),
         onSendProgress: onProgress,

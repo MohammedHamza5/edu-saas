@@ -4030,4 +4030,15 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get videoStreamingNotice =>
       'Video files will be uploaded and streamed via high-speed Bunny Stream CDN after creating the item using the \'Upload Video\' action.';
+
+  @override
+  String get uploadingFileKeepPageOpen => 'Uploading file to cloud storage...';
+
+  @override
+  String get doNotClosePageWarning =>
+      'Please keep this page open until the upload is completely finished.';
+
+  @override
+  String get videoUploadDoNotCloseWarning =>
+      'Video is being uploaded and encrypted on the CDN. Please stay on this page until upload reaches 100%.';
 }

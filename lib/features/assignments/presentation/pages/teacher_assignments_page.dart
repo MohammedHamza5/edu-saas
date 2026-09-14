@@ -513,13 +513,22 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
         child: ResponsiveContainer(
           maxWidth: ResponsiveBreakpoints.maxContentWidth,
           padding: const EdgeInsets.all(AppSpacing.s16),
-          child: BlocBuilder<AssignmentsCubit, AssignmentsState>(
-            builder: (context, state) {
-              final groupFilterBar = TeacherGroupFilterBar(
-                selectedGroupId: _selectedGroupId,
-                onGroupChanged: _onGroupChanged,
-                onRefresh: _loadAssignments,
-              );
+          child: Builder(
+            builder: (context) {
+              GroupsCubit? groupsCubit;
+              try {
+                groupsCubit = context.read<GroupsCubit>();
+              } catch (_) {
+                groupsCubit = null;
+              }
+
+              Widget bodyContent = BlocBuilder<AssignmentsCubit, AssignmentsState>(
+                builder: (context, state) {
+                  final groupFilterBar = TeacherGroupFilterBar(
+                    selectedGroupId: _selectedGroupId,
+                    onGroupChanged: _onGroupChanged,
+                    onRefresh: _loadAssignments,
+                  );
 
               if (state is AssignmentsLoading) {
                 return Column(
@@ -611,11 +620,50 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
                 );
               }
 
-              return const SizedBox.shrink();
-            },
-          ),
+                return Column(
+                  children: [
+                    groupFilterBar,
+                    const SizedBox(height: AppSpacing.s16),
+                    const Expanded(
+                      child: AppLoadingView.cardsGrid(
+                        count: 4,
+                        columns: 2,
+                      ),
+                    ),
+                  ],
+                );
+              },
+            );
+
+            if (groupsCubit != null) {
+              bodyContent = BlocListener<GroupsCubit, GroupsState>(
+                bloc: groupsCubit,
+                listener: (context, groupsState) {
+                  if (groupsState is GroupsLoaded && groupsState.groups.isNotEmpty) {
+                    if (_selectedGroupId == null ||
+                        !groupsState.groups.any((g) => g.id == _selectedGroupId)) {
+                      final targetGroup = (widget.groupId != null &&
+                              groupsState.groups.any((g) => g.id == widget.groupId))
+                          ? groupsState.groups.firstWhere((g) => g.id == widget.groupId)
+                          : groupsState.groups.first;
+                      TeacherGroupFilterBar.lastSelectedGroupId = targetGroup.id;
+                      setState(() {
+                        _selectedGroupId = targetGroup.id;
+                        _selectedGroupName = targetGroup.name;
+                      });
+                      _loadAssignments();
+                    }
+                  }
+                },
+                child: bodyContent,
+              );
+            }
+
+            return bodyContent;
+          },
         ),
       ),
-    );
+    ),
+  );
   }
 }

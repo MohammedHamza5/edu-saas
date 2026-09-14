@@ -157,7 +157,9 @@ class _VideoUploadDialogState extends State<VideoUploadDialog> {
         final uploadProgress = state is VideoUploading ? state.progress : 0.0;
         final uploadPercentage = state is VideoUploading ? state.percentage : 0;
 
-        return Dialog(
+        return PopScope(
+          canPop: !isUploading,
+          child: Dialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
           ),
@@ -343,6 +345,35 @@ class _VideoUploadDialogState extends State<VideoUploadDialog> {
 
                     // Live Upload Progress Bar
                     if (isUploading) ...[
+                      Container(
+                        padding: const EdgeInsets.all(AppSpacing.s12),
+                        decoration: BoxDecoration(
+                          color: AppColors.warning.withAlpha(20),
+                          borderRadius:
+                              BorderRadius.circular(AppSpacing.radiusSmall),
+                          border: Border.all(color: AppColors.warning.withAlpha(80)),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(Icons.warning_amber_rounded,
+                                size: 20, color: AppColors.warning),
+                            const SizedBox(width: AppSpacing.s10),
+                            Expanded(
+                              child: Text(
+                                context.l10n.videoUploadDoNotCloseWarning,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textPrimary,
+                                  height: 1.4,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.s16),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -357,9 +388,9 @@ class _VideoUploadDialogState extends State<VideoUploadDialog> {
                             ],
                           ),
                           Text(
-                            '$uploadPercentage%',
+                            '$uploadPercentage%${state.totalBytes > 0 ? " (${(state.sentBytes / (1024 * 1024)).toStringAsFixed(1)} / ${(state.totalBytes / (1024 * 1024)).toStringAsFixed(1)} MB)" : ""}',
                             style: const TextStyle(
-                              fontSize: 13,
+                              fontSize: 12,
                               fontWeight: FontWeight.bold,
                               color: AppColors.primary,
                             ),
@@ -405,8 +436,9 @@ class _VideoUploadDialogState extends State<VideoUploadDialog> {
             ),
           ),
         ),
-      );
-      },
+      ),
     );
+  },
+);
   }
 }
