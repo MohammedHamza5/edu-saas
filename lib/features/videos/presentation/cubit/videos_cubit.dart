@@ -45,6 +45,15 @@ class VideosCubit extends Cubit<VideosState> {
 
     final video = videoResult.dataOrNull!;
 
+    // If video has not been uploaded yet or has no provider video ID, emit loaded with null playbackUrl
+    if (video.providerVideoId == null || video.providerVideoId!.isEmpty) {
+      emit(VideosLoaded(
+        currentVideo: video,
+        playbackUrl: null,
+      ));
+      return;
+    }
+
     // 2. Fetch secure signed playback URL
     final urlResult = await _repository.getPlaybackUrl(videoId);
     if (urlResult.isFailure) {

@@ -112,68 +112,14 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
           }
 
           if (state is VideosError) {
-            final authState = context.read<AuthCubit>().state;
-            final isTeacher =
-                authState is AuthAuthenticated && authState.user.isTeacher;
-
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.s24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.video_camera_back_outlined,
-                      size: 64,
-                      color: AppColors.textMuted,
-                    ),
-                    const SizedBox(height: AppSpacing.s16),
-                    Text(
-                      state.message,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.s20),
-                    if (isTeacher) ...[
-                      ElevatedButton.icon(
-                        icon: const Icon(Icons.cloud_upload_rounded),
-                        label: Text(context.l10n.uploadVideoAction),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.s20,
-                            vertical: AppSpacing.s12,
-                          ),
-                        ),
-                        onPressed: () {
-                          VideoUploadDialog.show(
-                            context,
-                            contentId: widget.videoId,
-                            onUploadSuccess: () {
-                              _loadVideo();
-                            },
-                          );
-                        },
-                      ),
-                      const SizedBox(height: AppSpacing.s12),
-                    ],
-                    OutlinedButton.icon(
-                      icon: const Icon(Icons.refresh_rounded),
-                      label: Text(context.l10n.retryAction),
-                      onPressed: _loadVideo,
-                    ),
-                  ],
-                ),
-              ),
-            );
+            return _buildErrorView(context, state);
           }
 
-          if (state is VideosLoaded && state.playbackUrl != null) {
+          if (state is VideosLoaded) {
+            if (state.playbackUrl == null || state.playbackUrl!.isEmpty) {
+              return _buildPendingUploadView(context, state.currentVideo);
+            }
+
             final video = state.currentVideo;
             final playbackUrl = state.playbackUrl!;
             final progress = state.progress;
@@ -279,6 +225,241 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
 
           return const SizedBox.shrink();
         },
+      ),
+    );
+  }
+
+  Widget _buildPendingUploadView(BuildContext context, VideoEntity? video) {
+    final theme = Theme.of(context);
+    final authState = context.read<AuthCubit>().state;
+    final isTeacher = authState is AuthAuthenticated && authState.user.isTeacher;
+
+    return Center(
+      child: ResponsiveContainer(
+        maxWidth: ResponsiveBreakpoints.maxFormWidth,
+        padding: const EdgeInsets.all(AppSpacing.s24),
+        child: AppCard(
+          variant: AppCardVariant.elevated,
+          padding: const EdgeInsets.all(AppSpacing.s32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  color: (isTeacher ? AppColors.primary : AppColors.warning).withAlpha(20),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: (isTeacher ? AppColors.primary : AppColors.warning).withAlpha(60),
+                    width: 1.5,
+                  ),
+                ),
+                child: Icon(
+                  isTeacher ? Icons.cloud_upload_outlined : Icons.hourglass_top_rounded,
+                  size: 36,
+                  color: isTeacher ? AppColors.primary : AppColors.warning,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.s20),
+              Text(
+                video?.title ?? context.l10n.defaultLessonTitle,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.s8),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.s12,
+                  vertical: AppSpacing.s4,
+                ),
+                decoration: BoxDecoration(
+                  color: (isTeacher ? AppColors.primary : AppColors.warning).withAlpha(15),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+                  border: Border.all(
+                    color: (isTeacher ? AppColors.primary : AppColors.warning).withAlpha(60),
+                  ),
+                ),
+                child: Text(
+                  isTeacher
+                      ? context.l10n.teacherVideoNotUploadedBadge
+                      : context.l10n.videoPendingUploadTitle,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: isTeacher ? AppColors.primary : AppColors.warning,
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.s16),
+              Text(
+                isTeacher
+                    ? context.l10n.teacherVideoNotUploadedDesc
+                    : context.l10n.studentVideoPendingUploadDesc,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: AppColors.textSecondary,
+                  height: 1.5,
+                ),
+              ),
+              if (video?.description != null && video!.description!.isNotEmpty) ...[
+                const SizedBox(height: AppSpacing.s16),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(AppSpacing.s12),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceVariant.withAlpha(40),
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                    border: Border.all(color: AppColors.border.withAlpha(50)),
+                  ),
+                  child: Text(
+                    video.description!,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: AppColors.textSecondary,
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+              ],
+              const SizedBox(height: AppSpacing.s24),
+              if (isTeacher) ...[
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.cloud_upload_rounded),
+                  label: Text(context.l10n.uploadVideoAction),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(200, 44),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.s24,
+                      vertical: AppSpacing.s12,
+                    ),
+                  ),
+                  onPressed: () {
+                    VideoUploadDialog.show(
+                      context,
+                      contentId: video?.contentId ?? widget.videoId,
+                      onUploadSuccess: _loadVideo,
+                    );
+                  },
+                ),
+                const SizedBox(height: AppSpacing.s12),
+              ],
+              Wrap(
+                spacing: AppSpacing.s12,
+                runSpacing: AppSpacing.s8,
+                alignment: WrapAlignment.center,
+                children: [
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.arrow_back_rounded, size: 18),
+                    label: Text(context.l10n.backToContentAction),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.refresh_rounded, size: 18),
+                    label: Text(context.l10n.retryAction),
+                    onPressed: _loadVideo,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorView(BuildContext context, VideosError state) {
+    final authState = context.read<AuthCubit>().state;
+    final isTeacher = authState is AuthAuthenticated && authState.user.isTeacher;
+
+    final isNotFoundOrCoerce = state.code == 'VIDEO_NOT_FOUND' ||
+        state.message.contains('Cannot coerce') ||
+        state.message.contains('not found');
+
+    final message = isNotFoundOrCoerce
+        ? (isTeacher
+            ? context.l10n.teacherVideoNotUploadedDesc
+            : context.l10n.videoNotFoundMessage)
+        : (state.code == 'VIDEO_NOT_READY'
+            ? context.l10n.videoPlaybackError
+            : state.message);
+
+    return Center(
+      child: ResponsiveContainer(
+        maxWidth: ResponsiveBreakpoints.maxFormWidth,
+        padding: const EdgeInsets.all(AppSpacing.s24),
+        child: AppCard(
+          variant: AppCardVariant.elevated,
+          padding: const EdgeInsets.all(AppSpacing.s24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.video_camera_back_outlined,
+                size: 56,
+                color: AppColors.textMuted,
+              ),
+              const SizedBox(height: AppSpacing.s16),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.s20),
+              if (isTeacher) ...[
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.cloud_upload_rounded),
+                  label: Text(context.l10n.uploadVideoAction),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.s20,
+                      vertical: AppSpacing.s12,
+                    ),
+                  ),
+                  onPressed: () {
+                    VideoUploadDialog.show(
+                      context,
+                      contentId: widget.videoId,
+                      onUploadSuccess: _loadVideo,
+                    );
+                  },
+                ),
+                const SizedBox(height: AppSpacing.s12),
+              ],
+              Wrap(
+                spacing: AppSpacing.s12,
+                runSpacing: AppSpacing.s8,
+                alignment: WrapAlignment.center,
+                children: [
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.arrow_back_rounded, size: 18),
+                    label: Text(context.l10n.backToContentAction),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.refresh_rounded, size: 18),
+                    label: Text(context.l10n.retryAction),
+                    onPressed: _loadVideo,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

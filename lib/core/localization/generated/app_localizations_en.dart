@@ -2676,6 +2676,30 @@ class AppLocalizationsEn extends AppLocalizations {
       'Video uploaded to Bunny Stream successfully and is processing!';
 
   @override
+  String get videoPendingUploadTitle => 'Lesson Under Preparation';
+
+  @override
+  String get studentVideoPendingUploadDesc =>
+      'The teacher is currently preparing and uploading the video for this lesson. Please check back later.';
+
+  @override
+  String get teacherVideoNotUploadedTitle => 'No Video Uploaded Yet';
+
+  @override
+  String get teacherVideoNotUploadedDesc =>
+      'Lesson created, but the video file has not been uploaded to Bunny Stream yet. You can upload it now so students can watch.';
+
+  @override
+  String get teacherVideoNotUploadedBadge => 'Pending Video Upload';
+
+  @override
+  String get backToContentAction => 'Back to Content';
+
+  @override
+  String get videoNotFoundMessage =>
+      'The requested educational lesson could not be found.';
+
+  @override
   String get uploadNewLessonVideo => 'Upload New Lesson Video';
 
   @override

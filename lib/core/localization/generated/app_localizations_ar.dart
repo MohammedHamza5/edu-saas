@@ -2662,6 +2662,29 @@ class AppLocalizationsAr extends AppLocalizations {
       'تم رفع الفيديو إلى Bunny Stream بنجاح وجاري معالجته سحابياً!';
 
   @override
+  String get videoPendingUploadTitle => 'الدرس قيد التجهيز';
+
+  @override
+  String get studentVideoPendingUploadDesc =>
+      'يقوم المعلم حالياً بتجهيز ورفع الفيديو الخاص بهذا الدرس. يرجى مراجعة الدرس لاحقاً.';
+
+  @override
+  String get teacherVideoNotUploadedTitle => 'لم يتم رفع ملف الفيديو بعد';
+
+  @override
+  String get teacherVideoNotUploadedDesc =>
+      'تم إنشاء عنوان الدرس ولكن لم يتم رفع ملف الفيديو إلى خادم البث بعد. يمكنك رفعه الآن لتمكين الطلاب من مشاهدته.';
+
+  @override
+  String get teacherVideoNotUploadedBadge => 'بانتظار رفع الفيديو';
+
+  @override
+  String get backToContentAction => 'العودة للمحتوى';
+
+  @override
+  String get videoNotFoundMessage => 'تعذر العثور على الدرس التعليمي المطلوب.';
+
+  @override
   String get uploadNewLessonVideo => 'رفع درس فيديو جديد';
 
   @override

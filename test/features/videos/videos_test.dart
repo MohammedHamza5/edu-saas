@@ -233,6 +233,26 @@ void main() {
       expect(state.progress?.progressSeconds, equals(320));
     });
 
+    test('loadVideoPlayback with un-uploaded video emits Loaded with null playbackUrl', () async {
+      mockRepo.singleVideoResponse = VideoEntity(
+        id: 'vid-pending',
+        contentId: 'c-pending',
+        title: 'درس قيد التجهيز',
+        providerVideoId: null,
+        duration: 0,
+        status: VideoStatus.uploading,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      await cubit.loadVideoPlayback(videoId: 'vid-pending', studentId: 'std-1');
+
+      expect(cubit.state, isA<VideosLoaded>());
+      final state = cubit.state as VideosLoaded;
+      expect(state.currentVideo?.id, equals('vid-pending'));
+      expect(state.playbackUrl, isNull);
+    });
+
     test('uploadVideo emits uploading progress and success states', () async {
       await cubit.uploadVideo(
         contentId: 'c-1',

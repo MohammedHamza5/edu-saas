@@ -4915,6 +4915,48 @@ abstract class AppLocalizations {
   /// **'Video uploaded to Bunny Stream successfully and is processing!'**
   String get videoUploadSuccessToast;
 
+  /// Title when video is pending upload
+  ///
+  /// In en, this message translates to:
+  /// **'Lesson Under Preparation'**
+  String get videoPendingUploadTitle;
+
+  /// Description for students when video is pending upload
+  ///
+  /// In en, this message translates to:
+  /// **'The teacher is currently preparing and uploading the video for this lesson. Please check back later.'**
+  String get studentVideoPendingUploadDesc;
+
+  /// Title for teacher when video is not uploaded
+  ///
+  /// In en, this message translates to:
+  /// **'No Video Uploaded Yet'**
+  String get teacherVideoNotUploadedTitle;
+
+  /// Description for teacher when video is not uploaded
+  ///
+  /// In en, this message translates to:
+  /// **'Lesson created, but the video file has not been uploaded to Bunny Stream yet. You can upload it now so students can watch.'**
+  String get teacherVideoNotUploadedDesc;
+
+  /// Badge for pending video upload
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Video Upload'**
+  String get teacherVideoNotUploadedBadge;
+
+  /// Button to go back to content library/feed
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Content'**
+  String get backToContentAction;
+
+  /// Error message when lesson video is not found
+  ///
+  /// In en, this message translates to:
+  /// **'The requested educational lesson could not be found.'**
+  String get videoNotFoundMessage;
+
   /// Title of video upload dialog
   ///
   /// In en, this message translates to:

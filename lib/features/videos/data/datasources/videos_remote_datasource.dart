@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/config/app_config.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/network/supabase_service.dart';
+import '../../domain/entities/video_entity.dart';
 import '../models/video_model.dart';
 import '../models/video_progress_model.dart';
 
@@ -85,17 +86,52 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
           .select('*, content(*)')
           .or('id.eq.$videoId,content_id.eq.$videoId')
           .limit(1)
-          .single();
+          .maybeSingle();
 
-      final model = VideoModel.fromJson(data);
-      if (model.providerVideoId != null) {
-        final playbackUrl = _generateSignedPlaybackUrl(model.providerVideoId!);
-        return model.copyWithPlaybackUrl(playbackUrl);
+      if (data != null) {
+        final model = VideoModel.fromJson(data);
+        if (model.providerVideoId != null && model.providerVideoId!.isNotEmpty) {
+          final playbackUrl = _generateSignedPlaybackUrl(model.providerVideoId!);
+          return model.copyWithPlaybackUrl(playbackUrl);
+        }
+        return model;
       }
-      return model;
+
+      // If no row exists in videos table, check if content row exists for this ID
+      final contentData = await _c
+          .from('content')
+          .select('*')
+          .eq('id', videoId)
+          .maybeSingle();
+
+      if (contentData != null) {
+        return VideoModel(
+          id: contentData['id'] as String,
+          contentId: contentData['id'] as String,
+          title: contentData['title'] as String?,
+          description: contentData['description'] as String?,
+          provider: 'bunny',
+          providerVideoId: null,
+          thumbnailUrl: null,
+          duration: 0,
+          status: VideoStatus.uploading,
+          createdAt: contentData['created_at'] != null
+              ? DateTime.tryParse(contentData['created_at'] as String) ?? DateTime.now()
+              : DateTime.now(),
+          updatedAt: contentData['updated_at'] != null
+              ? DateTime.tryParse(contentData['updated_at'] as String) ?? DateTime.now()
+              : DateTime.now(),
+        );
+      }
+
+      throw const ServerException(
+        'Video not found',
+        code: 'VIDEO_NOT_FOUND',
+      );
     } on PostgrestException catch (e) {
       throw ServerException(e.message, code: e.code);
     } catch (e) {
+      if (e is ServerException) rethrow;
       throw ServerException(e.toString());
     }
   }
