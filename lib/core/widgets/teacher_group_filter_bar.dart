@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../extensions/localized_context_extension.dart';
-import '../router/app_router.dart';
+import '../router/app_routes.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 import '../widgets/app_badge.dart';
@@ -102,7 +102,7 @@ class TeacherGroupFilterBar extends StatelessWidget {
                         context.l10n.createNewGroup,
                         style: const TextStyle(fontSize: 12),
                       ),
-                      onPressed: () => context.push(AppRouter.groupsList),
+                      onPressed: () => context.push(AppRoutes.groupsList),
                     ),
                   ],
                 ),

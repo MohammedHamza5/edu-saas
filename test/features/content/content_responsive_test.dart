@@ -22,6 +22,8 @@ class _FakeContentRepository implements ContentRepository {
   @override
   Future<Result<List<ContentEntity>>> getGroupContent({
     required String groupId,
+    int page = 1,
+    int pageSize = 20,
     ContentStatus? statusFilter,
   }) async {
     var list = items.where((i) => i.groupId == groupId).toList();
@@ -33,7 +35,7 @@ class _FakeContentRepository implements ContentRepository {
 
   @override
   Future<Result<ContentEntity>> createContent({
-    required String groupId,
+    String? groupId,
     required String title,
     String? description,
     required ContentType type,
@@ -44,6 +46,8 @@ class _FakeContentRepository implements ContentRepository {
     String? mimeType,
     int? fileSize,
     List<int>? fileBytes,
+    String? associatedExamId,
+    String? prerequisiteExamId,
   }) async {
     final entity = ContentEntity(
       id: 'c-new',
@@ -56,6 +60,8 @@ class _FakeContentRepository implements ContentRepository {
       sortOrder: sortOrder ?? 0,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
+      associatedExamId: associatedExamId,
+      prerequisiteExamId: prerequisiteExamId,
     );
     return Success(entity);
   }
@@ -68,18 +74,24 @@ class _FakeContentRepository implements ContentRepository {
     ContentType? type,
     ContentStatus? status,
     int? sortOrder,
+    String? fileName,
+    String? storagePath,
+    String? mimeType,
+    int? fileSize,
+    List<int>? fileBytes,
+    String? associatedExamId,
+    String? prerequisiteExamId,
   }) async {
     final item = items.firstWhere((i) => i.id == contentId);
     return Success(item);
   }
 
   @override
-  Future<Result<ContentEntity>> updateContentStatus({
+  Future<Result<void>> updateContentStatus({
     required String contentId,
     required ContentStatus status,
   }) async {
-    final item = items.firstWhere((i) => i.id == contentId);
-    return Success(item.copyWith(status: status));
+    return const Success(null);
   }
 
   @override
@@ -100,6 +112,30 @@ class _FakeContentRepository implements ContentRepository {
     int expiresInSeconds = 3600,
   }) async {
     return const Success('https://storage.supabase.co/signed/file.pdf');
+  }
+
+  @override
+  Future<Result<List<ContentEntity>>> getCentralVideoBank({
+    int page = 0,
+    int pageSize = 100,
+  }) async {
+    return Success(items);
+  }
+
+  @override
+  Future<Result<void>> assignContentToGroups({
+    required String contentId,
+    required List<String> groupIds,
+  }) async {
+    return const Success(null);
+  }
+
+  @override
+  Future<Result<void>> linkLessonExam({
+    required String contentId,
+    required String examId,
+  }) async {
+    return const Success(null);
   }
 }
 
@@ -156,6 +192,9 @@ void main() {
   }) {
     return MaterialApp(
       theme: AppTheme.lightTheme,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('ar'),
       home: BlocProvider<ContentCubit>(
         create: (_) => ContentCubit(repository: repo),
         child: child,
@@ -283,6 +322,9 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             theme: AppTheme.lightTheme,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('ar'),
             home: Scaffold(
               body: MaterialViewerSheet(
                 content: sampleItems[0],

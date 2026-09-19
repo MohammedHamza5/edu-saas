@@ -238,6 +238,8 @@ class AssignmentEntity extends Equatable {
   bool get isOverdue => dueAt != null && DateTime.now().isAfter(dueAt!);
   bool get hasSubmitted => mySubmission != null;
   bool get isReviewed => mySubmission?.isReviewed ?? false;
+  String? get description => instructions;
+  DateTime? get dueDate => dueAt;
 
   AssignmentEntity copyWith({
     String? id,

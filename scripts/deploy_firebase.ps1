@@ -26,8 +26,20 @@ if (-not $SkipBuild) {
 Write-Host "`n[2/2] Deploying to Firebase Hosting (site: antounios)..." -ForegroundColor Yellow
 $env:NODE_OPTIONS = "--dns-result-order=ipv4first"
 firebase deploy --only hosting:antounios
+$deploySuccess = ($LASTEXITCODE -eq 0)
 
-if ($LASTEXITCODE -eq 0) {
+# Check if deploy actually completed despite CLI analytics telemetry timeout
+if (-not $deploySuccess) {
+    $debugLog = Join-Path $PSScriptRoot "..\firebase-debug.log"
+    if (Test-Path $debugLog) {
+        $tail = Get-Content $debugLog -Tail 40 -Raw
+        if ($tail -match "release complete" -or $tail -match "Deploy complete") {
+            $deploySuccess = $true
+        }
+    }
+}
+
+if ($deploySuccess) {
     Write-Host "`n=================================================================" -ForegroundColor Green
     Write-Host "  [SUCCESS] Deployment complete!" -ForegroundColor Green
     Write-Host "  Live URL: https://antounios.web.app" -ForegroundColor Cyan

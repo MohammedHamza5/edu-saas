@@ -51,7 +51,7 @@ class _NotificationTileState extends State<NotificationTile> {
           curve: Curves.easeOutCubic,
           transform: Matrix4.translationValues(0, _isHovered ? -1.5 : 0.0, 0),
           child: Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.s8),
+            padding: const EdgeInsets.only(bottom: AppSpacing.s12),
             child: AppCard(
               onTap: widget.onTap,
               padding: EdgeInsets.zero,
@@ -93,14 +93,15 @@ class _NotificationTileState extends State<NotificationTile> {
 
                     // Main Content
                     Padding(
-                      padding: const EdgeInsets.all(AppSpacing.s12),
+                      padding: const EdgeInsets.all(AppSpacing.s16),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // Type Icon with subtle gradient glow
                           AnimatedContainer(
                             duration: const Duration(milliseconds: 180),
-                            padding: const EdgeInsets.all(AppSpacing.s8),
+                            width: 46,
+                            height: 46,
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 begin: Alignment.topLeft,
@@ -124,7 +125,9 @@ class _NotificationTileState extends State<NotificationTile> {
                                 width: 1,
                               ),
                             ),
-                            child: Icon(type.icon, size: 20, color: type.color),
+                            child: Center(
+                              child: Icon(type.icon, size: 22, color: type.color),
+                            ),
                           ),
                           const SizedBox(width: AppSpacing.s12),
 

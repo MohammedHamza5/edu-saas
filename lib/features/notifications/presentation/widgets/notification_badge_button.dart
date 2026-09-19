@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
-import '../../../../core/router/app_router.dart';
+import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../cubit/notifications_cubit.dart';
 import '../cubit/notifications_state.dart';
@@ -30,7 +30,7 @@ class NotificationBadgeButton extends StatelessWidget {
                 onPressed:
                     onPressed ??
                     () {
-                      context.push(AppRouter.notificationsCenter);
+                      context.push(AppRoutes.notificationsCenter);
                     },
               ),
               if (unreadCount > 0)

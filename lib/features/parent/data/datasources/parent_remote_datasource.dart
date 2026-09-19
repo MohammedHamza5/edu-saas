@@ -106,7 +106,7 @@ class ParentRemoteDataSourceImpl implements ParentRemoteDataSource {
           exams(
             id,
             max_score,
-            content(title)
+            content:content!exams_content_id_fkey(title)
           )
         ''')
         .eq('student_id', studentId)

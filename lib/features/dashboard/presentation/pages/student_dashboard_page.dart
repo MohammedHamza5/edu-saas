@@ -1,28 +1,31 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/config/tenant_registry.dart';
+import '../../../../core/di/injection_container.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/extensions/responsive_context_extension.dart';
-import '../../../../core/router/app_router.dart';
+import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/app_typography.dart';
 import '../../../../core/theme/responsive_breakpoints.dart';
 import '../../../../core/theme/tenant_theme_cubit.dart';
+import '../../../../core/utils/group_slug_resolver.dart';
 import '../../../../core/widgets/academic_hero_banner.dart';
 import '../../../../core/widgets/app_card.dart';
+import '../../../../core/widgets/app_loading_view.dart';
 import '../../../../core/widgets/responsive_container.dart';
 import '../../../../core/widgets/responsive_grid.dart';
 import '../../../auth/presentation/cubit/auth_cubit.dart';
 import '../../../auth/presentation/cubit/auth_state.dart';
 import '../../../notifications/presentation/cubit/notifications_cubit.dart';
-import '../../../notifications/presentation/cubit/notifications_state.dart';
 import '../../../notifications/presentation/widgets/notification_badge_button.dart';
 import '../cubit/student_dashboard_cubit.dart';
 import '../cubit/student_dashboard_state.dart';
 import '../widgets/academic_performance_card.dart';
-import '../../../../core/widgets/app_loading_view.dart';
+import '../widgets/continue_learning_card.dart';
+import '../widgets/urgent_tasks_radar_card.dart';
 
 class StudentDashboardPage extends StatefulWidget {
   const StudentDashboardPage({super.key});
@@ -69,7 +72,7 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
             onPressed: () {
               Navigator.of(ctx).pop();
               context.read<AuthCubit>().logout();
-              context.go(AppRouter.login);
+              context.go(AppRoutes.login);
             },
             child: Text(context.l10n.logout),
           ),
@@ -78,16 +81,32 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
     );
   }
 
+  Future<void> _handleOpenContent(BuildContext context) async {
+    final result = await InjectionContainer.groupsRepository.getGroups();
+    if (!context.mounted) return;
+
+    final groups = result.dataOrNull ?? [];
+    if (!result.isSuccess || groups.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.studentNoGroupsAssigned),
+          backgroundColor: AppColors.info,
+        ),
+      );
+      return;
+    }
+
+    // Direct 1-tap navigation to the student's assigned group content
+    final g = groups.first;
+    final slug = GroupSlugResolver.toSlug(g.id, g.name);
+    context.go(
+      AppRoutes.studentGroupContent.replaceAll(':groupId', slug),
+      extra: g.name,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    NotificationsState? notifState;
-    try {
-      notifState = context.watch<NotificationsCubit>().state;
-    } catch (_) {}
-    final unreadNotifs = notifState is NotificationsLoaded
-        ? notifState.unreadCount
-        : 0;
-
     final branding = (() {
       try {
         return context.watch<TenantThemeCubit>().state;
@@ -101,7 +120,7 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
         title: Text(context.l10n.studentDashboardHeader(branding.brandName)),
         actions: [
           NotificationBadgeButton(
-            onPressed: () => context.go(AppRouter.studentNotifications),
+            onPressed: () => context.go(AppRoutes.studentNotifications),
           ),
           IconButton(
             icon: const Icon(Icons.logout_rounded),
@@ -113,13 +132,13 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
       backgroundColor: Colors.transparent,
       body: TweenAnimationBuilder<double>(
         tween: Tween(begin: 0.0, end: 1.0),
-        duration: const Duration(milliseconds: 500),
+        duration: const Duration(milliseconds: 400),
         curve: Curves.easeOutCubic,
         builder: (context, value, child) {
           return Opacity(
             opacity: value,
             child: Transform.translate(
-              offset: Offset(0, 16 * (1 - value)),
+              offset: Offset(0, 12 * (1 - value)),
               child: child,
             ),
           );
@@ -142,8 +161,19 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
 
             final stats = (dashboardState as StudentDashboardLoaded).stats;
 
-            return SingleChildScrollView(
-              padding: context.responsivePagePadding,
+            return RefreshIndicator(
+              onRefresh: () async {
+                final authState = context.read<AuthCubit>().state;
+                if (authState is AuthAuthenticated) {
+                  await context.read<StudentDashboardCubit>().loadDashboardStats(
+                        authState.user.id,
+                        forceRefresh: true,
+                      );
+                }
+              },
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: context.responsivePagePadding,
               child: ResponsiveContainer(
                 maxWidth: ResponsiveBreakpoints.maxContentWidth,
                 child: Column(
@@ -159,309 +189,52 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
                         branding.localizedAcademicTrack(context),
                       ),
                       academicTrack: branding.localizedAcademicTrack(context),
-                      badgeText: context.l10n.americanMathAcademy,
+                      badgeText: stats.activeGroupName != 'No Active Group'
+                          ? stats.activeGroupName
+                          : context.l10n.americanMathAcademy,
                     ),
-                    const SizedBox(height: AppSpacing.s24),
+                    const SizedBox(height: AppSpacing.s16),
 
-                    // 2. Responsive Stat Cards Grid
-                    ResponsiveGrid(
-                      mobileColumns: 2,
-                      tabletColumns: 2,
-                      desktopColumns: 4,
-                      spacing: AppSpacing.s16,
-                      runSpacing: AppSpacing.s16,
-                      children: [
-                        AppCard(
-                          variant: AppCardVariant.elevated,
-                          padding: const EdgeInsets.all(AppSpacing.s12),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Container(
-                                    width: 32,
-                                    height: 32,
-                                    decoration: BoxDecoration(
-                                      color: AppColors.primaryLight.withValues(
-                                        alpha: 0.15,
-                                      ),
-                                      borderRadius: BorderRadius.circular(
-                                        AppSpacing.radiusSmall,
-                                      ),
-                                    ),
-                                    child: const Icon(
-                                      Icons.school_rounded,
-                                      color: AppColors.primary,
-                                      size: 18,
-                                    ),
-                                  ),
-                                  Flexible(
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 6,
-                                        vertical: 2,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.successLight,
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                      child: Text(
-                                        stats.activeGroupName !=
-                                                'No Active Group'
-                                            ? context.l10n.active
-                                            : context.l10n.pendingReview,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColors.success,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: AppSpacing.s12),
-                              Text(
-                                context.l10n.academicTrackLabel,
-                                style: const TextStyle(
-                                  color: AppColors.textSecondary,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              const SizedBox(height: AppSpacing.s4),
-                              Text(
-                                branding.academicTrack,
-                                style: const TextStyle(
-                                  color: AppColors.textPrimary,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        AppCard(
-                          variant: AppCardVariant.elevated,
-                          padding: const EdgeInsets.all(AppSpacing.s12),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Container(
-                                    width: 32,
-                                    height: 32,
-                                    decoration: BoxDecoration(
-                                      color: AppColors.primaryLight.withValues(
-                                        alpha: 0.15,
-                                      ),
-                                      borderRadius: BorderRadius.circular(
-                                        AppSpacing.radiusSmall,
-                                      ),
-                                    ),
-                                    child: const Icon(
-                                      Icons.auto_awesome_rounded,
-                                      color: AppColors.primary,
-                                      size: 18,
-                                    ),
-                                  ),
-                                  Flexible(
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 6,
-                                        vertical: 2,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.primaryLight
-                                            .withValues(alpha: 0.2),
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                      child: const Text(
-                                        'V1',
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColors.primary,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: AppSpacing.s12),
-                              Text(
-                                context.l10n.assessmentSystemLabel,
-                                style: const TextStyle(
-                                  color: AppColors.textSecondary,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              const SizedBox(height: AppSpacing.s4),
-                              Text(
-                                stats.activeGroupLevel,
-                                style: const TextStyle(
-                                  color: AppColors.textPrimary,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        AppCard(
-                          variant: AppCardVariant.elevated,
-                          padding: const EdgeInsets.all(AppSpacing.s12),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Container(
-                                    width: 32,
-                                    height: 32,
-                                    decoration: BoxDecoration(
-                                      color: AppColors.successLight,
-                                      borderRadius: BorderRadius.circular(
-                                        AppSpacing.radiusSmall,
-                                      ),
-                                    ),
-                                    child: const Icon(
-                                      Icons.event_available_rounded,
-                                      color: AppColors.success,
-                                      size: 18,
-                                    ),
-                                  ),
-                                  Flexible(
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 6,
-                                        vertical: 2,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.successLight,
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                      child: Text(
-                                        context.l10n.excellentStatus,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColors.success,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: AppSpacing.s12),
-                              Text(
-                                context.l10n.attendanceRateLabel,
-                                style: const TextStyle(
-                                  color: AppColors.textSecondary,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              const SizedBox(height: AppSpacing.s4),
-                              Text(
-                                '${stats.attendancePercentage.toStringAsFixed(0)}%',
-                                style: AppTypography.statFigureLarge,
-                              ),
-                            ],
-                          ),
-                        ),
-                        AppCard(
-                          variant: AppCardVariant.elevated,
-                          padding: const EdgeInsets.all(AppSpacing.s12),
-                          onTap: () =>
-                              context.go(AppRouter.studentNotifications),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Container(
-                                    width: 32,
-                                    height: 32,
-                                    decoration: BoxDecoration(
-                                      color: AppColors.primaryLight.withValues(
-                                        alpha: 0.15,
-                                      ),
-                                      borderRadius: BorderRadius.circular(
-                                        AppSpacing.radiusSmall,
-                                      ),
-                                    ),
-                                    child: const Icon(
-                                      Icons.notifications_active_rounded,
-                                      color: AppColors.primary,
-                                      size: 18,
-                                    ),
-                                  ),
-                                  Flexible(
-                                    child: Text(
-                                      unreadNotifs > 0
-                                          ? context.l10n.newNotificationsCount(
-                                              unreadNotifs,
-                                            )
-                                          : context.l10n.navNotifications,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.primary,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: AppSpacing.s12),
-                              Text(
-                                context.l10n.notificationsCenter,
-                                style: const TextStyle(
-                                  color: AppColors.textSecondary,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              const SizedBox(height: AppSpacing.s4),
-                              Text(
-                                unreadNotifs > 0
-                                    ? '$unreadNotifs'
-                                    : context.l10n.active,
-                                style: AppTypography.statFigureLarge,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                    // 2. Continue Learning Hero Card (If student has a lecture in progress)
+                    if (stats.continueLearningItem != null) ...[
+                      ContinueLearningCard(item: stats.continueLearningItem!),
+                      const SizedBox(height: AppSpacing.s16),
+                    ],
 
-                    const SizedBox(height: AppSpacing.s24),
+                    // 3. Urgent Tasks & Deadlines Radar
+                    UrgentTasksRadarCard(tasks: stats.urgentTasks),
+                    const SizedBox(height: AppSpacing.s16),
 
-                    // 2.5 Academic Performance Summary
+                    // 4. Academic Performance Summary (Sigma Badge)
                     AcademicPerformanceCard(stats: stats),
+                    const SizedBox(height: AppSpacing.s20),
 
-                    const SizedBox(height: AppSpacing.s24),
+                    // 5. Section Title: Quick Study Hub
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            context.l10n.quickAccessTitle,
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.textPrimary,
+                                ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            context.l10n.quickAccessSubtitle,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.s12),
 
-                    // 3. Responsive Action Cards Grid (1 col mobile, 2 col tablet/desktop)
+                    // 6. Responsive Action Cards Grid (Fast Navigation Hub)
                     ResponsiveGrid(
                       mobileColumns: 1,
                       tabletColumns: 2,
@@ -469,16 +242,81 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
                       spacing: AppSpacing.s16,
                       runSpacing: AppSpacing.s16,
                       children: [
+                        // Card A: Study Materials & Lectures
                         AppCard(
                           variant: AppCardVariant.elevated,
-                          onTap: () => context.go(AppRouter.studentAssignments),
+                          onTap: () => _handleOpenContent(context),
                           child: Row(
                             children: [
-                              const CircleAvatar(
-                                backgroundColor: AppColors.primaryLight,
-                                child: Icon(
+                              Container(
+                                width: 46,
+                                height: 46,
+                                decoration: BoxDecoration(
+                                  color: AppColors.primaryLight.withValues(alpha: 0.2),
+                                  borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                                  border: Border.all(
+                                    color: AppColors.primary.withValues(alpha: 0.25),
+                                  ),
+                                ),
+                                child: const Icon(
+                                  Icons.menu_book_rounded,
+                                  color: AppColors.primary,
+                                  size: 24,
+                                ),
+                              ),
+                              const SizedBox(width: AppSpacing.s16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      context.l10n.myStudyMaterials,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 15,
+                                        color: AppColors.textPrimary,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      context.l10n.myStudyMaterialsDesc,
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const Icon(
+                                Icons.arrow_forward_ios_rounded,
+                                size: 16,
+                                color: AppColors.textSecondary,
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        // Card B: Homework & Submissions
+                        AppCard(
+                          variant: AppCardVariant.elevated,
+                          onTap: () => context.go(AppRoutes.studentAssignments),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 46,
+                                height: 46,
+                                decoration: BoxDecoration(
+                                  color: AppColors.primaryLight.withValues(alpha: 0.2),
+                                  borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                                  border: Border.all(
+                                    color: AppColors.primary.withValues(alpha: 0.25),
+                                  ),
+                                ),
+                                child: const Icon(
                                   Icons.assignment_rounded,
                                   color: AppColors.primary,
+                                  size: 24,
                                 ),
                               ),
                               const SizedBox(width: AppSpacing.s16),
@@ -513,16 +351,27 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
                             ],
                           ),
                         ),
+
+                        // Card C: Exams & Assessments
                         AppCard(
                           variant: AppCardVariant.elevated,
-                          onTap: () => context.go(AppRouter.studentExams),
+                          onTap: () => context.go(AppRoutes.studentExams),
                           child: Row(
                             children: [
-                              const CircleAvatar(
-                                backgroundColor: AppColors.primaryLight,
-                                child: Icon(
+                              Container(
+                                width: 46,
+                                height: 46,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF7C3AED).withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                                  border: Border.all(
+                                    color: const Color(0xFF7C3AED).withValues(alpha: 0.25),
+                                  ),
+                                ),
+                                child: const Icon(
                                   Icons.quiz_rounded,
-                                  color: AppColors.primary,
+                                  color: Color(0xFF7C3AED),
+                                  size: 24,
                                 ),
                               ),
                               const SizedBox(width: AppSpacing.s16),
@@ -557,17 +406,27 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
                             ],
                           ),
                         ),
+
+                        // Card D: Teacher Announcements & Updates
                         AppCard(
                           variant: AppCardVariant.elevated,
-                          onTap: () =>
-                              context.go(AppRouter.studentNotifications),
+                          onTap: () => context.go(AppRoutes.studentNotifications),
                           child: Row(
                             children: [
-                              const CircleAvatar(
-                                backgroundColor: AppColors.primaryLight,
-                                child: Icon(
+                              Container(
+                                width: 46,
+                                height: 46,
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                                  border: Border.all(
+                                    color: AppColors.primary.withValues(alpha: 0.25),
+                                  ),
+                                ),
+                                child: const Icon(
                                   Icons.campaign_rounded,
                                   color: AppColors.primary,
+                                  size: 24,
                                 ),
                               ),
                               const SizedBox(width: AppSpacing.s16),
@@ -602,57 +461,14 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
                             ],
                           ),
                         ),
-                        AppCard(
-                          variant: AppCardVariant.elevated,
-                          onTap: () => context.go(AppRouter.studentAttendance),
-                          child: Row(
-                            children: [
-                              const CircleAvatar(
-                                backgroundColor: AppColors.primaryLight,
-                                child: Icon(
-                                  Icons.calendar_today_rounded,
-                                  color: AppColors.primary,
-                                ),
-                              ),
-                              const SizedBox(width: AppSpacing.s16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      context.l10n.attendanceRecord,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 15,
-                                        color: AppColors.textPrimary,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      context.l10n.attendanceRecordDesc,
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        color: AppColors.textSecondary,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const Icon(
-                                Icons.arrow_forward_ios_rounded,
-                                size: 16,
-                                color: AppColors.textSecondary,
-                              ),
-                            ],
-                          ),
-                        ),
                       ],
                     ),
                   ],
                 ),
               ),
-            );
-          },
+            ),
+          );
+        },
         ),
       ),
     );

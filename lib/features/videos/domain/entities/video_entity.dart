@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../../content/domain/entities/file_attachment_entity.dart';
 
 enum VideoStatus {
   uploading,
@@ -36,6 +37,7 @@ class VideoEntity extends Equatable {
   final int duration; // in seconds
   final VideoStatus status;
   final String? playbackUrl; // Generated temporary tokenized HLS stream URL
+  final FileAttachmentEntity? attachedFile;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -50,9 +52,45 @@ class VideoEntity extends Equatable {
     this.duration = 0,
     this.status = VideoStatus.uploading,
     this.playbackUrl,
+    this.attachedFile,
     required this.createdAt,
     required this.updatedAt,
   });
+
+  bool get isYouTube => provider.toLowerCase() == 'youtube';
+  bool get isBunny => provider.toLowerCase() == 'bunny';
+
+  VideoEntity copyWith({
+    String? id,
+    String? contentId,
+    String? title,
+    String? description,
+    String? provider,
+    String? providerVideoId,
+    String? thumbnailUrl,
+    int? duration,
+    VideoStatus? status,
+    String? playbackUrl,
+    FileAttachmentEntity? attachedFile,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return VideoEntity(
+      id: id ?? this.id,
+      contentId: contentId ?? this.contentId,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      provider: provider ?? this.provider,
+      providerVideoId: providerVideoId ?? this.providerVideoId,
+      thumbnailUrl: thumbnailUrl ?? this.thumbnailUrl,
+      duration: duration ?? this.duration,
+      status: status ?? this.status,
+      playbackUrl: playbackUrl ?? this.playbackUrl,
+      attachedFile: attachedFile ?? this.attachedFile,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
 
   String get formattedDuration {
     if (duration <= 0) return '00:00';
@@ -78,6 +116,7 @@ class VideoEntity extends Equatable {
         duration,
         status,
         playbackUrl,
+        attachedFile,
         createdAt,
         updatedAt,
       ];

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/di/injection_container.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
-import '../../../../core/router/app_router.dart';
+import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/responsive_breakpoints.dart';
@@ -11,6 +12,7 @@ import '../../../../core/widgets/app_error_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/responsive_container.dart';
+import '../../../groups/domain/entities/group_entity.dart';
 import '../../domain/entities/content_entity.dart';
 import '../cubit/content_cubit.dart';
 import '../cubit/content_state.dart';
@@ -32,6 +34,11 @@ class StudentContentFeedPage extends StatefulWidget {
 }
 
 class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
+  final ScrollController _scrollController = ScrollController();
+  late String _activeGroupId;
+  late String? _activeGroupName;
+  List<GroupEntity> _studentGroups = [];
+
   ContentType? _selectedTypeFilter;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
@@ -39,28 +46,86 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
   @override
   void initState() {
     super.initState();
+    _activeGroupId = widget.groupId;
+    _activeGroupName = widget.groupName;
+    _fetchStudentGroups();
     context.read<ContentCubit>().loadGroupContent(
-          widget.groupId,
+          _activeGroupId,
           isStudent: true,
         );
+    _scrollController.addListener(_onScroll);
+  }
+
+  Future<void> _fetchStudentGroups() async {
+    try {
+      final result = await InjectionContainer.groupsRepository.getGroups();
+      if (mounted && result.isSuccess && result.dataOrNull != null) {
+        setState(() {
+          _studentGroups = result.dataOrNull!;
+          if (_activeGroupName == null && _studentGroups.isNotEmpty) {
+            final match = _studentGroups.where((g) => g.id == _activeGroupId);
+            if (match.isNotEmpty) {
+              _activeGroupName = match.first.name;
+            }
+          }
+        });
+      }
+    } catch (_) {
+      // Safe fallback when groupsRepository is uninitialized in tests or offline
+    }
   }
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
     _searchController.dispose();
     super.dispose();
   }
 
+  void _onScroll() {
+    if (_scrollController.hasClients &&
+        _scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200) {
+      context.read<ContentCubit>().loadMoreContent();
+    }
+  }
+
   Future<void> _handleContentTap(ContentEntity item) async {
+    if (item.isLocked) {
+      final examTitle =
+          item.prerequisiteExamTitle ?? context.l10n.prerequisiteExamBadge;
+      final passScore = item.prerequisitePassingScore ?? 60;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: AppColors.error,
+          content: Text(context.l10n.mustPassExamToUnlock(examTitle, passScore)),
+          action: item.prerequisiteExamId != null
+              ? SnackBarAction(
+                  label: context.l10n.takeRequiredExamAction,
+                  textColor: Colors.white,
+                  onPressed: () => context.push(AppRoutes.studentExams),
+                )
+              : null,
+        ),
+      );
+      return;
+    }
+
     switch (item.type) {
       case ContentType.video:
-        await context.push('${AppRouter.videoPlayer}?id=${item.id}');
+        final encodedTitle = item.associatedExamTitle != null 
+            ? Uri.encodeComponent(item.associatedExamTitle!) 
+            : '';
+        await context.push(
+          '${AppRoutes.videoPlayer}?id=${item.id}&associatedExamId=${item.associatedExamId ?? ''}&associatedExamTitle=$encodedTitle',
+        );
         break;
       case ContentType.assignment:
-        await context.push(AppRouter.studentAssignments);
+        await context.push(AppRoutes.studentAssignments);
         break;
       case ContentType.exam:
-        await context.push(AppRouter.studentExams);
+        await context.push(AppRoutes.studentExams);
         break;
       case ContentType.pdf:
       case ContentType.image:
@@ -77,8 +142,8 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final title = widget.groupName != null
-        ? context.l10n.groupContentPrefix(widget.groupName!)
+    final title = _activeGroupName != null
+        ? context.l10n.groupContentPrefix(_activeGroupName!)
         : context.l10n.groupContentDefault;
 
     return Scaffold(
@@ -88,7 +153,7 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
           tooltip: context.l10n.backToStudentDashboard,
           onPressed: () => context.canPop()
               ? context.pop()
-              : context.go(AppRouter.studentDashboard),
+              : context.go(AppRoutes.studentDashboard),
         ),
         title: Row(
           children: [
@@ -112,8 +177,9 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
             icon: const Icon(Icons.refresh_rounded),
             tooltip: context.l10n.refreshContent,
             onPressed: () => context.read<ContentCubit>().loadGroupContent(
-                  widget.groupId,
+                  _activeGroupId,
                   isStudent: true,
+                  forceRefresh: true,
                 ),
           ),
         ],
@@ -138,8 +204,9 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
             return AppErrorView(
               message: state.message,
               onRetry: () => context.read<ContentCubit>().loadGroupContent(
-                    widget.groupId,
+                    _activeGroupId,
                     isStudent: true,
+                    forceRefresh: true,
                   ),
             );
           }
@@ -181,13 +248,75 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                 child: RefreshIndicator(
                   onRefresh: () async =>
                       context.read<ContentCubit>().loadGroupContent(
-                            widget.groupId,
+                            _activeGroupId,
                             isStudent: true,
+                            forceRefresh: true,
                           ),
                   child: CustomScrollView(
+                    controller: _scrollController,
                     physics: const AlwaysScrollableScrollPhysics(),
                     slivers: [
-                      // 1. Search Bar (Scrolls away with the page)
+                      // 1. Group Switcher Pills (Only if student has multiple groups)
+                      if (_studentGroups.length > 1)
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: AppSpacing.s12),
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: _studentGroups.map((g) {
+                                  final isSelected = g.id == _activeGroupId;
+                                  return Padding(
+                                    padding: const EdgeInsetsDirectional.only(
+                                      end: AppSpacing.s8,
+                                    ),
+                                    child: ChoiceChip(
+                                      avatar: Icon(
+                                        Icons.school_rounded,
+                                        size: 16,
+                                        color: isSelected
+                                            ? Colors.white
+                                            : AppColors.primary,
+                                      ),
+                                      label: Text(g.name),
+                                      selected: isSelected,
+                                      selectedColor: AppColors.primary,
+                                      backgroundColor: AppColors.surfaceVariant,
+                                      labelStyle: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: isSelected
+                                            ? FontWeight.bold
+                                            : FontWeight.w500,
+                                        color: isSelected
+                                            ? Colors.white
+                                            : AppColors.textPrimary,
+                                      ),
+                                      onSelected: (selected) {
+                                        if (selected && _activeGroupId != g.id) {
+                                          setState(() {
+                                            _activeGroupId = g.id;
+                                            _activeGroupName = g.name;
+                                            _selectedTypeFilter = null;
+                                            _searchController.clear();
+                                            _searchQuery = '';
+                                          });
+                                          context
+                                              .read<ContentCubit>()
+                                              .loadGroupContent(
+                                                g.id,
+                                                isStudent: true,
+                                              );
+                                        }
+                                      },
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                          ),
+                        ),
+
+                      // 2. Search Bar
                       SliverToBoxAdapter(
                         child: Padding(
                           padding: const EdgeInsets.only(top: AppSpacing.s12),
@@ -218,7 +347,7 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                         ),
                       ),
 
-                      // 2. Type Filter Chips Row
+                      // 3. Type Filter Chips Row
                       SliverToBoxAdapter(
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
@@ -287,7 +416,7 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                         ),
                       ),
 
-                      // 3. Content Feed List or Empty State
+                      // 4. Content Feed List or Empty State
                       if (allPublished.isEmpty)
                         SliverToBoxAdapter(
                           child: Padding(
@@ -346,6 +475,17 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                                 ),
                               );
                             },
+                          ),
+                        ),
+                      if (state.isLoadingMore)
+                        const SliverToBoxAdapter(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              vertical: AppSpacing.s16,
+                            ),
+                            child: Center(
+                              child: AppLoadingView.compact(size: 24),
+                            ),
                           ),
                         ),
                     ],

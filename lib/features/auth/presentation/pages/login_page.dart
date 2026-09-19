@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/config/tenant_registry.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
-import '../../../../core/router/app_router.dart';
+import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/tenant_theme_cubit.dart';
 import '../../../../core/widgets/academic_auth_scaffold.dart';
@@ -57,15 +57,15 @@ class _LoginPageState extends State<LoginPage> {
       listener: (context, state) {
         if (state is AuthAuthenticated) {
           final targetRoute = switch (state.user.role) {
-            UserRole.teacher => AppRouter.teacherDashboard,
-            UserRole.parent => AppRouter.parentDashboard,
-            UserRole.student => AppRouter.studentDashboard,
+            UserRole.teacher => AppRoutes.teacherDashboard,
+            UserRole.parent => AppRoutes.parentDashboard,
+            UserRole.student => AppRoutes.studentDashboard,
           };
           context.go(targetRoute);
         } else if (state is AuthPendingApproval) {
-          context.go(AppRouter.studentPending, extra: state.user.fullName);
+          context.go(AppRoutes.studentPending, extra: state.user.fullName);
         } else if (state is AuthTenantSuspended) {
-          context.go(AppRouter.tenantSuspended);
+          context.go(AppRoutes.tenantSuspended);
         } else if (state is AuthError) {
           AppFeedback.showError(context, state.message);
         }
@@ -227,7 +227,7 @@ class _LoginPageState extends State<LoginPage> {
                       style: TextButton.styleFrom(
                         enabledMouseCursor: SystemMouseCursors.click,
                       ),
-                      onPressed: () => context.go(AppRouter.registerStudent),
+                      onPressed: () => context.go(AppRoutes.registerStudent),
                       child: Text(
                         context.l10n.registerNewStudentLink,
                         style: TextStyle(

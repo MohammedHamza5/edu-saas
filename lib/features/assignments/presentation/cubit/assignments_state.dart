@@ -33,6 +33,8 @@ final class TeacherAssignmentsLoaded extends AssignmentsState {
   final bool isGrading;
   final bool isCreating;
   final bool actionSuccess;
+  final bool hasMore;
+  final bool isLoadingMore;
   final String? message;
 
   const TeacherAssignmentsLoaded({
@@ -44,6 +46,8 @@ final class TeacherAssignmentsLoaded extends AssignmentsState {
     this.isGrading = false,
     this.isCreating = false,
     this.actionSuccess = false,
+    this.hasMore = true,
+    this.isLoadingMore = false,
     this.message,
   });
 
@@ -56,6 +60,8 @@ final class TeacherAssignmentsLoaded extends AssignmentsState {
     bool? isGrading,
     bool? isCreating,
     bool? actionSuccess,
+    bool? hasMore,
+    bool? isLoadingMore,
     String? message,
   }) {
     return TeacherAssignmentsLoaded(
@@ -67,6 +73,8 @@ final class TeacherAssignmentsLoaded extends AssignmentsState {
       isGrading: isGrading ?? this.isGrading,
       isCreating: isCreating ?? this.isCreating,
       actionSuccess: actionSuccess ?? this.actionSuccess,
+      hasMore: hasMore ?? this.hasMore,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
       message: message,
     );
   }
@@ -81,6 +89,8 @@ final class TeacherAssignmentsLoaded extends AssignmentsState {
         isGrading,
         isCreating,
         actionSuccess,
+        hasMore,
+        isLoadingMore,
         message,
       ];
 }
@@ -90,6 +100,8 @@ final class StudentAssignmentsLoaded extends AssignmentsState {
   final AssignmentEntity? selectedAssignment;
   final bool isSubmitting;
   final bool submitSuccess;
+  final bool hasMore;
+  final bool isLoadingMore;
   final String? message;
 
   const StudentAssignmentsLoaded({
@@ -97,6 +109,8 @@ final class StudentAssignmentsLoaded extends AssignmentsState {
     this.selectedAssignment,
     this.isSubmitting = false,
     this.submitSuccess = false,
+    this.hasMore = true,
+    this.isLoadingMore = false,
     this.message,
   });
 
@@ -105,6 +119,8 @@ final class StudentAssignmentsLoaded extends AssignmentsState {
     AssignmentEntity? selectedAssignment,
     bool? isSubmitting,
     bool? submitSuccess,
+    bool? hasMore,
+    bool? isLoadingMore,
     String? message,
   }) {
     return StudentAssignmentsLoaded(
@@ -112,6 +128,8 @@ final class StudentAssignmentsLoaded extends AssignmentsState {
       selectedAssignment: selectedAssignment ?? this.selectedAssignment,
       isSubmitting: isSubmitting ?? this.isSubmitting,
       submitSuccess: submitSuccess ?? this.submitSuccess,
+      hasMore: hasMore ?? this.hasMore,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
       message: message,
     );
   }
@@ -122,6 +140,8 @@ final class StudentAssignmentsLoaded extends AssignmentsState {
         selectedAssignment,
         isSubmitting,
         submitSuccess,
+        hasMore,
+        isLoadingMore,
         message,
       ];
 }

@@ -33,6 +33,8 @@ final class TeacherExamsLoaded extends ExamsState {
   final bool isLoadingAttempts;
   final bool isCreating;
   final bool actionSuccess;
+  final bool hasMore;
+  final bool isLoadingMore;
   final String? message;
 
   const TeacherExamsLoaded({
@@ -44,6 +46,8 @@ final class TeacherExamsLoaded extends ExamsState {
     this.isLoadingAttempts = false,
     this.isCreating = false,
     this.actionSuccess = false,
+    this.hasMore = true,
+    this.isLoadingMore = false,
     this.message,
   });
 
@@ -56,6 +60,8 @@ final class TeacherExamsLoaded extends ExamsState {
     bool? isLoadingAttempts,
     bool? isCreating,
     bool? actionSuccess,
+    bool? hasMore,
+    bool? isLoadingMore,
     String? message,
   }) {
     return TeacherExamsLoaded(
@@ -67,6 +73,8 @@ final class TeacherExamsLoaded extends ExamsState {
       isLoadingAttempts: isLoadingAttempts ?? this.isLoadingAttempts,
       isCreating: isCreating ?? this.isCreating,
       actionSuccess: actionSuccess ?? this.actionSuccess,
+      hasMore: hasMore ?? this.hasMore,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
       message: message,
     );
   }
@@ -81,6 +89,8 @@ final class TeacherExamsLoaded extends ExamsState {
         isLoadingAttempts,
         isCreating,
         actionSuccess,
+        hasMore,
+        isLoadingMore,
         message,
       ];
 }
@@ -88,28 +98,42 @@ final class TeacherExamsLoaded extends ExamsState {
 final class StudentExamsLoaded extends ExamsState {
   final List<ExamEntity> exams;
   final ExamEntity? selectedExam;
+  final bool hasMore;
+  final bool isLoadingMore;
   final String? message;
 
   const StudentExamsLoaded({
     required this.exams,
     this.selectedExam,
+    this.hasMore = true,
+    this.isLoadingMore = false,
     this.message,
   });
 
   StudentExamsLoaded copyWith({
     List<ExamEntity>? exams,
     ExamEntity? selectedExam,
+    bool? hasMore,
+    bool? isLoadingMore,
     String? message,
   }) {
     return StudentExamsLoaded(
       exams: exams ?? this.exams,
       selectedExam: selectedExam ?? this.selectedExam,
+      hasMore: hasMore ?? this.hasMore,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
       message: message,
     );
   }
 
   @override
-  List<Object?> get props => [exams, selectedExam, message];
+  List<Object?> get props => [
+        exams,
+        selectedExam,
+        hasMore,
+        isLoadingMore,
+        message,
+      ];
 }
 
 final class ExamTakingState extends ExamsState {

@@ -18,6 +18,8 @@ abstract interface class AttendanceRemoteDataSource {
   Future<List<AttendanceModel>> getStudentAttendanceHistory({
     required String studentId,
     String? groupId,
+    int? page,
+    int? pageSize,
   });
 
   Future<AttendanceStats> getStudentAttendanceStats({
@@ -163,6 +165,8 @@ class AttendanceRemoteDataSourceImpl implements AttendanceRemoteDataSource {
   Future<List<AttendanceModel>> getStudentAttendanceHistory({
     required String studentId,
     String? groupId,
+    int? page,
+    int? pageSize,
   }) async {
     var query = _safeClient
         .from('attendance')
@@ -173,7 +177,19 @@ class AttendanceRemoteDataSourceImpl implements AttendanceRemoteDataSource {
       query = query.eq('group_id', groupId);
     }
 
-    final response = await query.order('date', ascending: false);
+    var orderedQuery = query.order('date', ascending: false);
+    if (page != null && pageSize != null) {
+      final from = page * pageSize;
+      final to = from + pageSize - 1;
+      final response = await orderedQuery.range(from, to);
+      final list = response as List<dynamic>;
+
+      return list
+          .map((json) => AttendanceModel.fromJson(json as Map<String, dynamic>))
+          .toList();
+    }
+
+    final response = await orderedQuery;
     final list = response as List<dynamic>;
 
     return list

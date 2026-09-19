@@ -6,7 +6,7 @@ import '../../../../core/config/tenant_registry.dart';
 import '../../../../core/localization/generated/app_localizations.dart';
 import '../../../../core/localization/locale_cubit.dart';
 import '../../../../core/network/supabase_service.dart';
-import '../../../../core/router/app_router.dart';
+import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/tenant_branding.dart';
@@ -185,7 +185,7 @@ class _TeacherSettingsPageState extends State<TeacherSettingsPage> {
             if (context.canPop()) {
               context.pop();
             } else {
-              context.go(AppRouter.teacherDashboard);
+              context.go(AppRoutes.teacherDashboard);
             }
           },
         ),

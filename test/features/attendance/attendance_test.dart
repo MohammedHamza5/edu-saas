@@ -94,6 +94,8 @@ class FakeAttendanceRepository implements AttendanceRepository {
   Future<Result<List<AttendanceEntity>>> getStudentAttendanceHistory({
     required String studentId,
     String? groupId,
+    int? page,
+    int? pageSize,
   }) async {
     if (shouldFail) {
       return const FailureResult(ServerFailure('History error'));
@@ -343,13 +345,15 @@ void main() {
       expect(loaded.isSaving, isFalse);
     });
 
-    test('loadStudentAttendance emits StudentAttendanceLoaded with stats', () async {
+    test('loadStudentAttendance emits StudentAttendanceLoaded with stats and pagination state', () async {
       await cubit.loadStudentAttendance(studentId: 'student-1');
 
       expect(cubit.state, isA<StudentAttendanceLoaded>());
       final loaded = cubit.state as StudentAttendanceLoaded;
       expect(loaded.records.length, 2);
       expect(loaded.stats.attendancePercentage, 80.0);
+      expect(loaded.hasMore, isFalse);
+      expect(loaded.isLoadingMore, isFalse);
     });
   });
 

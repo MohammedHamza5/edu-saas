@@ -4,10 +4,12 @@ import 'package:flutter/services.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/network/supabase_service.dart';
 import '../../../../core/widgets/app_badge.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_loading_view.dart';
+import '../../../../core/widgets/forensic_watermark_overlay.dart';
 import '../../domain/entities/content_entity.dart';
 
 /// An academic, highly polished modal sheet or dialog to view and download
@@ -140,17 +142,20 @@ class _MaterialViewerSheetState extends State<MaterialViewerSheet> {
       ContentType.exam => Icons.quiz_rounded,
     };
 
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.scaffoldBackgroundColor,
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(AppSpacing.radiusLarge),
+    final isTeacher = SupabaseService.currentUserRole == 'teacher';
+
+    return ForensicWatermarkOverlay(
+      child: Container(
+        decoration: BoxDecoration(
+          color: theme.scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(AppSpacing.radiusLarge),
+          ),
         ),
-      ),
-      padding: const EdgeInsets.all(AppSpacing.s20),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        padding: const EdgeInsets.all(AppSpacing.s20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Drag handle pill for bottom sheet
           Center(
@@ -460,7 +465,9 @@ class _MaterialViewerSheetState extends State<MaterialViewerSheet> {
                 const SizedBox(width: AppSpacing.s6),
                 Expanded(
                   child: Text(
-                    context.l10n.contentSecurityDisclaimer,
+                    isTeacher
+                        ? context.l10n.contentSecurityDisclaimer
+                        : context.l10n.contentSecurityDisclaimerStudent,
                     style: const TextStyle(
                       fontSize: 10,
                       color: AppColors.primary,
@@ -473,6 +480,7 @@ class _MaterialViewerSheetState extends State<MaterialViewerSheet> {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 }

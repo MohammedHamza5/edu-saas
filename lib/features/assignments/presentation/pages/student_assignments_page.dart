@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
-import '../../../../core/router/app_router.dart';
+import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/responsive_breakpoints.dart';
@@ -27,16 +27,33 @@ class StudentAssignmentsPage extends StatefulWidget {
 }
 
 class _StudentAssignmentsPageState extends State<StudentAssignmentsPage> {
+  final ScrollController _scrollController = ScrollController();
   StudentAssignmentFilter _activeFilter = StudentAssignmentFilter.all;
 
   @override
   void initState() {
     super.initState();
     _loadAssignments();
+    _scrollController.addListener(_onScroll);
   }
 
-  void _loadAssignments() {
-    context.read<AssignmentsCubit>().loadStudentAssignments();
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.hasClients &&
+        _scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200) {
+      context.read<AssignmentsCubit>().loadMoreStudentAssignments();
+    }
+  }
+
+  Future<void> _loadAssignments({bool forceRefresh = false}) async {
+    await context.read<AssignmentsCubit>().loadStudentAssignments(forceRefresh: forceRefresh);
   }
 
   List<AssignmentEntity> _filterAssignments(List<AssignmentEntity> list) {
@@ -63,7 +80,7 @@ class _StudentAssignmentsPageState extends State<StudentAssignmentsPage> {
             if (Navigator.of(context).canPop()) {
               Navigator.of(context).pop();
             } else {
-              context.go(AppRouter.studentDashboard);
+              context.go(AppRoutes.studentDashboard);
             }
           },
         ),
@@ -73,7 +90,7 @@ class _StudentAssignmentsPageState extends State<StudentAssignmentsPage> {
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: context.l10n.refreshTooltip,
-            onPressed: _loadAssignments,
+            onPressed: () => _loadAssignments(forceRefresh: true),
           ),
         ],
       ),
@@ -87,7 +104,7 @@ class _StudentAssignmentsPageState extends State<StudentAssignmentsPage> {
             return Center(
               child: AppErrorView(
                 message: state.message,
-                onRetry: _loadAssignments,
+                onRetry: () => _loadAssignments(forceRefresh: true),
               ),
             );
           }
@@ -162,40 +179,54 @@ class _StudentAssignmentsPageState extends State<StudentAssignmentsPage> {
                               ),
                             )
                           : RefreshIndicator(
-                              onRefresh: () async => _loadAssignments(),
+                              onRefresh: () => _loadAssignments(forceRefresh: true),
                               child: SingleChildScrollView(
+                                controller: _scrollController,
                                 physics: const AlwaysScrollableScrollPhysics(),
                                 padding: const EdgeInsets.all(AppSpacing.s16),
-                                child: ResponsiveGrid(
-                                  mobileColumns: 1,
-                                  tabletColumns: 2,
-                                  desktopColumns: 2,
-                                  spacing: AppSpacing.s16,
-                                  runSpacing: AppSpacing.s16,
-                                  children: filtered.map((assignment) {
-                                    return AssignmentCard(
-                                      assignment: assignment,
-                                      isTeacher: false,
-                                      onTap: () {
-                                        Navigator.of(context)
-                                            .push<void>(
-                                          MaterialPageRoute<void>(
-                                            builder: (_) => BlocProvider.value(
-                                              value: context.read<AssignmentsCubit>(),
-                                              child: AssignmentSubmissionPage(
-                                                assignment: assignment,
+                                child: Column(
+                                  children: [
+                                    ResponsiveGrid(
+                                      mobileColumns: 1,
+                                      tabletColumns: 2,
+                                      desktopColumns: 2,
+                                      spacing: AppSpacing.s16,
+                                      runSpacing: AppSpacing.s16,
+                                      children: filtered.map((assignment) {
+                                        return AssignmentCard(
+                                          assignment: assignment,
+                                          isTeacher: false,
+                                          onTap: () {
+                                            Navigator.of(context)
+                                                .push<void>(
+                                              MaterialPageRoute<void>(
+                                                builder: (_) => BlocProvider.value(
+                                                  value: context.read<AssignmentsCubit>(),
+                                                  child: AssignmentSubmissionPage(
+                                                    assignment: assignment,
+                                                  ),
+                                                ),
                                               ),
-                                            ),
-                                          ),
-                                        )
-                                            .then((_) {
-                                          if (context.mounted) {
-                                            _loadAssignments();
-                                          }
-                                        });
-                                      },
-                                    );
-                                  }).toList(),
+                                            )
+                                                .then((_) {
+                                              if (context.mounted) {
+                                                _loadAssignments(forceRefresh: true);
+                                              }
+                                            });
+                                          },
+                                        );
+                                      }).toList(),
+                                    ),
+                                    if (state.isLoadingMore)
+                                      const Padding(
+                                        padding: EdgeInsets.symmetric(
+                                          vertical: AppSpacing.s16,
+                                        ),
+                                        child: Center(
+                                          child: AppLoadingView.compact(size: 24),
+                                        ),
+                                      ),
+                                  ],
                                 ),
                               ),
                             ),

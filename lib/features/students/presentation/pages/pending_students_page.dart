@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
-import '../../../../core/router/app_router.dart';
+import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/responsive_breakpoints.dart';
@@ -45,7 +45,7 @@ class _PendingStudentsPageState extends State<PendingStudentsPage> {
           icon: const Icon(Icons.arrow_back_rounded),
           tooltip: context.l10n.backToStudentsList,
           onPressed: () =>
-              context.canPop() ? context.pop() : context.go(AppRouter.studentsList),
+              context.canPop() ? context.pop() : context.go(AppRoutes.studentsList),
         ),
         title: Text(context.l10n.newRegistrationRequests),
         actions: [
@@ -53,7 +53,7 @@ class _PendingStudentsPageState extends State<PendingStudentsPage> {
             icon: const Icon(Icons.refresh_rounded),
             tooltip: context.l10n.refresh,
             onPressed: () =>
-                context.read<StudentsCubit>().loadPendingStudents(),
+                context.read<StudentsCubit>().loadPendingStudents(refresh: true),
           ),
         ],
       ),
@@ -95,7 +95,7 @@ class _PendingStudentsPageState extends State<PendingStudentsPage> {
             return AppErrorView(
               message: state.message,
               onRetry: () =>
-                  context.read<StudentsCubit>().loadPendingStudents(),
+                  context.read<StudentsCubit>().loadPendingStudents(refresh: true),
             );
           }
 
@@ -109,9 +109,14 @@ class _PendingStudentsPageState extends State<PendingStudentsPage> {
 
             return ResponsiveContainer(
               maxWidth: ResponsiveBreakpoints.maxContentWidth,
-              child: ListView.separated(
-                padding: const EdgeInsets.all(AppSpacing.s16),
-                itemCount: state.pending.length + 1,
+              child: RefreshIndicator(
+                onRefresh: () => context
+                    .read<StudentsCubit>()
+                    .loadPendingStudents(refresh: true),
+                child: ListView.separated(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(AppSpacing.s16),
+                  itemCount: state.pending.length + 1,
                 separatorBuilder: (_, __) =>
                     const SizedBox(height: AppSpacing.s12),
                 itemBuilder: (context, index) {
@@ -159,7 +164,8 @@ class _PendingStudentsPageState extends State<PendingStudentsPage> {
                   );
                 },
               ),
-            );
+            ),
+          );
           }
 
           WidgetsBinding.instance.addPostFrameCallback((_) {

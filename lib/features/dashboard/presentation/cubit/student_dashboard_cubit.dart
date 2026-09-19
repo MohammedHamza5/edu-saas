@@ -9,14 +9,27 @@ class StudentDashboardCubit extends Cubit<StudentDashboardState> {
       : _repository = repository,
         super(StudentDashboardInitial());
 
-  Future<void> loadDashboardStats(String studentId) async {
-    emit(StudentDashboardLoading());
+  Future<void> loadDashboardStats(
+    String studentId, {
+    bool forceRefresh = false,
+  }) async {
+    // Only emit loading spinner on initial load to avoid jarring UI flickers on tab return
+    if (state is! StudentDashboardLoaded) {
+      emit(StudentDashboardLoading());
+    }
 
-    final result = await _repository.getStudentDashboardStats(studentId);
+    final result = await _repository.getStudentDashboardStats(
+      studentId,
+      forceRefresh: forceRefresh,
+    );
 
     result.when(
       onSuccess: (stats) => emit(StudentDashboardLoaded(stats: stats)),
-      onFailure: (failure) => emit(StudentDashboardError(message: failure.message)),
+      onFailure: (failure) {
+        if (state is! StudentDashboardLoaded) {
+          emit(StudentDashboardError(message: failure.message));
+        }
+      },
     );
   }
 }

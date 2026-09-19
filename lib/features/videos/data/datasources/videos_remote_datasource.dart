@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/config/app_config.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/network/supabase_service.dart';
+import '../../../../core/utils/youtube_url_parser.dart';
 import '../../domain/entities/video_entity.dart';
 import '../models/video_model.dart';
 import '../models/video_progress_model.dart';
@@ -39,7 +40,25 @@ abstract interface class VideosRemoteDataSource {
     void Function(int sentBytes, int totalBytes)? onProgress,
   });
 
+  Future<VideoModel> linkYouTubeVideo({
+    required String contentId,
+    required String youtubeUrl,
+    String? title,
+  });
+
   Future<void> deleteVideo(String videoId);
+
+  Future<String> getSignedFileUrl({
+    required String storagePath,
+    int expiresInSeconds = 3600,
+  });
+
+  Future<VideoModel> attachMaterialToVideo({
+    required String videoId,
+    required String contentId,
+    required String fileName,
+    required List<int> fileBytes,
+  });
 }
 
 class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
@@ -59,7 +78,7 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
     try {
       final response = await _c
           .from('videos')
-          .select('*, content!inner(*)')
+          .select('*, content!inner(*, files(*))')
           .eq('content.group_id', groupId)
           .order('created_at', ascending: false);
 
@@ -67,7 +86,9 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
       return list.map((json) {
         final model = VideoModel.fromJson(json as Map<String, dynamic>);
         if (model.providerVideoId != null && model.status.isReady) {
-          final playbackUrl = _generateSignedPlaybackUrl(model.providerVideoId!);
+          final playbackUrl = model.isYouTube
+              ? YouTubeUrlParser.getEmbedUrl(model.providerVideoId!)
+              : _generateSignedPlaybackUrl(model.providerVideoId!);
           return model.copyWithPlaybackUrl(playbackUrl);
         }
         return model;
@@ -84,7 +105,7 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
     try {
       final data = await _c
           .from('videos')
-          .select('*, content(*)')
+          .select('*, content(*, files(*))')
           .or('id.eq.$videoId,content_id.eq.$videoId')
           .limit(1)
           .maybeSingle();
@@ -92,7 +113,9 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
       if (data != null) {
         final model = VideoModel.fromJson(data);
         if (model.providerVideoId != null && model.providerVideoId!.isNotEmpty) {
-          final playbackUrl = _generateSignedPlaybackUrl(model.providerVideoId!);
+          final playbackUrl = model.isYouTube
+              ? YouTubeUrlParser.getEmbedUrl(model.providerVideoId!)
+              : _generateSignedPlaybackUrl(model.providerVideoId!);
           return model.copyWithPlaybackUrl(playbackUrl);
         }
         return model;
@@ -101,7 +124,7 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
       // If no row exists in videos table, check if content row exists for this ID
       final contentData = await _c
           .from('content')
-          .select('*')
+          .select('*, files(*)')
           .eq('id', videoId)
           .maybeSingle();
 
@@ -139,6 +162,24 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
 
   @override
   Future<String> getPlaybackUrl(String videoId) async {
+    try {
+      final res = await _c.rpc<dynamic>('get_video_playback_url', params: {'p_video_id': videoId});
+      if (res is Map && res['playback_url'] != null) {
+        return res['playback_url'] as String;
+      }
+    } catch (e) {
+      final msg = e.toString();
+      if (msg.contains('VIDEO_NOT_READY')) {
+        throw const ServerException('Video is currently processing', code: 'VIDEO_NOT_READY');
+      } else if (msg.contains('NOT_AUTHORIZED')) {
+        throw const ServerException('Not authorized to play this video', code: 'NOT_AUTHORIZED');
+      } else if (msg.contains('CONTENT_NOT_PUBLISHED')) {
+        throw const ServerException('Video content is not published', code: 'CONTENT_NOT_PUBLISHED');
+      } else if (msg.contains('VIDEO_NOT_FOUND')) {
+        throw const ServerException('Video record not found', code: 'VIDEO_NOT_FOUND');
+      }
+    }
+
     final video = await getVideoById(videoId);
     if (video.providerVideoId == null || video.providerVideoId!.isEmpty) {
       throw const ServerException(
@@ -146,22 +187,45 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
         code: 'VIDEO_NOT_READY',
       );
     }
+    if (video.isYouTube) {
+      return YouTubeUrlParser.getEmbedUrl(video.providerVideoId!);
+    }
     return _generateSignedPlaybackUrl(video.providerVideoId!);
   }
 
-  /// Generates a secure, time-limited Tokenized HLS stream URL from Bunny Stream
+  /// Generates a secure, time-limited Tokenized Embed URL from Bunny Stream (fallback when token is available)
   String _generateSignedPlaybackUrl(String providerVideoId) {
     final tokenKey = AppConfig.bunnyTokenKey;
-    final cdnHost = AppConfig.bunnyCdnHostname;
+    final libraryId = AppConfig.bunnyLibraryId;
 
-    // Expires in 3 hours (10800 seconds)
-    final expires = (DateTime.now().toUtc().millisecondsSinceEpoch ~/ 1000) + 10800;
+    if (tokenKey.isEmpty) {
+      return 'https://iframe.mediadelivery.net/embed/$libraryId/$providerVideoId?autoplay=true&preload=true&responsive=true&playerjs=true';
+    }
+
+    // Expires in 4 hours (14400 seconds)
+    final expires = (DateTime.now().toUtc().millisecondsSinceEpoch ~/ 1000) + 14400;
 
     // SHA256(token_key + video_id + expires)
     final hashInput = '$tokenKey$providerVideoId$expires';
     final token = sha256.convert(utf8.encode(hashInput)).toString();
 
-    return 'https://$cdnHost/$providerVideoId/playlist.m3u8?token=$token&expires=$expires';
+    return 'https://iframe.mediadelivery.net/embed/$libraryId/$providerVideoId?token=$token&expires=$expires&autoplay=true&preload=true&responsive=true&playerjs=true';
+  }
+
+  /// Resolves the actual videos.id whether passed an id or content_id
+  Future<String> _resolveVideoId(String idOrContentId) async {
+    try {
+      final row = await _c
+          .from('videos')
+          .select('id')
+          .or('id.eq.$idOrContentId,content_id.eq.$idOrContentId')
+          .limit(1)
+          .maybeSingle();
+      if (row != null && row['id'] != null) {
+        return row['id'] as String;
+      }
+    } catch (_) {}
+    return idOrContentId;
   }
 
   @override
@@ -170,10 +234,11 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
     required String studentId,
   }) async {
     try {
+      final actualVideoId = await _resolveVideoId(videoId);
       final data = await _c
           .from('video_progress')
           .select()
-          .eq('video_id', videoId)
+          .eq('video_id', actualVideoId)
           .eq('student_id', studentId)
           .maybeSingle();
 
@@ -196,33 +261,79 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
     bool isSkipped = false,
   }) async {
     try {
+      final actualVideoId = await _resolveVideoId(videoId);
+
       final double percentage = durationSeconds > 0
           ? ((progressSeconds / durationSeconds) * 100).clamp(0.0, 100.0)
           : 0.0;
 
-      // Completion criteria: watching >= 90% AND not skipped
-      final bool completed = percentage >= 90.0 && !isSkipped;
+      // Query existing progress to prevent overwriting higher percentage or completion
+      int existingActualWatch = 0;
+      double existingPercentage = 0.0;
+      bool existingCompleted = false;
+      int existingProgressSecs = 0;
 
-      // Get user tenant
-      final userTenant = _c.auth.currentUser?.userMetadata?['tenant_id'] ??
-          (await _c.from('users').select('tenant_id').eq('id', studentId).single())['tenant_id'];
+      try {
+        final existing = await _c
+            .from('video_progress')
+            .select('percentage, completed, actual_watch_seconds, progress_seconds')
+            .eq('video_id', actualVideoId)
+            .eq('student_id', studentId)
+            .maybeSingle();
+
+        if (existing != null) {
+          existingPercentage = (existing['percentage'] as num?)?.toDouble() ?? 0.0;
+          existingCompleted = existing['completed'] as bool? ?? false;
+          existingActualWatch = (existing['actual_watch_seconds'] as num?)?.toInt() ?? 0;
+          existingProgressSecs = (existing['progress_seconds'] as num?)?.toInt() ?? 0;
+        }
+      } catch (_) {}
+
+      final totalAccumulatedWatch = existingActualWatch + actualWatchSeconds;
+      final maxPercentage = percentage > existingPercentage ? percentage : existingPercentage;
+      final bool completed = existingCompleted || (maxPercentage >= 80.0 && !isSkipped);
+      final int effectiveProgressSeconds = progressSeconds > existingProgressSecs
+          ? progressSeconds
+          : (progressSeconds > 0 ? progressSeconds : existingProgressSecs);
+
+      // Get user tenant with multiple fail-safes
+      String? userTenant = _c.auth.currentUser?.userMetadata?['tenant_id'] as String?;
+      if (userTenant == null || userTenant.isEmpty) {
+        try {
+          final userRow = await _c.from('users').select('tenant_id').eq('id', studentId).maybeSingle();
+          userTenant = userRow?['tenant_id'] as String?;
+        } catch (_) {}
+      }
+      if (userTenant == null || userTenant.isEmpty) {
+        try {
+          final vidRow = await _c.from('videos').select('content(tenant_id)').eq('id', actualVideoId).maybeSingle();
+          final contentMap = vidRow?['content'] as Map<String, dynamic>?;
+          userTenant = contentMap?['tenant_id'] as String?;
+        } catch (_) {}
+      }
+      if (userTenant == null || userTenant.isEmpty) {
+        try {
+          final tenantRow = await _c.from('tenants').select('id').limit(1).maybeSingle();
+          userTenant = tenantRow?['id'] as String?;
+        } catch (_) {}
+      }
 
       final payload = {
-        'tenant_id': userTenant,
-        'video_id': videoId,
+        'tenant_id': userTenant ?? '11111111-1111-1111-1111-111111111111',
+        'video_id': actualVideoId,
         'student_id': studentId,
-        'progress_seconds': progressSeconds,
+        'progress_seconds': effectiveProgressSeconds,
         'duration_seconds': durationSeconds,
-        'percentage': double.parse(percentage.toStringAsFixed(2)),
+        'percentage': double.parse(maxPercentage.toStringAsFixed(2)),
         'completed': completed,
-        'actual_watch_seconds': actualWatchSeconds,
+        'actual_watch_seconds': totalAccumulatedWatch,
         'is_skipped': isSkipped,
         'last_watched_at': DateTime.now().toIso8601String(),
       };
 
       final data = await _c
           .from('video_progress')
-          .upsert(payload, onConflict: 'video_id, student_id')
+          .upsert(payload, onConflict: 'video_id,student_id')
           .select()
           .single();
 
@@ -263,8 +374,8 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
       final videoGuid = createResponse.data?['guid'] as String?;
       if (videoGuid == null || videoGuid.isEmpty) {
         throw const ServerException(
-          'Failed to initialize video with Bunny Stream',
-          code: 'BUNNY_INIT_FAILED',
+          'Failed to initialize video processing',
+          code: 'VIDEO_INIT_FAILED',
         );
       }
 
@@ -283,15 +394,37 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
         onSendProgress: onProgress,
       );
 
-      // 3. Save Video Record in Supabase
+      // 3. Save or Update Video Record in Supabase
       final thumbnailUrl = 'https://$cdnHost/$videoGuid/thumbnail.jpg';
-      final videoData = await _c.from('videos').insert({
-        'content_id': contentId,
-        'provider': 'bunny',
-        'provider_video_id': videoGuid,
-        'status': 'processing',
-        'thumbnail_url': thumbnailUrl,
-      }).select('*, content(*)').single();
+      final existing = await _c
+          .from('videos')
+          .select('id')
+          .eq('content_id', contentId)
+          .maybeSingle();
+
+      Map<String, dynamic> videoData;
+      if (existing != null && existing['id'] != null) {
+        videoData = await _c
+            .from('videos')
+            .update({
+              'provider': 'bunny',
+              'provider_video_id': videoGuid,
+              'status': 'processing',
+              'thumbnail_url': thumbnailUrl,
+              'updated_at': DateTime.now().toUtc().toIso8601String(),
+            })
+            .eq('id', existing['id'] as String)
+            .select('*, content(*)')
+            .single();
+      } else {
+        videoData = await _c.from('videos').insert({
+          'content_id': contentId,
+          'provider': 'bunny',
+          'provider_video_id': videoGuid,
+          'status': 'processing',
+          'thumbnail_url': thumbnailUrl,
+        }).select('*, content(*)').single();
+      }
 
       return VideoModel.fromJson(videoData);
     } on DioException catch (e) {
@@ -307,12 +440,184 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
   }
 
   @override
+  Future<VideoModel> linkYouTubeVideo({
+    required String contentId,
+    required String youtubeUrl,
+    String? title,
+  }) async {
+    final youtubeId = YouTubeUrlParser.extractVideoId(youtubeUrl);
+    if (youtubeId == null) {
+      throw const ServerException(
+        'Invalid YouTube URL or video ID',
+        code: 'INVALID_YOUTUBE_URL',
+      );
+    }
+
+    try {
+      final thumbnailUrl = YouTubeUrlParser.getThumbnailUrl(youtubeId);
+      final existing = await _c
+          .from('videos')
+          .select('id')
+          .eq('content_id', contentId)
+          .maybeSingle();
+
+      final payload = <String, dynamic>{
+        'content_id': contentId,
+        'provider': 'youtube',
+        'provider_video_id': youtubeId,
+        'status': 'ready',
+        'thumbnail_url': thumbnailUrl,
+        'updated_at': DateTime.now().toUtc().toIso8601String(),
+      };
+
+      Map<String, dynamic> videoData;
+      if (existing != null && existing['id'] != null) {
+        videoData = await _c
+            .from('videos')
+            .update(payload)
+            .eq('id', existing['id'] as String)
+            .select('*, content(*, files(*))')
+            .single();
+      } else {
+        payload['created_at'] = DateTime.now().toUtc().toIso8601String();
+        videoData = await _c
+            .from('videos')
+            .insert(payload)
+            .select('*, content(*, files(*))')
+            .single();
+      }
+
+      // If a title is provided, sync with the parent content row
+      if (title != null && title.trim().isNotEmpty) {
+        await _c
+            .from('content')
+            .update({'title': title.trim()})
+            .eq('id', contentId);
+      }
+
+      final model = VideoModel.fromJson(videoData);
+      final embedUrl = YouTubeUrlParser.getEmbedUrl(youtubeId);
+      return model.copyWithPlaybackUrl(embedUrl);
+    } on PostgrestException catch (e) {
+      throw ServerException(e.message, code: e.code);
+    } catch (e) {
+      if (e is ServerException) rethrow;
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
   Future<void> deleteVideo(String videoId) async {
     try {
       await _c.from('videos').delete().eq('id', videoId);
     } on PostgrestException catch (e) {
       throw ServerException(e.message, code: e.code);
     } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<String> getSignedFileUrl({
+    required String storagePath,
+    int expiresInSeconds = 900,
+  }) async {
+    try {
+      final signedUrl = await _c.storage
+          .from('group-content')
+          .createSignedUrl(storagePath, expiresInSeconds);
+      return signedUrl;
+    } catch (e) {
+      throw ServerException(e.toString(), code: 'STORAGE_ERROR');
+    }
+  }
+
+  @override
+  Future<VideoModel> attachMaterialToVideo({
+    required String videoId,
+    required String contentId,
+    required String fileName,
+    required List<int> fileBytes,
+  }) async {
+    try {
+      final now = DateTime.now().toUtc().toIso8601String();
+      final sanitizedName =
+          fileName.toLowerCase().replaceAll(RegExp(r'[^a-z0-9_.-]'), '_');
+      final storagePath =
+          'content/$contentId/${DateTime.now().millisecondsSinceEpoch}_$sanitizedName';
+      final mimeType = fileName.toLowerCase().endsWith('.pdf')
+          ? 'application/pdf'
+          : 'application/octet-stream';
+
+      // 1. Upload to Supabase Storage
+      await _c.storage.from('group-content').uploadBinary(
+            storagePath,
+            fileBytes is Uint8List ? fileBytes : Uint8List.fromList(fileBytes),
+            fileOptions: FileOptions(contentType: mimeType, upsert: true),
+          );
+
+      // 2. Resolve Tenant ID
+      String? tenantId = _c.auth.currentUser?.userMetadata?['tenant_id'] as String?;
+      if (tenantId == null) {
+        final currentUserId = _c.auth.currentUser?.id;
+        if (currentUserId != null) {
+          final userProfile = await _c
+              .from('users')
+              .select('tenant_id')
+              .eq('id', currentUserId)
+              .maybeSingle();
+          tenantId = userProfile?['tenant_id'] as String?;
+        }
+      }
+
+      if (tenantId == null) {
+        final contentRow = await _c
+            .from('content')
+            .select('tenant_id')
+            .eq('id', contentId)
+            .maybeSingle();
+        tenantId = contentRow?['tenant_id'] as String?;
+      }
+
+      if (tenantId == null) {
+        throw const ServerException('Tenant ID could not be determined', code: 'TENANT_NOT_FOUND');
+      }
+
+      // 3. Check if file record exists
+      final existingFiles = await _c
+          .from('files')
+          .select('id')
+          .eq('content_id', contentId)
+          .limit(1);
+      final list = existingFiles as List<dynamic>;
+
+      if (list.isNotEmpty) {
+        final existingId = list.first['id'] as String;
+        await _c.from('files').update({
+          'storage_path': storagePath,
+          'file_name': fileName,
+          'mime_type': mimeType,
+          'file_size': fileBytes.length,
+          'created_at': now,
+        }).eq('id', existingId);
+      } else {
+        await _c.from('files').insert({
+          'tenant_id': tenantId,
+          'content_id': contentId,
+          'storage_path': storagePath,
+          'file_name': fileName,
+          'mime_type': mimeType,
+          'file_size': fileBytes.length,
+          'created_at': now,
+        });
+      }
+
+      // 4. Return refreshed VideoModel
+      return await getVideoById(videoId.isNotEmpty ? videoId : contentId);
+    } on PostgrestException catch (e) {
+      throw ServerException(e.message, code: e.code);
+    } catch (e) {
+      if (e is ServerException) rethrow;
       throw ServerException(e.toString());
     }
   }

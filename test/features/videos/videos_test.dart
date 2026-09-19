@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:edu_saas/core/errors/failures.dart';
 import 'package:edu_saas/core/errors/result.dart';
+import 'package:edu_saas/features/content/domain/entities/file_attachment_entity.dart';
 import 'package:edu_saas/features/videos/domain/entities/video_entity.dart';
 import 'package:edu_saas/features/videos/domain/entities/video_progress_entity.dart';
 import 'package:edu_saas/features/videos/domain/repositories/videos_repository.dart';
 import 'package:edu_saas/features/videos/presentation/cubit/videos_cubit.dart';
 import 'package:edu_saas/features/videos/presentation/cubit/videos_state.dart';
 import 'package:edu_saas/features/videos/presentation/widgets/video_card.dart';
+import 'package:edu_saas/core/localization/generated/app_localizations.dart';
 
 class MockVideosRepository implements VideosRepository {
   List<VideoEntity> videosResponse = [];
@@ -100,10 +102,91 @@ class MockVideosRepository implements VideosRepository {
     if (failureToThrow != null) return Result.failure(failureToThrow!);
     return const Result.success(null);
   }
+
+  @override
+  Future<Result<String>> getSignedFileUrl(String storagePath) async {
+    if (failureToThrow != null) return Result.failure(failureToThrow!);
+    return Result.success('https://example.com/signed/$storagePath');
+  }
+
+  @override
+  Future<Result<VideoEntity>> attachMaterialToVideo({
+    required String videoId,
+    required String contentId,
+    required String fileName,
+    required List<int> fileBytes,
+  }) async {
+    if (failureToThrow != null) return Result.failure(failureToThrow!);
+    final attached = FileAttachmentEntity(
+      id: 'file-1',
+      tenantId: 'tenant-1',
+      contentId: contentId,
+      fileName: fileName,
+      storagePath: 'tenants/tenant-1/content/$contentId/$fileName',
+      fileSize: fileBytes.length,
+      mimeType: 'application/pdf',
+      createdAt: DateTime.now(),
+    );
+    final base = singleVideoResponse ??
+        VideoEntity(
+          id: videoId,
+          contentId: contentId,
+          title: 'درس الجبر والهندسة',
+          providerVideoId: 'test-guid',
+          duration: 1200,
+          status: VideoStatus.ready,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+    return Result.success(base.copyWith(attachedFile: attached));
+  }
+
+  @override
+  Future<Result<VideoEntity>> linkYouTubeVideo({
+    required String contentId,
+    required String youtubeUrl,
+    String? title,
+  }) async {
+    if (failureToThrow != null) return Result.failure(failureToThrow!);
+    final video = VideoEntity(
+      id: 'vid-yt-1',
+      contentId: contentId,
+      title: title ?? 'درس يوتيوب',
+      provider: 'youtube',
+      providerVideoId: 'dQw4w9WgXcQ',
+      playbackUrl: 'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?enablejsapi=1',
+      thumbnailUrl: 'https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg',
+      status: VideoStatus.ready,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+    return Result.success(video);
+  }
 }
 
 void main() {
   group('VideoEntity & VideoProgressEntity Unit Tests', () {
+    test('isYouTube and isBunny getters reflect provider', () {
+      final yt = VideoEntity(
+        id: '1',
+        contentId: 'c1',
+        provider: 'youtube',
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+      expect(yt.isYouTube, isTrue);
+      expect(yt.isBunny, isFalse);
+
+      final bunny = VideoEntity(
+        id: '2',
+        contentId: 'c2',
+        provider: 'bunny',
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+      expect(bunny.isBunny, isTrue);
+      expect(bunny.isYouTube, isFalse);
+    });
     test('formattedDuration handles zero, minutes, and hours', () {
       final v1 = VideoEntity(
         id: '1',
@@ -265,15 +348,30 @@ void main() {
       final success = cubit.state as VideoUploadSuccess;
       expect(success.video.title, equals('درس جديد'));
     });
+
+    test('linkYouTubeVideo links unlisted youtube lesson successfully', () async {
+      final success = await cubit.linkYouTubeVideo(
+        contentId: 'c-yt',
+        youtubeUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        title: 'درس يوتيوب SAT',
+      );
+
+      expect(success, isTrue);
+      expect(cubit.state, isA<VideoUploadSuccess>());
+      final state = cubit.state as VideoUploadSuccess;
+      expect(state.video.isYouTube, isTrue);
+      expect(state.video.providerVideoId, equals('dQw4w9WgXcQ'));
+    });
   });
 
   group('VideoCard Widget Tests', () {
-    testWidgets('renders video title, duration, and status properly', (tester) async {
+    testWidgets('renders video title, duration, and CDN status properly', (tester) async {
       final video = VideoEntity(
         id: 'v1',
         contentId: 'c1',
         title: 'درس الإحصاء والاحتمالات',
         duration: 900,
+        provider: 'bunny',
         status: VideoStatus.ready,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
@@ -283,6 +381,9 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('ar'),
           home: Scaffold(
             body: VideoCard(
               video: video,
@@ -294,10 +395,40 @@ void main() {
 
       expect(find.text('درس الإحصاء والاحتمالات'), findsOneWidget);
       expect(find.text('15:00'), findsOneWidget);
-      expect(find.text('Bunny Stream HLS'), findsOneWidget);
+      expect(find.text('Bunny CDN آمن'), findsOneWidget);
 
       await tester.tap(find.byType(VideoCard), warnIfMissed: false);
       expect(tapped, isTrue);
+    });
+
+    testWidgets('renders YouTube badge for youtube video', (tester) async {
+      final video = VideoEntity(
+        id: 'v-yt',
+        contentId: 'c-yt',
+        title: 'بث مباشر SAT Math',
+        duration: 3600,
+        provider: 'youtube',
+        status: VideoStatus.ready,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('ar'),
+          home: Scaffold(
+            body: VideoCard(
+              video: video,
+              onTap: () {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('بث مباشر SAT Math'), findsOneWidget);
+      expect(find.text('يوتيوب'), findsOneWidget);
     });
 
     testWidgets('shows completed badge when progress is completed', (tester) async {
@@ -323,6 +454,9 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('ar'),
           home: Scaffold(
             body: VideoCard(
               video: video,

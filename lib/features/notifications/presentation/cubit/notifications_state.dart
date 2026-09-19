@@ -23,6 +23,8 @@ final class NotificationsLoaded extends NotificationsState {
   final bool isMarkingAll;
   final bool isSending;
   final bool sendSuccess;
+  final bool hasMore;
+  final bool isLoadingMore;
   final String? message;
 
   const NotificationsLoaded({
@@ -32,6 +34,8 @@ final class NotificationsLoaded extends NotificationsState {
     this.isMarkingAll = false,
     this.isSending = false,
     this.sendSuccess = false,
+    this.hasMore = true,
+    this.isLoadingMore = false,
     this.message,
   });
 
@@ -49,6 +53,8 @@ final class NotificationsLoaded extends NotificationsState {
     bool? isMarkingAll,
     bool? isSending,
     bool? sendSuccess,
+    bool? hasMore,
+    bool? isLoadingMore,
     String? message,
   }) {
     return NotificationsLoaded(
@@ -58,6 +64,8 @@ final class NotificationsLoaded extends NotificationsState {
       isMarkingAll: isMarkingAll ?? this.isMarkingAll,
       isSending: isSending ?? this.isSending,
       sendSuccess: sendSuccess ?? this.sendSuccess,
+      hasMore: hasMore ?? this.hasMore,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
       message: message,
     );
   }
@@ -70,6 +78,8 @@ final class NotificationsLoaded extends NotificationsState {
     isMarkingAll,
     isSending,
     sendSuccess,
+    hasMore,
+    isLoadingMore,
     message,
   ];
 }

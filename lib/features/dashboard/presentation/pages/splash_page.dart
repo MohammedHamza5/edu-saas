@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/localization/generated/app_localizations.dart';
-import '../../../../core/router/app_router.dart';
+import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/animated_math_background.dart';
 import '../../../../core/widgets/app_logo.dart';
@@ -107,20 +107,20 @@ class _SplashPageState extends State<SplashPage>
 
     if (state is AuthAuthenticated) {
       final target = switch (state.user.role) {
-        UserRole.teacher => AppRouter.teacherDashboard,
-        UserRole.student => AppRouter.studentDashboard,
-        UserRole.parent => AppRouter.parentDashboard,
+        UserRole.teacher => AppRoutes.teacherDashboard,
+        UserRole.student => AppRoutes.studentDashboard,
+        UserRole.parent => AppRoutes.parentDashboard,
       };
       context.go(target);
     } else if (state is AuthPendingApproval) {
-      context.go(AppRouter.studentPending, extra: state.user.fullName);
+      context.go(AppRoutes.studentPending, extra: state.user.fullName);
     } else if (state is AuthTenantSuspended) {
-      context.go(AppRouter.tenantSuspended);
+      context.go(AppRoutes.tenantSuspended);
     } else if (state is AuthUnauthenticated || state is AuthError) {
-      context.go(AppRouter.login);
+      context.go(AppRoutes.login);
     } else {
       // If still loading or initial when fallback timer expires, safely redirect to login
-      context.go(AppRouter.login);
+      context.go(AppRoutes.login);
     }
   }
 

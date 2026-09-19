@@ -267,30 +267,30 @@ BEGIN
     ),
 
     -- 5. متوسط الامتحانات
-    'exam_avg_percentage', (
-      SELECT COALESCE(AVG(percentage), 0)
+    'exam_avg_percentage', COALESCE((
+      SELECT AVG(percentage)
       FROM public.exam_attempts
       WHERE student_id = p_student_id AND status = 'submitted'
-    ),
+    ), 0),
 
     -- 6. متوسط مشاهدة الفيديو
-    'video_avg_percentage', (
-      SELECT COALESCE(AVG(percentage), 0)
+    'video_avg_percentage', COALESCE((
+      SELECT AVG(percentage)
       FROM public.video_progress
       WHERE student_id = p_student_id
-    ),
+    ), 0),
 
     -- 7. إحصائيات الحضور والتفاعل الذكي اليوم (Smart Engagement)
-    'today_active_seconds', (
-      SELECT COALESCE(active_seconds, 0)
+    'today_active_seconds', COALESCE((
+      SELECT active_seconds
       FROM public.student_daily_engagement
       WHERE student_id = p_student_id AND date = v_today
-    ),
-    'today_idle_seconds', (
-      SELECT COALESCE(idle_seconds, 0)
+    ), 0),
+    'today_idle_seconds', COALESCE((
+      SELECT idle_seconds
       FROM public.student_daily_engagement
       WHERE student_id = p_student_id AND date = v_today
-    ),
+    ), 0),
     'first_seen_today', (
       SELECT first_seen_at
       FROM public.student_daily_engagement
@@ -303,16 +303,16 @@ BEGIN
     ),
 
     -- 8. إجمالي آخر 7 أيام
-    'total_active_seconds_7d', (
-      SELECT COALESCE(SUM(active_seconds), 0)
+    'total_active_seconds_7d', COALESCE((
+      SELECT SUM(active_seconds)
       FROM public.student_daily_engagement
       WHERE student_id = p_student_id AND date >= v_today - 7
-    ),
-    'total_idle_seconds_7d', (
-      SELECT COALESCE(SUM(idle_seconds), 0)
+    ), 0),
+    'total_idle_seconds_7d', COALESCE((
+      SELECT SUM(idle_seconds)
       FROM public.student_daily_engagement
       WHERE student_id = p_student_id AND date >= v_today - 7
-    ),
+    ), 0),
 
     -- 9. آخر الأحداث الزمنية (Activity Feed / Timeline - آخر 15 حدث)
     'recent_activities', (

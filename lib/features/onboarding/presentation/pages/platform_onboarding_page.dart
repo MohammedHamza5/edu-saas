@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
-import '../../../../core/router/app_router.dart';
+import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -101,7 +101,7 @@ class _PlatformOnboardingViewState extends State<_PlatformOnboardingView> {
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () => context.go(AppRouter.login),
+          onPressed: () => context.go(AppRoutes.login),
         ),
         actions: const [
           LanguageSwitcherButton(compact: true),
@@ -188,7 +188,7 @@ class _PlatformOnboardingViewState extends State<_PlatformOnboardingView> {
                 const SizedBox(height: AppSpacing.s24),
                 AppButton(
                   text: context.l10n.goToTeacherLogin,
-                  onPressed: () => context.go(AppRouter.login),
+                  onPressed: () => context.go(AppRoutes.login),
                 ),
                 const SizedBox(height: AppSpacing.s12),
                 TextButton(

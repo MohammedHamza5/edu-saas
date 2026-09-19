@@ -48,29 +48,42 @@ class ExamModel extends ExamEntity {
 
     // Active version parsing
     ExamVersionModel? activeVersion;
-    if (json['active_version'] is Map<String, dynamic>) {
+    if (json['active_version'] is Map) {
       activeVersion = ExamVersionModel.fromJson(
-        json['active_version'] as Map<String, dynamic>,
+        Map<String, dynamic>.from(json['active_version'] as Map),
       );
     } else if (json['exam_versions'] is List && (json['exam_versions'] as List).isNotEmpty) {
-      final versions = json['exam_versions'] as List;
-      final published = versions.firstWhere(
-        (v) => (v as Map<String, dynamic>)['status'] == 'published',
-        orElse: () => versions.first,
-      );
-      activeVersion = ExamVersionModel.fromJson(published as Map<String, dynamic>);
+      final versions = (json['exam_versions'] as List).whereType<Map<dynamic, dynamic>>().toList();
+      Map<dynamic, dynamic>? published;
+      for (final v in versions) {
+        if (v['status'] == 'published') {
+          published = v;
+          break;
+        }
+      }
+      published ??= versions.firstOrNull;
+      if (published != null) {
+        activeVersion = ExamVersionModel.fromJson(Map<String, dynamic>.from(published));
+      }
     }
 
     // Student attempts metadata
     ExamAttemptModel? myLatestAttempt;
     int? myBestScore;
-    if (json['my_latest_attempt'] is Map<String, dynamic>) {
+    if (json['my_latest_attempt'] is Map) {
       myLatestAttempt = ExamAttemptModel.fromJson(
-        json['my_latest_attempt'] as Map<String, dynamic>,
+        Map<String, dynamic>.from(json['my_latest_attempt'] as Map),
       );
     } else if (json['exam_attempts'] is List && (json['exam_attempts'] as List).isNotEmpty) {
-      final attemptsList = (json['exam_attempts'] as List)
-          .map((a) => ExamAttemptModel.fromJson(a as Map<String, dynamic>))
+      // Only parse as ExamAttemptModel if the items actually look like attempts (have an 'id' and 'student_id')
+      final validAttemptMaps = (json['exam_attempts'] as List)
+          .whereType<Map<dynamic, dynamic>>()
+          .where((a) => a['id'] != null && a['student_id'] != null)
+          .map((a) => Map<String, dynamic>.from(a))
+          .toList();
+
+      final attemptsList = validAttemptMaps
+          .map((a) => ExamAttemptModel.fromJson(a))
           .toList();
 
       if (attemptsList.isNotEmpty) {
@@ -93,10 +106,25 @@ class ExamModel extends ExamEntity {
     int attemptsCount = 0;
     if (json['attempts_count'] != null) {
       attemptsCount = (json['attempts_count'] as num).toInt();
+    } else if (json['exam_attempts'] is List && (json['exam_attempts'] as List).isNotEmpty) {
+      final first = (json['exam_attempts'] as List).first;
+      if (first is Map && first.containsKey('count')) {
+        attemptsCount = (first['count'] as num?)?.toInt() ?? 0;
+      }
+    }
+
+    DateTime parsedCreatedAt = DateTime.now();
+    if (json['created_at'] != null) {
+      parsedCreatedAt = DateTime.tryParse(json['created_at'].toString()) ?? DateTime.now();
+    }
+
+    DateTime parsedUpdatedAt = DateTime.now();
+    if (json['updated_at'] != null) {
+      parsedUpdatedAt = DateTime.tryParse(json['updated_at'].toString()) ?? DateTime.now();
     }
 
     return ExamModel(
-      id: json['id'] as String,
+      id: json['id'] as String? ?? '',
       contentId: json['content_id'] as String? ?? '',
       tenantId: json['tenant_id'] as String? ?? '',
       groupId: groupId,
@@ -108,10 +136,10 @@ class ExamModel extends ExamEntity {
       shuffleQuestions: json['shuffle_questions'] as bool? ?? false,
       showResult: json['show_result'] as bool? ?? true,
       allowRetake: json['allow_retake'] as bool? ?? false,
-      startAt: json['start_at'] != null ? DateTime.parse(json['start_at'] as String) : null,
-      endAt: json['end_at'] != null ? DateTime.parse(json['end_at'] as String) : null,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
+      startAt: json['start_at'] != null ? DateTime.tryParse(json['start_at'].toString()) : null,
+      endAt: json['end_at'] != null ? DateTime.tryParse(json['end_at'].toString()) : null,
+      createdAt: parsedCreatedAt,
+      updatedAt: parsedUpdatedAt,
       activeVersion: activeVersion,
       attemptsCount: attemptsCount,
       myLatestAttempt: myLatestAttempt,

@@ -9,11 +9,13 @@ abstract class ContentRepository {
   Future<Result<List<ContentEntity>>> getGroupContent({
     required String groupId,
     ContentStatus? statusFilter,
+    int page = 0,
+    int pageSize = 20,
   });
 
-  /// Creates a new content item under the specified group
+  /// Creates a new content item (optional groupId for bank items)
   Future<Result<ContentEntity>> createContent({
-    required String groupId,
+    String? groupId,
     required String title,
     String? description,
     required ContentType type,
@@ -24,9 +26,11 @@ abstract class ContentRepository {
     String? mimeType,
     int? fileSize,
     List<int>? fileBytes,
+    String? associatedExamId,
+    String? prerequisiteExamId,
   });
 
-  /// Updates an existing content item's metadata
+  /// Updates an existing content item's metadata and optional attached file
   Future<Result<ContentEntity>> updateContent({
     required String contentId,
     String? title,
@@ -34,6 +38,13 @@ abstract class ContentRepository {
     ContentType? type,
     ContentStatus? status,
     int? sortOrder,
+    String? fileName,
+    String? storagePath,
+    String? mimeType,
+    int? fileSize,
+    List<int>? fileBytes,
+    String? associatedExamId,
+    String? prerequisiteExamId,
   });
 
   /// Updates lifecycle status (e.g., Publish or Archive)
@@ -54,5 +65,23 @@ abstract class ContentRepository {
   Future<Result<String>> getSignedFileUrl({
     required String storagePath,
     int expiresInSeconds = 3600,
+  });
+
+  /// Retrieves the centralized video bank for the tenant (all video lessons)
+  Future<Result<List<ContentEntity>>> getCentralVideoBank({
+    int page = 0,
+    int pageSize = 100,
+  });
+
+  /// Assigns/synchronizes a content item to one or more groups
+  Future<Result<void>> assignContentToGroups({
+    required String contentId,
+    required List<String> groupIds,
+  });
+
+  /// Links a quiz/exam to a lesson unit
+  Future<Result<void>> linkLessonExam({
+    required String contentId,
+    required String examId,
   });
 }

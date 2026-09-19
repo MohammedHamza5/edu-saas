@@ -161,6 +161,34 @@ class AttendanceStats extends Equatable {
       lateCount = 0,
       excusedCount = 0;
 
+  factory AttendanceStats.fromRecords(List<AttendanceEntity> records) {
+    int present = 0;
+    int absent = 0;
+    int late = 0;
+    int excused = 0;
+
+    for (final record in records) {
+      switch (record.status) {
+        case AttendanceStatus.present:
+          present++;
+        case AttendanceStatus.absent:
+          absent++;
+        case AttendanceStatus.late:
+          late++;
+        case AttendanceStatus.excused:
+          excused++;
+      }
+    }
+
+    return AttendanceStats(
+      totalSessions: records.length,
+      presentCount: present,
+      absentCount: absent,
+      lateCount: late,
+      excusedCount: excused,
+    );
+  }
+
   double get attendancePercentage {
     if (totalSessions == 0) return 0.0;
     // Present + Excused are considered compliant attendance

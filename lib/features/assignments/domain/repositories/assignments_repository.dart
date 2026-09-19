@@ -3,11 +3,18 @@ import '../entities/assignment_entity.dart';
 
 abstract class AssignmentsRepository {
   /// Fetches all assignments belonging to a specific group (for teachers).
-  Future<Result<List<AssignmentEntity>>> getGroupAssignments(String groupId);
+  Future<Result<List<AssignmentEntity>>> getGroupAssignments(
+    String groupId, {
+    int page = 0,
+    int pageSize = 15,
+  });
 
   /// Fetches all assignments available to the currently logged-in student across all their groups,
   /// including the student's submission status for each assignment.
-  Future<Result<List<AssignmentEntity>>> getStudentAssignments();
+  Future<Result<List<AssignmentEntity>>> getStudentAssignments({
+    int page = 0,
+    int pageSize = 15,
+  });
 
   /// Fetches detailed information for a specific assignment.
   Future<Result<AssignmentEntity>> getAssignmentDetails(String assignmentId);

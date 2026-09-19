@@ -345,6 +345,7 @@ class ExamAttemptEntity extends Equatable {
   final int? score;
   final double? percentage;
   final List<ExamAnswerEntity> answers;
+  final List<ExamQuestionEntity> questions;
 
   const ExamAttemptEntity({
     required this.id,
@@ -358,6 +359,7 @@ class ExamAttemptEntity extends Equatable {
     this.score,
     this.percentage,
     this.answers = const [],
+    this.questions = const [],
   });
 
   bool get isInProgress => status == AttemptStatus.inProgress;
@@ -381,6 +383,7 @@ class ExamAttemptEntity extends Equatable {
     int? score,
     double? percentage,
     List<ExamAnswerEntity>? answers,
+    List<ExamQuestionEntity>? questions,
   }) {
     return ExamAttemptEntity(
       id: id ?? this.id,
@@ -394,6 +397,7 @@ class ExamAttemptEntity extends Equatable {
       score: score ?? this.score,
       percentage: percentage ?? this.percentage,
       answers: answers ?? this.answers,
+      questions: questions ?? this.questions,
     );
   }
 
@@ -410,6 +414,7 @@ class ExamAttemptEntity extends Equatable {
         score,
         percentage,
         answers,
+        questions,
       ];
 }
 
@@ -459,12 +464,21 @@ class ExamEntity extends Equatable {
   });
 
   bool get hasAttempted => myLatestAttempt != null;
-  bool get hasActiveAttempt => myLatestAttempt?.isInProgress ?? false;
+  bool get hasActiveAttempt {
+    if (myLatestAttempt == null) return false;
+    if (!myLatestAttempt!.isInProgress) return false;
+    // An attempt is only active if it has not exceeded the exam duration
+    final elapsedMinutes =
+        DateTime.now().difference(myLatestAttempt!.startedAt).inMinutes;
+    return elapsedMinutes < durationMinutes;
+  }
   bool get canTakeExam {
     if (!hasAttempted) return true;
     if (hasActiveAttempt) return true; // Resume
     return allowRetake;
   }
+  bool get isPublished => activeVersion?.isPublished ?? (activeVersion != null);
+  String? get description => null;
 
   ExamEntity copyWith({
     String? id,

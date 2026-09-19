@@ -2459,6 +2459,20 @@ class AppLocalizationsAr extends AppLocalizations {
       'يرجى التواصل مع إدارة المنصة أو المعلم لإعادة التفعيل.';
 
   @override
+  String get errorUserSuspendedMessage => 'تم إيقاف حسابك من قِبل المعلم.';
+
+  @override
+  String get errorRegistrationRejectedTitle => 'تم رفض التسجيل';
+
+  @override
+  String get errorRegistrationRejectedMessage =>
+      'تم رفض طلب تسجيل حسابك من قِبل المعلم.';
+
+  @override
+  String get errorRegistrationRejectedHint =>
+      'يرجى التواصل مع معلمك إذا كنت تعتقد أن هذا الإجراء تم بالخطأ.';
+
+  @override
   String get errorVideoProcessingTitle => 'الفيديو قيد المعالجة';
 
   @override
@@ -4010,4 +4024,474 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get videoUploadDoNotCloseWarning =>
       'جاري رفع وتشفير الفيديو سحابياً... برجاء إبقاء هذه الصفحة مفتوحة حتى اكتمال الرفع إلى 100%.';
+
+  @override
+  String get sequentialLearningSectionTitle => 'التعلم المتسلسل والاختبارات';
+
+  @override
+  String get associatedExamBadge => 'الاختبار المرتبط (كويز المحاضرة)';
+
+  @override
+  String get associatedExamLabel => 'الاختبار المرتبط (كويز المحاضرة)';
+
+  @override
+  String associatedExamTitleLabel(String title) {
+    return 'الاختبار المرتبط: $title';
+  }
+
+  @override
+  String get associatedExamHint => 'اختر اختباراً لهذه المحاضرة';
+
+  @override
+  String get prerequisiteExamLabel => 'الاختبار المشترط (قفل المحاضرة)';
+
+  @override
+  String get prerequisiteExamHint => 'اختر اختباراً يجب اجتيازه أولاً';
+
+  @override
+  String get noneOption => 'لا يوجد';
+
+  @override
+  String totalPointsSummary(int points, int maxScore) {
+    return 'المجموع: $points / $maxScore نقطة';
+  }
+
+  @override
+  String autoAdjustMaxScore(int points) {
+    return 'ضبط الدرجة النهائية تلقائياً';
+  }
+
+  @override
+  String get removeOption => 'حذف الخيار';
+
+  @override
+  String get selectCorrectAnswerPrompt => 'اختر الإجابة الصحيحة';
+
+  @override
+  String get correctAnswerBadge => 'إجابة صحيحة';
+
+  @override
+  String get addOption => 'إضافة خيار';
+
+  @override
+  String optionLetter(String letter) {
+    return 'خيار $letter';
+  }
+
+  @override
+  String get searchExamsHint => 'ابحث عن اختبار...';
+
+  @override
+  String get clearSearchAction => 'مسح البحث';
+
+  @override
+  String filterAllExams(int count) {
+    return 'الكل ($count)';
+  }
+
+  @override
+  String filterPublishedExams(int count) {
+    return 'منشور ($count)';
+  }
+
+  @override
+  String filterDraftExams(int count) {
+    return 'مسودات ($count)';
+  }
+
+  @override
+  String get noMatchingExamsFound => 'لا توجد اختبارات تطابق بحثك';
+
+  @override
+  String get teacherPreviewMode => 'وضع المعاينة (للمعلم)';
+
+  @override
+  String remainingTime(String time) {
+    return 'متبقي: $time';
+  }
+
+  @override
+  String get restartLesson => 'إعادة المحاضرة';
+
+  @override
+  String get clickToSeek => 'اضغط للتقديم/التأخير';
+
+  @override
+  String get lessonCompletedSuccess => 'تم الانتهاء من المحاضرة!';
+
+  @override
+  String get progressSavedAutomatically => 'يتم حفظ تقدمك تلقائياً';
+
+  @override
+  String get takeRequiredExamAction => 'ابدأ الاختبار المطلوب';
+
+  @override
+  String get attachedLessonMaterial => 'المذكرة المرفقة';
+
+  @override
+  String get attachedLessonMaterialSubtitle =>
+      'تحميل ملف الـ PDF الخاص بالمحاضرة';
+
+  @override
+  String get viewAttachedPdf => 'عرض ملف PDF';
+
+  @override
+  String get attachPdfToLessonAction => 'إرفاق ملف PDF';
+
+  @override
+  String get noAttachedMaterialForLesson => 'لا توجد ملفات مرفقة';
+
+  @override
+  String get videoUnmute => 'إلغاء كتم الصوت';
+
+  @override
+  String get videoMute => 'كتم الصوت';
+
+  @override
+  String get videoSourceBadgeYouTube => 'يوتيوب';
+
+  @override
+  String get invalidYoutubeUrl => 'رابط يوتيوب غير صالح';
+
+  @override
+  String get videoLinkedSuccessToast => 'تم ربط الفيديو بنجاح';
+
+  @override
+  String get youtubeTabTitle => 'فيديو يوتيوب';
+
+  @override
+  String get bunnyTabTitle => 'خوادم المنصة (Bunny)';
+
+  @override
+  String get youtubeUrlLabel => 'رابط يوتيوب';
+
+  @override
+  String get youtubeUrlHint => 'ضع رابط يوتيوب هنا';
+
+  @override
+  String get youtubeUnlistedAdvice =>
+      'يفضل استخدام فيديوهات غير مدرجة (Unlisted) للخصوصية';
+
+  @override
+  String get linkVideoAction => 'ربط الفيديو';
+
+  @override
+  String get noVideosInBankDesc =>
+      'لا توجد فيديوهات في بنك الفيديوهات حتى الآن.';
+
+  @override
+  String get addVideoToBankAction => 'إضافة فيديو للبنك';
+
+  @override
+  String get unassignedBadge => 'غير معين لمجموعة';
+
+  @override
+  String get assignToGroupsAction => 'تعيين للمجموعات';
+
+  @override
+  String get lessonPrerequisiteLocked => 'المحاضرة مقفلة باختبار مشروط';
+
+  @override
+  String mustPassExamToUnlock(String title, int score) {
+    return 'يجب أن تحصل على $score% في $title لفتح هذه المحاضرة.';
+  }
+
+  @override
+  String get prerequisiteExamBadge => 'الاختبار المشروط';
+
+  @override
+  String get videoMaterialPdfBadge => 'مذكرة PDF';
+
+  @override
+  String get videoReadyBadge => 'جاهز';
+
+  @override
+  String get videoFailedBadge => 'فشل';
+
+  @override
+  String get videoProcessingBadge => 'جاري المعالجة';
+
+  @override
+  String get contentSecurityDisclaimerStudent =>
+      'يتم مراقبة نشاطك وتقدمك. يرجى عدم مشاركة حسابك مع آخرين.';
+
+  @override
+  String get quickAccessTitle => 'وصول سريع';
+
+  @override
+  String get quickAccessSubtitle => 'انتقل مباشرة إلى مجموعاتك النشطة';
+
+  @override
+  String get myStudyMaterials => 'موادي الدراسية';
+
+  @override
+  String get myStudyMaterialsDesc =>
+      'الوصول إلى جميع مجموعاتك والمحتوى المخصص لك';
+
+  @override
+  String get academicMomentumTitle => 'الزخم الأكاديمي';
+
+  @override
+  String get statExamAverage => 'متوسط درجات الاختبارات';
+
+  @override
+  String get statAssignmentsDone => 'الواجبات المنجزة';
+
+  @override
+  String get statVideoProgress => 'تقدم مشاهدة الفيديوهات';
+
+  @override
+  String get continueLearningTitle => 'مواصلة التعلم';
+
+  @override
+  String resumeAtTime(String time) {
+    return 'استئناف عند $time';
+  }
+
+  @override
+  String lectureCompletedPercent(String percent) {
+    return 'مكتمل $percent%';
+  }
+
+  @override
+  String get resumeNow => 'استئناف الآن';
+
+  @override
+  String get overdue => 'متأخر';
+
+  @override
+  String dueInHours(int hours) {
+    return 'مستحق خلال $hours ساعة';
+  }
+
+  @override
+  String get dueTomorrow => 'مستحق غداً';
+
+  @override
+  String dueInDays(int days) {
+    return 'مستحق خلال $days أيام';
+  }
+
+  @override
+  String get noUrgentTasks => 'لا توجد مهام عاجلة';
+
+  @override
+  String get noUrgentTasksSubtitle => 'لقد أنجزت كل ما عليك!';
+
+  @override
+  String get urgentTasksTitle => 'المهام العاجلة';
+
+  @override
+  String get urgentTasksSubtitle => 'مهام تتطلب اهتمامك الفوري';
+
+  @override
+  String get taskTypeAssignment => 'واجب';
+
+  @override
+  String get taskTypeExam => 'اختبار';
+
+  @override
+  String get atLeastTwoOptionsRequired => 'يجب إضافة خيارين على الأقل';
+
+  @override
+  String examPublishFailed(String error) {
+    return 'فشل نشر الاختبار: $error';
+  }
+
+  @override
+  String totalQuestionsSummary(int count) {
+    return '$count أسئلة';
+  }
+
+  @override
+  String get attachVideoMaterialNotice =>
+      'قم بإرفاق مذكرة PDF أو ملف لهذا الفيديو.';
+
+  @override
+  String get attachVideoMaterialHint => 'اختر ملف PDF';
+
+  @override
+  String get addNewMaterialTitle => 'إضافة مادة جديدة';
+
+  @override
+  String get uploadBunnyVideoTitle => 'رفع فيديو';
+
+  @override
+  String get uploadBunnyVideoSubtitle => 'رفع مباشرة لخوادم المنصة';
+
+  @override
+  String get uploadPdfFileTitle => 'رفع ملف PDF';
+
+  @override
+  String get uploadPdfFileSubtitle => 'مذكرات وملفات';
+
+  @override
+  String get imagesCategory => 'صور';
+
+  @override
+  String get createAssignmentShortcut => 'إنشاء واجب';
+
+  @override
+  String get createAssignmentShortcutSubtitle => 'إضافة تكليف جديد';
+
+  @override
+  String get createExamShortcut => 'إنشاء اختبار';
+
+  @override
+  String get createExamShortcutSubtitle => 'إضافة كويز أو اختبار';
+
+  @override
+  String get videosCategory => 'فيديوهات';
+
+  @override
+  String get pdfDocumentsCategory => 'ملفات PDF';
+
+  @override
+  String get allCategories => 'كل الفئات';
+
+  @override
+  String filterAssignmentsWithCount(int count) {
+    return 'الواجبات ($count)';
+  }
+
+  @override
+  String filterExamsWithCount(int count) {
+    return 'الاختبارات ($count)';
+  }
+
+  @override
+  String get noVideosInCategory => 'لا توجد فيديوهات في هذه الفئة.';
+
+  @override
+  String get uploadFirstVideoAction => 'ارفع أول فيديو';
+
+  @override
+  String get noPdfsInCategory => 'لا توجد ملفات PDF في هذه الفئة.';
+
+  @override
+  String get uploadFirstPdfAction => 'ارفع أول ملف PDF';
+
+  @override
+  String get noAssignmentsInCategory => 'لا توجد واجبات في هذه الفئة.';
+
+  @override
+  String get createFirstAssignmentAction => 'أنشئ أول واجب';
+
+  @override
+  String get noExamsInCategory => 'لا توجد اختبارات في هذه الفئة.';
+
+  @override
+  String get createFirstExamAction => 'أنشئ أول اختبار';
+
+  @override
+  String get videoBankTitle => 'بنك الفيديوهات';
+
+  @override
+  String get videoBankSubtitle => 'إدارة جميع الفيديوهات المرفوعة';
+
+  @override
+  String totalVideosCount(int count) {
+    return 'الإجمالي ($count)';
+  }
+
+  @override
+  String assignedVideosCount(int count) {
+    return 'تم تعيينه ($count)';
+  }
+
+  @override
+  String unassignedVideosCount(int count) {
+    return 'غير معين ($count)';
+  }
+
+  @override
+  String filterAllVideos(int count) {
+    return 'كل الفيديوهات ($count)';
+  }
+
+  @override
+  String filterUnassignedOnly(int count) {
+    return 'الغير معينة فقط ($count)';
+  }
+
+  @override
+  String get noVideosInBankTitle => 'لا توجد فيديوهات بعد';
+
+  @override
+  String get studentNavDashboardSubtitle => 'تقدمك ومهامك';
+
+  @override
+  String get studentNavNotificationsSubtitle => 'آخر التحديثات';
+
+  @override
+  String get studentNavContentSubtitle => 'الفيديوهات والمحاضرات';
+
+  @override
+  String get studentNavAssignmentsSubtitle => 'الواجبات المنزلية';
+
+  @override
+  String get studentNavExamsSubtitle => 'الاختبارات والنتائج';
+
+  @override
+  String get searchAssignmentsHint => 'ابحث في الواجبات...';
+
+  @override
+  String filterAllAssignments(int count) {
+    return 'الكل ($count)';
+  }
+
+  @override
+  String get filterNeedsGrading => 'بانتظار التقييم';
+
+  @override
+  String get filterPastDue => 'متأخر';
+
+  @override
+  String get noMatchingAssignmentsFound => 'لا توجد واجبات تطابق بحثك.';
+
+  @override
+  String get lecturesRoadmapTitle => 'خريطة المحاضرات';
+
+  @override
+  String get lecturesRoadmapSubtitle => 'مواعيد محاضراتك القادمة';
+
+  @override
+  String get recordedSessionAvailable => 'جلسة مسجلة متاحة';
+
+  @override
+  String get youtubeUnlistedNotice =>
+      'استخدم فيديوهات غير مدرجة لمنع الوصول العام.';
+
+  @override
+  String get materialAttachmentTitle => 'مرفقات المادة';
+
+  @override
+  String get chooseMaterialFile => 'اختر ملفاً';
+
+  @override
+  String get changePdfFileAction => 'تغيير ملف الـ PDF';
+
+  @override
+  String get selectTargetGroups => 'اختر المجموعات المستهدفة';
+
+  @override
+  String get noGroupsAvailable => 'لا توجد مجموعات متاحة';
+
+  @override
+  String get groupAssignmentSuccess => 'تم تعيين المجموعات بنجاح';
+
+  @override
+  String get manageAssignedGroupsTitle => 'إدارة المجموعات';
+
+  @override
+  String get manageAssignedGroupsDesc =>
+      'حدد المجموعات التي يمكنها الوصول لهذا المحتوى.';
+
+  @override
+  String get saveGroupAssignmentsAction => 'حفظ التعيينات';
+
+  @override
+  String enrolledStudentsCountLabel(int count) {
+    return '$count طلاب مسجلين';
+  }
 }

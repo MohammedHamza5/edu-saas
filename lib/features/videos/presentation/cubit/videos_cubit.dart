@@ -1,5 +1,8 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/errors/result.dart';
+import '../../domain/entities/video_entity.dart';
+import '../../domain/entities/video_progress_entity.dart';
 import '../../domain/repositories/videos_repository.dart';
 import 'videos_state.dart';
 
@@ -9,10 +12,9 @@ class VideosCubit extends Cubit<VideosState> {
   int _lastReportedSecond = -1;
   DateTime _lastReportedTime = DateTime.fromMillisecondsSinceEpoch(0);
 
-  VideosCubit({
-    required VideosRepository repository,
-  })  : _repository = repository,
-        super(const VideosInitial());
+  VideosCubit({required VideosRepository repository})
+    : _repository = repository,
+      super(const VideosInitial());
 
   Future<void> loadVideosForGroup(String groupId) async {
     emit(const VideosLoading());
@@ -35,8 +37,20 @@ class VideosCubit extends Cubit<VideosState> {
   }) async {
     emit(const VideosLoading());
 
-    // 1. Fetch video record
-    final videoResult = await _repository.getVideoById(videoId);
+    // 1. Fetch video and progress concurrently in a single parallel round-trip
+    final videoFuture = _repository.getVideoById(videoId);
+    final progressFuture = studentId.isNotEmpty
+        ? _repository.getVideoProgress(videoId: videoId, studentId: studentId)
+        : Future.value(const Result<VideoProgressEntity?>.success(null));
+
+    final results = await Future.wait<dynamic>(<Future<dynamic>>[
+      videoFuture,
+      progressFuture,
+    ]);
+
+    final videoResult = results[0] as Result<VideoEntity>;
+    final progressResult = results[1] as Result<VideoProgressEntity?>;
+
     if (videoResult.isFailure) {
       final f = videoResult.failureOrNull!;
       emit(VideosError(f.message, code: f.code));
@@ -45,38 +59,28 @@ class VideosCubit extends Cubit<VideosState> {
 
     final video = videoResult.dataOrNull!;
 
-    // If video has not been uploaded yet or has no provider video ID, emit loaded with null playbackUrl
+    // If video has not been uploaded yet or has no provider video ID
     if (video.providerVideoId == null || video.providerVideoId!.isEmpty) {
-      emit(VideosLoaded(
-        currentVideo: video,
-        playbackUrl: null,
-      ));
+      emit(VideosLoaded(currentVideo: video, playbackUrl: null));
       return;
     }
 
-    // 2. Fetch secure signed playback URL
-    final urlResult = await _repository.getPlaybackUrl(videoId);
-    if (urlResult.isFailure) {
-      final f = urlResult.failureOrNull!;
-      emit(VideosError(f.message, code: f.code));
-      return;
+    // Playback URL is already securely signed inside getVideoById without extra network trip
+    String? playbackUrl = video.playbackUrl;
+    if (playbackUrl == null || playbackUrl.isEmpty) {
+      final urlResult = await _repository.getPlaybackUrl(video.id);
+      playbackUrl = urlResult.dataOrNull;
     }
-
-    final playbackUrl = urlResult.dataOrNull!;
-
-    // 3. Fetch current student progress for Resume functionality
-    final progressResult = await _repository.getVideoProgress(
-      videoId: videoId,
-      studentId: studentId,
-    );
 
     final progress = progressResult.dataOrNull;
 
-    emit(VideosLoaded(
-      currentVideo: video,
-      playbackUrl: playbackUrl,
-      progress: progress,
-    ));
+    emit(
+      VideosLoaded(
+        currentVideo: video,
+        playbackUrl: playbackUrl,
+        progress: progress,
+      ),
+    );
   }
 
   /// Throttled progress update: saves to DB every 10 seconds or when forced (pause/exit)
@@ -95,7 +99,14 @@ class VideosCubit extends Cubit<VideosState> {
     final elapsedMs = now.difference(_lastReportedTime).inMilliseconds;
 
     // Only update if forced OR (at least 10 seconds passed AND progress changed by >= 5s)
-    if (!force && (elapsedMs < 10000 || (progressSeconds - _lastReportedSecond).abs() < 5)) {
+    if (!force &&
+        (elapsedMs < 10000 ||
+            (progressSeconds - _lastReportedSecond).abs() < 5)) {
+      return;
+    }
+
+    // Never overwrite an existing higher progress with 0 seconds unless forced
+    if (progressSeconds <= 0 && _lastReportedSecond > 5 && !force) {
       return;
     }
 
@@ -118,7 +129,7 @@ class VideosCubit extends Cubit<VideosState> {
           emit(current.copyWith(progress: updatedProgress));
         }
       },
-      onFailure: (_) {
+      onFailure: (failure) {
         // Silently tolerate minor progress network drops without interrupting playback
       },
     );
@@ -130,11 +141,7 @@ class VideosCubit extends Cubit<VideosState> {
     required List<int> videoBytes,
     required String fileName,
   }) async {
-    emit(const VideoUploading(
-      progress: 0.0,
-      sentBytes: 0,
-      totalBytes: 0,
-    ));
+    emit(const VideoUploading(progress: 0.0, sentBytes: 0, totalBytes: 0));
 
     final result = await _repository.createAndUploadVideo(
       contentId: contentId,
@@ -144,11 +151,13 @@ class VideosCubit extends Cubit<VideosState> {
       onProgress: (sent, total) {
         if (total > 0) {
           final progress = (sent / total).clamp(0.0, 1.0);
-          emit(VideoUploading(
-            progress: progress,
-            sentBytes: sent,
-            totalBytes: total,
-          ));
+          emit(
+            VideoUploading(
+              progress: progress,
+              sentBytes: sent,
+              totalBytes: total,
+            ),
+          );
         }
       },
     );
@@ -159,6 +168,64 @@ class VideosCubit extends Cubit<VideosState> {
       },
       onFailure: (failure) {
         emit(VideosError(failure.message, code: failure.code));
+      },
+    );
+  }
+
+  Future<bool> linkYouTubeVideo({
+    required String contentId,
+    required String youtubeUrl,
+    String? title,
+  }) async {
+    emit(const VideoUploading(progress: 0.5, sentBytes: 50, totalBytes: 100));
+
+    final result = await _repository.linkYouTubeVideo(
+      contentId: contentId,
+      youtubeUrl: youtubeUrl,
+      title: title,
+    );
+
+    return result.when(
+      onSuccess: (video) {
+        emit(VideoUploadSuccess(video));
+        return true;
+      },
+      onFailure: (failure) {
+        emit(VideosError(failure.message, code: failure.code));
+        return false;
+      },
+    );
+  }
+
+  Future<String?> getSignedFileUrl(String storagePath) async {
+    final result = await _repository.getSignedFileUrl(storagePath);
+    return result.dataOrNull;
+  }
+
+  Future<bool> attachMaterialToVideo({
+    required String videoId,
+    required String contentId,
+    required String fileName,
+    required List<int> fileBytes,
+  }) async {
+    final result = await _repository.attachMaterialToVideo(
+      videoId: videoId,
+      contentId: contentId,
+      fileName: fileName,
+      fileBytes: fileBytes,
+    );
+
+    return result.when(
+      onSuccess: (video) {
+        if (state is VideosLoaded) {
+          final current = state as VideosLoaded;
+          emit(current.copyWith(currentVideo: video));
+        }
+        return true;
+      },
+      onFailure: (failure) {
+        emit(VideosError(failure.message, code: failure.code));
+        return false;
       },
     );
   }

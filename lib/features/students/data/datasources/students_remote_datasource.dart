@@ -301,22 +301,27 @@ class StudentsRemoteDataSourceImpl implements StudentsRemoteDataSource {
   Future<List<StudentGroupInfoModel>> getAvailableGroupsForStudent(
     String studentId,
   ) async {
-    // Get all groups the student IS in
-    final memberRows = await _c
+    // Run member groups query and active groups query in parallel via Future.wait
+    final memberRowsFuture = _c
         .from('group_members')
         .select('group_id')
         .eq('student_id', studentId);
 
-    final memberGroupIds =
-        (memberRows as List<dynamic>).map((r) => r['group_id'] as String).toList();
-
-    // Get all active groups in the tenant
-    final allGroupsResponse = await _c
+    final allGroupsFuture = _c
         .from('groups')
         .select('id, name, level')
         .eq('status', 'active');
 
-    final allGroups = allGroupsResponse as List<dynamic>;
+    final results = await Future.wait<dynamic>(<Future<dynamic>>[
+      memberRowsFuture,
+      allGroupsFuture,
+    ]);
+
+    final memberRows = results[0] as List<dynamic>;
+    final allGroups = results[1] as List<dynamic>;
+
+    final memberGroupIds =
+        memberRows.map((r) => (r as Map)['group_id'] as String).toSet();
 
     // Filter out groups the student is already in and return as StudentGroupInfo
     return allGroups

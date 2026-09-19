@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html dir="rtl" lang="ar">
+<html lang="ar">
 <head>
   <base href="$FLUTTER_BASE_HREF">
 
@@ -127,6 +127,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
   </noscript>
 
+  <!-- hls.js: Enables HLS (.m3u8) video playback on Chrome / Firefox / Edge.
+       Must be loaded BEFORE Flutter so that the video_player_web plugin detects it.
+       Platform serves encrypted adaptive HLS; without hls.js Chrome cannot play it natively. -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.15/dist/hls.min.js"
+          crossorigin="anonymous"
+          defer></script>
+
+  <!-- Player.js: Enables bidirectional event communication (timeupdate, progress, play, pause, seek) with Bunny Stream embed iframe -->
+  <script src="player-0.1.0.min.js"></script>
+
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -151,7 +161,45 @@
       overflow: hidden;
       background-color: #0F172A;
       font-family: 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif;
-      direction: rtl;
+      direction: ltr;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       FLUTTER WEB VIDEO PLAYER CENTERING & POINTER FIX
+       1. Forces video content to be centered horizontally & vertically (fixes black left half in RTL).
+       2. Disables HTML video element from capturing/hiding the mouse cursor.
+       3. Removes browser native media overlays & Picture-in-Picture buttons.
+       ═══════════════════════════════════════════════════════ */
+    flt-platform-view, flt-platform-view-slot, flutter-view, flt-glass-pane, flt-scene-host {
+      direction: ltr !important;
+      transform-origin: 0 0 !important;
+    }
+
+    video, [id^="videoElement-"] {
+      direction: ltr !important;
+      width: 100% !important;
+      height: 100% !important;
+      display: block !important;
+      margin: 0 auto !important;
+      object-fit: contain !important;
+      object-position: center center !important;
+      pointer-events: none !important;
+      background-color: #000000 !important;
+    }
+
+    flt-platform-view {
+      pointer-events: none !important;
+      direction: ltr !important;
+    }
+
+    /* Hide Chrome/Edge native media control overlays & PiP buttons */
+    video::-webkit-media-controls,
+    video::-webkit-media-controls-enclosure,
+    video::-webkit-media-controls-overlay-play-button,
+    video::-webkit-media-controls-start-playback-button,
+    video::-internal-media-controls-overlay-cast-button {
+      display: none !important;
+      -webkit-appearance: none !important;
     }
 
     /* ═══════════════════════════════════════════════════════
@@ -381,6 +429,432 @@
           }
         });
       }
+    })();
+  </script>
+
+  <!-- ═══════════════════════════════════════════════════════
+       HLS.JS ENGINE & ADAPTIVE STREAM DECODER FOR FLUTTER WEB
+       Enables seamless .m3u8 playback on Chrome, Edge & Firefox
+       ═══════════════════════════════════════════════════════ -->
+  <script src="hls.min.js"></script>
+  <script>
+    (function() {
+      // 1. Transparent HLS MediaElement interceptor
+      try {
+        var proto = HTMLMediaElement.prototype;
+        var originalSrcDescriptor = Object.getOwnPropertyDescriptor(proto, 'src') || {
+          get: function() { return this.getAttribute('src'); },
+          set: function(val) { this.setAttribute('src', val); }
+        };
+
+        function attachHlsIfSupported(video, url) {
+          if (!url || typeof url !== 'string') return false;
+          var isHls = url.indexOf('.m3u8') !== -1 || url.indexOf('playlist') !== -1;
+          if (!isHls) return false;
+
+          var canPlayNative = video.canPlayType && video.canPlayType('application/vnd.apple.mpegurl');
+          if (canPlayNative && canPlayNative !== '') {
+            // Safari / iOS has native HLS support
+            return false;
+          }
+
+          if (window.Hls && window.Hls.isSupported()) {
+            if (video._hlsInstance) {
+              video._hlsInstance.destroy();
+              video._hlsInstance = null;
+            }
+            var hls = new window.Hls({
+              enableWorker: true,
+              lowLatencyMode: true,
+              backBufferLength: 90,
+              maxBufferLength: 30,
+              maxMaxBufferLength: 60
+            });
+            hls.loadSource(url);
+            hls.attachMedia(video);
+            video._hlsInstance = hls;
+
+            hls.on(window.Hls.Events.ERROR, function(event, data) {
+              if (data.fatal) {
+                switch(data.type) {
+                  case window.Hls.ErrorTypes.NETWORK_ERROR:
+                    console.warn('[HLS] Network error, recovering...', data);
+                    hls.startLoad();
+                    break;
+                  case window.Hls.ErrorTypes.MEDIA_ERROR:
+                    console.warn('[HLS] Media error, recovering...', data);
+                    hls.recoverMediaError();
+                    break;
+                  default:
+                    console.error('[HLS] Fatal error:', data);
+                    hls.destroy();
+                    break;
+                }
+              }
+            });
+            return true;
+          }
+          return false;
+        }
+
+        Object.defineProperty(proto, 'src', {
+          get: function() {
+            return originalSrcDescriptor.get.call(this);
+          },
+          set: function(url) {
+            var handled = attachHlsIfSupported(this, url);
+            if (handled) return;
+            if (this._hlsInstance) {
+              this._hlsInstance.destroy();
+              this._hlsInstance = null;
+            }
+            return originalSrcDescriptor.set.call(this, url);
+          },
+          configurable: true,
+          enumerable: true
+        });
+
+        // Also intercept setAttribute('src', ...)
+        var originalSetAttribute = proto.setAttribute;
+        proto.setAttribute = function(name, value) {
+          if (name === 'src') {
+            var handled = attachHlsIfSupported(this, value);
+            if (handled) return;
+          }
+          return originalSetAttribute.call(this, name, value);
+        };
+      } catch(e) {
+        console.error('[EduSaaS] HLS initialization error:', e);
+      }
+
+      // 2. Fullscreen Management for Web
+      window.toggleAppFullscreen = function() {
+        if (!document.fullscreenElement) {
+          var el = document.documentElement;
+          if (el.requestFullscreen) {
+            el.requestFullscreen();
+          } else if (el.webkitRequestFullscreen) {
+            el.webkitRequestFullscreen();
+          }
+          return true;
+        } else {
+          if (document.exitFullscreen) {
+            document.exitFullscreen();
+          } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+          }
+          return false;
+        }
+      };
+
+      window.isAppFullscreen = function() {
+        return !!document.fullscreenElement;
+      };
+
+      window.setFullscreenCallback = function(callback) {
+        window._fullscreenCallback = callback;
+      };
+
+      document.addEventListener('fullscreenchange', function() {
+        var isFull = !!document.fullscreenElement;
+        if (typeof window._fullscreenCallback === 'function') {
+          window._fullscreenCallback(isFull);
+        }
+        window.dispatchEvent(new CustomEvent('app-fullscreen-changed', {
+          detail: { isFullscreen: isFull }
+        }));
+      });
+
+      // ═══════════════════════════════════════════════════════════════
+      // 3A. Bunny Stream Player Bridge (PURE — no YouTube code)
+      // ═══════════════════════════════════════════════════════════════
+      window._bunnyPlayers = window._bunnyPlayers || {};
+      window._bunnyPollTimers = window._bunnyPollTimers || {};
+
+      function notifyBunnyFlutter(msg) {
+        if (typeof window.onBunnyPlayerMessage === 'function') {
+          try {
+            window.onBunnyPlayerMessage(JSON.stringify(msg));
+          } catch (e) {}
+        }
+      }
+
+      window.createBunnyPlayer = function(src, viewId) {
+        // Ensure playerjs=true query parameter for Bunny Stream postMessage bridge
+        if (src.indexOf('playerjs=true') === -1) {
+          src += (src.indexOf('?') === -1 ? '?' : '&') + 'playerjs=true';
+        }
+
+        var iframe = document.createElement('iframe');
+        iframe.id = 'bunny_frame_' + viewId;
+        iframe.src = src;
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = '0';
+        iframe.style.display = 'block';
+        iframe.style.pointerEvents = 'auto';
+        iframe.setAttribute('allow', 'accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen');
+        iframe.setAttribute('allowfullscreen', 'true');
+        iframe.setAttribute('webkitallowfullscreen', 'true');
+        iframe.setAttribute('mozallowfullscreen', 'true');
+        iframe.allowFullscreen = true;
+
+        function initPlayerJs() {
+          if (typeof window.playerjs !== 'undefined' && window.playerjs.Player) {
+            try {
+              if (window._bunnyPlayers[viewId]) return;
+              var player = new window.playerjs.Player(iframe);
+              window._bunnyPlayers[viewId] = player;
+
+              player.on('ready', function() {
+                notifyBunnyFlutter({ event: 'ready' });
+              });
+              player.on('play', function() {
+                notifyBunnyFlutter({ event: 'play' });
+              });
+              player.on('pause', function() {
+                notifyBunnyFlutter({ event: 'pause' });
+              });
+              player.on('ended', function() {
+                notifyBunnyFlutter({ event: 'ended' });
+              });
+              player.on('timeupdate', function(data) {
+                if (typeof data === 'string') {
+                  try { data = JSON.parse(data); } catch (e) {}
+                }
+                var sec = (data && data.seconds !== undefined) ? Math.floor(data.seconds) :
+                          (data && data.currentTime !== undefined) ? Math.floor(data.currentTime) : 0;
+                var dur = (data && data.duration !== undefined) ? Math.floor(data.duration) : 0;
+                notifyBunnyFlutter({
+                  event: 'timeupdate',
+                  value: { seconds: sec, duration: dur }
+                });
+              });
+
+              // Continuous heartbeat poll every 1s
+              if (window._bunnyPollTimers[viewId]) {
+                clearInterval(window._bunnyPollTimers[viewId]);
+              }
+              window._bunnyPollTimers[viewId] = setInterval(function() {
+                var el = document.getElementById('bunny_frame_' + viewId);
+                if (!el) {
+                  clearInterval(window._bunnyPollTimers[viewId]);
+                  delete window._bunnyPollTimers[viewId];
+                  delete window._bunnyPlayers[viewId];
+                  return;
+                }
+                if (player && player.isReady) {
+                  player.getCurrentTime(function(t) {
+                    if (typeof t === 'number' && t >= 0) {
+                      player.getDuration(function(d) {
+                        var dur = (typeof d === 'number' && d > 0) ? Math.floor(d) : 0;
+                        notifyBunnyFlutter({
+                          event: 'timeupdate',
+                          value: { seconds: Math.floor(t), duration: dur }
+                        });
+                      });
+                    }
+                  });
+                }
+              }, 1000);
+            } catch (err) {
+              console.warn('[BunnyBridge] playerjs init:', err);
+            }
+          }
+        }
+
+        setTimeout(initPlayerJs, 100);
+        iframe.addEventListener('load', function() {
+          setTimeout(initPlayerJs, 150);
+        });
+
+        return iframe;
+      };
+
+      window.bunnyPostMessage = function(viewId, method, value) {
+        var player = window._bunnyPlayers && window._bunnyPlayers[viewId];
+        if (player && typeof player[method] === 'function') {
+          player[method](value);
+          return;
+        }
+        var iframe = document.getElementById('bunny_frame_' + viewId);
+        if (iframe && iframe.contentWindow) {
+          iframe.contentWindow.postMessage(JSON.stringify({
+            context: 'player.js',
+            method: method,
+            value: value
+          }), '*');
+        }
+      };
+
+      // Bunny-only message listener
+      window.addEventListener('message', function(event) {
+        if (!event.origin) return;
+        if (event.origin.indexOf('mediadelivery.net') !== -1) {
+          try {
+            var data = event.data;
+            if (typeof data === 'string') data = JSON.parse(data);
+            if (data) notifyBunnyFlutter(data);
+          } catch(e) {}
+        }
+      });
+
+      // ═══════════════════════════════════════════════════════════════
+      // 3B. YouTube Player Bridge (INDEPENDENT — uses YT IFrame API)
+      // ═══════════════════════════════════════════════════════════════
+      window._ytPlayers = window._ytPlayers || {};
+      window._ytPollTimers = window._ytPollTimers || {};
+      window._ytApiReady = false;
+      window._ytApiCallbacks = [];
+
+      function notifyYouTubeFlutter(msg) {
+        if (typeof window.onYouTubePlayerMessage === 'function') {
+          try {
+            window.onYouTubePlayerMessage(JSON.stringify(msg));
+          } catch (e) {}
+        }
+      }
+
+      // Load the YouTube IFrame API SDK once
+      function ensureYouTubeApi(callback) {
+        if (window._ytApiReady && window.YT && window.YT.Player) {
+          callback();
+          return;
+        }
+        window._ytApiCallbacks.push(callback);
+        if (!document.getElementById('yt-iframe-api-script')) {
+          var tag = document.createElement('script');
+          tag.id = 'yt-iframe-api-script';
+          tag.src = 'https://www.youtube.com/iframe_api';
+          var first = document.getElementsByTagName('script')[0];
+          first.parentNode.insertBefore(tag, first);
+        }
+      }
+
+      // YouTube API calls this when ready
+      window.onYouTubeIframeAPIReady = function() {
+        window._ytApiReady = true;
+        for (var i = 0; i < window._ytApiCallbacks.length; i++) {
+          try { window._ytApiCallbacks[i](); } catch (e) {}
+        }
+        window._ytApiCallbacks = [];
+      };
+
+      window.createYouTubePlayer = function(videoId, viewId, origin) {
+        // Create a wrapper container
+        var wrapper = document.createElement('div');
+        wrapper.style.position = 'relative';
+        wrapper.style.width = '100%';
+        wrapper.style.height = '100%';
+        wrapper.style.overflow = 'hidden';
+        wrapper.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+
+        // Create the div that YT.Player will replace with an iframe
+        var playerDiv = document.createElement('div');
+        playerDiv.id = 'yt_container_' + viewId;
+        playerDiv.style.width = '100%';
+        playerDiv.style.height = '100%';
+        wrapper.appendChild(playerDiv);
+
+        // Security overlay: block top-right corner (Watch on YouTube + Share buttons)
+        var topRightBlock = document.createElement('div');
+        topRightBlock.style.cssText = 'position:absolute;top:0;right:0;width:140px;height:45px;z-index:9999;pointer-events:auto;cursor:default;background:transparent;';
+        wrapper.appendChild(topRightBlock);
+
+        // Security overlay: block top-left corner (YouTube logo)
+        var topLeftBlock = document.createElement('div');
+        topLeftBlock.style.cssText = 'position:absolute;top:0;left:0;width:80px;height:45px;z-index:9999;pointer-events:auto;cursor:default;background:transparent;';
+        wrapper.appendChild(topLeftBlock);
+
+        // Security overlay: block bottom-right "YouTube" branding text in controls
+        var bottomRightBlock = document.createElement('div');
+        bottomRightBlock.style.cssText = 'position:absolute;bottom:0;right:0;width:120px;height:36px;z-index:9999;pointer-events:auto;cursor:default;background:transparent;';
+        wrapper.appendChild(bottomRightBlock);
+
+        ensureYouTubeApi(function() {
+          try {
+            var player = new YT.Player('yt_container_' + viewId, {
+              videoId: videoId,
+              playerVars: {
+                enablejsapi: 1,
+                origin: origin || window.location.origin,
+                rel: 0,
+                modestbranding: 1,
+                iv_load_policy: 3,
+                controls: 1,
+                playsinline: 1,
+                fs: 0,
+                cc_load_policy: 0,
+                disablekb: 0
+              },
+              events: {
+                onReady: function(evt) {
+                  window._ytPlayers[viewId] = player;
+                  notifyYouTubeFlutter({ event: 'ready' });
+
+                  // Start 1s heartbeat poll for currentTime + duration
+                  if (window._ytPollTimers[viewId]) {
+                    clearInterval(window._ytPollTimers[viewId]);
+                  }
+                  window._ytPollTimers[viewId] = setInterval(function() {
+                    try {
+                      if (!player || typeof player.getCurrentTime !== 'function') {
+                        clearInterval(window._ytPollTimers[viewId]);
+                        delete window._ytPollTimers[viewId];
+                        return;
+                      }
+                      var t = player.getCurrentTime();
+                      var d = player.getDuration();
+                      if (typeof t === 'number' && t >= 0) {
+                        notifyYouTubeFlutter({
+                          event: 'timeupdate',
+                          value: {
+                            seconds: Math.floor(t),
+                            duration: (typeof d === 'number' && d > 0) ? Math.floor(d) : 0
+                          }
+                        });
+                      }
+                    } catch (e) {}
+                  }, 1000);
+                },
+                onStateChange: function(evt) {
+                  var state = evt.data;
+                  if (state === YT.PlayerState.PLAYING) {
+                    notifyYouTubeFlutter({ event: 'play' });
+                  } else if (state === YT.PlayerState.PAUSED) {
+                    notifyYouTubeFlutter({ event: 'pause' });
+                  } else if (state === YT.PlayerState.ENDED) {
+                    notifyYouTubeFlutter({ event: 'ended' });
+                  }
+                },
+                onError: function(evt) {
+                  console.warn('[YouTubeBridge] Player error:', evt.data);
+                }
+              }
+            });
+          } catch (err) {
+            console.warn('[YouTubeBridge] YT.Player init error:', err);
+          }
+        });
+
+        return wrapper;
+      };
+
+      window.youtubePostMessage = function(viewId, method, value) {
+        var player = window._ytPlayers && window._ytPlayers[viewId];
+        if (!player) return;
+        try {
+          if (method === 'seekTo') {
+            player.seekTo(Number(value), true);
+          } else if (method === 'play') {
+            player.playVideo();
+          } else if (method === 'pause') {
+            player.pauseVideo();
+          }
+        } catch (e) {
+          console.warn('[YouTubeBridge] postMessage error:', e);
+        }
+      };
     })();
   </script>
 

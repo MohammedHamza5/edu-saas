@@ -2,6 +2,7 @@ import 'package:edu_saas/core/errors/failures.dart';
 import 'package:edu_saas/core/errors/result.dart';
 import 'package:edu_saas/core/localization/generated/app_localizations.dart';
 import 'package:edu_saas/core/theme/app_theme.dart';
+import 'package:edu_saas/core/utils/cache_manager.dart';
 import 'package:edu_saas/features/exams/domain/entities/exam_entity.dart';
 import 'package:edu_saas/features/exams/domain/repositories/exams_repository.dart';
 import 'package:edu_saas/features/exams/presentation/cubit/exams_cubit.dart';
@@ -24,14 +25,21 @@ class FakeExamsRepository implements ExamsRepository {
   String failureMessage = 'Server error occurred';
 
   @override
-  Future<Result<List<ExamEntity>>> getGroupExams(String groupId) async {
+  Future<Result<List<ExamEntity>>> getGroupExams(
+    String groupId, {
+    int page = 0,
+    int pageSize = 15,
+  }) async {
     if (shouldFail) return FailureResult(ServerFailure(failureMessage));
     final filtered = mockExams.where((e) => e.groupId == groupId).toList();
     return Success(filtered);
   }
 
   @override
-  Future<Result<List<ExamEntity>>> getStudentExams() async {
+  Future<Result<List<ExamEntity>>> getStudentExams({
+    int page = 0,
+    int pageSize = 15,
+  }) async {
     if (shouldFail) return FailureResult(ServerFailure(failureMessage));
     final filtered = mockExams
         .where((e) => e.activeVersion?.status == ExamStatus.published)
@@ -284,11 +292,13 @@ void main() {
   late ExamsCubit examsCubit;
 
   setUp(() {
+    AppCache.clearAll();
     fakeRepository = FakeExamsRepository();
     examsCubit = ExamsCubit(repository: fakeRepository);
   });
 
   tearDown(() {
+    AppCache.clearAll();
     examsCubit.close();
   });
 
@@ -688,5 +698,84 @@ void main() {
       expect(find.text('امتحاناتي واختباراتي'), findsOneWidget);
       expect(find.text('امتحان الجبر والتفاضل'), findsOneWidget);
     });
+
+    testWidgets('TeacherExamsPage opens exam details sheet on card tap without error', (tester) async {
+      final exam = FakeExamsRepository._sampleExam();
+      fakeRepository.mockExams = [exam];
+      fakeRepository.mockAttempts = [
+        ExamAttemptEntity(
+          id: 'att-1',
+          examId: exam.id,
+          examVersionId: exam.activeVersion?.id ?? 'v1',
+          studentId: 'student-1',
+          studentName: 'محمود سامي',
+          score: 85,
+          percentage: 85.0,
+          status: AttemptStatus.submitted,
+          startedAt: DateTime.now().subtract(const Duration(minutes: 30)),
+          submittedAt: DateTime.now(),
+        ),
+      ];
+
+      await tester.pumpWidget(
+        createTestApp(
+          child: BlocProvider<ExamsCubit>.value(
+            value: examsCubit,
+            child: const TeacherExamsPage(
+              groupId: 'group-1',
+              groupName: 'مجموعة 1',
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+      expect(find.text('امتحان الجبر والتفاضل'), findsOneWidget);
+
+      // Tap the exam card
+      await tester.tap(find.text('امتحان الجبر والتفاضل'));
+      await tester.pumpAndSettle();
+
+      // Verify the details sheet opened with student attempt, NOT an error widget
+      expect(find.text('محمود سامي'), findsOneWidget);
+      expect(find.text('An error occurred displaying content'), findsNothing);
+    });
+
+    test('ExamsCubit loadStudentExams ignores invocation when exam is currently in progress (ExamTakingState)', () async {
+      final exam = FakeExamsRepository._sampleExam();
+      fakeRepository.mockExams = [exam];
+
+      final success = await examsCubit.startExamTaking(exam);
+      expect(success, isTrue);
+      expect(examsCubit.state, isA<ExamTakingState>());
+
+      // Calling loadStudentExams while taking exam should NOT overwrite ExamTakingState
+      await examsCubit.loadStudentExams(forceRefresh: true);
+      expect(examsCubit.state, isA<ExamTakingState>());
+    });
+
+    test('ExamsCubit startExamTaking fails gracefully when questions are empty', () async {
+      final examWithoutQuestions = ExamEntity(
+        id: 'empty-exam',
+        contentId: 'content-empty',
+        tenantId: 'tenant-1',
+        groupId: 'group-1',
+        title: 'امتحان فارغ',
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+        activeVersion: ExamVersionEntity(
+          id: 'v-empty',
+          examId: 'empty-exam',
+          createdAt: DateTime.now(),
+          questions: const [],
+        ),
+      );
+      fakeRepository.mockExams = [examWithoutQuestions];
+
+      final success = await examsCubit.startExamTaking(examWithoutQuestions);
+      expect(success, isFalse);
+      expect(examsCubit.state, isA<ExamsError>());
+    });
   });
 }
+

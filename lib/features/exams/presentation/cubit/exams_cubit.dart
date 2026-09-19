@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/utils/app_logger.dart';
 import '../../../../core/utils/cache_manager.dart';
 import '../../domain/entities/exam_entity.dart';
 import '../../domain/repositories/exams_repository.dart';
@@ -8,6 +9,10 @@ import 'exams_state.dart';
 class ExamsCubit extends Cubit<ExamsState> {
   final ExamsRepository _repository;
   Timer? _countdownTimer;
+
+  static const int _pageSize = 15;
+  int _teacherPage = 0;
+  int _studentPage = 0;
 
   ExamsCubit({required ExamsRepository repository})
       : _repository = repository,
@@ -22,8 +27,14 @@ class ExamsCubit extends Cubit<ExamsState> {
   // ── Teacher Flow ─────────────────────────────────────────────────────────
 
   /// Loads all exams for a specific group (Teacher flow) with instant SWR cache
-  Future<void> loadGroupExams(String groupId) async {
+  Future<void> loadGroupExams(String groupId, {bool forceRefresh = false}) async {
+    if (state is ExamTakingState) return;
+
+    _teacherPage = 0;
     final cacheKey = 'teacher_exams_$groupId';
+    if (forceRefresh) {
+      AppCache.exams.invalidate(cacheKey);
+    }
 
     // ── Stale-While-Revalidate: Instant display from memory cache ──────────
     final cached = AppCache.exams.getStale(cacheKey);
@@ -31,13 +42,18 @@ class ExamsCubit extends Cubit<ExamsState> {
       emit(TeacherExamsLoaded(
         groupId: groupId,
         exams: cached,
+        hasMore: cached.length >= _pageSize,
       ));
-      if (AppCache.exams.has(cacheKey)) return; // Fresh cache, skip network
+      if (!forceRefresh && AppCache.exams.has(cacheKey)) return; // Fresh cache, skip network
     } else {
       emit(const ExamsLoading());
     }
 
-    final result = await _repository.getGroupExams(groupId);
+    final result = await _repository.getGroupExams(
+      groupId,
+      page: 0,
+      pageSize: _pageSize,
+    );
 
     result.when(
       onSuccess: (exams) {
@@ -45,12 +61,48 @@ class ExamsCubit extends Cubit<ExamsState> {
         emit(TeacherExamsLoaded(
           groupId: groupId,
           exams: exams,
+          hasMore: exams.length == _pageSize,
+          isLoadingMore: false,
         ));
       },
       onFailure: (failure) {
         if (state is! TeacherExamsLoaded) {
           emit(ExamsError(failure.message));
         }
+      },
+    );
+  }
+
+  /// Loads next page of teacher exams on scroll (Infinite Scroll)
+  Future<void> loadMoreTeacherExams() async {
+    final currentState = state;
+    if (currentState is! TeacherExamsLoaded) return;
+    if (!currentState.hasMore || currentState.isLoadingMore || currentState.groupId == null) return;
+
+    emit(currentState.copyWith(isLoadingMore: true));
+    final nextPage = _teacherPage + 1;
+
+    final result = await _repository.getGroupExams(
+      currentState.groupId!,
+      page: nextPage,
+      pageSize: _pageSize,
+    );
+
+    if (isClosed) return;
+
+    result.when(
+      onSuccess: (newExams) {
+        _teacherPage = nextPage;
+        final allExams = [...currentState.exams, ...newExams];
+        AppCache.exams.put('teacher_exams_${currentState.groupId}', allExams);
+        emit(currentState.copyWith(
+          exams: allExams,
+          hasMore: newExams.length == _pageSize,
+          isLoadingMore: false,
+        ));
+      },
+      onFailure: (failure) {
+        emit(currentState.copyWith(isLoadingMore: false));
       },
     );
   }
@@ -122,7 +174,8 @@ class ExamsCubit extends Cubit<ExamsState> {
 
     return result.when(
       onSuccess: (created) {
-        loadGroupExams(groupId);
+        AppCache.exams.invalidate('teacher_exams_$groupId');
+        loadGroupExams(groupId, forceRefresh: true);
         return true;
       },
       onFailure: (failure) {
@@ -149,7 +202,8 @@ class ExamsCubit extends Cubit<ExamsState> {
     return result.when(
       onSuccess: (_) {
         if (currentState.groupId != null) {
-          loadGroupExams(currentState.groupId!);
+          AppCache.exams.invalidate('teacher_exams_${currentState.groupId}');
+          loadGroupExams(currentState.groupId!, forceRefresh: true);
         }
         return true;
       },
@@ -170,7 +224,8 @@ class ExamsCubit extends Cubit<ExamsState> {
     return result.when(
       onSuccess: (_) {
         if (currentState.groupId != null) {
-          loadGroupExams(currentState.groupId!);
+          AppCache.exams.invalidate('teacher_exams_${currentState.groupId}');
+          loadGroupExams(currentState.groupId!, forceRefresh: true);
         }
         return true;
       },
@@ -184,8 +239,18 @@ class ExamsCubit extends Cubit<ExamsState> {
   // ── Student Flow ─────────────────────────────────────────────────────────
 
   /// Loads all exams available for the currently logged-in student (Student flow) with instant SWR cache
-  Future<void> loadStudentExams() async {
+  Future<void> loadStudentExams({bool forceRefresh = false}) async {
+    // Critical Guard: Never overwrite or interrupt an active exam taking session!
+    if (state is ExamTakingState) {
+      AppLogger.w('ExamsCubit', 'Ignored loadStudentExams while exam is actively in progress');
+      return;
+    }
+
+    _studentPage = 0;
     const cacheKey = 'student_exams_all';
+    if (forceRefresh) {
+      AppCache.exams.invalidate(cacheKey);
+    }
 
     // ── Stale-While-Revalidate: Instant display from memory cache ──────────
     final cached = AppCache.exams.getStale(cacheKey);
@@ -193,28 +258,74 @@ class ExamsCubit extends Cubit<ExamsState> {
       if (cached.isEmpty) {
         emit(const ExamsEmpty(message: 'لا توجد امتحانات متاحة حالياً'));
       } else {
-        emit(StudentExamsLoaded(exams: cached));
+        emit(StudentExamsLoaded(
+          exams: cached,
+          hasMore: cached.length >= _pageSize,
+        ));
       }
-      if (AppCache.exams.has(cacheKey)) return; // Fresh cache, skip network
+      if (!forceRefresh && AppCache.exams.has(cacheKey)) return; // Fresh cache, skip network
     } else {
       emit(const ExamsLoading());
     }
 
-    final result = await _repository.getStudentExams();
+    final result = await _repository.getStudentExams(
+      page: 0,
+      pageSize: _pageSize,
+    );
 
     result.when(
       onSuccess: (exams) {
+        // Double check state hasn't transitioned to ExamTakingState while waiting for network
+        if (state is ExamTakingState) return;
+
         AppCache.exams.put(cacheKey, exams);
         if (exams.isEmpty) {
           emit(const ExamsEmpty(message: 'لا توجد امتحانات متاحة حالياً'));
         } else {
-          emit(StudentExamsLoaded(exams: exams));
+          emit(StudentExamsLoaded(
+            exams: exams,
+            hasMore: exams.length == _pageSize,
+            isLoadingMore: false,
+          ));
         }
       },
       onFailure: (failure) {
-        if (state is! StudentExamsLoaded) {
+        if (state is! StudentExamsLoaded && state is! ExamTakingState) {
           emit(ExamsError(failure.message));
         }
+      },
+    );
+  }
+
+  /// Loads next page of student exams on scroll (Infinite Scroll)
+  Future<void> loadMoreStudentExams() async {
+    final currentState = state;
+    if (currentState is! StudentExamsLoaded) return;
+    if (!currentState.hasMore || currentState.isLoadingMore) return;
+
+    emit(currentState.copyWith(isLoadingMore: true));
+    final nextPage = _studentPage + 1;
+
+    final result = await _repository.getStudentExams(
+      page: nextPage,
+      pageSize: _pageSize,
+    );
+
+    if (isClosed) return;
+
+    result.when(
+      onSuccess: (newExams) {
+        _studentPage = nextPage;
+        final allExams = [...currentState.exams, ...newExams];
+        AppCache.exams.put('student_exams_all', allExams);
+        emit(currentState.copyWith(
+          exams: allExams,
+          hasMore: newExams.length == _pageSize,
+          isLoadingMore: false,
+        ));
+      },
+      onFailure: (failure) {
+        emit(currentState.copyWith(isLoadingMore: false));
       },
     );
   }
@@ -235,7 +346,14 @@ class ExamsCubit extends Cubit<ExamsState> {
 
     return attemptRes.when(
       onSuccess: (attempt) {
-        final questions = fullExam.activeVersion?.questions ?? <ExamQuestionEntity>[];
+        final questions = attempt.questions.isNotEmpty
+            ? attempt.questions
+            : (fullExam.activeVersion?.questions ?? <ExamQuestionEntity>[]);
+
+        if (questions.isEmpty) {
+          emit(const ExamsError('لا توجد أسئلة منشورة في هذا الامتحان بعد'));
+          return false;
+        }
 
         // Calculate remaining seconds
         final elapsedSeconds =
@@ -243,11 +361,16 @@ class ExamsCubit extends Cubit<ExamsState> {
         final totalSeconds = fullExam.durationMinutes * 60;
         final remaining = totalSeconds - elapsedSeconds;
 
+        if (remaining <= 0) {
+          emit(const ExamsError('انتهت المدة الزمنية المحددة لهذا الامتحان'));
+          return false;
+        }
+
         emit(ExamTakingState(
           exam: fullExam,
           attempt: attempt,
           questions: questions,
-          remainingSeconds: remaining > 0 ? remaining : 0,
+          remainingSeconds: remaining,
         ));
 
         _startTimer();

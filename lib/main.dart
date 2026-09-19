@@ -142,35 +142,45 @@ class EduSaaSApp extends StatelessWidget {
           },
         ),
       ],
-      child: BlocBuilder<TenantThemeCubit, TenantBranding>(
-        builder: (context, branding) {
-          return BlocBuilder<LocaleCubit, Locale>(
-            builder: (context, activeLocale) {
-              return MaterialApp.router(
-                title: activeLocale.languageCode == 'ar'
-                    ? '${branding.brandName} | SAT • EST • ACT'
-                    : '${branding.brandNameEn ?? branding.brandName} | American Curriculum SAT • EST • ACT',
-                theme: AppTheme.fromBranding(branding),
-                routerConfig: AppRouter.router,
-                debugShowCheckedModeBanner: false,
-                locale: activeLocale,
-                builder: (context, child) =>
-                    GlobalActivityListener(child: child ?? const SizedBox()),
-                supportedLocales: const [
-                  Locale('en'),
-                  Locale('ar'),
-                ],
-                localizationsDelegates: const [
-                  AppLocalizations.delegate,
-                  GlobalMaterialLocalizations.delegate,
-                  GlobalWidgetsLocalizations.delegate,
-                  GlobalCupertinoLocalizations.delegate,
-                ],
-              );
-            },
-          );
-        },
-      ),
+      child: const _AppRootView(),
     );
   }
 }
+
+class _AppRootView extends StatelessWidget {
+  const _AppRootView();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<TenantThemeCubit, TenantBranding>(
+      builder: (context, branding) {
+        return BlocBuilder<LocaleCubit, Locale>(
+          builder: (context, activeLocale) {
+            return MaterialApp.router(
+              title: activeLocale.languageCode == 'ar'
+                  ? '${branding.brandName} | SAT • EST • ACT'
+                  : '${branding.brandNameEn ?? branding.brandName} | American Curriculum SAT • EST • ACT',
+              theme: AppTheme.fromBranding(branding),
+              routerConfig: AppRouter.router,
+              debugShowCheckedModeBanner: false,
+              locale: activeLocale,
+              builder: (context, child) =>
+                  GlobalActivityListener(child: child ?? const SizedBox()),
+              supportedLocales: const [
+                Locale('en'),
+                Locale('ar'),
+              ],
+              localizationsDelegates: const [
+                AppLocalizations.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+}
+

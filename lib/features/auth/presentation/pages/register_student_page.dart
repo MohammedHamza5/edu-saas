@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/config/tenant_registry.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
-import '../../../../core/router/app_router.dart';
+import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/math_tokens.dart';
 import '../../../../core/theme/tenant_theme_cubit.dart';
@@ -96,7 +96,7 @@ class _RegisterStudentPageState extends State<RegisterStudentPage> {
     return BlocConsumer<AuthCubit, AuthState>(
       listener: (context, state) {
         if (state is AuthPendingApproval) {
-          context.go(AppRouter.studentPending, extra: state.user.fullName);
+          context.go(AppRoutes.studentPending, extra: state.user.fullName);
         } else if (state is AuthError) {
           AppFeedback.showError(context, state.message);
         }
@@ -393,7 +393,7 @@ class _RegisterStudentPageState extends State<RegisterStudentPage> {
                       style: TextButton.styleFrom(
                         enabledMouseCursor: SystemMouseCursors.click,
                       ),
-                      onPressed: () => context.go(AppRouter.login),
+                      onPressed: () => context.go(AppRoutes.login),
                       child: Text(
                         context.l10n.signInNowLink,
                         style: TextStyle(

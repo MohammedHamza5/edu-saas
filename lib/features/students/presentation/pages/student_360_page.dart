@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
-import '../../../../core/router/app_router.dart';
+import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -57,7 +57,7 @@ class _Student360PageState extends State<Student360Page> {
           tooltip: context.l10n.backToStudentsList,
           onPressed: () => context.canPop()
               ? context.pop()
-              : context.go(AppRouter.studentsList),
+              : context.go(AppRoutes.studentsList),
         ),
         title: Text(
           widget.initialStudent?.fullName ?? context.l10n.studentProfileTitle,
@@ -69,7 +69,7 @@ class _Student360PageState extends State<Student360Page> {
             icon: const Icon(Icons.group_add_rounded),
             tooltip: context.l10n.assignGroupsAction,
             onPressed: () =>
-                context.go(AppRouter.assignGroups, extra: widget.studentId),
+                context.go(AppRoutes.assignGroups, extra: widget.studentId),
           ),
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
@@ -465,7 +465,7 @@ class _Student360PageState extends State<Student360Page> {
                         ),
                         TextButton.icon(
                           onPressed: () => context.push(
-                            AppRouter.assignGroups,
+                            AppRoutes.assignGroups,
                             extra: widget.studentId,
                           ),
                           icon: const Icon(Icons.edit_rounded, size: 14),

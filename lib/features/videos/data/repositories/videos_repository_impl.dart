@@ -128,4 +128,58 @@ class VideosRepositoryImpl implements VideosRepository {
       return Result.failure(ServerFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Result<String>> getSignedFileUrl(String storagePath) async {
+    try {
+      final url = await _remoteDataSource.getSignedFileUrl(storagePath: storagePath);
+      return Result.success(url);
+    } on ServerException catch (e) {
+      return Result.failure(ServerFailure(e.message, code: e.code));
+    } catch (e) {
+      return Result.failure(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<VideoEntity>> attachMaterialToVideo({
+    required String videoId,
+    required String contentId,
+    required String fileName,
+    required List<int> fileBytes,
+  }) async {
+    try {
+      final video = await _remoteDataSource.attachMaterialToVideo(
+        videoId: videoId,
+        contentId: contentId,
+        fileName: fileName,
+        fileBytes: fileBytes,
+      );
+      return Result.success(video);
+    } on ServerException catch (e) {
+      return Result.failure(ServerFailure(e.message, code: e.code));
+    } catch (e) {
+      return Result.failure(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<VideoEntity>> linkYouTubeVideo({
+    required String contentId,
+    required String youtubeUrl,
+    String? title,
+  }) async {
+    try {
+      final video = await _remoteDataSource.linkYouTubeVideo(
+        contentId: contentId,
+        youtubeUrl: youtubeUrl,
+        title: title,
+      );
+      return Result.success(video);
+    } on ServerException catch (e) {
+      return Result.failure(ServerFailure(e.message, code: e.code));
+    } catch (e) {
+      return Result.failure(ServerFailure(e.toString()));
+    }
+  }
 }

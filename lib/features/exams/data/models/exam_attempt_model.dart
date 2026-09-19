@@ -1,4 +1,5 @@
 import '../../domain/entities/exam_entity.dart';
+import 'exam_question_model.dart';
 
 class ExamAttemptModel extends ExamAttemptEntity {
   const ExamAttemptModel({
@@ -13,6 +14,7 @@ class ExamAttemptModel extends ExamAttemptEntity {
     super.score,
     super.percentage,
     super.answers,
+    super.questions,
   });
 
   factory ExamAttemptModel.fromJson(Map<String, dynamic> json) {
@@ -40,6 +42,12 @@ class ExamAttemptModel extends ExamAttemptEntity {
         }).toList() ??
         <ExamAnswerEntity>[];
 
+    final rawQuestions = json['questions'] as List<dynamic>?;
+    final questionsList = rawQuestions?.map((q) {
+          return ExamQuestionModel.fromJson(Map<String, dynamic>.from(q as Map));
+        }).toList() ??
+        <ExamQuestionEntity>[];
+
     return ExamAttemptModel(
       id: json['id'] as String,
       examId: json['exam_id'] as String,
@@ -54,6 +62,7 @@ class ExamAttemptModel extends ExamAttemptEntity {
       score: (json['score'] as num?)?.toInt(),
       percentage: (json['percentage'] as num?)?.toDouble(),
       answers: answersList,
+      questions: questionsList,
     );
   }
 

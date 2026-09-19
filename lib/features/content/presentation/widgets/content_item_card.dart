@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
+import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_badge.dart';
@@ -62,7 +64,7 @@ class ContentItemCard extends StatelessWidget {
 
     return AppCard(
       variant: AppCardVariant.elevated,
-      padding: const EdgeInsets.all(AppSpacing.s12),
+      padding: const EdgeInsets.all(AppSpacing.s16),
       onTap: onTap ??
           (hasFile && onOpenFile != null
               ? () => onOpenFile!(content.file!.storagePath)
@@ -90,16 +92,26 @@ class ContentItemCard extends StatelessWidget {
 
           // Type Icon Avatar with subtle mathematical gradient & border
           Container(
-            width: 44,
-            height: 44,
+            width: 46,
+            height: 46,
             decoration: BoxDecoration(
-              color: _typeColor.withAlpha(25),
+              color: (!isTeacher && content.isLocked)
+                  ? AppColors.error.withValues(alpha: 0.12)
+                  : _typeColor.withAlpha(25),
               borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-              border: Border.all(color: _typeColor.withAlpha(60)),
+              border: Border.all(
+                color: (!isTeacher && content.isLocked)
+                    ? AppColors.error.withValues(alpha: 0.4)
+                    : _typeColor.withAlpha(60),
+              ),
             ),
             child: Icon(
-              _typeIcon,
-              color: _typeColor,
+              (!isTeacher && content.isLocked)
+                  ? Icons.lock_rounded
+                  : _typeIcon,
+              color: (!isTeacher && content.isLocked)
+                  ? AppColors.error
+                  : _typeColor,
               size: 24,
             ),
           ),
@@ -113,10 +125,12 @@ class ContentItemCard extends StatelessWidget {
                 // Title and Quick Status Tag
                 Text(
                   content.title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: (!isTeacher && content.isLocked)
+                        ? AppColors.textSecondary
+                        : AppColors.textPrimary,
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -132,6 +146,11 @@ class ContentItemCard extends StatelessWidget {
                       label: content.type.localizedLabel(context),
                       variant: AppBadgeVariant.neutral,
                     ),
+                    if (!isTeacher && content.isLocked)
+                      AppBadge(
+                        label: context.l10n.lessonPrerequisiteLocked,
+                        variant: AppBadgeVariant.suspended,
+                      ),
                     if (isTeacher)
                       AppBadge(
                         label: content.status.localizedLabel(context),
@@ -143,6 +162,104 @@ class ContentItemCard extends StatelessWidget {
                       ),
                   ],
                 ),
+
+                // Prerequisite Locked Notification Banner
+                if (!isTeacher && content.isLocked) ...[
+                  const SizedBox(height: AppSpacing.s8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: AppColors.error.withValues(alpha: 0.08),
+                      border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.lock_rounded, size: 16, color: AppColors.error),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            context.l10n.mustPassExamToUnlock(
+                              content.prerequisiteExamTitle ??
+                                  context.l10n.prerequisiteExamBadge,
+                              content.prerequisitePassingScore ?? 60,
+                            ),
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: AppColors.error,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        if (content.prerequisiteExamId != null)
+                          TextButton(
+                            onPressed: () => context.push(AppRoutes.studentExams),
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              minimumSize: Size.zero,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            child: Text(
+                              context.l10n.takeRequiredExamAction,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.error,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+
+                // Associated Lesson Quiz Banner
+                if (content.associatedExamTitle != null) ...[
+                  const SizedBox(height: AppSpacing.s8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryLight.withValues(alpha: 0.08),
+                      border: Border.all(color: AppColors.primaryLight.withValues(alpha: 0.3)),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.quiz_outlined, size: 16, color: AppColors.primaryLight),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            context.l10n.associatedExamTitleLabel(content.associatedExamTitle!),
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primaryLight,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (!isTeacher && !content.isLocked)
+                          TextButton(
+                            onPressed: () => context.push(AppRoutes.studentExams),
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              minimumSize: Size.zero,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            child: Text(
+                              context.l10n.takeRequiredExamAction,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primaryLight,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
 
                 // Description (if present)
                 if (content.description != null &&
@@ -162,7 +279,7 @@ class ContentItemCard extends StatelessWidget {
 
                 const SizedBox(height: AppSpacing.s10),
 
-                // Attachment File Link (if attached)
+                // Attachment File Link (if attached for document/image)
                 if (hasFile) ...[
                   const SizedBox(height: AppSpacing.s6),
                   InkWell(
@@ -199,45 +316,111 @@ class ContentItemCard extends StatelessWidget {
                   ),
                 ],
 
-                // Video Upload Action Pill for Teacher
-                if (isTeacher &&
-                    content.type == ContentType.video &&
-                    onUploadVideo != null) ...[
+                // Supplementary PDF Material (for Video lessons)
+                if (content.type == ContentType.video && content.file != null) ...[
                   const SizedBox(height: AppSpacing.s8),
                   InkWell(
-                    onTap: onUploadVideo,
+                    onTap: onOpenFile != null
+                        ? () => onOpenFile!(content.file!.storagePath)
+                        : null,
                     borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 6,
+                        horizontal: AppSpacing.s8,
+                        vertical: 5,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withAlpha(20),
-                        borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                        border: Border.all(color: AppColors.primary.withAlpha(60)),
+                        color: AppColors.primary.withAlpha(12),
+                        borderRadius:
+                            BorderRadius.circular(AppSpacing.radiusSmall),
+                        border: Border.all(
+                          color: AppColors.primary.withAlpha(40),
+                        ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           const Icon(
-                            Icons.cloud_upload_rounded,
-                            size: 16,
-                            color: AppColors.primary,
+                            Icons.picture_as_pdf_rounded,
+                            size: 14,
+                            color: Color(0xFFEA580C),
                           ),
-                          const SizedBox(width: 6),
-                          Text(
-                            context.l10n.uploadVideoAction,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.primary,
+                          const SizedBox(width: 5),
+                          Flexible(
+                            child: Text(
+                              '${context.l10n.videoMaterialPdfBadge}: ${content.file!.fileName} (${content.file!.formattedFileSize})',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primary,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
+                          if (onOpenFile != null) ...[
+                            const SizedBox(width: 4),
+                            const Icon(
+                              Icons.open_in_new_rounded,
+                              size: 12,
+                              color: AppColors.primary,
+                            ),
+                          ],
                         ],
                       ),
                     ),
                   ),
+                ],
+
+                // Video Status / Upload Action for Teacher
+                if (isTeacher && content.type == ContentType.video) ...[
+                  const SizedBox(height: AppSpacing.s8),
+                  // Case A: video already uploaded → show status badge
+                  if (content.hasVideo)
+                    _VideoStatusBadge(
+                      status: content.videoStatus ?? 'uploading',
+                      onReplace: onUploadVideo,
+                    )
+                  // Case B: no video yet → show upload button
+                  else if (onUploadVideo != null)
+                    InkWell(
+                      onTap: onUploadVideo,
+                      borderRadius:
+                          BorderRadius.circular(AppSpacing.radiusSmall),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withAlpha(20),
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.radiusSmall,
+                          ),
+                          border:
+                              Border.all(color: AppColors.primary.withAlpha(60)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.cloud_upload_rounded,
+                              size: 16,
+                              color: AppColors.primary,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              context.l10n.uploadVideoAction,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                 ],
 
                 const SizedBox(height: AppSpacing.s8),
@@ -397,6 +580,112 @@ class ContentItemCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Private helper widget: Video Status Badge
+// Shown on teacher cards when a video has already been uploaded for this content
+// ─────────────────────────────────────────────────────────────────────────────
+class _VideoStatusBadge extends StatelessWidget {
+  final String status; // 'uploading' | 'processing' | 'ready' | 'failed'
+  final VoidCallback? onReplace;
+
+  const _VideoStatusBadge({required this.status, this.onReplace});
+
+  @override
+  Widget build(BuildContext context) {
+    final isReady = status == 'ready';
+    final isFailed = status == 'failed';
+    final isProcessing = status == 'uploading' || status == 'processing';
+
+    final Color bgColor = isReady
+        ? AppColors.success.withAlpha(22)
+        : isFailed
+            ? AppColors.error.withAlpha(22)
+            : AppColors.warning.withAlpha(22);
+
+    final Color borderColor = isReady
+        ? AppColors.success.withAlpha(70)
+        : isFailed
+            ? AppColors.error.withAlpha(70)
+            : AppColors.warning.withAlpha(70);
+
+    final Color textColor = isReady
+        ? AppColors.success
+        : isFailed
+            ? AppColors.error
+            : AppColors.warning;
+
+    final IconData icon = isReady
+        ? Icons.check_circle_rounded
+        : isFailed
+            ? Icons.error_rounded
+            : Icons.hourglass_top_rounded;
+
+    final String label = isReady
+        ? context.l10n.videoReadyBadge
+        : isFailed
+            ? context.l10n.videoFailedBadge
+            : context.l10n.videoProcessingBadge;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: bgColor,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+            border: Border.all(color: borderColor),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (isProcessing)
+                SizedBox(
+                  width: 12,
+                  height: 12,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 1.5,
+                    color: textColor,
+                  ),
+                )
+              else
+                Icon(icon, size: 14, color: textColor),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: textColor,
+                ),
+              ),
+            ],
+          ),
+        ),
+        // Small "change video" icon button (only if callback provided)
+        if (onReplace != null) ...[
+          const SizedBox(width: 6),
+          InkWell(
+            onTap: onReplace,
+            borderRadius: BorderRadius.circular(4),
+            child: Padding(
+              padding: const EdgeInsets.all(4),
+              child: Tooltip(
+                message: context.l10n.uploadUpdateLectureVideo,
+                child: const Icon(
+                  Icons.swap_horiz_rounded,
+                  size: 16,
+                  color: AppColors.textMuted,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

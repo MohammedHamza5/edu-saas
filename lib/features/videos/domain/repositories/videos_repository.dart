@@ -39,4 +39,22 @@ abstract interface class VideosRepository {
 
   /// Deletes a video record.
   Future<Result<void>> deleteVideo(String videoId);
+
+  /// Gets a signed URL to download or view a private attachment.
+  Future<Result<String>> getSignedFileUrl(String storagePath);
+
+  /// Attaches supplementary material (e.g. PDF notes) directly to a video lesson.
+  Future<Result<VideoEntity>> attachMaterialToVideo({
+    required String videoId,
+    required String contentId,
+    required String fileName,
+    required List<int> fileBytes,
+  });
+
+  /// Links an unlisted or public YouTube video/live stream to a content item.
+  Future<Result<VideoEntity>> linkYouTubeVideo({
+    required String contentId,
+    required String youtubeUrl,
+    String? title,
+  });
 }

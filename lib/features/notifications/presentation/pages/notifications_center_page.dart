@@ -23,18 +23,30 @@ class NotificationsCenterPage extends StatefulWidget {
 
 class _NotificationsCenterPageState extends State<NotificationsCenterPage> {
   final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
   String _searchQuery = '';
 
   @override
   void initState() {
     super.initState();
     context.read<NotificationsCubit>().loadNotifications();
+    _scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.hasClients &&
+        _scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200) {
+      context.read<NotificationsCubit>().loadMoreNotifications();
+    }
   }
 
   void _showNotificationDetails(BuildContext context, NotificationEntity item) {
@@ -191,7 +203,7 @@ class _NotificationsCenterPageState extends State<NotificationsCenterPage> {
             icon: const Icon(Icons.refresh_rounded),
             tooltip: context.l10n.refresh,
             onPressed: () =>
-                context.read<NotificationsCubit>().loadNotifications(),
+                context.read<NotificationsCubit>().loadNotifications(forceRefresh: true),
           ),
         ],
       ),
@@ -205,7 +217,7 @@ class _NotificationsCenterPageState extends State<NotificationsCenterPage> {
             return AppErrorView(
               message: state.message,
               onRetry: () =>
-                  context.read<NotificationsCubit>().loadNotifications(),
+                  context.read<NotificationsCubit>().loadNotifications(forceRefresh: true),
             );
           }
 
@@ -377,11 +389,23 @@ class _NotificationsCenterPageState extends State<NotificationsCenterPage> {
                           : RefreshIndicator(
                               onRefresh: () => context
                                   .read<NotificationsCubit>()
-                                  .loadNotifications(),
+                                  .loadNotifications(forceRefresh: true),
                               child: ListView.builder(
+                                controller: _scrollController,
                                 padding: const EdgeInsets.all(AppSpacing.s16),
-                                itemCount: displayedItems.length,
+                                itemCount: displayedItems.length +
+                                    (state.isLoadingMore ? 1 : 0),
                                 itemBuilder: (context, index) {
+                                  if (index == displayedItems.length) {
+                                    return const Padding(
+                                      padding: EdgeInsets.symmetric(
+                                        vertical: AppSpacing.s16,
+                                      ),
+                                      child: Center(
+                                        child: AppLoadingView.compact(size: 24),
+                                      ),
+                                    );
+                                  }
                                   final item = displayedItems[index];
                                   return NotificationTile(
                                     notification: item,

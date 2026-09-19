@@ -118,7 +118,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     // يجلب بيانات المستخدم + حالة الـ Tenant في رحلة HTTP واحدة
     final data = await _safeClient
         .from('users')
-        .select('id, tenant_id, role, status, full_name, email, phone, parent_phone, tenants!inner(status)')
+        .select('id, tenant_id, role, status, full_name, email, phone, parent_phone, tenants(status)')
         .eq('id', userId)
         .maybeSingle();
 

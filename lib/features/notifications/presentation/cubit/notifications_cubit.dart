@@ -7,30 +7,40 @@ import 'notifications_state.dart';
 class NotificationsCubit extends Cubit<NotificationsState> {
   final NotificationsRepository _repository;
 
-  // ── Cache keys ──────────────────────────────────────────────────────────
+  // ── Cache keys & Pagination ─────────────────────────────────────────────
   static const _cacheKeyNotifs = 'notifications_all';
+  static const int _pageSize = 20;
+  int _currentOffset = 0;
 
   NotificationsCubit({required NotificationsRepository repository})
     : _repository = repository,
       super(const NotificationsInitial());
 
   /// Loads notifications and unread count — with parallel fetch + cache.
-  Future<void> loadNotifications() async {
+  Future<void> loadNotifications({bool forceRefresh = false}) async {
+    _currentOffset = 0;
+    if (forceRefresh) {
+      AppCache.notifications.invalidate(_cacheKeyNotifs);
+    }
     // ── Stale-While-Revalidate ────────────────────────────────────────────
     final cached = AppCache.notifications.getStale(_cacheKeyNotifs);
     if (cached is _NotifsCachePayload) {
       emit(NotificationsLoaded(
         notifications: cached.notifications,
         unreadCount: cached.unreadCount,
+        hasMore: cached.notifications.length >= _pageSize,
       ));
-      if (AppCache.notifications.has(_cacheKeyNotifs)) return;
+      if (!forceRefresh && AppCache.notifications.has(_cacheKeyNotifs)) return;
       // Continue to refresh silently
     } else {
       emit(const NotificationsLoading());
     }
 
     // ── Parallel fetch ───────────────────────────────────────────────────
-    final notifsFuture = _repository.getMyNotifications();
+    final notifsFuture = _repository.getMyNotifications(
+      limit: _pageSize,
+      offset: 0,
+    );
     final countFuture = _repository.getUnreadCount();
 
     final notifsResult = await notifsFuture;
@@ -49,7 +59,12 @@ class NotificationsCubit extends Cubit<NotificationsState> {
       ));
 
       if (!isClosed) {
-        emit(NotificationsLoaded(notifications: notifs, unreadCount: count));
+        emit(NotificationsLoaded(
+          notifications: notifs,
+          unreadCount: count,
+          hasMore: notifs.length == _pageSize,
+          isLoadingMore: false,
+        ));
       }
     } else {
       if (!isClosed) {
@@ -59,6 +74,45 @@ class NotificationsCubit extends Cubit<NotificationsState> {
           ),
         );
       }
+    }
+  }
+
+  /// Loads more notifications on scroll to bottom (Infinite Scroll)
+  Future<void> loadMoreNotifications() async {
+    final currentState = state;
+    if (currentState is! NotificationsLoaded) return;
+    if (!currentState.hasMore || currentState.isLoadingMore) return;
+
+    emit(currentState.copyWith(isLoadingMore: true));
+    final nextOffset = _currentOffset + _pageSize;
+
+    final result = await _repository.getMyNotifications(
+      limit: _pageSize,
+      offset: nextOffset,
+    );
+
+    if (isClosed) return;
+
+    if (result.isSuccess) {
+      final newNotifs = result.dataOrNull ?? <NotificationEntity>[];
+      _currentOffset = nextOffset;
+      final allNotifs = [...currentState.notifications, ...newNotifs];
+
+      AppCache.notifications.put(
+        _cacheKeyNotifs,
+        _NotifsCachePayload(
+          notifications: allNotifs,
+          unreadCount: currentState.unreadCount,
+        ),
+      );
+
+      emit(currentState.copyWith(
+        notifications: allNotifs,
+        hasMore: newNotifs.length == _pageSize,
+        isLoadingMore: false,
+      ));
+    } else {
+      emit(currentState.copyWith(isLoadingMore: false));
     }
   }
 

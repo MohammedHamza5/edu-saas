@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../config/tenant_registry.dart';
 import '../di/injection_container.dart';
 import '../network/supabase_service.dart';
-import '../router/app_router.dart';
+import '../router/app_routes.dart';
 import '../utils/group_slug_resolver.dart';
 import '../extensions/localized_context_extension.dart';
 import '../theme/app_colors.dart';
@@ -35,29 +35,25 @@ class StudentShell extends StatelessWidget {
     if (path.contains('/content')) return 2;
     if (path.startsWith('/student/assignments')) return 3;
     if (path.startsWith('/student/exams')) return 4;
-    if (path.startsWith('/student/attendance')) return 5;
     return 0;
   }
 
   void _onNavigationChanged(BuildContext context, int index) {
     switch (index) {
       case 0:
-        context.go(AppRouter.studentDashboard);
+        context.go(AppRoutes.studentDashboard);
         break;
       case 1:
-        context.go(AppRouter.studentNotifications);
+        context.go(AppRoutes.studentNotifications);
         break;
       case 2:
         _handleStudentContentNavigation(context);
         break;
       case 3:
-        context.go(AppRouter.studentAssignments);
+        context.go(AppRoutes.studentAssignments);
         break;
       case 4:
-        context.go(AppRouter.studentExams);
-        break;
-      case 5:
-        context.go(AppRouter.studentAttendance);
+        context.go(AppRoutes.studentExams);
         break;
     }
   }
@@ -78,88 +74,13 @@ class StudentShell extends StatelessWidget {
       return;
     }
 
-    if (groups.length == 1) {
-      final g = groups.first;
-      final slug = GroupSlugResolver.toSlug(g.id, g.name);
-      context.go(
-        AppRouter.studentGroupContent.replaceAll(':groupId', slug),
-        extra: g.name,
-      );
-      return;
-    }
-
-    // Show group picker bottom sheet if multiple groups
-    unawaited(showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppSpacing.radiusLarge)),
-      ),
-      builder: (sheetContext) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.s16),
-            child: Column(
-               mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      sheetContext.l10n.selectSubjectGroup,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close_rounded, size: 20),
-                      onPressed: () => Navigator.of(sheetContext).pop(),
-                    ),
-                  ],
-                ),
-                const Divider(height: 1),
-                const SizedBox(height: AppSpacing.s8),
-                ConstrainedBox(
-                  constraints: const BoxConstraints(maxHeight: 280),
-                  child: ListView.separated(
-                    shrinkWrap: true,
-                    itemCount: groups.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.s8),
-                    itemBuilder: (ctx, i) {
-                      final group = groups[i];
-                      return ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: AppColors.primaryLight.withValues(alpha: 0.15),
-                          child: const Icon(Icons.menu_book_rounded, color: AppColors.primary),
-                        ),
-                        title: Text(group.name, style: const TextStyle(fontWeight: FontWeight.w600)),
-                        subtitle: Text(group.level),
-                        trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                          side: const BorderSide(color: AppColors.border),
-                        ),
-                        onTap: () {
-                          Navigator.of(sheetContext).pop();
-                          final slug = GroupSlugResolver.toSlug(group.id, group.name);
-                          context.go(
-                            AppRouter.studentGroupContent.replaceAll(':groupId', slug),
-                            extra: group.name,
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    ));
+    // Direct 1-tap navigation to the student's assigned group content
+    final g = groups.first;
+    final slug = GroupSlugResolver.toSlug(g.id, g.name);
+    context.go(
+      AppRoutes.studentGroupContent.replaceAll(':groupId', slug),
+      extra: g.name,
+    );
   }
 
   @override
@@ -189,12 +110,14 @@ class StudentShell extends StatelessWidget {
             icon: Icons.dashboard_outlined,
             selectedIcon: Icons.dashboard_rounded,
             label: context.l10n.studentNavDashboard,
+            subtitle: context.l10n.studentNavDashboardSubtitle,
             tooltip: context.l10n.navDashboard,
           ),
           AdaptiveDestination(
             icon: Icons.notifications_outlined,
             selectedIcon: Icons.notifications_rounded,
             label: context.l10n.studentNavNotifications,
+            subtitle: context.l10n.studentNavNotificationsSubtitle,
             tooltip: context.l10n.notificationsCenterTitle,
             badgeCount: unreadNotifications,
           ),
@@ -209,6 +132,7 @@ class StudentShell extends StatelessWidget {
             icon: Icons.menu_book_outlined,
             selectedIcon: Icons.menu_book_rounded,
             label: context.l10n.studentNavContent,
+            subtitle: context.l10n.studentNavContentSubtitle,
             tooltip: context.l10n.contentLibraryTitle,
           ),
         ],
@@ -222,19 +146,15 @@ class StudentShell extends StatelessWidget {
             icon: Icons.assignment_outlined,
             selectedIcon: Icons.assignment_rounded,
             label: context.l10n.studentNavAssignments,
+            subtitle: context.l10n.studentNavAssignmentsSubtitle,
             tooltip: context.l10n.assignmentsListTitle,
           ),
           AdaptiveDestination(
             icon: Icons.quiz_outlined,
             selectedIcon: Icons.quiz_rounded,
             label: context.l10n.studentNavExams,
+            subtitle: context.l10n.studentNavExamsSubtitle,
             tooltip: context.l10n.examsListTitle,
-          ),
-          AdaptiveDestination(
-            icon: Icons.fact_check_outlined,
-            selectedIcon: Icons.fact_check_rounded,
-            label: context.l10n.studentNavAttendance,
-            tooltip: context.l10n.studentAttendanceTitle,
           ),
         ],
       ),
@@ -261,7 +181,7 @@ class StudentShell extends StatelessWidget {
     })();
 
     return InkWell(
-      onTap: () => context.go(AppRouter.studentDashboard),
+      onTap: () => context.go(AppRoutes.studentDashboard),
       mouseCursor: SystemMouseCursors.click,
       borderRadius: BorderRadius.circular(12),
       child: AppLogo.compact(
@@ -341,7 +261,7 @@ class StudentShell extends StatelessWidget {
               if (confirmed == true && context.mounted) {
                 await SupabaseService.client.auth.signOut();
                 if (context.mounted) {
-                  context.go(AppRouter.login);
+                  context.go(AppRoutes.login);
                 }
               }
             },

@@ -7,15 +7,13 @@ import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../domain/entities/exam_entity.dart';
 import '../cubit/exams_cubit.dart';
+import '../cubit/exams_state.dart';
 import 'exam_taking_page.dart';
 
 class ExamIntroPage extends StatelessWidget {
   final ExamEntity exam;
 
-  const ExamIntroPage({
-    super.key,
-    required this.exam,
-  });
+  const ExamIntroPage({super.key, required this.exam});
 
   @override
   Widget build(BuildContext context) {
@@ -102,7 +100,9 @@ class ExamIntroPage extends StatelessWidget {
                   child: _buildInfoTile(
                     Icons.verified_outlined,
                     context.l10n.passingScoreTitle,
-                    exam.passingScore != null ? context.l10n.scorePoints(exam.passingScore!) : context.l10n.notSpecified,
+                    exam.passingScore != null
+                        ? context.l10n.scorePoints(exam.passingScore!)
+                        : context.l10n.notSpecified,
                   ),
                 ),
                 const SizedBox(width: AppSpacing.s12),
@@ -110,7 +110,9 @@ class ExamIntroPage extends StatelessWidget {
                   child: _buildInfoTile(
                     Icons.replay_outlined,
                     context.l10n.retakePolicy,
-                    exam.allowRetake ? context.l10n.allowedHighestScore : context.l10n.notAllowed,
+                    exam.allowRetake
+                        ? context.l10n.allowedHighestScore
+                        : context.l10n.notAllowed,
                   ),
                 ),
               ],
@@ -153,23 +155,48 @@ class ExamIntroPage extends StatelessWidget {
 
             // Action Button
             if (canTake) ...[
-              AppButton(
-                text: hasActive ? context.l10n.resumeCurrentExam : context.l10n.startExamNow,
-                icon: hasActive ? Icons.play_arrow : Icons.rocket_launch_outlined,
-                onPressed: () async {
-                  final cubit = context.read<ExamsCubit>();
-                  final success = await cubit.startExamTaking(exam);
-
-                  if (context.mounted && success) {
-                    await Navigator.of(context).pushReplacement<void, void>(
-                      MaterialPageRoute<void>(
-                        builder: (_) => BlocProvider.value(
-                          value: cubit,
-                          child: const ExamTakingPage(),
-                        ),
+              BlocConsumer<ExamsCubit, ExamsState>(
+                listener: (context, state) {
+                  if (state is ExamsError) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(state.message),
+                        backgroundColor: AppColors.error,
                       ),
                     );
                   }
+                },
+                builder: (context, state) {
+                  final isLoading = state is ExamsLoading;
+                  return AppButton(
+                    text: hasActive
+                        ? context.l10n.resumeCurrentExam
+                        : context.l10n.startExamNow,
+                    icon: hasActive
+                        ? Icons.play_arrow
+                        : Icons.rocket_launch_outlined,
+                    isLoading: isLoading,
+                    onPressed: isLoading
+                        ? null
+                        : () async {
+                            final cubit = context.read<ExamsCubit>();
+                            final success = await cubit.startExamTaking(exam);
+
+                            if (context.mounted && success) {
+                              await Navigator.of(context).push<void>(
+                                MaterialPageRoute<void>(
+                                  builder: (_) => BlocProvider.value(
+                                    value: cubit,
+                                    child: const ExamTakingPage(),
+                                  ),
+                                ),
+                              );
+                              if (context.mounted) {
+                                Navigator.of(context).pop();
+                              }
+                            }
+                          },
+                  );
                 },
               ),
             ] else ...[
@@ -184,7 +211,10 @@ class ExamIntroPage extends StatelessWidget {
                 child: Center(
                   child: Text(
                     exam.myBestScore != null
-                        ? context.l10n.examAlreadyCompletedNoRetake(exam.myBestScore!, exam.maxScore)
+                        ? context.l10n.examAlreadyCompletedNoRetake(
+                            exam.myBestScore!,
+                            exam.maxScore,
+                          )
                         : context.l10n.examCannotBeTaken,
                     textAlign: TextAlign.center,
                     style: const TextStyle(
@@ -219,7 +249,10 @@ class ExamIntroPage extends StatelessWidget {
               const SizedBox(width: AppSpacing.s6),
               Text(
                 title,
-                style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppColors.textMuted,
+                ),
               ),
             ],
           ),
@@ -249,7 +282,11 @@ class _RuleItem extends StatelessWidget {
       children: [
         const Padding(
           padding: EdgeInsets.only(top: 4),
-          child: Icon(Icons.check_circle_outline, size: 14, color: AppColors.primary),
+          child: Icon(
+            Icons.check_circle_outline,
+            size: 14,
+            color: AppColors.primary,
+          ),
         ),
         const SizedBox(width: AppSpacing.s8),
         Expanded(

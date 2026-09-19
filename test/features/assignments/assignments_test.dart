@@ -29,14 +29,19 @@ class FakeAssignmentsRepository implements AssignmentsRepository {
 
   @override
   Future<Result<List<AssignmentEntity>>> getGroupAssignments(
-    String groupId,
-  ) async {
+    String groupId, {
+    int page = 0,
+    int pageSize = 15,
+  }) async {
     if (shouldFail) return FailureResult(ServerFailure(failureMessage));
     return Success(mockAssignments);
   }
 
   @override
-  Future<Result<List<AssignmentEntity>>> getStudentAssignments() async {
+  Future<Result<List<AssignmentEntity>>> getStudentAssignments({
+    int page = 0,
+    int pageSize = 15,
+  }) async {
     if (shouldFail) return FailureResult(ServerFailure(failureMessage));
     return Success(mockAssignments);
   }
@@ -291,7 +296,7 @@ void main() {
         'content_id': 'c-1',
         'tenant_id': 't-1',
         'instructions': 'حل الأسئلة من 1 إلى 5',
-        'due_at': '2026-09-15T23:59:00.000Z',
+        'due_at': DateTime.now().add(const Duration(days: 7)).toIso8601String(),
         'allow_late_submission': true,
         'max_score': 50,
         'created_at': '2026-09-08T10:00:00.000Z',
@@ -693,6 +698,63 @@ void main() {
         expect(find.text('واجبات: SAT Group A'), findsOneWidget);
         expect(find.text('واجب المصفوفات والمحددات'), findsOneWidget);
         expect(find.text('إنشاء واجب'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'TeacherAssignmentsPage opens submissions sheet on card tap without error',
+      (tester) async {
+        final fakeRepo = FakeAssignmentsRepository();
+        final assignment = AssignmentEntity(
+          id: 't-a1',
+          contentId: 'c1',
+          tenantId: 't1',
+          groupId: 'g-target',
+          title: 'واجب المصفوفات والمحددات',
+          maxScore: 100,
+          submissionsCount: 1,
+          reviewedCount: 0,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+        fakeRepo.mockAssignments = [assignment];
+        fakeRepo.mockSubmissions = [
+          AssignmentSubmissionEntity(
+            id: 'sub-1',
+            assignmentId: 't-a1',
+            studentId: 'student-1',
+            studentName: 'أحمد محمود',
+            attemptNumber: 1,
+            submittedAt: DateTime.now(),
+            status: SubmissionStatus.submitted,
+            score: null,
+            files: const [],
+          ),
+        ];
+        final cubit = AssignmentsCubit(repository: fakeRepo);
+
+        await tester.pumpWidget(
+          createTestApp(
+            child: BlocProvider.value(
+              value: cubit,
+              child: const TeacherAssignmentsPage(
+                groupId: 'g-target',
+                groupName: 'SAT Group A',
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+        expect(find.text('واجب المصفوفات والمحددات'), findsOneWidget);
+
+        // Tap the assignment card
+        await tester.tap(find.text('واجب المصفوفات والمحددات'));
+        await tester.pumpAndSettle();
+
+        // Verify the submissions sheet opened and displays student name, NOT an error widget
+        expect(find.text('أحمد محمود'), findsOneWidget);
+        expect(find.text('An error occurred displaying content'), findsNothing);
       },
     );
   });

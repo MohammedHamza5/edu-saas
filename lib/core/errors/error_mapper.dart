@@ -134,6 +134,12 @@ class ErrorMapper {
       if (msg.contains('tenant_suspended')) {
         return _tenantSuspendedError(customCode ?? 'TENANT_SUSPENDED', raw: exception);
       }
+      if (msg.contains('user_suspended') || msg.contains('suspended')) {
+        return _userSuspendedError(customCode ?? 'USER_SUSPENDED', raw: exception);
+      }
+      if (msg.contains('user_rejected') || msg.contains('rejected')) {
+        return _userRejectedError(customCode ?? 'USER_REJECTED', raw: exception);
+      }
       if (msg.contains('expired') || msg.contains('jwt')) {
         return _sessionExpiredError(customCode ?? 'AUTH_EXPIRED', raw: exception);
       }
@@ -243,6 +249,12 @@ class ErrorMapper {
     if (lower.contains('tenant_suspended')) {
       return _tenantSuspendedError(customCode ?? 'TENANT_SUSPENDED', raw: text);
     }
+    if (lower.contains('user_suspended') || lower.contains('account has been suspended') || lower.contains('suspended')) {
+      return _userSuspendedError(customCode ?? 'USER_SUSPENDED', raw: text);
+    }
+    if (lower.contains('user_rejected') || lower.contains('registration request for this account was rejected') || lower.contains('rejected')) {
+      return _userRejectedError(customCode ?? 'USER_REJECTED', raw: text);
+    }
     if (lower.contains('jwt expired') || lower.contains('token expired') || lower.contains('session expired')) {
       return _sessionExpiredError(customCode ?? 'AUTH_EXPIRED', raw: text);
     }
@@ -331,6 +343,28 @@ class ErrorMapper {
         messageBuilder: (l10n) => l10n.tenantSuspendedMessage,
         hintBuilder: (l10n) => l10n.errorAccountSuspendedHint,
         icon: Icons.block_rounded,
+        canRetry: false,
+        rawError: raw,
+      );
+
+  static UserFriendlyError _userSuspendedError(String code, {dynamic raw}) => UserFriendlyError(
+        type: FailureType.permission,
+        code: code,
+        titleBuilder: (l10n) => l10n.errorAccountSuspendedTitle,
+        messageBuilder: (l10n) => l10n.errorUserSuspendedMessage,
+        hintBuilder: (l10n) => l10n.errorAccountSuspendedHint,
+        icon: Icons.block_rounded,
+        canRetry: false,
+        rawError: raw,
+      );
+
+  static UserFriendlyError _userRejectedError(String code, {dynamic raw}) => UserFriendlyError(
+        type: FailureType.permission,
+        code: code,
+        titleBuilder: (l10n) => l10n.errorRegistrationRejectedTitle,
+        messageBuilder: (l10n) => l10n.errorRegistrationRejectedMessage,
+        hintBuilder: (l10n) => l10n.errorRegistrationRejectedHint,
+        icon: Icons.cancel_outlined,
         canRetry: false,
         rawError: raw,
       );

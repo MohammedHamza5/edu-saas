@@ -5,7 +5,7 @@ import '../../../../core/config/tenant_registry.dart';
 import '../../../../core/network/supabase_service.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/extensions/responsive_context_extension.dart';
-import '../../../../core/router/app_router.dart';
+import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -226,7 +226,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                           ),
                         ),
                       ),
-                      onPressed: () => context.go(AppRouter.sendAnnouncement),
+                      onPressed: () => context.go(AppRoutes.sendAnnouncement),
                     ),
                   ],
                 ),
@@ -265,7 +265,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                     AppCard(
                       variant: AppCardVariant.elevated,
                       padding: const EdgeInsets.all(AppSpacing.s12),
-                      onTap: () => context.go(AppRouter.studentsList),
+                      onTap: () => context.go(AppRoutes.studentsList),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -352,7 +352,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                     AppCard(
                       variant: AppCardVariant.elevated,
                       padding: const EdgeInsets.all(AppSpacing.s12),
-                      onTap: () => context.go(AppRouter.groupsList),
+                      onTap: () => context.go(AppRoutes.groupsList),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -421,7 +421,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                     AppCard(
                       variant: AppCardVariant.elevated,
                       padding: const EdgeInsets.all(AppSpacing.s12),
-                      onTap: () => context.go(AppRouter.teacherAttendance),
+                      onTap: () => context.go(AppRoutes.teacherAttendance),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -498,7 +498,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                     AppCard(
                       variant: AppCardVariant.elevated,
                       padding: const EdgeInsets.all(AppSpacing.s12),
-                      onTap: () => context.go(AppRouter.notificationsCenter),
+                      onTap: () => context.go(AppRoutes.notificationsCenter),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -617,7 +617,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                     // Service 1: Students Management
                     AppCard(
                       variant: AppCardVariant.elevated,
-                      onTap: () => context.go(AppRouter.studentsList),
+                      onTap: () => context.go(AppRoutes.studentsList),
                       child: Row(
                         children: [
                           const CircleAvatar(
@@ -663,7 +663,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                     // Service 2: Groups Management
                     AppCard(
                       variant: AppCardVariant.elevated,
-                      onTap: () => context.go(AppRouter.groupsList),
+                      onTap: () => context.go(AppRoutes.groupsList),
                       child: Row(
                         children: [
                           const CircleAvatar(
@@ -709,7 +709,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                     // Service 3: Attendance
                     AppCard(
                       variant: AppCardVariant.elevated,
-                      onTap: () => context.go(AppRouter.teacherAttendance),
+                      onTap: () => context.go(AppRoutes.teacherAttendance),
                       child: Row(
                         children: [
                           const CircleAvatar(
@@ -755,7 +755,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                     // Service 4: Announcement
                     AppCard(
                       variant: AppCardVariant.elevated,
-                      onTap: () => context.go(AppRouter.sendAnnouncement),
+                      onTap: () => context.go(AppRoutes.sendAnnouncement),
                       child: Row(
                         children: [
                           const CircleAvatar(
@@ -801,7 +801,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                     // Service 5: Exams & Question Bank
                     AppCard(
                       variant: AppCardVariant.elevated,
-                      onTap: () => context.go(AppRouter.teacherExams),
+                      onTap: () => context.go(AppRoutes.teacherExams),
                       child: Row(
                         children: [
                           Container(
@@ -852,7 +852,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                     // Service 6: Content Library
                     AppCard(
                       variant: AppCardVariant.elevated,
-                      onTap: () => context.go(AppRouter.teacherContent),
+                      onTap: () => context.go(AppRoutes.teacherContent),
                       child: Row(
                         children: [
                           Container(
@@ -903,7 +903,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                     // Service 7: Assignments & Grading
                     AppCard(
                       variant: AppCardVariant.elevated,
-                      onTap: () => context.go(AppRouter.teacherAssignments),
+                      onTap: () => context.go(AppRoutes.teacherAssignments),
                       child: Row(
                         children: [
                           Container(
@@ -956,7 +956,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                     // Service 8: Platform & Academy Settings
                     AppCard(
                       variant: AppCardVariant.elevated,
-                      onTap: () => context.go(AppRouter.teacherSettings),
+                      onTap: () => context.go(AppRoutes.teacherSettings),
                       child: Row(
                         children: [
                           const CircleAvatar(
@@ -1096,7 +1096,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                           (group) => InteractiveGroupCard(
                             group: group,
                             onTap: () => context.push(
-                              '${AppRouter.groupsList}/${group.id}',
+                              '${AppRoutes.groupsList}/${group.id}',
                               extra: group,
                             ),
                           ),

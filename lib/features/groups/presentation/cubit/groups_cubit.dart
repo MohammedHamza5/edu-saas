@@ -14,13 +14,16 @@ class GroupsCubit extends Cubit<GroupsState> {
     : _repository = repository,
       super(const GroupsInitial());
 
-  Future<void> loadGroups() async {
+  Future<void> loadGroups({bool forceRefresh = false}) async {
+    if (forceRefresh) {
+      AppCache.groups.invalidate(_cacheKeyGroups);
+    }
     // ── Stale-While-Revalidate: show cached data instantly ──────────────
     final cached = AppCache.groups.getStale(_cacheKeyGroups);
     if (cached is List<GroupEntity>) {
       emit(GroupsLoaded(groups: cached));
-      // If still fresh, skip network
-      if (AppCache.groups.has(_cacheKeyGroups)) return;
+      // If still fresh and not forceRefresh, skip network
+      if (!forceRefresh && AppCache.groups.has(_cacheKeyGroups)) return;
       // Otherwise continue to refresh silently (no loading state)
     } else {
       emit(const GroupsLoading());
@@ -107,12 +110,15 @@ class GroupsCubit extends Cubit<GroupsState> {
     );
   }
 
-  Future<void> loadGroupDetail(String groupId) async {
+  Future<void> loadGroupDetail(String groupId, {bool forceRefresh = false}) async {
     if (state is! GroupsLoaded) {
       await loadGroups();
     }
     if (isClosed) return;
+    await loadGroupMembers(groupId, forceRefresh: forceRefresh);
+  }
 
+  Future<void> loadGroupMembers(String groupId, {bool forceRefresh = false}) async {
     if (state is GroupsLoaded) {
       final current = state as GroupsLoaded;
       GroupEntity? group;
@@ -127,10 +133,13 @@ class GroupsCubit extends Cubit<GroupsState> {
 
       // Check members cache
       final membersCacheKey = 'members_$groupId';
+      if (forceRefresh) {
+        AppCache.groups.invalidate(membersCacheKey);
+      }
       final cachedMembers = AppCache.groups.getStale(membersCacheKey);
       if (cachedMembers != null) {
         emit(current.copyWith(selectedGroup: group, groupMembers: (cachedMembers as List).cast()));
-        if (AppCache.groups.has(membersCacheKey)) return;
+        if (!forceRefresh && AppCache.groups.has(membersCacheKey)) return;
       }
 
       final membersResult = await _repository.getGroupMembers(groupId);

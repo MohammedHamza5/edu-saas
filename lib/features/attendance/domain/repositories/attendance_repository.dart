@@ -15,10 +15,12 @@ abstract interface class AttendanceRepository {
     required List<StudentAttendanceItem> items,
   });
 
-  /// Fetches a student's attendance history, optionally filtered by group
+  /// Fetches a student's attendance history, optionally filtered by group and paginated
   Future<Result<List<AttendanceEntity>>> getStudentAttendanceHistory({
     required String studentId,
     String? groupId,
+    int? page,
+    int? pageSize,
   });
 
   /// Calculates attendance statistics (present, absent, late, excused, percentage)

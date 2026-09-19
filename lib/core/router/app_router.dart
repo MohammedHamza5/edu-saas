@@ -26,6 +26,7 @@ import '../../features/students/presentation/pages/students_list_page.dart';
 import '../../features/videos/presentation/cubit/videos_cubit.dart';
 import '../../features/videos/presentation/pages/video_player_page.dart';
 import '../../features/content/presentation/pages/teacher_content_library_page.dart';
+import '../../features/content/presentation/pages/teacher_video_bank_page.dart';
 import '../../features/content/presentation/pages/student_content_feed_page.dart';
 import '../../features/assignments/presentation/pages/teacher_assignments_page.dart';
 import '../../features/assignments/presentation/pages/student_assignments_page.dart';
@@ -38,65 +39,68 @@ import '../utils/group_slug_resolver.dart';
 import '../widgets/student_shell.dart';
 import '../widgets/teacher_shell.dart';
 import 'app_route_observer.dart';
+import 'app_routes.dart';
+
+export 'app_routes.dart';
 
 class AppRouter {
   AppRouter._();
 
-  static const String splash = '/';
-  static const String login = '/login';
-  static const String registerStudent = '/register-student';
-  static const String studentPending = '/student-pending';
-  static const String tenantSuspended = '/tenant-suspended';
+  static const String splash = AppRoutes.splash;
+  static const String login = AppRoutes.login;
+  static const String registerStudent = AppRoutes.registerStudent;
+  static const String studentPending = AppRoutes.studentPending;
+  static const String tenantSuspended = AppRoutes.tenantSuspended;
 
   // Role dashboards (No single dashboard with if-role - Task 5)
-  static const String teacherDashboard = '/teacher';
-  static const String studentDashboard = '/student';
-  static const String parentDashboard = '/parent';
+  static const String teacherDashboard = AppRoutes.teacherDashboard;
+  static const String studentDashboard = AppRoutes.studentDashboard;
+  static const String parentDashboard = AppRoutes.parentDashboard;
 
   // Feature: Groups routes
-  static const String groupsList = '/teacher/groups';
-  static const String groupDetail = '/teacher/groups/:id';
+  static const String groupsList = AppRoutes.groupsList;
+  static const String groupDetail = AppRoutes.groupDetail;
 
   // Feature: Attendance routes
-  static const String teacherAttendance = '/teacher/attendance';
-  static const String studentAttendance = '/student/attendance';
+  static const String teacherAttendance = AppRoutes.teacherAttendance;
+  static const String studentAttendance = AppRoutes.studentAttendance;
 
   // Feature: Students routes
-  static const String studentsList = '/teacher/students';
-  static const String pendingStudents = '/teacher/students/pending';
-  static const String student360 = '/teacher/students/profile';
-  static const String assignGroups = '/teacher/students/assign-groups';
+  static const String studentsList = AppRoutes.studentsList;
+  static const String pendingStudents = AppRoutes.pendingStudents;
+  static const String student360 = AppRoutes.student360;
+  static const String assignGroups = AppRoutes.assignGroups;
 
   // Feature: Notifications routes
-  static const String notificationsCenter = '/notifications';
-  static const String teacherNotifications = '/teacher/notifications';
-  static const String studentNotifications = '/student/notifications';
-  static const String sendAnnouncement = '/teacher/announcements/new';
+  static const String notificationsCenter = AppRoutes.notificationsCenter;
+  static const String teacherNotifications = AppRoutes.teacherNotifications;
+  static const String studentNotifications = AppRoutes.studentNotifications;
+  static const String sendAnnouncement = AppRoutes.sendAnnouncement;
 
   // Feature: Content routes
-  static const String teacherContent = '/teacher/content';
-  static const String teacherGroupContent = '/teacher/groups/:groupId/content';
-  static const String studentGroupContent = '/student/groups/:groupId/content';
+  static const String teacherContent = AppRoutes.teacherContent;
+  static const String teacherGroupContent = AppRoutes.teacherGroupContent;
+  static const String studentGroupContent = AppRoutes.studentGroupContent;
 
   // Feature: Assignments routes
-  static const String teacherAssignments = '/teacher/assignments';
-  static const String teacherGroupAssignments =
-      '/teacher/groups/:groupId/assignments';
-  static const String studentAssignments = '/student/assignments';
+  static const String teacherAssignments = AppRoutes.teacherAssignments;
+  static const String teacherGroupAssignments = AppRoutes.teacherGroupAssignments;
+  static const String studentAssignments = AppRoutes.studentAssignments;
 
   // Feature: Exams routes
-  static const String teacherExams = '/teacher/exams';
-  static const String teacherGroupExams = '/teacher/groups/:groupId/exams';
-  static const String studentExams = '/student/exams';
+  static const String teacherExams = AppRoutes.teacherExams;
+  static const String teacherGroupExams = AppRoutes.teacherGroupExams;
+  static const String studentExams = AppRoutes.studentExams;
 
   // Feature: Platform Onboarding
-  static const String platformOnboarding = '/platform/onboarding';
+  static const String platformOnboarding = AppRoutes.platformOnboarding;
 
   // Feature: Settings
-  static const String teacherSettings = '/teacher/settings';
+  static const String teacherSettings = AppRoutes.teacherSettings;
 
   // Feature: Videos routes
-  static const String videoPlayer = '/videos/player';
+  static const String teacherVideos = AppRoutes.teacherVideos;
+  static const String videoPlayer = AppRoutes.videoPlayer;
 
   static final GoRouter router = GoRouter(
     initialLocation: splash,
@@ -111,7 +115,9 @@ class AppRouter {
             path.startsWith('/student') ||
             path.startsWith('/parent') ||
             path.startsWith('/platform') ||
-            path.startsWith('/notifications');
+            path.startsWith('/notifications') ||
+            path.startsWith('/videos') ||
+            path.startsWith('/video');
         if (isProtected) {
           return login;
         }
@@ -342,6 +348,23 @@ class AppRouter {
             },
           ),
           GoRoute(
+            path: teacherVideos,
+            pageBuilder: (BuildContext context, GoRouterState state) =>
+                NoTransitionPage(
+              child: MultiBlocProvider(
+                providers: [
+                  BlocProvider(
+                    create: (_) => InjectionContainer.createContentCubit(),
+                  ),
+                  BlocProvider(
+                    create: (_) => InjectionContainer.createGroupsCubit(),
+                  ),
+                ],
+                child: const TeacherVideoBankPage(),
+              ),
+            ),
+          ),
+          GoRoute(
             path: teacherAssignments,
             pageBuilder: (BuildContext context, GoRouterState state) {
               final groupId = state.uri.queryParameters['groupId'];
@@ -502,11 +525,33 @@ class AppRouter {
         builder: (BuildContext context, GoRouterState state) {
           final videoId = state.uri.queryParameters['id'] ?? (state.extra as String? ?? '');
           final studentId = state.uri.queryParameters['studentId'];
+          final associatedExamId = state.uri.queryParameters['associatedExamId'];
+          final associatedExamTitle = state.uri.queryParameters['associatedExamTitle'];
           return BlocProvider<VideosCubit>(
             create: (_) => InjectionContainer.createVideosCubit(),
             child: VideoPlayerPage(
               videoId: videoId,
               studentId: studentId,
+              associatedExamId: associatedExamId?.isNotEmpty == true ? associatedExamId : null,
+              associatedExamTitle: associatedExamTitle?.isNotEmpty == true ? associatedExamTitle : null,
+            ),
+          );
+        },
+      ),
+      GoRoute(
+        path: '/video/:id',
+        builder: (BuildContext context, GoRouterState state) {
+          final videoId = state.pathParameters['id'] ?? (state.extra as String? ?? '');
+          final studentId = state.uri.queryParameters['studentId'];
+          final associatedExamId = state.uri.queryParameters['associatedExamId'];
+          final associatedExamTitle = state.uri.queryParameters['associatedExamTitle'];
+          return BlocProvider<VideosCubit>(
+            create: (_) => InjectionContainer.createVideosCubit(),
+            child: VideoPlayerPage(
+              videoId: videoId,
+              studentId: studentId,
+              associatedExamId: associatedExamId?.isNotEmpty == true ? associatedExamId : null,
+              associatedExamTitle: associatedExamTitle?.isNotEmpty == true ? associatedExamTitle : null,
             ),
           );
         },

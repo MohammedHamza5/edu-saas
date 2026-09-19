@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
-import '../../../../core/router/app_router.dart';
+import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -310,7 +310,7 @@ class TeacherActionRadar extends StatelessWidget {
                 color: AppColors.error,
                 items: unwatchedStudents,
                 actionLabel: context.l10n.radarSendWatchAlert,
-                onAction: () => context.push(AppRouter.sendAnnouncement),
+                onAction: () => context.push(AppRoutes.sendAnnouncement),
               ),
             ),
 
@@ -331,7 +331,7 @@ class TeacherActionRadar extends StatelessWidget {
                 color: AppColors.warning,
                 items: unsubmittedHomework,
                 actionLabel: context.l10n.radarOpenHomeworkList,
-                onAction: () => context.push(AppRouter.groupsList),
+                onAction: () => context.push(AppRoutes.groupsList),
               ),
             ),
 
@@ -352,7 +352,7 @@ class TeacherActionRadar extends StatelessWidget {
                 color: const Color(0xFF8B5CF6),
                 items: lowScoreAlerts,
                 actionLabel: context.l10n.radarReviewPerformance,
-                onAction: () => context.push(AppRouter.studentsList),
+                onAction: () => context.push(AppRoutes.studentsList),
               ),
             ),
 
@@ -367,7 +367,7 @@ class TeacherActionRadar extends StatelessWidget {
               icon: Icons.person_add_alt_1_rounded,
               color: AppColors.primary,
               isCritical: pendingCount > 0,
-              onTap: () => context.push(AppRouter.pendingStudents),
+              onTap: () => context.push(AppRoutes.pendingStudents),
             ),
           ],
         ),
@@ -710,28 +710,28 @@ class TeacherActionRadar extends StatelessWidget {
                     label: Text(context.l10n.chipHandoutsPdfs, style: const TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.w600)),
                     backgroundColor: const Color(0xFF1E293B),
                     side: const BorderSide(color: Color(0xFF334155)),
-                    onPressed: () => context.push(AppRouter.groupsList),
+                    onPressed: () => context.push(AppRoutes.groupsList),
                   ),
                   ActionChip(
                     avatar: const Icon(Icons.assignment_rounded, size: 14, color: Color(0xFFFBBF24)),
                     label: Text(context.l10n.chipDrillHomework, style: const TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.w600)),
                     backgroundColor: const Color(0xFF1E293B),
                     side: const BorderSide(color: Color(0xFF334155)),
-                    onPressed: () => context.push(AppRouter.groupsList),
+                    onPressed: () => context.push(AppRoutes.groupsList),
                   ),
                   ActionChip(
                     avatar: const Icon(Icons.quiz_rounded, size: 14, color: Color(0xFFA78BFA)),
                     label: Text(context.l10n.chipExamsSimulations, style: const TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.w600)),
                     backgroundColor: const Color(0xFF1E293B),
                     side: const BorderSide(color: Color(0xFF334155)),
-                    onPressed: () => context.push(AppRouter.groupsList),
+                    onPressed: () => context.push(AppRoutes.groupsList),
                   ),
                   ActionChip(
                     avatar: const Icon(Icons.fact_check_rounded, size: 14, color: Color(0xFF34D399)),
                     label: Text(context.l10n.chipRecordAttendance, style: const TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.w600)),
                     backgroundColor: const Color(0xFF1E293B),
                     side: const BorderSide(color: Color(0xFF334155)),
-                    onPressed: () => context.push(AppRouter.teacherAttendance),
+                    onPressed: () => context.push(AppRoutes.teacherAttendance),
                   ),
                 ],
               ),

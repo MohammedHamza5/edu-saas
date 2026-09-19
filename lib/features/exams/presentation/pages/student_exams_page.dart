@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
-import '../../../../core/router/app_router.dart';
+import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/responsive_breakpoints.dart';
@@ -27,16 +27,33 @@ class StudentExamsPage extends StatefulWidget {
 }
 
 class _StudentExamsPageState extends State<StudentExamsPage> {
+  final ScrollController _scrollController = ScrollController();
   StudentExamFilter _activeFilter = StudentExamFilter.all;
 
   @override
   void initState() {
     super.initState();
     _loadExams();
+    _scrollController.addListener(_onScroll);
   }
 
-  void _loadExams() {
-    context.read<ExamsCubit>().loadStudentExams();
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.hasClients &&
+        _scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200) {
+      context.read<ExamsCubit>().loadMoreStudentExams();
+    }
+  }
+
+  Future<void> _loadExams({bool forceRefresh = false}) async {
+    await context.read<ExamsCubit>().loadStudentExams(forceRefresh: forceRefresh);
   }
 
   List<ExamEntity> _filterExams(List<ExamEntity> list) {
@@ -63,7 +80,7 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
             if (Navigator.of(context).canPop()) {
               Navigator.of(context).pop();
             } else {
-              context.go(AppRouter.studentDashboard);
+              context.go(AppRoutes.studentDashboard);
             }
           },
         ),
@@ -73,7 +90,7 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: context.l10n.refreshTooltip,
-            onPressed: _loadExams,
+            onPressed: () => _loadExams(forceRefresh: true),
           ),
         ],
       ),
@@ -87,7 +104,7 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
             return Center(
               child: AppErrorView(
                 message: state.message,
-                onRetry: _loadExams,
+                onRetry: () => _loadExams(forceRefresh: true),
               ),
             );
           }
@@ -156,38 +173,50 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
                               ),
                             )
                           : RefreshIndicator(
-                              onRefresh: () async => _loadExams(),
+                              onRefresh: () => _loadExams(forceRefresh: true),
                               child: SingleChildScrollView(
+                                controller: _scrollController,
                                 physics: const AlwaysScrollableScrollPhysics(),
                                 padding: const EdgeInsets.all(AppSpacing.s16),
-                                child: ResponsiveGrid(
-                                  mobileColumns: 1,
-                                  tabletColumns: 2,
-                                  desktopColumns: 2,
-                                  spacing: AppSpacing.s16,
-                                  runSpacing: AppSpacing.s16,
-                                  children: filtered.map((exam) {
-                                    return ExamCard(
-                                      exam: exam,
-                                      isTeacher: false,
-                                      onTap: () {
-                                        Navigator.of(context)
-                                            .push<void>(
-                                          MaterialPageRoute<void>(
-                                            builder: (_) => BlocProvider.value(
-                                              value: context.read<ExamsCubit>(),
-                                              child: ExamIntroPage(exam: exam),
-                                            ),
-                                          ),
-                                        )
-                                            .then((_) {
-                                          if (context.mounted) {
-                                            _loadExams();
-                                          }
-                                        });
-                                      },
-                                    );
-                                  }).toList(),
+                                child: Column(
+                                  children: [
+                                    ResponsiveGrid(
+                                      mobileColumns: 1,
+                                      tabletColumns: 2,
+                                      desktopColumns: 2,
+                                      spacing: AppSpacing.s16,
+                                      runSpacing: AppSpacing.s16,
+                                      children: filtered.map((exam) {
+                                        return ExamCard(
+                                          exam: exam,
+                                          isTeacher: false,
+                                          onTap: () async {
+                                            final cubit = context.read<ExamsCubit>();
+                                            await Navigator.of(context).push<void>(
+                                              MaterialPageRoute<void>(
+                                                builder: (_) => BlocProvider.value(
+                                                  value: cubit,
+                                                  child: ExamIntroPage(exam: exam),
+                                                ),
+                                              ),
+                                            );
+                                            if (context.mounted && cubit.state is! ExamTakingState) {
+                                              await _loadExams(forceRefresh: true);
+                                            }
+                                          },
+                                        );
+                                      }).toList(),
+                                    ),
+                                    if (state.isLoadingMore)
+                                      const Padding(
+                                        padding: EdgeInsets.symmetric(
+                                          vertical: AppSpacing.s16,
+                                        ),
+                                        child: Center(
+                                          child: AppLoadingView.compact(size: 24),
+                                        ),
+                                      ),
+                                  ],
                                 ),
                               ),
                             ),

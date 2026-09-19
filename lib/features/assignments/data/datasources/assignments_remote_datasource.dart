@@ -5,8 +5,15 @@ import '../models/assignment_model.dart';
 import '../models/assignment_submission_model.dart';
 
 abstract interface class AssignmentsRemoteDataSource {
-  Future<List<AssignmentModel>> getGroupAssignments(String groupId);
-  Future<List<AssignmentModel>> getStudentAssignments();
+  Future<List<AssignmentModel>> getGroupAssignments(
+    String groupId, {
+    int page = 0,
+    int pageSize = 15,
+  });
+  Future<List<AssignmentModel>> getStudentAssignments({
+    int page = 0,
+    int pageSize = 15,
+  });
   Future<AssignmentModel> getAssignmentDetails(String assignmentId);
   Future<List<AssignmentSubmissionModel>> getSubmissions(String assignmentId);
   Future<AssignmentSubmissionModel?> getMySubmission(String assignmentId);
@@ -41,7 +48,11 @@ class AssignmentsRemoteDataSourceImpl implements AssignmentsRemoteDataSource {
   SupabaseClient get _safeClient => _client ?? SupabaseService.client;
 
   @override
-  Future<List<AssignmentModel>> getGroupAssignments(String groupId) async {
+  Future<List<AssignmentModel>> getGroupAssignments(
+    String groupId, {
+    int page = 0,
+    int pageSize = 15,
+  }) async {
     // 1. Fetch assignments with content & group join
     final response = await _safeClient
         .from('assignments')
@@ -65,23 +76,34 @@ class AssignmentsRemoteDataSourceImpl implements AssignmentsRemoteDataSource {
           )
         ''')
         .eq('content.group_id', groupId)
-        .order('created_at', ascending: false);
+        .order('created_at', ascending: false)
+        .range(page * pageSize, (page + 1) * pageSize - 1);
 
     final list = response as List<dynamic>;
+    if (list.isEmpty) return [];
 
-    // 2. Aggregate submissions counts for each assignment
+    final assignmentIds = list
+        .map((item) => (item as Map<String, dynamic>)['id'] as String)
+        .toList();
+
+    // 2. Batch fetch submissions for all assignments in a single query
+    final allSubmissions = await _safeClient
+        .from('assignment_submissions')
+        .select('assignment_id, status')
+        .inFilter('assignment_id', assignmentIds);
+
+    final subsByAssignment = <String, List<Map<String, dynamic>>>{};
+    for (final sub in allSubmissions as List<dynamic>) {
+      final sMap = sub as Map<String, dynamic>;
+      final aId = sMap['assignment_id'] as String;
+      subsByAssignment.putIfAbsent(aId, () => []).add(sMap);
+    }
+
     final results = <AssignmentModel>[];
     for (final item in list) {
       final map = Map<String, dynamic>.from(item as Map<String, dynamic>);
       final assignmentId = map['id'] as String;
-
-      // Count submissions and reviewed submissions
-      final submissionsRes = await _safeClient
-          .from('assignment_submissions')
-          .select('id, status')
-          .eq('assignment_id', assignmentId);
-
-      final subsList = submissionsRes as List<dynamic>;
+      final subsList = subsByAssignment[assignmentId] ?? [];
       map['submissions_count'] = subsList.length;
       map['reviewed_count'] =
           subsList.where((s) => s['status'] == 'reviewed').length;
@@ -93,7 +115,10 @@ class AssignmentsRemoteDataSourceImpl implements AssignmentsRemoteDataSource {
   }
 
   @override
-  Future<List<AssignmentModel>> getStudentAssignments() async {
+  Future<List<AssignmentModel>> getStudentAssignments({
+    int page = 0,
+    int pageSize = 15,
+  }) async {
     final currentUserId = _safeClient.auth.currentUser?.id;
     if (currentUserId == null) return [];
 
@@ -134,41 +159,50 @@ class AssignmentsRemoteDataSourceImpl implements AssignmentsRemoteDataSource {
         ''')
         .inFilter('content.group_id', groupIds)
         .eq('content.status', 'published')
-        .order('created_at', ascending: false);
+        .order('created_at', ascending: false)
+        .range(page * pageSize, (page + 1) * pageSize - 1);
 
     final list = response as List<dynamic>;
-    final results = <AssignmentModel>[];
+    if (list.isEmpty) return [];
 
+    final assignmentIds = list.map((item) => (item as Map<String, dynamic>)['id'] as String).toList();
+
+    // Fetch all student submissions in 1 batch query instead of N sequential loop queries
+    final allSubmissions = await _safeClient
+        .from('assignment_submissions')
+        .select('''
+          id,
+          assignment_id,
+          student_id,
+          attempt_number,
+          submitted_at,
+          status,
+          score,
+          teacher_feedback,
+          reviewed_at,
+          reviewed_by,
+          submission_files(*)
+        ''')
+        .eq('student_id', currentUserId)
+        .inFilter('assignment_id', assignmentIds)
+        .order('attempt_number', ascending: false);
+
+    final subMap = <String, Map<String, dynamic>>{};
+    for (final sub in allSubmissions as List<dynamic>) {
+      final sMap = sub as Map<String, dynamic>;
+      final aId = sMap['assignment_id'] as String;
+      // Highest attempt number first due to order('attempt_number', ascending: false)
+      subMap.putIfAbsent(aId, () => sMap);
+    }
+
+    final results = <AssignmentModel>[];
     for (final item in list) {
       final map = Map<String, dynamic>.from(item as Map<String, dynamic>);
       final assignmentId = map['id'] as String;
-
-      // Check student's submission
-      final subRes = await _safeClient
-          .from('assignment_submissions')
-          .select('''
-            id,
-            assignment_id,
-            student_id,
-            attempt_number,
-            submitted_at,
-            status,
-            score,
-            teacher_feedback,
-            reviewed_at,
-            reviewed_by,
-            submission_files(*)
-          ''')
-          .eq('assignment_id', assignmentId)
-          .eq('student_id', currentUserId)
-          .order('attempt_number', ascending: false)
-          .limit(1)
-          .maybeSingle();
-
-      if (subRes != null) {
-        map['my_submission'] = subRes;
+      final sub = subMap[assignmentId];
+      if (sub != null) {
+        map['my_submission'] = sub;
       }
-
       results.add(AssignmentModel.fromJson(map));
     }
 

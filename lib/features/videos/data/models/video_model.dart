@@ -1,3 +1,4 @@
+import '../../../content/data/models/file_attachment_model.dart';
 import '../../domain/entities/video_entity.dart';
 
 class VideoModel extends VideoEntity {
@@ -12,6 +13,7 @@ class VideoModel extends VideoEntity {
     super.duration = 0,
     super.status = VideoStatus.uploading,
     super.playbackUrl,
+    super.attachedFile,
     required super.createdAt,
     required super.updatedAt,
   });
@@ -22,9 +24,19 @@ class VideoModel extends VideoEntity {
     final title = json['title'] as String? ?? content?['title'] as String?;
     final description = json['description'] as String? ?? content?['description'] as String?;
 
+    FileAttachmentModel? attachedFile;
+    final rawFiles = content?['files'] ?? json['files'];
+    if (rawFiles != null) {
+      if (rawFiles is List && rawFiles.isNotEmpty) {
+        attachedFile = FileAttachmentModel.fromJson(rawFiles.first as Map<String, dynamic>);
+      } else if (rawFiles is Map<String, dynamic>) {
+        attachedFile = FileAttachmentModel.fromJson(rawFiles);
+      }
+    }
+
     return VideoModel(
       id: json['id'] as String,
-      contentId: json['content_id'] as String,
+      contentId: json['content_id'] as String? ?? json['id'] as String,
       title: title,
       description: description,
       provider: json['provider'] as String? ?? 'bunny',
@@ -33,6 +45,7 @@ class VideoModel extends VideoEntity {
       duration: json['duration'] as int? ?? 0,
       status: VideoStatus.fromString(json['status'] as String? ?? 'uploading'),
       playbackUrl: json['playback_url'] as String?,
+      attachedFile: attachedFile,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
           : DateTime.now(),
@@ -68,6 +81,7 @@ class VideoModel extends VideoEntity {
       duration: duration,
       status: status,
       playbackUrl: url,
+      attachedFile: attachedFile,
       createdAt: createdAt,
       updatedAt: updatedAt,
     );

@@ -2470,6 +2470,21 @@ class AppLocalizationsEn extends AppLocalizations {
       'Please contact the platform administrator or teacher for reactivation.';
 
   @override
+  String get errorUserSuspendedMessage =>
+      'Your account has been suspended by your instructor.';
+
+  @override
+  String get errorRegistrationRejectedTitle => 'Registration Rejected';
+
+  @override
+  String get errorRegistrationRejectedMessage =>
+      'Your registration request was rejected by the instructor.';
+
+  @override
+  String get errorRegistrationRejectedHint =>
+      'Please contact your instructor if you believe this was done in error.';
+
+  @override
   String get errorVideoProcessingTitle => 'Video is Processing';
 
   @override
@@ -4041,4 +4056,472 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get videoUploadDoNotCloseWarning =>
       'Video is being uploaded and encrypted on the CDN. Please stay on this page until upload reaches 100%.';
+
+  @override
+  String get sequentialLearningSectionTitle => 'Sequential Learning & Exams';
+
+  @override
+  String get associatedExamBadge => 'Associated Exam (Lesson Quiz)';
+
+  @override
+  String get associatedExamLabel => 'Associated Exam (Lesson Quiz)';
+
+  @override
+  String associatedExamTitleLabel(String title) {
+    return 'Associated Exam: $title';
+  }
+
+  @override
+  String get associatedExamHint => 'Select an exam for this lesson';
+
+  @override
+  String get prerequisiteExamLabel => 'Prerequisite Exam (Lock Lesson)';
+
+  @override
+  String get prerequisiteExamHint => 'Select an exam that must be passed first';
+
+  @override
+  String get noneOption => 'None';
+
+  @override
+  String totalPointsSummary(int points, int maxScore) {
+    return 'Total: $points / $maxScore pts';
+  }
+
+  @override
+  String autoAdjustMaxScore(int points) {
+    return 'Auto-adjust max score';
+  }
+
+  @override
+  String get removeOption => 'Remove Option';
+
+  @override
+  String get selectCorrectAnswerPrompt => 'Select the correct answer';
+
+  @override
+  String get correctAnswerBadge => 'Correct Answer';
+
+  @override
+  String get addOption => 'Add Option';
+
+  @override
+  String optionLetter(String letter) {
+    return 'Option $letter';
+  }
+
+  @override
+  String get searchExamsHint => 'Search exams...';
+
+  @override
+  String get clearSearchAction => 'Clear Search';
+
+  @override
+  String filterAllExams(int count) {
+    return 'All ($count)';
+  }
+
+  @override
+  String filterPublishedExams(int count) {
+    return 'Published ($count)';
+  }
+
+  @override
+  String filterDraftExams(int count) {
+    return 'Drafts ($count)';
+  }
+
+  @override
+  String get noMatchingExamsFound => 'No exams found matching your criteria';
+
+  @override
+  String get teacherPreviewMode => 'Teacher Preview Mode';
+
+  @override
+  String remainingTime(String time) {
+    return 'Remaining: $time';
+  }
+
+  @override
+  String get restartLesson => 'Restart Lesson';
+
+  @override
+  String get clickToSeek => 'Click to Seek';
+
+  @override
+  String get lessonCompletedSuccess => 'Lesson Completed!';
+
+  @override
+  String get progressSavedAutomatically => 'Progress saved automatically';
+
+  @override
+  String get takeRequiredExamAction => 'Take Required Exam';
+
+  @override
+  String get attachedLessonMaterial => 'Attached Material';
+
+  @override
+  String get attachedLessonMaterialSubtitle => 'Download PDF material';
+
+  @override
+  String get viewAttachedPdf => 'View PDF';
+
+  @override
+  String get attachPdfToLessonAction => 'Attach PDF';
+
+  @override
+  String get noAttachedMaterialForLesson => 'No material attached';
+
+  @override
+  String get videoUnmute => 'Unmute';
+
+  @override
+  String get videoMute => 'Mute';
+
+  @override
+  String get videoSourceBadgeYouTube => 'YouTube';
+
+  @override
+  String get invalidYoutubeUrl => 'Invalid YouTube URL';
+
+  @override
+  String get videoLinkedSuccessToast => 'Video Linked Successfully';
+
+  @override
+  String get youtubeTabTitle => 'YouTube Video';
+
+  @override
+  String get bunnyTabTitle => 'Bunny CDN';
+
+  @override
+  String get youtubeUrlLabel => 'YouTube URL';
+
+  @override
+  String get youtubeUrlHint => 'Paste YouTube link here';
+
+  @override
+  String get youtubeUnlistedAdvice => 'Use Unlisted videos for privacy';
+
+  @override
+  String get linkVideoAction => 'Link Video';
+
+  @override
+  String get noVideosInBankDesc => 'No videos uploaded to the bank yet.';
+
+  @override
+  String get addVideoToBankAction => 'Add Video to Bank';
+
+  @override
+  String get unassignedBadge => 'Unassigned';
+
+  @override
+  String get assignToGroupsAction => 'Assign to Groups';
+
+  @override
+  String get lessonPrerequisiteLocked => 'Lesson Locked by Prerequisite';
+
+  @override
+  String mustPassExamToUnlock(String title, int score) {
+    return 'You must score at least $score% on $title to unlock this.';
+  }
+
+  @override
+  String get prerequisiteExamBadge => 'Prerequisite';
+
+  @override
+  String get videoMaterialPdfBadge => 'PDF';
+
+  @override
+  String get videoReadyBadge => 'Ready';
+
+  @override
+  String get videoFailedBadge => 'Failed';
+
+  @override
+  String get videoProcessingBadge => 'Processing';
+
+  @override
+  String get contentSecurityDisclaimerStudent =>
+      'Your progress and activity are being monitored. Please do not share access.';
+
+  @override
+  String get quickAccessTitle => 'Quick Access';
+
+  @override
+  String get quickAccessSubtitle => 'Jump right into your active groups';
+
+  @override
+  String get myStudyMaterials => 'My Study Materials';
+
+  @override
+  String get myStudyMaterialsDesc =>
+      'Access all your assigned groups and content';
+
+  @override
+  String get academicMomentumTitle => 'Academic Momentum';
+
+  @override
+  String get statExamAverage => 'Exam Average';
+
+  @override
+  String get statAssignmentsDone => 'Assignments Done';
+
+  @override
+  String get statVideoProgress => 'Video Progress';
+
+  @override
+  String get continueLearningTitle => 'Continue Learning';
+
+  @override
+  String resumeAtTime(String time) {
+    return 'Resume at $time';
+  }
+
+  @override
+  String lectureCompletedPercent(String percent) {
+    return '$percent% Completed';
+  }
+
+  @override
+  String get resumeNow => 'Resume Now';
+
+  @override
+  String get overdue => 'Overdue';
+
+  @override
+  String dueInHours(int hours) {
+    return 'Due in ${hours}h';
+  }
+
+  @override
+  String get dueTomorrow => 'Due Tomorrow';
+
+  @override
+  String dueInDays(int days) {
+    return 'Due in ${days}d';
+  }
+
+  @override
+  String get noUrgentTasks => 'No Urgent Tasks';
+
+  @override
+  String get noUrgentTasksSubtitle => 'You\'re all caught up!';
+
+  @override
+  String get urgentTasksTitle => 'Urgent Tasks';
+
+  @override
+  String get urgentTasksSubtitle => 'Requires your immediate attention';
+
+  @override
+  String get taskTypeAssignment => 'Assignment';
+
+  @override
+  String get taskTypeExam => 'Exam';
+
+  @override
+  String get atLeastTwoOptionsRequired => 'At least two options required';
+
+  @override
+  String examPublishFailed(String error) {
+    return 'Failed to publish exam: $error';
+  }
+
+  @override
+  String totalQuestionsSummary(int count) {
+    return '$count Questions';
+  }
+
+  @override
+  String get attachVideoMaterialNotice =>
+      'Attach a PDF or Notes to this video.';
+
+  @override
+  String get attachVideoMaterialHint => 'Select a PDF file';
+
+  @override
+  String get addNewMaterialTitle => 'Add New Material';
+
+  @override
+  String get uploadBunnyVideoTitle => 'Upload Video';
+
+  @override
+  String get uploadBunnyVideoSubtitle => 'Upload directly to Bunny CDN';
+
+  @override
+  String get uploadPdfFileTitle => 'Upload PDF';
+
+  @override
+  String get uploadPdfFileSubtitle => 'Upload documents and notes';
+
+  @override
+  String get imagesCategory => 'Images';
+
+  @override
+  String get createAssignmentShortcut => 'Create Assignment';
+
+  @override
+  String get createAssignmentShortcutSubtitle => 'Add a new assignment task';
+
+  @override
+  String get createExamShortcut => 'Create Exam';
+
+  @override
+  String get createExamShortcutSubtitle => 'Add a new quiz or exam';
+
+  @override
+  String get videosCategory => 'Videos';
+
+  @override
+  String get pdfDocumentsCategory => 'PDF Documents';
+
+  @override
+  String get allCategories => 'All Categories';
+
+  @override
+  String filterAssignmentsWithCount(int count) {
+    return 'Assignments ($count)';
+  }
+
+  @override
+  String filterExamsWithCount(int count) {
+    return 'Exams ($count)';
+  }
+
+  @override
+  String get noVideosInCategory => 'No videos found in this category.';
+
+  @override
+  String get uploadFirstVideoAction => 'Upload First Video';
+
+  @override
+  String get noPdfsInCategory => 'No PDFs found in this category.';
+
+  @override
+  String get uploadFirstPdfAction => 'Upload First PDF';
+
+  @override
+  String get noAssignmentsInCategory =>
+      'No assignments found in this category.';
+
+  @override
+  String get createFirstAssignmentAction => 'Create First Assignment';
+
+  @override
+  String get noExamsInCategory => 'No exams found in this category.';
+
+  @override
+  String get createFirstExamAction => 'Create First Exam';
+
+  @override
+  String get videoBankTitle => 'Video Bank';
+
+  @override
+  String get videoBankSubtitle => 'Manage all your uploaded videos';
+
+  @override
+  String totalVideosCount(int count) {
+    return 'Total ($count)';
+  }
+
+  @override
+  String assignedVideosCount(int count) {
+    return 'Assigned ($count)';
+  }
+
+  @override
+  String unassignedVideosCount(int count) {
+    return 'Unassigned ($count)';
+  }
+
+  @override
+  String filterAllVideos(int count) {
+    return 'All Videos ($count)';
+  }
+
+  @override
+  String filterUnassignedOnly(int count) {
+    return 'Unassigned Only ($count)';
+  }
+
+  @override
+  String get noVideosInBankTitle => 'No Videos Yet';
+
+  @override
+  String get studentNavDashboardSubtitle => 'Your progress & tasks';
+
+  @override
+  String get studentNavNotificationsSubtitle => 'Recent updates';
+
+  @override
+  String get studentNavContentSubtitle => 'Videos & lessons';
+
+  @override
+  String get studentNavAssignmentsSubtitle => 'Homework tasks';
+
+  @override
+  String get studentNavExamsSubtitle => 'Quizzes & results';
+
+  @override
+  String get searchAssignmentsHint => 'Search assignments...';
+
+  @override
+  String filterAllAssignments(int count) {
+    return 'All ($count)';
+  }
+
+  @override
+  String get filterNeedsGrading => 'Needs Grading';
+
+  @override
+  String get filterPastDue => 'Past Due';
+
+  @override
+  String get noMatchingAssignmentsFound => 'No assignments match your search.';
+
+  @override
+  String get lecturesRoadmapTitle => 'Lectures Roadmap';
+
+  @override
+  String get lecturesRoadmapSubtitle => 'Your scheduled lectures';
+
+  @override
+  String get recordedSessionAvailable => 'Recorded Session Available';
+
+  @override
+  String get youtubeUnlistedNotice =>
+      'Use Unlisted videos to prevent public access.';
+
+  @override
+  String get materialAttachmentTitle => 'Material Attachment';
+
+  @override
+  String get chooseMaterialFile => 'Choose File';
+
+  @override
+  String get changePdfFileAction => 'Change PDF';
+
+  @override
+  String get selectTargetGroups => 'Select Target Groups';
+
+  @override
+  String get noGroupsAvailable => 'No groups available';
+
+  @override
+  String get groupAssignmentSuccess => 'Groups assigned successfully';
+
+  @override
+  String get manageAssignedGroupsTitle => 'Manage Groups';
+
+  @override
+  String get manageAssignedGroupsDesc =>
+      'Select which groups can access this content.';
+
+  @override
+  String get saveGroupAssignmentsAction => 'Save Assignments';
+
+  @override
+  String enrolledStudentsCountLabel(int count) {
+    return '$count Students Enrolled';
+  }
 }

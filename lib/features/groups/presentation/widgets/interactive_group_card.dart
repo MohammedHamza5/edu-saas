@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
-import '../../../../core/router/app_router.dart';
+import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/math_tokens.dart';
@@ -80,7 +80,7 @@ class _InteractiveGroupCardState extends State<InteractiveGroupCard> {
               widget.onTap ??
               () {
                 context.go(
-                  '${AppRouter.groupsList}/${group.id}',
+                  '${AppRoutes.groupsList}/${group.id}',
                   extra: group,
                 );
               },
@@ -272,7 +272,7 @@ class _InteractiveGroupCardState extends State<InteractiveGroupCard> {
                                   ),
                                   onPressed: () {
                                     context.go(
-                                      '${AppRouter.teacherAttendance}?groupId=${group.id}',
+                                      '${AppRoutes.teacherAttendance}?groupId=${group.id}',
                                     );
                                   },
                                 ),

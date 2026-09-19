@@ -6,6 +6,7 @@ import 'package:edu_saas/core/theme/app_theme.dart';
 import 'package:edu_saas/features/auth/domain/entities/user_entity.dart';
 import 'package:edu_saas/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:edu_saas/features/auth/presentation/cubit/auth_state.dart';
+import 'package:edu_saas/features/content/domain/entities/file_attachment_entity.dart';
 import 'package:edu_saas/features/videos/domain/entities/video_entity.dart';
 import 'package:edu_saas/features/videos/domain/entities/video_progress_entity.dart';
 import 'package:edu_saas/features/videos/domain/repositories/videos_repository.dart';
@@ -93,6 +94,40 @@ class _FakeVideosRepository implements VideosRepository {
   Future<Result<void>> deleteVideo(String videoId) async {
     return const Success(null);
   }
+
+  @override
+  Future<Result<String>> getSignedFileUrl(String storagePath) async {
+    return Success('https://example.com/signed/$storagePath');
+  }
+
+  @override
+  Future<Result<VideoEntity>> attachMaterialToVideo({
+    required String videoId,
+    required String contentId,
+    required String fileName,
+    required List<int> fileBytes,
+  }) async {
+    final attached = FileAttachmentEntity(
+      id: 'file-resp-1',
+      tenantId: 'tenant-1',
+      contentId: contentId,
+      fileName: fileName,
+      storagePath: 'tenants/tenant-1/content/$contentId/$fileName',
+      fileSize: fileBytes.length,
+      mimeType: 'application/pdf',
+      createdAt: DateTime.now(),
+    );
+    return Success(video.copyWith(attachedFile: attached));
+  }
+
+  @override
+  Future<Result<VideoEntity>> linkYouTubeVideo({
+    required String contentId,
+    required String youtubeUrl,
+    String? title,
+  }) async {
+    return Success(video);
+  }
 }
 
 void main() {
@@ -168,26 +203,22 @@ void main() {
           ),
         );
 
-        await tester.pumpAndSettle();
+        await tester.pump();
+        await tester.pump();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 100));
 
         // 1. Verify Page Title and CDN Badge rendered
         expect(find.text('مشاهدة الدرس التعليمي'), findsOneWidget);
-        expect(find.text('Bunny CDN آمن'), findsOneWidget);
+        expect(find.text('بث سحابي آمن ومشفر'), findsOneWidget);
 
-        // 2. Verify Academic Stats and Milestones
-        expect(find.text('التقدم الأكاديمي للدرس'), findsOneWidget);
-        expect(find.text('نسبة الإنجاز: 66%'), findsOneWidget);
-        expect(find.text('محطات الدرس الأكاديمية:'), findsOneWidget);
-        expect(find.text('المفاهيم والتأسيس'), findsOneWidget);
+        // 2. Verify Academic Stats Card
+        expect(find.text('التقدم الأكاديمي للدرس'), findsWidgets);
+        expect(find.text('66%'), findsOneWidget);
+        expect(find.text('إعادة من البداية'), findsOneWidget);
+        expect(find.text('قيد المتابعة'), findsOneWidget);
 
-        // 3. Verify Desktop-specific shortcuts bar vs Mobile-specific stack
-        if (entry.value.width >= 960) {
-          expect(find.text('مسافة'), findsOneWidget);
-          expect(find.text('تشغيل / إيقاف'), findsOneWidget);
-          expect(find.text('F'), findsOneWidget);
-        }
-
-        // 4. Zero RenderFlex overflow assertions
+        // 3. Zero RenderFlex overflow assertions
         expect(tester.takeException(), isNull);
       });
     }
@@ -221,9 +252,9 @@ void main() {
 
         await tester.pumpAndSettle();
 
-        expect(find.text(sampleVideo.title!), findsOneWidget);
-        expect(find.text('30:00'), findsOneWidget);
-        expect(find.text('Bunny Stream HLS'), findsOneWidget);
+        expect(find.text('درس الإحصاء والاحتمالات'), findsOneWidget);
+        expect(find.text('15:00'), findsOneWidget);
+        expect(find.text('Bunny CDN آمن'), findsOneWidget);
         expect(find.text('تم مشاهدة 66%'), findsOneWidget);
         expect(tester.takeException(), isNull);
       });

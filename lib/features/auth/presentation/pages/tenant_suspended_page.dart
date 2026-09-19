@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
-import '../../../../core/router/app_router.dart';
+import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/academic_auth_scaffold.dart';
 import '../../../../core/widgets/app_button.dart';
@@ -71,7 +71,7 @@ class TenantSuspendedPage extends StatelessWidget {
             text: context.l10n.backToLogin,
             variant: AppButtonVariant.primary,
             onPressed: () {
-              context.go(AppRouter.login);
+              context.go(AppRoutes.login);
             },
           ),
         ],

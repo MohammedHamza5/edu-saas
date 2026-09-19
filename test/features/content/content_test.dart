@@ -32,6 +32,8 @@ class _FakeContentRepository implements ContentRepository {
   @override
   Future<Result<List<ContentEntity>>> getGroupContent({
     required String groupId,
+    int page = 1,
+    int pageSize = 20,
     ContentStatus? statusFilter,
   }) async {
     if (shouldFail) {
@@ -46,7 +48,7 @@ class _FakeContentRepository implements ContentRepository {
 
   @override
   Future<Result<ContentEntity>> createContent({
-    required String groupId,
+    String? groupId,
     required String title,
     String? description,
     required ContentType type,
@@ -57,6 +59,8 @@ class _FakeContentRepository implements ContentRepository {
     String? mimeType,
     int? fileSize,
     List<int>? fileBytes,
+    String? associatedExamId,
+    String? prerequisiteExamId,
   }) async {
     if (shouldFail) {
       return const FailureResult(ServerFailure('Failed to create content'));
@@ -72,6 +76,8 @@ class _FakeContentRepository implements ContentRepository {
       sortOrder: sortOrder ?? items.length,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
+      associatedExamId: associatedExamId,
+      prerequisiteExamId: prerequisiteExamId,
       file: fileName != null
           ? FileAttachmentEntity(
               id: 'f-1',
@@ -97,6 +103,13 @@ class _FakeContentRepository implements ContentRepository {
     ContentType? type,
     ContentStatus? status,
     int? sortOrder,
+    String? fileName,
+    String? storagePath,
+    String? mimeType,
+    int? fileSize,
+    List<int>? fileBytes,
+    String? associatedExamId,
+    String? prerequisiteExamId,
   }) async {
     if (shouldFail) {
       return const FailureResult(ServerFailure('Failed to update content'));
@@ -112,6 +125,20 @@ class _FakeContentRepository implements ContentRepository {
       type: type,
       status: status,
       sortOrder: sortOrder,
+      associatedExamId: associatedExamId,
+      prerequisiteExamId: prerequisiteExamId,
+      file: fileName != null
+          ? FileAttachmentEntity(
+              id: old.file?.id ?? 'f-upd',
+              tenantId: old.tenantId,
+              contentId: contentId,
+              storagePath: storagePath ?? old.file?.storagePath ?? '',
+              fileName: fileName,
+              mimeType: mimeType ?? old.file?.mimeType ?? 'application/pdf',
+              fileSize: fileSize ?? old.file?.fileSize ?? 1024,
+              createdAt: old.file?.createdAt ?? DateTime.now(),
+            )
+          : old.file,
     );
     items[index] = updated;
     return Success(updated);
@@ -169,6 +196,39 @@ class _FakeContentRepository implements ContentRepository {
       return const FailureResult(ServerFailure('Signed URL generation failed'));
     }
     return Success(signedUrlResult ?? 'https://storage.example.com/url');
+  }
+
+  @override
+  Future<Result<List<ContentEntity>>> getCentralVideoBank({
+    int page = 0,
+    int pageSize = 100,
+  }) async {
+    if (shouldFail) {
+      return const FailureResult(ServerFailure('Failed to load video bank'));
+    }
+    return Success(items);
+  }
+
+  @override
+  Future<Result<void>> assignContentToGroups({
+    required String contentId,
+    required List<String> groupIds,
+  }) async {
+    if (shouldFail) {
+      return const FailureResult(ServerFailure('Failed to assign groups'));
+    }
+    return const Success(null);
+  }
+
+  @override
+  Future<Result<void>> linkLessonExam({
+    required String contentId,
+    required String examId,
+  }) async {
+    if (shouldFail) {
+      return const FailureResult(ServerFailure('Failed to link exam'));
+    }
+    return const Success(null);
   }
 }
 
@@ -452,6 +512,14 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.lightTheme,
+          locale: const Locale('ar'),
+          supportedLocales: const [Locale('ar'), Locale('en')],
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
           home: Scaffold(
             body: MaterialViewerSheet(
               content: sampleItem,

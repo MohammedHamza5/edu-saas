@@ -83,7 +83,7 @@ enum ContentStatus {
 class ContentEntity extends Equatable {
   final String id;
   final String tenantId;
-  final String groupId;
+  final String? groupId;
   final String title;
   final String? description;
   final ContentType type;
@@ -94,10 +94,29 @@ class ContentEntity extends Equatable {
   final DateTime updatedAt;
   final FileAttachmentEntity? file;
 
+  /// Video metadata — populated when type == ContentType.video and a
+  /// video record exists in the `videos` table for this content item.
+  final String? videoId;          // UUID from videos.id
+  final String? videoStatus;      // 'uploading' | 'processing' | 'ready' | 'failed'
+  final String? videoProviderId;  // Bunny Stream GUID or YouTube Video ID
+  final String? videoProvider;    // 'youtube' | 'bunny'
+
+  /// Multi-group assignments (from content_groups junction)
+  final List<String> assignedGroupIds;
+  final List<String> assignedGroupNames;
+
+  /// Integrated Lesson Unit & Prerequisite Progression
+  final String? associatedExamId;     // The quiz for this lesson unit
+  final String? associatedExamTitle;
+  final String? prerequisiteExamId;   // Prerequisite exam that must be passed
+  final String? prerequisiteExamTitle;
+  final int? prerequisitePassingScore;
+  final bool isLocked;                // True if student has not passed prerequisite exam
+
   const ContentEntity({
     required this.id,
     required this.tenantId,
-    required this.groupId,
+    this.groupId,
     required this.title,
     this.description,
     required this.type,
@@ -107,6 +126,18 @@ class ContentEntity extends Equatable {
     required this.createdAt,
     required this.updatedAt,
     this.file,
+    this.videoId,
+    this.videoStatus,
+    this.videoProviderId,
+    this.videoProvider,
+    this.assignedGroupIds = const [],
+    this.assignedGroupNames = const [],
+    this.associatedExamId,
+    this.associatedExamTitle,
+    this.prerequisiteExamId,
+    this.prerequisiteExamTitle,
+    this.prerequisitePassingScore,
+    this.isLocked = false,
   });
 
   bool get isPublished => status == ContentStatus.published;
@@ -114,10 +145,27 @@ class ContentEntity extends Equatable {
   bool get isArchived => status == ContentStatus.archived;
   bool get hasAttachment => file != null;
 
+  /// True when in Central Bank without any assigned groups
+  bool get isUnassigned =>
+      (groupId == null || groupId!.isEmpty) && assignedGroupIds.isEmpty;
+
+  /// True when a video has been successfully linked to this content item.
+  bool get hasVideo => videoId != null;
+
+  /// True when video is fully processed and ready for playback.
+  bool get isVideoReady => videoStatus == 'ready';
+
+  /// True when video is still being processed by Bunny Stream.
+  bool get isVideoProcessing =>
+      videoStatus == 'uploading' || videoStatus == 'processing';
+
+  bool get isYouTube => videoProvider == 'youtube';
+  bool get isBunny => videoProvider == 'bunny';
+
   ContentEntity copyWith({
     String? id,
     String? tenantId,
-    String? groupId,
+    Object? groupId = _sentinel,
     String? title,
     String? description,
     ContentType? type,
@@ -127,11 +175,23 @@ class ContentEntity extends Equatable {
     DateTime? createdAt,
     DateTime? updatedAt,
     FileAttachmentEntity? file,
+    Object? videoId = _sentinel,
+    Object? videoStatus = _sentinel,
+    Object? videoProviderId = _sentinel,
+    Object? videoProvider = _sentinel,
+    List<String>? assignedGroupIds,
+    List<String>? assignedGroupNames,
+    Object? associatedExamId = _sentinel,
+    Object? associatedExamTitle = _sentinel,
+    Object? prerequisiteExamId = _sentinel,
+    Object? prerequisiteExamTitle = _sentinel,
+    Object? prerequisitePassingScore = _sentinel,
+    bool? isLocked,
   }) {
     return ContentEntity(
       id: id ?? this.id,
       tenantId: tenantId ?? this.tenantId,
-      groupId: groupId ?? this.groupId,
+      groupId: groupId == _sentinel ? this.groupId : groupId as String?,
       title: title ?? this.title,
       description: description ?? this.description,
       type: type ?? this.type,
@@ -141,8 +201,22 @@ class ContentEntity extends Equatable {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       file: file ?? this.file,
+      videoId: videoId == _sentinel ? this.videoId : videoId as String?,
+      videoStatus: videoStatus == _sentinel ? this.videoStatus : videoStatus as String?,
+      videoProviderId: videoProviderId == _sentinel ? this.videoProviderId : videoProviderId as String?,
+      videoProvider: videoProvider == _sentinel ? this.videoProvider : videoProvider as String?,
+      assignedGroupIds: assignedGroupIds ?? this.assignedGroupIds,
+      assignedGroupNames: assignedGroupNames ?? this.assignedGroupNames,
+      associatedExamId: associatedExamId == _sentinel ? this.associatedExamId : associatedExamId as String?,
+      associatedExamTitle: associatedExamTitle == _sentinel ? this.associatedExamTitle : associatedExamTitle as String?,
+      prerequisiteExamId: prerequisiteExamId == _sentinel ? this.prerequisiteExamId : prerequisiteExamId as String?,
+      prerequisiteExamTitle: prerequisiteExamTitle == _sentinel ? this.prerequisiteExamTitle : prerequisiteExamTitle as String?,
+      prerequisitePassingScore: prerequisitePassingScore == _sentinel ? this.prerequisitePassingScore : prerequisitePassingScore as int?,
+      isLocked: isLocked ?? this.isLocked,
     );
   }
+
+  static const Object _sentinel = Object();
 
   @override
   List<Object?> get props => [
@@ -158,5 +232,17 @@ class ContentEntity extends Equatable {
         createdAt,
         updatedAt,
         file,
+        videoId,
+        videoStatus,
+        videoProviderId,
+        videoProvider,
+        assignedGroupIds,
+        assignedGroupNames,
+        associatedExamId,
+        associatedExamTitle,
+        prerequisiteExamId,
+        prerequisiteExamTitle,
+        prerequisitePassingScore,
+        isLocked,
       ];
 }

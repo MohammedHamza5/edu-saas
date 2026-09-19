@@ -78,7 +78,10 @@ class _FakeNotificationsRepository implements NotificationsRepository {
 
 class _FakeStudentDashboardRepository implements StudentDashboardRepository {
   @override
-  Future<Result<StudentDashboardStats>> getStudentDashboardStats(String studentId) async {
+  Future<Result<StudentDashboardStats>> getStudentDashboardStats(
+    String studentId, {
+    bool forceRefresh = false,
+  }) async {
     return const Success(StudentDashboardStats(
       attendancePercentage: 100,
       examAverage: 85,
@@ -156,7 +159,7 @@ void main() {
       expect(tester.takeException(), isNull);
       expect(find.textContaining('لوحة الطالب'), findsOneWidget);
       expect(find.textContaining('مرحباً بك'), findsOneWidget);
-      expect(find.text('المسار الدراسي'), findsOneWidget);
+      expect(find.textContaining('مؤشرات التحصيل الأكاديمي'), findsOneWidget);
     });
 
     testWidgets('Renders cleanly on Standard Mobile (390x844)', (tester) async {
@@ -169,7 +172,7 @@ void main() {
 
       expect(tester.takeException(), isNull);
       expect(find.textContaining('لوحة الطالب'), findsOneWidget);
-      expect(find.text('نسبة الحضور'), findsOneWidget);
+      expect(find.textContaining('مؤشرات التحصيل الأكاديمي'), findsOneWidget);
     });
 
     testWidgets('Renders cleanly on Tablet Portrait (768x1024)', (tester) async {
@@ -195,7 +198,7 @@ void main() {
 
       expect(tester.takeException(), isNull);
       expect(find.textContaining('لوحة الطالب'), findsOneWidget);
-      expect(find.text('المسار الدراسي'), findsOneWidget);
+      expect(find.textContaining('مؤشرات التحصيل الأكاديمي'), findsOneWidget);
     });
 
     testWidgets('Renders cleanly on 1080p Desktop (1920x1080)', (tester) async {

@@ -85,56 +85,60 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
     final mathTokens =
         Theme.of(context).extension<MathTokens>() ?? MathTokens.light;
 
-    Widget content = Padding(
-      padding: widget.padding,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (widget.title != null || widget.trailing != null) ...[
-            Row(
+    final hasHeader = widget.title != null || widget.trailing != null;
+    final Widget content = hasHeader
+        ? Padding(
+            padding: widget.padding,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (widget.title != null)
-                        Text(
-                          widget.title!,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                      if (widget.subtitle != null) ...[
-                        const SizedBox(height: AppSpacing.s4),
-                        Text(
-                          widget.subtitle!,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (widget.title != null)
+                            Text(
+                              widget.title!,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                          if (widget.subtitle != null) ...[
+                            const SizedBox(height: AppSpacing.s4),
+                            Text(
+                              widget.subtitle!,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    if (widget.trailing != null) widget.trailing!,
+                  ],
                 ),
-                if (widget.trailing != null) widget.trailing!,
+                const SizedBox(height: AppSpacing.s12),
+                const Divider(height: 1),
+                const SizedBox(height: AppSpacing.s12),
+                widget.child,
               ],
             ),
-            const SizedBox(height: AppSpacing.s12),
-            const Divider(height: 1),
-            const SizedBox(height: AppSpacing.s12),
-          ],
-          widget.child,
-        ],
-      ),
-    );
+          )
+        : Padding(
+            padding: widget.padding,
+            child: widget.child,
+          );
 
     return AnimatedBuilder(
       animation: _hoverController,

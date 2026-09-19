@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
-import '../../../../core/router/app_router.dart';
+import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/responsive_breakpoints.dart';
@@ -35,12 +35,17 @@ class TeacherAssignmentsPage extends StatefulWidget {
 }
 
 class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
+  final ScrollController _scrollController = ScrollController();
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  String _activeStatusFilter = 'all'; // 'all', 'open', 'needs_grading', 'past_due'
   String? _selectedGroupId;
   String? _selectedGroupName;
 
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
     final initialId =
         widget.groupId ?? TeacherGroupFilterBar.lastSelectedGroupId;
     GroupsState? groupsState;
@@ -69,6 +74,23 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
     } catch (_) {}
   }
 
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+
+  void _onScroll() {
+    if (_scrollController.hasClients &&
+        _scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200) {
+      context.read<AssignmentsCubit>().loadMoreTeacherAssignments();
+    }
+  }
+
   void _onGroupChanged(GroupEntity group) {
     if (_selectedGroupId == group.id) return;
     TeacherGroupFilterBar.lastSelectedGroupId = group.id;
@@ -79,13 +101,17 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
     _loadAssignments();
   }
 
-  void _loadAssignments() {
+  Future<void> _loadAssignments({bool forceRefresh = false}) async {
     if (_selectedGroupId != null) {
-      context.read<AssignmentsCubit>().loadGroupAssignments(_selectedGroupId!);
+      await context.read<AssignmentsCubit>().loadGroupAssignments(
+            _selectedGroupId!,
+            forceRefresh: forceRefresh,
+          );
     }
   }
 
   void _showCreateAssignmentDialog() {
+    final cubit = context.read<AssignmentsCubit>();
     final formKey = GlobalKey<FormState>();
     final titleController = TextEditingController();
     final instructionsController = TextEditingController();
@@ -103,7 +129,9 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
         ),
       ),
       builder: (sheetContext) {
-        return StatefulBuilder(
+        return BlocProvider.value(
+          value: cubit,
+          child: StatefulBuilder(
           builder: (ctx, setModalState) {
             return Padding(
               padding: EdgeInsets.only(
@@ -302,6 +330,7 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
 
                           final successMsg =
                               context.l10n.assignmentPublishedSuccess;
+                          final messenger = ScaffoldMessenger.of(context);
                           final success = await context
                               .read<AssignmentsCubit>()
                               .createAssignment(
@@ -316,7 +345,9 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
                               );
 
                           if (mounted && success) {
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            await _loadAssignments(forceRefresh: true);
+                            if (!mounted) return;
+                            messenger.showSnackBar(
                               SnackBar(
                                 content: Text(successMsg),
                                 backgroundColor: AppColors.success,
@@ -331,13 +362,15 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
               ),
             );
           },
-        );
-      },
-    );
-  }
+        ),
+      );
+    },
+  );
+}
 
   void _showSubmissionsSheet(AssignmentEntity assignment) {
-    context.read<AssignmentsCubit>().selectAssignmentForTeacher(assignment);
+    final cubit = context.read<AssignmentsCubit>();
+    cubit.selectAssignmentForTeacher(assignment);
 
     showModalBottomSheet<void>(
       context: context,
@@ -349,13 +382,15 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
         ),
       ),
       builder: (sheetContext) {
-        return DraggableScrollableSheet(
-          initialChildSize: 0.75,
-          minChildSize: 0.5,
-          maxChildSize: 0.95,
-          expand: false,
-          builder: (ctx, scrollController) {
-            return BlocBuilder<AssignmentsCubit, AssignmentsState>(
+        return BlocProvider.value(
+          value: cubit,
+          child: DraggableScrollableSheet(
+            initialChildSize: 0.75,
+            minChildSize: 0.5,
+            maxChildSize: 0.95,
+            expand: false,
+            builder: (ctx, scrollController) {
+              return BlocBuilder<AssignmentsCubit, AssignmentsState>(
               builder: (context, state) {
                 if (state is! TeacherAssignmentsLoaded) {
                   return const AppLoadingView.list(count: 3);
@@ -465,10 +500,11 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
               },
             );
           },
-        );
-      },
-    );
-  }
+        ),
+      );
+    },
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -479,7 +515,7 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
           tooltip: context.l10n.backToHomeTooltip,
           onPressed: () => context.canPop()
               ? context.pop()
-              : context.go(AppRouter.teacherDashboard),
+              : context.go(AppRoutes.teacherDashboard),
         ),
         title: Text(
           _selectedGroupName != null
@@ -491,7 +527,7 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: context.l10n.refreshTooltip,
-            onPressed: _loadAssignments,
+            onPressed: () => _loadAssignments(forceRefresh: true),
           ),
         ],
       ),
@@ -527,7 +563,7 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
                   final groupFilterBar = TeacherGroupFilterBar(
                     selectedGroupId: _selectedGroupId,
                     onGroupChanged: _onGroupChanged,
-                    onRefresh: _loadAssignments,
+                    onRefresh: () => _loadAssignments(forceRefresh: true),
                   );
 
               if (state is AssignmentsLoading) {
@@ -554,7 +590,7 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
                       child: Center(
                         child: AppErrorView(
                           message: state.message,
-                          onRetry: _loadAssignments,
+                          onRetry: () => _loadAssignments(forceRefresh: true),
                         ),
                       ),
                     ),
@@ -563,9 +599,49 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
               }
 
               if (state is TeacherAssignmentsLoaded) {
-                final assignments = state.assignments;
+                final allAssignments = state.assignments;
+                final now = DateTime.now();
 
-                if (assignments.isEmpty) {
+                var filteredAssignments = allAssignments;
+
+                // Search query filter
+                if (_searchQuery.isNotEmpty) {
+                  final q = _searchQuery.toLowerCase();
+                  filteredAssignments = filteredAssignments
+                      .where((a) =>
+                          a.title.toLowerCase().contains(q) ||
+                          (a.instructions?.toLowerCase().contains(q) ?? false))
+                      .toList();
+                }
+
+                // Status filter
+                if (_activeStatusFilter == 'open') {
+                  filteredAssignments = filteredAssignments
+                      .where((a) => a.dueAt == null || a.dueAt!.isAfter(now))
+                      .toList();
+                } else if (_activeStatusFilter == 'needs_grading') {
+                  filteredAssignments = filteredAssignments
+                      .where((a) => a.submissionsCount > a.reviewedCount)
+                      .toList();
+                } else if (_activeStatusFilter == 'past_due') {
+                  filteredAssignments = filteredAssignments
+                      .where((a) => a.dueAt != null && a.dueAt!.isBefore(now))
+                      .toList();
+                }
+
+                final openCount = allAssignments
+                    .where((a) => a.dueAt == null || a.dueAt!.isAfter(now))
+                    .length;
+                final needsGradingCount = allAssignments
+                    .where((a) => a.submissionsCount > a.reviewedCount)
+                    .length;
+                final pastDueCount = allAssignments
+                    .where((a) => a.dueAt != null && a.dueAt!.isBefore(now))
+                    .length;
+                final hasActiveFilters =
+                    _searchQuery.isNotEmpty || _activeStatusFilter != 'all';
+
+                if (allAssignments.isEmpty) {
                   return Column(
                     children: [
                       groupFilterBar,
@@ -591,29 +667,248 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
                 }
 
                 return RefreshIndicator(
-                  onRefresh: () async => _loadAssignments(),
+                  onRefresh: () => _loadAssignments(forceRefresh: true),
                   child: SingleChildScrollView(
+                    controller: _scrollController,
                     physics: const AlwaysScrollableScrollPhysics(),
                     padding: const EdgeInsets.only(bottom: 96),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         groupFilterBar,
-                        const SizedBox(height: AppSpacing.s16),
-                        ResponsiveGrid(
-                          mobileColumns: 1,
-                          tabletColumns: 2,
-                          desktopColumns: 2,
-                          spacing: AppSpacing.s16,
-                          runSpacing: AppSpacing.s16,
-                          children: assignments.map((assignment) {
-                            return AssignmentCard(
-                              assignment: assignment,
-                              isTeacher: true,
-                              onTap: () => _showSubmissionsSheet(assignment),
-                            );
-                          }).toList(),
+                        const SizedBox(height: AppSpacing.s12),
+
+                        // Search Bar
+                        AppTextField(
+                          controller: _searchController,
+                          hintText: context.l10n.searchAssignmentsHint,
+                          prefixIcon: const Icon(
+                            Icons.search_rounded,
+                            color: AppColors.textSecondary,
+                            size: 20,
+                          ),
+                          suffixIcon: _searchQuery.isNotEmpty
+                              ? IconButton(
+                                  icon: const Icon(
+                                    Icons.clear_rounded,
+                                    size: 18,
+                                  ),
+                                  tooltip: context.l10n.clearSearchAction,
+                                  onPressed: () {
+                                    _searchController.clear();
+                                    setState(() => _searchQuery = '');
+                                  },
+                                )
+                              : null,
+                          onChanged: (val) {
+                            setState(() => _searchQuery = val.trim());
+                          },
                         ),
+                        const SizedBox(height: AppSpacing.s8),
+
+                        // Status Filter Chips
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: [
+                              FilterChip(
+                                label: Text(context.l10n.filterAllAssignments(allAssignments.length)),
+                                selected: _activeStatusFilter == 'all',
+                                onSelected: (_) => setState(() => _activeStatusFilter = 'all'),
+                                selectedColor: AppColors.primary,
+                                backgroundColor: AppColors.surfaceVariant,
+                                checkmarkColor: Colors.white,
+                                labelStyle: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: _activeStatusFilter == 'all'
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                  color: _activeStatusFilter == 'all'
+                                      ? Colors.white
+                                      : AppColors.textPrimary,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                  side: BorderSide(
+                                    color: _activeStatusFilter == 'all'
+                                        ? AppColors.primary
+                                        : AppColors.border,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: AppSpacing.s8),
+                              FilterChip(
+                                avatar: Icon(
+                                  Icons.assignment_turned_in_rounded,
+                                  size: 16,
+                                  color: _activeStatusFilter == 'open'
+                                      ? Colors.white
+                                      : AppColors.success,
+                                ),
+                                label: Text('${context.l10n.active} ($openCount)'),
+                                selected: _activeStatusFilter == 'open',
+                                onSelected: (_) => setState(() => _activeStatusFilter = 'open'),
+                                selectedColor: AppColors.success,
+                                backgroundColor: AppColors.surfaceVariant,
+                                checkmarkColor: Colors.white,
+                                labelStyle: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: _activeStatusFilter == 'open'
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                  color: _activeStatusFilter == 'open'
+                                      ? Colors.white
+                                      : AppColors.textPrimary,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                  side: BorderSide(
+                                    color: _activeStatusFilter == 'open'
+                                        ? AppColors.success
+                                        : AppColors.border,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: AppSpacing.s8),
+                              FilterChip(
+                                avatar: Icon(
+                                  Icons.rate_review_rounded,
+                                  size: 16,
+                                  color: _activeStatusFilter == 'needs_grading'
+                                      ? Colors.white
+                                      : AppColors.warning,
+                                ),
+                                label: Text('${context.l10n.filterNeedsGrading} ($needsGradingCount)'),
+                                selected: _activeStatusFilter == 'needs_grading',
+                                onSelected: (_) => setState(() => _activeStatusFilter = 'needs_grading'),
+                                selectedColor: AppColors.warning,
+                                backgroundColor: AppColors.surfaceVariant,
+                                checkmarkColor: Colors.white,
+                                labelStyle: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: _activeStatusFilter == 'needs_grading'
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                  color: _activeStatusFilter == 'needs_grading'
+                                      ? Colors.white
+                                      : AppColors.textPrimary,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                  side: BorderSide(
+                                    color: _activeStatusFilter == 'needs_grading'
+                                        ? AppColors.warning
+                                        : AppColors.border,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: AppSpacing.s8),
+                              FilterChip(
+                                avatar: Icon(
+                                  Icons.alarm_off_rounded,
+                                  size: 16,
+                                  color: _activeStatusFilter == 'past_due'
+                                      ? Colors.white
+                                      : AppColors.error,
+                                ),
+                                label: Text('${context.l10n.filterPastDue} ($pastDueCount)'),
+                                selected: _activeStatusFilter == 'past_due',
+                                onSelected: (_) => setState(() => _activeStatusFilter = 'past_due'),
+                                selectedColor: AppColors.error,
+                                backgroundColor: AppColors.surfaceVariant,
+                                checkmarkColor: Colors.white,
+                                labelStyle: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: _activeStatusFilter == 'past_due'
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                  color: _activeStatusFilter == 'past_due'
+                                      ? Colors.white
+                                      : AppColors.textPrimary,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                  side: BorderSide(
+                                    color: _activeStatusFilter == 'past_due'
+                                        ? AppColors.error
+                                        : AppColors.border,
+                                  ),
+                                ),
+                              ),
+                              if (hasActiveFilters) ...[
+                                const SizedBox(width: AppSpacing.s8),
+                                ActionChip(
+                                  avatar: const Icon(
+                                    Icons.close_rounded,
+                                    size: 14,
+                                    color: AppColors.error,
+                                  ),
+                                  label: Text(
+                                    context.l10n.clearSearchAction,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: AppColors.error,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  backgroundColor: AppColors.error.withAlpha(20),
+                                  side: BorderSide(color: AppColors.error.withAlpha(50)),
+                                  onPressed: () {
+                                    setState(() {
+                                      _activeStatusFilter = 'all';
+                                      _searchController.clear();
+                                      _searchQuery = '';
+                                    });
+                                  },
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.s16),
+
+                        if (filteredAssignments.isEmpty)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 48),
+                            child: Center(
+                              child: AppEmptyView(
+                                icon: Icons.search_off_rounded,
+                                message: context.l10n.noMatchingAssignmentsFound,
+                                actionText: context.l10n.clearSearchAction,
+                                onAction: () {
+                                  setState(() {
+                                    _searchController.clear();
+                                    _searchQuery = '';
+                                    _activeStatusFilter = 'all';
+                                  });
+                                },
+                              ),
+                            ),
+                          )
+                        else
+                          ResponsiveGrid(
+                            mobileColumns: 1,
+                            tabletColumns: 2,
+                            desktopColumns: 2,
+                            spacing: AppSpacing.s16,
+                            runSpacing: AppSpacing.s16,
+                            children: filteredAssignments.map((assignment) {
+                              return AssignmentCard(
+                                assignment: assignment,
+                                isTeacher: true,
+                                onTap: () => _showSubmissionsSheet(assignment),
+                              );
+                            }).toList(),
+                          ),
+                        if (state.isLoadingMore)
+                          const Padding(
+                            padding: EdgeInsets.symmetric(
+                              vertical: AppSpacing.s16,
+                            ),
+                            child: Center(
+                              child: AppLoadingView.compact(size: 24),
+                            ),
+                          ),
                       ],
                     ),
                   ),

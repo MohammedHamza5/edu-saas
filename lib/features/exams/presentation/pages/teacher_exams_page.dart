@@ -4,13 +4,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
-import '../../../../core/router/app_router.dart';
+import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/responsive_breakpoints.dart';
 import '../../../../core/widgets/app_empty_view.dart';
 import '../../../../core/widgets/app_error_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
+import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/responsive_container.dart';
 import '../../../../core/widgets/responsive_grid.dart';
 import '../../domain/entities/exam_entity.dart';
@@ -34,12 +35,17 @@ class TeacherExamsPage extends StatefulWidget {
 }
 
 class _TeacherExamsPageState extends State<TeacherExamsPage> {
+  final ScrollController _scrollController = ScrollController();
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  String _activeStatusFilter = 'all'; // 'all', 'published', 'draft'
   String? _selectedGroupId;
   String? _selectedGroupName;
 
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
     final initialId =
         widget.groupId ?? TeacherGroupFilterBar.lastSelectedGroupId;
     GroupsState? groupsState;
@@ -68,6 +74,23 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
     } catch (_) {}
   }
 
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+
+  void _onScroll() {
+    if (_scrollController.hasClients &&
+        _scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200) {
+      context.read<ExamsCubit>().loadMoreTeacherExams();
+    }
+  }
+
   void _onGroupChanged(GroupEntity group) {
     if (_selectedGroupId == group.id) return;
     TeacherGroupFilterBar.lastSelectedGroupId = group.id;
@@ -78,14 +101,18 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
     _loadExams();
   }
 
-  void _loadExams() {
+  Future<void> _loadExams({bool forceRefresh = false}) async {
     if (_selectedGroupId != null) {
-      context.read<ExamsCubit>().loadGroupExams(_selectedGroupId!);
+      await context.read<ExamsCubit>().loadGroupExams(
+            _selectedGroupId!,
+            forceRefresh: forceRefresh,
+          );
     }
   }
 
   void _showExamDetailsSheet(ExamEntity exam) {
-    context.read<ExamsCubit>().selectExamForTeacher(exam);
+    final cubit = context.read<ExamsCubit>();
+    cubit.selectExamForTeacher(exam);
     final dateFormat = DateFormat('yyyy/MM/dd - hh:mm a');
 
     showModalBottomSheet<void>(
@@ -98,13 +125,15 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
         ),
       ),
       builder: (sheetContext) {
-        return DraggableScrollableSheet(
-          initialChildSize: 0.75,
-          minChildSize: 0.5,
-          maxChildSize: 0.95,
-          expand: false,
-          builder: (ctx, scrollController) {
-            return BlocBuilder<ExamsCubit, ExamsState>(
+        return BlocProvider.value(
+          value: cubit,
+          child: DraggableScrollableSheet(
+            initialChildSize: 0.75,
+            minChildSize: 0.5,
+            maxChildSize: 0.95,
+            expand: false,
+            builder: (ctx, scrollController) {
+              return BlocBuilder<ExamsCubit, ExamsState>(
               builder: (context, state) {
                 if (state is! TeacherExamsLoaded) {
                   return const AppLoadingView.list(count: 3);
@@ -351,10 +380,11 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
               },
             );
           },
-        );
-      },
-    );
-  }
+        ),
+      );
+    },
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -365,7 +395,7 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
           tooltip: context.l10n.backTooltip,
           onPressed: () => context.canPop()
               ? context.pop()
-              : context.go(AppRouter.teacherDashboard),
+              : context.go(AppRoutes.teacherDashboard),
         ),
         title: Text(
           _selectedGroupName != null
@@ -377,7 +407,7 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: context.l10n.refreshTooltip,
-            onPressed: _loadExams,
+            onPressed: () => _loadExams(forceRefresh: true),
           ),
         ],
       ),
@@ -399,7 +429,7 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
                     )
                     .then((_) {
                       if (context.mounted) {
-                        _loadExams();
+                        _loadExams(forceRefresh: true);
                       }
                     });
               },
@@ -431,7 +461,7 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
                   final groupFilterBar = TeacherGroupFilterBar(
                     selectedGroupId: _selectedGroupId,
                     onGroupChanged: _onGroupChanged,
-                    onRefresh: _loadExams,
+                    onRefresh: () => _loadExams(forceRefresh: true),
                   );
 
                   if (state is ExamsLoading) {
@@ -458,7 +488,7 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
                       child: Center(
                         child: AppErrorView(
                           message: state.message,
-                          onRetry: _loadExams,
+                          onRetry: () => _loadExams(forceRefresh: true),
                         ),
                       ),
                     ),
@@ -467,9 +497,35 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
               }
 
               if (state is TeacherExamsLoaded) {
-                final exams = state.exams;
+                final allExams = state.exams;
 
-                if (exams.isEmpty) {
+                var filteredExams = allExams;
+
+                // Search query filter
+                if (_searchQuery.isNotEmpty) {
+                  final q = _searchQuery.toLowerCase();
+                  filteredExams = filteredExams
+                      .where((e) => e.title.toLowerCase().contains(q))
+                      .toList();
+                }
+
+                // Status filter
+                if (_activeStatusFilter == 'published') {
+                  filteredExams =
+                      filteredExams.where((e) => e.isPublished).toList();
+                } else if (_activeStatusFilter == 'draft') {
+                  filteredExams =
+                      filteredExams.where((e) => !e.isPublished).toList();
+                }
+
+                final publishedCount =
+                    allExams.where((e) => e.isPublished).length;
+                final draftCount =
+                    allExams.where((e) => !e.isPublished).length;
+                final hasActiveFilters =
+                    _searchQuery.isNotEmpty || _activeStatusFilter != 'all';
+
+                if (allExams.isEmpty) {
                   return Column(
                     children: [
                       groupFilterBar,
@@ -495,7 +551,11 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
                                           ),
                                         ),
                                       ),
-                                    );
+                                    ).then((_) {
+                                      if (context.mounted) {
+                                        _loadExams(forceRefresh: true);
+                                      }
+                                    });
                                   },
                             icon: Icons.quiz_outlined,
                           ),
@@ -506,29 +566,215 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
                 }
 
                 return RefreshIndicator(
-                  onRefresh: () async => _loadExams(),
+                  onRefresh: () => _loadExams(forceRefresh: true),
                   child: SingleChildScrollView(
+                    controller: _scrollController,
                     physics: const AlwaysScrollableScrollPhysics(),
                     padding: const EdgeInsets.only(bottom: 96),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         groupFilterBar,
-                        const SizedBox(height: AppSpacing.s16),
-                        ResponsiveGrid(
-                          mobileColumns: 1,
-                          tabletColumns: 2,
-                          desktopColumns: 2,
-                          spacing: AppSpacing.s16,
-                          runSpacing: AppSpacing.s16,
-                          children: exams.map((exam) {
-                            return ExamCard(
-                              exam: exam,
-                              isTeacher: true,
-                              onTap: () => _showExamDetailsSheet(exam),
-                            );
-                          }).toList(),
+                        const SizedBox(height: AppSpacing.s12),
+
+                        // Search Bar
+                        AppTextField(
+                          controller: _searchController,
+                          hintText: context.l10n.searchExamsHint,
+                          prefixIcon: const Icon(
+                            Icons.search_rounded,
+                            color: AppColors.textSecondary,
+                            size: 20,
+                          ),
+                          suffixIcon: _searchQuery.isNotEmpty
+                              ? IconButton(
+                                  icon: const Icon(
+                                    Icons.clear_rounded,
+                                    size: 18,
+                                  ),
+                                  tooltip: context.l10n.clearSearchAction,
+                                  onPressed: () {
+                                    _searchController.clear();
+                                    setState(() => _searchQuery = '');
+                                  },
+                                )
+                              : null,
+                          onChanged: (val) {
+                            setState(() => _searchQuery = val.trim());
+                          },
                         ),
+                        const SizedBox(height: AppSpacing.s8),
+
+                        // Status Filter Chips
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: [
+                              FilterChip(
+                                label: Text(context.l10n.filterAllExams(allExams.length)),
+                                selected: _activeStatusFilter == 'all',
+                                onSelected: (_) => setState(() => _activeStatusFilter = 'all'),
+                                selectedColor: AppColors.primary,
+                                backgroundColor: AppColors.surfaceVariant,
+                                checkmarkColor: Colors.white,
+                                labelStyle: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: _activeStatusFilter == 'all'
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                  color: _activeStatusFilter == 'all'
+                                      ? Colors.white
+                                      : AppColors.textPrimary,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                  side: BorderSide(
+                                    color: _activeStatusFilter == 'all'
+                                        ? AppColors.primary
+                                        : AppColors.border,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: AppSpacing.s8),
+                              FilterChip(
+                                avatar: Icon(
+                                  Icons.check_circle_rounded,
+                                  size: 16,
+                                  color: _activeStatusFilter == 'published'
+                                      ? Colors.white
+                                      : AppColors.success,
+                                ),
+                                label: Text(context.l10n.filterPublishedExams(publishedCount)),
+                                selected: _activeStatusFilter == 'published',
+                                onSelected: (_) => setState(() => _activeStatusFilter = 'published'),
+                                selectedColor: AppColors.success,
+                                backgroundColor: AppColors.surfaceVariant,
+                                checkmarkColor: Colors.white,
+                                labelStyle: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: _activeStatusFilter == 'published'
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                  color: _activeStatusFilter == 'published'
+                                      ? Colors.white
+                                      : AppColors.textPrimary,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                  side: BorderSide(
+                                    color: _activeStatusFilter == 'published'
+                                        ? AppColors.success
+                                        : AppColors.border,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: AppSpacing.s8),
+                              FilterChip(
+                                avatar: Icon(
+                                  Icons.edit_note_rounded,
+                                  size: 16,
+                                  color: _activeStatusFilter == 'draft'
+                                      ? Colors.white
+                                      : AppColors.warning,
+                                ),
+                                label: Text(context.l10n.filterDraftExams(draftCount)),
+                                selected: _activeStatusFilter == 'draft',
+                                onSelected: (_) => setState(() => _activeStatusFilter = 'draft'),
+                                selectedColor: AppColors.warning,
+                                backgroundColor: AppColors.surfaceVariant,
+                                checkmarkColor: Colors.white,
+                                labelStyle: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: _activeStatusFilter == 'draft'
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                  color: _activeStatusFilter == 'draft'
+                                      ? Colors.white
+                                      : AppColors.textPrimary,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                  side: BorderSide(
+                                    color: _activeStatusFilter == 'draft'
+                                        ? AppColors.warning
+                                        : AppColors.border,
+                                  ),
+                                ),
+                              ),
+                              if (hasActiveFilters) ...[
+                                const SizedBox(width: AppSpacing.s8),
+                                ActionChip(
+                                  avatar: const Icon(
+                                    Icons.close_rounded,
+                                    size: 14,
+                                    color: AppColors.error,
+                                  ),
+                                  label: Text(
+                                    context.l10n.clearSearchAction,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: AppColors.error,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  backgroundColor: AppColors.error.withAlpha(20),
+                                  side: BorderSide(color: AppColors.error.withAlpha(50)),
+                                  onPressed: () {
+                                    setState(() {
+                                      _activeStatusFilter = 'all';
+                                      _searchController.clear();
+                                      _searchQuery = '';
+                                    });
+                                  },
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.s16),
+
+                        if (filteredExams.isEmpty)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 48),
+                            child: Center(
+                              child: AppEmptyView(
+                                icon: Icons.search_off_rounded,
+                                message: context.l10n.noMatchingExamsFound,
+                                actionText: context.l10n.clearSearchAction,
+                                onAction: () {
+                                  setState(() {
+                                    _searchController.clear();
+                                    _searchQuery = '';
+                                    _activeStatusFilter = 'all';
+                                  });
+                                },
+                              ),
+                            ),
+                          )
+                        else
+                          ResponsiveGrid(
+                            mobileColumns: 1,
+                            tabletColumns: 2,
+                            desktopColumns: 2,
+                            spacing: AppSpacing.s16,
+                            runSpacing: AppSpacing.s16,
+                            children: filteredExams.map((exam) {
+                              return ExamCard(
+                                exam: exam,
+                                isTeacher: true,
+                                onTap: () => _showExamDetailsSheet(exam),
+                              );
+                            }).toList(),
+                          ),
+                        if (state.isLoadingMore)
+                          const Padding(
+                            padding: EdgeInsets.symmetric(
+                              vertical: AppSpacing.s16,
+                            ),
+                            child: Center(
+                              child: AppLoadingView.compact(size: 24),
+                            ),
+                          ),
                       ],
                     ),
                   ),

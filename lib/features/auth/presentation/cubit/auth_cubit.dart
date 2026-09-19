@@ -170,10 +170,12 @@ class AuthCubit extends Cubit<AuthState> {
         emit(AuthAuthenticated(user));
       case UserStatus.suspended:
         AppLogger.w(_tag, 'User status: SUSPENDED → blocking access');
-        emit(const AuthError('This account has been suspended. Please contact your instructor.'));
+        _repository.signOut();
+        emit(const AuthError('USER_SUSPENDED'));
       case UserStatus.rejected:
         AppLogger.w(_tag, 'User status: REJECTED → registration was denied');
-        emit(const AuthError('Registration request for this account was rejected.'));
+        _repository.signOut();
+        emit(const AuthError('USER_REJECTED'));
     }
   }
 }

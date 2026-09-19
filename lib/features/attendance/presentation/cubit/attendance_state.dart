@@ -95,12 +95,16 @@ final class StudentAttendanceLoaded extends AttendanceState {
   final AttendanceStats stats;
   final String? selectedGroupId;
   final bool isRefreshing;
+  final bool hasMore;
+  final bool isLoadingMore;
 
   const StudentAttendanceLoaded({
     required this.records,
     required this.stats,
     this.selectedGroupId,
     this.isRefreshing = false,
+    this.hasMore = true,
+    this.isLoadingMore = false,
   });
 
   StudentAttendanceLoaded copyWith({
@@ -108,17 +112,28 @@ final class StudentAttendanceLoaded extends AttendanceState {
     AttendanceStats? stats,
     String? selectedGroupId,
     bool? isRefreshing,
+    bool? hasMore,
+    bool? isLoadingMore,
   }) {
     return StudentAttendanceLoaded(
       records: records ?? this.records,
       stats: stats ?? this.stats,
       selectedGroupId: selectedGroupId ?? this.selectedGroupId,
       isRefreshing: isRefreshing ?? this.isRefreshing,
+      hasMore: hasMore ?? this.hasMore,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
     );
   }
 
   @override
-  List<Object?> get props => [records, stats, selectedGroupId, isRefreshing];
+  List<Object?> get props => [
+    records,
+    stats,
+    selectedGroupId,
+    isRefreshing,
+    hasMore,
+    isLoadingMore,
+  ];
 }
 
 final class AttendanceError extends AttendanceState {

@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../config/tenant_registry.dart';
 import '../extensions/localized_context_extension.dart';
 import '../network/supabase_service.dart';
-import '../router/app_router.dart';
+import '../router/app_routes.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 import '../theme/tenant_theme_cubit.dart';
@@ -40,10 +40,11 @@ class TeacherShell extends StatelessWidget {
     if (path == '/teacher/groups' || path == '/teacher/groups/') return 4;
     if (path.startsWith('/teacher/attendance')) return 5;
     if (path.contains('/content')) return 6;
-    if (path.contains('/assignments')) return 7;
-    if (path.contains('/exams')) return 8;
-    if (path.startsWith('/teacher/announcements')) return 9;
-    if (path.startsWith('/teacher/settings')) return 10;
+    if (path.contains('/videos') || path.contains('/teacher/videos')) return 7;
+    if (path.contains('/assignments')) return 8;
+    if (path.contains('/exams')) return 9;
+    if (path.startsWith('/teacher/announcements')) return 10;
+    if (path.startsWith('/teacher/settings')) return 11;
     if (path.startsWith('/teacher/groups/')) return 4; // Group detail fallback
     return 0;
   }
@@ -51,37 +52,40 @@ class TeacherShell extends StatelessWidget {
   void _onNavigationChanged(BuildContext context, int index) {
     switch (index) {
       case 0:
-        context.go(AppRouter.teacherDashboard);
+        context.go(AppRoutes.teacherDashboard);
         break;
       case 1:
-        context.go(AppRouter.notificationsCenter);
+        context.go(AppRoutes.notificationsCenter);
         break;
       case 2:
-        context.go(AppRouter.studentsList);
+        context.go(AppRoutes.studentsList);
         break;
       case 3:
-        context.go(AppRouter.pendingStudents);
+        context.go(AppRoutes.pendingStudents);
         break;
       case 4:
-        context.go(AppRouter.groupsList);
+        context.go(AppRoutes.groupsList);
         break;
       case 5:
-        context.go(AppRouter.teacherAttendance);
+        context.go(AppRoutes.teacherAttendance);
         break;
       case 6:
-        context.go(AppRouter.teacherContent);
+        context.go(AppRoutes.teacherContent);
         break;
       case 7:
-        context.go(AppRouter.teacherAssignments);
+        context.go(AppRoutes.teacherVideos);
         break;
       case 8:
-        context.go(AppRouter.teacherExams);
+        context.go(AppRoutes.teacherAssignments);
         break;
       case 9:
-        context.go(AppRouter.sendAnnouncement);
+        context.go(AppRoutes.teacherExams);
         break;
       case 10:
-        context.go(AppRouter.teacherSettings);
+        context.go(AppRoutes.sendAnnouncement);
+        break;
+      case 11:
+        context.go(AppRoutes.teacherSettings);
         break;
     }
   }
@@ -178,6 +182,12 @@ class TeacherShell extends StatelessWidget {
             tooltip: context.l10n.contentLibraryTitle,
           ),
           AdaptiveDestination(
+            icon: Icons.video_library_outlined,
+            selectedIcon: Icons.video_library_rounded,
+            label: context.l10n.videoBankTitle,
+            tooltip: context.l10n.videoBankTitle,
+          ),
+          AdaptiveDestination(
             icon: Icons.assignment_outlined,
             selectedIcon: Icons.assignment_rounded,
             label: context.l10n.assignmentsListTitle,
@@ -233,7 +243,7 @@ class TeacherShell extends StatelessWidget {
     })();
 
     return InkWell(
-      onTap: () => context.go(AppRouter.teacherDashboard),
+      onTap: () => context.go(AppRoutes.teacherDashboard),
       mouseCursor: SystemMouseCursors.click,
       borderRadius: BorderRadius.circular(12),
       child: AppLogo.compact(
@@ -313,7 +323,7 @@ class TeacherShell extends StatelessWidget {
               if (confirmed == true && context.mounted) {
                 await SupabaseService.client.auth.signOut();
                 if (context.mounted) {
-                  context.go(AppRouter.login);
+                  context.go(AppRoutes.login);
                 }
               }
             },

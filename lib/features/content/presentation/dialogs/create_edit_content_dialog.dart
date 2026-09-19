@@ -8,10 +8,12 @@ import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../domain/entities/content_entity.dart';
+import '../../../../core/network/supabase_service.dart';
 
 class CreateEditContentDialog extends StatefulWidget {
   final String groupId;
   final ContentEntity? initialContent;
+  final ContentType? initialType;
   final Future<bool> Function({
     required String title,
     String? description,
@@ -22,12 +24,15 @@ class CreateEditContentDialog extends StatefulWidget {
     String? mimeType,
     int? fileSize,
     List<int>? fileBytes,
+    String? associatedExamId,
+    String? prerequisiteExamId,
   }) onSave;
 
   const CreateEditContentDialog({
     super.key,
     required this.groupId,
     this.initialContent,
+    this.initialType,
     required this.onSave,
   });
 
@@ -49,6 +54,11 @@ class _CreateEditContentDialogState extends State<CreateEditContentDialog> {
   int? _pickedFileSize;
   Uint8List? _pickedFileBytes;
 
+  String? _selectedAssociatedExamId;
+  String? _selectedPrerequisiteExamId;
+  List<Map<String, dynamic>> _availableExams = [];
+  bool _isLoadingExams = false;
+
   @override
   void initState() {
     super.initState();
@@ -59,9 +69,32 @@ class _CreateEditContentDialogState extends State<CreateEditContentDialog> {
     _fileNameController =
         TextEditingController(text: content?.file?.fileName ?? '');
 
-    _selectedType = content?.type ?? ContentType.pdf;
+    _selectedType = content?.type ?? widget.initialType ?? ContentType.pdf;
     _selectedStatus = content?.status ?? ContentStatus.draft;
     _hasAttachment = content?.hasAttachment ?? false;
+    _selectedAssociatedExamId = content?.associatedExamId;
+    _selectedPrerequisiteExamId = content?.prerequisiteExamId;
+
+    _loadExams();
+  }
+
+  Future<void> _loadExams() async {
+    setState(() => _isLoadingExams = true);
+    try {
+      final res = await SupabaseService.client
+          .from('exams')
+          .select('id, title')
+          .eq('group_id', widget.groupId)
+          .order('created_at');
+      if (mounted) {
+        setState(() {
+          _availableExams = List<Map<String, dynamic>>.from(res);
+          _isLoadingExams = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _isLoadingExams = false);
+    }
   }
 
   @override
@@ -74,13 +107,14 @@ class _CreateEditContentDialogState extends State<CreateEditContentDialog> {
 
   Future<void> _pickFile() async {
     try {
+      final isPdfOrVideo = _selectedType == ContentType.pdf || _selectedType == ContentType.video;
       final result = await FilePicker.platform.pickFiles(
-        type: _selectedType == ContentType.pdf
+        type: isPdfOrVideo
             ? FileType.custom
             : _selectedType == ContentType.image
                 ? FileType.image
                 : FileType.any,
-        allowedExtensions: _selectedType == ContentType.pdf ? ['pdf'] : null,
+        allowedExtensions: isPdfOrVideo ? ['pdf', 'doc', 'docx'] : null,
         withData: true,
       );
 
@@ -115,19 +149,21 @@ class _CreateEditContentDialogState extends State<CreateEditContentDialog> {
     String? mimeType;
     int? fileSize;
 
-    if (_selectedType != ContentType.video &&
-        _hasAttachment &&
+    if (_hasAttachment &&
         _fileNameController.text.trim().isNotEmpty) {
       fileName = _fileNameController.text.trim();
       final sanitizedName =
           fileName.toLowerCase().replaceAll(RegExp(r'[^a-z0-9_.-]'), '_');
       storagePath =
           'groups/${widget.groupId}/content/${DateTime.now().millisecondsSinceEpoch}_$sanitizedName';
-      mimeType = _selectedType == ContentType.pdf
+      final lower = fileName.toLowerCase();
+      mimeType = (lower.endsWith('.pdf') || _selectedType == ContentType.pdf || _selectedType == ContentType.video)
           ? 'application/pdf'
-          : _selectedType == ContentType.image
+          : (_selectedType == ContentType.image || lower.endsWith('.jpg') || lower.endsWith('.jpeg'))
               ? 'image/jpeg'
-              : 'application/octet-stream';
+              : lower.endsWith('.png')
+                  ? 'image/png'
+                  : 'application/octet-stream';
       fileSize = _pickedFileSize ?? (1024 * 500); // 500KB fallback
     }
 
@@ -143,6 +179,8 @@ class _CreateEditContentDialogState extends State<CreateEditContentDialog> {
       mimeType: mimeType,
       fileSize: fileSize,
       fileBytes: _pickedFileBytes,
+      associatedExamId: _selectedAssociatedExamId,
+      prerequisiteExamId: _selectedPrerequisiteExamId,
     );
 
     if (mounted) {
@@ -336,65 +374,7 @@ class _CreateEditContentDialogState extends State<CreateEditContentDialog> {
 
                 const SizedBox(height: AppSpacing.s16),
 
-                // Attachment Section (for non-video content)
-                if (_selectedType != ContentType.video) ...[
-                  AppCard(
-                    variant: AppCardVariant.standard,
-                    padding: const EdgeInsets.all(AppSpacing.s12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        CheckboxListTile(
-                          title: Text(
-                            context.l10n.attachMaterialFile,
-                            style: const TextStyle(
-                                fontSize: 13, fontWeight: FontWeight.bold),
-                          ),
-                          value: _hasAttachment,
-                          activeColor: AppColors.primary,
-                          contentPadding: EdgeInsets.zero,
-                          onChanged: (val) {
-                            setState(() => _hasAttachment = val ?? false);
-                          },
-                        ),
-                        if (_hasAttachment) ...[
-                          const SizedBox(height: AppSpacing.s6),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: AppTextField(
-                                  controller: _fileNameController,
-                                  labelText: context.l10n.attachedFileNameLabel,
-                                  hintText: context.l10n.attachedFileNameHint,
-                                  prefixIcon:
-                                      const Icon(Icons.attach_file_rounded),
-                                  validator: (val) {
-                                    if (_hasAttachment &&
-                                        (val == null || val.trim().isEmpty)) {
-                                      return context.l10n.fileNameRequired;
-                                    }
-                                    return null;
-                                  },
-                                ),
-                              ),
-                              const SizedBox(width: AppSpacing.s8),
-                              OutlinedButton.icon(
-                                style: OutlinedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 14),
-                                ),
-                                onPressed: _pickFile,
-                                icon: const Icon(Icons.folder_open_rounded,
-                                    size: 18),
-                                label: Text(context.l10n.browseFileAction),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                ] else ...[
+                if (_selectedType == ContentType.video) ...[
                   Container(
                     padding: const EdgeInsets.all(AppSpacing.s12),
                     decoration: BoxDecoration(
@@ -420,7 +400,87 @@ class _CreateEditContentDialogState extends State<CreateEditContentDialog> {
                       ],
                     ),
                   ),
+                  const SizedBox(height: AppSpacing.s12),
                 ],
+
+                // Attachment Section (for all materials, including video lesson notes)
+                AppCard(
+                  variant: AppCardVariant.standard,
+                  padding: const EdgeInsets.all(AppSpacing.s12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      CheckboxListTile(
+                        title: Text(
+                          _selectedType == ContentType.video
+                              ? context.l10n.attachVideoMaterialNotice
+                              : context.l10n.attachMaterialFile,
+                          style: const TextStyle(
+                              fontSize: 13, fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: _selectedType == ContentType.video
+                            ? Text(
+                                context.l10n.attachVideoMaterialHint,
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: AppColors.textSecondary,
+                                ),
+                              )
+                            : null,
+                        value: _hasAttachment,
+                        activeColor: AppColors.primary,
+                        contentPadding: EdgeInsets.zero,
+                        onChanged: (val) {
+                          setState(() => _hasAttachment = val ?? false);
+                        },
+                      ),
+                      if (_hasAttachment) ...[
+                        const SizedBox(height: AppSpacing.s6),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: AppTextField(
+                                controller: _fileNameController,
+                                labelText: context.l10n.attachedFileNameLabel,
+                                hintText: context.l10n.attachedFileNameHint,
+                                prefixIcon:
+                                    const Icon(Icons.attach_file_rounded),
+                                validator: (val) {
+                                  if (_hasAttachment &&
+                                      (val == null || val.trim().isEmpty)) {
+                                    return context.l10n.fileNameRequired;
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: AppSpacing.s8),
+                            SizedBox(
+                              height: 48,
+                              child: ElevatedButton.icon(
+                                onPressed: _pickFile,
+                                icon: const Icon(Icons.file_upload_outlined,
+                                    size: 18),
+                                label: Text(context.l10n.browseFileAction),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.surfaceVariant,
+                                  foregroundColor: AppColors.textPrimary,
+                                  elevation: 0,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(
+                                        AppSpacing.radiusSmall),
+                                    side: const BorderSide(
+                                        color: AppColors.border),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
 
                 const SizedBox(height: AppSpacing.s24),
 
@@ -475,6 +535,88 @@ class _CreateEditContentDialogState extends State<CreateEditContentDialog> {
                   ),
                   const SizedBox(height: AppSpacing.s16),
                 ],
+                // Sequential Learning Section
+                AppCard(
+                  variant: AppCardVariant.standard,
+                  padding: const EdgeInsets.all(AppSpacing.s12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        context.l10n.sequentialLearningSectionTitle,
+                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: AppSpacing.s12),
+                      
+                      // Associated Exam
+                      if (_isLoadingExams)
+                        const Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)))
+                      else
+                        DropdownButtonFormField<String?>(
+                          value: _availableExams.any((e) => e['id'] == _selectedAssociatedExamId) ? _selectedAssociatedExamId : null,
+                          isExpanded: true,
+                          decoration: InputDecoration(
+                            labelText: context.l10n.associatedExamLabel,
+                            border: const OutlineInputBorder(),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.s12),
+                          ),
+                          items: [
+                            DropdownMenuItem(
+                              value: null,
+                              child: Text(context.l10n.noneOption, style: const TextStyle(color: AppColors.textSecondary)),
+                            ),
+                            ..._availableExams.map((exam) {
+                              return DropdownMenuItem(
+                                value: exam['id'] as String,
+                                child: Text(
+                                  exam['title'] as String,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              );
+                            }),
+                          ],
+                          onChanged: (val) {
+                            setState(() => _selectedAssociatedExamId = val);
+                          },
+                        ),
+
+                      const SizedBox(height: AppSpacing.s12),
+
+                      // Prerequisite Exam
+                      if (!_isLoadingExams)
+                        DropdownButtonFormField<String?>(
+                          value: _availableExams.any((e) => e['id'] == _selectedPrerequisiteExamId) ? _selectedPrerequisiteExamId : null,
+                          isExpanded: true,
+                          decoration: InputDecoration(
+                            labelText: context.l10n.prerequisiteExamLabel,
+                            border: const OutlineInputBorder(),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.s12),
+                          ),
+                          items: [
+                            DropdownMenuItem(
+                              value: null,
+                              child: Text(context.l10n.noneOption, style: const TextStyle(color: AppColors.textSecondary)),
+                            ),
+                            ..._availableExams.map((exam) {
+                              return DropdownMenuItem(
+                                value: exam['id'] as String,
+                                child: Text(
+                                  exam['title'] as String,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              );
+                            }),
+                          ],
+                          onChanged: (val) {
+                            setState(() => _selectedPrerequisiteExamId = val);
+                          },
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.s24),
 
                 // Action Buttons
                 Row(

@@ -4561,6 +4561,30 @@ abstract class AppLocalizations {
   /// **'Please contact the platform administrator or teacher for reactivation.'**
   String get errorAccountSuspendedHint;
 
+  /// Error message when student account is suspended
+  ///
+  /// In en, this message translates to:
+  /// **'Your account has been suspended by your instructor.'**
+  String get errorUserSuspendedMessage;
+
+  /// Title when student registration was rejected
+  ///
+  /// In en, this message translates to:
+  /// **'Registration Rejected'**
+  String get errorRegistrationRejectedTitle;
+
+  /// Message when student registration was rejected
+  ///
+  /// In en, this message translates to:
+  /// **'Your registration request was rejected by the instructor.'**
+  String get errorRegistrationRejectedMessage;
+
+  /// Hint when student registration was rejected
+  ///
+  /// In en, this message translates to:
+  /// **'Please contact your instructor if you believe this was done in error.'**
+  String get errorRegistrationRejectedHint;
+
   /// Error title when video is still being transcoded
   ///
   /// In en, this message translates to:
@@ -7254,6 +7278,834 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Video is being uploaded and encrypted on the CDN. Please stay on this page until upload reaches 100%.'**
   String get videoUploadDoNotCloseWarning;
+
+  /// No description provided for @sequentialLearningSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sequential Learning & Exams'**
+  String get sequentialLearningSectionTitle;
+
+  /// No description provided for @associatedExamBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Associated Exam (Lesson Quiz)'**
+  String get associatedExamBadge;
+
+  /// No description provided for @associatedExamLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Associated Exam (Lesson Quiz)'**
+  String get associatedExamLabel;
+
+  /// No description provided for @associatedExamTitleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Associated Exam: {title}'**
+  String associatedExamTitleLabel(String title);
+
+  /// No description provided for @associatedExamHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select an exam for this lesson'**
+  String get associatedExamHint;
+
+  /// No description provided for @prerequisiteExamLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Prerequisite Exam (Lock Lesson)'**
+  String get prerequisiteExamLabel;
+
+  /// No description provided for @prerequisiteExamHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select an exam that must be passed first'**
+  String get prerequisiteExamHint;
+
+  /// No description provided for @noneOption.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get noneOption;
+
+  /// No description provided for @totalPointsSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Total: {points} / {maxScore} pts'**
+  String totalPointsSummary(int points, int maxScore);
+
+  /// No description provided for @autoAdjustMaxScore.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-adjust max score'**
+  String autoAdjustMaxScore(int points);
+
+  /// No description provided for @removeOption.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Option'**
+  String get removeOption;
+
+  /// No description provided for @selectCorrectAnswerPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Select the correct answer'**
+  String get selectCorrectAnswerPrompt;
+
+  /// No description provided for @correctAnswerBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct Answer'**
+  String get correctAnswerBadge;
+
+  /// No description provided for @addOption.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Option'**
+  String get addOption;
+
+  /// No description provided for @optionLetter.
+  ///
+  /// In en, this message translates to:
+  /// **'Option {letter}'**
+  String optionLetter(String letter);
+
+  /// No description provided for @searchExamsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search exams...'**
+  String get searchExamsHint;
+
+  /// No description provided for @clearSearchAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Search'**
+  String get clearSearchAction;
+
+  /// No description provided for @filterAllExams.
+  ///
+  /// In en, this message translates to:
+  /// **'All ({count})'**
+  String filterAllExams(int count);
+
+  /// No description provided for @filterPublishedExams.
+  ///
+  /// In en, this message translates to:
+  /// **'Published ({count})'**
+  String filterPublishedExams(int count);
+
+  /// No description provided for @filterDraftExams.
+  ///
+  /// In en, this message translates to:
+  /// **'Drafts ({count})'**
+  String filterDraftExams(int count);
+
+  /// No description provided for @noMatchingExamsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No exams found matching your criteria'**
+  String get noMatchingExamsFound;
+
+  /// No description provided for @teacherPreviewMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher Preview Mode'**
+  String get teacherPreviewMode;
+
+  /// No description provided for @remainingTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining: {time}'**
+  String remainingTime(String time);
+
+  /// No description provided for @restartLesson.
+  ///
+  /// In en, this message translates to:
+  /// **'Restart Lesson'**
+  String get restartLesson;
+
+  /// No description provided for @clickToSeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Click to Seek'**
+  String get clickToSeek;
+
+  /// No description provided for @lessonCompletedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Lesson Completed!'**
+  String get lessonCompletedSuccess;
+
+  /// No description provided for @progressSavedAutomatically.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress saved automatically'**
+  String get progressSavedAutomatically;
+
+  /// No description provided for @takeRequiredExamAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Take Required Exam'**
+  String get takeRequiredExamAction;
+
+  /// No description provided for @attachedLessonMaterial.
+  ///
+  /// In en, this message translates to:
+  /// **'Attached Material'**
+  String get attachedLessonMaterial;
+
+  /// No description provided for @attachedLessonMaterialSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Download PDF material'**
+  String get attachedLessonMaterialSubtitle;
+
+  /// No description provided for @viewAttachedPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'View PDF'**
+  String get viewAttachedPdf;
+
+  /// No description provided for @attachPdfToLessonAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach PDF'**
+  String get attachPdfToLessonAction;
+
+  /// No description provided for @noAttachedMaterialForLesson.
+  ///
+  /// In en, this message translates to:
+  /// **'No material attached'**
+  String get noAttachedMaterialForLesson;
+
+  /// No description provided for @videoUnmute.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmute'**
+  String get videoUnmute;
+
+  /// No description provided for @videoMute.
+  ///
+  /// In en, this message translates to:
+  /// **'Mute'**
+  String get videoMute;
+
+  /// No description provided for @videoSourceBadgeYouTube.
+  ///
+  /// In en, this message translates to:
+  /// **'YouTube'**
+  String get videoSourceBadgeYouTube;
+
+  /// No description provided for @invalidYoutubeUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid YouTube URL'**
+  String get invalidYoutubeUrl;
+
+  /// No description provided for @videoLinkedSuccessToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Video Linked Successfully'**
+  String get videoLinkedSuccessToast;
+
+  /// No description provided for @youtubeTabTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'YouTube Video'**
+  String get youtubeTabTitle;
+
+  /// No description provided for @bunnyTabTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bunny CDN'**
+  String get bunnyTabTitle;
+
+  /// No description provided for @youtubeUrlLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'YouTube URL'**
+  String get youtubeUrlLabel;
+
+  /// No description provided for @youtubeUrlHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste YouTube link here'**
+  String get youtubeUrlHint;
+
+  /// No description provided for @youtubeUnlistedAdvice.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Unlisted videos for privacy'**
+  String get youtubeUnlistedAdvice;
+
+  /// No description provided for @linkVideoAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Link Video'**
+  String get linkVideoAction;
+
+  /// No description provided for @noVideosInBankDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'No videos uploaded to the bank yet.'**
+  String get noVideosInBankDesc;
+
+  /// No description provided for @addVideoToBankAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Video to Bank'**
+  String get addVideoToBankAction;
+
+  /// No description provided for @unassignedBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Unassigned'**
+  String get unassignedBadge;
+
+  /// No description provided for @assignToGroupsAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign to Groups'**
+  String get assignToGroupsAction;
+
+  /// No description provided for @lessonPrerequisiteLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Lesson Locked by Prerequisite'**
+  String get lessonPrerequisiteLocked;
+
+  /// No description provided for @mustPassExamToUnlock.
+  ///
+  /// In en, this message translates to:
+  /// **'You must score at least {score}% on {title} to unlock this.'**
+  String mustPassExamToUnlock(String title, int score);
+
+  /// No description provided for @prerequisiteExamBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Prerequisite'**
+  String get prerequisiteExamBadge;
+
+  /// No description provided for @videoMaterialPdfBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF'**
+  String get videoMaterialPdfBadge;
+
+  /// No description provided for @videoReadyBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready'**
+  String get videoReadyBadge;
+
+  /// No description provided for @videoFailedBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get videoFailedBadge;
+
+  /// No description provided for @videoProcessingBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing'**
+  String get videoProcessingBadge;
+
+  /// No description provided for @contentSecurityDisclaimerStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Your progress and activity are being monitored. Please do not share access.'**
+  String get contentSecurityDisclaimerStudent;
+
+  /// No description provided for @quickAccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Access'**
+  String get quickAccessTitle;
+
+  /// No description provided for @quickAccessSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Jump right into your active groups'**
+  String get quickAccessSubtitle;
+
+  /// No description provided for @myStudyMaterials.
+  ///
+  /// In en, this message translates to:
+  /// **'My Study Materials'**
+  String get myStudyMaterials;
+
+  /// No description provided for @myStudyMaterialsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Access all your assigned groups and content'**
+  String get myStudyMaterialsDesc;
+
+  /// No description provided for @academicMomentumTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Academic Momentum'**
+  String get academicMomentumTitle;
+
+  /// No description provided for @statExamAverage.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam Average'**
+  String get statExamAverage;
+
+  /// No description provided for @statAssignmentsDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Assignments Done'**
+  String get statAssignmentsDone;
+
+  /// No description provided for @statVideoProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Video Progress'**
+  String get statVideoProgress;
+
+  /// No description provided for @continueLearningTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue Learning'**
+  String get continueLearningTitle;
+
+  /// No description provided for @resumeAtTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume at {time}'**
+  String resumeAtTime(String time);
+
+  /// No description provided for @lectureCompletedPercent.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% Completed'**
+  String lectureCompletedPercent(String percent);
+
+  /// No description provided for @resumeNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume Now'**
+  String get resumeNow;
+
+  /// No description provided for @overdue.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue'**
+  String get overdue;
+
+  /// No description provided for @dueInHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Due in {hours}h'**
+  String dueInHours(int hours);
+
+  /// No description provided for @dueTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Due Tomorrow'**
+  String get dueTomorrow;
+
+  /// No description provided for @dueInDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Due in {days}d'**
+  String dueInDays(int days);
+
+  /// No description provided for @noUrgentTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'No Urgent Tasks'**
+  String get noUrgentTasks;
+
+  /// No description provided for @noUrgentTasksSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re all caught up!'**
+  String get noUrgentTasksSubtitle;
+
+  /// No description provided for @urgentTasksTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Urgent Tasks'**
+  String get urgentTasksTitle;
+
+  /// No description provided for @urgentTasksSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Requires your immediate attention'**
+  String get urgentTasksSubtitle;
+
+  /// No description provided for @taskTypeAssignment.
+  ///
+  /// In en, this message translates to:
+  /// **'Assignment'**
+  String get taskTypeAssignment;
+
+  /// No description provided for @taskTypeExam.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam'**
+  String get taskTypeExam;
+
+  /// No description provided for @atLeastTwoOptionsRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'At least two options required'**
+  String get atLeastTwoOptionsRequired;
+
+  /// No description provided for @examPublishFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to publish exam: {error}'**
+  String examPublishFailed(String error);
+
+  /// No description provided for @totalQuestionsSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Questions'**
+  String totalQuestionsSummary(int count);
+
+  /// No description provided for @attachVideoMaterialNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach a PDF or Notes to this video.'**
+  String get attachVideoMaterialNotice;
+
+  /// No description provided for @attachVideoMaterialHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a PDF file'**
+  String get attachVideoMaterialHint;
+
+  /// No description provided for @addNewMaterialTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add New Material'**
+  String get addNewMaterialTitle;
+
+  /// No description provided for @uploadBunnyVideoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Video'**
+  String get uploadBunnyVideoTitle;
+
+  /// No description provided for @uploadBunnyVideoSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload directly to Bunny CDN'**
+  String get uploadBunnyVideoSubtitle;
+
+  /// No description provided for @uploadPdfFileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload PDF'**
+  String get uploadPdfFileTitle;
+
+  /// No description provided for @uploadPdfFileSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload documents and notes'**
+  String get uploadPdfFileSubtitle;
+
+  /// No description provided for @imagesCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Images'**
+  String get imagesCategory;
+
+  /// No description provided for @createAssignmentShortcut.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Assignment'**
+  String get createAssignmentShortcut;
+
+  /// No description provided for @createAssignmentShortcutSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a new assignment task'**
+  String get createAssignmentShortcutSubtitle;
+
+  /// No description provided for @createExamShortcut.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Exam'**
+  String get createExamShortcut;
+
+  /// No description provided for @createExamShortcutSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a new quiz or exam'**
+  String get createExamShortcutSubtitle;
+
+  /// No description provided for @videosCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Videos'**
+  String get videosCategory;
+
+  /// No description provided for @pdfDocumentsCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF Documents'**
+  String get pdfDocumentsCategory;
+
+  /// No description provided for @allCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'All Categories'**
+  String get allCategories;
+
+  /// No description provided for @filterAssignmentsWithCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Assignments ({count})'**
+  String filterAssignmentsWithCount(int count);
+
+  /// No description provided for @filterExamsWithCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Exams ({count})'**
+  String filterExamsWithCount(int count);
+
+  /// No description provided for @noVideosInCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'No videos found in this category.'**
+  String get noVideosInCategory;
+
+  /// No description provided for @uploadFirstVideoAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload First Video'**
+  String get uploadFirstVideoAction;
+
+  /// No description provided for @noPdfsInCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'No PDFs found in this category.'**
+  String get noPdfsInCategory;
+
+  /// No description provided for @uploadFirstPdfAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload First PDF'**
+  String get uploadFirstPdfAction;
+
+  /// No description provided for @noAssignmentsInCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'No assignments found in this category.'**
+  String get noAssignmentsInCategory;
+
+  /// No description provided for @createFirstAssignmentAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Create First Assignment'**
+  String get createFirstAssignmentAction;
+
+  /// No description provided for @noExamsInCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'No exams found in this category.'**
+  String get noExamsInCategory;
+
+  /// No description provided for @createFirstExamAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Create First Exam'**
+  String get createFirstExamAction;
+
+  /// No description provided for @videoBankTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Video Bank'**
+  String get videoBankTitle;
+
+  /// No description provided for @videoBankSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage all your uploaded videos'**
+  String get videoBankSubtitle;
+
+  /// No description provided for @totalVideosCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Total ({count})'**
+  String totalVideosCount(int count);
+
+  /// No description provided for @assignedVideosCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned ({count})'**
+  String assignedVideosCount(int count);
+
+  /// No description provided for @unassignedVideosCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Unassigned ({count})'**
+  String unassignedVideosCount(int count);
+
+  /// No description provided for @filterAllVideos.
+  ///
+  /// In en, this message translates to:
+  /// **'All Videos ({count})'**
+  String filterAllVideos(int count);
+
+  /// No description provided for @filterUnassignedOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Unassigned Only ({count})'**
+  String filterUnassignedOnly(int count);
+
+  /// No description provided for @noVideosInBankTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No Videos Yet'**
+  String get noVideosInBankTitle;
+
+  /// No description provided for @studentNavDashboardSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your progress & tasks'**
+  String get studentNavDashboardSubtitle;
+
+  /// No description provided for @studentNavNotificationsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent updates'**
+  String get studentNavNotificationsSubtitle;
+
+  /// No description provided for @studentNavContentSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Videos & lessons'**
+  String get studentNavContentSubtitle;
+
+  /// No description provided for @studentNavAssignmentsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Homework tasks'**
+  String get studentNavAssignmentsSubtitle;
+
+  /// No description provided for @studentNavExamsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quizzes & results'**
+  String get studentNavExamsSubtitle;
+
+  /// No description provided for @searchAssignmentsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search assignments...'**
+  String get searchAssignmentsHint;
+
+  /// No description provided for @filterAllAssignments.
+  ///
+  /// In en, this message translates to:
+  /// **'All ({count})'**
+  String filterAllAssignments(int count);
+
+  /// No description provided for @filterNeedsGrading.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs Grading'**
+  String get filterNeedsGrading;
+
+  /// No description provided for @filterPastDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Past Due'**
+  String get filterPastDue;
+
+  /// No description provided for @noMatchingAssignmentsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No assignments match your search.'**
+  String get noMatchingAssignmentsFound;
+
+  /// No description provided for @lecturesRoadmapTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Lectures Roadmap'**
+  String get lecturesRoadmapTitle;
+
+  /// No description provided for @lecturesRoadmapSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your scheduled lectures'**
+  String get lecturesRoadmapSubtitle;
+
+  /// No description provided for @recordedSessionAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Recorded Session Available'**
+  String get recordedSessionAvailable;
+
+  /// No description provided for @youtubeUnlistedNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Unlisted videos to prevent public access.'**
+  String get youtubeUnlistedNotice;
+
+  /// No description provided for @materialAttachmentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Material Attachment'**
+  String get materialAttachmentTitle;
+
+  /// No description provided for @chooseMaterialFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose File'**
+  String get chooseMaterialFile;
+
+  /// No description provided for @changePdfFileAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Change PDF'**
+  String get changePdfFileAction;
+
+  /// No description provided for @selectTargetGroups.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Target Groups'**
+  String get selectTargetGroups;
+
+  /// No description provided for @noGroupsAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No groups available'**
+  String get noGroupsAvailable;
+
+  /// No description provided for @groupAssignmentSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Groups assigned successfully'**
+  String get groupAssignmentSuccess;
+
+  /// No description provided for @manageAssignedGroupsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Groups'**
+  String get manageAssignedGroupsTitle;
+
+  /// No description provided for @manageAssignedGroupsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Select which groups can access this content.'**
+  String get manageAssignedGroupsDesc;
+
+  /// No description provided for @saveGroupAssignmentsAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Assignments'**
+  String get saveGroupAssignmentsAction;
+
+  /// No description provided for @enrolledStudentsCountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Students Enrolled'**
+  String enrolledStudentsCountLabel(int count);
 }
 
 class _AppLocalizationsDelegate

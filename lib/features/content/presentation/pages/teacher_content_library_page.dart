@@ -3,11 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
-import '../../../../core/router/app_router.dart';
+import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/responsive_breakpoints.dart';
-import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_empty_view.dart';
 import '../../../../core/widgets/app_error_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
@@ -37,6 +36,7 @@ class TeacherContentLibraryPage extends StatefulWidget {
 }
 
 class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
+  final ScrollController _scrollController = ScrollController();
   String? _selectedGroupId;
   String? _selectedGroupName;
   ContentStatus? _activeFilter;
@@ -47,6 +47,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
     final initialId = widget.groupId ?? TeacherGroupFilterBar.lastSelectedGroupId;
     GroupsState? groupsState;
     try {
@@ -71,6 +72,14 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
     } catch (_) {}
   }
 
+  void _onScroll() {
+    if (_scrollController.hasClients &&
+        _scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200) {
+      context.read<ContentCubit>().loadMoreContent();
+    }
+  }
+
   void _onGroupChanged(GroupEntity group) {
     if (_selectedGroupId == group.id) return;
     TeacherGroupFilterBar.lastSelectedGroupId = group.id;
@@ -81,24 +90,30 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
     _loadContent();
   }
 
-  void _loadContent() {
+  Future<void> _loadContent({bool forceRefresh = false}) async {
     if (_selectedGroupId != null) {
-      context.read<ContentCubit>().loadGroupContent(_selectedGroupId!);
+      await context.read<ContentCubit>().loadGroupContent(
+            _selectedGroupId!,
+            forceRefresh: forceRefresh,
+          );
     }
   }
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
     _searchController.dispose();
     super.dispose();
   }
 
-  void _openCreateDialog() {
+  void _openCreateDialog({ContentType? preselectedType}) {
     if (_selectedGroupId == null) return;
     showDialog<bool>(
       context: context,
       builder: (ctx) => CreateEditContentDialog(
         groupId: _selectedGroupId!,
+        initialType: preselectedType ?? _activeTypeFilter,
         onSave:
             ({
               required title,
@@ -110,6 +125,8 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
               mimeType,
               fileSize,
               fileBytes,
+              associatedExamId,
+              prerequisiteExamId,
             }) {
               return context.read<ContentCubit>().createContent(
                 groupId: _selectedGroupId!,
@@ -122,11 +139,14 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                 mimeType: mimeType,
                 fileSize: fileSize,
                 fileBytes: fileBytes,
+                associatedExamId: associatedExamId,
+                prerequisiteExamId: prerequisiteExamId,
               );
             },
       ),
     ).then((created) {
       if (created == true && mounted) {
+        _loadContent(forceRefresh: true);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             backgroundColor: AppColors.success,
@@ -136,6 +156,177 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
       }
     });
   }
+
+  void _showAddMaterialSheet() {
+    if (_selectedGroupId == null) return;
+    showModalBottomSheet<void>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppSpacing.radiusLarge),
+        ),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.s16,
+              vertical: AppSpacing.s16,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: AppColors.border,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.s12),
+                Text(
+                  context.l10n.addNewMaterialTitle,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSpacing.s16),
+                _buildAddOptionTile(
+                  icon: Icons.play_circle_fill_rounded,
+                  color: AppColors.primary,
+                  title: context.l10n.uploadBunnyVideoTitle,
+                  subtitle: context.l10n.uploadBunnyVideoSubtitle,
+                  onTap: () {
+                    Navigator.of(ctx).pop();
+                    _openCreateDialog(preselectedType: ContentType.video);
+                  },
+                ),
+                const SizedBox(height: AppSpacing.s8),
+                _buildAddOptionTile(
+                  icon: Icons.picture_as_pdf_rounded,
+                  color: const Color(0xFFEA580C),
+                  title: context.l10n.uploadPdfFileTitle,
+                  subtitle: context.l10n.uploadPdfFileSubtitle,
+                  onTap: () {
+                    Navigator.of(ctx).pop();
+                    _openCreateDialog(preselectedType: ContentType.pdf);
+                  },
+                ),
+                const SizedBox(height: AppSpacing.s8),
+                _buildAddOptionTile(
+                  icon: Icons.image_rounded,
+                  color: Colors.purple,
+                  title: context.l10n.imagesCategory,
+                  subtitle: context.l10n.uploadPdfFileSubtitle,
+                  onTap: () {
+                    Navigator.of(ctx).pop();
+                    _openCreateDialog(preselectedType: ContentType.image);
+                  },
+                ),
+                const SizedBox(height: AppSpacing.s8),
+                _buildAddOptionTile(
+                  icon: Icons.assignment_rounded,
+                  color: AppColors.warning,
+                  title: context.l10n.createAssignmentShortcut,
+                  subtitle: context.l10n.createAssignmentShortcutSubtitle,
+                  onTap: () {
+                    Navigator.of(ctx).pop();
+                    context.go(
+                      '${AppRoutes.teacherGroupAssignments.replaceAll(':groupId', _selectedGroupId!)}?name=${Uri.encodeComponent(_selectedGroupName ?? '')}',
+                    );
+                  },
+                ),
+                const SizedBox(height: AppSpacing.s8),
+                _buildAddOptionTile(
+                  icon: Icons.quiz_rounded,
+                  color: const Color(0xFF6366F1),
+                  title: context.l10n.createExamShortcut,
+                  subtitle: context.l10n.createExamShortcutSubtitle,
+                  onTap: () {
+                    Navigator.of(ctx).pop();
+                    context.go(
+                      '${AppRoutes.teacherGroupExams.replaceAll(':groupId', _selectedGroupId!)}?name=${Uri.encodeComponent(_selectedGroupName ?? '')}',
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildAddOptionTile({
+    required IconData icon,
+    required Color color,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.s12),
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.border),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.s8),
+              decoration: BoxDecoration(
+                color: color.withAlpha(25),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+              ),
+              child: Icon(icon, color: color, size: 22),
+            ),
+            const SizedBox(width: AppSpacing.s12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: AppColors.textSecondary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 14,
+              color: AppColors.textMuted,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
 
   void _openEditDialog(ContentEntity content) {
     if (_selectedGroupId == null) return;
@@ -155,6 +346,8 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
               mimeType,
               fileSize,
               fileBytes,
+              associatedExamId,
+              prerequisiteExamId,
             }) {
               return context.read<ContentCubit>().updateContent(
                 contentId: content.id,
@@ -162,11 +355,19 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                 description: description,
                 type: type,
                 status: status,
+                fileName: fileName,
+                storagePath: storagePath,
+                mimeType: mimeType,
+                fileSize: fileSize,
+                fileBytes: fileBytes,
+                associatedExamId: associatedExamId,
+                prerequisiteExamId: prerequisiteExamId,
               );
             },
       ),
     ).then((updated) {
       if (updated == true && mounted) {
+        _loadContent(forceRefresh: true);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(context.l10n.contentUpdatedToast)),
         );
@@ -195,7 +396,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
               content: Text(context.l10n.videoProcessingStartedToast),
             ),
           );
-          _loadContent();
+          _loadContent(forceRefresh: true);
         }
       },
     );
@@ -203,7 +404,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
 
   Future<void> _handleItemTap(ContentEntity item) async {
     if (item.type == ContentType.video) {
-      await context.push('${AppRouter.videoPlayer}?id=${item.id}');
+      await context.push('${AppRoutes.videoPlayer}?id=${item.id}');
     } else if (item.file != null) {
       await _handleOpenFile(item);
     } else {
@@ -252,7 +453,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
           tooltip: context.l10n.backTooltip,
           onPressed: () => context.canPop()
               ? context.pop()
-              : context.go(AppRouter.teacherDashboard),
+              : context.go(AppRoutes.teacherDashboard),
         ),
         title: Row(
           children: [
@@ -278,19 +479,20 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
             tooltip: context.l10n.refreshTooltip,
-            onPressed: _loadContent,
+            onPressed: () => _loadContent(forceRefresh: true),
           ),
         ],
       ),
       floatingActionButton: _selectedGroupId == null
           ? null
           : FloatingActionButton.extended(
-              onPressed: _openCreateDialog,
+              onPressed: _showAddMaterialSheet,
               icon: const Icon(Icons.add_rounded),
               label: Text(context.l10n.addContentAction),
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
             ),
+
       body: Center(
         child: ResponsiveContainer(
           maxWidth: ResponsiveBreakpoints.maxContentWidth,
@@ -310,7 +512,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                 builder: (context, state) {
               if (state is ContentLoading) {
                 return RefreshIndicator(
-                  onRefresh: () async => _loadContent(),
+                  onRefresh: () => _loadContent(forceRefresh: true),
                   child: CustomScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
                     slivers: [
@@ -320,7 +522,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                           child: TeacherGroupFilterBar(
                             selectedGroupId: _selectedGroupId,
                             onGroupChanged: _onGroupChanged,
-                            onRefresh: _loadContent,
+                            onRefresh: () => _loadContent(forceRefresh: true),
                           ),
                         ),
                       ),
@@ -337,7 +539,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
 
               if (state is ContentError) {
                 return RefreshIndicator(
-                  onRefresh: () async => _loadContent(),
+                  onRefresh: () => _loadContent(forceRefresh: true),
                   child: CustomScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
                     slivers: [
@@ -347,7 +549,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                           child: TeacherGroupFilterBar(
                             selectedGroupId: _selectedGroupId,
                             onGroupChanged: _onGroupChanged,
-                            onRefresh: _loadContent,
+                            onRefresh: () => _loadContent(forceRefresh: true),
                           ),
                         ),
                       ),
@@ -357,7 +559,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                           child: Center(
                             child: AppErrorView(
                               message: state.message,
-                              onRetry: _loadContent,
+                              onRetry: () => _loadContent(forceRefresh: true),
                             ),
                           ),
                         ),
@@ -379,27 +581,32 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
 
                 // Filter by live search query
                 if (_searchQuery.isNotEmpty) {
+                  final q = _searchQuery.toLowerCase();
                   items = items
                       .where(
                         (i) =>
-                            i.title.toLowerCase().contains(
-                              _searchQuery.toLowerCase(),
-                            ) ||
-                            (i.description?.toLowerCase().contains(
-                                  _searchQuery.toLowerCase(),
-                                ) ??
-                                false) ||
-                            (i.file?.fileName.toLowerCase().contains(
-                                  _searchQuery.toLowerCase(),
-                                ) ??
-                                false),
+                            i.title.toLowerCase().contains(q) ||
+                            (i.description?.toLowerCase().contains(q) ?? false) ||
+                            (i.file?.fileName.toLowerCase().contains(q) ?? false),
                       )
                       .toList();
                 }
 
+                final totalCount = state.items.length;
+                final videosCount = state.items.where((i) => i.type == ContentType.video).length;
+                final pdfsCount = state.items.where((i) => i.type == ContentType.pdf).length;
+                final imagesCount = state.items.where((i) => i.type == ContentType.image).length;
+                final assignmentsCount = state.items.where((i) => i.type == ContentType.assignment).length;
+                final examsCount = state.items.where((i) => i.type == ContentType.exam).length;
+
+                final hasActiveFilters = _activeTypeFilter != null ||
+                    _activeFilter != null ||
+                    _searchQuery.isNotEmpty;
+
                 return RefreshIndicator(
-                  onRefresh: () async => _loadContent(),
+                  onRefresh: () => _loadContent(forceRefresh: true),
                   child: CustomScrollView(
+                    controller: _scrollController,
                     physics: const AlwaysScrollableScrollPhysics(),
                     slivers: [
                       // 1. Group Selector Bar (Scrolls away with the page)
@@ -409,89 +616,110 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                           child: TeacherGroupFilterBar(
                             selectedGroupId: _selectedGroupId,
                             onGroupChanged: _onGroupChanged,
-                            onRefresh: _loadContent,
+                            onRefresh: () => _loadContent(forceRefresh: true),
                           ),
                         ),
                       ),
 
-                      // 2. Summary Stat Cards Row
+                      // 2. Summary Stat Cards Row (Interactive filtering)
                       SliverToBoxAdapter(
                         child: Padding(
                           padding: const EdgeInsets.only(top: AppSpacing.s12),
-                          child: Builder(
-                            builder: (context) {
-                              final isCompact = MediaQuery.sizeOf(context).width < 600;
-                              if (isCompact) {
-                                return SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  child: Row(
-                                    children: [
-                                      SizedBox(
-                                        width: 140,
-                                        child: _buildStatMiniCard(
-                                          label: context.l10n.totalMaterials,
-                                          count: state.items.length,
-                                          color: AppColors.primary,
-                                          icon: Icons.layers_rounded,
-                                        ),
-                                      ),
-                                      const SizedBox(width: AppSpacing.s8),
-                                      SizedBox(
-                                        width: 140,
-                                        child: _buildStatMiniCard(
-                                          label: context.l10n.publishedToStudents,
-                                          count: state.publishedCount,
-                                          color: AppColors.success,
-                                          icon: Icons
-                                              .check_circle_outline_rounded,
-                                        ),
-                                      ),
-                                      const SizedBox(width: AppSpacing.s8),
-                                      SizedBox(
-                                        width: 150,
-                                        child: _buildStatMiniCard(
-                                          label: context.l10n.draftsInProgress,
-                                          count: state.draftCount,
-                                          color: AppColors.warning,
-                                          icon: Icons.edit_note_rounded,
-                                        ),
-                                      ),
-                                    ],
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: [
+                                SizedBox(
+                                  width: 140,
+                                  child: _buildStatMiniCard(
+                                    label: context.l10n.totalMaterials,
+                                    count: totalCount,
+                                    color: AppColors.primary,
+                                    icon: Icons.layers_rounded,
+                                    isSelected: _activeTypeFilter == null && _activeFilter == null,
+                                    onTap: () {
+                                      setState(() {
+                                        _activeTypeFilter = null;
+                                        _activeFilter = null;
+                                      });
+                                      context.read<ContentCubit>().setFilter(null);
+                                    },
                                   ),
-                                );
-                              }
-
-                              return Row(
-                                children: [
-                                  Expanded(
-                                    child: _buildStatMiniCard(
-                                      label: context.l10n.totalMaterials,
-                                      count: state.items.length,
-                                      color: AppColors.primary,
-                                      icon: Icons.layers_rounded,
-                                    ),
+                                ),
+                                const SizedBox(width: AppSpacing.s8),
+                                SizedBox(
+                                  width: 140,
+                                  child: _buildStatMiniCard(
+                                    label: context.l10n.videosCategory,
+                                    count: videosCount,
+                                    color: AppColors.primary,
+                                    icon: Icons.play_circle_fill_rounded,
+                                    isSelected: _activeTypeFilter == ContentType.video,
+                                    onTap: () {
+                                      setState(() {
+                                        _activeTypeFilter = _activeTypeFilter == ContentType.video
+                                            ? null
+                                            : ContentType.video;
+                                      });
+                                    },
                                   ),
-                                  const SizedBox(width: AppSpacing.s8),
-                                  Expanded(
-                                    child: _buildStatMiniCard(
-                                      label: context.l10n.publishedToStudents,
-                                      count: state.publishedCount,
-                                      color: AppColors.success,
-                                      icon: Icons.check_circle_outline_rounded,
-                                    ),
+                                ),
+                                const SizedBox(width: AppSpacing.s8),
+                                SizedBox(
+                                  width: 140,
+                                  child: _buildStatMiniCard(
+                                    label: context.l10n.pdfDocumentsCategory,
+                                    count: pdfsCount,
+                                    color: const Color(0xFFEA580C),
+                                    icon: Icons.picture_as_pdf_rounded,
+                                    isSelected: _activeTypeFilter == ContentType.pdf,
+                                    onTap: () {
+                                      setState(() {
+                                        _activeTypeFilter = _activeTypeFilter == ContentType.pdf
+                                            ? null
+                                            : ContentType.pdf;
+                                      });
+                                    },
                                   ),
-                                  const SizedBox(width: AppSpacing.s8),
-                                  Expanded(
-                                    child: _buildStatMiniCard(
-                                      label: context.l10n.draftsInProgress,
-                                      count: state.draftCount,
-                                      color: AppColors.warning,
-                                      icon: Icons.edit_note_rounded,
-                                    ),
+                                ),
+                                const SizedBox(width: AppSpacing.s8),
+                                SizedBox(
+                                  width: 140,
+                                  child: _buildStatMiniCard(
+                                    label: context.l10n.publishedToStudents,
+                                    count: state.publishedCount,
+                                    color: AppColors.success,
+                                    icon: Icons.check_circle_outline_rounded,
+                                    isSelected: _activeFilter == ContentStatus.published,
+                                    onTap: () {
+                                      final newStatus = _activeFilter == ContentStatus.published
+                                          ? null
+                                          : ContentStatus.published;
+                                      setState(() => _activeFilter = newStatus);
+                                      context.read<ContentCubit>().setFilter(newStatus);
+                                    },
                                   ),
-                                ],
-                              );
-                            },
+                                ),
+                                const SizedBox(width: AppSpacing.s8),
+                                SizedBox(
+                                  width: 140,
+                                  child: _buildStatMiniCard(
+                                    label: context.l10n.draftsInProgress,
+                                    count: state.draftCount,
+                                    color: AppColors.warning,
+                                    icon: Icons.edit_note_rounded,
+                                    isSelected: _activeFilter == ContentStatus.draft,
+                                    onTap: () {
+                                      final newStatus = _activeFilter == ContentStatus.draft
+                                          ? null
+                                          : ContentStatus.draft;
+                                      setState(() => _activeFilter = newStatus);
+                                      context.read<ContentCubit>().setFilter(newStatus);
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -514,6 +742,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                       Icons.clear_rounded,
                                       size: 18,
                                     ),
+                                    tooltip: context.l10n.clearSearchAction,
                                     onPressed: () {
                                       _searchController.clear();
                                       setState(() => _searchQuery = '');
@@ -527,7 +756,87 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                         ),
                       ),
 
-                      // 4. Status Filter Chips
+                      // 4. Primary Content Type Filter Chips Bar
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: AppSpacing.s12),
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: [
+                                _buildFilterChip(
+                                  label: '${context.l10n.allCategories} ($totalCount)',
+                                  icon: Icons.grid_view_rounded,
+                                  isSelected: _activeTypeFilter == null,
+                                  onSelected: () => setState(() => _activeTypeFilter = null),
+                                ),
+                                const SizedBox(width: AppSpacing.s8),
+                                _buildFilterChip(
+                                  label: context.l10n.filterVideosWithCount(videosCount),
+                                  icon: Icons.play_circle_fill_rounded,
+                                  accentColor: AppColors.primary,
+                                  isSelected: _activeTypeFilter == ContentType.video,
+                                  onSelected: () => setState(
+                                    () => _activeTypeFilter = _activeTypeFilter == ContentType.video
+                                        ? null
+                                        : ContentType.video,
+                                  ),
+                                ),
+                                const SizedBox(width: AppSpacing.s8),
+                                _buildFilterChip(
+                                  label: context.l10n.filterPdfsWithCount(pdfsCount),
+                                  icon: Icons.picture_as_pdf_rounded,
+                                  accentColor: const Color(0xFFEA580C),
+                                  isSelected: _activeTypeFilter == ContentType.pdf,
+                                  onSelected: () => setState(
+                                    () => _activeTypeFilter = _activeTypeFilter == ContentType.pdf
+                                        ? null
+                                        : ContentType.pdf,
+                                  ),
+                                ),
+                                const SizedBox(width: AppSpacing.s8),
+                                _buildFilterChip(
+                                  label: context.l10n.filterImagesWithCount(imagesCount),
+                                  icon: Icons.image_rounded,
+                                  accentColor: Colors.purple,
+                                  isSelected: _activeTypeFilter == ContentType.image,
+                                  onSelected: () => setState(
+                                    () => _activeTypeFilter = _activeTypeFilter == ContentType.image
+                                        ? null
+                                        : ContentType.image,
+                                  ),
+                                ),
+                                const SizedBox(width: AppSpacing.s8),
+                                _buildFilterChip(
+                                  label: context.l10n.filterAssignmentsWithCount(assignmentsCount),
+                                  icon: Icons.assignment_rounded,
+                                  accentColor: AppColors.warning,
+                                  isSelected: _activeTypeFilter == ContentType.assignment,
+                                  onSelected: () => setState(
+                                    () => _activeTypeFilter = _activeTypeFilter == ContentType.assignment
+                                        ? null
+                                        : ContentType.assignment,
+                                  ),
+                                ),
+                                const SizedBox(width: AppSpacing.s8),
+                                _buildFilterChip(
+                                  label: context.l10n.filterExamsWithCount(examsCount),
+                                  icon: Icons.quiz_rounded,
+                                  accentColor: const Color(0xFF6366F1),
+                                  isSelected: _activeTypeFilter == ContentType.exam,
+                                  onSelected: () => setState(
+                                    () => _activeTypeFilter = _activeTypeFilter == ContentType.exam
+                                        ? null
+                                        : ContentType.exam,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // 5. Secondary Publication Status Filter Chips Bar
                       SliverToBoxAdapter(
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: AppSpacing.s8),
@@ -540,62 +849,74 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                   isSelected: _activeFilter == null,
                                   onSelected: () {
                                     setState(() => _activeFilter = null);
-                                    context.read<ContentCubit>().setFilter(
-                                      null,
-                                    );
+                                    context.read<ContentCubit>().setFilter(null);
                                   },
                                 ),
                                 const SizedBox(width: AppSpacing.s8),
                                 _buildFilterChip(
                                   label: context.l10n.filterPublishedWithCount(state.publishedCount),
-                                  isSelected:
-                                      _activeFilter == ContentStatus.published,
+                                  accentColor: AppColors.success,
+                                  isSelected: _activeFilter == ContentStatus.published,
                                   onSelected: () {
-                                    setState(
-                                      () => _activeFilter =
-                                          ContentStatus.published,
-                                    );
-                                    context.read<ContentCubit>().setFilter(
-                                      ContentStatus.published,
-                                    );
+                                    setState(() => _activeFilter = ContentStatus.published);
+                                    context.read<ContentCubit>().setFilter(ContentStatus.published);
                                   },
                                 ),
                                 const SizedBox(width: AppSpacing.s8),
                                 _buildFilterChip(
                                   label: context.l10n.filterDraftsWithCount(state.draftCount),
-                                  isSelected:
-                                      _activeFilter == ContentStatus.draft,
+                                  accentColor: AppColors.warning,
+                                  isSelected: _activeFilter == ContentStatus.draft,
                                   onSelected: () {
-                                    setState(
-                                      () => _activeFilter = ContentStatus.draft,
-                                    );
-                                    context.read<ContentCubit>().setFilter(
-                                      ContentStatus.draft,
-                                    );
+                                    setState(() => _activeFilter = ContentStatus.draft);
+                                    context.read<ContentCubit>().setFilter(ContentStatus.draft);
                                   },
                                 ),
                                 const SizedBox(width: AppSpacing.s8),
                                 _buildFilterChip(
                                   label: context.l10n.filterArchivedWithCount(state.archivedCount),
-                                  isSelected:
-                                      _activeFilter == ContentStatus.archived,
+                                  isSelected: _activeFilter == ContentStatus.archived,
                                   onSelected: () {
-                                    setState(
-                                      () => _activeFilter =
-                                          ContentStatus.archived,
-                                    );
-                                    context.read<ContentCubit>().setFilter(
-                                      ContentStatus.archived,
-                                    );
+                                    setState(() => _activeFilter = ContentStatus.archived);
+                                    context.read<ContentCubit>().setFilter(ContentStatus.archived);
                                   },
                                 ),
+                                if (hasActiveFilters) ...[
+                                  const SizedBox(width: AppSpacing.s8),
+                                  ActionChip(
+                                    avatar: const Icon(
+                                      Icons.close_rounded,
+                                      size: 14,
+                                      color: AppColors.error,
+                                    ),
+                                    label: Text(
+                                      context.l10n.clearSearchAction,
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: AppColors.error,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    backgroundColor: AppColors.error.withAlpha(20),
+                                    side: BorderSide(color: AppColors.error.withAlpha(50)),
+                                    onPressed: () {
+                                      setState(() {
+                                        _activeFilter = null;
+                                        _activeTypeFilter = null;
+                                        _searchController.clear();
+                                        _searchQuery = '';
+                                      });
+                                      context.read<ContentCubit>().setFilter(null);
+                                    },
+                                  ),
+                                ],
                               ],
                             ),
                           ),
                         ),
                       ),
 
-                      // 5. Content List / Empty States
+                      // 6. Content List / Targeted Empty States
                       if (state.items.isEmpty)
                         SliverToBoxAdapter(
                           child: Padding(
@@ -605,7 +926,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                 message: context.l10n.emptyContentCategory,
                                 icon: Icons.folder_open_rounded,
                                 actionText: context.l10n.addFirstContent,
-                                onAction: _openCreateDialog,
+                                onAction: _showAddMaterialSheet,
                               ),
                             ),
                           ),
@@ -615,27 +936,11 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 48),
                             child: Center(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(
-                                    Icons.search_off_rounded,
-                                    size: 48,
-                                    color: AppColors.textMuted,
-                                  ),
-                                  const SizedBox(height: AppSpacing.s12),
-                                  Text(
-                                    context.l10n.noMaterialsMatchFilter,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                              child: _buildEmptyFilteredState(context),
                             ),
                           ),
                         )
+
                       else
                         SliverPadding(
                           padding: const EdgeInsets.only(bottom: 96),
@@ -690,6 +995,13 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                             },
                           ),
                         ),
+                      if (state.isLoadingMore)
+                        const SliverToBoxAdapter(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(vertical: AppSpacing.s16),
+                            child: Center(child: AppLoadingView.compact(size: 24)),
+                          ),
+                        ),
                     ],
                   ),
                 );
@@ -697,8 +1009,8 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
 
               return RefreshIndicator(
                 onRefresh: () async {
-                  await context.read<GroupsCubit>().loadGroups();
-                  _loadContent();
+                  await context.read<GroupsCubit>().loadGroups(forceRefresh: true);
+                  await _loadContent(forceRefresh: true);
                 },
                 child: CustomScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
@@ -709,7 +1021,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                         child: TeacherGroupFilterBar(
                           selectedGroupId: _selectedGroupId,
                           onGroupChanged: _onGroupChanged,
-                          onRefresh: _loadContent,
+                          onRefresh: () => _loadContent(forceRefresh: true),
                         ),
                       ),
                     ),
@@ -769,54 +1081,146 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
   );
   }
 
+  Widget _buildEmptyFilteredState(BuildContext context) {
+    if (_searchQuery.isNotEmpty) {
+      return AppEmptyView(
+        icon: Icons.search_off_rounded,
+        message: context.l10n.noMatchingContentFound(_searchQuery),
+        actionText: context.l10n.clearSearchAction,
+        onAction: () {
+          _searchController.clear();
+          setState(() => _searchQuery = '');
+        },
+      );
+    }
+
+    if (_activeTypeFilter == ContentType.video) {
+      return AppEmptyView(
+        icon: Icons.video_library_rounded,
+        message: context.l10n.noVideosInCategory,
+        actionText: context.l10n.uploadFirstVideoAction,
+        onAction: () => _openCreateDialog(preselectedType: ContentType.video),
+      );
+    }
+
+    if (_activeTypeFilter == ContentType.pdf) {
+      return AppEmptyView(
+        icon: Icons.picture_as_pdf_rounded,
+        message: context.l10n.noPdfsInCategory,
+        actionText: context.l10n.uploadFirstPdfAction,
+        onAction: () => _openCreateDialog(preselectedType: ContentType.pdf),
+      );
+    }
+
+    if (_activeTypeFilter == ContentType.assignment) {
+      return AppEmptyView(
+        icon: Icons.assignment_rounded,
+        message: context.l10n.noAssignmentsInCategory,
+        actionText: context.l10n.createFirstAssignmentAction,
+        onAction: () {
+          if (_selectedGroupId != null) {
+            context.go(
+              '${AppRoutes.teacherGroupAssignments.replaceAll(':groupId', _selectedGroupId!)}?name=${Uri.encodeComponent(_selectedGroupName ?? '')}',
+            );
+          }
+        },
+      );
+    }
+
+    if (_activeTypeFilter == ContentType.exam) {
+      return AppEmptyView(
+        icon: Icons.quiz_rounded,
+        message: context.l10n.noExamsInCategory,
+        actionText: context.l10n.createFirstExamAction,
+        onAction: () {
+          if (_selectedGroupId != null) {
+            context.go(
+              '${AppRoutes.teacherGroupExams.replaceAll(':groupId', _selectedGroupId!)}?name=${Uri.encodeComponent(_selectedGroupName ?? '')}',
+            );
+          }
+        },
+      );
+    }
+
+    return AppEmptyView(
+      icon: Icons.filter_alt_off_rounded,
+      message: context.l10n.noMaterialsMatchFilter,
+      actionText: context.l10n.clearSearchAction,
+      onAction: () {
+        setState(() {
+          _activeFilter = null;
+          _activeTypeFilter = null;
+        });
+        context.read<ContentCubit>().setFilter(null);
+      },
+    );
+  }
+
   Widget _buildStatMiniCard({
+
     required String label,
     required int count,
     required Color color,
     required IconData icon,
+    bool isSelected = false,
+    VoidCallback? onTap,
   }) {
-    return AppCard(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.s10,
-        vertical: AppSpacing.s8,
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.s6),
-            decoration: BoxDecoration(
-              color: color.withAlpha(25),
-              borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-            ),
-            child: Icon(icon, color: color, size: 16),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        decoration: BoxDecoration(
+          color: isSelected ? color.withAlpha(20) : AppColors.surface,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+          border: Border.all(
+            color: isSelected ? color : AppColors.border,
+            width: isSelected ? 1.5 : 1.0,
           ),
-          const SizedBox(width: AppSpacing.s8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  '$count',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: color,
-                  ),
-                ),
-                Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 10,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
+        ),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.s10,
+          vertical: AppSpacing.s8,
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.s6),
+              decoration: BoxDecoration(
+                color: color.withAlpha(25),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+              ),
+              child: Icon(icon, color: color, size: 16),
             ),
-          ),
-        ],
+            const SizedBox(width: AppSpacing.s8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '$count',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: color,
+                    ),
+                  ),
+                  Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      color: isSelected ? color : AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -825,17 +1229,34 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
     required String label,
     required bool isSelected,
     required VoidCallback onSelected,
+    IconData? icon,
+    Color? accentColor,
   }) {
+    final color = accentColor ?? AppColors.primary;
     return FilterChip(
+      avatar: icon != null
+          ? Icon(
+              icon,
+              size: 16,
+              color: isSelected ? Colors.white : color,
+            )
+          : null,
       label: Text(label),
       selected: isSelected,
       onSelected: (_) => onSelected(),
-      selectedColor: AppColors.primary.withAlpha(35),
-      checkmarkColor: AppColors.primary,
+      selectedColor: color,
+      backgroundColor: AppColors.surfaceVariant,
+      checkmarkColor: Colors.white,
       labelStyle: TextStyle(
-        fontSize: 13,
+        fontSize: 12,
         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-        color: isSelected ? AppColors.primary : AppColors.textSecondary,
+        color: isSelected ? Colors.white : AppColors.textPrimary,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color: isSelected ? color : AppColors.border,
+        ),
       ),
     );
   }

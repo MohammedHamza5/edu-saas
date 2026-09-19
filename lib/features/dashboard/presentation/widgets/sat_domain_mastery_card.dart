@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/config/tenant_registry.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
-import '../../../../core/router/app_router.dart';
+import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -397,7 +397,7 @@ class SatDomainMasteryCard extends StatelessWidget {
                               borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
                             ),
                           ),
-                          onPressed: () => context.go(AppRouter.studentAssignments),
+                          onPressed: () => context.go(AppRoutes.studentAssignments),
                           child: Text(context.l10n.uploadHomeworkSolutionNow, style: const TextStyle(fontSize: 12)),
                         ),
                       ),
@@ -440,7 +440,7 @@ class SatDomainMasteryCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
                         ),
                       ),
-                      onPressed: () => context.go(AppRouter.studentAssignments),
+                      onPressed: () => context.go(AppRoutes.studentAssignments),
                       child: Text(context.l10n.uploadHomeworkSolutionNow, style: const TextStyle(fontSize: 12)),
                     ),
                   ],

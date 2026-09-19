@@ -143,11 +143,12 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
     _loadAttendance();
   }
 
-  void _loadAttendance() {
+  Future<void> _loadAttendance({bool forceRefresh = false}) async {
     if (_selectedGroupId == null) return;
-    _attendanceCubit.loadGroupAttendance(
+    await _attendanceCubit.loadGroupAttendance(
       groupId: _selectedGroupId!,
       date: _selectedDate,
+      forceRefresh: forceRefresh,
     );
   }
 
@@ -407,7 +408,7 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
           IconButton.filledTonal(
             icon: const Icon(Icons.refresh_rounded, size: 20),
             tooltip: context.l10n.refreshAttendanceSheetTooltip,
-            onPressed: _loadAttendance,
+            onPressed: () => _loadAttendance(forceRefresh: true),
           ),
         ],
       ),
@@ -704,7 +705,7 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
     if (attendanceState is AttendanceError) {
       return AppErrorView(
         message: attendanceState.message,
-        onRetry: _loadAttendance,
+        onRetry: () => _loadAttendance(forceRefresh: true),
       );
     }
 

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
-import '../../../../core/router/app_router.dart';
+import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/responsive_breakpoints.dart';
@@ -133,7 +133,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
               tooltip: context.l10n.backToGroups,
               onPressed: () => context.canPop()
                   ? context.pop()
-                  : context.go(AppRouter.groupsList),
+                  : context.go(AppRoutes.groupsList),
             ),
             title: Text(
               group.name,
@@ -298,7 +298,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
                                 foregroundColor: Colors.white,
                               ),
                               onPressed: () => context.go(
-                                '${AppRouter.teacherGroupContent.replaceAll(':groupId', widget.groupId)}?name=${Uri.encodeComponent(groupName)}',
+                                '${AppRoutes.teacherGroupContent.replaceAll(':groupId', widget.groupId)}?name=${Uri.encodeComponent(groupName)}',
                               ),
                             ),
                             ElevatedButton.icon(
@@ -309,7 +309,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
                                 foregroundColor: Colors.white,
                               ),
                               onPressed: () => context.go(
-                                '${AppRouter.teacherGroupAssignments.replaceAll(':groupId', widget.groupId)}?name=${Uri.encodeComponent(groupName)}',
+                                '${AppRoutes.teacherGroupAssignments.replaceAll(':groupId', widget.groupId)}?name=${Uri.encodeComponent(groupName)}',
                               ),
                             ),
                             ElevatedButton.icon(
@@ -320,14 +320,14 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
                                 foregroundColor: Colors.white,
                               ),
                               onPressed: () => context.go(
-                                '${AppRouter.teacherGroupExams.replaceAll(':groupId', widget.groupId)}?name=${Uri.encodeComponent(groupName)}',
+                                '${AppRoutes.teacherGroupExams.replaceAll(':groupId', widget.groupId)}?name=${Uri.encodeComponent(groupName)}',
                               ),
                             ),
                             OutlinedButton.icon(
                               icon: const Icon(Icons.campaign_rounded, size: 16),
                               label: Text(context.l10n.sendGroupAnnouncement),
                               onPressed: () => context.go(
-                                '${AppRouter.sendAnnouncement}?groupId=${widget.groupId}',
+                                '${AppRoutes.sendAnnouncement}?groupId=${widget.groupId}',
                               ),
                             ),
                           ],
@@ -404,7 +404,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
                           ),
                         ),
                         onPressed: () => context.push(
-                          '${AppRouter.teacherAttendance}?groupId=${widget.groupId}',
+                          '${AppRoutes.teacherAttendance}?groupId=${widget.groupId}',
                         ),
                       ),
                     ],

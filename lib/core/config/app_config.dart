@@ -47,7 +47,7 @@ class AppConfig {
     }
     return const String.fromEnvironment(
       'BUNNY_API_KEY',
-      defaultValue: 'dc757e9a-1045-44f3-8130f6c98385-9a77-48cf',
+      defaultValue: '',
     );
   }
 
@@ -69,7 +69,30 @@ class AppConfig {
     }
     return const String.fromEnvironment(
       'BUNNY_TOKEN_KEY',
-      defaultValue: 'd472d690-df72-45d1-8233-a5a9a8ccd155',
+      defaultValue: '',
     );
   }
+
+  static String get defaultVideoProvider {
+    if (dotenv.isInitialized) {
+      final val = dotenv.env['DEFAULT_VIDEO_PROVIDER'];
+      if (val != null && val.isNotEmpty) return val;
+    }
+    return const String.fromEnvironment(
+      'DEFAULT_VIDEO_PROVIDER',
+      defaultValue: 'youtube',
+    );
+  }
+
+  /// Whether YouTube provider is available (provider is 'youtube' or 'both').
+  static bool get isYouTubeEnabled =>
+      defaultVideoProvider == 'youtube' || defaultVideoProvider == 'both';
+
+  /// Whether Bunny Stream provider is available (provider is 'bunny' or 'both').
+  static bool get isBunnyEnabled =>
+      defaultVideoProvider == 'bunny' || defaultVideoProvider == 'both';
+
+  /// Whether both providers are shown for teacher selection.
+  static bool get showBothProviders => defaultVideoProvider == 'both';
 }
+

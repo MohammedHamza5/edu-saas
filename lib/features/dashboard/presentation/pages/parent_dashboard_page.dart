@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/extensions/responsive_context_extension.dart';
-import '../../../../core/router/app_router.dart';
+import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/responsive_breakpoints.dart';
@@ -86,14 +86,14 @@ class _ParentDashboardViewState extends State<_ParentDashboardView> {
             onPressed: () => context.read<ParentCubit>().refresh(),
           ),
           NotificationBadgeButton(
-            onPressed: () => context.push(AppRouter.notificationsCenter),
+            onPressed: () => context.push(AppRoutes.notificationsCenter),
           ),
           IconButton(
             icon: const Icon(Icons.logout_rounded),
             tooltip: context.l10n.logout,
             onPressed: () {
               context.read<AuthCubit>().logout();
-              context.go(AppRouter.login);
+              context.go(AppRoutes.login);
             },
           ),
         ],

@@ -7,13 +7,21 @@ import 'assignments_state.dart';
 class AssignmentsCubit extends Cubit<AssignmentsState> {
   final AssignmentsRepository _repository;
 
+  static const int _pageSize = 15;
+  int _teacherPage = 0;
+  int _studentPage = 0;
+
   AssignmentsCubit({required AssignmentsRepository repository})
       : _repository = repository,
         super(const AssignmentsInitial());
 
   /// Loads assignments for a specific group (Teacher flow) with instant SWR cache
-  Future<void> loadGroupAssignments(String groupId) async {
+  Future<void> loadGroupAssignments(String groupId, {bool forceRefresh = false}) async {
+    _teacherPage = 0;
     final cacheKey = 'teacher_group_$groupId';
+    if (forceRefresh) {
+      AppCache.assignments.invalidate(cacheKey);
+    }
 
     // ── Stale-While-Revalidate: Instant display from memory cache ──────────
     final cached = AppCache.assignments.getStale(cacheKey);
@@ -21,13 +29,18 @@ class AssignmentsCubit extends Cubit<AssignmentsState> {
       emit(TeacherAssignmentsLoaded(
         groupId: groupId,
         assignments: cached,
+        hasMore: cached.length >= _pageSize,
       ));
-      if (AppCache.assignments.has(cacheKey)) return; // Fresh cache, skip network
+      if (!forceRefresh && AppCache.assignments.has(cacheKey)) return; // Fresh cache, skip network
     } else {
       emit(const AssignmentsLoading());
     }
 
-    final result = await _repository.getGroupAssignments(groupId);
+    final result = await _repository.getGroupAssignments(
+      groupId,
+      page: 0,
+      pageSize: _pageSize,
+    );
 
     result.when(
       onSuccess: (assignments) {
@@ -35,12 +48,48 @@ class AssignmentsCubit extends Cubit<AssignmentsState> {
         emit(TeacherAssignmentsLoaded(
           groupId: groupId,
           assignments: assignments,
+          hasMore: assignments.length == _pageSize,
+          isLoadingMore: false,
         ));
       },
       onFailure: (failure) {
         if (state is! TeacherAssignmentsLoaded) {
           emit(AssignmentsError(failure.message));
         }
+      },
+    );
+  }
+
+  /// Loads next page of teacher assignments on scroll (Infinite Scroll)
+  Future<void> loadMoreTeacherAssignments() async {
+    final currentState = state;
+    if (currentState is! TeacherAssignmentsLoaded) return;
+    if (!currentState.hasMore || currentState.isLoadingMore || currentState.groupId == null) return;
+
+    emit(currentState.copyWith(isLoadingMore: true));
+    final nextPage = _teacherPage + 1;
+
+    final result = await _repository.getGroupAssignments(
+      currentState.groupId!,
+      page: nextPage,
+      pageSize: _pageSize,
+    );
+
+    if (isClosed) return;
+
+    result.when(
+      onSuccess: (newAssignments) {
+        _teacherPage = nextPage;
+        final allAssignments = [...currentState.assignments, ...newAssignments];
+        AppCache.assignments.put('teacher_group_${currentState.groupId}', allAssignments);
+        emit(currentState.copyWith(
+          assignments: allAssignments,
+          hasMore: newAssignments.length == _pageSize,
+          isLoadingMore: false,
+        ));
+      },
+      onFailure: (failure) {
+        emit(currentState.copyWith(isLoadingMore: false));
       },
     );
   }
@@ -102,8 +151,9 @@ class AssignmentsCubit extends Cubit<AssignmentsState> {
 
     return result.when(
       onSuccess: (created) {
-        // Refresh assignments list
-        loadGroupAssignments(groupId);
+        // Refresh assignments list and bust cache
+        AppCache.assignments.invalidate('teacher_group_$groupId');
+        loadGroupAssignments(groupId, forceRefresh: true);
         return true;
       },
       onFailure: (failure) {
@@ -175,8 +225,12 @@ class AssignmentsCubit extends Cubit<AssignmentsState> {
   }
 
   /// Loads all assignments for the currently logged-in student (Student flow) with instant SWR cache
-  Future<void> loadStudentAssignments() async {
+  Future<void> loadStudentAssignments({bool forceRefresh = false}) async {
+    _studentPage = 0;
     const cacheKey = 'student_assignments_all';
+    if (forceRefresh) {
+      AppCache.assignments.invalidate(cacheKey);
+    }
 
     // ── Stale-While-Revalidate: Instant display from memory cache ──────────
     final cached = AppCache.assignments.getStale(cacheKey);
@@ -184,14 +238,20 @@ class AssignmentsCubit extends Cubit<AssignmentsState> {
       if (cached.isEmpty) {
         emit(const AssignmentsEmpty(message: 'لا توجد واجبات مطلوبة حالياً'));
       } else {
-        emit(StudentAssignmentsLoaded(assignments: cached));
+        emit(StudentAssignmentsLoaded(
+          assignments: cached,
+          hasMore: cached.length >= _pageSize,
+        ));
       }
-      if (AppCache.assignments.has(cacheKey)) return; // Fresh cache, skip network
+      if (!forceRefresh && AppCache.assignments.has(cacheKey)) return; // Fresh cache, skip network
     } else {
       emit(const AssignmentsLoading());
     }
 
-    final result = await _repository.getStudentAssignments();
+    final result = await _repository.getStudentAssignments(
+      page: 0,
+      pageSize: _pageSize,
+    );
 
     result.when(
       onSuccess: (assignments) {
@@ -199,13 +259,50 @@ class AssignmentsCubit extends Cubit<AssignmentsState> {
         if (assignments.isEmpty) {
           emit(const AssignmentsEmpty(message: 'لا توجد واجبات مطلوبة حالياً'));
         } else {
-          emit(StudentAssignmentsLoaded(assignments: assignments));
+          emit(StudentAssignmentsLoaded(
+            assignments: assignments,
+            hasMore: assignments.length == _pageSize,
+            isLoadingMore: false,
+          ));
         }
       },
       onFailure: (failure) {
         if (state is! StudentAssignmentsLoaded) {
           emit(AssignmentsError(failure.message));
         }
+      },
+    );
+  }
+
+  /// Loads next page of student assignments on scroll (Infinite Scroll)
+  Future<void> loadMoreStudentAssignments() async {
+    final currentState = state;
+    if (currentState is! StudentAssignmentsLoaded) return;
+    if (!currentState.hasMore || currentState.isLoadingMore) return;
+
+    emit(currentState.copyWith(isLoadingMore: true));
+    final nextPage = _studentPage + 1;
+
+    final result = await _repository.getStudentAssignments(
+      page: nextPage,
+      pageSize: _pageSize,
+    );
+
+    if (isClosed) return;
+
+    result.when(
+      onSuccess: (newAssignments) {
+        _studentPage = nextPage;
+        final allAssignments = [...currentState.assignments, ...newAssignments];
+        AppCache.assignments.put('student_assignments_all', allAssignments);
+        emit(currentState.copyWith(
+          assignments: allAssignments,
+          hasMore: newAssignments.length == _pageSize,
+          isLoadingMore: false,
+        ));
+      },
+      onFailure: (failure) {
+        emit(currentState.copyWith(isLoadingMore: false));
       },
     );
   }

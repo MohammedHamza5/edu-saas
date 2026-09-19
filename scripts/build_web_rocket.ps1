@@ -119,7 +119,17 @@ if ($DeployFirebase) {
     Write-Host "=================================================================" -ForegroundColor Cyan
     $env:NODE_OPTIONS = "--dns-result-order=ipv4first"
     firebase deploy --only hosting:antounios
-    if ($LASTEXITCODE -eq 0) {
+    $deploySuccess = ($LASTEXITCODE -eq 0)
+    if (-not $deploySuccess) {
+        $debugLog = Join-Path $PSScriptRoot "..\firebase-debug.log"
+        if (Test-Path $debugLog) {
+            $tail = Get-Content $debugLog -Tail 40 -Raw
+            if ($tail -match "release complete" -or $tail -match "Deploy complete") {
+                $deploySuccess = $true
+            }
+        }
+    }
+    if ($deploySuccess) {
         Write-Host "`n[SUCCESS] Successfully deployed to: https://antounios.web.app" -ForegroundColor Green
     } else {
         Write-Host "`n[ERROR] Firebase deploy failed!" -ForegroundColor Red

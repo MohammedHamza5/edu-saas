@@ -185,17 +185,20 @@ class StudentActivityTracker with WidgetsBindingObserver {
 
       registerUserInteraction();
 
+      final validContentId = (contentId != null && contentId.trim().isNotEmpty) ? contentId.trim() : null;
+      final validGroupId = (groupId != null && groupId.trim().isNotEmpty) ? groupId.trim() : null;
+
       await client.rpc<void>('record_activity_event', params: {
         'p_event_type': eventType,
-        'p_content_id': contentId,
-        'p_group_id': groupId,
+        'p_content_id': validContentId,
+        'p_group_id': validGroupId,
         'p_metadata': metadata ?? {},
       });
 
       AppLogger.d(
         'StudentActivityTracker',
         'Activity recorded',
-        data: {'event_type': eventType, 'content_id': contentId},
+        data: {'event_type': eventType, 'content_id': validContentId},
       );
     } catch (e) {
       AppLogger.w('StudentActivityTracker', 'Failed to record activity $eventType: $e');

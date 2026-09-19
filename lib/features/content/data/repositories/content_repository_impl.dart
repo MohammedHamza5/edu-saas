@@ -15,11 +15,15 @@ class ContentRepositoryImpl implements ContentRepository {
   Future<Result<List<ContentEntity>>> getGroupContent({
     required String groupId,
     ContentStatus? statusFilter,
+    int page = 0,
+    int pageSize = 20,
   }) async {
     try {
       final models = await _remoteDataSource.getGroupContent(
         groupId: groupId,
         statusFilter: statusFilter?.value,
+        page: page,
+        pageSize: pageSize,
       );
       return Success(models);
     } catch (e) {
@@ -31,7 +35,7 @@ class ContentRepositoryImpl implements ContentRepository {
 
   @override
   Future<Result<ContentEntity>> createContent({
-    required String groupId,
+    String? groupId,
     required String title,
     String? description,
     required ContentType type,
@@ -42,6 +46,8 @@ class ContentRepositoryImpl implements ContentRepository {
     String? mimeType,
     int? fileSize,
     List<int>? fileBytes,
+    String? associatedExamId,
+    String? prerequisiteExamId,
   }) async {
     try {
       final model = await _remoteDataSource.createContent(
@@ -56,6 +62,8 @@ class ContentRepositoryImpl implements ContentRepository {
         mimeType: mimeType,
         fileSize: fileSize,
         fileBytes: fileBytes,
+        associatedExamId: associatedExamId,
+        prerequisiteExamId: prerequisiteExamId,
       );
       return Success(model);
     } catch (e) {
@@ -73,6 +81,13 @@ class ContentRepositoryImpl implements ContentRepository {
     ContentType? type,
     ContentStatus? status,
     int? sortOrder,
+    String? fileName,
+    String? storagePath,
+    String? mimeType,
+    int? fileSize,
+    List<int>? fileBytes,
+    String? associatedExamId,
+    String? prerequisiteExamId,
   }) async {
     try {
       final model = await _remoteDataSource.updateContent(
@@ -82,6 +97,13 @@ class ContentRepositoryImpl implements ContentRepository {
         type: type?.value,
         status: status?.value,
         sortOrder: sortOrder,
+        fileName: fileName,
+        storagePath: storagePath,
+        mimeType: mimeType,
+        fileSize: fileSize,
+        fileBytes: fileBytes,
+        associatedExamId: associatedExamId,
+        prerequisiteExamId: prerequisiteExamId,
       );
       return Success(model);
     } catch (e) {
@@ -151,6 +173,60 @@ class ContentRepositoryImpl implements ContentRepository {
     } catch (e) {
       return FailureResult(
         ServerFailure('فشل في إنشاء الرابط الآمن للملف: ${e.toString()}'),
+      );
+    }
+  }
+
+  @override
+  Future<Result<List<ContentEntity>>> getCentralVideoBank({
+    int page = 0,
+    int pageSize = 100,
+  }) async {
+    try {
+      final models = await _remoteDataSource.getCentralVideoBank(
+        page: page,
+        pageSize: pageSize,
+      );
+      return Success(models);
+    } catch (e) {
+      return FailureResult(
+        ServerFailure('فشل في جلب بنك المحاضرات: ${e.toString()}'),
+      );
+    }
+  }
+
+  @override
+  Future<Result<void>> assignContentToGroups({
+    required String contentId,
+    required List<String> groupIds,
+  }) async {
+    try {
+      await _remoteDataSource.assignContentToGroups(
+        contentId: contentId,
+        groupIds: groupIds,
+      );
+      return const Success(null);
+    } catch (e) {
+      return FailureResult(
+        ServerFailure('فشل في ربط المحتوى بالمجموعات: ${e.toString()}'),
+      );
+    }
+  }
+
+  @override
+  Future<Result<void>> linkLessonExam({
+    required String contentId,
+    required String examId,
+  }) async {
+    try {
+      await _remoteDataSource.linkLessonExam(
+        contentId: contentId,
+        examId: examId,
+      );
+      return const Success(null);
+    } catch (e) {
+      return FailureResult(
+        ServerFailure('فشل في ربط اختبار الحصة: ${e.toString()}'),
       );
     }
   }

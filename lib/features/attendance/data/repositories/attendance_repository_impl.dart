@@ -57,11 +57,15 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
   Future<Result<List<AttendanceEntity>>> getStudentAttendanceHistory({
     required String studentId,
     String? groupId,
+    int? page,
+    int? pageSize,
   }) async {
     try {
       final history = await _remoteDataSource.getStudentAttendanceHistory(
         studentId: studentId,
         groupId: groupId,
+        page: page,
+        pageSize: pageSize,
       );
       return Success(history);
     } on PostgrestException catch (e) {

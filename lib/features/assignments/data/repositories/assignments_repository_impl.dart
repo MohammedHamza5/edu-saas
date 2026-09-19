@@ -13,9 +13,17 @@ class AssignmentsRepositoryImpl implements AssignmentsRepository {
             remoteDataSource ?? AssignmentsRemoteDataSourceImpl();
 
   @override
-  Future<Result<List<AssignmentEntity>>> getGroupAssignments(String groupId) async {
+  Future<Result<List<AssignmentEntity>>> getGroupAssignments(
+    String groupId, {
+    int page = 0,
+    int pageSize = 15,
+  }) async {
     try {
-      final assignments = await _remoteDataSource.getGroupAssignments(groupId);
+      final assignments = await _remoteDataSource.getGroupAssignments(
+        groupId,
+        page: page,
+        pageSize: pageSize,
+      );
       return Success(assignments);
     } on PostgrestException catch (e) {
       return FailureResult(ServerFailure(e.message, code: e.code));
@@ -27,9 +35,15 @@ class AssignmentsRepositoryImpl implements AssignmentsRepository {
   }
 
   @override
-  Future<Result<List<AssignmentEntity>>> getStudentAssignments() async {
+  Future<Result<List<AssignmentEntity>>> getStudentAssignments({
+    int page = 0,
+    int pageSize = 15,
+  }) async {
     try {
-      final assignments = await _remoteDataSource.getStudentAssignments();
+      final assignments = await _remoteDataSource.getStudentAssignments(
+        page: page,
+        pageSize: pageSize,
+      );
       return Success(assignments);
     } on PostgrestException catch (e) {
       return FailureResult(ServerFailure(e.message, code: e.code));

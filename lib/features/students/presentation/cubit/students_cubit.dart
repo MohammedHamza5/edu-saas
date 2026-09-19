@@ -234,7 +234,7 @@ class StudentsCubit extends Cubit<StudentsState> {
           emit(StudentActionSuccess(updatedStudent: updated, action: action));
           // Refresh the appropriate list to reflect new status
           if (prev is PendingStudentsLoaded) {
-            loadPendingStudents();
+            loadPendingStudents(refresh: true);
           } else {
             loadStudents(
               status: _currentStatus,
@@ -256,14 +256,17 @@ class StudentsCubit extends Cubit<StudentsState> {
     );
   }
 
-  // ── Pending students (T-03) ───────────────────────────────────────────────
+  // ── Pending Students (T-04) ───────────────────────────────────────────────
 
-  Future<void> loadPendingStudents() async {
+  Future<void> loadPendingStudents({bool refresh = false}) async {
+    if (refresh) {
+      AppCache.students.invalidate(_cacheKeyPending);
+    }
     // ── Stale-While-Revalidate ────────────────────────────────────────────
     final cached = AppCache.students.getStale(_cacheKeyPending);
     if (cached is List<StudentEntity>) {
       emit(PendingStudentsLoaded(pending: cached));
-      if (AppCache.students.has(_cacheKeyPending)) return;
+      if (!refresh && AppCache.students.has(_cacheKeyPending)) return;
       // Continue to refresh silently
     } else {
       emit(const StudentsLoading());

@@ -7,8 +7,15 @@ import '../models/exam_question_model.dart';
 import '../models/exam_version_model.dart';
 
 abstract interface class ExamsRemoteDataSource {
-  Future<List<ExamModel>> getGroupExams(String groupId);
-  Future<List<ExamModel>> getStudentExams();
+  Future<List<ExamModel>> getGroupExams(
+    String groupId, {
+    int page = 0,
+    int pageSize = 15,
+  });
+  Future<List<ExamModel>> getStudentExams({
+    int page = 0,
+    int pageSize = 15,
+  });
   Future<ExamModel> getExamDetails(String examId);
   Future<ExamModel> createExam({
     required String groupId,
@@ -42,7 +49,11 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
   SupabaseClient get _safeClient => _client ?? SupabaseService.client;
 
   @override
-  Future<List<ExamModel>> getGroupExams(String groupId) async {
+  Future<List<ExamModel>> getGroupExams(
+    String groupId, {
+    int page = 0,
+    int pageSize = 15,
+  }) async {
     final response = await _safeClient
         .from('exams')
         .select('''
@@ -59,7 +70,7 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
           end_at,
           created_at,
           updated_at,
-          content!inner(
+          content:content!exams_content_id_fkey!inner(
             id,
             group_id,
             title,
@@ -78,7 +89,8 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
           exam_attempts(count)
         ''')
         .eq('content.group_id', groupId)
-        .order('created_at', ascending: false);
+        .order('created_at', ascending: false)
+        .range(page * pageSize, (page + 1) * pageSize - 1);
 
     final list = response as List<dynamic>;
     final results = <ExamModel>[];
@@ -91,6 +103,7 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
       } else {
         map['attempts_count'] = 0;
       }
+      map.remove('exam_attempts');
       results.add(ExamModel.fromJson(map));
     }
 
@@ -98,7 +111,10 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
   }
 
   @override
-  Future<List<ExamModel>> getStudentExams() async {
+  Future<List<ExamModel>> getStudentExams({
+    int page = 0,
+    int pageSize = 15,
+  }) async {
     final currentUserId = _safeClient.auth.currentUser?.id;
     if (currentUserId == null) return [];
 
@@ -132,7 +148,7 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
           end_at,
           created_at,
           updated_at,
-          content!inner(
+          content:content!exams_content_id_fkey!inner(
             id,
             group_id,
             title,
@@ -151,34 +167,44 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
         ''')
         .inFilter('content.group_id', groupIds)
         .eq('content.status', 'published')
-        .order('created_at', ascending: false);
+        .order('created_at', ascending: false)
+        .range(page * pageSize, (page + 1) * pageSize - 1);
 
     final list = response as List<dynamic>;
-    final results = <ExamModel>[];
+    if (list.isEmpty) return [];
 
+    final examIds = list.map((item) => (item as Map<String, dynamic>)['id'] as String).toList();
+
+    // Fetch all student attempts in 1 batch query instead of N sequential loop queries
+    final allAttempts = await _safeClient
+        .from('exam_attempts')
+        .select('''
+          id,
+          exam_id,
+          exam_version_id,
+          student_id,
+          started_at,
+          submitted_at,
+          status,
+          score,
+          percentage
+        ''')
+        .eq('student_id', currentUserId)
+        .inFilter('exam_id', examIds)
+        .order('started_at', ascending: false);
+
+    final attemptsByExam = <String, List<Map<String, dynamic>>>{};
+    for (final att in allAttempts as List<dynamic>) {
+      final aMap = att as Map<String, dynamic>;
+      final eId = aMap['exam_id'] as String;
+      attemptsByExam.putIfAbsent(eId, () => []).add(aMap);
+    }
+
+    final results = <ExamModel>[];
     for (final item in list) {
       final map = Map<String, dynamic>.from(item as Map<String, dynamic>);
       final examId = map['id'] as String;
-
-      // Check student attempts for this exam
-      final attemptsRes = await _safeClient
-          .from('exam_attempts')
-          .select('''
-            id,
-            exam_id,
-            exam_version_id,
-            student_id,
-            started_at,
-            submitted_at,
-            status,
-            score,
-            percentage
-          ''')
-          .eq('exam_id', examId)
-          .eq('student_id', currentUserId)
-          .order('started_at', ascending: false);
-
-      map['exam_attempts'] = attemptsRes;
+      map['exam_attempts'] = attemptsByExam[examId] ?? [];
       results.add(ExamModel.fromJson(map));
     }
 
@@ -187,6 +213,11 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
 
   @override
   Future<ExamModel> getExamDetails(String examId) async {
+    final isTeacher = SupabaseService.currentUserRole == 'teacher';
+    final optionsFields = isTeacher
+        ? 'id, question_id, option_text, sort_order, is_correct'
+        : 'id, question_id, option_text, sort_order';
+
     final response = await _safeClient
         .from('exams')
         .select('''
@@ -203,7 +234,7 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
           end_at,
           created_at,
           updated_at,
-          content!inner(
+          content:content!exams_content_id_fkey!inner(
             id,
             group_id,
             title,
@@ -226,11 +257,7 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
               points,
               sort_order,
               question_options(
-                id,
-                question_id,
-                option_text,
-                sort_order,
-                is_correct
+                $optionsFields
               )
             )
           )
@@ -335,14 +362,18 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
 
       final qId = questionRes['id'] as String;
 
-      for (int j = 0; j < q.options.length; j++) {
-        final opt = q.options[j];
-        await _safeClient.from('question_options').insert({
-          'question_id': qId,
-          'option_text': opt.optionText,
-          'sort_order': j + 1,
-          'is_correct': opt.isCorrect ?? false,
-        });
+      if (q.options.isNotEmpty) {
+        final optionsPayload = q.options.asMap().entries.map((optEntry) {
+          final j = optEntry.key;
+          final opt = optEntry.value;
+          return {
+            'question_id': qId,
+            'option_text': opt.optionText,
+            'sort_order': j + 1,
+            'is_correct': opt.isCorrect ?? false,
+          };
+        }).toList();
+        await _safeClient.from('question_options').insert(optionsPayload);
       }
     }
 
@@ -438,13 +469,26 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
 
   @override
   Future<ExamAttemptModel> startExam(String examId) async {
-    try {
-      final rpcRes = await _safeClient.rpc<dynamic>(
-        'start_exam',
-        params: {'p_exam_id': examId},
-      );
+    final rpcRes = await _safeClient.rpc<dynamic>(
+      'start_exam',
+      params: {'p_exam_id': examId},
+    );
 
-      final map = Map<String, dynamic>.from(rpcRes as Map);
+    if (rpcRes is Map) {
+      final map = Map<String, dynamic>.from(rpcRes);
+      if (map.containsKey('error')) {
+        throw PostgrestException(
+          message: map['message'] as String? ?? (map['error'] as String),
+          code: map['error'] as String?,
+        );
+      }
+
+      final rawQuestions = map['questions'] as List<dynamic>?;
+      final parsedQuestions = rawQuestions
+              ?.map((q) => ExamQuestionModel.fromJson(Map<String, dynamic>.from(q as Map)))
+              .toList() ??
+          <ExamQuestionModel>[];
+
       return ExamAttemptModel(
         id: map['attempt_id'] as String,
         examId: examId,
@@ -452,48 +496,11 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
         studentId: _safeClient.auth.currentUser?.id ?? '',
         startedAt: DateTime.parse(map['started_at'] as String),
         status: AttemptStatus.inProgress,
+        questions: parsedQuestions,
       );
-    } catch (_) {
-      // Fallback for offline unit/widget test environments
-      final currentUserId = _safeClient.auth.currentUser?.id ?? 'student-mock';
-
-      // Check if active attempt exists
-      final existing = await _safeClient
-          .from('exam_attempts')
-          .select()
-          .eq('exam_id', examId)
-          .eq('student_id', currentUserId)
-          .eq('status', 'in_progress')
-          .maybeSingle();
-
-      if (existing != null) {
-        return ExamAttemptModel.fromJson(Map<String, dynamic>.from(existing));
-      }
-
-      // Get latest published version
-      final versionRes = await _safeClient
-          .from('exam_versions')
-          .select('id')
-          .eq('exam_id', examId)
-          .eq('status', 'published')
-          .order('version_number', ascending: false)
-          .limit(1)
-          .single();
-
-      final newAttempt = await _safeClient
-          .from('exam_attempts')
-          .insert({
-            'exam_id': examId,
-            'exam_version_id': versionRes['id'],
-            'student_id': currentUserId,
-            'started_at': DateTime.now().toUtc().toIso8601String(),
-            'status': 'in_progress',
-          })
-          .select()
-          .single();
-
-      return ExamAttemptModel.fromJson(Map<String, dynamic>.from(newAttempt));
     }
+
+    throw const PostgrestException(message: 'Invalid response from start_exam');
   }
 
   @override

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
-import '../../../../core/router/app_router.dart';
+import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/responsive_breakpoints.dart';
@@ -100,7 +100,7 @@ class _StudentsListPageState extends State<StudentsListPage> {
                   IconButton(
                     icon: const Icon(Icons.pending_actions_rounded),
                     tooltip: context.l10n.pendingStudentsTitle,
-                    onPressed: () => context.go(AppRouter.pendingStudents),
+                    onPressed: () => context.go(AppRoutes.pendingStudents),
                   ),
                   if (count > 0)
                     Positioned(
@@ -303,12 +303,12 @@ class _StudentsListPageState extends State<StudentsListPage> {
                           return _StudentCard(
                             student: student,
                             onTap: () => context.go(
-                              '${AppRouter.student360}?id=${student.id}',
+                              '${AppRoutes.student360}?id=${student.id}',
                               extra: student,
                             ),
                             onAssignGroups: student.isActive
                                 ? () => context.go(
-                                    AppRouter.assignGroups,
+                                    AppRoutes.assignGroups,
                                     extra: student.id,
                                   )
                                 : null,

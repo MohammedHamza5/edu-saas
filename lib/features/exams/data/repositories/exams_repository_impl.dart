@@ -14,9 +14,17 @@ class ExamsRepositoryImpl implements ExamsRepository {
             remoteDataSource ?? ExamsRemoteDataSourceImpl();
 
   @override
-  Future<Result<List<ExamEntity>>> getGroupExams(String groupId) async {
+  Future<Result<List<ExamEntity>>> getGroupExams(
+    String groupId, {
+    int page = 0,
+    int pageSize = 15,
+  }) async {
     try {
-      final exams = await _remoteDataSource.getGroupExams(groupId);
+      final exams = await _remoteDataSource.getGroupExams(
+        groupId,
+        page: page,
+        pageSize: pageSize,
+      );
       return Success(exams);
     } on PostgrestException catch (e) {
       return FailureResult(ServerFailure(e.message, code: e.code));
@@ -28,9 +36,15 @@ class ExamsRepositoryImpl implements ExamsRepository {
   }
 
   @override
-  Future<Result<List<ExamEntity>>> getStudentExams() async {
+  Future<Result<List<ExamEntity>>> getStudentExams({
+    int page = 0,
+    int pageSize = 15,
+  }) async {
     try {
-      final exams = await _remoteDataSource.getStudentExams();
+      final exams = await _remoteDataSource.getStudentExams(
+        page: page,
+        pageSize: pageSize,
+      );
       return Success(exams);
     } on PostgrestException catch (e) {
       return FailureResult(ServerFailure(e.message, code: e.code));

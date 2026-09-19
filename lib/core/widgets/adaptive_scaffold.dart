@@ -10,6 +10,7 @@ class AdaptiveDestination {
   final IconData icon;
   final IconData? selectedIcon;
   final String label;
+  final String? subtitle;
   final int? badgeCount;
   final String? tooltip;
   final Widget? badge;
@@ -19,6 +20,7 @@ class AdaptiveDestination {
     required this.icon,
     this.selectedIcon,
     required this.label,
+    this.subtitle,
     this.badgeCount,
     this.tooltip,
     this.badge,
@@ -309,9 +311,9 @@ class AdaptiveScaffold extends StatelessWidget {
       floatingActionButton: floatingActionButton,
       body: Row(
         children: [
-          // Permanent Desktop Categorized Sidebar (260dp)
+          // Permanent Desktop Categorized Sidebar (280dp)
           Container(
-            width: 260,
+            width: 280,
             decoration: BoxDecoration(
               color: _sidebarBg,
               border: Border(
@@ -387,17 +389,17 @@ class AdaptiveScaffold extends StatelessWidget {
             Padding(
               padding: EdgeInsets.fromLTRB(
                 AppSpacing.s16,
-                sIdx == 0 ? AppSpacing.s12 : AppSpacing.s16,
+                sIdx == 0 ? AppSpacing.s14 : AppSpacing.s20,
                 AppSpacing.s16,
-                AppSpacing.s6,
+                AppSpacing.s8,
               ),
               child: Text(
                 section.title!,
                 style: const TextStyle(
                   color: _sidebarSectionTitle,
                   fontWeight: FontWeight.w800,
-                  letterSpacing: 0.8,
-                  fontSize: 11,
+                  letterSpacing: 0.9,
+                  fontSize: 12,
                 ),
               ),
             ),
@@ -412,8 +414,8 @@ class AdaptiveScaffold extends StatelessWidget {
           widgets.add(
             Padding(
               padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.s8,
-                vertical: 2,
+                horizontal: AppSpacing.s10,
+                vertical: AppSpacing.s4,
               ),
               child: _DesktopNavTile(
                 item: item,
@@ -431,7 +433,7 @@ class AdaptiveScaffold extends StatelessWidget {
       }
 
       return ListView(
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.s8),
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.s10),
         children: widgets,
       );
     }
@@ -440,11 +442,11 @@ class AdaptiveScaffold extends StatelessWidget {
     final all = destinations ?? const [];
     return ListView.separated(
       padding: const EdgeInsets.symmetric(
-        vertical: AppSpacing.s12,
-        horizontal: AppSpacing.s8,
+        vertical: AppSpacing.s14,
+        horizontal: AppSpacing.s10,
       ),
       itemCount: all.length,
-      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.s4),
+      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.s8),
       itemBuilder: (context, index) {
         final item = all[index];
         final isSelected = index == currentIndex;
@@ -501,7 +503,7 @@ class _DesktopNavTile extends StatelessWidget {
           duration: const Duration(milliseconds: 150),
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.s12,
-            vertical: AppSpacing.s10,
+            vertical: AppSpacing.s12,
           ),
           decoration: BoxDecoration(
             color: bgColor,
@@ -521,22 +523,61 @@ class _DesktopNavTile extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Icon(
-                isSelected ? (item.selectedIcon ?? item.icon) : item.icon,
-                color: fgColor,
-                size: 20,
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? const Color(0xFF38BDF8).withValues(alpha: 0.16)
+                      : const Color(0xFF1E293B).withValues(alpha: 0.6),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: isSelected
+                        ? const Color(0xFF38BDF8).withValues(alpha: 0.4)
+                        : const Color(0xFF334155).withValues(alpha: 0.4),
+                    width: 1,
+                  ),
+                ),
+                child: Center(
+                  child: Icon(
+                    isSelected ? (item.selectedIcon ?? item.icon) : item.icon,
+                    color: fgColor,
+                    size: 20,
+                  ),
+                ),
               ),
               const SizedBox(width: AppSpacing.s12),
               Expanded(
-                child: Text(
-                  item.label,
-                  style: TextStyle(
-                    color: isSelected ? textColor : inactiveTextColor,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                    fontSize: 13.5,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      item.label,
+                      style: TextStyle(
+                        color: isSelected ? textColor : inactiveTextColor,
+                        fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                        fontSize: 14.5,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (item.subtitle != null && item.subtitle!.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        item.subtitle!,
+                        style: TextStyle(
+                          color: isSelected
+                              ? const Color(0xFF7DD3FC)
+                              : const Color(0xFF94A3B8),
+                          fontWeight: FontWeight.w500,
+                          fontSize: 11.5,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ],
                 ),
               ),
               if (item.badge != null)

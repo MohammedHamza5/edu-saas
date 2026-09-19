@@ -92,9 +92,50 @@ class ExamTakingPage extends StatelessWidget {
         }
       },
       builder: (context, state) {
+        if (state is ExamsError) {
+          return Scaffold(
+            appBar: AppBar(
+              title: Text(context.l10n.examRulesAndGuidelines),
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back_rounded),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ),
+            body: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.s24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.error_outline_rounded, size: 56, color: AppColors.error),
+                    const SizedBox(height: AppSpacing.s16),
+                    Text(
+                      state.message,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: AppSpacing.s24),
+                    ElevatedButton.icon(
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(Icons.arrow_back_rounded),
+                      label: Text(context.l10n.backToExamsList),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+
         if (state is! ExamTakingState) {
-          return const Scaffold(
-            body: Center(child: AppLoadingView.signature()),
+          return Scaffold(
+            appBar: AppBar(
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back_rounded),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ),
+            body: const Center(child: AppLoadingView.signature()),
           );
         }
 

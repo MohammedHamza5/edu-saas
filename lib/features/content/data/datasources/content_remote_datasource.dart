@@ -9,11 +9,13 @@ abstract interface class ContentRemoteDataSource {
   Future<List<ContentModel>> getGroupContent({
     required String groupId,
     String? statusFilter,
+    int page = 0,
+    int pageSize = 20,
   });
 
-  /// Creates a content entry and optional file attachment record
+  /// Creates a content entry and optional file attachment record (groupId optional for Bank)
   Future<ContentModel> createContent({
-    required String groupId,
+    String? groupId,
     required String title,
     String? description,
     required String type,
@@ -24,6 +26,8 @@ abstract interface class ContentRemoteDataSource {
     String? mimeType,
     int? fileSize,
     List<int>? fileBytes,
+    String? associatedExamId,
+    String? prerequisiteExamId,
   });
 
   /// Updates content metadata
@@ -34,6 +38,13 @@ abstract interface class ContentRemoteDataSource {
     String? type,
     String? status,
     int? sortOrder,
+    String? fileName,
+    String? storagePath,
+    String? mimeType,
+    int? fileSize,
+    List<int>? fileBytes,
+    String? associatedExamId,
+    String? prerequisiteExamId,
   });
 
   /// Updates lifecycle status and sets published_at if publishing
@@ -55,6 +66,24 @@ abstract interface class ContentRemoteDataSource {
     required String storagePath,
     int expiresInSeconds = 3600,
   });
+
+  /// Retrieves the centralized video bank for the tenant (all video lessons)
+  Future<List<ContentModel>> getCentralVideoBank({
+    int page = 0,
+    int pageSize = 100,
+  });
+
+  /// Assigns/synchronizes a content item to one or more groups
+  Future<void> assignContentToGroups({
+    required String contentId,
+    required List<String> groupIds,
+  });
+
+  /// Links a quiz/exam to a lesson unit
+  Future<void> linkLessonExam({
+    required String contentId,
+    required String examId,
+  });
 }
 
 class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
@@ -68,11 +97,31 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
   Future<List<ContentModel>> getGroupContent({
     required String groupId,
     String? statusFilter,
+    int page = 0,
+    int pageSize = 20,
   }) async {
-    var query = _safeClient
-        .from('content')
-        .select('*, files(*)')
+    // Fetch any content linked to this group via the junction table content_groups
+    final junctionRes = await _safeClient
+        .from('content_groups')
+        .select('content_id')
         .eq('group_id', groupId);
+    final junctionIds = (junctionRes as List<dynamic>)
+        .map((e) => e['content_id'] as String)
+        .toList();
+
+    var query = _safeClient.from('content').select(
+          '*, files(*), videos(id, status, provider_video_id, provider), '
+          'content_groups(group_id, groups(name)), '
+          'associated_exam:exams!content_associated_exam_id_fkey(id, title), '
+          'prerequisite_exam:exams!content_prerequisite_exam_id_fkey(id, title, passing_score)',
+        );
+
+    if (junctionIds.isEmpty) {
+      query = query.eq('group_id', groupId);
+    } else {
+      final joinedIds = junctionIds.join(',');
+      query = query.or('group_id.eq.$groupId,id.in.($joinedIds)');
+    }
 
     if (statusFilter != null && statusFilter.isNotEmpty) {
       query = query.eq('status', statusFilter);
@@ -80,17 +129,73 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
 
     final response = await query
         .order('sort_order', ascending: true)
-        .order('created_at', ascending: false);
+        .order('created_at', ascending: false)
+        .range(page * pageSize, (page + 1) * pageSize - 1);
 
     final list = response as List<dynamic>;
-    return list
+    final models = list
         .map((json) => ContentModel.fromJson(json as Map<String, dynamic>))
         .toList();
+
+    // Check student sequential progression lock status
+    final currentUserId = _safeClient.auth.currentUser?.id;
+    final userRole = SupabaseService.currentUserRole;
+
+    if (userRole == 'student' && currentUserId != null && models.isNotEmpty) {
+      try {
+        final groupData = await _safeClient
+            .from('groups')
+            .select('enforce_sequential_learning')
+            .eq('id', groupId)
+            .maybeSingle();
+        final enforceSeq = groupData?['enforce_sequential_learning'] != false;
+
+        final attemptsRes = await _safeClient
+            .from('exam_attempts')
+            .select('exam_id, score, percentage, exams(passing_score)')
+            .eq('student_id', currentUserId)
+            .eq('status', 'submitted');
+
+        final Set<String> passedExamIds = {};
+        for (final att in (attemptsRes as List<dynamic>)) {
+          final examObj = att['exams'] as Map<String, dynamic>?;
+          final passScore = (examObj?['passing_score'] as num?)?.toInt() ?? 60;
+          final score = (att['score'] as num?)?.toInt() ?? 0;
+          final pct = (att['percentage'] as num?)?.toDouble() ?? 0.0;
+          if (score >= passScore || pct >= passScore) {
+            final eId = att['exam_id'] as String?;
+            if (eId != null) passedExamIds.add(eId);
+          }
+        }
+
+        String? previousLessonExamId;
+        for (int i = 0; i < models.length; i++) {
+          final item = models[i];
+          bool locked = false;
+
+          if (item.prerequisiteExamId != null) {
+            locked = !passedExamIds.contains(item.prerequisiteExamId);
+          } else if (enforceSeq && i > 0 && previousLessonExamId != null) {
+            locked = !passedExamIds.contains(previousLessonExamId);
+          }
+
+          if (locked) {
+            models[i] = models[i].copyWith(isLocked: true) as ContentModel;
+          }
+
+          if (item.associatedExamId != null) {
+            previousLessonExamId = item.associatedExamId;
+          }
+        }
+      } catch (_) {}
+    }
+
+    return models;
   }
 
   @override
   Future<ContentModel> createContent({
-    required String groupId,
+    String? groupId,
     required String title,
     String? description,
     required String type,
@@ -101,19 +206,18 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     String? mimeType,
     int? fileSize,
     List<int>? fileBytes,
+    String? associatedExamId,
+    String? prerequisiteExamId,
   }) async {
     final currentUserId = _safeClient.auth.currentUser?.id;
     if (currentUserId == null) {
       throw const AuthException('AUTH_REQUIRED: User not authenticated');
     }
 
-    // ⚡ Performance: نجلب tenant_id من JWT claims مباشرةً
-    // بدلاً من SELECT إضافي من جدول users — توفير ~400ms
     final userMeta = _safeClient.auth.currentUser?.userMetadata;
     final tenantId = userMeta?['tenant_id'] as String?;
 
     if (tenantId == null) {
-      // احتياطي: إذا لم يكن في الـ JWT metadata نجلبه مرة واحدة فقط
       final userProfile = await _safeClient
           .from('users')
           .select('tenant_id')
@@ -133,6 +237,8 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
         fileSize: fileSize,
         fileBytes: fileBytes,
         tenantId: resolvedTenantId,
+        associatedExamId: associatedExamId,
+        prerequisiteExamId: prerequisiteExamId,
       );
     }
 
@@ -149,11 +255,13 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
       fileSize: fileSize,
       fileBytes: fileBytes,
       tenantId: tenantId,
+      associatedExamId: associatedExamId,
+      prerequisiteExamId: prerequisiteExamId,
     );
   }
 
   Future<ContentModel> _createContentInternal({
-    required String groupId,
+    String? groupId,
     required String title,
     String? description,
     required String type,
@@ -165,14 +273,15 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     int? fileSize,
     List<int>? fileBytes,
     required String tenantId,
+    String? associatedExamId,
+    String? prerequisiteExamId,
   }) async {
-
     final now = DateTime.now().toUtc().toIso8601String();
     final publishedAt = status == 'published' ? now : null;
 
     // Calculate max sort_order if not provided
     var order = sortOrder;
-    if (order == null) {
+    if (order == null && groupId != null) {
       final existing = await _safeClient
           .from('content')
           .select('sort_order')
@@ -185,15 +294,17 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
           : 0;
     }
 
-    final insertPayload = {
+    final insertPayload = <String, dynamic>{
       'tenant_id': tenantId,
-      'group_id': groupId,
+      if (groupId != null) 'group_id': groupId,
       'title': title,
       if (description != null) 'description': description,
       'type': type,
       'status': status,
-      'sort_order': order,
+      'sort_order': order ?? 0,
       if (publishedAt != null) 'published_at': publishedAt,
+      if (associatedExamId != null) 'associated_exam_id': associatedExamId,
+      if (prerequisiteExamId != null) 'prerequisite_exam_id': prerequisiteExamId,
       'created_at': now,
       'updated_at': now,
     };
@@ -208,7 +319,6 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
 
     FileAttachmentModel? attachedFile;
     if (storagePath != null && fileName != null && mimeType != null) {
-      // ⚡ Actually upload the binary file to Supabase Storage 'group-content' bucket
       if (fileBytes != null && fileBytes.isNotEmpty) {
         await _safeClient.storage.from('group-content').uploadBinary(
           storagePath,
@@ -250,6 +360,8 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
       createdAt: model.createdAt,
       updatedAt: model.updatedAt,
       file: attachedFile,
+      associatedExamId: associatedExamId,
+      prerequisiteExamId: prerequisiteExamId,
     );
   }
 
@@ -261,6 +373,13 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     String? type,
     String? status,
     int? sortOrder,
+    String? fileName,
+    String? storagePath,
+    String? mimeType,
+    int? fileSize,
+    List<int>? fileBytes,
+    String? associatedExamId,
+    String? prerequisiteExamId,
   }) async {
     final now = DateTime.now().toUtc().toIso8601String();
     final updatePayload = <String, dynamic>{
@@ -271,6 +390,12 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     if (description != null) updatePayload['description'] = description;
     if (type != null) updatePayload['type'] = type;
     if (sortOrder != null) updatePayload['sort_order'] = sortOrder;
+    if (associatedExamId != null) {
+      updatePayload['associated_exam_id'] = associatedExamId;
+    }
+    if (prerequisiteExamId != null) {
+      updatePayload['prerequisite_exam_id'] = prerequisiteExamId;
+    }
 
     if (status != null) {
       updatePayload['status'] = status;
@@ -285,6 +410,52 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
         .eq('id', contentId)
         .select('*, files(*)')
         .single();
+
+    if (storagePath != null && fileName != null && mimeType != null) {
+      if (fileBytes != null && fileBytes.isNotEmpty) {
+        await _safeClient.storage.from('group-content').uploadBinary(
+          storagePath,
+          Uint8List.fromList(fileBytes),
+          fileOptions: FileOptions(contentType: mimeType, upsert: true),
+        );
+      }
+
+      final tenantId = res['tenant_id'] as String;
+      final existingFiles = await _safeClient
+          .from('files')
+          .select('id')
+          .eq('content_id', contentId)
+          .limit(1);
+      final list = existingFiles as List<dynamic>;
+
+      if (list.isNotEmpty) {
+        final existingId = list.first['id'] as String;
+        await _safeClient.from('files').update({
+          'storage_path': storagePath,
+          'file_name': fileName,
+          'mime_type': mimeType,
+          'file_size': fileSize ?? (fileBytes?.length ?? 0),
+          'created_at': now,
+        }).eq('id', existingId);
+      } else {
+        await _safeClient.from('files').insert({
+          'tenant_id': tenantId,
+          'content_id': contentId,
+          'storage_path': storagePath,
+          'file_name': fileName,
+          'mime_type': mimeType,
+          'file_size': fileSize ?? (fileBytes?.length ?? 0),
+          'created_at': now,
+        });
+      }
+
+      final refreshed = await _safeClient
+          .from('content')
+          .select('*, files(*)')
+          .eq('id', contentId)
+          .single();
+      return ContentModel.fromJson(refreshed);
+    }
 
     return ContentModel.fromJson(res);
   }
@@ -330,11 +501,61 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
   @override
   Future<String> getSignedFileUrl({
     required String storagePath,
-    int expiresInSeconds = 3600,
+    int expiresInSeconds = 900,
   }) async {
     final signedUrl = await _safeClient.storage
         .from('group-content')
         .createSignedUrl(storagePath, expiresInSeconds);
     return signedUrl;
+  }
+
+  @override
+  Future<List<ContentModel>> getCentralVideoBank({
+    int page = 0,
+    int pageSize = 100,
+  }) async {
+    final startIndex = page * pageSize;
+    final endIndex = startIndex + pageSize - 1;
+
+    final response = await _safeClient
+        .from('content')
+        .select(
+          '*, files(*), videos(*), content_groups(group_id, groups(name)), '
+          'associated_exam:exams!content_associated_exam_id_fkey(id, title), '
+          'prerequisite_exam:exams!content_prerequisite_exam_id_fkey(id, title, passing_score)',
+        )
+        .inFilter('type', ['video', 'youtube'])
+        .order('created_at', ascending: false)
+        .range(startIndex, endIndex);
+
+    final list = response as List<dynamic>;
+    return list
+        .map((e) => ContentModel.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  @override
+  Future<void> assignContentToGroups({
+    required String contentId,
+    required List<String> groupIds,
+  }) async {
+    await _safeClient.rpc<void>(
+      'assign_content_to_groups',
+      params: {
+        'p_content_id': contentId,
+        'p_group_ids': groupIds,
+      },
+    );
+  }
+
+  @override
+  Future<void> linkLessonExam({
+    required String contentId,
+    required String examId,
+  }) async {
+    await _safeClient.from('content').update({
+      'associated_exam_id': examId,
+      'updated_at': DateTime.now().toUtc().toIso8601String(),
+    }).eq('id', contentId);
   }
 }

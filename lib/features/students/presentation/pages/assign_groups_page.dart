@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
-import '../../../../core/router/app_router.dart';
+import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_badge.dart';
@@ -90,7 +90,7 @@ class _AssignGroupsPageState extends State<AssignGroupsPage> {
           tooltip: context.l10n.backToStudentsList,
           onPressed: () => context.canPop()
               ? context.pop()
-              : context.go(AppRouter.studentsList),
+              : context.go(AppRoutes.studentsList),
         ),
         title: Text(context.l10n.assignGroupsTitle),
         actions: [

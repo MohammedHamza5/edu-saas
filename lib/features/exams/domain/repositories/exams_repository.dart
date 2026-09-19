@@ -3,10 +3,17 @@ import '../entities/exam_entity.dart';
 
 abstract class ExamsRepository {
   /// Fetches all exams belonging to a specific group (Teacher view).
-  Future<Result<List<ExamEntity>>> getGroupExams(String groupId);
+  Future<Result<List<ExamEntity>>> getGroupExams(
+    String groupId, {
+    int page = 0,
+    int pageSize = 15,
+  });
 
   /// Fetches all active and published exams available to the currently logged-in student.
-  Future<Result<List<ExamEntity>>> getStudentExams();
+  Future<Result<List<ExamEntity>>> getStudentExams({
+    int page = 0,
+    int pageSize = 15,
+  });
 
   /// Fetches complete details of an exam including its active versions and questions.
   Future<Result<ExamEntity>> getExamDetails(String examId);

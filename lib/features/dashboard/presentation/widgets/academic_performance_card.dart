@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -14,27 +15,27 @@ class AcademicPerformanceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppCard(
       variant: AppCardVariant.elevated,
-      padding: const EdgeInsets.all(AppSpacing.s20),
+      padding: const EdgeInsets.all(AppSpacing.s16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Container(
-                width: 48,
-                height: 48,
+                width: 46,
+                height: 46,
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
                     colors: [AppColors.primary, AppColors.primaryLight],
                   ),
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
                 ),
                 child: const Center(
                   child: Text(
                     '∑',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 24,
+                      fontSize: 22,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -45,10 +46,10 @@ class AcademicPerformanceCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Academic Performance',
-                      style: TextStyle(
-                        fontSize: 17,
+                    Text(
+                      context.l10n.academicMomentumTitle,
+                      style: const TextStyle(
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: AppColors.textPrimary,
                       ),
@@ -66,9 +67,9 @@ class AcademicPerformanceCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.s20),
+          const SizedBox(height: AppSpacing.s16),
           const Divider(height: 1, color: AppColors.border),
-          const SizedBox(height: AppSpacing.s20),
+          const SizedBox(height: AppSpacing.s16),
           Row(
             children: [
               Expanded(
@@ -77,7 +78,7 @@ class AcademicPerformanceCard extends StatelessWidget {
                   icon: Icons.percent_rounded,
                   color: AppColors.primary,
                   value: '${stats.examAverage.toStringAsFixed(1)}%',
-                  label: 'Exam Average',
+                  label: context.l10n.statExamAverage,
                 ),
               ),
               Expanded(
@@ -86,7 +87,7 @@ class AcademicPerformanceCard extends StatelessWidget {
                   icon: Icons.assignment_turned_in_rounded,
                   color: AppColors.success,
                   value: '${stats.assignmentsSubmitted}',
-                  label: 'Assignments',
+                  label: context.l10n.statAssignmentsDone,
                 ),
               ),
               Expanded(
@@ -95,7 +96,7 @@ class AcademicPerformanceCard extends StatelessWidget {
                   icon: Icons.ondemand_video_rounded,
                   color: AppColors.warning,
                   value: '${stats.videoCompletionPercentage.toStringAsFixed(1)}%',
-                  label: 'Video Watched',
+                  label: context.l10n.statVideoProgress,
                 ),
               ),
             ],
