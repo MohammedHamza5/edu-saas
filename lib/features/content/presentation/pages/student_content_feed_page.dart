@@ -16,8 +16,9 @@ import '../../../groups/domain/entities/group_entity.dart';
 import '../../domain/entities/content_entity.dart';
 import '../cubit/content_cubit.dart';
 import '../cubit/content_state.dart';
-import '../widgets/content_item_card.dart';
 import '../widgets/material_viewer_sheet.dart';
+import '../widgets/student_lesson_tile.dart';
+import '../widgets/student_mission_command_deck.dart';
 
 class StudentContentFeedPage extends StatefulWidget {
   final String groupId;
@@ -42,6 +43,7 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
   ContentType? _selectedTypeFilter;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  bool _isRoadmapMode = true;
 
   @override
   void initState() {
@@ -222,6 +224,28 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                 ? ((completedCount / totalPublishedCount) * 100).toInt()
                 : 0;
 
+            // Find immediate next mission/lesson
+            ContentEntity? nextLesson;
+            int? nextLessonIndex;
+            for (int i = 0; i < allPublished.length; i++) {
+              final it = allPublished[i];
+              if (!it.isCompleted && !it.isLocked) {
+                nextLesson = it;
+                nextLessonIndex = i + 1;
+                break;
+              }
+            }
+            if (nextLesson == null) {
+              for (int i = 0; i < allPublished.length; i++) {
+                final it = allPublished[i];
+                if (!it.isCompleted) {
+                  nextLesson = it;
+                  nextLessonIndex = i + 1;
+                  break;
+                }
+              }
+            }
+
             // Filter by type
             var items = _selectedTypeFilter == null
                 ? allPublished
@@ -322,80 +346,54 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                           ),
                         ),
 
-                      // 1.1 Overall Course Completion Roadmap Banner
+                      // 1.1 Hero Mission Command Deck
+                      if (allPublished.isNotEmpty)
+                        SliverToBoxAdapter(
+                          child: StudentMissionCommandDeck(
+                            nextLesson: nextLesson,
+                            nextLessonIndex: nextLessonIndex,
+                            completedCount: completedCount,
+                            totalCount: totalPublishedCount,
+                            overallPercentage: overallProgressPct,
+                            groupName: _activeGroupName ?? '',
+                            onResume: nextLesson != null
+                                ? () => _handleContentTap(nextLesson!)
+                                : null,
+                          ),
+                        ),
+
+                      // 1.2 View Switcher (Roadmap vs Syllabus List)
                       if (allPublished.isNotEmpty)
                         SliverToBoxAdapter(
                           child: Padding(
-                            padding: const EdgeInsets.only(top: AppSpacing.s12),
-                            child: Container(
-                              padding: const EdgeInsets.all(AppSpacing.s16),
-                              decoration: BoxDecoration(
-                                color: AppColors.surfaceVariant,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: AppColors.border,
-                                ),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                            padding: const EdgeInsets.only(top: AppSpacing.s4, bottom: AppSpacing.s8),
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
                                 children: [
-                                  Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.timeline_rounded,
-                                        color: AppColors.primary,
-                                        size: 20,
-                                      ),
-                                      const SizedBox(width: AppSpacing.s8),
-                                      Expanded(
-                                        child: Text(
-                                          context.l10n.overallCourseProgress(
-                                            completedCount,
-                                            totalPublishedCount,
-                                            overallProgressPct,
-                                          ),
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 13,
-                                            color: AppColors.textPrimary,
-                                          ),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: AppColors.surfaceVariant,
+                                      borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+                                      border: Border.all(color: AppColors.border),
+                                    ),
+                                    padding: const EdgeInsets.all(3),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        _buildViewModeButton(
+                                          icon: Icons.alt_route_rounded,
+                                          label: context.l10n.syllabusViewRoadmap,
+                                          isActive: _isRoadmapMode,
+                                          onTap: () => setState(() => _isRoadmapMode = true),
                                         ),
-                                      ),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 3,
+                                        _buildViewModeButton(
+                                          icon: Icons.format_list_numbered_rounded,
+                                          label: context.l10n.syllabusViewList,
+                                          isActive: !_isRoadmapMode,
+                                          onTap: () => setState(() => _isRoadmapMode = false),
                                         ),
-                                        decoration: BoxDecoration(
-                                          color: AppColors.primary.withAlpha(25),
-                                          borderRadius: BorderRadius.circular(12),
-                                          border: Border.all(
-                                            color: AppColors.primary.withAlpha(60),
-                                          ),
-                                        ),
-                                        child: Text(
-                                          '$overallProgressPct%',
-                                          style: const TextStyle(
-                                            color: AppColors.primary,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: AppSpacing.s10),
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(4),
-                                    child: LinearProgressIndicator(
-                                      value: totalPublishedCount > 0
-                                          ? completedCount / totalPublishedCount
-                                          : 0.0,
-                                      backgroundColor: AppColors.border,
-                                      valueColor: const AlwaysStoppedAnimation<Color>(
-                                        AppColors.primary,
-                                      ),
-                                      minHeight: 6,
+                                      ],
                                     ),
                                   ),
                                 ],
@@ -551,17 +549,27 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                             itemCount: items.length,
                             itemBuilder: (context, index) {
                               final item = items[index];
-                              return Padding(
-                                padding: const EdgeInsets.only(
-                                  bottom: AppSpacing.s10,
-                                ),
-                                child: ContentItemCard(
-                                  content: item,
-                                  isTeacher: false,
-                                  index: index,
-                                  onOpenFile: (_) => _handleContentTap(item),
-                                  onTap: () => _handleContentTap(item),
-                                ),
+                              return StudentLessonTile(
+                                content: item,
+                                index: index + 1,
+                                isLast: index == items.length - 1,
+                                isRoadmapMode: _isRoadmapMode &&
+                                    _selectedTypeFilter == null &&
+                                    _searchQuery.isEmpty,
+                                onTap: () => _handleContentTap(item),
+                                onOpenHandout: item.file != null
+                                    ? () => MaterialViewerSheet.show(
+                                          context,
+                                          content: item,
+                                          onGetSignedUrl: (storagePath) =>
+                                              context
+                                                  .read<ContentCubit>()
+                                                  .getSignedUrl(storagePath),
+                                        )
+                                    : null,
+                                onTakeQuiz: item.associatedExamId != null
+                                    ? () => context.push(AppRoutes.studentExams)
+                                    : null,
                               );
                             },
                           ),
@@ -586,6 +594,54 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
 
           return const SizedBox.shrink();
         },
+      ),
+    );
+  }
+
+  Widget _buildViewModeButton({
+    required IconData icon,
+    required String label,
+    required bool isActive,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isActive ? AppColors.primary : Colors.transparent,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+          boxShadow: isActive
+              ? [
+                  BoxShadow(
+                    color: AppColors.primary.withAlpha(50),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 14,
+              color: isActive ? Colors.white : AppColors.textSecondary,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11.5,
+                fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
+                color: isActive ? Colors.white : AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

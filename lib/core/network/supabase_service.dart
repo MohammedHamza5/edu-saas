@@ -87,4 +87,7 @@ class SupabaseService {
   static String? get cachedRole => _cachedRole;
   static String? get currentUserRole =>
       _cachedRole ?? (currentUser?.userMetadata?['role'] as String?);
+  static String? get currentTenantId =>
+      (currentUser?.userMetadata?['tenant_id'] as String?) ??
+      (currentUser?.appMetadata['tenant_id'] as String?);
 }

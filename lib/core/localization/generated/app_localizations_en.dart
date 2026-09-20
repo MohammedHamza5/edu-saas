@@ -4738,4 +4738,86 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get youtubeUrlRequired => 'YouTube URL is required';
+
+  @override
+  String get currentMissionTitle => 'Current Mission';
+
+  @override
+  String get currentMissionSubtitle =>
+      'Resume your academic mastery right where you left off';
+
+  @override
+  String get resumeLessonAction => 'Resume Lecture Now';
+
+  @override
+  String get startNextLessonAction => 'Start Next Lecture';
+
+  @override
+  String get allLecturesCompletedTitle =>
+      'Outstanding! You completed all lectures in this syllabus 🏆';
+
+  @override
+  String get allLecturesCompletedSubtitle =>
+      'You have mastered all syllabus requirements successfully';
+
+  @override
+  String get syllabusViewRoadmap => 'Interactive Roadmap';
+
+  @override
+  String get syllabusViewList => 'Syllabus List';
+
+  @override
+  String estimatedDurationMinutes(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String milestoneStationLabel(int index) {
+    return 'Station $index';
+  }
+
+  @override
+  String get lessonHandoutChip => 'Handout PDF';
+
+  @override
+  String get lessonQuizChip => 'Lesson Quiz';
+
+  @override
+  String get lockedByPrereqTooltip =>
+      'Locked: Requires passing previous lecture quiz';
+
+  @override
+  String get groupHandoutPdfLabel => 'Handout PDF for this group';
+
+  @override
+  String get groupExamLabel => 'Lesson Quiz for this group';
+
+  @override
+  String get noExamSelected => 'No quiz (Optional)';
+
+  @override
+  String get lockUntilPreviousQuizPassed =>
+      'Lock until previous quiz is passed';
+
+  @override
+  String get sortOrderInGroup => 'Sequence in Group';
+
+  @override
+  String customFileSelected(String fileName) {
+    return 'Custom Handout: $fileName';
+  }
+
+  @override
+  String get pickGroupHandoutAction => 'Upload Group Handout (PDF)';
+
+  @override
+  String get customizeForThisGroup => 'Customize Handout & Quiz for this group';
+
+  @override
+  String assignedToCountGroups(int count) {
+    return 'Assigned to $count groups';
+  }
+
+  @override
+  String get distributeToGroupsAction => 'Distribute to Groups';
 }

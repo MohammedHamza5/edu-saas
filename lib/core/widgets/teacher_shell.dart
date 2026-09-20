@@ -39,54 +39,32 @@ class TeacherShell extends StatelessWidget {
     if (path.startsWith('/teacher/students/pending')) return 3;
     if (path == '/teacher/groups' || path == '/teacher/groups/') return 4;
     if (path.startsWith('/teacher/attendance')) return 5;
-    if (path.contains('/content')) return 6;
-    if (path.contains('/videos') || path.contains('/teacher/videos')) return 7;
-    if (path.contains('/assignments')) return 8;
-    if (path.contains('/exams')) return 9;
-    if (path.startsWith('/teacher/announcements')) return 10;
-    if (path.startsWith('/teacher/settings')) return 11;
+    if (path.contains('/videos') || path.contains('/content')) return 6;
+    if (path.contains('/assignments')) return 7;
+    if (path.contains('/exams')) return 8;
+    if (path.startsWith('/teacher/announcements')) return 9;
+    if (path.startsWith('/teacher/settings')) return 10;
     if (path.startsWith('/teacher/groups/')) return 4; // Group detail fallback
     return 0;
   }
 
-  void _onNavigationChanged(BuildContext context, int index) {
-    switch (index) {
-      case 0:
-        context.go(AppRoutes.teacherDashboard);
-        break;
-      case 1:
-        context.go(AppRoutes.notificationsCenter);
-        break;
-      case 2:
-        context.go(AppRoutes.studentsList);
-        break;
-      case 3:
-        context.go(AppRoutes.pendingStudents);
-        break;
-      case 4:
-        context.go(AppRoutes.groupsList);
-        break;
-      case 5:
-        context.go(AppRoutes.teacherAttendance);
-        break;
-      case 6:
-        context.go(AppRoutes.teacherContent);
-        break;
-      case 7:
-        context.go(AppRoutes.teacherVideos);
-        break;
-      case 8:
-        context.go(AppRoutes.teacherAssignments);
-        break;
-      case 9:
-        context.go(AppRoutes.teacherExams);
-        break;
-      case 10:
-        context.go(AppRoutes.sendAnnouncement);
-        break;
-      case 11:
-        context.go(AppRoutes.teacherSettings);
-        break;
+  void _onNavigationChanged(BuildContext context, int index, bool isYouTube) {
+    final routes = [
+      AppRoutes.teacherDashboard, // 0
+      AppRoutes.notificationsCenter, // 1
+      AppRoutes.studentsList, // 2
+      AppRoutes.pendingStudents, // 3
+      AppRoutes.groupsList, // 4
+      AppRoutes.teacherAttendance, // 5
+      isYouTube ? AppRoutes.teacherVideos : AppRoutes.teacherContent, // 6
+      AppRoutes.teacherAssignments, // 7
+      AppRoutes.teacherExams, // 8
+      AppRoutes.sendAnnouncement, // 9
+      AppRoutes.teacherSettings, // 10
+    ];
+
+    if (index >= 0 && index < routes.length) {
+      context.go(routes[index]);
     }
   }
 
@@ -99,6 +77,14 @@ class TeacherShell extends StatelessWidget {
     }
 
     final currentIndex = _computeIndex(currentLocation);
+
+    // Watch active video provider preference (YouTube vs Bunny Stream)
+    String activeProvider = TenantRegistry.defaultBranding.videoProvider;
+    try {
+      final branding = context.watch<TenantThemeCubit>().state;
+      activeProvider = branding.videoProvider;
+    } catch (_) {}
+    final isYouTube = activeProvider != 'bunny';
 
     // Watch live notification unread count
     int unreadNotifications = 0;
@@ -171,22 +157,24 @@ class TeacherShell extends StatelessWidget {
         ],
       ),
 
-      // Section 3: Academic Operations
+      // Section 3: Academic Operations (Streaming channel dedicated to teacher's choice)
       AdaptiveSidebarSection(
         title: context.l10n.navSectionAcademic,
         destinations: [
-          AdaptiveDestination(
-            icon: Icons.folder_shared_outlined,
-            selectedIcon: Icons.folder_shared_rounded,
-            label: context.l10n.contentLibraryTitle,
-            tooltip: context.l10n.contentLibraryTitle,
-          ),
-          AdaptiveDestination(
-            icon: Icons.video_library_outlined,
-            selectedIcon: Icons.video_library_rounded,
-            label: context.l10n.videoBankTitle,
-            tooltip: context.l10n.videoBankTitle,
-          ),
+          if (isYouTube)
+            AdaptiveDestination(
+              icon: Icons.video_library_outlined,
+              selectedIcon: Icons.video_library_rounded,
+              label: context.l10n.videoBankTitle,
+              tooltip: context.l10n.videoBankTitle,
+            )
+          else
+            AdaptiveDestination(
+              icon: Icons.folder_shared_outlined,
+              selectedIcon: Icons.folder_shared_rounded,
+              label: context.l10n.contentLibraryTitle,
+              tooltip: context.l10n.contentLibraryTitle,
+            ),
           AdaptiveDestination(
             icon: Icons.assignment_outlined,
             selectedIcon: Icons.assignment_rounded,
@@ -225,7 +213,7 @@ class TeacherShell extends StatelessWidget {
     return AdaptiveScaffold(
       currentIndex: currentIndex,
       sections: sections,
-      onNavigationIndexChanged: (idx) => _onNavigationChanged(context, idx),
+      onNavigationIndexChanged: (idx) => _onNavigationChanged(context, idx, isYouTube),
       sidebarHeader: _buildSidebarHeader(context),
       sidebarFooter: _buildSidebarFooter(context),
       body: child,

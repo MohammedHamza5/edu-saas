@@ -54,7 +54,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   VideoEntity? _currentVideo;
   final ValueNotifier<int> _livePositionSecs = ValueNotifier<int>(0);
   final ValueNotifier<int> _liveDurationSecs = ValueNotifier<int>(0);
+  final ValueNotifier<bool> _isPlayingNotifier = ValueNotifier<bool>(false);
   void Function(int seconds)? _seekTo;
+  VoidCallback? _togglePlayPauseFn;
   bool _hasRecordedStarted = false;
 
   @override
@@ -160,6 +162,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     }
     _livePositionSecs.dispose();
     _liveDurationSecs.dispose();
+    _isPlayingNotifier.dispose();
     super.dispose();
   }
 
@@ -185,12 +188,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
         appBar: _isFullscreen
             ? null
             : AppBar(
-                title: Row(
-            children: [
-              const Icon(Icons.play_lesson_rounded, size: 20, color: AppColors.primary),
-              const SizedBox(width: AppSpacing.s8),
-              Expanded(
-                child: Text(
+                title: Text(
                   context.l10n.watchLessonTitle,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -198,9 +196,6 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-              ),
-            ],
-          ),
           actions: [
             Container(
               margin: const EdgeInsetsDirectional.only(end: AppSpacing.s16),
@@ -277,9 +272,18 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                 onProgress: (current, total) {
                   _livePositionSecs.value = current;
                   _liveDurationSecs.value = total;
+                  if (!_isPlayingNotifier.value && current > 0) {
+                    _isPlayingNotifier.value = true;
+                  }
                 },
                 onSeekReady: (seekFn) {
                   _seekTo = seekFn;
+                },
+                onPlaybackControlsReady: (play, pause, toggle) {
+                  _togglePlayPauseFn = () {
+                    toggle();
+                    _isPlayingNotifier.value = !_isPlayingNotifier.value;
+                  };
                 },
                 onFullscreenChanged: _handleFullscreenChanged,
                 onMetricsProgress: (currentSeconds, totalSeconds, actualWatch, isSkipped) {
@@ -959,6 +963,63 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                           ),
                         );
                       },
+                    ),
+
+                    const SizedBox(height: AppSpacing.s12),
+
+                    // Quick Academic Playback Control Bar
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // -10s
+                        IconButton.filledTonal(
+                          tooltip: context.l10n.seek10Seconds,
+                          icon: const Icon(Icons.replay_10_rounded, size: 20),
+                          onPressed: () {
+                            final target = (livePos - 10).clamp(0, liveDur);
+                            _seekTo?.call(target);
+                          },
+                        ),
+                        const SizedBox(width: AppSpacing.s10),
+                        // Play / Pause Toggle
+                        ValueListenableBuilder<bool>(
+                          valueListenable: _isPlayingNotifier,
+                          builder: (context, isPlaying, _) {
+                            return FilledButton.icon(
+                              style: FilledButton.styleFrom(
+                                backgroundColor: AppColors.primary,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                              ),
+                              onPressed: () {
+                                if (_togglePlayPauseFn != null) {
+                                  _togglePlayPauseFn!();
+                                } else if (_seekTo != null) {
+                                  _seekTo!(livePos);
+                                }
+                              },
+                              icon: Icon(
+                                isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                                size: 18,
+                              ),
+                              label: Text(
+                                context.l10n.playPauseAction,
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                              ),
+                            );
+                          },
+                        ),
+                        const SizedBox(width: AppSpacing.s10),
+                        // +10s
+                        IconButton.filledTonal(
+                          tooltip: context.l10n.seek10Seconds,
+                          icon: const Icon(Icons.forward_10_rounded, size: 20),
+                          onPressed: () {
+                            final target = (livePos + 10).clamp(0, liveDur);
+                            _seekTo?.call(target);
+                          },
+                        ),
+                      ],
                     ),
                   ],
                 ),

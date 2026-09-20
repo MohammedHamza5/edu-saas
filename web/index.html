@@ -740,59 +740,75 @@
         window._ytApiCallbacks = [];
       };
 
+      window._ytFrames = window._ytFrames || {};
+
+      // Direct message listener for YouTube iframe events (fallback / universal bridge)
+      window.addEventListener('message', function(event) {
+        if (!event.data) return;
+        try {
+          var data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+          if (data && data.event === 'infoDelivery' && data.info) {
+            if (typeof data.info.currentTime === 'number') {
+              notifyYouTubeFlutter({
+                event: 'timeupdate',
+                value: {
+                  seconds: Math.floor(data.info.currentTime),
+                  duration: Math.floor(data.info.duration || 0)
+                }
+              });
+            }
+            if (typeof data.info.playerState === 'number') {
+              if (data.info.playerState === 1) {
+                notifyYouTubeFlutter({ event: 'play' });
+              } else if (data.info.playerState === 2) {
+                notifyYouTubeFlutter({ event: 'pause' });
+              } else if (data.info.playerState === 0) {
+                notifyYouTubeFlutter({ event: 'ended' });
+              }
+            }
+          } else if (data && data.event === 'onStateChange') {
+            if (data.info === 1) notifyYouTubeFlutter({ event: 'play' });
+            else if (data.info === 2) notifyYouTubeFlutter({ event: 'pause' });
+            else if (data.info === 0) notifyYouTubeFlutter({ event: 'ended' });
+          }
+        } catch (_) {}
+      });
+
       window.createYouTubePlayer = function(videoId, viewId, origin) {
-        // Create a wrapper container
-        var wrapper = document.createElement('div');
-        wrapper.style.position = 'relative';
-        wrapper.style.width = '100%';
-        wrapper.style.height = '100%';
-        wrapper.style.overflow = 'hidden';
-        wrapper.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+        var originParam = encodeURIComponent(origin || window.location.origin);
+        var embedUrl = 'https://www.youtube-nocookie.com/embed/' + encodeURIComponent(videoId) +
+          '?enablejsapi=1&origin=' + originParam +
+          '&rel=0&modestbranding=1&iv_load_policy=3&controls=1&playsinline=1&fs=1';
 
-        // Create the div that YT.Player will replace with an iframe
-        var playerDiv = document.createElement('div');
-        playerDiv.id = 'yt_container_' + viewId;
-        playerDiv.style.width = '100%';
-        playerDiv.style.height = '100%';
-        wrapper.appendChild(playerDiv);
+        // Create the iframe directly - no blocking overlays, full pointer responsiveness
+        var iframe = document.createElement('iframe');
+        iframe.id = 'yt_frame_' + viewId;
+        iframe.src = embedUrl;
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = '0';
+        iframe.style.display = 'block';
+        iframe.style.backgroundColor = '#000000';
+        iframe.style.borderRadius = '8px';
+        iframe.style.pointerEvents = 'auto';
+        iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
+        iframe.setAttribute('allowfullscreen', 'true');
+        iframe.setAttribute('webkitallowfullscreen', 'true');
+        iframe.setAttribute('mozallowfullscreen', 'true');
+        iframe.allowFullscreen = true;
 
-        // Security overlay: block top-right corner (Watch on YouTube + Share buttons)
-        var topRightBlock = document.createElement('div');
-        topRightBlock.style.cssText = 'position:absolute;top:0;right:0;width:140px;height:45px;z-index:9999;pointer-events:auto;cursor:default;background:transparent;';
-        wrapper.appendChild(topRightBlock);
-
-        // Security overlay: block top-left corner (YouTube logo)
-        var topLeftBlock = document.createElement('div');
-        topLeftBlock.style.cssText = 'position:absolute;top:0;left:0;width:80px;height:45px;z-index:9999;pointer-events:auto;cursor:default;background:transparent;';
-        wrapper.appendChild(topLeftBlock);
-
-        // Security overlay: block bottom-right "YouTube" branding text in controls
-        var bottomRightBlock = document.createElement('div');
-        bottomRightBlock.style.cssText = 'position:absolute;bottom:0;right:0;width:120px;height:36px;z-index:9999;pointer-events:auto;cursor:default;background:transparent;';
-        wrapper.appendChild(bottomRightBlock);
+        window._ytFrames[viewId] = iframe;
 
         ensureYouTubeApi(function() {
           try {
-            var player = new YT.Player('yt_container_' + viewId, {
-              videoId: videoId,
-              playerVars: {
-                enablejsapi: 1,
-                origin: origin || window.location.origin,
-                rel: 0,
-                modestbranding: 1,
-                iv_load_policy: 3,
-                controls: 1,
-                playsinline: 1,
-                fs: 0,
-                cc_load_policy: 0,
-                disablekb: 0
-              },
+            // Attach YT.Player directly to the iframe element (bypasses Shadow DOM document.getElementById failure)
+            var player = new YT.Player(iframe, {
               events: {
                 onReady: function(evt) {
                   window._ytPlayers[viewId] = player;
                   notifyYouTubeFlutter({ event: 'ready' });
 
-                  // Start 1s heartbeat poll for currentTime + duration
+                  // 1s heartbeat poll for currentTime + duration
                   if (window._ytPollTimers[viewId]) {
                     clearInterval(window._ytPollTimers[viewId]);
                   }
@@ -833,26 +849,49 @@
               }
             });
           } catch (err) {
-            console.warn('[YouTubeBridge] YT.Player init error:', err);
+            console.warn('[YouTubeBridge] Direct YT.Player attach warning:', err);
           }
         });
 
-        return wrapper;
+        return iframe;
       };
 
       window.youtubePostMessage = function(viewId, method, value) {
         var player = window._ytPlayers && window._ytPlayers[viewId];
-        if (!player) return;
+        var iframe = window._ytFrames && window._ytFrames[viewId];
+
+        // 1. Primary path: Call YT.Player API
         try {
-          if (method === 'seekTo') {
-            player.seekTo(Number(value), true);
-          } else if (method === 'play') {
-            player.playVideo();
-          } else if (method === 'pause') {
-            player.pauseVideo();
+          if (player) {
+            if (method === 'seekTo') {
+              player.seekTo(Number(value), true);
+            } else if (method === 'play') {
+              player.playVideo();
+            } else if (method === 'pause') {
+              player.pauseVideo();
+            }
           }
         } catch (e) {
-          console.warn('[YouTubeBridge] postMessage error:', e);
+          console.warn('[YouTubeBridge] Player method error:', e);
+        }
+
+        // 2. Secondary path: Direct postMessage to iframe.contentWindow (100% reliable)
+        try {
+          if (iframe && iframe.contentWindow) {
+            var msg = null;
+            if (method === 'seekTo') {
+              msg = { event: 'command', func: 'seekTo', args: [Number(value), true] };
+            } else if (method === 'play') {
+              msg = { event: 'command', func: 'playVideo', args: [] };
+            } else if (method === 'pause') {
+              msg = { event: 'command', func: 'pauseVideo', args: [] };
+            }
+            if (msg) {
+              iframe.contentWindow.postMessage(JSON.stringify(msg), '*');
+            }
+          }
+        } catch (e) {
+          console.warn('[YouTubeBridge] Direct postMessage error:', e);
         }
       };
     })();

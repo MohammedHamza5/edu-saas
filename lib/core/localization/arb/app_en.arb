@@ -5743,5 +5743,48 @@
   "linkingYoutubeVideo": "Linking YouTube video...",
   "uploadingNotice": "Uploading attached handout...",
   "creatingExam": "Creating lecture quiz...",
-  "youtubeUrlRequired": "YouTube URL is required"
+  "youtubeUrlRequired": "YouTube URL is required",
+  "currentMissionTitle": "Current Mission",
+  "currentMissionSubtitle": "Resume your academic mastery right where you left off",
+  "resumeLessonAction": "Resume Lecture Now",
+  "startNextLessonAction": "Start Next Lecture",
+  "allLecturesCompletedTitle": "Outstanding! You completed all lectures in this syllabus 🏆",
+  "allLecturesCompletedSubtitle": "You have mastered all syllabus requirements successfully",
+  "syllabusViewRoadmap": "Interactive Roadmap",
+  "syllabusViewList": "Syllabus List",
+  "estimatedDurationMinutes": "{minutes} min",
+  "@estimatedDurationMinutes": {
+    "placeholders": {
+      "minutes": { "type": "int" }
+    }
+  },
+  "milestoneStationLabel": "Station {index}",
+  "@milestoneStationLabel": {
+    "placeholders": {
+      "index": { "type": "int" }
+    }
+  },
+  "lessonHandoutChip": "Handout PDF",
+  "lessonQuizChip": "Lesson Quiz",
+  "lockedByPrereqTooltip": "Locked: Requires passing previous lecture quiz",
+  "groupHandoutPdfLabel": "Handout PDF for this group",
+  "groupExamLabel": "Lesson Quiz for this group",
+  "noExamSelected": "No quiz (Optional)",
+  "lockUntilPreviousQuizPassed": "Lock until previous quiz is passed",
+  "sortOrderInGroup": "Sequence in Group",
+  "customFileSelected": "Custom Handout: {fileName}",
+  "@customFileSelected": {
+    "placeholders": {
+      "fileName": { "type": "String" }
+    }
+  },
+  "pickGroupHandoutAction": "Upload Group Handout (PDF)",
+  "customizeForThisGroup": "Customize Handout & Quiz for this group",
+  "assignedToCountGroups": "Assigned to {count} groups",
+  "@assignedToCountGroups": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "distributeToGroupsAction": "Distribute to Groups"
 }

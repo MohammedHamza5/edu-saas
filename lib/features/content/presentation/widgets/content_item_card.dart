@@ -679,7 +679,7 @@ class ContentItemCard extends StatelessWidget {
           Expanded(
             child: _PillarItem(
               icon: Icons.picture_as_pdf_outlined,
-              label: hasHandout ? 'PDF' : context.l10n.videoSourceNone,
+              label: hasHandout ? 'PDF' : '—',
               isActive: hasHandout,
               color: hasHandout ? const Color(0xFFEA580C) : AppColors.textMuted,
             ),
@@ -696,7 +696,7 @@ class ContentItemCard extends StatelessWidget {
               icon: Icons.quiz_outlined,
               label: hasQuiz
                   ? '${content.prerequisitePassingScore ?? 60}%'
-                  : context.l10n.videoSourceNone,
+                  : '—',
               isActive: hasQuiz,
               color: hasQuiz ? AppColors.success : AppColors.textMuted,
             ),

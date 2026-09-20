@@ -226,10 +226,12 @@ class ContentCubit extends Cubit<ContentState> {
   Future<bool> assignContentToGroups({
     required String contentId,
     required List<String> groupIds,
+    List<Map<String, dynamic>>? groupConfigs,
   }) async {
     final result = await _repository.assignContentToGroups(
       contentId: contentId,
       groupIds: groupIds,
+      groupConfigs: groupConfigs,
     );
     switch (result) {
       case Success():

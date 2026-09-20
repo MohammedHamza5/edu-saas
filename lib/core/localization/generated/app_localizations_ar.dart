@@ -4706,4 +4706,86 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get youtubeUrlRequired => 'رابط اليوتيوب مطلوب';
+
+  @override
+  String get currentMissionTitle => 'مهمتك الحالية';
+
+  @override
+  String get currentMissionSubtitle =>
+      'استكمل مسار تفوقك الأكاديمي من حيث توقفت';
+
+  @override
+  String get resumeLessonAction => 'استئناف المشاهدة الآن';
+
+  @override
+  String get startNextLessonAction => 'بدء المحاضرة التالية';
+
+  @override
+  String get allLecturesCompletedTitle =>
+      'أحسنت! أتممت جميع محاضرات هذا المنهج 🏆';
+
+  @override
+  String get allLecturesCompletedSubtitle =>
+      'لقد أنجزت كافة متطلبات المحتوى بنجاح فائق ومتميز';
+
+  @override
+  String get syllabusViewRoadmap => 'مسار التعلّم التفاعلي';
+
+  @override
+  String get syllabusViewList => 'فهرس المحاضرات';
+
+  @override
+  String estimatedDurationMinutes(int minutes) {
+    return '$minutes دقيقة';
+  }
+
+  @override
+  String milestoneStationLabel(int index) {
+    return 'المحطة $index';
+  }
+
+  @override
+  String get lessonHandoutChip => 'ملزمة الشرح PDF';
+
+  @override
+  String get lessonQuizChip => 'كويز الدرس';
+
+  @override
+  String get lockedByPrereqTooltip =>
+      'مقفولة: مشروطة باجتياز كويز المحاضرة السابقة';
+
+  @override
+  String get groupHandoutPdfLabel => 'مذكرة الشرح والواجب لهذه المجموعة (PDF)';
+
+  @override
+  String get groupExamLabel => 'اختبار الحصة لهذه المجموعة';
+
+  @override
+  String get noExamSelected => 'بدون اختبار (اختياري)';
+
+  @override
+  String get lockUntilPreviousQuizPassed =>
+      'قفل الحصة حتى اجتياز كويز الحصة السابقة';
+
+  @override
+  String get sortOrderInGroup => 'ترتيب الحصة في المجموعة';
+
+  @override
+  String customFileSelected(String fileName) {
+    return 'مذكرة مخصصة: $fileName';
+  }
+
+  @override
+  String get pickGroupHandoutAction => 'رفع مذكرة خاصة بالمجموعة (PDF)';
+
+  @override
+  String get customizeForThisGroup => 'تخصيص المذكرة والكويز لهذه المجموعة';
+
+  @override
+  String assignedToCountGroups(int count) {
+    return 'موزع على $count مجموعات';
+  }
+
+  @override
+  String get distributeToGroupsAction => 'توزيع على المجموعات';
 }

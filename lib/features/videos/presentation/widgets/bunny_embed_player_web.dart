@@ -194,16 +194,9 @@ class _BunnyEmbedPlayerWebState extends State<_BunnyEmbedPlayerWeb> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.black,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: AspectRatio(
-        aspectRatio: 16 / 9,
-        child: HtmlElementView(viewType: _viewType),
-      ),
+    return AspectRatio(
+      aspectRatio: 16 / 9,
+      child: HtmlElementView(viewType: _viewType),
     );
   }
 }

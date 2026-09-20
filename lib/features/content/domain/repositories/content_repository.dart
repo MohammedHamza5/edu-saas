@@ -77,6 +77,7 @@ abstract class ContentRepository {
   Future<Result<void>> assignContentToGroups({
     required String contentId,
     required List<String> groupIds,
+    List<Map<String, dynamic>>? groupConfigs,
   });
 
   /// Links a quiz/exam to a lesson unit

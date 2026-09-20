@@ -22,6 +22,7 @@ class AppVideoPlayer extends StatefulWidget {
   final VoidCallback? onCompleted;
   final String? videoTitle;
   final void Function(void Function(int seconds) seekTo)? onSeekReady;
+  final void Function(VoidCallback play, VoidCallback pause, VoidCallback togglePlayPause)? onPlaybackControlsReady;
   final ValueChanged<bool>? onFullscreenChanged;
 
   const AppVideoPlayer({
@@ -35,6 +36,7 @@ class AppVideoPlayer extends StatefulWidget {
     this.onCompleted,
     this.videoTitle,
     this.onSeekReady,
+    this.onPlaybackControlsReady,
     this.onFullscreenChanged,
   });
 
@@ -154,6 +156,19 @@ class _AppVideoPlayerState extends State<AppVideoPlayer> {
           _resetControlsTimer();
         }
       });
+
+      widget.onPlaybackControlsReady?.call(
+        () {
+          _controller?.play();
+          _startHideControlsTimer();
+        },
+        () {
+          _controller?.pause();
+          _showControls = true;
+          _hideControlsTimer?.cancel();
+        },
+        _togglePlayPause,
+      );
 
       _startHideControlsTimer();
     } catch (e) {
@@ -347,6 +362,7 @@ class _AppVideoPlayerState extends State<AppVideoPlayer> {
         onMetricsProgress: widget.onMetricsProgress,
         onCompleted: widget.onCompleted,
         onSeekReady: widget.onSeekReady,
+        onPlaybackControlsReady: widget.onPlaybackControlsReady,
         onFullscreenChanged: widget.onFullscreenChanged,
       );
     }

@@ -21,6 +21,7 @@ Widget buildYouTubeEmbedPlayer({
   void Function(int currentSeconds, int totalSeconds, int actualWatchSeconds, bool isSkipped)? onMetricsProgress,
   VoidCallback? onCompleted,
   void Function(void Function(int seconds) seekTo)? onSeekReady,
+  void Function(VoidCallback play, VoidCallback pause, VoidCallback togglePlayPause)? onPlaybackControlsReady,
   ValueChanged<bool>? onFullscreenChanged,
 }) {
   return _YouTubeEmbedPlayerWeb(
@@ -30,6 +31,7 @@ Widget buildYouTubeEmbedPlayer({
     onMetricsProgress: onMetricsProgress,
     onCompleted: onCompleted,
     onSeekReady: onSeekReady,
+    onPlaybackControlsReady: onPlaybackControlsReady,
     onFullscreenChanged: onFullscreenChanged,
   );
 }
@@ -41,6 +43,7 @@ class _YouTubeEmbedPlayerWeb extends StatefulWidget {
   final void Function(int currentSeconds, int totalSeconds, int actualWatchSeconds, bool isSkipped)? onMetricsProgress;
   final VoidCallback? onCompleted;
   final void Function(void Function(int seconds) seekTo)? onSeekReady;
+  final void Function(VoidCallback play, VoidCallback pause, VoidCallback togglePlayPause)? onPlaybackControlsReady;
   final ValueChanged<bool>? onFullscreenChanged;
 
   const _YouTubeEmbedPlayerWeb({
@@ -50,6 +53,7 @@ class _YouTubeEmbedPlayerWeb extends StatefulWidget {
     this.onMetricsProgress,
     this.onCompleted,
     this.onSeekReady,
+    this.onPlaybackControlsReady,
     this.onFullscreenChanged,
   });
 
@@ -110,6 +114,12 @@ class _YouTubeEmbedPlayerWebState extends State<_YouTubeEmbedPlayerWeb> {
     widget.onSeekReady?.call((seconds) {
       seekTo(seconds);
     });
+
+    widget.onPlaybackControlsReady?.call(
+      play,
+      pause,
+      togglePlayPause,
+    );
   }
 
   /// Extracts the 11-character YouTube video ID from any embed/watch/short URL.
@@ -197,6 +207,28 @@ class _YouTubeEmbedPlayerWebState extends State<_YouTubeEmbedPlayerWeb> {
     } catch (_) {}
   }
 
+  void play() {
+    try {
+      _youtubePostMessage(_viewId.toJS, 'play'.toJS, null);
+      _isPlaying = true;
+    } catch (_) {}
+  }
+
+  void pause() {
+    try {
+      _youtubePostMessage(_viewId.toJS, 'pause'.toJS, null);
+      _isPlaying = false;
+    } catch (_) {}
+  }
+
+  void togglePlayPause() {
+    if (_isPlaying) {
+      pause();
+    } else {
+      play();
+    }
+  }
+
   void seekTo(int seconds) {
     try {
       _youtubePostMessage(_viewId.toJS, 'seekTo'.toJS, seconds.toJS);
@@ -215,16 +247,11 @@ class _YouTubeEmbedPlayerWebState extends State<_YouTubeEmbedPlayerWeb> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.black,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: AspectRatio(
-        aspectRatio: 16 / 9,
-        child: HtmlElementView(viewType: _viewType),
-      ),
+    // Return direct AspectRatio with HtmlElementView: no Container, no clipBehavior: Clip.antiAlias
+    // which previously created a CanvasKit canvas layer over the iframe blocking mouse clicks.
+    return AspectRatio(
+      aspectRatio: 16 / 9,
+      child: HtmlElementView(viewType: _viewType),
     );
   }
 }

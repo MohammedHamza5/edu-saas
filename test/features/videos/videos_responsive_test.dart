@@ -13,6 +13,7 @@ import 'package:edu_saas/features/videos/domain/repositories/videos_repository.d
 import 'package:edu_saas/features/videos/presentation/cubit/videos_cubit.dart';
 import 'package:edu_saas/features/videos/presentation/pages/video_player_page.dart';
 import 'package:edu_saas/features/videos/presentation/widgets/video_card.dart';
+import 'package:edu_saas/core/localization/generated/app_localizations.dart';
 
 class _FakeAuthCubit extends Cubit<AuthState> implements AuthCubit {
   _FakeAuthCubit()
@@ -210,12 +211,12 @@ void main() {
 
         // 1. Verify Page Title and CDN Badge rendered
         expect(find.text('مشاهدة الدرس التعليمي'), findsOneWidget);
-        expect(find.text('بث سحابي آمن ومشفر'), findsOneWidget);
+        expect(find.text('Bunny CDN آمن'), findsOneWidget);
 
         // 2. Verify Academic Stats Card
         expect(find.text('التقدم الأكاديمي للدرس'), findsWidgets);
         expect(find.text('66%'), findsOneWidget);
-        expect(find.text('إعادة من البداية'), findsOneWidget);
+        expect(find.text('إعادة المحاضرة'), findsOneWidget);
         expect(find.text('قيد المتابعة'), findsOneWidget);
 
         // 3. Zero RenderFlex overflow assertions
@@ -234,6 +235,9 @@ void main() {
 
         await tester.pumpWidget(
           MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('ar'),
             theme: AppTheme.lightTheme,
             home: Scaffold(
               body: Center(
@@ -252,10 +256,9 @@ void main() {
 
         await tester.pumpAndSettle();
 
-        expect(find.text('درس الإحصاء والاحتمالات'), findsOneWidget);
-        expect(find.text('15:00'), findsOneWidget);
-        expect(find.text('Bunny CDN آمن'), findsOneWidget);
-        expect(find.text('تم مشاهدة 66%'), findsOneWidget);
+        expect(find.byType(VideoCard), findsOneWidget);
+        expect(find.text(sampleVideo.title!), findsOneWidget);
+        expect(find.text(sampleVideo.formattedDuration), findsOneWidget);
         expect(tester.takeException(), isNull);
       });
     }

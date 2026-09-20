@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../../core/config/app_config.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -230,26 +229,24 @@ class VideoCard extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
-                            AppConfig.showBothProviders && video.isYouTube
+                            video.isYouTube
                                 ? Icons.play_circle_fill_rounded
                                 : Icons.verified_rounded,
                             size: 13,
-                            color: AppConfig.showBothProviders && video.isYouTube
+                            color: video.isYouTube
                                 ? const Color(0xFFFF0000)
                                 : AppColors.primary,
                           ),
                           const SizedBox(width: 4),
                           Flexible(
                             child: Text(
-                              AppConfig.showBothProviders
-                                  ? (video.isYouTube
-                                      ? context.l10n.videoSourceBadgeYouTube
-                                      : context.l10n.secureCdnBadge)
+                              video.isYouTube
+                                  ? context.l10n.videoSourceBadgeYouTube
                                   : context.l10n.secureCdnBadge,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: theme.textTheme.labelSmall?.copyWith(
-                                color: AppConfig.showBothProviders && video.isYouTube
+                                color: video.isYouTube
                                     ? const Color(0xFFFF0000)
                                     : AppColors.primary,
                                 fontWeight: FontWeight.w600,

@@ -8490,6 +8490,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'YouTube URL is required'**
   String get youtubeUrlRequired;
+
+  /// No description provided for @currentMissionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Mission'**
+  String get currentMissionTitle;
+
+  /// No description provided for @currentMissionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume your academic mastery right where you left off'**
+  String get currentMissionSubtitle;
+
+  /// No description provided for @resumeLessonAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume Lecture Now'**
+  String get resumeLessonAction;
+
+  /// No description provided for @startNextLessonAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Next Lecture'**
+  String get startNextLessonAction;
+
+  /// No description provided for @allLecturesCompletedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Outstanding! You completed all lectures in this syllabus 🏆'**
+  String get allLecturesCompletedTitle;
+
+  /// No description provided for @allLecturesCompletedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You have mastered all syllabus requirements successfully'**
+  String get allLecturesCompletedSubtitle;
+
+  /// No description provided for @syllabusViewRoadmap.
+  ///
+  /// In en, this message translates to:
+  /// **'Interactive Roadmap'**
+  String get syllabusViewRoadmap;
+
+  /// No description provided for @syllabusViewList.
+  ///
+  /// In en, this message translates to:
+  /// **'Syllabus List'**
+  String get syllabusViewList;
+
+  /// No description provided for @estimatedDurationMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min'**
+  String estimatedDurationMinutes(int minutes);
+
+  /// No description provided for @milestoneStationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Station {index}'**
+  String milestoneStationLabel(int index);
+
+  /// No description provided for @lessonHandoutChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Handout PDF'**
+  String get lessonHandoutChip;
+
+  /// No description provided for @lessonQuizChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Lesson Quiz'**
+  String get lessonQuizChip;
+
+  /// No description provided for @lockedByPrereqTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked: Requires passing previous lecture quiz'**
+  String get lockedByPrereqTooltip;
+
+  /// No description provided for @groupHandoutPdfLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Handout PDF for this group'**
+  String get groupHandoutPdfLabel;
+
+  /// No description provided for @groupExamLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Lesson Quiz for this group'**
+  String get groupExamLabel;
+
+  /// No description provided for @noExamSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'No quiz (Optional)'**
+  String get noExamSelected;
+
+  /// No description provided for @lockUntilPreviousQuizPassed.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock until previous quiz is passed'**
+  String get lockUntilPreviousQuizPassed;
+
+  /// No description provided for @sortOrderInGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Sequence in Group'**
+  String get sortOrderInGroup;
+
+  /// No description provided for @customFileSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Handout: {fileName}'**
+  String customFileSelected(String fileName);
+
+  /// No description provided for @pickGroupHandoutAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Group Handout (PDF)'**
+  String get pickGroupHandoutAction;
+
+  /// No description provided for @customizeForThisGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Customize Handout & Quiz for this group'**
+  String get customizeForThisGroup;
+
+  /// No description provided for @assignedToCountGroups.
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned to {count} groups'**
+  String assignedToCountGroups(int count);
+
+  /// No description provided for @distributeToGroupsAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Distribute to Groups'**
+  String get distributeToGroupsAction;
 }
 
 class _AppLocalizationsDelegate

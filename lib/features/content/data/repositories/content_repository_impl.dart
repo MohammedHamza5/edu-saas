@@ -199,11 +199,13 @@ class ContentRepositoryImpl implements ContentRepository {
   Future<Result<void>> assignContentToGroups({
     required String contentId,
     required List<String> groupIds,
+    List<Map<String, dynamic>>? groupConfigs,
   }) async {
     try {
       await _remoteDataSource.assignContentToGroups(
         contentId: contentId,
         groupIds: groupIds,
+        groupConfigs: groupConfigs,
       );
       return const Success(null);
     } catch (e) {

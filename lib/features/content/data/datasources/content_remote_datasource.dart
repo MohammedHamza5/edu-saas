@@ -77,6 +77,7 @@ abstract interface class ContentRemoteDataSource {
   Future<void> assignContentToGroups({
     required String contentId,
     required List<String> groupIds,
+    List<Map<String, dynamic>>? groupConfigs,
   });
 
   /// Links a quiz/exam to a lesson unit
@@ -100,14 +101,26 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     int page = 0,
     int pageSize = 20,
   }) async {
-    // Fetch any content linked to this group via the junction table content_groups
+    // Fetch any content linked to this group via the junction table content_groups with group overrides
     final junctionRes = await _safeClient
         .from('content_groups')
-        .select('content_id')
+        .select(
+          'content_id, file_id, associated_exam_id, prerequisite_exam_id, sort_order, custom_title, '
+          'file:files!content_groups_file_id_fkey(*), '
+          'associated_exam:exams!content_groups_associated_exam_id_fkey(id, title), '
+          'prerequisite_exam:exams!content_groups_prerequisite_exam_id_fkey(id, title, passing_score)',
+        )
         .eq('group_id', groupId);
-    final junctionIds = (junctionRes as List<dynamic>)
-        .map((e) => e['content_id'] as String)
-        .toList();
+
+    final Map<String, Map<String, dynamic>> junctionConfigMap = {};
+    final junctionIds = <String>[];
+    for (final row in (junctionRes as List<dynamic>)) {
+      final cId = row['content_id'] as String?;
+      if (cId != null) {
+        junctionIds.add(cId);
+        junctionConfigMap[cId] = row as Map<String, dynamic>;
+      }
+    }
 
     var query = _safeClient.from('content').select(
           '*, files(*), videos(id, status, provider_video_id, provider), '
@@ -136,6 +149,63 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     final models = list
         .map((json) => ContentModel.fromJson(json as Map<String, dynamic>))
         .toList();
+
+    // Apply group-specific customizations from content_groups junction
+    for (int i = 0; i < models.length; i++) {
+      final m = models[i];
+      final cfg = junctionConfigMap[m.id];
+      if (cfg != null) {
+        FileAttachmentModel? customFile = m.file as FileAttachmentModel?;
+        if (cfg['file'] != null && cfg['file'] is Map<String, dynamic>) {
+          customFile = FileAttachmentModel.fromJson(cfg['file'] as Map<String, dynamic>);
+        }
+
+        String? assocExamId = m.associatedExamId;
+        String? assocExamTitle = m.associatedExamTitle;
+        if (cfg['associated_exam_id'] != null) {
+          assocExamId = cfg['associated_exam_id'] as String?;
+          final assocObj = cfg['associated_exam'] as Map<String, dynamic>?;
+          assocExamTitle = assocObj?['title'] as String? ?? assocExamTitle;
+        }
+
+        String? prereqExamId = m.prerequisiteExamId;
+        String? prereqExamTitle = m.prerequisiteExamTitle;
+        int? prereqPassingScore = m.prerequisitePassingScore;
+        if (cfg['prerequisite_exam_id'] != null) {
+          prereqExamId = cfg['prerequisite_exam_id'] as String?;
+          final prereqObj = cfg['prerequisite_exam'] as Map<String, dynamic>?;
+          prereqExamTitle = prereqObj?['title'] as String? ?? prereqExamTitle;
+          prereqPassingScore = (prereqObj?['passing_score'] as num?)?.toInt() ?? prereqPassingScore;
+        }
+
+        int sortOrder = m.sortOrder;
+        if (cfg['sort_order'] != null && (cfg['sort_order'] as num).toInt() > 0) {
+          sortOrder = (cfg['sort_order'] as num).toInt();
+        }
+
+        String title = m.title;
+        if (cfg['custom_title'] != null && cfg['custom_title'].toString().trim().isNotEmpty) {
+          title = cfg['custom_title'].toString().trim();
+        }
+
+        models[i] = m.copyWith(
+          title: title,
+          file: customFile,
+          associatedExamId: assocExamId,
+          associatedExamTitle: assocExamTitle,
+          prerequisiteExamId: prereqExamId,
+          prerequisiteExamTitle: prereqExamTitle,
+          prerequisitePassingScore: prereqPassingScore,
+          sortOrder: sortOrder,
+        ) as ContentModel;
+      }
+    }
+
+    models.sort((a, b) {
+      final s = a.sortOrder.compareTo(b.sortOrder);
+      if (s != 0) return s;
+      return b.createdAt.compareTo(a.createdAt);
+    });
 
     // Check student sequential progression lock status
     final currentUserId = _safeClient.auth.currentUser?.id;
@@ -578,12 +648,14 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
   Future<void> assignContentToGroups({
     required String contentId,
     required List<String> groupIds,
+    List<Map<String, dynamic>>? groupConfigs,
   }) async {
     await _safeClient.rpc<void>(
       'assign_content_to_groups',
       params: {
         'p_content_id': contentId,
         'p_group_ids': groupIds,
+        'p_group_configs': groupConfigs ?? [],
       },
     );
   }

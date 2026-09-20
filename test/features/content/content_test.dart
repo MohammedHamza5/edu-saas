@@ -213,6 +213,7 @@ class _FakeContentRepository implements ContentRepository {
   Future<Result<void>> assignContentToGroups({
     required String contentId,
     required List<String> groupIds,
+    List<Map<String, dynamic>>? groupConfigs,
   }) async {
     if (shouldFail) {
       return const FailureResult(ServerFailure('Failed to assign groups'));
