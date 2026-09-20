@@ -36,7 +36,9 @@ class ExamCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: AppColors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                  border: Border.all(color: AppColors.primary.withValues(alpha: 0.25)),
+                  border: Border.all(
+                    color: AppColors.primary.withValues(alpha: 0.25),
+                  ),
                 ),
                 child: const Icon(
                   Icons.quiz_outlined,
@@ -150,12 +152,16 @@ class ExamCard extends StatelessWidget {
         children: [
           Icon(icon, size: 13, color: AppColors.textSecondary),
           const SizedBox(width: 4),
-          Text(
-            text,
-            style: const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+          Flexible(
+            child: Text(
+              text,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
             ),
           ),
         ],

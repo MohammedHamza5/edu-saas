@@ -42,7 +42,8 @@ class _FakeAuthRepository implements AuthRepository {
   Future<Result<void>> signOut() async => const Success(null);
 
   @override
-  Future<Result<void>> resetPasswordForEmail(String email) async => const Success(null);
+  Future<Result<void>> resetPasswordForEmail(String email) async =>
+      const Success(null);
 
   @override
   Future<Result<UserEntity?>> getCurrentUser() async => const Success(null);
@@ -61,7 +62,8 @@ class _FakeNotificationsRepository implements NotificationsRepository {
   Future<Result<int>> getUnreadCount() async => const Success(0);
 
   @override
-  Future<Result<void>> markAsRead(String recipientId) async => const Success(null);
+  Future<Result<void>> markAsRead(String recipientId) async =>
+      const Success(null);
 
   @override
   Future<Result<void>> markAllAsRead() async => const Success(null);
@@ -82,14 +84,16 @@ class _FakeStudentDashboardRepository implements StudentDashboardRepository {
     String studentId, {
     bool forceRefresh = false,
   }) async {
-    return const Success(StudentDashboardStats(
-      attendancePercentage: 100,
-      examAverage: 85,
-      assignmentsSubmitted: 4,
-      videoCompletionPercentage: 90,
-      activeGroupName: 'Digital SAT Master',
-      activeGroupLevel: 'SAT',
-    ));
+    return const Success(
+      StudentDashboardStats(
+        attendancePercentage: 100,
+        examAverage: 85,
+        assignmentsSubmitted: 4,
+        videoCompletionPercentage: 90,
+        activeGroupName: 'Digital SAT Master',
+        activeGroupLevel: 'SAT',
+      ),
+    );
   }
 }
 
@@ -100,28 +104,35 @@ void main() {
 
   setUp(() {
     authCubit = AuthCubit(repository: _FakeAuthRepository())
-      ..emit(const AuthAuthenticated(
-        UserEntity(
-          id: 'student-1',
-          tenantId: 'tenant-1',
-          role: UserRole.student,
-          fullName: 'طالب تجريبي',
-          email: 'student@test.com',
-          status: UserStatus.active,
+      ..emit(
+        const AuthAuthenticated(
+          UserEntity(
+            id: 'student-1',
+            tenantId: 'tenant-1',
+            role: UserRole.student,
+            fullName: 'طالب تجريبي',
+            email: 'student@test.com',
+            status: UserStatus.active,
+          ),
         ),
-      ));
-    notificationsCubit = NotificationsCubit(repository: _FakeNotificationsRepository());
-    studentDashboardCubit = StudentDashboardCubit(repository: _FakeStudentDashboardRepository())
-      ..emit(const StudentDashboardLoaded(
-        stats: StudentDashboardStats(
-          attendancePercentage: 100,
-          examAverage: 85,
-          assignmentsSubmitted: 4,
-          videoCompletionPercentage: 90,
-          activeGroupName: 'المسار الدراسي',
-          activeGroupLevel: 'SAT',
-        ),
-      ));
+      );
+    notificationsCubit = NotificationsCubit(
+      repository: _FakeNotificationsRepository(),
+    );
+    studentDashboardCubit =
+        StudentDashboardCubit(repository: _FakeStudentDashboardRepository())
+          ..emit(
+            const StudentDashboardLoaded(
+              stats: StudentDashboardStats(
+                attendancePercentage: 100,
+                examAverage: 85,
+                assignmentsSubmitted: 4,
+                videoCompletionPercentage: 90,
+                activeGroupName: 'المسار الدراسي',
+                activeGroupLevel: 'SAT',
+              ),
+            ),
+          );
   });
 
   tearDown(() {
@@ -148,19 +159,22 @@ void main() {
   }
 
   group('StudentDashboardPage Multi-Device Responsive Tests', () {
-    testWidgets('Renders cleanly on Extra Small Mobile (320x640) with zero overflow', (tester) async {
-      tester.view.devicePixelRatio = 1.0;
-      tester.view.physicalSize = const Size(320, 640);
-      addTearDown(tester.view.resetPhysicalSize);
+    testWidgets(
+      'Renders cleanly on Extra Small Mobile (320x640) with zero overflow',
+      (tester) async {
+        tester.view.devicePixelRatio = 1.0;
+        tester.view.physicalSize = const Size(320, 640);
+        addTearDown(tester.view.resetPhysicalSize);
 
-      await tester.pumpWidget(buildStudentDashboardTestApp());
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(buildStudentDashboardTestApp());
+        await tester.pumpAndSettle();
 
-      expect(tester.takeException(), isNull);
-      expect(find.textContaining('لوحة الطالب'), findsOneWidget);
-      expect(find.textContaining('مرحباً بك'), findsOneWidget);
-      expect(find.textContaining('مؤشرات التحصيل الأكاديمي'), findsOneWidget);
-    });
+        expect(tester.takeException(), isNull);
+        expect(find.textContaining('لوحة الطالب'), findsOneWidget);
+        expect(find.textContaining('مرحباً بك'), findsOneWidget);
+        expect(find.textContaining('الزخم الأكاديمي'), findsOneWidget);
+      },
+    );
 
     testWidgets('Renders cleanly on Standard Mobile (390x844)', (tester) async {
       tester.view.devicePixelRatio = 1.0;
@@ -172,10 +186,12 @@ void main() {
 
       expect(tester.takeException(), isNull);
       expect(find.textContaining('لوحة الطالب'), findsOneWidget);
-      expect(find.textContaining('مؤشرات التحصيل الأكاديمي'), findsOneWidget);
+      expect(find.textContaining('الزخم الأكاديمي'), findsOneWidget);
     });
 
-    testWidgets('Renders cleanly on Tablet Portrait (768x1024)', (tester) async {
+    testWidgets('Renders cleanly on Tablet Portrait (768x1024)', (
+      tester,
+    ) async {
       tester.view.devicePixelRatio = 1.0;
       tester.view.physicalSize = const Size(768, 1024);
       addTearDown(tester.view.resetPhysicalSize);
@@ -188,18 +204,21 @@ void main() {
       expect(find.textContaining('مرحباً بك'), findsOneWidget);
     });
 
-    testWidgets('Renders cleanly on Desktop/Laptop (1440x900) with bounded width', (tester) async {
-      tester.view.devicePixelRatio = 1.0;
-      tester.view.physicalSize = const Size(1440, 900);
-      addTearDown(tester.view.resetPhysicalSize);
+    testWidgets(
+      'Renders cleanly on Desktop/Laptop (1440x900) with bounded width',
+      (tester) async {
+        tester.view.devicePixelRatio = 1.0;
+        tester.view.physicalSize = const Size(1440, 900);
+        addTearDown(tester.view.resetPhysicalSize);
 
-      await tester.pumpWidget(buildStudentDashboardTestApp());
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(buildStudentDashboardTestApp());
+        await tester.pumpAndSettle();
 
-      expect(tester.takeException(), isNull);
-      expect(find.textContaining('لوحة الطالب'), findsOneWidget);
-      expect(find.textContaining('مؤشرات التحصيل الأكاديمي'), findsOneWidget);
-    });
+        expect(tester.takeException(), isNull);
+        expect(find.textContaining('لوحة الطالب'), findsOneWidget);
+        expect(find.textContaining('الزخم الأكاديمي'), findsOneWidget);
+      },
+    );
 
     testWidgets('Renders cleanly on 1080p Desktop (1920x1080)', (tester) async {
       tester.view.devicePixelRatio = 1.0;

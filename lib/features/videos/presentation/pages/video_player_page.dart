@@ -105,16 +105,18 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
 
     if (!_isTeacher && _activeStudentId.isNotEmpty && _currentVideo != null) {
       final pos = _livePositionSecs.value;
-      final dur = _liveDurationSecs.value > 0 ? _liveDurationSecs.value : _currentVideo!.duration;
+      final dur = _liveDurationSecs.value > 0
+          ? _liveDurationSecs.value
+          : _currentVideo!.duration;
       if (pos > 0 && dur > 0) {
         try {
           await context.read<VideosCubit>().updateProgress(
-                videoId: _currentVideo!.id,
-                studentId: _activeStudentId,
-                progressSeconds: pos,
-                durationSeconds: dur,
-                force: true,
-              );
+            videoId: _currentVideo!.id,
+            studentId: _activeStudentId,
+            progressSeconds: pos,
+            durationSeconds: dur,
+            force: true,
+          );
         } catch (_) {
           try {
             await InjectionContainer.videosRepository.updateVideoProgress(
@@ -148,16 +150,23 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       }
     }
     // Fallback unawaited flush directly to repository in case exit didn't flush
-    if (!_isFlushingProgress && !_isTeacher && _activeStudentId.isNotEmpty && _currentVideo != null) {
+    if (!_isFlushingProgress &&
+        !_isTeacher &&
+        _activeStudentId.isNotEmpty &&
+        _currentVideo != null) {
       final pos = _livePositionSecs.value;
-      final dur = _liveDurationSecs.value > 0 ? _liveDurationSecs.value : _currentVideo!.duration;
+      final dur = _liveDurationSecs.value > 0
+          ? _liveDurationSecs.value
+          : _currentVideo!.duration;
       if (pos > 0 && dur > 0) {
-        unawaited(InjectionContainer.videosRepository.updateVideoProgress(
-          videoId: _currentVideo!.id,
-          studentId: _activeStudentId,
-          progressSeconds: pos,
-          durationSeconds: dur,
-        ));
+        unawaited(
+          InjectionContainer.videosRepository.updateVideoProgress(
+            videoId: _currentVideo!.id,
+            studentId: _activeStudentId,
+            progressSeconds: pos,
+            durationSeconds: dur,
+          ),
+        );
       }
     }
     _livePositionSecs.dispose();
@@ -168,9 +177,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
 
   void _loadVideo() {
     context.read<VideosCubit>().loadVideoPlayback(
-          videoId: widget.videoId,
-          studentId: _activeStudentId,
-        );
+      videoId: widget.videoId,
+      studentId: _activeStudentId,
+    );
   }
 
   @override
@@ -184,7 +193,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
         await _flushProgressAndExit();
       },
       child: Scaffold(
-        backgroundColor: _isFullscreen ? Colors.black : theme.scaffoldBackgroundColor,
+        backgroundColor: _isFullscreen
+            ? Colors.black
+            : theme.scaffoldBackgroundColor,
         appBar: _isFullscreen
             ? null
             : AppBar(
@@ -196,43 +207,55 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-          actions: [
-            Container(
-              margin: const EdgeInsetsDirectional.only(end: AppSpacing.s16),
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.s10,
-                vertical: AppSpacing.s4,
-              ),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withAlpha(20),
-                borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-                border: Border.all(color: AppColors.primary.withAlpha(60)),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    _currentVideo?.isYouTube == true ? Icons.play_circle_fill_rounded : Icons.lock_outline_rounded, 
-                    size: 13, 
-                    color: _currentVideo?.isYouTube == true ? const Color(0xFFFF0000) : AppColors.primary
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    _currentVideo?.isYouTube == true ? 'Protected Streaming' : context.l10n.secureCdnBadge,
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      color: _currentVideo?.isYouTube == true ? const Color(0xFFFF0000) : AppColors.primary,
+                actions: [
+                  Container(
+                    margin: const EdgeInsetsDirectional.only(
+                      end: AppSpacing.s16,
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.s10,
+                      vertical: AppSpacing.s4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withAlpha(20),
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.radiusFull,
+                      ),
+                      border: Border.all(
+                        color: AppColors.primary.withAlpha(60),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          _currentVideo?.isYouTube == true
+                              ? Icons.play_circle_fill_rounded
+                              : Icons.lock_outline_rounded,
+                          size: 13,
+                          color: _currentVideo?.isYouTube == true
+                              ? const Color(0xFFFF0000)
+                              : AppColors.primary,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          _currentVideo?.isYouTube == true
+                              ? 'Protected Streaming'
+                              : context.l10n.secureCdnBadge,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: _currentVideo?.isYouTube == true
+                                ? const Color(0xFFFF0000)
+                                : AppColors.primary,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
+                leading: BackButton(onPressed: _flushProgressAndExit),
               ),
-            ),
-          ],
-          leading: BackButton(
-            onPressed: _flushProgressAndExit,
-          ),
-        ),
         body: BlocBuilder<VideosCubit, VideosState>(
           buildWhen: (previous, current) {
             if (previous is VideosLoaded && current is VideosLoaded) {
@@ -243,7 +266,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
           },
           builder: (context, state) {
             if (state is VideosLoading) {
-              return AppLoadingView(message: state.message ?? context.l10n.loadingVideo);
+              return AppLoadingView(
+                message: state.message ?? context.l10n.loadingVideo,
+              );
             }
 
             if (state is VideosError) {
@@ -286,17 +311,22 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                   };
                 },
                 onFullscreenChanged: _handleFullscreenChanged,
-                onMetricsProgress: (currentSeconds, totalSeconds, actualWatch, isSkipped) {
-                  if (!_isTeacher && _activeStudentId.isNotEmpty && video != null) {
-                    if (!_hasRecordedStarted && currentSeconds > 0) {
-                      _hasRecordedStarted = true;
-                      StudentActivityTracker.instance.recordActivity(
-                        eventType: 'video_started',
-                        contentId: video.contentId,
-                      );
-                    }
-                    final dur = totalSeconds > 0 ? totalSeconds : video.duration;
-                    context.read<VideosCubit>().updateProgress(
+                onMetricsProgress:
+                    (currentSeconds, totalSeconds, actualWatch, isSkipped) {
+                      if (!_isTeacher &&
+                          _activeStudentId.isNotEmpty &&
+                          video != null) {
+                        if (!_hasRecordedStarted && currentSeconds > 0) {
+                          _hasRecordedStarted = true;
+                          StudentActivityTracker.instance.recordActivity(
+                            eventType: 'video_started',
+                            contentId: video.contentId,
+                          );
+                        }
+                        final dur = totalSeconds > 0
+                            ? totalSeconds
+                            : video.duration;
+                        context.read<VideosCubit>().updateProgress(
                           videoId: video.id,
                           studentId: _activeStudentId,
                           progressSeconds: currentSeconds,
@@ -304,17 +334,19 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                           actualWatchSeconds: actualWatch,
                           isSkipped: isSkipped,
                         );
-                  }
-                },
+                      }
+                    },
                 onCompleted: () {
-                  if (!_isTeacher && _activeStudentId.isNotEmpty && video != null) {
+                  if (!_isTeacher &&
+                      _activeStudentId.isNotEmpty &&
+                      video != null) {
                     context.read<VideosCubit>().updateProgress(
-                          videoId: video.id,
-                          studentId: _activeStudentId,
-                          progressSeconds: video.duration,
-                          durationSeconds: video.duration,
-                          force: true,
-                        );
+                      videoId: video.id,
+                      studentId: _activeStudentId,
+                      progressSeconds: video.duration,
+                      durationSeconds: video.duration,
+                      force: true,
+                    );
                     StudentActivityTracker.instance.recordActivity(
                       eventType: 'video_completed',
                       contentId: video.contentId,
@@ -343,9 +375,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                 return ColoredBox(
                   color: Colors.black,
                   child: SizedBox.expand(
-                    child: Center(
-                      child: videoPlayerWidget,
-                    ),
+                    child: Center(child: videoPlayerWidget),
                   ),
                 );
               }
@@ -365,21 +395,27 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               // Left Main Column: Player
-                              Expanded(
-                                flex: 7,
-                                child: videoPlayerWidget,
-                              ),
+                              Expanded(flex: 7, child: videoPlayerWidget),
                               const SizedBox(width: AppSpacing.s20),
                               // Right Sidebar: Academic Stats & Notes
                               Expanded(
                                 flex: 3,
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
                                   children: [
-                                    _buildAcademicStatsCard(theme, video, progress, isCompleted),
+                                    _buildAcademicStatsCard(
+                                      theme,
+                                      video,
+                                      progress,
+                                      isCompleted,
+                                    ),
                                     const SizedBox(height: AppSpacing.s16),
                                     if (widget.associatedExamId != null) ...[
-                                      _buildAssociatedExamCard(theme, isCompleted),
+                                      _buildAssociatedExamCard(
+                                        theme,
+                                        isCompleted,
+                                      ),
                                       const SizedBox(height: AppSpacing.s16),
                                     ],
                                     _buildAttachedMaterialCard(theme, video),
@@ -401,7 +437,12 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                           children: [
                             videoPlayerWidget,
                             const SizedBox(height: AppSpacing.s16),
-                            _buildAcademicStatsCard(theme, video, progress, isCompleted),
+                            _buildAcademicStatsCard(
+                              theme,
+                              video,
+                              progress,
+                              isCompleted,
+                            ),
                             const SizedBox(height: AppSpacing.s16),
                             if (widget.associatedExamId != null) ...[
                               _buildAssociatedExamCard(theme, isCompleted),
@@ -429,7 +470,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   Widget _buildPendingUploadView(BuildContext context, VideoEntity? video) {
     final theme = Theme.of(context);
     final authState = context.read<AuthCubit>().state;
-    final isTeacher = authState is AuthAuthenticated && authState.user.isTeacher;
+    final isTeacher =
+        authState is AuthAuthenticated && authState.user.isTeacher;
 
     return Center(
       child: ResponsiveContainer(
@@ -446,15 +488,19 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                 width: 72,
                 height: 72,
                 decoration: BoxDecoration(
-                  color: (isTeacher ? AppColors.primary : AppColors.warning).withAlpha(20),
+                  color: (isTeacher ? AppColors.primary : AppColors.warning)
+                      .withAlpha(20),
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: (isTeacher ? AppColors.primary : AppColors.warning).withAlpha(60),
+                    color: (isTeacher ? AppColors.primary : AppColors.warning)
+                        .withAlpha(60),
                     width: 1.5,
                   ),
                 ),
                 child: Icon(
-                  isTeacher ? Icons.cloud_upload_outlined : Icons.hourglass_top_rounded,
+                  isTeacher
+                      ? Icons.cloud_upload_outlined
+                      : Icons.hourglass_top_rounded,
                   size: 36,
                   color: isTeacher ? AppColors.primary : AppColors.warning,
                 ),
@@ -475,10 +521,12 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                   vertical: AppSpacing.s4,
                 ),
                 decoration: BoxDecoration(
-                  color: (isTeacher ? AppColors.primary : AppColors.warning).withAlpha(15),
+                  color: (isTeacher ? AppColors.primary : AppColors.warning)
+                      .withAlpha(15),
                   borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
                   border: Border.all(
-                    color: (isTeacher ? AppColors.primary : AppColors.warning).withAlpha(60),
+                    color: (isTeacher ? AppColors.primary : AppColors.warning)
+                        .withAlpha(60),
                   ),
                 ),
                 child: Text(
@@ -504,7 +552,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                   height: 1.5,
                 ),
               ),
-              if (video?.description != null && video!.description!.isNotEmpty) ...[
+              if (video?.description != null &&
+                  video!.description!.isNotEmpty) ...[
                 const SizedBox(height: AppSpacing.s16),
                 Container(
                   width: double.infinity,
@@ -574,19 +623,21 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
 
   Widget _buildErrorView(BuildContext context, VideosError state) {
     final authState = context.read<AuthCubit>().state;
-    final isTeacher = authState is AuthAuthenticated && authState.user.isTeacher;
+    final isTeacher =
+        authState is AuthAuthenticated && authState.user.isTeacher;
 
-    final isNotFoundOrCoerce = state.code == 'VIDEO_NOT_FOUND' ||
+    final isNotFoundOrCoerce =
+        state.code == 'VIDEO_NOT_FOUND' ||
         state.message.contains('Cannot coerce') ||
         state.message.contains('not found');
 
     final message = isNotFoundOrCoerce
         ? (isTeacher
-            ? context.l10n.teacherVideoNotUploadedDesc
-            : context.l10n.videoNotFoundMessage)
+              ? context.l10n.teacherVideoNotUploadedDesc
+              : context.l10n.videoNotFoundMessage)
         : (state.code == 'VIDEO_NOT_READY'
-            ? context.l10n.videoPlaybackError
-            : state.message);
+              ? context.l10n.videoPlaybackError
+              : state.message);
 
     return Center(
       child: ResponsiveContainer(
@@ -725,20 +776,21 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                       color: _isTeacher
                           ? AppColors.primary.withAlpha(20)
                           : completed
-                              ? AppColors.success.withAlpha(20)
-                              : pct > 0
-                                  ? AppColors.primary.withAlpha(15)
-                                  : AppColors.surfaceVariant,
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusFull),
+                          ? AppColors.success.withAlpha(20)
+                          : pct > 0
+                          ? AppColors.primary.withAlpha(15)
+                          : AppColors.surfaceVariant,
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.radiusFull,
+                      ),
                       border: Border.all(
                         color: _isTeacher
                             ? AppColors.primary.withAlpha(60)
                             : completed
-                                ? AppColors.success.withAlpha(70)
-                                : pct > 0
-                                    ? AppColors.primary.withAlpha(50)
-                                    : AppColors.border,
+                            ? AppColors.success.withAlpha(70)
+                            : pct > 0
+                            ? AppColors.primary.withAlpha(50)
+                            : AppColors.border,
                       ),
                     ),
                     child: Row(
@@ -748,38 +800,38 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                           _isTeacher
                               ? Icons.sensors_rounded
                               : completed
-                                  ? Icons.check_circle_rounded
-                                  : pct > 0
-                                      ? Icons.timelapse_rounded
-                                      : Icons.radio_button_unchecked_rounded,
+                              ? Icons.check_circle_rounded
+                              : pct > 0
+                              ? Icons.timelapse_rounded
+                              : Icons.radio_button_unchecked_rounded,
                           size: 11,
                           color: _isTeacher
                               ? AppColors.primary
                               : completed
-                                  ? AppColors.success
-                                  : pct > 0
-                                      ? AppColors.primary
-                                      : AppColors.textSecondary,
+                              ? AppColors.success
+                              : pct > 0
+                              ? AppColors.primary
+                              : AppColors.textSecondary,
                         ),
                         const SizedBox(width: 5),
                         Text(
                           _isTeacher
                               ? context.l10n.teacherPreviewMode
                               : completed
-                                  ? context.l10n.statusCompleted
-                                  : pct > 0
-                                      ? context.l10n.statusInProgress
-                                      : context.l10n.statusNotStarted,
+                              ? context.l10n.statusCompleted
+                              : pct > 0
+                              ? context.l10n.statusInProgress
+                              : context.l10n.statusNotStarted,
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
                             color: _isTeacher
                                 ? AppColors.primary
                                 : completed
-                                    ? AppColors.success
-                                    : pct > 0
-                                        ? AppColors.primary
-                                        : AppColors.textSecondary,
+                                ? AppColors.success
+                                : pct > 0
+                                ? AppColors.primary
+                                : AppColors.textSecondary,
                           ),
                         ),
                       ],
@@ -820,7 +872,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                context.l10n.remainingTime(_formatTime(remainingSecs)),
+                                context.l10n.remainingTime(
+                                  _formatTime(remainingSecs),
+                                ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
@@ -912,8 +966,14 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                         return GestureDetector(
                           behavior: HitTestBehavior.opaque,
                           onTapDown: (details) {
-                            if (liveDur > 0 && _seekTo != null && barWidth > 0) {
-                              final ratio = (details.localPosition.dx / barWidth).clamp(0.0, 1.0);
+                            if (liveDur > 0 &&
+                                _seekTo != null &&
+                                barWidth > 0) {
+                              final ratio =
+                                  (details.localPosition.dx / barWidth).clamp(
+                                    0.0,
+                                    1.0,
+                                  );
                               final targetSecs = (ratio * liveDur).round();
                               _seekTo?.call(targetSecs);
                             }
@@ -949,7 +1009,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                                         borderRadius: BorderRadius.circular(4),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: AppColors.primary.withAlpha(90),
+                                            color: AppColors.primary.withAlpha(
+                                              90,
+                                            ),
                                             blurRadius: 6,
                                             spreadRadius: 1,
                                           ),
@@ -968,58 +1030,72 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                     const SizedBox(height: AppSpacing.s12),
 
                     // Quick Academic Playback Control Bar
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // -10s
-                        IconButton.filledTonal(
-                          tooltip: context.l10n.seek10Seconds,
-                          icon: const Icon(Icons.replay_10_rounded, size: 20),
-                          onPressed: () {
-                            final target = (livePos - 10).clamp(0, liveDur);
-                            _seekTo?.call(target);
-                          },
-                        ),
-                        const SizedBox(width: AppSpacing.s10),
-                        // Play / Pause Toggle
-                        ValueListenableBuilder<bool>(
-                          valueListenable: _isPlayingNotifier,
-                          builder: (context, isPlaying, _) {
-                            return FilledButton.icon(
-                              style: FilledButton.styleFrom(
-                                backgroundColor: AppColors.primary,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                              ),
-                              onPressed: () {
-                                if (_togglePlayPauseFn != null) {
-                                  _togglePlayPauseFn!();
-                                } else if (_seekTo != null) {
-                                  _seekTo!(livePos);
-                                }
-                              },
-                              icon: Icon(
-                                isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-                                size: 18,
-                              ),
-                              label: Text(
-                                context.l10n.playPauseAction,
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-                              ),
-                            );
-                          },
-                        ),
-                        const SizedBox(width: AppSpacing.s10),
-                        // +10s
-                        IconButton.filledTonal(
-                          tooltip: context.l10n.seek10Seconds,
-                          icon: const Icon(Icons.forward_10_rounded, size: 20),
-                          onPressed: () {
-                            final target = (livePos + 10).clamp(0, liveDur);
-                            _seekTo?.call(target);
-                          },
-                        ),
-                      ],
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // -10s
+                          IconButton.filledTonal(
+                            tooltip: context.l10n.seek10Seconds,
+                            icon: const Icon(Icons.replay_10_rounded, size: 20),
+                            onPressed: () {
+                              final target = (livePos - 10).clamp(0, liveDur);
+                              _seekTo?.call(target);
+                            },
+                          ),
+                          const SizedBox(width: AppSpacing.s10),
+                          // Play / Pause Toggle
+                          ValueListenableBuilder<bool>(
+                            valueListenable: _isPlayingNotifier,
+                            builder: (context, isPlaying, _) {
+                              return FilledButton.icon(
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: AppColors.primary,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                    vertical: 8,
+                                  ),
+                                ),
+                                onPressed: () {
+                                  if (_togglePlayPauseFn != null) {
+                                    _togglePlayPauseFn!();
+                                  } else if (_seekTo != null) {
+                                    _seekTo!(livePos);
+                                  }
+                                },
+                                icon: Icon(
+                                  isPlaying
+                                      ? Icons.pause_rounded
+                                      : Icons.play_arrow_rounded,
+                                  size: 18,
+                                ),
+                                label: Text(
+                                  context.l10n.playPauseAction,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                          const SizedBox(width: AppSpacing.s10),
+                          // +10s
+                          IconButton.filledTonal(
+                            tooltip: context.l10n.seek10Seconds,
+                            icon: const Icon(
+                              Icons.forward_10_rounded,
+                              size: 20,
+                            ),
+                            onPressed: () {
+                              final target = (livePos + 10).clamp(0, liveDur);
+                              _seekTo?.call(target);
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -1036,7 +1112,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                   ),
                   decoration: BoxDecoration(
                     color: AppColors.success.withAlpha(15),
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                    borderRadius: BorderRadius.circular(
+                      AppSpacing.radiusMedium,
+                    ),
                     border: Border.all(color: AppColors.success.withAlpha(40)),
                   ),
                   child: Row(
@@ -1068,7 +1146,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                   ),
                   decoration: BoxDecoration(
                     color: AppColors.surfaceVariant.withAlpha(35),
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                    borderRadius: BorderRadius.circular(
+                      AppSpacing.radiusMedium,
+                    ),
                     border: Border.all(color: AppColors.border.withAlpha(40)),
                   ),
                   child: Row(
@@ -1141,11 +1221,11 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
         final cubit = context.read<VideosCubit>();
         setState(() => _isAttachingPdf = true);
         final success = await cubit.attachMaterialToVideo(
-              videoId: video.id,
-              contentId: video.contentId,
-              fileName: file.name,
-              fileBytes: bytes,
-            );
+          videoId: video.id,
+          contentId: video.contentId,
+          fileName: file.name,
+          fileBytes: bytes,
+        );
 
         if (mounted) {
           setState(() => _isAttachingPdf = false);
@@ -1210,19 +1290,24 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
                       color: themeColor.withAlpha(20),
-                      borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-                      border: Border.all(
-                        color: themeColor.withAlpha(60),
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.radiusFull,
                       ),
+                      border: Border.all(color: themeColor.withAlpha(60)),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          isUnlocked ? Icons.quiz_rounded : Icons.lock_outline_rounded,
+                          isUnlocked
+                              ? Icons.quiz_rounded
+                              : Icons.lock_outline_rounded,
                           size: 11,
                           color: themeColor,
                         ),
@@ -1247,7 +1332,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                     : context.l10n.quizGateNotice,
                 style: TextStyle(
                   fontSize: 11,
-                  color: isUnlocked ? AppColors.success : AppColors.textSecondary,
+                  color: isUnlocked
+                      ? AppColors.success
+                      : AppColors.textSecondary,
                   fontWeight: isUnlocked ? FontWeight.w600 : FontWeight.normal,
                 ),
               ),
@@ -1266,7 +1353,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                       height: 40,
                       decoration: BoxDecoration(
                         color: themeColor.withAlpha(20),
-                        borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusSmall,
+                        ),
                       ),
                       child: Icon(
                         isUnlocked ? Icons.quiz_rounded : Icons.lock_rounded,
@@ -1280,7 +1369,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            widget.associatedExamTitle ?? context.l10n.associatedExamBadge,
+                            widget.associatedExamTitle ??
+                                context.l10n.associatedExamBadge,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
@@ -1298,24 +1388,39 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
               const SizedBox(height: AppSpacing.s12),
               ElevatedButton.icon(
                 icon: Icon(
-                  isUnlocked ? Icons.arrow_forward_rounded : Icons.lock_outline_rounded,
+                  isUnlocked
+                      ? Icons.arrow_forward_rounded
+                      : Icons.lock_outline_rounded,
                   size: 16,
                 ),
-                label: Text(
-                  isUnlocked
-                      ? context.l10n.takeQuizNowAction
-                      : context.l10n.quizGateNotice,
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                label: Flexible(
+                  child: Text(
+                    isUnlocked
+                        ? context.l10n.takeQuizNowAction
+                        : context.l10n.quizGateNotice,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: isUnlocked ? AppColors.success : AppColors.surfaceVariant,
-                  foregroundColor: isUnlocked ? Colors.white : AppColors.textMuted,
+                  backgroundColor: isUnlocked
+                      ? AppColors.success
+                      : AppColors.surfaceVariant,
+                  foregroundColor: isUnlocked
+                      ? Colors.white
+                      : AppColors.textMuted,
                   padding: const EdgeInsets.symmetric(
                     vertical: AppSpacing.s12,
                     horizontal: AppSpacing.s16,
                   ),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                    borderRadius: BorderRadius.circular(
+                      AppSpacing.radiusMedium,
+                    ),
                   ),
                 ),
                 onPressed: isUnlocked
@@ -1431,7 +1536,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                     height: 40,
                     decoration: BoxDecoration(
                       color: const Color(0xFFEA580C).withAlpha(20),
-                      borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.radiusSmall,
+                      ),
                     ),
                     child: const Icon(
                       Icons.picture_as_pdf_rounded,
@@ -1472,7 +1579,13 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
             const SizedBox(height: AppSpacing.s12),
             ElevatedButton.icon(
               icon: const Icon(Icons.download_rounded, size: 16),
-              label: Text(context.l10n.viewAttachedPdf),
+              label: Flexible(
+                child: Text(
+                  context.l10n.viewAttachedPdf,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
@@ -1496,8 +1609,16 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.sync_rounded, size: 15),
-                label: Text(context.l10n.attachPdfToLessonAction),
-                onPressed: _isAttachingPdf ? null : () => _pickAndAttachPdf(video!),
+                label: Flexible(
+                  child: Text(
+                    context.l10n.attachPdfToLessonAction,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                onPressed: _isAttachingPdf
+                    ? null
+                    : () => _pickAndAttachPdf(video!),
               ),
             ],
           ] else if (_isTeacher) ...[
@@ -1549,8 +1670,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                           vertical: AppSpacing.s10,
                         ),
                       ),
-                      onPressed:
-                          _isAttachingPdf ? null : () => _pickAndAttachPdf(video!),
+                      onPressed: _isAttachingPdf
+                          ? null
+                          : () => _pickAndAttachPdf(video!),
                     ),
                   ),
                 ],
@@ -1578,7 +1700,11 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
           const SizedBox(height: AppSpacing.s8),
           Row(
             children: [
-              const Icon(Icons.verified_user_rounded, size: 14, color: AppColors.primary),
+              const Icon(
+                Icons.verified_user_rounded,
+                size: 14,
+                color: AppColors.primary,
+              ),
               const SizedBox(width: 4),
               Expanded(
                 child: Text(
