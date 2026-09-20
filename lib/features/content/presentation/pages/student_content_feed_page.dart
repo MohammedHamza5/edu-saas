@@ -216,6 +216,12 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                 .where((i) => i.status == ContentStatus.published)
                 .toList();
 
+            final completedCount = allPublished.where((i) => i.isCompleted).length;
+            final totalPublishedCount = allPublished.length;
+            final overallProgressPct = totalPublishedCount > 0
+                ? ((completedCount / totalPublishedCount) * 100).toInt()
+                : 0;
+
             // Filter by type
             var items = _selectedTypeFilter == null
                 ? allPublished
@@ -311,6 +317,88 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                                     ),
                                   );
                                 }).toList(),
+                              ),
+                            ),
+                          ),
+                        ),
+
+                      // 1.1 Overall Course Completion Roadmap Banner
+                      if (allPublished.isNotEmpty)
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: AppSpacing.s12),
+                            child: Container(
+                              padding: const EdgeInsets.all(AppSpacing.s16),
+                              decoration: BoxDecoration(
+                                color: AppColors.surfaceVariant,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: AppColors.border,
+                                ),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.timeline_rounded,
+                                        color: AppColors.primary,
+                                        size: 20,
+                                      ),
+                                      const SizedBox(width: AppSpacing.s8),
+                                      Expanded(
+                                        child: Text(
+                                          context.l10n.overallCourseProgress(
+                                            completedCount,
+                                            totalPublishedCount,
+                                            overallProgressPct,
+                                          ),
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 13,
+                                            color: AppColors.textPrimary,
+                                          ),
+                                        ),
+                                      ),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 3,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.primary.withAlpha(25),
+                                          borderRadius: BorderRadius.circular(12),
+                                          border: Border.all(
+                                            color: AppColors.primary.withAlpha(60),
+                                          ),
+                                        ),
+                                        child: Text(
+                                          '$overallProgressPct%',
+                                          style: const TextStyle(
+                                            color: AppColors.primary,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: AppSpacing.s10),
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(4),
+                                    child: LinearProgressIndicator(
+                                      value: totalPublishedCount > 0
+                                          ? completedCount / totalPublishedCount
+                                          : 0.0,
+                                      backgroundColor: AppColors.border,
+                                      valueColor: const AlwaysStoppedAnimation<Color>(
+                                        AppColors.primary,
+                                      ),
+                                      minHeight: 6,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
@@ -470,6 +558,7 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                                 child: ContentItemCard(
                                   content: item,
                                   isTeacher: false,
+                                  index: index,
                                   onOpenFile: (_) => _handleContentTap(item),
                                   onTap: () => _handleContentTap(item),
                                 ),

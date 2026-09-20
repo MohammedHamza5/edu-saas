@@ -27,6 +27,9 @@ class ContentModel extends ContentEntity {
     super.prerequisiteExamTitle,
     super.prerequisitePassingScore,
     super.isLocked = false,
+    super.isVideoCompleted = false,
+    super.videoProgressPercentage = 0.0,
+    super.isExamPassed = false,
   });
 
   factory ContentModel.fromJson(Map<String, dynamic> json) {
@@ -131,6 +134,10 @@ class ContentModel extends ContentEntity {
       prerequisiteExamTitle: prerequisiteExamTitle,
       prerequisitePassingScore: prerequisitePassingScore,
       isLocked: isLocked,
+      isVideoCompleted: json['is_video_completed'] == true,
+      videoProgressPercentage:
+          (json['video_progress_percentage'] as num?)?.toDouble() ?? 0.0,
+      isExamPassed: json['is_exam_passed'] == true,
     );
   }
 

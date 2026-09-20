@@ -880,13 +880,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get addQuestionAction => 'Add Question';
+  String get addQuestionAction => 'Add Quiz Question';
 
   @override
-  String get questionTextLabel => 'Question Prompt';
+  String get questionTextLabel => 'Question Text';
 
   @override
-  String get questionPointsLabel => 'Point Value';
+  String get questionPointsLabel => 'Points';
 
   @override
   String optionTextLabel(String letter) {
@@ -3069,7 +3069,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String passingScoreLabel(int score) {
-    return 'Passing: $score';
+    return 'Passing Score to Unlock (%)';
   }
 
   @override
@@ -3494,7 +3494,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get questionTypeMultipleChoice => 'Multiple Choice';
 
   @override
-  String get questionTypeTrueFalse => 'True or False';
+  String get questionTypeTrueFalse => 'True / False';
 
   @override
   String get attemptStatusInProgress => 'In Progress';
@@ -4194,10 +4194,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bunnyTabTitle => 'Bunny CDN';
 
   @override
-  String get youtubeUrlLabel => 'YouTube URL';
+  String get youtubeUrlLabel => 'YouTube Video URL';
 
   @override
-  String get youtubeUrlHint => 'Paste YouTube link here';
+  String get youtubeUrlHint => 'Paste YouTube link e.g. https://youtu.be/...';
 
   @override
   String get youtubeUnlistedAdvice => 'Use Unlisted videos for privacy';
@@ -4524,4 +4524,218 @@ class AppLocalizationsEn extends AppLocalizations {
   String enrolledStudentsCountLabel(int count) {
     return '$count Students Enrolled';
   }
+
+  @override
+  String get streamingProviderSettingTitle => 'Lecture Streaming Provider';
+
+  @override
+  String get streamingProviderSettingDesc =>
+      'Select the authorized provider to stream your lectures to students';
+
+  @override
+  String get providerYoutubeLabel => 'YouTube (Unlisted)';
+
+  @override
+  String get providerYoutubeDesc =>
+      'Fast & free hosting with instant linking via video URL';
+
+  @override
+  String get providerBunnyLabel => 'Bunny Stream (Private Encrypted CDN)';
+
+  @override
+  String get providerBunnyDesc =>
+      'High security & anti-download protection with HLS streaming';
+
+  @override
+  String get providerUpdatedToast => 'Streaming provider updated successfully';
+
+  @override
+  String get allInOneStudioTitle => 'All-in-One Lecture Studio';
+
+  @override
+  String get allInOneStudioSubtitle =>
+      'Add video, handout, and quiz in a single step';
+
+  @override
+  String get lectureDetailsSection => 'Lecture & Video Details';
+
+  @override
+  String get lectureTitleLabel => 'Lecture Title';
+
+  @override
+  String get lectureTitleHint => 'e.g. Lecture 01 - Intro to Algebra';
+
+  @override
+  String get lectureDescLabel => 'Lecture Description or Notes';
+
+  @override
+  String get lectureDescHint =>
+      'Important points for students beside the video...';
+
+  @override
+  String get handoutAttachmentSection => 'Attached Lecture Handout (PDF)';
+
+  @override
+  String get attachHandoutPdf => 'Attach Lecture PDF Handout';
+
+  @override
+  String handoutSelected(String fileName) {
+    return 'File selected: $fileName';
+  }
+
+  @override
+  String get inlineQuizSection => 'Lecture Quiz & Unlock Requirement';
+
+  @override
+  String get enableInlineQuiz => 'Enable required quiz to unlock next lecture';
+
+  @override
+  String get questionTypeMcq => 'Multiple Choice';
+
+  @override
+  String optionLabel(int index) {
+    return 'Option $index';
+  }
+
+  @override
+  String get correctOptionBadge => 'Correct Answer';
+
+  @override
+  String get publishAndApproveAction => 'Save & Approve Lecture to Syllabus 🚀';
+
+  @override
+  String get lectureCreatedSuccessToast =>
+      'Lecture & quiz successfully added to syllabus';
+
+  @override
+  String get curriculumRoadmapTitle => 'Group Lectures & Curriculum';
+
+  @override
+  String get curriculumRoadmapSubtitle =>
+      'Sequential lecture roadmap & quiz gates';
+
+  @override
+  String lectureNumberBadge(int number) {
+    return 'Lecture $number';
+  }
+
+  @override
+  String get moveUpAction => 'Move Up';
+
+  @override
+  String get moveDownAction => 'Move Down';
+
+  @override
+  String get quizGateNotice =>
+      '🔒 Quiz locked: Complete watching the lecture first';
+
+  @override
+  String get quizUnlockedReady => '🟢 Quiz ready: Start now';
+
+  @override
+  String get downloadHandoutAction => 'Download Handout (PDF)';
+
+  @override
+  String nextLectureLockedNotice(String prevTitle, int score) {
+    return '🔒 Locked: Requires finishing $prevTitle and passing its quiz with $score%';
+  }
+
+  @override
+  String get videoCompletedCongrats =>
+      'Well done! You have completed the lecture 🎉 The quiz is now unlocked.';
+
+  @override
+  String get takeQuizNowAction => 'Take Lecture Quiz Now 📝';
+
+  @override
+  String get quizPassedUnlockNext =>
+      'Congratulations! You passed the quiz and unlocked the next lecture 🚀';
+
+  @override
+  String get videoSourceYoutube => 'YouTube';
+
+  @override
+  String get videoSourceBunny => 'Bunny CDN';
+
+  @override
+  String get videoSourceNone => 'No Video';
+
+  @override
+  String get videoSourceLabel => 'Video Source';
+
+  @override
+  String get changeVideoFileAction => 'Change Video File';
+
+  @override
+  String get addMcqQuestionAction => 'Add Multiple Choice Question';
+
+  @override
+  String get addTrueFalseQuestionAction => 'Add True / False Question';
+
+  @override
+  String get trueOptionLabel => 'True (Correct)';
+
+  @override
+  String get falseOptionLabel => 'False (Incorrect)';
+
+  @override
+  String get completedBadge => 'Completed';
+
+  @override
+  String get currentActiveLectureBadge => 'Current Lecture';
+
+  @override
+  String overallCourseProgress(int completed, int total, int percentage) {
+    return 'Overall Progress: $completed of $total lectures completed ($percentage%)';
+  }
+
+  @override
+  String get reviewQuizResultAction => 'Review Quiz Score';
+
+  @override
+  String get rewatchLectureAction => 'Rewatch Lecture';
+
+  @override
+  String get startLectureAction => 'Watch Lecture';
+
+  @override
+  String get quizPrefix => 'Lecture Quiz';
+
+  @override
+  String get removeQuestionTooltip => 'Delete Question';
+
+  @override
+  String get addNewLectureHero => 'Add New All-in-One Lecture';
+
+  @override
+  String get noLecturesInCurriculum => 'No lectures in this curriculum yet';
+
+  @override
+  String get noLecturesInCurriculumSubtitle =>
+      'Start by adding the first lecture with video, booklet, and quiz';
+
+  @override
+  String get quizRulesAtLeastOneQuestion =>
+      'Quiz must contain at least one question';
+
+  @override
+  String get questionTextRequired => 'Please enter question text';
+
+  @override
+  String get fillAllOptionsNotice => 'Please fill in all options';
+
+  @override
+  String get creatingContent => 'Creating lecture...';
+
+  @override
+  String get linkingYoutubeVideo => 'Linking YouTube video...';
+
+  @override
+  String get uploadingNotice => 'Uploading attached handout...';
+
+  @override
+  String get creatingExam => 'Creating lecture quiz...';
+
+  @override
+  String get youtubeUrlRequired => 'YouTube URL is required';
 }

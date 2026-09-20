@@ -878,13 +878,13 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get addQuestionAction => 'إضافة سؤال';
+  String get addQuestionAction => 'إضافة سؤال للكويز';
 
   @override
   String get questionTextLabel => 'نص السؤال';
 
   @override
-  String get questionPointsLabel => 'قيمة الدرجة';
+  String get questionPointsLabel => 'الدرجات';
 
   @override
   String optionTextLabel(String letter) {
@@ -3050,7 +3050,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String passingScoreLabel(int score) {
-    return 'النجاح: $score';
+    return 'نسبة النجاح المطلوبة لفك القفل (%)';
   }
 
   @override
@@ -3470,7 +3470,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get questionTypeMultipleChoice => 'اختيار من متعدد';
 
   @override
-  String get questionTypeTrueFalse => 'صواب أو خطأ';
+  String get questionTypeTrueFalse => 'صح أو خطأ';
 
   @override
   String get attemptStatusInProgress => 'قيد الأداء';
@@ -4163,10 +4163,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get bunnyTabTitle => 'خوادم المنصة (Bunny)';
 
   @override
-  String get youtubeUrlLabel => 'رابط يوتيوب';
+  String get youtubeUrlLabel => 'رابط فيديو يوتيوب';
 
   @override
-  String get youtubeUrlHint => 'ضع رابط يوتيوب هنا';
+  String get youtubeUrlHint => 'ضع رابط اليوتيوب هنا...';
 
   @override
   String get youtubeUnlistedAdvice =>
@@ -4494,4 +4494,216 @@ class AppLocalizationsAr extends AppLocalizations {
   String enrolledStudentsCountLabel(int count) {
     return '$count طلاب مسجلين';
   }
+
+  @override
+  String get streamingProviderSettingTitle => 'قناة بث المحاضرات';
+
+  @override
+  String get streamingProviderSettingDesc =>
+      'اختر القناة المعتمدة لبث محاضراتك للطلاب';
+
+  @override
+  String get providerYoutubeLabel => 'يوتيوب (غير مدرج Unlisted)';
+
+  @override
+  String get providerYoutubeDesc => 'استضافة سريعة وسهلة عبر وضع رابط الفيديو';
+
+  @override
+  String get providerBunnyLabel => 'سيرفرات Bunny الخاصة (مشفرة CDN)';
+
+  @override
+  String get providerBunnyDesc =>
+      'حماية فائقة ومنع تحميل مباشر مع دعم تقنية HLS';
+
+  @override
+  String get providerUpdatedToast => 'تم تحديث قناة البث بنجاح';
+
+  @override
+  String get allInOneStudioTitle => 'استوديو المحاضرة المتكامل';
+
+  @override
+  String get allInOneStudioSubtitle =>
+      'أضف الفيديو، ملزمة الـ PDF، والكويز في خطوة واحدة';
+
+  @override
+  String get lectureDetailsSection => 'تفاصيل المحاضرة والفيديو';
+
+  @override
+  String get lectureTitleLabel => 'عنوان المحاضرة';
+
+  @override
+  String get lectureTitleHint => 'مثال: المحاضرة 01 - مقدمة في الجبر';
+
+  @override
+  String get lectureDescLabel => 'وصف المحاضرة أو ملاحظات';
+
+  @override
+  String get lectureDescHint => 'نقاط هامة للطلاب بجانب الفيديو...';
+
+  @override
+  String get handoutAttachmentSection => 'ملزمة المحاضرة المرفقة (PDF)';
+
+  @override
+  String get attachHandoutPdf => 'إرفاق ملزمة المحاضرة (PDF)';
+
+  @override
+  String handoutSelected(String fileName) {
+    return 'تم اختيار الملف: $fileName';
+  }
+
+  @override
+  String get inlineQuizSection => 'كويز المحاضرة وشرط الفتح';
+
+  @override
+  String get enableInlineQuiz => 'تفعيل كويز إلزامي لفك قفل المحاضرة التالية';
+
+  @override
+  String get questionTypeMcq => 'اختيار من متعدد';
+
+  @override
+  String optionLabel(int index) {
+    return 'الخيار $index';
+  }
+
+  @override
+  String get correctOptionBadge => 'الإجابة الصحيحة';
+
+  @override
+  String get publishAndApproveAction => 'حفظ واعتماد المحاضرة للمنهج 🚀';
+
+  @override
+  String get lectureCreatedSuccessToast =>
+      'تمت إضافة المحاضرة والكويز للمنهج بنجاح';
+
+  @override
+  String get curriculumRoadmapTitle => 'منهج ومحاضرات المجموعة';
+
+  @override
+  String get curriculumRoadmapSubtitle =>
+      'الخريطة التسلسلية للمحاضرات وبوابات الاختبارات';
+
+  @override
+  String lectureNumberBadge(int number) {
+    return 'المحاضرة $number';
+  }
+
+  @override
+  String get moveUpAction => 'تحريك لأعلى';
+
+  @override
+  String get moveDownAction => 'تحريك لأسفل';
+
+  @override
+  String get quizGateNotice =>
+      '🔒 الكويز مقفول: يجب إنهاء مشاهدة المحاضرة أولاً';
+
+  @override
+  String get quizUnlockedReady => '🟢 الكويز متاح: ابدأ الاختبار الآن';
+
+  @override
+  String get downloadHandoutAction => 'تحميل الملزمة (PDF)';
+
+  @override
+  String nextLectureLockedNotice(String prevTitle, int score) {
+    return '🔒 مقفول: يتطلب إنهاء $prevTitle واجتياز اختبارها بنسبة $score%';
+  }
+
+  @override
+  String get videoCompletedCongrats =>
+      'أحسنت! لقد أتممت مشاهدة المحاضرة 🎉 تم فتح الاختبار الآن.';
+
+  @override
+  String get takeQuizNowAction => 'ابدأ كويز المحاضرة الآن 📝';
+
+  @override
+  String get quizPassedUnlockNext =>
+      'تهانينا! لقد اجتزت الاختبار بنجاح وتم فتح المحاضرة التالية 🚀';
+
+  @override
+  String get videoSourceYoutube => 'يوتيوب';
+
+  @override
+  String get videoSourceBunny => 'Bunny CDN';
+
+  @override
+  String get videoSourceNone => 'بدون فيديو';
+
+  @override
+  String get videoSourceLabel => 'مصدر الفيديو';
+
+  @override
+  String get changeVideoFileAction => 'تغيير ملف الفيديو';
+
+  @override
+  String get addMcqQuestionAction => 'إضافة سؤال اختيار من متعدد (MCQ)';
+
+  @override
+  String get addTrueFalseQuestionAction => 'إضافة سؤال صح أو خطأ';
+
+  @override
+  String get trueOptionLabel => 'صواب (True)';
+
+  @override
+  String get falseOptionLabel => 'خطأ (False)';
+
+  @override
+  String get completedBadge => 'مكتملة';
+
+  @override
+  String get currentActiveLectureBadge => 'المحاضرة الحالية';
+
+  @override
+  String overallCourseProgress(int completed, int total, int percentage) {
+    return 'التقدم العام: $completed من $total مكتملة ($percentage%)';
+  }
+
+  @override
+  String get reviewQuizResultAction => 'مراجعة نتيجة الكويز';
+
+  @override
+  String get rewatchLectureAction => 'إعادة مشاهدة المحاضرة';
+
+  @override
+  String get startLectureAction => 'مشاهدة المحاضرة';
+
+  @override
+  String get quizPrefix => 'كويز محاضرة';
+
+  @override
+  String get removeQuestionTooltip => 'حذف هذا السؤال';
+
+  @override
+  String get addNewLectureHero => 'إضافة محاضرة جديدة (شاملة)';
+
+  @override
+  String get noLecturesInCurriculum => 'لا توجد محاضرات في هذا المنهج بعد';
+
+  @override
+  String get noLecturesInCurriculumSubtitle =>
+      'ابدأ بإضافة أول محاضرة بملزمتها وكويزها الآن';
+
+  @override
+  String get quizRulesAtLeastOneQuestion =>
+      'يجب أن يحتوي الكويز على سؤال واحد على الأقل';
+
+  @override
+  String get questionTextRequired => 'يرجى كتابة نص السؤال';
+
+  @override
+  String get fillAllOptionsNotice => 'يرجى كتابة نصوص الخيارات الأربعة كاملة';
+
+  @override
+  String get creatingContent => 'جاري إنشاء المحاضرة...';
+
+  @override
+  String get linkingYoutubeVideo => 'جاري ربط فيديو اليوتيوب...';
+
+  @override
+  String get uploadingNotice => 'جاري رفع ملزمة الدرس PDF...';
+
+  @override
+  String get creatingExam => 'جاري إنشاء كويز المحاضرة...';
+
+  @override
+  String get youtubeUrlRequired => 'رابط اليوتيوب مطلوب';
 }

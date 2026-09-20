@@ -35,6 +35,8 @@ class _TeacherSettingsPageState extends State<TeacherSettingsPage> {
   late final TextEditingController _supportEmailController;
 
   bool _isSaving = false;
+  String _selectedVideoProvider = TenantRegistry.defaultBranding.videoProvider;
+  bool _isUpdatingProvider = false;
 
   @override
   void initState() {
@@ -46,6 +48,75 @@ class _TeacherSettingsPageState extends State<TeacherSettingsPage> {
     _taglineController = TextEditingController(text: branding.tagline);
     _supportPhoneController = TextEditingController(text: branding.supportPhone ?? '');
     _supportEmailController = TextEditingController(text: branding.supportEmail ?? '');
+    _selectedVideoProvider = branding.videoProvider;
+    _loadTenantProvider();
+  }
+
+  Future<void> _loadTenantProvider() async {
+    try {
+      final tenantId = TenantRegistry.defaultBranding.tenantId;
+      final row = await SupabaseService.client
+          .from('tenants')
+          .select('video_provider')
+          .eq('id', tenantId)
+          .maybeSingle();
+      if (row != null && row['video_provider'] != null && mounted) {
+        final prov = row['video_provider'] as String;
+        setState(() {
+          _selectedVideoProvider = prov;
+        });
+        final updated = TenantRegistry.defaultBranding.copyWith(videoProvider: prov);
+        TenantRegistry.register(updated);
+        try {
+          context.read<TenantThemeCubit>().setBranding(updated);
+        } catch (_) {}
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _updateVideoProvider(String newProvider) async {
+    if (_selectedVideoProvider == newProvider || _isUpdatingProvider) return;
+    setState(() {
+      _selectedVideoProvider = newProvider;
+      _isUpdatingProvider = true;
+    });
+
+    try {
+      final tenantId = TenantRegistry.defaultBranding.tenantId;
+      await SupabaseService.client
+          .from('tenants')
+          .update({'video_provider': newProvider})
+          .eq('id', tenantId);
+
+      final updated = TenantRegistry.defaultBranding.copyWith(videoProvider: newProvider);
+      TenantRegistry.register(updated);
+      if (mounted) {
+        try {
+          context.read<TenantThemeCubit>().setBranding(updated);
+        } catch (_) {}
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.providerUpdatedToast),
+            backgroundColor: AppColors.success,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isUpdatingProvider = false);
+      }
+    }
   }
 
   @override
@@ -77,6 +148,7 @@ class _TeacherSettingsPageState extends State<TeacherSettingsPage> {
       primaryColor: currentBranding.primaryColor,
       supportPhone: _supportPhoneController.text.trim(),
       supportEmail: _supportEmailController.text.trim(),
+      videoProvider: _selectedVideoProvider,
     );
 
     // Register in tenant registry and update theme cubit
@@ -284,7 +356,85 @@ class _TeacherSettingsPageState extends State<TeacherSettingsPage> {
                 ),
                 const SizedBox(height: AppSpacing.s24),
 
-                // 3. Section: Language Preference (Arabic / English)
+                // 3. Section: Video Streaming Provider (YouTube vs Bunny Stream)
+                _buildSectionCard(
+                  context,
+                  title: l10n.streamingProviderSettingTitle,
+                  icon: Icons.video_settings_rounded,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.streamingProviderSettingDesc,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.s16),
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          final isCompact = constraints.maxWidth < 600;
+                          if (isCompact) {
+                            return Column(
+                              children: [
+                                _buildProviderOptionCard(
+                                  context,
+                                  providerKey: 'youtube',
+                                  providerName: l10n.providerYoutubeLabel,
+                                  subtitle: l10n.providerYoutubeDesc,
+                                  icon: Icons.play_circle_fill_rounded,
+                                  iconColor: const Color(0xFFFF0000),
+                                  isSelected: _selectedVideoProvider == 'youtube',
+                                ),
+                                const SizedBox(height: AppSpacing.s12),
+                                _buildProviderOptionCard(
+                                  context,
+                                  providerKey: 'bunny',
+                                  providerName: l10n.providerBunnyLabel,
+                                  subtitle: l10n.providerBunnyDesc,
+                                  icon: Icons.cloud_done_rounded,
+                                  iconColor: const Color(0xFFF97316),
+                                  isSelected: _selectedVideoProvider == 'bunny',
+                                ),
+                              ],
+                            );
+                          }
+                          return Row(
+                            children: [
+                              Expanded(
+                                child: _buildProviderOptionCard(
+                                  context,
+                                  providerKey: 'youtube',
+                                  providerName: l10n.providerYoutubeLabel,
+                                  subtitle: l10n.providerYoutubeDesc,
+                                  icon: Icons.play_circle_fill_rounded,
+                                  iconColor: const Color(0xFFFF0000),
+                                  isSelected: _selectedVideoProvider == 'youtube',
+                                ),
+                              ),
+                              const SizedBox(width: AppSpacing.s16),
+                              Expanded(
+                                child: _buildProviderOptionCard(
+                                  context,
+                                  providerKey: 'bunny',
+                                  providerName: l10n.providerBunnyLabel,
+                                  subtitle: l10n.providerBunnyDesc,
+                                  icon: Icons.cloud_done_rounded,
+                                  iconColor: const Color(0xFFF97316),
+                                  isSelected: _selectedVideoProvider == 'bunny',
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.s24),
+
+                // 4. Section: Language Preference (Arabic / English)
                 _buildSectionCard(
                   context,
                   title: l10n.settingsLanguageSection,
@@ -526,6 +676,81 @@ class _TeacherSettingsPageState extends State<TeacherSettingsPage> {
                 ],
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProviderOptionCard(
+    BuildContext context, {
+    required String providerKey,
+    required String providerName,
+    required String subtitle,
+    required IconData icon,
+    required Color iconColor,
+    required bool isSelected,
+  }) {
+    return InkWell(
+      onTap: _isUpdatingProvider ? null : () => _updateVideoProvider(providerKey),
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.s16),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primary.withValues(alpha: 0.08) : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? AppColors.primary : AppColors.borderDark,
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.s8),
+              decoration: BoxDecoration(
+                color: iconColor.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: iconColor, size: 24),
+            ),
+            const SizedBox(width: AppSpacing.s12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    providerName,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: isSelected ? AppColors.primary : AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: AppSpacing.s8),
+            if (_isUpdatingProvider && _selectedVideoProvider == providerKey)
+              const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            else
+              Icon(
+                isSelected ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
+                color: isSelected ? AppColors.primary : AppColors.textMuted,
+                size: 22,
+              ),
           ],
         ),
       ),

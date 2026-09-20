@@ -1769,19 +1769,19 @@ abstract class AppLocalizations {
   /// Add question action button
   ///
   /// In en, this message translates to:
-  /// **'Add Question'**
+  /// **'Add Quiz Question'**
   String get addQuestionAction;
 
   /// Question text field
   ///
   /// In en, this message translates to:
-  /// **'Question Prompt'**
+  /// **'Question Text'**
   String get questionTextLabel;
 
   /// Points field
   ///
   /// In en, this message translates to:
-  /// **'Point Value'**
+  /// **'Points'**
   String get questionPointsLabel;
 
   /// Option label
@@ -5584,7 +5584,7 @@ abstract class AppLocalizations {
   /// Passing score badge label
   ///
   /// In en, this message translates to:
-  /// **'Passing: {score}'**
+  /// **'Passing Score to Unlock (%)'**
   String passingScoreLabel(int score);
 
   /// Version and attempts label
@@ -6322,7 +6322,7 @@ abstract class AppLocalizations {
   /// True or false type
   ///
   /// In en, this message translates to:
-  /// **'True or False'**
+  /// **'True / False'**
   String get questionTypeTrueFalse;
 
   /// Attempt status in progress
@@ -7522,13 +7522,13 @@ abstract class AppLocalizations {
   /// No description provided for @youtubeUrlLabel.
   ///
   /// In en, this message translates to:
-  /// **'YouTube URL'**
+  /// **'YouTube Video URL'**
   String get youtubeUrlLabel;
 
   /// No description provided for @youtubeUrlHint.
   ///
   /// In en, this message translates to:
-  /// **'Paste YouTube link here'**
+  /// **'Paste YouTube link e.g. https://youtu.be/...'**
   String get youtubeUrlHint;
 
   /// No description provided for @youtubeUnlistedAdvice.
@@ -8106,6 +8106,390 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} Students Enrolled'**
   String enrolledStudentsCountLabel(int count);
+
+  /// No description provided for @streamingProviderSettingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Lecture Streaming Provider'**
+  String get streamingProviderSettingTitle;
+
+  /// No description provided for @streamingProviderSettingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Select the authorized provider to stream your lectures to students'**
+  String get streamingProviderSettingDesc;
+
+  /// No description provided for @providerYoutubeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'YouTube (Unlisted)'**
+  String get providerYoutubeLabel;
+
+  /// No description provided for @providerYoutubeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Fast & free hosting with instant linking via video URL'**
+  String get providerYoutubeDesc;
+
+  /// No description provided for @providerBunnyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Bunny Stream (Private Encrypted CDN)'**
+  String get providerBunnyLabel;
+
+  /// No description provided for @providerBunnyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'High security & anti-download protection with HLS streaming'**
+  String get providerBunnyDesc;
+
+  /// No description provided for @providerUpdatedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Streaming provider updated successfully'**
+  String get providerUpdatedToast;
+
+  /// No description provided for @allInOneStudioTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'All-in-One Lecture Studio'**
+  String get allInOneStudioTitle;
+
+  /// No description provided for @allInOneStudioSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add video, handout, and quiz in a single step'**
+  String get allInOneStudioSubtitle;
+
+  /// No description provided for @lectureDetailsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Lecture & Video Details'**
+  String get lectureDetailsSection;
+
+  /// No description provided for @lectureTitleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Lecture Title'**
+  String get lectureTitleLabel;
+
+  /// No description provided for @lectureTitleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Lecture 01 - Intro to Algebra'**
+  String get lectureTitleHint;
+
+  /// No description provided for @lectureDescLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Lecture Description or Notes'**
+  String get lectureDescLabel;
+
+  /// No description provided for @lectureDescHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Important points for students beside the video...'**
+  String get lectureDescHint;
+
+  /// No description provided for @handoutAttachmentSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Attached Lecture Handout (PDF)'**
+  String get handoutAttachmentSection;
+
+  /// No description provided for @attachHandoutPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach Lecture PDF Handout'**
+  String get attachHandoutPdf;
+
+  /// No description provided for @handoutSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'File selected: {fileName}'**
+  String handoutSelected(String fileName);
+
+  /// No description provided for @inlineQuizSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Lecture Quiz & Unlock Requirement'**
+  String get inlineQuizSection;
+
+  /// No description provided for @enableInlineQuiz.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable required quiz to unlock next lecture'**
+  String get enableInlineQuiz;
+
+  /// No description provided for @questionTypeMcq.
+  ///
+  /// In en, this message translates to:
+  /// **'Multiple Choice'**
+  String get questionTypeMcq;
+
+  /// No description provided for @optionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Option {index}'**
+  String optionLabel(int index);
+
+  /// No description provided for @correctOptionBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct Answer'**
+  String get correctOptionBadge;
+
+  /// No description provided for @publishAndApproveAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Save & Approve Lecture to Syllabus 🚀'**
+  String get publishAndApproveAction;
+
+  /// No description provided for @lectureCreatedSuccessToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Lecture & quiz successfully added to syllabus'**
+  String get lectureCreatedSuccessToast;
+
+  /// No description provided for @curriculumRoadmapTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Group Lectures & Curriculum'**
+  String get curriculumRoadmapTitle;
+
+  /// No description provided for @curriculumRoadmapSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sequential lecture roadmap & quiz gates'**
+  String get curriculumRoadmapSubtitle;
+
+  /// No description provided for @lectureNumberBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Lecture {number}'**
+  String lectureNumberBadge(int number);
+
+  /// No description provided for @moveUpAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Move Up'**
+  String get moveUpAction;
+
+  /// No description provided for @moveDownAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Move Down'**
+  String get moveDownAction;
+
+  /// No description provided for @quizGateNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'🔒 Quiz locked: Complete watching the lecture first'**
+  String get quizGateNotice;
+
+  /// No description provided for @quizUnlockedReady.
+  ///
+  /// In en, this message translates to:
+  /// **'🟢 Quiz ready: Start now'**
+  String get quizUnlockedReady;
+
+  /// No description provided for @downloadHandoutAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Download Handout (PDF)'**
+  String get downloadHandoutAction;
+
+  /// No description provided for @nextLectureLockedNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'🔒 Locked: Requires finishing {prevTitle} and passing its quiz with {score}%'**
+  String nextLectureLockedNotice(String prevTitle, int score);
+
+  /// No description provided for @videoCompletedCongrats.
+  ///
+  /// In en, this message translates to:
+  /// **'Well done! You have completed the lecture 🎉 The quiz is now unlocked.'**
+  String get videoCompletedCongrats;
+
+  /// No description provided for @takeQuizNowAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Take Lecture Quiz Now 📝'**
+  String get takeQuizNowAction;
+
+  /// No description provided for @quizPassedUnlockNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Congratulations! You passed the quiz and unlocked the next lecture 🚀'**
+  String get quizPassedUnlockNext;
+
+  /// No description provided for @videoSourceYoutube.
+  ///
+  /// In en, this message translates to:
+  /// **'YouTube'**
+  String get videoSourceYoutube;
+
+  /// No description provided for @videoSourceBunny.
+  ///
+  /// In en, this message translates to:
+  /// **'Bunny CDN'**
+  String get videoSourceBunny;
+
+  /// No description provided for @videoSourceNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No Video'**
+  String get videoSourceNone;
+
+  /// No description provided for @videoSourceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Video Source'**
+  String get videoSourceLabel;
+
+  /// No description provided for @changeVideoFileAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Video File'**
+  String get changeVideoFileAction;
+
+  /// No description provided for @addMcqQuestionAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Multiple Choice Question'**
+  String get addMcqQuestionAction;
+
+  /// No description provided for @addTrueFalseQuestionAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Add True / False Question'**
+  String get addTrueFalseQuestionAction;
+
+  /// No description provided for @trueOptionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'True (Correct)'**
+  String get trueOptionLabel;
+
+  /// No description provided for @falseOptionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'False (Incorrect)'**
+  String get falseOptionLabel;
+
+  /// No description provided for @completedBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get completedBadge;
+
+  /// No description provided for @currentActiveLectureBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Lecture'**
+  String get currentActiveLectureBadge;
+
+  /// No description provided for @overallCourseProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Overall Progress: {completed} of {total} lectures completed ({percentage}%)'**
+  String overallCourseProgress(int completed, int total, int percentage);
+
+  /// No description provided for @reviewQuizResultAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Review Quiz Score'**
+  String get reviewQuizResultAction;
+
+  /// No description provided for @rewatchLectureAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Rewatch Lecture'**
+  String get rewatchLectureAction;
+
+  /// No description provided for @startLectureAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch Lecture'**
+  String get startLectureAction;
+
+  /// No description provided for @quizPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Lecture Quiz'**
+  String get quizPrefix;
+
+  /// No description provided for @removeQuestionTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Question'**
+  String get removeQuestionTooltip;
+
+  /// No description provided for @addNewLectureHero.
+  ///
+  /// In en, this message translates to:
+  /// **'Add New All-in-One Lecture'**
+  String get addNewLectureHero;
+
+  /// No description provided for @noLecturesInCurriculum.
+  ///
+  /// In en, this message translates to:
+  /// **'No lectures in this curriculum yet'**
+  String get noLecturesInCurriculum;
+
+  /// No description provided for @noLecturesInCurriculumSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start by adding the first lecture with video, booklet, and quiz'**
+  String get noLecturesInCurriculumSubtitle;
+
+  /// No description provided for @quizRulesAtLeastOneQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiz must contain at least one question'**
+  String get quizRulesAtLeastOneQuestion;
+
+  /// No description provided for @questionTextRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter question text'**
+  String get questionTextRequired;
+
+  /// No description provided for @fillAllOptionsNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Please fill in all options'**
+  String get fillAllOptionsNotice;
+
+  /// No description provided for @creatingContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating lecture...'**
+  String get creatingContent;
+
+  /// No description provided for @linkingYoutubeVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Linking YouTube video...'**
+  String get linkingYoutubeVideo;
+
+  /// No description provided for @uploadingNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading attached handout...'**
+  String get uploadingNotice;
+
+  /// No description provided for @creatingExam.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating lecture quiz...'**
+  String get creatingExam;
+
+  /// No description provided for @youtubeUrlRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'YouTube URL is required'**
+  String get youtubeUrlRequired;
 }
 
 class _AppLocalizationsDelegate

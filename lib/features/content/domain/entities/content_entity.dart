@@ -112,6 +112,9 @@ class ContentEntity extends Equatable {
   final String? prerequisiteExamTitle;
   final int? prerequisitePassingScore;
   final bool isLocked;                // True if student has not passed prerequisite exam
+  final bool isVideoCompleted;        // True if student completed video playback (>=90%)
+  final double videoProgressPercentage; // Student live progress (0.0 to 100.0)
+  final bool isExamPassed;            // True if student passed associated exam
 
   const ContentEntity({
     required this.id,
@@ -138,6 +141,9 @@ class ContentEntity extends Equatable {
     this.prerequisiteExamTitle,
     this.prerequisitePassingScore,
     this.isLocked = false,
+    this.isVideoCompleted = false,
+    this.videoProgressPercentage = 0.0,
+    this.isExamPassed = false,
   });
 
   bool get isPublished => status == ContentStatus.published;
@@ -161,6 +167,15 @@ class ContentEntity extends Equatable {
 
   bool get isYouTube => videoProvider == 'youtube';
   bool get isBunny => videoProvider == 'bunny';
+
+  /// True when the student has completed the entire lecture unit
+  /// (both video watched >=90% and associated exam passed, or whatever is required).
+  bool get isCompleted =>
+      (videoId == null || isVideoCompleted) &&
+      (associatedExamId == null || isExamPassed);
+
+  /// True when student can take the associated exam (must have watched video first)
+  bool get canTakeExam => !isLocked && (videoId == null || isVideoCompleted);
 
   ContentEntity copyWith({
     String? id,
@@ -187,6 +202,9 @@ class ContentEntity extends Equatable {
     Object? prerequisiteExamTitle = _sentinel,
     Object? prerequisitePassingScore = _sentinel,
     bool? isLocked,
+    bool? isVideoCompleted,
+    double? videoProgressPercentage,
+    bool? isExamPassed,
   }) {
     return ContentEntity(
       id: id ?? this.id,
@@ -213,6 +231,9 @@ class ContentEntity extends Equatable {
       prerequisiteExamTitle: prerequisiteExamTitle == _sentinel ? this.prerequisiteExamTitle : prerequisiteExamTitle as String?,
       prerequisitePassingScore: prerequisitePassingScore == _sentinel ? this.prerequisitePassingScore : prerequisitePassingScore as int?,
       isLocked: isLocked ?? this.isLocked,
+      isVideoCompleted: isVideoCompleted ?? this.isVideoCompleted,
+      videoProgressPercentage: videoProgressPercentage ?? this.videoProgressPercentage,
+      isExamPassed: isExamPassed ?? this.isExamPassed,
     );
   }
 
@@ -244,5 +265,8 @@ class ContentEntity extends Equatable {
         prerequisiteExamTitle,
         prerequisitePassingScore,
         isLocked,
+        isVideoCompleted,
+        videoProgressPercentage,
+        isExamPassed,
       ];
 }

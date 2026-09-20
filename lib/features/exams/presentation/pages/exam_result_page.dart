@@ -120,6 +120,38 @@ class ExamResultPage extends StatelessWidget {
                       style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
                     ),
                   ],
+                  if (isPassed) ...[
+                    const SizedBox(height: AppSpacing.s16),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.s16,
+                        vertical: AppSpacing.s12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.success.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: AppColors.success.withValues(alpha: 0.3),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          const Text('🚀', style: TextStyle(fontSize: 20)),
+                          const SizedBox(width: AppSpacing.s8),
+                          Expanded(
+                            child: Text(
+                              context.l10n.quizPassedUnlockNext,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.success,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

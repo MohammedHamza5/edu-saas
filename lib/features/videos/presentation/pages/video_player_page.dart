@@ -315,6 +315,22 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                       eventType: 'video_completed',
                       contentId: video.contentId,
                     );
+                    if (widget.associatedExamId != null && mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          backgroundColor: AppColors.success,
+                          duration: const Duration(seconds: 6),
+                          content: Text(context.l10n.videoCompletedCongrats),
+                          action: SnackBarAction(
+                            label: context.l10n.takeQuizNowAction,
+                            textColor: Colors.white,
+                            onPressed: () {
+                              context.push(AppRoutes.studentExams);
+                            },
+                          ),
+                        ),
+                      );
+                    }
                   }
                 },
               );
@@ -359,7 +375,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                                     _buildAcademicStatsCard(theme, video, progress, isCompleted),
                                     const SizedBox(height: AppSpacing.s16),
                                     if (widget.associatedExamId != null) ...[
-                                      _buildAssociatedExamCard(theme),
+                                      _buildAssociatedExamCard(theme, isCompleted),
                                       const SizedBox(height: AppSpacing.s16),
                                     ],
                                     _buildAttachedMaterialCard(theme, video),
@@ -384,7 +400,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                             _buildAcademicStatsCard(theme, video, progress, isCompleted),
                             const SizedBox(height: AppSpacing.s16),
                             if (widget.associatedExamId != null) ...[
-                              _buildAssociatedExamCard(theme),
+                              _buildAssociatedExamCard(theme, isCompleted),
                               const SizedBox(height: AppSpacing.s16),
                             ],
                             _buildAttachedMaterialCard(theme, video),
@@ -1095,146 +1111,166 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     }
   }
 
-  Widget _buildAssociatedExamCard(ThemeData theme) {
-    return AppCard(
-      variant: AppCardVariant.elevated,
-      padding: const EdgeInsets.all(AppSpacing.s16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
+  Widget _buildAssociatedExamCard(ThemeData theme, bool isInitiallyCompleted) {
+    return AnimatedBuilder(
+      animation: Listenable.merge([_livePositionSecs, _liveDurationSecs]),
+      builder: (context, _) {
+        final livePos = _livePositionSecs.value;
+        final liveDur = _liveDurationSecs.value;
+        final pct = liveDur > 0 ? (livePos / liveDur) * 100 : 0.0;
+        final isUnlocked = _isTeacher || isInitiallyCompleted || pct >= 90.0;
+        final themeColor = isUnlocked ? AppColors.success : AppColors.warning;
+
+        return AppCard(
+          variant: AppCardVariant.elevated,
+          padding: const EdgeInsets.all(AppSpacing.s16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Container(
-                width: 3,
-                height: 18,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [AppColors.success, Color(0xFF10B981)],
-                  ),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.s8),
-              Expanded(
-                child: Text(
-                  context.l10n.associatedExamBadge,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: AppColors.success.withAlpha(20),
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-                  border: Border.all(
-                    color: AppColors.success.withAlpha(60),
-                  ),
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.quiz_rounded,
-                      size: 11,
-                      color: AppColors.success,
+              Row(
+                children: [
+                  Container(
+                    width: 3,
+                    height: 18,
+                    decoration: BoxDecoration(
+                      color: themeColor,
+                      borderRadius: BorderRadius.circular(2),
                     ),
-                    SizedBox(width: 4),
-                    Text(
-                      'QUIZ',
-                      style: TextStyle(
-                        fontSize: 10,
+                  ),
+                  const SizedBox(width: AppSpacing.s8),
+                  Expanded(
+                    child: Text(
+                      context.l10n.associatedExamBadge,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: AppColors.success,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: themeColor.withAlpha(20),
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+                      border: Border.all(
+                        color: themeColor.withAlpha(60),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          isUnlocked ? Icons.quiz_rounded : Icons.lock_outline_rounded,
+                          size: 11,
+                          color: themeColor,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          isUnlocked ? 'QUIZ' : 'LOCKED',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: themeColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Text(
+                isUnlocked
+                    ? context.l10n.videoCompletedCongrats
+                    : context.l10n.quizGateNotice,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: isUnlocked ? AppColors.success : AppColors.textSecondary,
+                  fontWeight: isUnlocked ? FontWeight.w600 : FontWeight.normal,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.s12),
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.s12),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceVariant.withAlpha(25),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                  border: Border.all(color: themeColor.withAlpha(70)),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: themeColor.withAlpha(20),
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                      ),
+                      child: Icon(
+                        isUnlocked ? Icons.quiz_rounded : Icons.lock_rounded,
+                        size: 22,
+                        color: themeColor,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.s12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.associatedExamTitle ?? context.l10n.associatedExamBadge,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
               ),
+              const SizedBox(height: AppSpacing.s12),
+              ElevatedButton.icon(
+                icon: Icon(
+                  isUnlocked ? Icons.arrow_forward_rounded : Icons.lock_outline_rounded,
+                  size: 16,
+                ),
+                label: Text(
+                  isUnlocked
+                      ? context.l10n.takeQuizNowAction
+                      : context.l10n.quizGateNotice,
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isUnlocked ? AppColors.success : AppColors.surfaceVariant,
+                  foregroundColor: isUnlocked ? Colors.white : AppColors.textMuted,
+                  padding: const EdgeInsets.symmetric(
+                    vertical: AppSpacing.s12,
+                    horizontal: AppSpacing.s16,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                  ),
+                ),
+                onPressed: isUnlocked
+                    ? () {
+                        if (_isTeacher) {
+                          context.push(AppRoutes.teacherExams);
+                        } else {
+                          context.push(AppRoutes.studentExams);
+                        }
+                      }
+                    : null,
+              ),
             ],
           ),
-          const SizedBox(height: 4),
-          Text(
-            context.l10n.takeRequiredExamAction,
-            style: const TextStyle(
-              fontSize: 11,
-              color: AppColors.textSecondary,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.s12),
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.s12),
-            decoration: BoxDecoration(
-              color: AppColors.surfaceVariant.withAlpha(25),
-              borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-              border: Border.all(color: AppColors.border.withAlpha(70)),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: AppColors.success.withAlpha(20),
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                  ),
-                  child: const Icon(
-                    Icons.quiz_rounded,
-                    size: 22,
-                    color: AppColors.success,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.s12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.associatedExamTitle ?? context.l10n.associatedExamBadge,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: AppSpacing.s12),
-          ElevatedButton.icon(
-            icon: const Icon(Icons.arrow_forward_rounded, size: 16),
-            label: Text(context.l10n.takeRequiredExamAction),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.success,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(
-                vertical: AppSpacing.s12,
-                horizontal: AppSpacing.s16,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-              ),
-            ),
-            onPressed: () {
-              if (_isTeacher) {
-                context.push(AppRoutes.teacherExams);
-              } else {
-                context.push(AppRoutes.studentExams);
-              }
-            },
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 

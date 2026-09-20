@@ -15,6 +15,7 @@ import '../../../../core/widgets/responsive_container.dart';
 import '../../domain/entities/content_entity.dart';
 import '../cubit/content_cubit.dart';
 import '../cubit/content_state.dart';
+import '../dialogs/all_in_one_lecture_dialog.dart';
 import '../dialogs/create_edit_content_dialog.dart';
 import '../widgets/content_item_card.dart';
 import '../widgets/material_viewer_sheet.dart';
@@ -157,6 +158,25 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
     });
   }
 
+  void _openAllInOneStudio() {
+    if (_selectedGroupId == null) return;
+    AllInOneLectureDialog.show(
+      context,
+      groupId: _selectedGroupId!,
+      groupName: _selectedGroupName,
+    ).then((created) {
+      if (created == true && mounted) {
+        _loadContent(forceRefresh: true);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: AppColors.success,
+            content: Text(context.l10n.lectureCreatedSuccessToast),
+          ),
+        );
+      }
+    });
+  }
+
   void _showAddMaterialSheet() {
     if (_selectedGroupId == null) return;
     showModalBottomSheet<void>(
@@ -173,41 +193,54 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
               horizontal: AppSpacing.s16,
               vertical: AppSpacing.s16,
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: AppColors.border,
-                      borderRadius: BorderRadius.circular(2),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: AppColors.border,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: AppSpacing.s12),
-                Text(
-                  context.l10n.addNewMaterialTitle,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                  const SizedBox(height: AppSpacing.s12),
+                  Text(
+                    context.l10n.addNewMaterialTitle,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: AppSpacing.s16),
-                _buildAddOptionTile(
-                  icon: Icons.play_circle_fill_rounded,
-                  color: AppColors.primary,
-                  title: context.l10n.uploadBunnyVideoTitle,
-                  subtitle: context.l10n.uploadBunnyVideoSubtitle,
-                  onTap: () {
-                    Navigator.of(ctx).pop();
-                    _openCreateDialog(preselectedType: ContentType.video);
-                  },
-                ),
+                  const SizedBox(height: AppSpacing.s16),
+                  // Prominent All-in-One Lecture Creator Option
+                  _buildAddOptionTile(
+                    icon: Icons.auto_stories_rounded,
+                    color: AppColors.primaryLight,
+                    title: context.l10n.addNewLectureHero,
+                    subtitle: context.l10n.curriculumRoadmapSubtitle,
+                    onTap: () {
+                      Navigator.of(ctx).pop();
+                      _openAllInOneStudio();
+                    },
+                  ),
+                  const SizedBox(height: AppSpacing.s8),
+                  _buildAddOptionTile(
+                    icon: Icons.play_circle_fill_rounded,
+                    color: AppColors.primary,
+                    title: context.l10n.uploadBunnyVideoTitle,
+                    subtitle: context.l10n.uploadBunnyVideoSubtitle,
+                    onTap: () {
+                      Navigator.of(ctx).pop();
+                      _openCreateDialog(preselectedType: ContentType.video);
+                    },
+                  ),
                 const SizedBox(height: AppSpacing.s8),
                 _buildAddOptionTile(
                   icon: Icons.picture_as_pdf_rounded,
@@ -259,9 +292,10 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
               ],
             ),
           ),
-        );
-      },
-    );
+        ),
+      );
+    },
+  );
   }
 
   Widget _buildAddOptionTile({
@@ -621,6 +655,75 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                         ),
                       ),
 
+                      // 1.1 Hero All-in-One Lecture Creator Card (Prominent action banner)
+                      if (_selectedGroupId != null)
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: AppSpacing.s12),
+                            child: InkWell(
+                              onTap: _openAllInOneStudio,
+                              borderRadius: BorderRadius.circular(12),
+                              child: Container(
+                                padding: const EdgeInsets.all(AppSpacing.s12),
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(
+                                    colors: [AppColors.gradientStart, AppColors.gradientMid],
+                                  ),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: AppColors.primaryLight.withValues(alpha: 0.4),
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withValues(alpha: 0.15),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: const Icon(
+                                        Icons.auto_stories_rounded,
+                                        color: Colors.white,
+                                        size: 24,
+                                      ),
+                                    ),
+                                    const SizedBox(width: AppSpacing.s12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            context.l10n.addNewLectureHero,
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            context.l10n.curriculumRoadmapSubtitle,
+                                            style: TextStyle(
+                                              color: Colors.white.withValues(alpha: 0.8),
+                                              fontSize: 11,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const Icon(
+                                      Icons.add_circle_outline_rounded,
+                                      color: Colors.white,
+                                      size: 22,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+
                       // 2. Summary Stat Cards Row (Interactive filtering)
                       SliverToBoxAdapter(
                         child: Padding(
@@ -963,6 +1066,10 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                   content: item,
                                   isTeacher: true,
                                   index: index,
+                                  onMoveUp: () => context.read<ContentCubit>().reorderItems(index, index - 1),
+                                  onMoveDown: () => context.read<ContentCubit>().reorderItems(index, index + 1),
+                                  canMoveUp: index > 0,
+                                  canMoveDown: index < items.length - 1,
                                   onEdit: () => _openEditDialog(item),
                                   onOpenFile: (_) => _handleOpenFile(item),
                                   onUploadVideo: () => _handleUploadVideo(item),

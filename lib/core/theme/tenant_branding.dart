@@ -33,6 +33,7 @@ class TenantBranding extends Equatable {
   final String? avatarUrl;
   final String? supportPhone;
   final String? supportEmail;
+  final String videoProvider;
 
   const TenantBranding({
     required this.tenantId,
@@ -63,6 +64,7 @@ class TenantBranding extends Equatable {
     this.avatarUrl,
     this.supportPhone,
     this.supportEmail,
+    this.videoProvider = 'youtube',
   });
 
   /// Default baseline identity (Deep Indigo Academic SAT theme)
@@ -118,6 +120,7 @@ class TenantBranding extends Equatable {
     String? avatarUrl,
     String? supportPhone,
     String? supportEmail,
+    String videoProvider = 'youtube',
   }) {
     final hsl = HSLColor.fromColor(primaryColor);
 
@@ -167,6 +170,7 @@ class TenantBranding extends Equatable {
       avatarUrl: avatarUrl,
       supportPhone: supportPhone,
       supportEmail: supportEmail,
+      videoProvider: videoProvider,
     );
   }
 
@@ -247,6 +251,7 @@ class TenantBranding extends Equatable {
     String? avatarUrl,
     String? supportPhone,
     String? supportEmail,
+    String? videoProvider,
   }) {
     return TenantBranding(
       tenantId: tenantId ?? this.tenantId,
@@ -277,6 +282,7 @@ class TenantBranding extends Equatable {
       avatarUrl: avatarUrl ?? this.avatarUrl,
       supportPhone: supportPhone ?? this.supportPhone,
       supportEmail: supportEmail ?? this.supportEmail,
+      videoProvider: videoProvider ?? this.videoProvider,
     );
   }
 
@@ -310,5 +316,6 @@ class TenantBranding extends Equatable {
         avatarUrl,
         supportPhone,
         supportEmail,
+        videoProvider,
       ];
 }

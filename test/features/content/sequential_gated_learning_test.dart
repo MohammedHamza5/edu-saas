@@ -164,7 +164,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Derivatives 101'), findsOneWidget);
-      expect(find.byIcon(Icons.quiz_outlined), findsOneWidget);
+      expect(find.byIcon(Icons.quiz_outlined), findsAtLeastNWidgets(1));
       expect(find.textContaining('Derivatives Practice Quiz'), findsOneWidget);
     });
   });

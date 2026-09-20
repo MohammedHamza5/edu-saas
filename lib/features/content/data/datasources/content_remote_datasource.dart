@@ -168,24 +168,64 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
           }
         }
 
+        // Fetch video progress for all video lessons in this group
+        final videoIds = models
+            .map((m) => m.videoId)
+            .where((id) => id != null && id.isNotEmpty)
+            .cast<String>()
+            .toList();
+
+        final Set<String> completedVideoIds = {};
+        final Map<String, double> videoProgressMap = {};
+
+        if (videoIds.isNotEmpty) {
+          final progressRes = await _safeClient
+              .from('video_progress')
+              .select('video_id, completed, percentage')
+              .eq('student_id', currentUserId)
+              .inFilter('video_id', videoIds);
+
+          for (final row in (progressRes as List<dynamic>)) {
+            final vId = row['video_id'] as String?;
+            final comp = row['completed'] == true;
+            final pct = (row['percentage'] as num?)?.toDouble() ?? 0.0;
+            if (vId != null) {
+              videoProgressMap[vId] = pct;
+              if (comp || pct >= 90.0) {
+                completedVideoIds.add(vId);
+              }
+            }
+          }
+        }
+
         String? previousLessonExamId;
+        String? previousLessonVideoId;
         for (int i = 0; i < models.length; i++) {
           final item = models[i];
-          bool locked = false;
+          final isVideoCompleted = item.videoId == null || completedVideoIds.contains(item.videoId);
+          final progressPct = item.videoId != null ? (videoProgressMap[item.videoId] ?? 0.0) : 0.0;
+          final isExamPassed = item.associatedExamId != null && passedExamIds.contains(item.associatedExamId);
 
+          bool locked = false;
           if (item.prerequisiteExamId != null) {
             locked = !passedExamIds.contains(item.prerequisiteExamId);
-          } else if (enforceSeq && i > 0 && previousLessonExamId != null) {
-            locked = !passedExamIds.contains(previousLessonExamId);
+          } else if (enforceSeq && i > 0) {
+            if (previousLessonExamId != null && !passedExamIds.contains(previousLessonExamId)) {
+              locked = true;
+            } else if (previousLessonVideoId != null && !completedVideoIds.contains(previousLessonVideoId)) {
+              locked = true;
+            }
           }
 
-          if (locked) {
-            models[i] = models[i].copyWith(isLocked: true) as ContentModel;
-          }
+          models[i] = models[i].copyWith(
+            isLocked: locked,
+            isVideoCompleted: isVideoCompleted,
+            videoProgressPercentage: progressPct,
+            isExamPassed: isExamPassed,
+          ) as ContentModel;
 
-          if (item.associatedExamId != null) {
-            previousLessonExamId = item.associatedExamId;
-          }
+          previousLessonExamId = item.associatedExamId;
+          previousLessonVideoId = item.videoId;
         }
       } catch (_) {}
     }

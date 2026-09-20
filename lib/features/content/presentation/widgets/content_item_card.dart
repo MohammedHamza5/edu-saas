@@ -19,6 +19,10 @@ class ContentItemCard extends StatelessWidget {
   final ValueChanged<String>? onOpenFile;
   final VoidCallback? onUploadVideo;
   final VoidCallback? onTap;
+  final VoidCallback? onMoveUp;
+  final VoidCallback? onMoveDown;
+  final bool canMoveUp;
+  final bool canMoveDown;
 
   const ContentItemCard({
     super.key,
@@ -32,6 +36,10 @@ class ContentItemCard extends StatelessWidget {
     this.onOpenFile,
     this.onUploadVideo,
     this.onTap,
+    this.onMoveUp,
+    this.onMoveDown,
+    this.canMoveUp = false,
+    this.canMoveDown = false,
   });
 
   IconData get _typeIcon {
@@ -72,48 +80,96 @@ class ContentItemCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Drag handle for Teacher when reordering
+          // Reordering controls for Teacher
           if (isTeacher && index != null) ...[
-            ReorderableDragStartListener(
-              index: index!,
-              child: const Padding(
-                padding: EdgeInsetsDirectional.only(
-                  end: AppSpacing.s8,
-                  top: AppSpacing.s8,
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ReorderableDragStartListener(
+                  index: index!,
+                  child: const Padding(
+                    padding: EdgeInsetsDirectional.only(
+                      end: AppSpacing.s4,
+                      top: 4,
+                      bottom: 2,
+                    ),
+                    child: Icon(
+                      Icons.drag_indicator_rounded,
+                      color: AppColors.textMuted,
+                      size: 20,
+                    ),
+                  ),
                 ),
-                child: Icon(
-                  Icons.drag_indicator_rounded,
-                  color: AppColors.textMuted,
-                  size: 22,
-                ),
-              ),
+                if (canMoveUp || canMoveDown) ...[
+                  IconButton(
+                    icon: const Icon(Icons.keyboard_arrow_up_rounded, size: 18),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(minWidth: 24, minHeight: 22),
+                    visualDensity: VisualDensity.compact,
+                    tooltip: context.l10n.moveUpAction,
+                    onPressed: canMoveUp ? onMoveUp : null,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 18),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(minWidth: 24, minHeight: 22),
+                    visualDensity: VisualDensity.compact,
+                    tooltip: context.l10n.moveDownAction,
+                    onPressed: canMoveDown ? onMoveDown : null,
+                  ),
+                ],
+              ],
             ),
           ],
 
-          // Type Icon Avatar with subtle mathematical gradient & border
-          Container(
-            width: 46,
-            height: 46,
-            decoration: BoxDecoration(
-              color: (!isTeacher && content.isLocked)
-                  ? AppColors.error.withValues(alpha: 0.12)
-                  : _typeColor.withAlpha(25),
-              borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-              border: Border.all(
-                color: (!isTeacher && content.isLocked)
-                    ? AppColors.error.withValues(alpha: 0.4)
-                    : _typeColor.withAlpha(60),
+          // Type Icon Avatar with sequential lecture number badge
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  color: (!isTeacher && content.isLocked)
+                      ? AppColors.error.withValues(alpha: 0.12)
+                      : _typeColor.withAlpha(25),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                  border: Border.all(
+                    color: (!isTeacher && content.isLocked)
+                        ? AppColors.error.withValues(alpha: 0.4)
+                        : _typeColor.withAlpha(60),
+                  ),
+                ),
+                child: Icon(
+                  (!isTeacher && content.isLocked)
+                      ? Icons.lock_rounded
+                      : _typeIcon,
+                  color: (!isTeacher && content.isLocked)
+                      ? AppColors.error
+                      : _typeColor,
+                  size: 24,
+                ),
               ),
-            ),
-            child: Icon(
-              (!isTeacher && content.isLocked)
-                  ? Icons.lock_rounded
-                  : _typeIcon,
-              color: (!isTeacher && content.isLocked)
-                  ? AppColors.error
-                  : _typeColor,
-              size: 24,
-            ),
+              if (index != null) ...[
+                const SizedBox(height: 4),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withAlpha(15),
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(color: AppColors.primary.withAlpha(40)),
+                  ),
+                  child: Text(
+                    '#${(index! + 1).toString().padLeft(2, '0')}',
+                    style: const TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ),
+              ],
+            ],
           ),
           const SizedBox(width: AppSpacing.s12),
 
@@ -142,10 +198,20 @@ class ContentItemCard extends StatelessWidget {
                   spacing: AppSpacing.s6,
                   runSpacing: AppSpacing.s4,
                   children: [
+                    if (index != null)
+                      AppBadge(
+                        label: context.l10n.lectureNumberBadge(index! + 1),
+                        variant: AppBadgeVariant.neutral,
+                      ),
                     AppBadge(
                       label: content.type.localizedLabel(context),
                       variant: AppBadgeVariant.neutral,
                     ),
+                    if (!isTeacher && content.isCompleted)
+                      AppBadge(
+                        label: context.l10n.completedBadge,
+                        variant: AppBadgeVariant.active,
+                      ),
                     if (!isTeacher && content.isLocked)
                       AppBadge(
                         label: context.l10n.lessonPrerequisiteLocked,
@@ -162,6 +228,9 @@ class ContentItemCard extends StatelessWidget {
                       ),
                   ],
                 ),
+
+                // 3-Pillars Summary Row (Video ➔ PDF Handout ➔ Quiz)
+                _buildPillarsRow(context),
 
                 // Prerequisite Locked Notification Banner
                 if (!isTeacher && content.isLocked) ...[
@@ -213,50 +282,39 @@ class ContentItemCard extends StatelessWidget {
                   ),
                 ],
 
-                // Associated Lesson Quiz Banner
+                // Associated Lesson Quiz Gating Banner
                 if (content.associatedExamTitle != null) ...[
                   const SizedBox(height: AppSpacing.s8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryLight.withValues(alpha: 0.08),
-                      border: Border.all(color: AppColors.primaryLight.withValues(alpha: 0.3)),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.quiz_outlined, size: 16, color: AppColors.primaryLight),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            context.l10n.associatedExamTitleLabel(content.associatedExamTitle!),
-                            style: const TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.primaryLight,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        if (!isTeacher && !content.isLocked)
-                          TextButton(
-                            onPressed: () => context.push(AppRoutes.studentExams),
-                            style: TextButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                              minimumSize: Size.zero,
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            ),
-                            child: Text(
-                              context.l10n.takeRequiredExamAction,
-                              style: const TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.primaryLight,
-                              ),
-                            ),
-                          ),
-                      ],
+                  _buildAssociatedExamBanner(context),
+                ],
+
+                // Student Action: Watch / Rewatch Lecture Button
+                if (!isTeacher && !content.isLocked && (content.type == ContentType.video || content.hasVideo)) ...[
+                  const SizedBox(height: AppSpacing.s8),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: onTap,
+                      icon: Icon(
+                        content.isVideoCompleted
+                            ? Icons.replay_rounded
+                            : Icons.play_arrow_rounded,
+                        size: 16,
+                      ),
+                      label: Text(
+                        content.isVideoCompleted
+                            ? context.l10n.rewatchLectureAction
+                            : context.l10n.startLectureAction,
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
                     ),
                   ),
                 ],
@@ -582,6 +640,158 @@ class ContentItemCard extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildPillarsRow(BuildContext context) {
+    final hasVideo = content.type == ContentType.video || content.hasVideo;
+    final hasHandout = content.file != null;
+    final hasQuiz = content.associatedExamId != null;
+
+    return Container(
+      margin: const EdgeInsets.only(top: AppSpacing.s8),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceVariant,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
+      ),
+      child: Row(
+        children: [
+          // 1. Video Pillar
+          Expanded(
+            child: _PillarItem(
+              icon: Icons.play_circle_outline_rounded,
+              label: hasVideo
+                  ? (content.videoProvider == 'youtube'
+                      ? context.l10n.videoSourceYoutube
+                      : context.l10n.videoSourceBunny)
+                  : context.l10n.videoSourceNone,
+              isActive: hasVideo,
+              color: hasVideo ? AppColors.primary : AppColors.textMuted,
+            ),
+          ),
+          Container(
+            width: 1,
+            height: 16,
+            color: AppColors.border.withValues(alpha: 0.5),
+            margin: const EdgeInsets.symmetric(horizontal: 4),
+          ),
+          // 2. Handout Pillar
+          Expanded(
+            child: _PillarItem(
+              icon: Icons.picture_as_pdf_outlined,
+              label: hasHandout ? 'PDF' : context.l10n.videoSourceNone,
+              isActive: hasHandout,
+              color: hasHandout ? const Color(0xFFEA580C) : AppColors.textMuted,
+            ),
+          ),
+          Container(
+            width: 1,
+            height: 16,
+            color: AppColors.border.withValues(alpha: 0.5),
+            margin: const EdgeInsets.symmetric(horizontal: 4),
+          ),
+          // 3. Quiz Pillar
+          Expanded(
+            child: _PillarItem(
+              icon: Icons.quiz_outlined,
+              label: hasQuiz
+                  ? '${content.prerequisitePassingScore ?? 60}%'
+                  : context.l10n.videoSourceNone,
+              isActive: hasQuiz,
+              color: hasQuiz ? AppColors.success : AppColors.textMuted,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAssociatedExamBanner(BuildContext context) {
+    final isPassed = content.isExamPassed;
+    final canTake = content.canTakeExam;
+    final bannerColor = isPassed
+        ? AppColors.success
+        : canTake
+            ? AppColors.primaryLight
+            : AppColors.warning;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: bannerColor.withValues(alpha: 0.08),
+        border: Border.all(color: bannerColor.withValues(alpha: 0.3)),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            isPassed
+                ? Icons.check_circle_outline_rounded
+                : canTake
+                    ? Icons.quiz_outlined
+                    : Icons.lock_outline_rounded,
+            size: 16,
+            color: bannerColor,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  content.associatedExamTitle ?? context.l10n.quizPrefix,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: bannerColor,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                if (!isTeacher && !content.isLocked) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    isPassed
+                        ? context.l10n.quizPassedUnlockNext
+                        : canTake
+                            ? context.l10n.quizUnlockedReady
+                            : context.l10n.quizGateNotice,
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: bannerColor.withValues(alpha: 0.9),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          if (!isTeacher && !content.isLocked)
+            TextButton(
+              onPressed: () => context.push(AppRoutes.studentExams),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: Text(
+                isPassed
+                    ? context.l10n.reviewQuizResultAction
+                    : canTake
+                        ? context.l10n.takeQuizNowAction
+                        : context.l10n.takeRequiredExamAction,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: bannerColor,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -685,6 +895,43 @@ class _VideoStatusBadge extends StatelessWidget {
             ),
           ),
         ],
+      ],
+    );
+  }
+}
+
+class _PillarItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool isActive;
+  final Color color;
+
+  const _PillarItem({
+    required this.icon,
+    required this.label,
+    required this.isActive,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 14, color: color),
+        const SizedBox(width: 4),
+        Flexible(
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
+              color: color,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
       ],
     );
   }
