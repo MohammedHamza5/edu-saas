@@ -236,6 +236,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                 // 2. Teacher Action Radar & Early Warning Alerts
                 TeacherActionRadar(
                   alertsState: alertsState,
+                  groupsState: groupsState,
                   pendingCount: pendingStudentsCount,
                 ),
 

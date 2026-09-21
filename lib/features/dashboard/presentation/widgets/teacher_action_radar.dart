@@ -9,8 +9,10 @@ import '../../../../core/widgets/app_badge.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/responsive_grid.dart';
 import '../../../dashboard/presentation/cubit/teacher_dashboard_state.dart';
+import '../../../groups/presentation/cubit/groups_state.dart';
 
-/// رادار المتابعة والإنذار المبكر لدكتور أنطونيوس أشرف
+
+/// رادار المتابعة والإنذار المبكر للمعلم
 /// يجيب عن الأسئلة الأربعة المصيرية بنظرة واحدة:
 /// 1. مين مشافش المحاضرة؟
 /// 2. مين مسلّمش الواجب؟
@@ -18,12 +20,14 @@ import '../../../dashboard/presentation/cubit/teacher_dashboard_state.dart';
 /// 4. مين بانتظار القبول في المجموعات؟
 class TeacherActionRadar extends StatelessWidget {
   final TeacherDashboardState? alertsState;
+  final GroupsState? groupsState;
   final int pendingCount;
   final VoidCallback? onRefresh;
 
   const TeacherActionRadar({
     super.key,
     required this.alertsState,
+    this.groupsState,
     this.pendingCount = 0,
     this.onRefresh,
   });
@@ -142,7 +146,9 @@ class TeacherActionRadar extends StatelessWidget {
                               radius: 16,
                               backgroundColor: color.withValues(alpha: 0.15),
                               child: Text(
-                                item['name']?.substring(0, 1) ?? 'S',
+                                (item['name'] != null && item['name']!.trim().isNotEmpty)
+                                    ? item['name']!.trim()[0]
+                                    : 'S',
                                 style: TextStyle(
                                   color: color,
                                   fontWeight: FontWeight.bold,
@@ -331,7 +337,7 @@ class TeacherActionRadar extends StatelessWidget {
                 color: AppColors.warning,
                 items: unsubmittedHomework,
                 actionLabel: context.l10n.radarOpenHomeworkList,
-                onAction: () => context.push(AppRoutes.groupsList),
+                onAction: () => context.push(AppRoutes.teacherAssignments),
               ),
             ),
 
@@ -464,14 +470,14 @@ class TeacherActionRadar extends StatelessWidget {
             style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w700,
-              color: Colors.white,
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 2),
           Text(
             count,
             style: AppTypography.statFigureLarge.copyWith(
-              color: isCritical ? color : const Color(0xFF38BDF8),
+              color: isCritical ? color : AppColors.primary,
             ),
           ),
           const SizedBox(height: 2),
@@ -482,7 +488,7 @@ class TeacherActionRadar extends StatelessWidget {
             style: const TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w500,
-              color: Color(0xFFCBD5E1),
+              color: AppColors.textSecondary,
             ),
           ),
         ],
@@ -491,7 +497,241 @@ class TeacherActionRadar extends StatelessWidget {
   }
 
   Widget _buildTestPrepCohortsList(BuildContext context) {
-    // 5 Default High-Stakes Cohorts representing Dr. Antounios's actual groups
+    if (groupsState is GroupsLoading) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(AppSpacing.s24),
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    if (groupsState is GroupsLoaded && (groupsState as GroupsLoaded).groups.isNotEmpty) {
+      final groups = (groupsState as GroupsLoaded).groups;
+      final colors = [
+        const Color(0xFF818CF8), // Indigo
+        const Color(0xFF2DD4BF), // Teal
+        const Color(0xFFFB7185), // Rose
+        const Color(0xFFA78BFA), // Purple
+        const Color(0xFFFBBF24), // Amber
+      ];
+
+      return ListView.separated(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: groups.length,
+        separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.s12),
+        itemBuilder: (context, i) {
+          final group = groups[i];
+          final color = colors[i % colors.length];
+
+          return AppCard(
+            variant: AppCardVariant.elevated,
+            padding: const EdgeInsets.all(AppSpacing.s16),
+            child: LayoutBuilder(
+              builder: (context, cardConstraints) {
+                final isNarrow = cardConstraints.maxWidth < 450;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (isNarrow) ...[
+                      Row(
+                        children: [
+                          Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [color, color.withValues(alpha: 0.8)],
+                              ),
+                              borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                            ),
+                            child: const Center(
+                              child: Text(
+                                '∑',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.s8),
+                          Expanded(
+                            child: Text(
+                              group.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.s8),
+                      Text(
+                        group.level,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.s8),
+                      Wrap(
+                        spacing: AppSpacing.s8,
+                        runSpacing: AppSpacing.s4,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          AppBadge(
+                            label: '${group.membersCount} ${context.l10n.navStudents}',
+                            variant: AppBadgeVariant.active,
+                          ),
+                          Text(
+                            group.description ?? '',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ] else ...[
+                      Row(
+                        children: [
+                          Container(
+                            width: 42,
+                            height: 42,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [color, color.withValues(alpha: 0.8)],
+                              ),
+                              borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                            ),
+                            child: const Center(
+                              child: Text(
+                                '∑',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.s12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  group.name,
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  group.level,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.s8),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              AppBadge(
+                                label: '${group.membersCount} ${context.l10n.navStudents}',
+                                variant: AppBadgeVariant.active,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                group.description ?? '—',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w500,
+                                  color: color,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                    const SizedBox(height: AppSpacing.s12),
+                    const Divider(height: 1),
+                    const SizedBox(height: AppSpacing.s8),
+                    Wrap(
+                      spacing: AppSpacing.s8,
+                      runSpacing: AppSpacing.s8,
+                      children: [
+                        ActionChip(
+                          avatar: const Icon(Icons.folder_shared_rounded, size: 14, color: AppColors.primary),
+                          label: Text(context.l10n.chipHandoutsPdfs, style: const TextStyle(fontSize: 11, color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
+                          backgroundColor: AppColors.surfaceVariant.withValues(alpha: 0.5),
+                          side: const BorderSide(color: AppColors.border),
+                          onPressed: () => context.push(
+                            '${AppRoutes.teacherGroupContent.replaceAll(':groupId', group.id)}?name=${Uri.encodeComponent(group.name)}',
+                          ),
+                        ),
+                        ActionChip(
+                          avatar: const Icon(Icons.assignment_rounded, size: 14, color: AppColors.warning),
+                          label: Text(context.l10n.chipDrillHomework, style: const TextStyle(fontSize: 11, color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
+                          backgroundColor: AppColors.surfaceVariant.withValues(alpha: 0.5),
+                          side: const BorderSide(color: AppColors.border),
+                          onPressed: () => context.push(
+                            '${AppRoutes.teacherGroupAssignments.replaceAll(':groupId', group.id)}?name=${Uri.encodeComponent(group.name)}',
+                          ),
+                        ),
+                        ActionChip(
+                          avatar: const Icon(Icons.quiz_rounded, size: 14, color: AppColors.primary),
+                          label: Text(context.l10n.chipExamsSimulations, style: const TextStyle(fontSize: 11, color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
+                          backgroundColor: AppColors.surfaceVariant.withValues(alpha: 0.5),
+                          side: const BorderSide(color: AppColors.border),
+                          onPressed: () => context.push(
+                            '${AppRoutes.teacherGroupExams.replaceAll(':groupId', group.id)}?name=${Uri.encodeComponent(group.name)}',
+                          ),
+                        ),
+                        ActionChip(
+                          avatar: const Icon(Icons.fact_check_rounded, size: 14, color: AppColors.success),
+                          label: Text(context.l10n.chipRecordAttendance, style: const TextStyle(fontSize: 11, color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
+                          backgroundColor: AppColors.surfaceVariant.withValues(alpha: 0.5),
+                          side: const BorderSide(color: AppColors.border),
+                          onPressed: () => context.push(
+                            '${AppRoutes.teacherAttendance}?groupId=${group.id}',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                );
+              },
+            ),
+          );
+        },
+      );
+    }
+
+    // Default Academic Test Prep Cohorts (shown when groups are not loaded or in standalone previews)
     final defaultCohorts = [
       {
         'title': 'Digital SAT Master (Target 800)',
@@ -604,9 +844,10 @@ class TeacherActionRadar extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
-                        color: Color(0xFFCBD5E1),
+                        color: AppColors.textSecondary,
                       ),
                     ),
+                    const SizedBox(height: AppSpacing.s8),
                     Wrap(
                       spacing: AppSpacing.s8,
                       runSpacing: AppSpacing.s4,
@@ -670,7 +911,7 @@ class TeacherActionRadar extends StatelessWidget {
                                 style: const TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500,
-                                  color: Color(0xFFCBD5E1),
+                                  color: AppColors.textSecondary,
                                 ),
                               ),
                             ],
@@ -698,49 +939,50 @@ class TeacherActionRadar extends StatelessWidget {
                       ],
                     ),
                   ],
-              const SizedBox(height: AppSpacing.s12),
-              const Divider(height: 1),
-              const SizedBox(height: AppSpacing.s8),
-              Wrap(
-                spacing: AppSpacing.s8,
-                runSpacing: AppSpacing.s8,
-                children: [
-                  ActionChip(
-                    avatar: const Icon(Icons.folder_shared_rounded, size: 14, color: Color(0xFF38BDF8)),
-                    label: Text(context.l10n.chipHandoutsPdfs, style: const TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.w600)),
-                    backgroundColor: const Color(0xFF1E293B),
-                    side: const BorderSide(color: Color(0xFF334155)),
-                    onPressed: () => context.push(AppRoutes.groupsList),
-                  ),
-                  ActionChip(
-                    avatar: const Icon(Icons.assignment_rounded, size: 14, color: Color(0xFFFBBF24)),
-                    label: Text(context.l10n.chipDrillHomework, style: const TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.w600)),
-                    backgroundColor: const Color(0xFF1E293B),
-                    side: const BorderSide(color: Color(0xFF334155)),
-                    onPressed: () => context.push(AppRoutes.groupsList),
-                  ),
-                  ActionChip(
-                    avatar: const Icon(Icons.quiz_rounded, size: 14, color: Color(0xFFA78BFA)),
-                    label: Text(context.l10n.chipExamsSimulations, style: const TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.w600)),
-                    backgroundColor: const Color(0xFF1E293B),
-                    side: const BorderSide(color: Color(0xFF334155)),
-                    onPressed: () => context.push(AppRoutes.groupsList),
-                  ),
-                  ActionChip(
-                    avatar: const Icon(Icons.fact_check_rounded, size: 14, color: Color(0xFF34D399)),
-                    label: Text(context.l10n.chipRecordAttendance, style: const TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.w600)),
-                    backgroundColor: const Color(0xFF1E293B),
-                    side: const BorderSide(color: Color(0xFF334155)),
-                    onPressed: () => context.push(AppRoutes.teacherAttendance),
+                  const SizedBox(height: AppSpacing.s12),
+                  const Divider(height: 1),
+                  const SizedBox(height: AppSpacing.s8),
+                  Wrap(
+                    spacing: AppSpacing.s8,
+                    runSpacing: AppSpacing.s8,
+                    children: [
+                      ActionChip(
+                        avatar: const Icon(Icons.folder_shared_rounded, size: 14, color: AppColors.primary),
+                        label: Text(context.l10n.chipHandoutsPdfs, style: const TextStyle(fontSize: 11, color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
+                        backgroundColor: AppColors.surfaceVariant.withValues(alpha: 0.5),
+                        side: const BorderSide(color: AppColors.border),
+                        onPressed: () => context.push(AppRoutes.groupsList),
+                      ),
+                      ActionChip(
+                        avatar: const Icon(Icons.assignment_rounded, size: 14, color: AppColors.warning),
+                        label: Text(context.l10n.chipDrillHomework, style: const TextStyle(fontSize: 11, color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
+                        backgroundColor: AppColors.surfaceVariant.withValues(alpha: 0.5),
+                        side: const BorderSide(color: AppColors.border),
+                        onPressed: () => context.push(AppRoutes.groupsList),
+                      ),
+                      ActionChip(
+                        avatar: const Icon(Icons.quiz_rounded, size: 14, color: AppColors.primary),
+                        label: Text(context.l10n.chipExamsSimulations, style: const TextStyle(fontSize: 11, color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
+                        backgroundColor: AppColors.surfaceVariant.withValues(alpha: 0.5),
+                        side: const BorderSide(color: AppColors.border),
+                        onPressed: () => context.push(AppRoutes.groupsList),
+                      ),
+                      ActionChip(
+                        avatar: const Icon(Icons.fact_check_rounded, size: 14, color: AppColors.success),
+                        label: Text(context.l10n.chipRecordAttendance, style: const TextStyle(fontSize: 11, color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
+                        backgroundColor: AppColors.surfaceVariant.withValues(alpha: 0.5),
+                        side: const BorderSide(color: AppColors.border),
+                        onPressed: () => context.push(AppRoutes.teacherAttendance),
+                      ),
+                    ],
                   ),
                 ],
-              ),
-            ],
-          );
-        },
-      ),
+              );
+            },
+          ),
+        );
+      },
     );
-  },
-);
+  }
 }
-}
+
