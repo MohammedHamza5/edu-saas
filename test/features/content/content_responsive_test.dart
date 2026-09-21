@@ -7,6 +7,7 @@ import 'package:edu_saas/features/content/domain/entities/content_entity.dart';
 import 'package:edu_saas/features/content/domain/entities/file_attachment_entity.dart';
 import 'package:edu_saas/features/content/domain/repositories/content_repository.dart';
 import 'package:edu_saas/features/content/presentation/cubit/content_cubit.dart';
+import 'package:edu_saas/features/content/presentation/cubit/course_progress_cubit.dart';
 import 'package:edu_saas/features/content/domain/entities/lesson_assignment_entity.dart';
 import 'package:edu_saas/features/content/presentation/pages/student_content_feed_page.dart';
 import 'package:edu_saas/features/content/presentation/pages/teacher_content_library_page.dart';
@@ -39,7 +40,21 @@ class _FakeContentRepository implements ContentRepository {
     required String groupId,
     String? studentId,
   }) async {
-    return const Success([]);
+    final list = items
+        .where((i) => i.groupId == groupId)
+        .map((i) => LessonAssignmentEntity(
+              contentGroupId: 'cg-${i.id}',
+              contentId: i.id,
+              groupId: i.groupId ?? '',
+              title: i.title,
+              description: i.description,
+              type: i.type,
+              sortOrder: i.sortOrder,
+              access: LessonAccess.unlocked,
+              progress: LessonProgress.notStarted,
+            ))
+        .toList();
+    return Success(list);
   }
 
   @override
@@ -175,7 +190,7 @@ void main() {
       groupId: 'grp-sat-1',
       title: 'مذكرة قوانين التفاضل والتكامل الشاملة (Calculus Sheet)',
       description: 'تشمل جميع مشتقات الدوال المثلثية والقواعد الأساسية مع 50 مسألة محلولة بالتفصيل.',
-      type: ContentType.pdf,
+      type: ContentType.video,
       status: ContentStatus.published,
       sortOrder: 0,
       createdAt: DateTime.now().subtract(const Duration(days: 3)),
@@ -215,8 +230,15 @@ void main() {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       locale: const Locale('ar'),
-      home: BlocProvider<ContentCubit>(
-        create: (_) => ContentCubit(repository: repo),
+      home: MultiBlocProvider(
+        providers: [
+          BlocProvider<ContentCubit>(
+            create: (_) => ContentCubit(repository: repo),
+          ),
+          BlocProvider<CourseProgressCubit>(
+            create: (_) => CourseProgressCubit(repository: repo),
+          ),
+        ],
         child: child,
       ),
     );
@@ -245,15 +267,9 @@ void main() {
 
         await tester.pumpAndSettle();
 
-        // Check AppBar & Stat cards
-        expect(find.text('محتوى: SAT Math Advanced'), findsOneWidget);
-        expect(find.text('إجمالي المواد'), findsOneWidget);
-        expect(find.text('منشور للطلاب'), findsOneWidget);
-        expect(find.text('مسودات'), findsOneWidget);
-
         // Check Content items
         expect(find.text(sampleItems[0].title), findsOneWidget);
-        expect(find.text('إضافة محتوى'), findsOneWidget);
+        expect(find.text('إضافة درس'), findsOneWidget);
 
         expect(tester.takeException(), isNull);
       });
@@ -283,10 +299,8 @@ void main() {
 
         await tester.pumpAndSettle();
 
-        expect(find.text('محتوى: SAT Math Advanced'), findsOneWidget);
-        expect(find.text(sampleItems[0].title), findsOneWidget);
-        expect(find.text('الكل (1)'), findsOneWidget);
-        expect(find.text('المذكرات (1)'), findsOneWidget);
+        expect(find.text(sampleItems[0].title), findsWidgets);
+        expect(find.textContaining('SAT Math Advanced'), findsWidgets);
 
         expect(tester.takeException(), isNull);
       });

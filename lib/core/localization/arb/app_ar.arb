@@ -323,21 +323,21 @@
   "studentIdRequired": "يرجى إدخال معرّف الطالب",
   "invalidStudentId": "معرّف الطالب غير صالح",
   "addStudentSubmit": "إضافة الطالب",
-  "confirmRemoveMemberTitle": "تأكيد الاستبعاد",
-  "confirmRemoveMemberBody": "هل أنت متأكد من رغبتك في إزالة الطالب \"{name}\" من هذه المجموعة؟",
+  "confirmRemoveMemberTitle": "حذف طالب",
+  "confirmRemoveMemberBody": "هل أنت متأكد أنك تريد حذف الطالب \"{name}\" من هذه المادة؟",
   "removeStudentConfirmAction": "إزالة الطالب",
   "loadingGroupDetail": "جاري تحميل تفاصيل المجموعة والأعضاء...",
-  "groupDetailTitle": "تفاصيل المجموعة",
-  "groupNotFound": "لم يتم العثور على المجموعة",
-  "backToGroups": "رجوع للمجموعات",
+  "groupDetailTitle": "تفاصيل المادة",
+  "groupNotFound": "لم يتم العثور على المادة",
+  "backToGroups": "العودة للمواد",
   "previousContentPolicy": "سياسة المحتوى السابق:",
   "previousContentAllowedLabel": "متاح للطلاب الجدد (Allow)",
   "previousContentDeniedLabel": "محجوب عن الجدد (Deny)",
-  "groupServicesAndTools": "خدمات وأدوات المجموعة",
+  "groupServicesAndTools": "أدوات المادة",
   "contentAndMaterials": "المحتوى والمذكرات",
   "examsBank": "بنك الامتحانات",
   "sendGroupAnnouncement": "إرسال إعلان للمجموعة",
-  "groupMembersCountHeader": "أعضاء المجموعة ({count})",
+  "groupMembersCountHeader": "الطلاب المسجلين ({count})",
   "recordAttendanceAction": "رصد الحضور",
   "searchEnrolledStudentsHint": "بحث في أسماء الطلاب المسجلين...",
   "noStudentsInGroupYet": "لا يوجد طلاب مضافون في هذه المجموعة حالياً",
@@ -547,7 +547,7 @@
   "clickToPickVideo": "انقر لاختيار ملف الفيديو (MP4, MOV)",
   "autoTranscodeHint": "يتم التشفير والتحويل التلقائي لجودات 1080p, 720p, 480p",
   "changeFile": "تغيير الملف",
-  "lessonTitleLabel": "عنوان الدرس *",
+  "lessonTitleLabel": "عنوان الدرس",
   "lessonTitleHint": "مثال: شرح درس الدوال المثلثية - الجزء الأول",
   "lessonTitleRequired": "يرجى إدخال عنوان الدرس",
   "lessonNotesLabel": "محاور وملاحظات الدرس (اختياري)",
@@ -644,7 +644,7 @@
   "groupColon": "المجموعة: {name}",
   "minutesDuration": "{minutes} دقيقة",
   "scorePoints": "{points} درجة",
-  "passingScoreLabel": "النجاح: {score}",
+  "passingScoreLabel": "درجة النجاح",
   "examVersionAttempts": "النسخة: v{version} | المحاولات: {count}",
   "availableToStart": "متاح للبدء",
   "inProgressResume": "قيد الأداء (استئناف)",
@@ -754,7 +754,7 @@
   "allowRetakeTitle": "السماح بإعادة المحاولة (Retake)",
   "allowRetakeSubtitle": "تعتمد المنصة أعلى درجة محققة في سجل الطالب",
   "questionsSectionTitle": "الأسئلة ({count})",
-  "addQuestionAction": "إضافة سؤال",
+  "addQuestionAction": "إضافة سؤال للكويز",
   "questionNumberTitle": "السؤال رقم {number}",
   "questionTextField": "نص السؤال *",
   "questionTextHint": "اكتب نص السؤال الرياضي هنا...",
@@ -769,7 +769,7 @@
   "optionTrue": "صواب",
   "optionFalse": "خطأ",
   "questionTypeMultipleChoice": "اختيار من متعدد",
-  "questionTypeTrueFalse": "صواب أو خطأ",
+  "questionTypeTrueFalse": "صح أو خطأ",
   "attemptStatusInProgress": "قيد الأداء",
   "attemptStatusSubmitted": "تم التسليم",
   "attemptStatusExpired": "انتهى الوقت",
@@ -1131,7 +1131,7 @@
   "examTargetGroupLabel": "المجموعة الدراسية المعنية",
   "questionsCountLabel": "{count} أسئلة",
   "questionTextLabel": "نص السؤال",
-  "questionPointsLabel": "قيمة الدرجة",
+  "questionPointsLabel": "الدرجات",
   "optionTextLabel": "الخيار {letter}",
   "markAsCorrectOption": "تحديد كإجابة صحيحة",
   "atLeastOneCorrectWarning": "يجب أن يحتوي كل سؤال على إجابة صحيحة واحدة على الأقل.",
@@ -1321,7 +1321,6 @@
   "prerequisiteExamLabel": "الاختبار المشترط (قفل المحاضرة)",
   "prerequisiteExamHint": "اختر اختباراً يجب اجتيازه أولاً",
   "noneOption": "لا يوجد",
-
   "totalPointsSummary": "المجموع: {points} / {maxScore} نقطة",
   "autoAdjustMaxScore": "ضبط الدرجة النهائية تلقائياً",
   "removeOption": "حذف الخيار",
@@ -1354,11 +1353,10 @@
   "videoLinkedSuccessToast": "تم ربط الفيديو بنجاح",
   "youtubeTabTitle": "فيديو يوتيوب",
   "bunnyTabTitle": "خوادم المنصة (Bunny)",
-  "youtubeUrlLabel": "رابط يوتيوب",
-  "youtubeUrlHint": "ضع رابط يوتيوب هنا",
+  "youtubeUrlLabel": "رابط فيديو يوتيوب",
+  "youtubeUrlHint": "ضع رابط اليوتيوب هنا...",
   "youtubeUnlistedAdvice": "يفضل استخدام فيديوهات غير مدرجة (Unlisted) للخصوصية",
   "linkVideoAction": "ربط الفيديو",
-
   "noVideosInBankDesc": "لا توجد فيديوهات في بنك الفيديوهات حتى الآن.",
   "addVideoToBankAction": "إضافة فيديو للبنك",
   "unassignedBadge": "غير معين لمجموعة",
@@ -1396,7 +1394,6 @@
   "atLeastTwoOptionsRequired": "يجب إضافة خيارين على الأقل",
   "examPublishFailed": "فشل نشر الاختبار: {error}",
   "totalQuestionsSummary": "{count} أسئلة",
-  
   "attachVideoMaterialNotice": "قم بإرفاق مذكرة PDF أو ملف لهذا الفيديو.",
   "attachVideoMaterialHint": "اختر ملف PDF",
   "addNewMaterialTitle": "إضافة مادة جديدة",
@@ -1473,11 +1470,7 @@
   "handoutSelected": "تم اختيار الملف: {fileName}",
   "inlineQuizSection": "كويز المحاضرة وشرط الفتح",
   "enableInlineQuiz": "تفعيل كويز إلزامي لفك قفل المحاضرة التالية",
-  "passingScoreLabel": "نسبة النجاح المطلوبة لفك القفل (%)",
-  "addQuestionAction": "إضافة سؤال للكويز",
   "questionTypeMcq": "اختيار من متعدد",
-  "questionTypeTrueFalse": "صح أو خطأ",
-  "questionTextLabel": "نص السؤال",
   "optionLabel": "الخيار {index}",
   "correctOptionBadge": "الإجابة الصحيحة",
   "publishAndApproveAction": "حفظ واعتماد المحاضرة للمنهج 🚀",
@@ -1487,7 +1480,7 @@
   "lectureNumberBadge": "المحاضرة {number}",
   "moveUpAction": "تحريك لأعلى",
   "moveDownAction": "تحريك لأسفل",
-  "quizGateNotice": "🔒 الكويز مقفول: يجب إنهاء مشاهدة المحاضرة أولاً",
+  "quizGateNotice": "يجب اجتياز الاختبار السابق",
   "quizUnlockedReady": "🟢 الكويز متاح: ابدأ الاختبار الآن",
   "downloadHandoutAction": "تحميل الملزمة (PDF)",
   "nextLectureLockedNotice": "🔒 مقفول: يتطلب إنهاء {prevTitle} واجتياز اختبارها بنسبة {score}%",
@@ -1498,8 +1491,6 @@
   "videoSourceBunny": "Bunny CDN",
   "videoSourceNone": "بدون فيديو",
   "videoSourceLabel": "مصدر الفيديو",
-  "youtubeUrlLabel": "رابط فيديو يوتيوب",
-  "youtubeUrlHint": "ضع رابط اليوتيوب هنا...",
   "changeVideoFileAction": "تغيير ملف الفيديو",
   "addMcqQuestionAction": "إضافة سؤال اختيار من متعدد (MCQ)",
   "addTrueFalseQuestionAction": "إضافة سؤال صح أو خطأ",
@@ -1516,7 +1507,6 @@
   "addNewLectureHero": "إضافة محاضرة جديدة (شاملة)",
   "noLecturesInCurriculum": "لا توجد محاضرات في هذا المنهج بعد",
   "noLecturesInCurriculumSubtitle": "ابدأ بإضافة أول محاضرة بملزمتها وكويزها الآن",
-  "questionPointsLabel": "الدرجات",
   "quizRulesAtLeastOneQuestion": "يجب أن يحتوي الكويز على سؤال واحد على الأقل",
   "questionTextRequired": "يرجى كتابة نص السؤال",
   "fillAllOptionsNotice": "يرجى كتابة نصوص الخيارات الأربعة كاملة",
@@ -1550,7 +1540,6 @@
   "distributeToGroupsAction": "توزيع على المجموعات",
   "courseProgressTitle": "تقدم الدورة",
   "noContentYet": "لا يوجد محتوى بعد",
-  "quizGateNotice": "يجب اجتياز الاختبار السابق",
   "manualUnlockAction": "فتح يدوي",
   "manualUnlockTitle": "فتح قفل الدرس يدوياً",
   "manualUnlockWarningText1": "أنت على وشك فتح الدرس ",
@@ -1565,5 +1554,213 @@
   "defaultPassingScore": "درجة النجاح الافتراضية (%)",
   "passingScoreOverride": "درجة نجاح مخصصة (%)",
   "passingScoreDefaultHint": "الافتراضي للدورة",
-  "lessonQuizSequentialRequirement": "هذا الاختبار سيكون شرطاً للطلاب لفتح الدرس التالي (إذا كان التعلم المتسلسل مفعلاً)."
+  "lessonQuizSequentialRequirement": "هذا الاختبار سيكون شرطاً للطلاب لفتح الدرس التالي (إذا كان التعلم المتسلسل مفعلاً).",
+  "videoLibraryTitle": "مكتبة الفيديوهات",
+  "videoLibrarySubtitle": "أنشئ الفيديو مرة واحدة وأضفه لأي مادة دراسية.",
+  "addVideo": "إضافة فيديو",
+  "filterUsedInCourses": "مستخدمة في مواد",
+  "usedInNCourses": "{count, plural, one{مستخدم في مادة واحدة} other{مستخدم في {count} مواد}}",
+  "@usedInNCourses": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notUsedInAnyCourse": "غير مُضاف لأي مادة",
+  "addToCourse": "إضافة لمادة",
+  "editVideo": "تعديل الفيديو",
+  "videoAddedToLibrary": "تمت إضافة الفيديو للمكتبة.",
+  "addToCourseAfterSave": "إضافة لمادة",
+  "selectCourse": "اختر المادة",
+  "selectCourseSubtitle": "اختر المادة التي تريد إضافة هذا الفيديو إليها:",
+  "nCoursesNLessons": "{lessons} دروس · {students} طلاب",
+  "@nCoursesNLessons": {
+    "placeholders": {
+      "lessons": {
+        "type": "int"
+      },
+      "students": {
+        "type": "int"
+      }
+    }
+  },
+  "addLesson": "إضافة درس",
+  "addLessonTitle": "إضافة درس",
+  "addLessonSubtitle": "كيف تريد إضافة هذا الدرس؟",
+  "useExistingVideo": "استخدام فيديو موجود",
+  "useExistingVideoSubtitle": "اختر فيديو من مكتبتك",
+  "addNewVideoToLesson": "إضافة فيديو جديد",
+  "addNewVideoToLessonSubtitle": "إنشاء فيديو جديد لهذه المادة",
+  "lessonSetupTitle": "إعداد الدرس",
+  "studyMaterial": "المواد الدراسية",
+  "uploadPdf": "رفع ملف PDF",
+  "replacePdf": "استبدال",
+  "removePdf": "إزالة",
+  "lessonQuizLabel": "اختبار الدرس",
+  "lessonQuizHint": "اختر اختبار الدرس",
+  "createLessonQuiz": "+ إنشاء اختبار درس",
+  "useCourseDefault": "استخدام الافتراضي — {score}%",
+  "@useCourseDefault": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "customPassingScore": "مخصص",
+  "lessonAddedToCourse": "تمت إضافة الدرس إلى {course}.",
+  "@lessonAddedToCourse": {
+    "placeholders": {
+      "course": {
+        "type": "String"
+      }
+    }
+  },
+  "lessonUpdatedSuccess": "تم تحديث الدرس بنجاح.",
+  "manageLessons": "إدارة الدروس",
+  "courseBuilderTitle": "منشئ المادة",
+  "sequentialLearningLabel": "التعلم التسلسلي",
+  "sequentialLearningDescription": "يجب على الطلاب إكمال فيديو كل درس واجتياز اختباره قبل أن يُفتح الدرس التالي.",
+  "defaultLessonPassingScore": "درجة النجاح الافتراضية لاختبارات الدروس",
+  "learningProgression": "تقدم التعلم",
+  "noLessonsYet": "لا توجد دروس بعد",
+  "noLessonsYetSubtitle": "ابدأ ببناء مادتك بإضافة درس فيديو.",
+  "addFirstLesson": "إضافة أول درس",
+  "videoPickerTitle": "اختر فيديو",
+  "videoPickerSearchHint": "ابحث عن فيديو...",
+  "lessonNumber": "الدرس {n}",
+  "@lessonNumber": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "hasStudyMaterial": "مواد دراسية",
+  "hasLessonQuiz": "اختبار الدرس",
+  "editLesson": "تعديل الدرس",
+  "deleteLesson": "حذف الدرس",
+  "nLessonsCount": "{count, plural, one{درس واحد} other{{count} دروس}}",
+  "@nLessonsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nStudentsCount": "{count, plural, one{طالب واحد} other{{count} طلاب}}",
+  "@nStudentsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicateVideoInCourse": "هذا الفيديو موجود بالفعل في هذه المادة.",
+  "couldNotAddLesson": "تعذّر إضافة الدرس. يرجى المحاولة مجدداً.",
+  "couldNotUpdateLesson": "تعذّر تحديث الدرس. يرجى المحاولة مجدداً.",
+  "noCoursesAvailable": "لا توجد مواد متاحة.",
+  "noCoursesAvailableSubtitle": "أنشئ مادة أولاً ثم أضف الفيديوهات إليها.",
+  "videoNotAvailable": "الفيديو غير متاح",
+  "allVideosUsed": "جميع الفيديوهات مستخدمة",
+  "allVideosUsedSubtitle": "جميع فيديوهاتك مستخدمة حالياً في مادة واحدة على الأقل.",
+  "noUnusedVideos": "لا توجد فيديوهات غير مستخدمة",
+  "videoLibraryEmpty": "مكتبة الفيديوهات فارغة",
+  "videoLibraryEmptySubtitle": "أضف أول فيديو تعليمي وأعد استخدامه في جميع مواد دراسية.",
+  "usedInMoreCourses": "+ {count} أخرى",
+  "@usedInMoreCourses": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "myCoursesTitle": "موادي التعليمية",
+  "myCoursesSubtitle": "الوصول إلى جميع موادك الدراسية ومتابعة تقدمك",
+  "openCourseAction": "فتح المادة",
+  "noEnrolledCoursesTitle": "لا توجد مواد دراسية بعد",
+  "noEnrolledCoursesSubtitle": "ستظهر موادك الدراسية هنا فور تسجيلك بها.",
+  "courseBeingPreparedTitle": "يتم تجهيز هذه المادة التعليمية حالياً.",
+  "courseBeingPreparedSubtitle": "ستظهر دروسك هنا قريباً.",
+  "startCourseAction": "بدء المادة",
+  "continueLessonAction": "متابعة الدرس",
+  "takeLessonQuizAction": "بدء اختبار الدرس",
+  "retryLessonQuizAction": "إعادة اختبار الدرس",
+  "reviewCourseAction": "مراجعة المادة",
+  "reviewLessonAction": "مراجعة الدرس",
+  "continueToNextLessonAction": "الانتقال إلى الدرس التالي",
+  "completeLessonToUnlock": "أكمل الدرس {n} لفتح هذا الدرس.",
+  "@completeLessonToUnlock": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "availableStatus": "متاح",
+  "lessonQuizReadyTitle": "اختبار الدرس جاهز الآن.",
+  "lessonQuizReadyDesc": "اختبر فهمك لمحتوى الدرس لفتح الدرس التالي.",
+  "quizNotPassedTitle": "لم يتم اجتياز الاختبار",
+  "quizNotPassedDesc": "يمكنك مراجعة محتوى الدرس والمحاولة مرة أخرى.",
+  "lessonCompletedCongrats": "اكتمل الدرس بنجاح!",
+  "passedQuizNotice": "لقد اجتزت اختبار الدرس بنجاح.",
+  "nextLessonLabel": "الدرس التالي: {title}",
+  "@nextLessonLabel": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "previousLessonAction": "الدرس السابق",
+  "nextLessonAction": "الدرس التالي",
+  "lessonXofY": "الدرس {current} من {total}",
+  "@lessonXofY": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "lessonMaterialTitle": "المحتوى الدراسي",
+  "openPdfAction": "عرض الـ PDF",
+  "completeVideoToUnlockQuiz": "أكمل مشاهدة الفيديو لفتح اختبار الدرس.",
+  "videoCompletedTitle": "اكتملت مشاهدة الفيديو",
+  "courseAssessmentsTitle": "تقييمات المادة",
+  "lessonQuizzesSectionTitle": "اختبارات الدروس",
+  "lessonQuizzesSectionDesc": "تُؤدى كجزء من مسار تقدمك في الدروس.",
+  "generalExamsSectionTitle": "الامتحانات العامة",
+  "generalExamsSectionDesc": "تقييمات وامتحانات عامة إضافية للمادة.",
+  "lessonsCompletedRatio": "تم إكمال {completed} من أصل {total} درس",
+  "@lessonsCompletedRatio": {
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "percentComplete": "{pct}% مكتمل",
+  "@percentComplete": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "viewLessonsAction": "عرض الدروس",
+  "courseLessonsTitle": "دروس المادة",
+  "addLessonButton": "إضافة درس",
+  "courseBuilderEmptyTitle": "لا توجد دروس بعد",
+  "courseBuilderEmptySubtitle": "ابدأ في بناء المادة بإضافة درس.",
+  "manageLessons": "إدارة الدروس",
+  "sequentialLearning": "التعلم التسلسلي",
+  "sequentialLearningDesc": "يجب على الطلاب إكمال فيديو الدرس واجتياز الاختبار قبل أن يُفتح الدرس التالي.",
+  "defaultLessonPassingScore": "درجة النجاح الافتراضية للاختبار"
 }

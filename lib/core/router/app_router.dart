@@ -538,6 +538,10 @@ class AppRouter {
           final studentId = state.uri.queryParameters['studentId'];
           final associatedExamId = state.uri.queryParameters['associatedExamId'];
           final associatedExamTitle = state.uri.queryParameters['associatedExamTitle'];
+          final groupId = state.uri.queryParameters['groupId'];
+          final groupName = state.uri.queryParameters['groupName'];
+          final lessonIndex = int.tryParse(state.uri.queryParameters['lessonIndex'] ?? '');
+          final totalLessons = int.tryParse(state.uri.queryParameters['totalLessons'] ?? '');
           return BlocProvider<VideosCubit>(
             create: (_) => InjectionContainer.createVideosCubit(),
             child: VideoPlayerPage(
@@ -545,6 +549,10 @@ class AppRouter {
               studentId: studentId,
               associatedExamId: associatedExamId?.isNotEmpty == true ? associatedExamId : null,
               associatedExamTitle: associatedExamTitle?.isNotEmpty == true ? associatedExamTitle : null,
+              groupId: groupId?.isNotEmpty == true ? groupId : null,
+              groupName: groupName?.isNotEmpty == true ? groupName : null,
+              lessonIndex: lessonIndex,
+              totalLessons: totalLessons,
             ),
           );
         },
@@ -556,6 +564,10 @@ class AppRouter {
           final studentId = state.uri.queryParameters['studentId'];
           final associatedExamId = state.uri.queryParameters['associatedExamId'];
           final associatedExamTitle = state.uri.queryParameters['associatedExamTitle'];
+          final groupId = state.uri.queryParameters['groupId'];
+          final groupName = state.uri.queryParameters['groupName'];
+          final lessonIndex = int.tryParse(state.uri.queryParameters['lessonIndex'] ?? '');
+          final totalLessons = int.tryParse(state.uri.queryParameters['totalLessons'] ?? '');
           return BlocProvider<VideosCubit>(
             create: (_) => InjectionContainer.createVideosCubit(),
             child: VideoPlayerPage(
@@ -563,6 +575,10 @@ class AppRouter {
               studentId: studentId,
               associatedExamId: associatedExamId?.isNotEmpty == true ? associatedExamId : null,
               associatedExamTitle: associatedExamTitle?.isNotEmpty == true ? associatedExamTitle : null,
+              groupId: groupId?.isNotEmpty == true ? groupId : null,
+              groupName: groupName?.isNotEmpty == true ? groupName : null,
+              lessonIndex: lessonIndex,
+              totalLessons: totalLessons,
             ),
           );
         },

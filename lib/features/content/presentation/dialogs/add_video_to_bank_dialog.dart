@@ -10,16 +10,21 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/youtube_url_parser.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
-import '../../../groups/presentation/cubit/groups_cubit.dart';
-import '../../../groups/presentation/cubit/groups_state.dart';
 import '../../../videos/presentation/cubit/videos_cubit.dart';
 import '../../domain/entities/content_entity.dart';
 import '../cubit/content_cubit.dart';
 
 class AddVideoToBankDialog extends StatefulWidget {
-  const AddVideoToBankDialog({super.key});
+  /// Optional callback invoked with the newly created [ContentEntity] before
+  /// the dialog closes. Used by [AddLessonFlow] to auto-proceed to lesson setup.
+  final void Function(ContentEntity created)? onCreated;
 
-  static Future<bool?> show(BuildContext context) {
+  const AddVideoToBankDialog({super.key, this.onCreated});
+
+  static Future<bool?> show(
+    BuildContext context, {
+    void Function(ContentEntity created)? onCreated,
+  }) {
     return showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -34,10 +39,9 @@ class AddVideoToBankDialog extends StatefulWidget {
         return MultiBlocProvider(
           providers: [
             BlocProvider.value(value: context.read<ContentCubit>()),
-            BlocProvider.value(value: context.read<GroupsCubit>()),
             BlocProvider.value(value: videosCubit),
           ],
-          child: const AddVideoToBankDialog(),
+          child: AddVideoToBankDialog(onCreated: onCreated),
         );
       },
     );
@@ -56,16 +60,11 @@ class _AddVideoToBankDialogState extends State<AddVideoToBankDialog> {
   String? _extractedVideoId;
   PlatformFile? _selectedPdfFile;
   Uint8List? _pdfBytes;
-  final Set<String> _selectedGroupIds = {};
   bool _isSaving = false;
 
   @override
   void initState() {
     super.initState();
-    final groupsCubit = context.read<GroupsCubit>();
-    if (groupsCubit.state is! GroupsLoaded) {
-      groupsCubit.loadGroups();
-    }
   }
 
   @override
@@ -167,22 +166,18 @@ class _AddVideoToBankDialogState extends State<AddVideoToBankDialog> {
         throw Exception('Failed to link YouTube video record');
       }
 
-      // 3. If groups selected, assign them
-      if (_selectedGroupIds.isNotEmpty) {
-        await contentCubit.assignContentToGroups(
-          contentId: createdContent.id,
-          groupIds: _selectedGroupIds.toList(),
-        );
-      } else {
-        await contentCubit.loadCentralVideoBank(forceRefresh: true);
-      }
+      // 3. Reload bank so library is up-to-date
+      await contentCubit.loadCentralVideoBank(forceRefresh: true);
 
       if (!mounted) return;
       setState(() => _isSaving = false);
 
+      // Notify parent flow (e.g. AddLessonFlow) before closing
+      widget.onCreated?.call(createdContent);
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(context.l10n.videoLinkedSuccessToast),
+          content: Text(context.l10n.videoAddedToLibrary),
           backgroundColor: AppColors.success,
         ),
       );
@@ -431,63 +426,6 @@ class _AddVideoToBankDialogState extends State<AddVideoToBankDialog> {
                             ],
                           ),
                         ),
-
-                        const SizedBox(height: AppSpacing.s16),
-
-                        // Assign to Groups Section
-                        Text(
-                          l10n.selectTargetGroups,
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.s4),
-                        BlocBuilder<GroupsCubit, GroupsState>(
-                          builder: (context, state) {
-                            if (state is GroupsLoading) {
-                              return const LinearProgressIndicator();
-                            }
-                            if (state is GroupsLoaded) {
-                              if (state.groups.isEmpty) {
-                                return Text(
-                                  l10n.noGroupsAvailable,
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: AppColors.textSecondary,
-                                  ),
-                                );
-                              }
-
-                              return Wrap(
-                                spacing: 8,
-                                runSpacing: 6,
-                                children: state.groups.map((group) {
-                                  final isChecked = _selectedGroupIds.contains(group.id);
-                                  return FilterChip(
-                                    selected: isChecked,
-                                    label: Text(group.name),
-                                    selectedColor: AppColors.primary.withValues(alpha: 0.15),
-                                    checkmarkColor: AppColors.primary,
-                                    labelStyle: TextStyle(
-                                      fontSize: 12,
-                                      color: isChecked ? AppColors.primary : AppColors.textPrimary,
-                                      fontWeight: isChecked ? FontWeight.bold : FontWeight.normal,
-                                    ),
-                                    onSelected: (selected) {
-                                      setState(() {
-                                        if (selected) {
-                                          _selectedGroupIds.add(group.id);
-                                        } else {
-                                          _selectedGroupIds.remove(group.id);
-                                        }
-                                      });
-                                    },
-                                  );
-                                }).toList(),
-                              );
-                            }
-                            return const SizedBox.shrink();
-                          },
-                        ),
                       ],
                     ),
                   ),
@@ -510,7 +448,7 @@ class _AddVideoToBankDialogState extends State<AddVideoToBankDialog> {
                     ),
                     const SizedBox(width: AppSpacing.s8),
                     AppButton(
-                      text: l10n.addVideoToBankAction,
+                      text: l10n.addVideo,
                       isLoading: _isSaving,
                       icon: Icons.add_rounded,
                       onPressed: _isSaving ? null : _handleSave,

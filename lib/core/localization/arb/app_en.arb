@@ -1167,15 +1167,15 @@
       }
     }
   },
-  "addQuestionAction": "Add Question",
+  "addQuestionAction": "Add Quiz Question",
   "@addQuestionAction": {
     "description": "Add question action button"
   },
-  "questionTextLabel": "Question Prompt",
+  "questionTextLabel": "Question Text",
   "@questionTextLabel": {
     "description": "Question text field"
   },
-  "questionPointsLabel": "Point Value",
+  "questionPointsLabel": "Points",
   "@questionPointsLabel": {
     "description": "Points field"
   },
@@ -2719,11 +2719,11 @@
   "@addStudentSubmit": {
     "description": "Button text"
   },
-  "confirmRemoveMemberTitle": "Confirm Removal",
+  "confirmRemoveMemberTitle": "Remove Student",
   "@confirmRemoveMemberTitle": {
     "description": "Dialog title"
   },
-  "confirmRemoveMemberBody": "Are you sure you want to remove student \"{name}\" from this group?",
+  "confirmRemoveMemberBody": "Are you sure you want to remove student \"{name}\" from this course?",
   "@confirmRemoveMemberBody": {
     "description": "Dialog content",
     "placeholders": {
@@ -2740,15 +2740,15 @@
   "@loadingGroupDetail": {
     "description": "Loading message"
   },
-  "groupDetailTitle": "Group Details",
+  "groupDetailTitle": "Course Details",
   "@groupDetailTitle": {
     "description": "App bar title"
   },
-  "groupNotFound": "Group not found",
+  "groupNotFound": "Course not found",
   "@groupNotFound": {
     "description": "Error message"
   },
-  "backToGroups": "Back to Groups",
+  "backToGroups": "Back to Courses",
   "@backToGroups": {
     "description": "Tooltip"
   },
@@ -2764,7 +2764,7 @@
   "@previousContentDeniedLabel": {
     "description": "Badge label"
   },
-  "groupServicesAndTools": "Group Services & Tools",
+  "groupServicesAndTools": "Course Tools",
   "@groupServicesAndTools": {
     "description": "Card header"
   },
@@ -2780,7 +2780,7 @@
   "@sendGroupAnnouncement": {
     "description": "Button label"
   },
-  "groupMembersCountHeader": "Group Members ({count})",
+  "groupMembersCountHeader": "Enrolled Students ({count})",
   "@groupMembersCountHeader": {
     "description": "Header title with count",
     "placeholders": {
@@ -3641,7 +3641,7 @@
   "@changeFile": {
     "description": "Tooltip to change selected file"
   },
-  "lessonTitleLabel": "Lesson Title *",
+  "lessonTitleLabel": "Lesson Title",
   "@lessonTitleLabel": {
     "description": "Form label for video title"
   },
@@ -4108,15 +4108,6 @@
     "description": "Points score",
     "placeholders": {
       "points": {
-        "type": "int"
-      }
-    }
-  },
-  "passingScoreLabel": "Passing: {score}",
-  "@passingScoreLabel": {
-    "description": "Passing score badge label",
-    "placeholders": {
-      "score": {
         "type": "int"
       }
     }
@@ -4715,7 +4706,7 @@
   "@questionTypeMultipleChoice": {
     "description": "Multiple choice type"
   },
-  "questionTypeTrueFalse": "True or False",
+  "questionTypeTrueFalse": "True / False",
   "@questionTypeTrueFalse": {
     "description": "True or false type"
   },
@@ -5501,34 +5492,84 @@
   "associatedExamBadge": "Associated Exam (Lesson Quiz)",
   "associatedExamLabel": "Associated Exam (Lesson Quiz)",
   "associatedExamTitleLabel": "Associated Exam: {title}",
-  "@associatedExamTitleLabel": { "placeholders": { "title": { "type": "String" } } },
+  "@associatedExamTitleLabel": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "associatedExamHint": "Select an exam for this lesson",
   "prerequisiteExamLabel": "Prerequisite Exam (Lock Lesson)",
   "prerequisiteExamHint": "Select an exam that must be passed first",
   "noneOption": "None",
-  
   "totalPointsSummary": "Total: {points} / {maxScore} pts",
-  "@totalPointsSummary": { "placeholders": { "points": { "type": "int" }, "maxScore": { "type": "int" } } },
+  "@totalPointsSummary": {
+    "placeholders": {
+      "points": {
+        "type": "int"
+      },
+      "maxScore": {
+        "type": "int"
+      }
+    }
+  },
   "autoAdjustMaxScore": "Auto-adjust max score",
-  "@autoAdjustMaxScore": { "placeholders": { "points": { "type": "int" } } },
+  "@autoAdjustMaxScore": {
+    "placeholders": {
+      "points": {
+        "type": "int"
+      }
+    }
+  },
   "removeOption": "Remove Option",
   "selectCorrectAnswerPrompt": "Select the correct answer",
   "correctAnswerBadge": "Correct Answer",
   "addOption": "Add Option",
   "optionLetter": "Option {letter}",
-  "@optionLetter": { "placeholders": { "letter": { "type": "String" } } },
+  "@optionLetter": {
+    "placeholders": {
+      "letter": {
+        "type": "String"
+      }
+    }
+  },
   "searchExamsHint": "Search exams...",
   "clearSearchAction": "Clear Search",
   "filterAllExams": "All ({count})",
-  "@filterAllExams": { "placeholders": { "count": { "type": "int" } } },
+  "@filterAllExams": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "filterPublishedExams": "Published ({count})",
-  "@filterPublishedExams": { "placeholders": { "count": { "type": "int" } } },
+  "@filterPublishedExams": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "filterDraftExams": "Drafts ({count})",
-  "@filterDraftExams": { "placeholders": { "count": { "type": "int" } } },
+  "@filterDraftExams": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "noMatchingExamsFound": "No exams found matching your criteria",
   "teacherPreviewMode": "Teacher Preview Mode",
   "remainingTime": "Remaining: {time}",
-  "@remainingTime": { "placeholders": { "time": { "type": "String" } } },
+  "@remainingTime": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "restartLesson": "Restart Lesson",
   "clickToSeek": "Click to Seek",
   "lessonCompletedSuccess": "Lesson Completed!",
@@ -5546,18 +5587,26 @@
   "videoLinkedSuccessToast": "Video Linked Successfully",
   "youtubeTabTitle": "YouTube Video",
   "bunnyTabTitle": "Bunny CDN",
-  "youtubeUrlLabel": "YouTube URL",
-  "youtubeUrlHint": "Paste YouTube link here",
+  "youtubeUrlLabel": "YouTube Video URL",
+  "youtubeUrlHint": "Paste YouTube link e.g. https://youtu.be/...",
   "youtubeUnlistedAdvice": "Use Unlisted videos for privacy",
   "linkVideoAction": "Link Video",
-  
   "noVideosInBankDesc": "No videos uploaded to the bank yet.",
   "addVideoToBankAction": "Add Video to Bank",
   "unassignedBadge": "Unassigned",
   "assignToGroupsAction": "Assign to Groups",
   "lessonPrerequisiteLocked": "Lesson Locked by Prerequisite",
   "mustPassExamToUnlock": "You must score at least {score}% on {title} to unlock this.",
-  "@mustPassExamToUnlock": { "placeholders": { "title": { "type": "String" }, "score": { "type": "int" } } },
+  "@mustPassExamToUnlock": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "score": {
+        "type": "int"
+      }
+    }
+  },
   "prerequisiteExamBadge": "Prerequisite",
   "videoMaterialPdfBadge": "PDF",
   "videoReadyBadge": "Ready",
@@ -5574,16 +5623,40 @@
   "statVideoProgress": "Video Progress",
   "continueLearningTitle": "Continue Learning",
   "resumeAtTime": "Resume at {time}",
-  "@resumeAtTime": { "placeholders": { "time": { "type": "String" } } },
+  "@resumeAtTime": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "lectureCompletedPercent": "{percent}% Completed",
-  "@lectureCompletedPercent": { "placeholders": { "percent": { "type": "String" } } },
+  "@lectureCompletedPercent": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
   "resumeNow": "Resume Now",
   "overdue": "Overdue",
   "dueInHours": "Due in {hours}h",
-  "@dueInHours": { "placeholders": { "hours": { "type": "int" } } },
+  "@dueInHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
   "dueTomorrow": "Due Tomorrow",
   "dueInDays": "Due in {days}d",
-  "@dueInDays": { "placeholders": { "days": { "type": "int" } } },
+  "@dueInDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "noUrgentTasks": "No Urgent Tasks",
   "noUrgentTasksSubtitle": "You're all caught up!",
   "urgentTasksTitle": "Urgent Tasks",
@@ -5592,10 +5665,21 @@
   "taskTypeExam": "Exam",
   "atLeastTwoOptionsRequired": "At least two options required",
   "examPublishFailed": "Failed to publish exam: {error}",
-  "@examPublishFailed": { "placeholders": { "error": { "type": "String" } } },
+  "@examPublishFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "totalQuestionsSummary": "{count} Questions",
-  "@totalQuestionsSummary": { "placeholders": { "count": { "type": "int" } } },
-  
+  "@totalQuestionsSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "attachVideoMaterialNotice": "Attach a PDF or Notes to this video.",
   "attachVideoMaterialHint": "Select a PDF file",
   "addNewMaterialTitle": "Add New Material",
@@ -5612,9 +5696,21 @@
   "pdfDocumentsCategory": "PDF Documents",
   "allCategories": "All Categories",
   "filterAssignmentsWithCount": "Assignments ({count})",
-  "@filterAssignmentsWithCount": { "placeholders": { "count": { "type": "int" } } },
+  "@filterAssignmentsWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "filterExamsWithCount": "Exams ({count})",
-  "@filterExamsWithCount": { "placeholders": { "count": { "type": "int" } } },
+  "@filterExamsWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "noVideosInCategory": "No videos found in this category.",
   "uploadFirstVideoAction": "Upload First Video",
   "noPdfsInCategory": "No PDFs found in this category.",
@@ -5626,15 +5722,45 @@
   "videoBankTitle": "Video Bank",
   "videoBankSubtitle": "Manage all your uploaded videos",
   "totalVideosCount": "Total ({count})",
-  "@totalVideosCount": { "placeholders": { "count": { "type": "int" } } },
+  "@totalVideosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "assignedVideosCount": "Assigned ({count})",
-  "@assignedVideosCount": { "placeholders": { "count": { "type": "int" } } },
+  "@assignedVideosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "unassignedVideosCount": "Unassigned ({count})",
-  "@unassignedVideosCount": { "placeholders": { "count": { "type": "int" } } },
+  "@unassignedVideosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "filterAllVideos": "All Videos ({count})",
-  "@filterAllVideos": { "placeholders": { "count": { "type": "int" } } },
+  "@filterAllVideos": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "filterUnassignedOnly": "Unassigned Only ({count})",
-  "@filterUnassignedOnly": { "placeholders": { "count": { "type": "int" } } },
+  "@filterUnassignedOnly": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "noVideosInBankTitle": "No Videos Yet",
   "studentNavDashboardSubtitle": "Your progress & tasks",
   "studentNavNotificationsSubtitle": "Recent updates",
@@ -5643,7 +5769,13 @@
   "studentNavExamsSubtitle": "Quizzes & results",
   "searchAssignmentsHint": "Search assignments...",
   "filterAllAssignments": "All ({count})",
-  "@filterAllAssignments": { "placeholders": { "count": { "type": "int" } } },
+  "@filterAllAssignments": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "filterNeedsGrading": "Needs Grading",
   "filterPastDue": "Past Due",
   "noMatchingAssignmentsFound": "No assignments match your search.",
@@ -5661,7 +5793,13 @@
   "manageAssignedGroupsDesc": "Select which groups can access this content.",
   "saveGroupAssignmentsAction": "Save Assignments",
   "enrolledStudentsCountLabel": "{count} Students Enrolled",
-  "@enrolledStudentsCountLabel": { "placeholders": { "count": { "type": "int" } } },
+  "@enrolledStudentsCountLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "streamingProviderSettingTitle": "Lecture Streaming Provider",
   "streamingProviderSettingDesc": "Select the authorized provider to stream your lectures to students",
   "providerYoutubeLabel": "YouTube (Unlisted)",
@@ -5679,30 +5817,54 @@
   "handoutAttachmentSection": "Attached Lecture Handout (PDF)",
   "attachHandoutPdf": "Attach Lecture PDF Handout",
   "handoutSelected": "File selected: {fileName}",
-  "@handoutSelected": { "placeholders": { "fileName": { "type": "String" } } },
+  "@handoutSelected": {
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
   "inlineQuizSection": "Lecture Quiz & Unlock Requirement",
   "enableInlineQuiz": "Enable required quiz to unlock next lecture",
-  "passingScoreLabel": "Passing Score to Unlock (%)",
-  "addQuestionAction": "Add Quiz Question",
+  "passingScoreLabel": "Passing Score",
   "questionTypeMcq": "Multiple Choice",
-  "questionTypeTrueFalse": "True / False",
-  "questionTextLabel": "Question Text",
   "optionLabel": "Option {index}",
-  "@optionLabel": { "placeholders": { "index": { "type": "int" } } },
+  "@optionLabel": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
   "correctOptionBadge": "Correct Answer",
   "publishAndApproveAction": "Save & Approve Lecture to Syllabus 🚀",
   "lectureCreatedSuccessToast": "Lecture & quiz successfully added to syllabus",
   "curriculumRoadmapTitle": "Group Lectures & Curriculum",
   "curriculumRoadmapSubtitle": "Sequential lecture roadmap & quiz gates",
   "lectureNumberBadge": "Lecture {number}",
-  "@lectureNumberBadge": { "placeholders": { "number": { "type": "int" } } },
+  "@lectureNumberBadge": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
   "moveUpAction": "Move Up",
   "moveDownAction": "Move Down",
-  "quizGateNotice": "🔒 Quiz locked: Complete watching the lecture first",
+  "quizGateNotice": "Must pass previous exam",
   "quizUnlockedReady": "🟢 Quiz ready: Start now",
   "downloadHandoutAction": "Download Handout (PDF)",
   "nextLectureLockedNotice": "🔒 Locked: Requires finishing {prevTitle} and passing its quiz with {score}%",
-  "@nextLectureLockedNotice": { "placeholders": { "prevTitle": { "type": "String" }, "score": { "type": "int" } } },
+  "@nextLectureLockedNotice": {
+    "placeholders": {
+      "prevTitle": {
+        "type": "String"
+      },
+      "score": {
+        "type": "int"
+      }
+    }
+  },
   "videoCompletedCongrats": "Well done! You have completed the lecture 🎉 The quiz is now unlocked.",
   "takeQuizNowAction": "Take Lecture Quiz Now 📝",
   "quizPassedUnlockNext": "Congratulations! You passed the quiz and unlocked the next lecture 🚀",
@@ -5710,8 +5872,6 @@
   "videoSourceBunny": "Bunny CDN",
   "videoSourceNone": "No Video",
   "videoSourceLabel": "Video Source",
-  "youtubeUrlLabel": "YouTube Video URL",
-  "youtubeUrlHint": "Paste YouTube link e.g. https://youtu.be/...",
   "changeVideoFileAction": "Change Video File",
   "addMcqQuestionAction": "Add Multiple Choice Question",
   "addTrueFalseQuestionAction": "Add True / False Question",
@@ -5722,9 +5882,15 @@
   "overallCourseProgress": "Overall Progress: {completed} of {total} lectures completed ({percentage}%)",
   "@overallCourseProgress": {
     "placeholders": {
-      "completed": { "type": "int" },
-      "total": { "type": "int" },
-      "percentage": { "type": "int" }
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "percentage": {
+        "type": "int"
+      }
     }
   },
   "reviewQuizResultAction": "Review Quiz Score",
@@ -5735,7 +5901,6 @@
   "addNewLectureHero": "Add New All-in-One Lecture",
   "noLecturesInCurriculum": "No lectures in this curriculum yet",
   "noLecturesInCurriculumSubtitle": "Start by adding the first lecture with video, booklet, and quiz",
-  "questionPointsLabel": "Points",
   "quizRulesAtLeastOneQuestion": "Quiz must contain at least one question",
   "questionTextRequired": "Please enter question text",
   "fillAllOptionsNotice": "Please fill in all options",
@@ -5755,13 +5920,17 @@
   "estimatedDurationMinutes": "{minutes} min",
   "@estimatedDurationMinutes": {
     "placeholders": {
-      "minutes": { "type": "int" }
+      "minutes": {
+        "type": "int"
+      }
     }
   },
   "milestoneStationLabel": "Station {index}",
   "@milestoneStationLabel": {
     "placeholders": {
-      "index": { "type": "int" }
+      "index": {
+        "type": "int"
+      }
     }
   },
   "lessonHandoutChip": "Handout PDF",
@@ -5775,7 +5944,9 @@
   "customFileSelected": "Custom Handout: {fileName}",
   "@customFileSelected": {
     "placeholders": {
-      "fileName": { "type": "String" }
+      "fileName": {
+        "type": "String"
+      }
     }
   },
   "pickGroupHandoutAction": "Upload Group Handout (PDF)",
@@ -5783,208 +5954,14 @@
   "assignedToCountGroups": "Assigned to {count} groups",
   "@assignedToCountGroups": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "distributeToGroupsAction": "Distribute to Groups",
   "courseProgressTitle": "Course Progress",
   "noContentYet": "No content yet",
-  "quizGateNotice": "Must pass previous exam",
-  "manualUnlockAction": "Manual Unlock",
-  "manualUnlockTitle": "Manual Unlock",
-  "attachVideoMaterialHint": "Select a PDF file",
-  "addNewMaterialTitle": "Add New Material",
-  "uploadBunnyVideoTitle": "Upload Video",
-  "uploadBunnyVideoSubtitle": "Upload directly to Bunny CDN",
-  "uploadPdfFileTitle": "Upload PDF",
-  "uploadPdfFileSubtitle": "Upload documents and notes",
-  "imagesCategory": "Images",
-  "createAssignmentShortcut": "Create Assignment",
-  "createAssignmentShortcutSubtitle": "Add a new assignment task",
-  "createExamShortcut": "Create Exam",
-  "createExamShortcutSubtitle": "Add a new quiz or exam",
-  "videosCategory": "Videos",
-  "pdfDocumentsCategory": "PDF Documents",
-  "allCategories": "All Categories",
-  "filterAssignmentsWithCount": "Assignments ({count})",
-  "@filterAssignmentsWithCount": { "placeholders": { "count": { "type": "int" } } },
-  "filterExamsWithCount": "Exams ({count})",
-  "@filterExamsWithCount": { "placeholders": { "count": { "type": "int" } } },
-  "noVideosInCategory": "No videos found in this category.",
-  "uploadFirstVideoAction": "Upload First Video",
-  "noPdfsInCategory": "No PDFs found in this category.",
-  "uploadFirstPdfAction": "Upload First PDF",
-  "noAssignmentsInCategory": "No assignments found in this category.",
-  "createFirstAssignmentAction": "Create First Assignment",
-  "noExamsInCategory": "No exams found in this category.",
-  "createFirstExamAction": "Create First Exam",
-  "videoBankTitle": "Video Bank",
-  "videoBankSubtitle": "Manage all your uploaded videos",
-  "totalVideosCount": "Total ({count})",
-  "@totalVideosCount": { "placeholders": { "count": { "type": "int" } } },
-  "assignedVideosCount": "Assigned ({count})",
-  "@assignedVideosCount": { "placeholders": { "count": { "type": "int" } } },
-  "unassignedVideosCount": "Unassigned ({count})",
-  "@unassignedVideosCount": { "placeholders": { "count": { "type": "int" } } },
-  "filterAllVideos": "All Videos ({count})",
-  "@filterAllVideos": { "placeholders": { "count": { "type": "int" } } },
-  "filterUnassignedOnly": "Unassigned Only ({count})",
-  "@filterUnassignedOnly": { "placeholders": { "count": { "type": "int" } } },
-  "noVideosInBankTitle": "No Videos Yet",
-  "studentNavDashboardSubtitle": "Your progress & tasks",
-  "studentNavNotificationsSubtitle": "Recent updates",
-  "studentNavContentSubtitle": "Videos & lessons",
-  "studentNavAssignmentsSubtitle": "Homework tasks",
-  "studentNavExamsSubtitle": "Quizzes & results",
-  "searchAssignmentsHint": "Search assignments...",
-  "filterAllAssignments": "All ({count})",
-  "@filterAllAssignments": { "placeholders": { "count": { "type": "int" } } },
-  "filterNeedsGrading": "Needs Grading",
-  "filterPastDue": "Past Due",
-  "noMatchingAssignmentsFound": "No assignments match your search.",
-  "lecturesRoadmapTitle": "Lectures Roadmap",
-  "lecturesRoadmapSubtitle": "Your scheduled lectures",
-  "recordedSessionAvailable": "Recorded Session Available",
-  "youtubeUnlistedNotice": "Use Unlisted videos to prevent public access.",
-  "materialAttachmentTitle": "Material Attachment",
-  "chooseMaterialFile": "Choose File",
-  "changePdfFileAction": "Change PDF",
-  "selectTargetGroups": "Select Target Groups",
-  "noGroupsAvailable": "No groups available",
-  "groupAssignmentSuccess": "Groups assigned successfully",
-  "manageAssignedGroupsTitle": "Manage Groups",
-  "manageAssignedGroupsDesc": "Select which groups can access this content.",
-  "saveGroupAssignmentsAction": "Save Assignments",
-  "enrolledStudentsCountLabel": "{count} Students Enrolled",
-  "@enrolledStudentsCountLabel": { "placeholders": { "count": { "type": "int" } } },
-  "streamingProviderSettingTitle": "Lecture Streaming Provider",
-  "streamingProviderSettingDesc": "Select the authorized provider to stream your lectures to students",
-  "providerYoutubeLabel": "YouTube (Unlisted)",
-  "providerYoutubeDesc": "Fast & free hosting with instant linking via video URL",
-  "providerBunnyLabel": "Bunny Stream (Private Encrypted CDN)",
-  "providerBunnyDesc": "High security & anti-download protection with HLS streaming",
-  "providerUpdatedToast": "Streaming provider updated successfully",
-  "allInOneStudioTitle": "All-in-One Lecture Studio",
-  "allInOneStudioSubtitle": "Add video, handout, and quiz in a single step",
-  "lectureDetailsSection": "Lecture & Video Details",
-  "lectureTitleLabel": "Lecture Title",
-  "lectureTitleHint": "e.g. Lecture 01 - Intro to Algebra",
-  "lectureDescLabel": "Lecture Description or Notes",
-  "lectureDescHint": "Important points for students beside the video...",
-  "handoutAttachmentSection": "Attached Lecture Handout (PDF)",
-  "attachHandoutPdf": "Attach Lecture PDF Handout",
-  "handoutSelected": "File selected: {fileName}",
-  "@handoutSelected": { "placeholders": { "fileName": { "type": "String" } } },
-  "inlineQuizSection": "Lecture Quiz & Unlock Requirement",
-  "enableInlineQuiz": "Enable required quiz to unlock next lecture",
-  "passingScoreLabel": "Passing Score to Unlock (%)",
-  "addQuestionAction": "Add Quiz Question",
-  "questionTypeMcq": "Multiple Choice",
-  "questionTypeTrueFalse": "True / False",
-  "questionTextLabel": "Question Text",
-  "optionLabel": "Option {index}",
-  "@optionLabel": { "placeholders": { "index": { "type": "int" } } },
-  "correctOptionBadge": "Correct Answer",
-  "publishAndApproveAction": "Save & Approve Lecture to Syllabus 🚀",
-  "lectureCreatedSuccessToast": "Lecture & quiz successfully added to syllabus",
-  "curriculumRoadmapTitle": "Group Lectures & Curriculum",
-  "curriculumRoadmapSubtitle": "Sequential lecture roadmap & quiz gates",
-  "lectureNumberBadge": "Lecture {number}",
-  "@lectureNumberBadge": { "placeholders": { "number": { "type": "int" } } },
-  "moveUpAction": "Move Up",
-  "moveDownAction": "Move Down",
-  "quizGateNotice": "🔒 Quiz locked: Complete watching the lecture first",
-  "quizUnlockedReady": "🟢 Quiz ready: Start now",
-  "downloadHandoutAction": "Download Handout (PDF)",
-  "nextLectureLockedNotice": "🔒 Locked: Requires finishing {prevTitle} and passing its quiz with {score}%",
-  "@nextLectureLockedNotice": { "placeholders": { "prevTitle": { "type": "String" }, "score": { "type": "int" } } },
-  "videoCompletedCongrats": "Well done! You have completed the lecture 🎉 The quiz is now unlocked.",
-  "takeQuizNowAction": "Take Lecture Quiz Now 📝",
-  "quizPassedUnlockNext": "Congratulations! You passed the quiz and unlocked the next lecture 🚀",
-  "videoSourceYoutube": "YouTube",
-  "videoSourceBunny": "Bunny CDN",
-  "videoSourceNone": "No Video",
-  "videoSourceLabel": "Video Source",
-  "youtubeUrlLabel": "YouTube Video URL",
-  "youtubeUrlHint": "Paste YouTube link e.g. https://youtu.be/...",
-  "changeVideoFileAction": "Change Video File",
-  "addMcqQuestionAction": "Add Multiple Choice Question",
-  "addTrueFalseQuestionAction": "Add True / False Question",
-  "trueOptionLabel": "True (Correct)",
-  "falseOptionLabel": "False (Incorrect)",
-  "completedBadge": "Completed",
-  "currentActiveLectureBadge": "Current Lecture",
-  "overallCourseProgress": "Overall Progress: {completed} of {total} lectures completed ({percentage}%)",
-  "@overallCourseProgress": {
-    "placeholders": {
-      "completed": { "type": "int" },
-      "total": { "type": "int" },
-      "percentage": { "type": "int" }
-    }
-  },
-  "reviewQuizResultAction": "Review Quiz Score",
-  "rewatchLectureAction": "Rewatch Lecture",
-  "startLectureAction": "Watch Lecture",
-  "quizPrefix": "Lecture Quiz",
-  "removeQuestionTooltip": "Delete Question",
-  "addNewLectureHero": "Add New All-in-One Lecture",
-  "noLecturesInCurriculum": "No lectures in this curriculum yet",
-  "noLecturesInCurriculumSubtitle": "Start by adding the first lecture with video, booklet, and quiz",
-  "questionPointsLabel": "Points",
-  "quizRulesAtLeastOneQuestion": "Quiz must contain at least one question",
-  "questionTextRequired": "Please enter question text",
-  "fillAllOptionsNotice": "Please fill in all options",
-  "creatingContent": "Creating lecture...",
-  "linkingYoutubeVideo": "Linking YouTube video...",
-  "uploadingNotice": "Uploading attached handout...",
-  "creatingExam": "Creating lecture quiz...",
-  "youtubeUrlRequired": "YouTube URL is required",
-  "currentMissionTitle": "Current Mission",
-  "currentMissionSubtitle": "Resume your academic mastery right where you left off",
-  "resumeLessonAction": "Resume Lecture Now",
-  "startNextLessonAction": "Start Next Lecture",
-  "allLecturesCompletedTitle": "Outstanding! You completed all lectures in this syllabus 🏆",
-  "allLecturesCompletedSubtitle": "You have mastered all syllabus requirements successfully",
-  "syllabusViewRoadmap": "Interactive Roadmap",
-  "syllabusViewList": "Syllabus List",
-  "estimatedDurationMinutes": "{minutes} min",
-  "@estimatedDurationMinutes": {
-    "placeholders": {
-      "minutes": { "type": "int" }
-    }
-  },
-  "milestoneStationLabel": "Station {index}",
-  "@milestoneStationLabel": {
-    "placeholders": {
-      "index": { "type": "int" }
-    }
-  },
-  "lessonHandoutChip": "Handout PDF",
-  "lessonQuizChip": "Lesson Quiz",
-  "lockedByPrereqTooltip": "Locked: Requires passing previous lecture quiz",
-  "groupHandoutPdfLabel": "Handout PDF for this group",
-  "groupExamLabel": "Lesson Quiz for this group",
-  "noExamSelected": "No quiz (Optional)",
-  "lockUntilPreviousQuizPassed": "Lock until previous quiz is passed",
-  "sortOrderInGroup": "Sequence in Group",
-  "customFileSelected": "Custom Handout: {fileName}",
-  "@customFileSelected": {
-    "placeholders": {
-      "fileName": { "type": "String" }
-    }
-  },
-  "pickGroupHandoutAction": "Upload Group Handout (PDF)",
-  "customizeForThisGroup": "Customize Handout & Quiz for this group",
-  "assignedToCountGroups": "Assigned to {count} groups",
-  "@assignedToCountGroups": {
-    "placeholders": {
-      "count": { "type": "int" }
-    }
-  },
-  "distributeToGroupsAction": "Distribute to Groups",
-  "courseProgressTitle": "Course Progress",
-  "noContentYet": "No content yet",
-  "quizGateNotice": "Must pass previous exam",
   "manualUnlockAction": "Manual Unlock",
   "manualUnlockTitle": "Manual Unlock",
   "manualUnlockWarningText1": "You are about to unlock the lesson ",
@@ -5999,5 +5976,213 @@
   "defaultPassingScore": "Default Passing Score (%)",
   "passingScoreOverride": "Passing Score Override (%)",
   "passingScoreDefaultHint": "Course Default",
-  "lessonQuizSequentialRequirement": "This Lesson Quiz will be required for students to unlock the next lesson (if Sequential Learning is enabled)."
+  "lessonQuizSequentialRequirement": "This Lesson Quiz will be required for students to unlock the next lesson (if Sequential Learning is enabled).",
+  "videoLibraryTitle": "Video Library",
+  "videoLibrarySubtitle": "Create videos once and reuse them across multiple courses.",
+  "addVideo": "Add Video",
+  "filterUsedInCourses": "Used in Courses",
+  "usedInNCourses": "{count, plural, one{Used in 1 course} other{Used in {count} courses}}",
+  "@usedInNCourses": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notUsedInAnyCourse": "Not used in any course",
+  "addToCourse": "Add to Course",
+  "editVideo": "Edit Video",
+  "videoAddedToLibrary": "Video added to your library.",
+  "addToCourseAfterSave": "Add to Course",
+  "selectCourse": "Select Course",
+  "selectCourseSubtitle": "Choose which course to add this video to:",
+  "nCoursesNLessons": "{lessons} Lessons · {students} Students",
+  "@nCoursesNLessons": {
+    "placeholders": {
+      "lessons": {
+        "type": "int"
+      },
+      "students": {
+        "type": "int"
+      }
+    }
+  },
+  "addLesson": "Add Lesson",
+  "addLessonTitle": "Add Lesson",
+  "addLessonSubtitle": "How would you like to add this lesson?",
+  "useExistingVideo": "Use Existing Video",
+  "useExistingVideoSubtitle": "Choose a video from your library",
+  "addNewVideoToLesson": "Add New Video",
+  "addNewVideoToLessonSubtitle": "Create a new video for this course",
+  "lessonSetupTitle": "Lesson Setup",
+  "studyMaterial": "Study Material",
+  "uploadPdf": "Upload PDF",
+  "replacePdf": "Replace",
+  "removePdf": "Remove",
+  "lessonQuizLabel": "Lesson Quiz",
+  "lessonQuizHint": "Select Lesson Quiz",
+  "createLessonQuiz": "+ Create Lesson Quiz",
+  "useCourseDefault": "Use course default — {score}%",
+  "@useCourseDefault": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "customPassingScore": "Custom",
+  "lessonAddedToCourse": "Lesson added to {course}.",
+  "@lessonAddedToCourse": {
+    "placeholders": {
+      "course": {
+        "type": "String"
+      }
+    }
+  },
+  "lessonUpdatedSuccess": "Lesson updated successfully.",
+  "manageLessons": "Manage Lessons",
+  "courseBuilderTitle": "Course Builder",
+  "sequentialLearningLabel": "Sequential Learning",
+  "sequentialLearningDescription": "Students must complete each lesson's video and pass the lesson quiz before the next lesson becomes available.",
+  "defaultLessonPassingScore": "Default Lesson Quiz Passing Score",
+  "learningProgression": "Learning Progression",
+  "noLessonsYet": "No lessons yet",
+  "noLessonsYetSubtitle": "Start building your course by adding a video lesson.",
+  "addFirstLesson": "Add First Lesson",
+  "videoPickerTitle": "Select Video",
+  "videoPickerSearchHint": "Search videos...",
+  "lessonNumber": "Lesson {n}",
+  "@lessonNumber": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "hasStudyMaterial": "Study Material",
+  "hasLessonQuiz": "Lesson Quiz",
+  "editLesson": "Edit Lesson",
+  "deleteLesson": "Delete Lesson",
+  "nLessonsCount": "{count, plural, one{1 Lesson} other{{count} Lessons}}",
+  "@nLessonsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nStudentsCount": "{count, plural, one{1 Student} other{{count} Students}}",
+  "@nStudentsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicateVideoInCourse": "This video is already part of this course.",
+  "couldNotAddLesson": "We couldn't add this lesson. Please try again.",
+  "couldNotUpdateLesson": "We couldn't update this lesson. Please try again.",
+  "noCoursesAvailable": "No courses available.",
+  "noCoursesAvailableSubtitle": "Create a course first, then add videos to it.",
+  "videoNotAvailable": "Video not available",
+  "allVideosUsed": "All videos are being used",
+  "allVideosUsedSubtitle": "All your videos are currently used in at least one course.",
+  "noUnusedVideos": "No unused videos",
+  "videoLibraryEmpty": "Your Video Library is empty",
+  "videoLibraryEmptySubtitle": "Add your first teaching video and reuse it across your courses.",
+  "usedInMoreCourses": "+ {count} more",
+  "@usedInMoreCourses": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "myCoursesTitle": "My Courses",
+  "myCoursesSubtitle": "Access all your enrolled courses and track your progress",
+  "openCourseAction": "Open Course",
+  "noEnrolledCoursesTitle": "No courses yet",
+  "noEnrolledCoursesSubtitle": "Your courses will appear here once you are enrolled.",
+  "courseBeingPreparedTitle": "This course is being prepared.",
+  "courseBeingPreparedSubtitle": "Your lessons will appear here soon.",
+  "startCourseAction": "Start Course",
+  "continueLessonAction": "Continue Lesson",
+  "takeLessonQuizAction": "Start Lesson Quiz",
+  "retryLessonQuizAction": "Retry Lesson Quiz",
+  "reviewCourseAction": "Review Course",
+  "reviewLessonAction": "Review Lesson",
+  "continueToNextLessonAction": "Continue to Next Lesson",
+  "completeLessonToUnlock": "Complete Lesson {n} to unlock this lesson.",
+  "@completeLessonToUnlock": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "availableStatus": "Available",
+  "lessonQuizReadyTitle": "Your lesson quiz is ready.",
+  "lessonQuizReadyDesc": "Test your understanding of this lesson to unlock the next one.",
+  "quizNotPassedTitle": "Quiz not passed",
+  "quizNotPassedDesc": "You can review the lesson and try again.",
+  "lessonCompletedCongrats": "Lesson completed!",
+  "passedQuizNotice": "You passed the lesson quiz.",
+  "nextLessonLabel": "Next lesson: {title}",
+  "@nextLessonLabel": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "previousLessonAction": "Previous Lesson",
+  "nextLessonAction": "Next Lesson",
+  "lessonXofY": "Lesson {current} of {total}",
+  "@lessonXofY": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "lessonMaterialTitle": "Lesson Material",
+  "openPdfAction": "Open PDF",
+  "completeVideoToUnlockQuiz": "Complete the video to unlock the lesson quiz.",
+  "videoCompletedTitle": "Video completed",
+  "courseAssessmentsTitle": "Course Assessments",
+  "lessonQuizzesSectionTitle": "Lesson Quizzes",
+  "lessonQuizzesSectionDesc": "Completed as part of your lesson progression.",
+  "generalExamsSectionTitle": "General Exams",
+  "generalExamsSectionDesc": "Additional course-wide assessments.",
+  "lessonsCompletedRatio": "{completed} of {total} lessons completed",
+  "@lessonsCompletedRatio": {
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "percentComplete": "{pct}% Complete",
+  "@percentComplete": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "viewLessonsAction": "View Lessons",
+  "courseLessonsTitle": "Course Lessons",
+  "addLessonButton": "Add Lesson",
+  "courseBuilderEmptyTitle": "No Lessons Yet",
+  "courseBuilderEmptySubtitle": "Start building your course by adding a lesson.",
+  "manageLessons": "Manage Lessons",
+  "sequentialLearning": "Sequential Learning",
+  "sequentialLearningDesc": "Students must complete each lesson's video and pass the lesson quiz before the next lesson unlocks.",
+  "defaultLessonPassingScore": "Default Lesson Quiz Passing Score"
 }

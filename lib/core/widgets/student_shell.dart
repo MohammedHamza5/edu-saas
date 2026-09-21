@@ -124,16 +124,16 @@ class StudentShell extends StatelessWidget {
         ],
       ),
 
-      // Section 2: Learning Materials
+      // Section 2: Learning Courses
       AdaptiveSidebarSection(
-        title: context.l10n.studentNavContent,
+        title: context.l10n.myCoursesTitle,
         destinations: [
           AdaptiveDestination(
-            icon: Icons.menu_book_outlined,
-            selectedIcon: Icons.menu_book_rounded,
-            label: context.l10n.studentNavContent,
-            subtitle: context.l10n.studentNavContentSubtitle,
-            tooltip: context.l10n.contentLibraryTitle,
+            icon: Icons.school_outlined,
+            selectedIcon: Icons.school_rounded,
+            label: context.l10n.myCoursesTitle,
+            subtitle: context.l10n.myCoursesSubtitle,
+            tooltip: context.l10n.myCoursesTitle,
           ),
         ],
       ),

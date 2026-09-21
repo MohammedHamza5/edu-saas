@@ -219,41 +219,6 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
                                     ),
                                   ),
                                 ],
-                                const SizedBox(height: AppSpacing.s12),
-                                Wrap(
-                                  spacing: AppSpacing.s8,
-                                  runSpacing: AppSpacing.s8,
-                                  crossAxisAlignment: WrapCrossAlignment.center,
-                                  children: [
-                                    Icon(
-                                      group.isPreviousContentAllowed
-                                          ? Icons.lock_open_rounded
-                                          : Icons.lock_outline_rounded,
-                                      size: 16,
-                                      color: AppColors.textSecondary,
-                                    ),
-                                    Text(
-                                      context.l10n.previousContentPolicy,
-                                      style: const TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w600,
-                                        color: AppColors.textPrimary,
-                                      ),
-                                    ),
-                                    AppBadge(
-                                      label: group.isPreviousContentAllowed
-                                          ? context
-                                                .l10n
-                                                .previousContentAllowedLabel
-                                          : context
-                                                .l10n
-                                                .previousContentDeniedLabel,
-                                      variant: group.isPreviousContentAllowed
-                                          ? AppBadgeVariant.active
-                                          : AppBadgeVariant.neutral,
-                                    ),
-                                  ],
-                                ),
                               ],
                             ),
                           ),
@@ -302,7 +267,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
                                 Icons.folder_shared_rounded,
                                 size: 16,
                               ),
-                              label: Text(context.l10n.contentAndMaterials),
+                              label: Text(context.l10n.manageLessons),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.primary,
                                 foregroundColor: Colors.white,

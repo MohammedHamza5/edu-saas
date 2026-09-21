@@ -2032,11 +2032,11 @@ class AppLocalizationsAr extends AppLocalizations {
   String get addStudentSubmit => 'إضافة الطالب';
 
   @override
-  String get confirmRemoveMemberTitle => 'تأكيد الاستبعاد';
+  String get confirmRemoveMemberTitle => 'حذف طالب';
 
   @override
   String confirmRemoveMemberBody(String name) {
-    return 'هل أنت متأكد من رغبتك في إزالة الطالب \"$name\" من هذه المجموعة؟';
+    return 'هل أنت متأكد أنك تريد حذف الطالب \"$name\" من هذه المادة؟';
   }
 
   @override
@@ -2046,13 +2046,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get loadingGroupDetail => 'جاري تحميل تفاصيل المجموعة والأعضاء...';
 
   @override
-  String get groupDetailTitle => 'تفاصيل المجموعة';
+  String get groupDetailTitle => 'تفاصيل المادة';
 
   @override
-  String get groupNotFound => 'لم يتم العثور على المجموعة';
+  String get groupNotFound => 'لم يتم العثور على المادة';
 
   @override
-  String get backToGroups => 'رجوع للمجموعات';
+  String get backToGroups => 'العودة للمواد';
 
   @override
   String get previousContentPolicy => 'سياسة المحتوى السابق:';
@@ -2064,7 +2064,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get previousContentDeniedLabel => 'محجوب عن الجدد (Deny)';
 
   @override
-  String get groupServicesAndTools => 'خدمات وأدوات المجموعة';
+  String get groupServicesAndTools => 'أدوات المادة';
 
   @override
   String get contentAndMaterials => 'المحتوى والمذكرات';
@@ -2077,7 +2077,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String groupMembersCountHeader(int count) {
-    return 'أعضاء المجموعة ($count)';
+    return 'الطلاب المسجلين ($count)';
   }
 
   @override
@@ -2718,7 +2718,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get changeFile => 'تغيير الملف';
 
   @override
-  String get lessonTitleLabel => 'عنوان الدرس *';
+  String get lessonTitleLabel => 'عنوان الدرس';
 
   @override
   String get lessonTitleHint => 'مثال: شرح درس الدوال المثلثية - الجزء الأول';
@@ -3046,11 +3046,6 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String scorePoints(int points) {
     return '$points درجة';
-  }
-
-  @override
-  String passingScoreLabel(int score) {
-    return 'نسبة النجاح المطلوبة لفك القفل (%)';
   }
 
   @override
@@ -4558,6 +4553,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get enableInlineQuiz => 'تفعيل كويز إلزامي لفك قفل المحاضرة التالية';
 
   @override
+  String get passingScoreLabel => 'درجة النجاح';
+
+  @override
   String get questionTypeMcq => 'اختيار من متعدد';
 
   @override
@@ -4841,4 +4839,380 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get lessonQuizSequentialRequirement =>
       'هذا الاختبار سيكون شرطاً للطلاب لفتح الدرس التالي (إذا كان التعلم المتسلسل مفعلاً).';
+
+  @override
+  String get videoLibraryTitle => 'مكتبة الفيديوهات';
+
+  @override
+  String get videoLibrarySubtitle =>
+      'أنشئ الفيديو مرة واحدة وأضفه لأي مادة دراسية.';
+
+  @override
+  String get addVideo => 'إضافة فيديو';
+
+  @override
+  String get filterUsedInCourses => 'مستخدمة في مواد';
+
+  @override
+  String usedInNCourses(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'مستخدم في $count مواد',
+      one: 'مستخدم في مادة واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get notUsedInAnyCourse => 'غير مُضاف لأي مادة';
+
+  @override
+  String get addToCourse => 'إضافة لمادة';
+
+  @override
+  String get editVideo => 'تعديل الفيديو';
+
+  @override
+  String get videoAddedToLibrary => 'تمت إضافة الفيديو للمكتبة.';
+
+  @override
+  String get addToCourseAfterSave => 'إضافة لمادة';
+
+  @override
+  String get selectCourse => 'اختر المادة';
+
+  @override
+  String get selectCourseSubtitle =>
+      'اختر المادة التي تريد إضافة هذا الفيديو إليها:';
+
+  @override
+  String nCoursesNLessons(int lessons, int students) {
+    return '$lessons دروس · $students طلاب';
+  }
+
+  @override
+  String get addLesson => 'إضافة درس';
+
+  @override
+  String get addLessonTitle => 'إضافة درس';
+
+  @override
+  String get addLessonSubtitle => 'كيف تريد إضافة هذا الدرس؟';
+
+  @override
+  String get useExistingVideo => 'استخدام فيديو موجود';
+
+  @override
+  String get useExistingVideoSubtitle => 'اختر فيديو من مكتبتك';
+
+  @override
+  String get addNewVideoToLesson => 'إضافة فيديو جديد';
+
+  @override
+  String get addNewVideoToLessonSubtitle => 'إنشاء فيديو جديد لهذه المادة';
+
+  @override
+  String get lessonSetupTitle => 'إعداد الدرس';
+
+  @override
+  String get studyMaterial => 'المواد الدراسية';
+
+  @override
+  String get uploadPdf => 'رفع ملف PDF';
+
+  @override
+  String get replacePdf => 'استبدال';
+
+  @override
+  String get removePdf => 'إزالة';
+
+  @override
+  String get lessonQuizLabel => 'اختبار الدرس';
+
+  @override
+  String get lessonQuizHint => 'اختر اختبار الدرس';
+
+  @override
+  String get createLessonQuiz => '+ إنشاء اختبار درس';
+
+  @override
+  String useCourseDefault(int score) {
+    return 'استخدام الافتراضي — $score%';
+  }
+
+  @override
+  String get customPassingScore => 'مخصص';
+
+  @override
+  String lessonAddedToCourse(String course) {
+    return 'تمت إضافة الدرس إلى $course.';
+  }
+
+  @override
+  String get lessonUpdatedSuccess => 'تم تحديث الدرس بنجاح.';
+
+  @override
+  String get manageLessons => 'إدارة الدروس';
+
+  @override
+  String get courseBuilderTitle => 'منشئ المادة';
+
+  @override
+  String get sequentialLearningLabel => 'التعلم التسلسلي';
+
+  @override
+  String get sequentialLearningDescription =>
+      'يجب على الطلاب إكمال فيديو كل درس واجتياز اختباره قبل أن يُفتح الدرس التالي.';
+
+  @override
+  String get defaultLessonPassingScore => 'درجة النجاح الافتراضية للاختبار';
+
+  @override
+  String get learningProgression => 'تقدم التعلم';
+
+  @override
+  String get noLessonsYet => 'لا توجد دروس بعد';
+
+  @override
+  String get noLessonsYetSubtitle => 'ابدأ ببناء مادتك بإضافة درس فيديو.';
+
+  @override
+  String get addFirstLesson => 'إضافة أول درس';
+
+  @override
+  String get videoPickerTitle => 'اختر فيديو';
+
+  @override
+  String get videoPickerSearchHint => 'ابحث عن فيديو...';
+
+  @override
+  String lessonNumber(int n) {
+    return 'الدرس $n';
+  }
+
+  @override
+  String get hasStudyMaterial => 'مواد دراسية';
+
+  @override
+  String get hasLessonQuiz => 'اختبار الدرس';
+
+  @override
+  String get editLesson => 'تعديل الدرس';
+
+  @override
+  String get deleteLesson => 'حذف الدرس';
+
+  @override
+  String nLessonsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count دروس',
+      one: 'درس واحد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String nStudentsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count طلاب',
+      one: 'طالب واحد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get duplicateVideoInCourse =>
+      'هذا الفيديو موجود بالفعل في هذه المادة.';
+
+  @override
+  String get couldNotAddLesson => 'تعذّر إضافة الدرس. يرجى المحاولة مجدداً.';
+
+  @override
+  String get couldNotUpdateLesson => 'تعذّر تحديث الدرس. يرجى المحاولة مجدداً.';
+
+  @override
+  String get noCoursesAvailable => 'لا توجد مواد متاحة.';
+
+  @override
+  String get noCoursesAvailableSubtitle =>
+      'أنشئ مادة أولاً ثم أضف الفيديوهات إليها.';
+
+  @override
+  String get videoNotAvailable => 'الفيديو غير متاح';
+
+  @override
+  String get allVideosUsed => 'جميع الفيديوهات مستخدمة';
+
+  @override
+  String get allVideosUsedSubtitle =>
+      'جميع فيديوهاتك مستخدمة حالياً في مادة واحدة على الأقل.';
+
+  @override
+  String get noUnusedVideos => 'لا توجد فيديوهات غير مستخدمة';
+
+  @override
+  String get videoLibraryEmpty => 'مكتبة الفيديوهات فارغة';
+
+  @override
+  String get videoLibraryEmptySubtitle =>
+      'أضف أول فيديو تعليمي وأعد استخدامه في جميع مواد دراسية.';
+
+  @override
+  String usedInMoreCourses(int count) {
+    return '+ $count أخرى';
+  }
+
+  @override
+  String get myCoursesTitle => 'موادي التعليمية';
+
+  @override
+  String get myCoursesSubtitle =>
+      'الوصول إلى جميع موادك الدراسية ومتابعة تقدمك';
+
+  @override
+  String get openCourseAction => 'فتح المادة';
+
+  @override
+  String get noEnrolledCoursesTitle => 'لا توجد مواد دراسية بعد';
+
+  @override
+  String get noEnrolledCoursesSubtitle =>
+      'ستظهر موادك الدراسية هنا فور تسجيلك بها.';
+
+  @override
+  String get courseBeingPreparedTitle =>
+      'يتم تجهيز هذه المادة التعليمية حالياً.';
+
+  @override
+  String get courseBeingPreparedSubtitle => 'ستظهر دروسك هنا قريباً.';
+
+  @override
+  String get startCourseAction => 'بدء المادة';
+
+  @override
+  String get continueLessonAction => 'متابعة الدرس';
+
+  @override
+  String get takeLessonQuizAction => 'بدء اختبار الدرس';
+
+  @override
+  String get retryLessonQuizAction => 'إعادة اختبار الدرس';
+
+  @override
+  String get reviewCourseAction => 'مراجعة المادة';
+
+  @override
+  String get reviewLessonAction => 'مراجعة الدرس';
+
+  @override
+  String get continueToNextLessonAction => 'الانتقال إلى الدرس التالي';
+
+  @override
+  String completeLessonToUnlock(int n) {
+    return 'أكمل الدرس $n لفتح هذا الدرس.';
+  }
+
+  @override
+  String get availableStatus => 'متاح';
+
+  @override
+  String get lessonQuizReadyTitle => 'اختبار الدرس جاهز الآن.';
+
+  @override
+  String get lessonQuizReadyDesc =>
+      'اختبر فهمك لمحتوى الدرس لفتح الدرس التالي.';
+
+  @override
+  String get quizNotPassedTitle => 'لم يتم اجتياز الاختبار';
+
+  @override
+  String get quizNotPassedDesc =>
+      'يمكنك مراجعة محتوى الدرس والمحاولة مرة أخرى.';
+
+  @override
+  String get lessonCompletedCongrats => 'اكتمل الدرس بنجاح!';
+
+  @override
+  String get passedQuizNotice => 'لقد اجتزت اختبار الدرس بنجاح.';
+
+  @override
+  String nextLessonLabel(String title) {
+    return 'الدرس التالي: $title';
+  }
+
+  @override
+  String get previousLessonAction => 'الدرس السابق';
+
+  @override
+  String get nextLessonAction => 'الدرس التالي';
+
+  @override
+  String lessonXofY(int current, int total) {
+    return 'الدرس $current من $total';
+  }
+
+  @override
+  String get lessonMaterialTitle => 'المحتوى الدراسي';
+
+  @override
+  String get openPdfAction => 'عرض الـ PDF';
+
+  @override
+  String get completeVideoToUnlockQuiz =>
+      'أكمل مشاهدة الفيديو لفتح اختبار الدرس.';
+
+  @override
+  String get videoCompletedTitle => 'اكتملت مشاهدة الفيديو';
+
+  @override
+  String get courseAssessmentsTitle => 'تقييمات المادة';
+
+  @override
+  String get lessonQuizzesSectionTitle => 'اختبارات الدروس';
+
+  @override
+  String get lessonQuizzesSectionDesc => 'تُؤدى كجزء من مسار تقدمك في الدروس.';
+
+  @override
+  String get generalExamsSectionTitle => 'الامتحانات العامة';
+
+  @override
+  String get generalExamsSectionDesc => 'تقييمات وامتحانات عامة إضافية للمادة.';
+
+  @override
+  String lessonsCompletedRatio(int completed, int total) {
+    return 'تم إكمال $completed من أصل $total درس';
+  }
+
+  @override
+  String percentComplete(int pct) {
+    return '$pct% مكتمل';
+  }
+
+  @override
+  String get viewLessonsAction => 'عرض الدروس';
+
+  @override
+  String get courseLessonsTitle => 'دروس المادة';
+
+  @override
+  String get addLessonButton => 'إضافة درس';
+
+  @override
+  String get courseBuilderEmptyTitle => 'لا توجد دروس بعد';
+
+  @override
+  String get courseBuilderEmptySubtitle => 'ابدأ في بناء المادة بإضافة درس.';
+
+  @override
+  String get sequentialLearning => 'التعلم التسلسلي';
+
+  @override
+  String get sequentialLearningDesc =>
+      'يجب على الطلاب إكمال فيديو الدرس واجتياز الاختبار قبل أن يُفتح الدرس التالي.';
 }

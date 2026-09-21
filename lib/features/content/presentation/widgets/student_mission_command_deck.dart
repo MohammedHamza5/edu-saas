@@ -240,11 +240,29 @@ class StudentMissionCommandDeck extends StatelessWidget {
               ],
             );
 
+            final String buttonLabel;
+            if (lesson == null) {
+              buttonLabel = context.l10n.reviewCourseAction;
+            } else if (lesson.progress == LessonProgress.notStarted) {
+              buttonLabel = context.l10n.startCourseAction;
+            } else if (lesson.progress == LessonProgress.inProgress) {
+              buttonLabel = context.l10n.continueLessonAction;
+            } else if (lesson.progress == LessonProgress.quizAvailable ||
+                lesson.progress == LessonProgress.videoCompleted) {
+              buttonLabel = context.l10n.takeLessonQuizAction;
+            } else if (lesson.progress == LessonProgress.quizFailed) {
+              buttonLabel = context.l10n.retryLessonQuizAction;
+            } else if (lesson.progress == LessonProgress.completed) {
+              buttonLabel = context.l10n.reviewLessonAction;
+            } else {
+              buttonLabel = context.l10n.continueLessonAction;
+            }
+
             final resumeButton = ElevatedButton.icon(
               onPressed: onResume,
               icon: const Icon(Icons.play_arrow_rounded, size: 20),
               label: Text(
-                context.l10n.resumeLessonAction,
+                buttonLabel,
                 style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.bold,
@@ -343,6 +361,21 @@ class StudentMissionCommandDeck extends StatelessWidget {
             ],
           ),
         ),
+        if (onResume != null) ...[
+          const SizedBox(width: AppSpacing.s12),
+          OutlinedButton(
+            onPressed: onResume,
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.success,
+              side: const BorderSide(color: AppColors.success),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            ),
+            child: Text(
+              context.l10n.reviewCourseAction,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
       ],
     );
   }

@@ -695,7 +695,7 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      expect(find.text('امتحاناتي واختباراتي'), findsOneWidget);
+      expect(find.text('تقييمات المادة'), findsOneWidget);
       expect(find.text('امتحان الجبر والتفاضل'), findsOneWidget);
     });
 

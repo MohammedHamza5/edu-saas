@@ -186,12 +186,13 @@ class ContinueLearningCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.s16),
 
-          // Resume Action Button
+          // Dynamic CTA Action Button (Section 21)
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
               onPressed: () {
-                context.push('${AppRoutes.videoPlayer}?id=${item.videoId}');
+                final encodedGroup = Uri.encodeComponent(item.groupName);
+                context.push('${AppRoutes.videoPlayer}?id=${item.videoId}&groupName=$encodedGroup');
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
@@ -204,7 +205,11 @@ class ContinueLearningCard extends StatelessWidget {
               ),
               icon: const Icon(Icons.play_arrow_rounded, size: 20),
               label: Text(
-                context.l10n.resumeNow,
+                item.percentage == 0
+                    ? context.l10n.startCourseAction
+                    : item.percentage >= 100
+                        ? context.l10n.reviewLessonAction
+                        : context.l10n.continueLessonAction,
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 14,

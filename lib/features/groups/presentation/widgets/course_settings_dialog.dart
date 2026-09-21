@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/widgets/app_text_field.dart';
 import '../../domain/entities/group_entity.dart';
 import '../cubit/groups_cubit.dart';
 
@@ -57,6 +58,23 @@ class _CourseSettingsDialogState extends State<CourseSettingsDialog> {
     }
   }
 
+  Widget _buildSectionLabel(BuildContext context, String title, IconData icon) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: Theme.of(context).colorScheme.primary),
+        const SizedBox(width: AppSpacing.s8),
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -67,10 +85,12 @@ class _CourseSettingsDialogState extends State<CourseSettingsDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            _buildSectionLabel(context, context.l10n.courseSettingsTitle, Icons.settings),
+            const SizedBox(height: AppSpacing.s16),
             SwitchListTile(
-              title: Text(context.l10n.enforceSequentialLearning),
+              title: Text(context.l10n.sequentialLearning),
               subtitle: Text(
-                context.l10n.enforceSequentialLearningDesc,
+                context.l10n.sequentialLearningDesc,
                 style: const TextStyle(fontSize: 12),
               ),
               value: _enforceSequential,
@@ -78,13 +98,16 @@ class _CourseSettingsDialogState extends State<CourseSettingsDialog> {
               contentPadding: EdgeInsets.zero,
             ),
             const SizedBox(height: AppSpacing.s16),
-            TextFormField(
+            AppTextField(
               controller: _passingScoreController,
               keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: context.l10n.defaultPassingScore,
-                border: const OutlineInputBorder(),
-                suffixText: '%',
+              label: context.l10n.defaultLessonPassingScore,
+              suffixIcon: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [Text('%', style: TextStyle(fontSize: 16))],
+                ),
               ),
               validator: (v) {
                 if (v == null || v.trim().isEmpty) return 'Required';

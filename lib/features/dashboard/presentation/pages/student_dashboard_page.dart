@@ -19,6 +19,7 @@ import '../../../../core/widgets/responsive_container.dart';
 import '../../../../core/widgets/responsive_grid.dart';
 import '../../../auth/presentation/cubit/auth_cubit.dart';
 import '../../../auth/presentation/cubit/auth_state.dart';
+import '../../../groups/domain/entities/group_entity.dart';
 import '../../../notifications/presentation/cubit/notifications_cubit.dart';
 import '../../../notifications/presentation/widgets/notification_badge_button.dart';
 import '../cubit/student_dashboard_cubit.dart';
@@ -35,6 +36,9 @@ class StudentDashboardPage extends StatefulWidget {
 }
 
 class _StudentDashboardPageState extends State<StudentDashboardPage> {
+  List<GroupEntity> _enrolledCourses = [];
+  bool _isLoadingCourses = true;
+
   @override
   void initState() {
     super.initState();
@@ -48,9 +52,26 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
               authState.user.id,
             );
           }
+          _loadEnrolledCourses();
         } catch (_) {}
       }
     });
+  }
+
+  Future<void> _loadEnrolledCourses() async {
+    try {
+      final res = await InjectionContainer.groupsRepository.getGroups();
+      if (mounted) {
+        setState(() {
+          _enrolledCourses = res.dataOrNull ?? [];
+          _isLoadingCourses = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() => _isLoadingCourses = false);
+      }
+    }
   }
 
   void _confirmLogout(BuildContext context) {
@@ -160,15 +181,19 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
             }
 
             final stats = (dashboardState as StudentDashboardLoaded).stats;
+            final theme = Theme.of(context);
 
             return RefreshIndicator(
               onRefresh: () async {
                 final authState = context.read<AuthCubit>().state;
                 if (authState is AuthAuthenticated) {
-                  await context.read<StudentDashboardCubit>().loadDashboardStats(
-                        authState.user.id,
-                        forceRefresh: true,
-                      );
+                  await Future.wait([
+                    context.read<StudentDashboardCubit>().loadDashboardStats(
+                          authState.user.id,
+                          forceRefresh: true,
+                        ),
+                    _loadEnrolledCourses(),
+                  ]);
                 }
               },
               child: SingleChildScrollView(
@@ -209,7 +234,11 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
                     AcademicPerformanceCard(stats: stats),
                     const SizedBox(height: AppSpacing.s20),
 
-                    // 5. Section Title: Quick Study Hub
+                    // 5. My Courses (Section 4 LMS Design)
+                    _buildMyCoursesSection(context, theme),
+                    const SizedBox(height: AppSpacing.s20),
+
+                    // 6. Section Title: Quick Study Hub
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4),
                       child: Column(
@@ -471,6 +500,152 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
         },
         ),
       ),
+    );
+  }
+
+  Widget _buildMyCoursesSection(BuildContext context, ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                context.l10n.myCoursesTitle,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                context.l10n.myCoursesSubtitle,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppSpacing.s12),
+        if (_isLoadingCourses)
+          const AppLoadingView.cardsGrid(count: 2, columns: 2)
+        else if (_enrolledCourses.isEmpty)
+          AppCard(
+            variant: AppCardVariant.standard,
+            padding: const EdgeInsets.all(AppSpacing.s24),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.school_outlined, size: 40, color: AppColors.textMuted),
+                  const SizedBox(height: AppSpacing.s12),
+                  Text(
+                    context.l10n.noEnrolledCoursesTitle,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    context.l10n.noEnrolledCoursesSubtitle,
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
+        else
+          ResponsiveGrid(
+            mobileColumns: 1,
+            tabletColumns: 2,
+            desktopColumns: 2,
+            spacing: AppSpacing.s16,
+            runSpacing: AppSpacing.s16,
+            children: _enrolledCourses.map((course) {
+              final slug = GroupSlugResolver.toSlug(course.id, course.name);
+              return AppCard(
+                variant: AppCardVariant.elevated,
+                padding: const EdgeInsets.all(AppSpacing.s16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(AppSpacing.s10),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                          ),
+                          child: const Icon(
+                            Icons.school_rounded,
+                            color: AppColors.primary,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.s12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                course.name,
+                                style: theme.textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.textPrimary,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              if (course.level.isNotEmpty) ...[
+                                const SizedBox(height: 2),
+                                Text(
+                                  course.level,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.s16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        icon: const Icon(Icons.arrow_forward_rounded, size: 16),
+                        label: Text(context.l10n.openCourseAction),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.primary,
+                          side: const BorderSide(color: AppColors.primary),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                          ),
+                        ),
+                        onPressed: () {
+                          context.go(
+                            AppRoutes.studentGroupContent.replaceAll(':groupId', slug),
+                            extra: course.name,
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+      ],
     );
   }
 }

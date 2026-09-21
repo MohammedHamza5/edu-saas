@@ -140,10 +140,8 @@ class LessonAssignmentEntity extends Equatable {
   LessonProgress get status => progress;
   bool get isLocked => access == LessonAccess.locked;
 
-  /// يعتبر الدرس منتهياً إذا اكتمل فعلياً أو تم فتحه يدوياً لتخطي شرط.
-  bool get isEffectivelyCompleted =>
-      progress == LessonProgress.completed ||
-      unlockSource == UnlockSource.manualOverride;
+  /// يعتبر الدرس منتهياً فقط إذا اكتمل تقدمه فعلياً (الفتح اليدوي يغير الوصول فقط ولا ينهي الدرس).
+  bool get isEffectivelyCompleted => progress == LessonProgress.completed;
 
   /// تحويل كائن التعيين إلى ContentEntity للتوافق مع مكونات العرض (StudentLessonTile)
   ContentEntity toContentEntity() {

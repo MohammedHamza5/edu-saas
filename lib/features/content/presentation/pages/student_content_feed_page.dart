@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import '../../../auth/presentation/cubit/auth_cubit.dart';
+import '../../../auth/presentation/cubit/auth_state.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/router/app_routes.dart';
@@ -49,6 +51,19 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
   String _searchQuery = '';
   bool _isRoadmapMode = true;
 
+  String? get _currentUserId {
+    try {
+      final authState = context.read<AuthCubit>().state;
+      if (authState is AuthAuthenticated) {
+        return authState.user.id;
+      }
+    } catch (_) {}
+    try {
+      return InjectionContainer.supabaseClient.auth.currentUser?.id;
+    } catch (_) {}
+    return null;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -57,7 +72,7 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
     _fetchStudentGroups();
     context.read<CourseProgressCubit>().loadCourseProgress(
           _activeGroupId,
-          studentId: InjectionContainer.supabaseClient.auth.currentUser?.id,
+          studentId: _currentUserId,
         );
     _scrollController.addListener(_onScroll);
   }
@@ -93,21 +108,15 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
     // Pagination is not needed for the course progress as it returns the whole sequence
   }
 
-  Future<void> _handleContentTap(LessonAssignmentEntity item) async {
+  Future<void> _handleContentTap(LessonAssignmentEntity item, {int? index, int? totalCount}) async {
     if (item.isLocked) {
-      final examTitle = context.l10n.prerequisiteExamBadge;
-      const passScore = 60;
+      final prevIndex = index != null && index > 1
+          ? index - 1
+          : (item.sortOrder > 1 ? item.sortOrder - 1 : 1);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: AppColors.error,
-          content: Text(context.l10n.mustPassExamToUnlock(examTitle, passScore)),
-          action: item.prerequisiteExamId != null
-              ? SnackBarAction(
-                  label: context.l10n.takeRequiredExamAction,
-                  textColor: Colors.white,
-                  onPressed: () => context.push(AppRoutes.studentExams),
-                )
-              : null,
+          content: Text(context.l10n.completeLessonToUnlock(prevIndex)),
         ),
       );
       return;
@@ -118,8 +127,13 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
         final encodedTitle = item.lessonExamTitle != null 
             ? Uri.encodeComponent(item.lessonExamTitle!) 
             : '';
+        final encodedGroupName = _activeGroupName != null
+            ? Uri.encodeComponent(_activeGroupName!)
+            : '';
+        final lIndex = index ?? item.sortOrder;
+        final tLessons = totalCount ?? 1;
         await context.push(
-          '${AppRoutes.videoPlayer}?id=${item.contentId}&associatedExamId=${item.lessonExamId ?? ''}&associatedExamTitle=$encodedTitle',
+          '${AppRoutes.videoPlayer}?id=${item.contentId}&associatedExamId=${item.lessonExamId ?? ''}&associatedExamTitle=$encodedTitle&groupId=$_activeGroupId&groupName=$encodedGroupName&lessonIndex=$lIndex&totalLessons=$tLessons',
         );
         break;
       case ContentType.assignment:
@@ -302,7 +316,7 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                   onRefresh: () async =>
                       context.read<CourseProgressCubit>().loadCourseProgress(
                             _activeGroupId,
-                            studentId: InjectionContainer.supabaseClient.auth.currentUser?.id,
+                            studentId: _currentUserId,
                           ),
                   child: CustomScrollView(
                     controller: _scrollController,
@@ -356,7 +370,7 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                                               .read<CourseProgressCubit>()
                                               .loadCourseProgress(
                                                 g.id,
-                                                studentId: InjectionContainer.supabaseClient.auth.currentUser?.id,
+                                                studentId: _currentUserId,
                                               );
                                         }
                                       },
@@ -379,7 +393,11 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                             overallPercentage: overallProgressPct,
                             groupName: _activeGroupName ?? '',
                             onResume: nextLesson != null
-                                ? () => _handleContentTap(nextLesson!)
+                                ? () => _handleContentTap(
+                                      nextLesson!,
+                                      index: nextLessonIndex,
+                                      totalCount: totalPublishedCount,
+                                    )
                                 : null,
                           ),
                         ),
@@ -531,8 +549,9 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                             padding: const EdgeInsets.symmetric(vertical: 48),
                             child: Center(
                               child: AppEmptyView(
-                                message: context.l10n.noContentPublishedYet,
-                                icon: Icons.menu_book_rounded,
+                                message: context.l10n.courseBeingPreparedTitle,
+                                subtitle: context.l10n.courseBeingPreparedSubtitle,
+                                icon: Icons.school_outlined,
                               ),
                             ),
                           ),
@@ -573,12 +592,17 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                               final item = items[index];
                               return StudentLessonTile(
                                 content: item.toContentEntity(),
+                                lesson: item,
                                 index: index + 1,
                                 isLast: index == items.length - 1,
                                 isRoadmapMode: _isRoadmapMode &&
                                     _selectedTypeFilter == null &&
                                     _searchQuery.isEmpty,
-                                onTap: () => _handleContentTap(item),
+                                onTap: () => _handleContentTap(
+                                  item,
+                                  index: index + 1,
+                                  totalCount: items.length,
+                                ),
                                 onOpenHandout: item.pdfFileId != null
                                     ? () async {
                                         await MaterialViewerSheet.show(

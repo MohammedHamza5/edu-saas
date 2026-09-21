@@ -99,7 +99,7 @@ class ExamCard extends StatelessWidget {
               if (exam.passingScore != null)
                 _buildMetaTag(
                   Icons.verified_outlined,
-                  context.l10n.passingScoreLabel(exam.passingScore!),
+                  '${context.l10n.passingScoreLabel}: ${exam.passingScore}%',
                 ),
             ],
           ),

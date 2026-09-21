@@ -11,13 +11,14 @@ import 'package:edu_saas/features/content/domain/entities/content_entity.dart';
 import 'package:edu_saas/features/content/domain/entities/file_attachment_entity.dart';
 import 'package:edu_saas/features/content/domain/repositories/content_repository.dart';
 import 'package:edu_saas/features/content/presentation/cubit/content_cubit.dart';
+import 'package:edu_saas/features/content/presentation/cubit/course_progress_cubit.dart';
 import 'package:edu_saas/features/content/presentation/cubit/content_state.dart';
 import 'package:edu_saas/features/content/domain/entities/lesson_assignment_entity.dart';
 import 'package:edu_saas/features/content/presentation/pages/student_content_feed_page.dart';
 import 'package:edu_saas/features/content/presentation/pages/teacher_content_library_page.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:edu_saas/core/localization/generated/app_localizations.dart';
-import 'package:edu_saas/features/content/presentation/widgets/content_item_card.dart';
+
 import 'package:edu_saas/features/content/presentation/widgets/material_viewer_sheet.dart';
 
 class _FakeContentRepository implements ContentRepository {
@@ -55,7 +56,21 @@ class _FakeContentRepository implements ContentRepository {
     if (shouldFail) {
       return const FailureResult(ServerFailure('Connection error'));
     }
-    return const Success([]);
+    final list = items
+        .where((i) => i.groupId == groupId && i.status == ContentStatus.published)
+        .map((i) => LessonAssignmentEntity(
+              contentGroupId: 'cg-${i.id}',
+              contentId: i.id,
+              groupId: i.groupId ?? '',
+              title: i.title,
+              description: i.description,
+              type: i.type,
+              sortOrder: i.sortOrder,
+              access: LessonAccess.unlocked,
+              progress: LessonProgress.notStarted,
+            ))
+        .toList();
+    return Success(list);
   }
 
   @override
@@ -318,8 +333,18 @@ void main() {
   }) {
     return MaterialApp(
       theme: AppTheme.lightTheme,
-      home: BlocProvider<ContentCubit>(
-        create: (_) => ContentCubit(repository: repository),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('ar'),
+      home: MultiBlocProvider(
+        providers: [
+          BlocProvider<ContentCubit>(
+            create: (_) => ContentCubit(repository: repository),
+          ),
+          BlocProvider<CourseProgressCubit>(
+            create: (_) => CourseProgressCubit(repository: repository),
+          ),
+        ],
         child: child,
       ),
     );
@@ -443,7 +468,7 @@ void main() {
   });
 
   group('Content UI Widget Tests', () {
-    testWidgets('TeacherContentLibraryPage renders list of items and filter chips',
+    testWidgets('TeacherContentLibraryPage renders list of items and add lesson button',
         (tester) async {
       tester.view.physicalSize = const Size(1200, 1600);
       tester.view.devicePixelRatio = 1.0;
@@ -462,15 +487,9 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('محتوى: مجموعة SAT المتقدمة'), findsOneWidget);
-      expect(find.text('الكل (3)'), findsOneWidget);
-      expect(find.text('المنشور (1)'), findsOneWidget);
-      expect(find.text('المسودات (1)'), findsOneWidget);
-      expect(find.text('المؤرشف (1)'), findsOneWidget);
-      expect(find.text('مذكرة الهندسة الفراغية'), findsOneWidget);
+      expect(find.textContaining('مجموعة SAT المتقدمة'), findsWidgets);
       expect(find.text('فيديو شرح المتجهات'), findsOneWidget);
-      expect(find.byType(ContentItemCard, skipOffstage: false), findsNWidgets(3));
-      expect(find.byType(FloatingActionButton), findsOneWidget);
+      expect(find.text('إضافة درس'), findsOneWidget);
     });
 
     testWidgets('TeacherContentLibraryPage renders empty state when group has no content',
@@ -485,7 +504,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('لا يوجد محتوى تعليمي في هذا التصنيف حتى الآن'), findsOneWidget);
+      expect(find.text('لا توجد دروس بعد'), findsOneWidget);
     });
 
     testWidgets('StudentContentFeedPage renders published content feed and type chips',
@@ -503,9 +522,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('محتوى: مجموعة SAT'), findsOneWidget);
-      expect(find.text('الكل (1)'), findsOneWidget);
-      expect(find.text('مذكرة الهندسة الفراغية'), findsOneWidget);
+      expect(find.textContaining('مجموعة SAT'), findsWidgets);
+      expect(find.text('مذكرة الهندسة الفراغية'), findsWidgets);
       // Student feed must never show draft or archived items
       expect(find.text('فيديو شرح المتجهات'), findsNothing);
       expect(find.text('مخطط الإحداثيات الكارتيزية'), findsNothing);

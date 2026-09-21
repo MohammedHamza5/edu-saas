@@ -3,12 +3,16 @@ import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../domain/entities/content_entity.dart';
+import '../../domain/entities/lesson_assignment_entity.dart';
 
 /// Compact, high-aesthetic Student Lesson Tile & Roadmap Station.
 ///
-/// Eliminates all cognitive clutter, presents clear sequence numbers,
-/// direct access to PDF handouts and quizzes, and clear progression states.
+/// Follows the LMS course mental model:
+/// Sequence number, clear lesson title, authoritative states:
+/// (Completed, In Progress, Quiz Ready, Quiz Failed, Available, Locked),
+/// and direct access to PDF study material and lesson quiz.
 class StudentLessonTile extends StatefulWidget {
+  final LessonAssignmentEntity? lesson;
   final ContentEntity content;
   final int index;
   final bool isLast;
@@ -19,6 +23,7 @@ class StudentLessonTile extends StatefulWidget {
 
   const StudentLessonTile({
     super.key,
+    this.lesson,
     required this.content,
     required this.index,
     this.isLast = false,
@@ -36,13 +41,42 @@ class _StudentLessonTileState extends State<StudentLessonTile> {
   bool _isHovered = false;
 
   ContentEntity get content => widget.content;
-  bool get isCompleted => content.isCompleted;
-  bool get isLocked => content.isLocked;
+  LessonAssignmentEntity? get lesson => widget.lesson;
+
+  bool get isLocked => lesson?.isLocked ?? content.isLocked;
+
+  bool get isCompleted =>
+      (lesson != null)
+          ? lesson!.progress == LessonProgress.completed
+          : content.isCompleted;
+
+  bool get isQuizFailed =>
+      lesson?.progress == LessonProgress.quizFailed;
+
+  bool get isQuizReady =>
+      lesson?.progress == LessonProgress.quizAvailable ||
+      lesson?.progress == LessonProgress.videoCompleted;
+
+  bool get isInProgress =>
+      (lesson != null)
+          ? lesson!.progress == LessonProgress.inProgress
+          : (content.videoProgressPercentage > 0 && !isCompleted);
+
+  bool get isAvailable =>
+      (lesson != null)
+          ? (lesson!.access == LessonAccess.unlocked &&
+              !isCompleted &&
+              !isQuizReady &&
+              !isQuizFailed &&
+              !isInProgress)
+          : (!isLocked && !isCompleted && !isInProgress);
 
   Color get _statusAccentColor {
-    if (isLocked) return AppColors.error;
     if (isCompleted) return AppColors.success;
-    if (content.videoProgressPercentage > 0) return AppColors.primary;
+    if (isQuizReady) return AppColors.primary;
+    if (isQuizFailed) return AppColors.warning;
+    if (isInProgress) return AppColors.primary;
+    if (isLocked) return AppColors.textMuted;
     return AppColors.primary;
   }
 
@@ -434,20 +468,21 @@ class _StudentLessonTileState extends State<StudentLessonTile> {
 
   Widget _buildStatusBadge(BuildContext context) {
     if (isLocked) {
+      final prevIndex = widget.index > 1 ? widget.index - 1 : 1;
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.lock_outline_rounded, size: 11, color: AppColors.error),
-          const SizedBox(width: 3),
+          const Icon(Icons.lock_outline_rounded, size: 11, color: AppColors.textMuted),
+          const SizedBox(width: 4),
           Flexible(
             child: Text(
-              context.l10n.lockedByPrereqTooltip,
+              context.l10n.completeLessonToUnlock(prevIndex),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w600,
-                color: AppColors.error,
+                color: AppColors.textSecondary,
               ),
             ),
           ),
@@ -463,7 +498,7 @@ class _StudentLessonTileState extends State<StudentLessonTile> {
           const SizedBox(width: 3),
           Flexible(
             child: Text(
-              context.l10n.completedBadge,
+              context.l10n.statusCompleted,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
@@ -477,15 +512,40 @@ class _StudentLessonTileState extends State<StudentLessonTile> {
       );
     }
 
-    if (content.videoProgressPercentage > 0) {
+    if (isQuizFailed) {
+      final best = lesson?.examBestScore?.toInt();
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.timelapse_rounded, size: 11, color: AppColors.primary),
+          const Icon(Icons.warning_amber_rounded, size: 11, color: AppColors.warning),
           const SizedBox(width: 3),
           Flexible(
             child: Text(
-              '${content.videoProgressPercentage.toInt()}%',
+              best != null
+                  ? '${context.l10n.quizNotPassedTitle} ($best%)'
+                  : context.l10n.quizNotPassedTitle,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: AppColors.warning,
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    if (isQuizReady) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.star_rounded, size: 12, color: AppColors.primary),
+          const SizedBox(width: 3),
+          Flexible(
+            child: Text(
+              context.l10n.lessonQuizReadyTitle,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
@@ -499,7 +559,49 @@ class _StudentLessonTileState extends State<StudentLessonTile> {
       );
     }
 
-    return const SizedBox.shrink();
+    final pct = (lesson?.watchedCoveragePercent ?? content.videoProgressPercentage).toInt();
+    if (pct > 0) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.timelapse_rounded, size: 11, color: AppColors.primary),
+          const SizedBox(width: 3),
+          Flexible(
+            child: Text(
+              '$pct%',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primary,
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    // Newly unlocked or manually unlocked (shows "Available" - Section 8 & 33)
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Icon(Icons.play_circle_outline_rounded, size: 11, color: AppColors.primary),
+        const SizedBox(width: 3),
+        Flexible(
+          child: Text(
+            context.l10n.availableStatus,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              color: AppColors.primary,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _buildActionButton(BuildContext context) {
@@ -507,15 +609,14 @@ class _StudentLessonTileState extends State<StudentLessonTile> {
       return Container(
         width: 34,
         height: 34,
-        decoration: BoxDecoration(
-          color: AppColors.error.withAlpha(15),
+        decoration: const BoxDecoration(
+          color: AppColors.surfaceVariant,
           shape: BoxShape.circle,
         ),
-        child: const Icon(Icons.lock_rounded, size: 16, color: AppColors.error),
+        child: const Icon(Icons.lock_rounded, size: 15, color: AppColors.textMuted),
       );
     }
 
-    final isActionableVideo = content.type == ContentType.video || content.hasVideo;
     return Container(
       width: 34,
       height: 34,
@@ -533,10 +634,10 @@ class _StudentLessonTileState extends State<StudentLessonTile> {
       child: Icon(
         isCompleted
             ? Icons.replay_rounded
-            : (isActionableVideo
-                ? Icons.play_arrow_rounded
-                : Icons.arrow_forward_ios_rounded),
-        size: isActionableVideo ? 18 : 12,
+            : isQuizReady
+                ? Icons.quiz_rounded
+                : Icons.play_arrow_rounded,
+        size: isCompleted ? 16 : 18,
         color: isCompleted ? AppColors.textSecondary : AppColors.primary,
       ),
     );

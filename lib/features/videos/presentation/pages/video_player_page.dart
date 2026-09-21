@@ -18,7 +18,11 @@ import '../../../../core/widgets/responsive_container.dart';
 import '../../../auth/presentation/cubit/auth_cubit.dart';
 import '../../../auth/presentation/cubit/auth_state.dart';
 import '../../../content/domain/entities/content_entity.dart';
+import '../../../content/domain/entities/lesson_assignment_entity.dart';
 import '../../../content/presentation/widgets/material_viewer_sheet.dart';
+import '../../../exams/domain/entities/exam_entity.dart';
+import '../../../exams/presentation/cubit/exams_cubit.dart';
+import '../../../exams/presentation/pages/exam_intro_page.dart';
 import '../../domain/entities/video_entity.dart';
 import '../../domain/entities/video_progress_entity.dart';
 import '../cubit/videos_cubit.dart';
@@ -34,6 +38,9 @@ class VideoPlayerPage extends StatefulWidget {
   final String? associatedExamTitle;
   /// المجموعة التي يُشاهَد منها هذا الدرس (لجلب PDF الخاص بالمجموعة والاختبار المخصص)
   final String? groupId;
+  final String? groupName;
+  final int? lessonIndex;
+  final int? totalLessons;
 
   const VideoPlayerPage({
     super.key,
@@ -42,6 +49,9 @@ class VideoPlayerPage extends StatefulWidget {
     this.associatedExamId,
     this.associatedExamTitle,
     this.groupId,
+    this.groupName,
+    this.lessonIndex,
+    this.totalLessons,
   });
 
   @override
@@ -75,6 +85,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   String? _groupPdfFileName;
   String? _groupExamId;
   String? _groupExamTitle;
+  ExamEntity? _lessonExam;
+  List<LessonAssignmentEntity> _courseLessons = [];
 
   @override
   void initState() {
@@ -85,7 +97,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     _isTeacher = authUser?.isTeacher ?? false;
     _loadVideo();
     // جلب بيانات الدرس الخاصة بالمجموعة إذا توفرت
-    if (widget.groupId != null && !_isTeacher) {
+    if (!_isTeacher) {
       _loadLessonContext();
     }
 
@@ -100,25 +112,102 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
 
   Future<void> _loadLessonContext() async {
     try {
-      final result = await InjectionContainer.videosRepository.getLessonContext(
-        contentId: widget.videoId,  // videoId هنا هو content_id
-        groupId: widget.groupId!,
-      );
-      result.when(
-        onSuccess: (ctx) {
-          if (ctx != null && mounted) {
-            setState(() {
-              _groupPdfStoragePath = ctx['pdf_storage_path'] as String?;
-              _groupPdfFileName = ctx['pdf_file_name'] as String?;
-              // الاختبار المرتبط بالدرس (من content_groups) له الأولوية على widget.associatedExamId
-              _groupExamId = ctx['lesson_exam_id'] as String? ?? widget.associatedExamId;
-              _groupExamTitle = ctx['lesson_exam_title'] as String? ?? widget.associatedExamTitle;
-            });
-          }
-        },
-        onFailure: (_) {},
-      );
+      if (widget.groupId != null && !_isTeacher) {
+        final lessonsResult = await InjectionContainer.contentRepository.getGroupCourseProgress(
+          groupId: widget.groupId!,
+          studentId: _activeStudentId,
+        );
+        if (lessonsResult.isSuccess && lessonsResult.dataOrNull != null && mounted) {
+          setState(() {
+            _courseLessons = lessonsResult.dataOrNull!;
+          });
+        }
+      }
+
+      if (widget.groupId != null) {
+        final result = await InjectionContainer.videosRepository.getLessonContext(
+          contentId: widget.videoId,  // videoId هنا هو content_id
+          groupId: widget.groupId!,
+        );
+        result.when(
+          onSuccess: (ctx) {
+            if (ctx != null && mounted) {
+              final examId = ctx['lesson_exam_id'] as String? ?? widget.associatedExamId;
+              final examTitle = ctx['lesson_exam_title'] as String? ?? widget.associatedExamTitle;
+              setState(() {
+                _groupPdfStoragePath = ctx['pdf_storage_path'] as String?;
+                _groupPdfFileName = ctx['pdf_file_name'] as String?;
+                _groupExamId = examId;
+                _groupExamTitle = examTitle;
+              });
+              if (examId != null && examId.isNotEmpty) {
+                InjectionContainer.examsRepository.getExamDetails(examId).then((examResult) {
+                  if (examResult.isSuccess && examResult.dataOrNull != null && mounted) {
+                    setState(() {
+                      _lessonExam = examResult.dataOrNull;
+                    });
+                  }
+                });
+              }
+            }
+          },
+          onFailure: (_) {},
+        );
+      } else if (widget.associatedExamId != null) {
+        final examResult = await InjectionContainer.examsRepository.getExamDetails(widget.associatedExamId!);
+        if (examResult.isSuccess && examResult.dataOrNull != null && mounted) {
+          setState(() {
+            _lessonExam = examResult.dataOrNull;
+          });
+        }
+      }
     } catch (_) {}
+  }
+
+  Future<void> _startLessonQuiz(String examId) async {
+    try {
+      unawaited(
+        showDialog<void>(
+          context: context,
+          barrierDismissible: false,
+          builder: (_) => const Center(child: CircularProgressIndicator()),
+        ),
+      );
+      final result = await InjectionContainer.examsRepository.getExamDetails(examId);
+      if (mounted) Navigator.of(context).pop();
+
+      if (result.isSuccess && result.dataOrNull != null) {
+        final exam = result.dataOrNull!;
+        final examsCubit = InjectionContainer.createExamsCubit();
+        if (!mounted) return;
+        await Navigator.of(context).push<void>(
+          MaterialPageRoute<void>(
+            builder: (_) => BlocProvider<ExamsCubit>.value(
+              value: examsCubit,
+              child: ExamIntroPage(exam: exam),
+            ),
+          ),
+        );
+        if (mounted) {
+          await _loadLessonContext();
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: AppColors.error,
+              content: Text(result.failureOrNull?.message ?? context.l10n.errorOccurred),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(backgroundColor: AppColors.error, content: Text(e.toString())),
+        );
+      }
+    }
   }
 
   void _handleFullscreenChanged(bool isFull) {
@@ -143,7 +232,11 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
 
   bool _isFlushingProgress = false;
 
-  Future<void> _flushProgressAndExit() async {
+  Future<void> _flushProgressAndExit({
+    LessonAssignmentEntity? thenNavigateToLesson,
+    int? lessonIndex,
+    int? totalLessons,
+  }) async {
     if (_isFlushingProgress) return;
     _isFlushingProgress = true;
 
@@ -179,12 +272,299 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     }
 
     if (mounted) {
-      if (Navigator.of(context).canPop()) {
-        Navigator.of(context).pop();
+      if (thenNavigateToLesson != null) {
+        final encodedTitle = thenNavigateToLesson.lessonExamTitle != null
+            ? Uri.encodeComponent(thenNavigateToLesson.lessonExamTitle!)
+            : '';
+        final encodedGroupName = widget.groupName != null
+            ? Uri.encodeComponent(widget.groupName!)
+            : '';
+        final lIdx = lessonIndex ?? thenNavigateToLesson.sortOrder;
+        final tLessons = totalLessons ?? _courseLessons.length;
+        context.pushReplacement(
+          '${AppRoutes.videoPlayer}?id=${thenNavigateToLesson.contentId}&associatedExamId=${thenNavigateToLesson.lessonExamId ?? ''}&associatedExamTitle=$encodedTitle&groupId=${widget.groupId}&groupName=$encodedGroupName&lessonIndex=$lIdx&totalLessons=$tLessons',
+        );
       } else {
-        context.go(AppRoutes.studentDashboard);
+        if (Navigator.of(context).canPop()) {
+          Navigator.of(context).pop();
+        } else {
+          context.go(AppRoutes.studentDashboard);
+        }
       }
     }
+  }
+
+  Future<void> _openLesson(LessonAssignmentEntity lesson, int lessonIndex, int totalLessons) async {
+    if (lesson.isLocked) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: AppColors.error,
+          content: Text(context.l10n.completeLessonToUnlock(lessonIndex > 1 ? lessonIndex - 1 : 1)),
+        ),
+      );
+      return;
+    }
+
+    await _flushProgressAndExit(
+      thenNavigateToLesson: lesson,
+      lessonIndex: lessonIndex,
+      totalLessons: totalLessons,
+    );
+  }
+
+  Widget _buildSequentialNavigationBar(ThemeData theme) {
+    if (_courseLessons.isEmpty && widget.lessonIndex == null) return const SizedBox.shrink();
+
+    final currentIndex = _courseLessons.isNotEmpty
+        ? _courseLessons.indexWhere((l) => l.contentId == widget.videoId)
+        : (widget.lessonIndex != null ? widget.lessonIndex! - 1 : -1);
+
+    final totalCount = _courseLessons.isNotEmpty ? _courseLessons.length : (widget.totalLessons ?? 1);
+    final displayIndex = (currentIndex >= 0 ? currentIndex + 1 : (widget.lessonIndex ?? 1));
+
+    final prevLesson = currentIndex > 0 ? _courseLessons[currentIndex - 1] : null;
+    final nextLesson = (currentIndex >= 0 && currentIndex < _courseLessons.length - 1)
+        ? _courseLessons[currentIndex + 1]
+        : null;
+
+    return Container(
+      margin: const EdgeInsets.only(top: AppSpacing.s12, bottom: AppSpacing.s8),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s12, vertical: AppSpacing.s8),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceVariant.withAlpha(50),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+        border: Border.all(color: AppColors.border.withAlpha(60)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Previous Lesson Button
+          if (prevLesson != null)
+            TextButton.icon(
+              onPressed: () => _openLesson(prevLesson, displayIndex - 1, totalCount),
+              icon: const Icon(Icons.arrow_back_rounded, size: 16),
+              label: Text(context.l10n.previousLessonAction),
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.textPrimary,
+                textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+              ),
+            )
+          else
+            const SizedBox(width: 80),
+
+          // Middle: "Lesson X of Y" + View syllabus button
+          InkWell(
+            onTap: _courseLessons.isNotEmpty ? _showCourseLessonsDrawer : null,
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    context.l10n.lessonXofY(displayIndex, totalCount),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  if (_courseLessons.isNotEmpty) ...[
+                    const SizedBox(width: 4),
+                    const Icon(Icons.format_list_bulleted_rounded, size: 14, color: AppColors.primary),
+                  ],
+                ],
+              ),
+            ),
+          ),
+
+          // Next Lesson Button
+          if (nextLesson != null)
+            TextButton.icon(
+              onPressed: () => _openLesson(nextLesson, displayIndex + 1, totalCount),
+              icon: Icon(
+                nextLesson.isLocked ? Icons.lock_outline_rounded : Icons.arrow_forward_rounded,
+                size: 16,
+                color: nextLesson.isLocked ? AppColors.textMuted : AppColors.primary,
+              ),
+              label: Text(
+                context.l10n.nextLessonAction,
+                style: TextStyle(
+                  color: nextLesson.isLocked ? AppColors.textMuted : AppColors.primary,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12,
+                ),
+              ),
+            )
+          else
+            const SizedBox(width: 80),
+        ],
+      ),
+    );
+  }
+
+  void _showCourseLessonsDrawer() {
+    if (_courseLessons.isEmpty) return;
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (modalContext) {
+        final theme = Theme.of(modalContext);
+        final completedCount = _courseLessons.where((l) => l.isEffectivelyCompleted).length;
+        final totalCount = _courseLessons.length;
+        final pct = totalCount > 0 ? ((completedCount / totalCount) * 100).toInt() : 0;
+
+        return Container(
+          decoration: BoxDecoration(
+            color: theme.scaffoldBackgroundColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(AppSpacing.radiusLarge)),
+          ),
+          padding: const EdgeInsets.all(AppSpacing.s20),
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(modalContext).size.height * 0.75,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Header
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.groupName ?? context.l10n.courseLessonsTitle,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          context.l10n.lessonsCompletedRatio(completedCount, totalCount),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Text(
+                    '$pct%',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.s12),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: totalCount > 0 ? completedCount / totalCount : 0,
+                  minHeight: 6,
+                  backgroundColor: AppColors.surfaceVariant,
+                  valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.s16),
+              const Divider(height: 1, color: AppColors.border),
+              const SizedBox(height: AppSpacing.s8),
+
+              // Lessons List
+              Flexible(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  itemCount: _courseLessons.length,
+                  separatorBuilder: (_, __) => const Divider(height: 1, color: AppColors.border),
+                  itemBuilder: (ctx, i) {
+                    final item = _courseLessons[i];
+                    final isCurrent = item.contentId == widget.videoId;
+                    final isCompleted = item.isEffectivelyCompleted;
+                    final isLocked = item.isLocked;
+
+                    return ListTile(
+                      dense: true,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      leading: CircleAvatar(
+                        radius: 14,
+                        backgroundColor: isCompleted
+                            ? AppColors.success.withAlpha(25)
+                            : isCurrent
+                                ? AppColors.primary.withAlpha(25)
+                                : isLocked
+                                    ? AppColors.surfaceVariant
+                                    : AppColors.primary.withAlpha(15),
+                        child: Icon(
+                          isCompleted
+                              ? Icons.check_rounded
+                              : isCurrent
+                                  ? Icons.play_arrow_rounded
+                                  : isLocked
+                                      ? Icons.lock_rounded
+                                      : Icons.radio_button_unchecked_rounded,
+                          size: 14,
+                          color: isCompleted
+                              ? AppColors.success
+                              : isCurrent
+                                  ? AppColors.primary
+                                  : isLocked
+                                      ? AppColors.textMuted
+                                      : AppColors.primary,
+                        ),
+                      ),
+                      title: Text(
+                        '${i + 1}. ${item.title}',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: isCurrent ? FontWeight.bold : FontWeight.w500,
+                          color: isCurrent
+                              ? AppColors.primary
+                              : isLocked
+                                  ? AppColors.textMuted
+                                  : AppColors.textPrimary,
+                        ),
+                      ),
+                      trailing: isCurrent
+                          ? Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withAlpha(20),
+                                borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+                              ),
+                              child: Text(
+                                context.l10n.statusInProgress,
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            )
+                          : isCompleted
+                              ? const Icon(Icons.check_circle_rounded, size: 16, color: AppColors.success)
+                              : isLocked
+                                  ? const Icon(Icons.lock_outline_rounded, size: 16, color: AppColors.textMuted)
+                                  : null,
+                      onTap: () {
+                        Navigator.of(modalContext).pop();
+                        if (!isCurrent) {
+                          _openLesson(item, i + 1, totalCount);
+                        }
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -249,13 +629,41 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
         appBar: _isFullscreen
             ? null
             : AppBar(
-                title: Text(
-                  context.l10n.watchLessonTitle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                title: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      widget.groupName ?? _currentVideo?.title ?? context.l10n.watchLessonTitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    if (widget.lessonIndex != null && widget.totalLessons != null)
+                      Text(
+                        '${context.l10n.lessonXofY(widget.lessonIndex!, widget.totalLessons!)} · ${_currentVideo?.title ?? ''}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.normal,
+                        ),
+                      )
+                    else if (_currentVideo?.title != null && widget.groupName != null)
+                      Text(
+                        _currentVideo!.title!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.normal,
+                        ),
+                      ),
+                  ],
                 ),
                 actions: [
                   Container(
@@ -476,7 +884,16 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               // Left Main Column: Player
-                              Expanded(flex: 7, child: videoPlayerWidget),
+                              Expanded(
+                                flex: 7,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  children: [
+                                    videoPlayerWidget,
+                                    _buildSequentialNavigationBar(theme),
+                                  ],
+                                ),
+                              ),
                               const SizedBox(width: AppSpacing.s20),
                               // Right Sidebar: Academic Stats & Notes
                               Expanded(
@@ -517,7 +934,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             videoPlayerWidget,
-                            const SizedBox(height: AppSpacing.s16),
+                            _buildSequentialNavigationBar(theme),
+                            const SizedBox(height: AppSpacing.s12),
                             _buildAcademicStatsCard(
                               theme,
                               video,
@@ -1340,9 +1758,43 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
         final livePos = _livePositionSecs.value;
         final liveDur = _liveDurationSecs.value;
         final pct = liveDur > 0 ? (livePos / liveDur) * 100 : 0.0;
-        final isUnlocked = _isTeacher || isInitiallyCompleted || _videoCompletedLocally || pct >= 90.0;
-        final themeColor = isUnlocked ? AppColors.success : AppColors.warning;
-        final actualExamTitle = _groupExamTitle ?? widget.associatedExamTitle;
+        final isVideoCompleted = _isTeacher || isInitiallyCompleted || _videoCompletedLocally || pct >= 90.0;
+        final exam = _lessonExam;
+        final actualExamTitle = exam?.title ?? _groupExamTitle ?? widget.associatedExamTitle ?? context.l10n.associatedExamBadge;
+        final examId = exam?.id ?? _groupExamId ?? widget.associatedExamId;
+
+        // Determine quiz attempt state
+        final latestAttempt = exam?.myLatestAttempt;
+        final passingScore = exam?.passingScore ?? 60;
+        final isSubmitted = latestAttempt != null && latestAttempt.isSubmitted;
+        final isPassed = isSubmitted && latestAttempt.isPassed(passingScore);
+        final isFailed = isSubmitted && !isPassed;
+        final scorePct = latestAttempt?.percentage?.toInt() ?? 
+            (latestAttempt?.score != null && (exam?.maxScore ?? 100) > 0 
+                ? ((latestAttempt!.score! / (exam?.maxScore ?? 100)) * 100).toInt() 
+                : null);
+
+        // Find next lesson if available
+        LessonAssignmentEntity? nextLesson;
+        int? nextLessonIndex;
+        if (_courseLessons.isNotEmpty) {
+          final cIdx = _courseLessons.indexWhere((l) => l.contentId == widget.videoId);
+          if (cIdx >= 0 && cIdx < _courseLessons.length - 1) {
+            nextLesson = _courseLessons[cIdx + 1];
+            nextLessonIndex = cIdx + 2;
+          }
+        }
+
+        Color themeColor;
+        if (isPassed) {
+          themeColor = AppColors.success;
+        } else if (isFailed) {
+          themeColor = AppColors.error;
+        } else if (isVideoCompleted) {
+          themeColor = AppColors.primary;
+        } else {
+          themeColor = AppColors.warning;
+        }
 
         return AppCard(
           variant: AppCardVariant.elevated,
@@ -1350,6 +1802,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // Header: Tag & Status Pill
               Row(
                 children: [
                   Container(
@@ -1363,7 +1816,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                   const SizedBox(width: AppSpacing.s8),
                   Expanded(
                     child: Text(
-                      context.l10n.associatedExamBadge,
+                      context.l10n.lessonMaterialTitle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.titleSmall?.copyWith(
@@ -1387,15 +1840,25 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          isUnlocked
-                              ? Icons.quiz_rounded
-                              : Icons.lock_outline_rounded,
+                          isPassed
+                              ? Icons.check_circle_rounded
+                              : isFailed
+                                  ? Icons.cancel_rounded
+                                  : isVideoCompleted
+                                      ? Icons.quiz_rounded
+                                      : Icons.lock_outline_rounded,
                           size: 11,
                           color: themeColor,
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          isUnlocked ? 'QUIZ' : 'LOCKED',
+                          isPassed
+                              ? 'COMPLETED'
+                              : isFailed
+                                  ? 'FAILED'
+                                  : isVideoCompleted
+                                      ? 'QUIZ'
+                                      : 'LOCKED',
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
@@ -1407,20 +1870,77 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                   ),
                 ],
               ),
-              const SizedBox(height: 6),
-              Text(
-                isUnlocked
-                    ? context.l10n.videoCompletedCongrats
-                    : context.l10n.quizGateNotice,
-                style: TextStyle(
-                  fontSize: 11,
-                  color: isUnlocked
-                      ? AppColors.success
-                      : AppColors.textSecondary,
-                  fontWeight: isUnlocked ? FontWeight.w600 : FontWeight.normal,
+              const SizedBox(height: 8),
+
+              // Title and Description based on state
+              if (isPassed) ...[
+                Text(
+                  '🎉 ${context.l10n.lessonCompletedCongrats}',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.success,
+                  ),
                 ),
-              ),
+                const SizedBox(height: 2),
+                Text(
+                  scorePct != null
+                      ? '${context.l10n.passedQuizNotice} (${context.l10n.examScoreLabel}: $scorePct% · ${context.l10n.passingScoreTitle}: $passingScore%)'
+                      : context.l10n.passedQuizNotice,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ] else if (isFailed) ...[
+                Text(
+                  context.l10n.quizNotPassedTitle,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.error,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  scorePct != null
+                      ? '${context.l10n.quizNotPassedDesc} (${context.l10n.examScoreLabel}: $scorePct% · ${context.l10n.passingScoreTitle}: $passingScore%)'
+                      : context.l10n.quizNotPassedDesc,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ] else if (isVideoCompleted) ...[
+                Text(
+                  '✓ ${context.l10n.videoCompletedTitle}',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.success,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  context.l10n.lessonQuizReadyDesc,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ] else ...[
+                Text(
+                  context.l10n.completeVideoToUnlockQuiz,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+
               const SizedBox(height: AppSpacing.s12),
+
+              // Quiz detail box
               Container(
                 padding: const EdgeInsets.all(AppSpacing.s12),
                 decoration: BoxDecoration(
@@ -1440,7 +1960,11 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                         ),
                       ),
                       child: Icon(
-                        isUnlocked ? Icons.quiz_rounded : Icons.lock_rounded,
+                        isPassed
+                            ? Icons.verified_rounded
+                            : isVideoCompleted
+                                ? Icons.quiz_rounded
+                                : Icons.lock_rounded,
                         size: 22,
                         color: themeColor,
                       ),
@@ -1451,8 +1975,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            actualExamTitle ??
-                                context.l10n.associatedExamBadge,
+                            actualExamTitle,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
@@ -1461,25 +1984,121 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                               color: AppColors.textPrimary,
                             ),
                           ),
+                          const SizedBox(height: 2),
+                          Text(
+                            '${exam?.activeVersion?.questions.length ?? 10} Questions · Passing Score: $passingScore%',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
                         ],
                       ),
                     ),
                   ],
                 ),
               ),
+
               const SizedBox(height: AppSpacing.s12),
-              ElevatedButton.icon(
-                icon: Icon(
-                  isUnlocked
-                      ? Icons.arrow_forward_rounded
-                      : Icons.lock_outline_rounded,
-                  size: 16,
+
+              // Action Buttons
+              if (isPassed) ...[
+                if (nextLesson != null) ...[
+                  Text(
+                    context.l10n.nextLessonLabel(nextLesson.title),
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.arrow_forward_rounded, size: 16),
+                    label: Text(context.l10n.continueToNextLessonAction),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: AppSpacing.s12,
+                        horizontal: AppSpacing.s16,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusMedium,
+                        ),
+                      ),
+                    ),
+                    onPressed: () => _openLesson(
+                      nextLesson!,
+                      nextLessonIndex ?? 2,
+                      _courseLessons.length,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                ],
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.replay_rounded, size: 16),
+                  label: Text(context.l10n.reviewLessonAction),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.s10,
+                      horizontal: AppSpacing.s16,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.radiusMedium,
+                      ),
+                    ),
+                  ),
+                  onPressed: () => _seekTo?.call(0),
                 ),
-                label: Flexible(
-                  child: Text(
-                    isUnlocked
-                        ? context.l10n.takeQuizNowAction
-                        : context.l10n.quizGateNotice,
+              ] else if (isFailed) ...[
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        icon: const Icon(Icons.play_circle_outline_rounded, size: 16),
+                        label: Text(
+                          context.l10n.reviewLessonAction,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        onPressed: () => _seekTo?.call(0),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.s8),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        icon: const Icon(Icons.refresh_rounded, size: 16),
+                        label: Text(
+                          context.l10n.retryLessonQuizAction,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                        ),
+                        onPressed: examId != null
+                            ? () => _startLessonQuiz(examId)
+                            : null,
+                      ),
+                    ),
+                  ],
+                ),
+              ] else ...[
+                ElevatedButton.icon(
+                  icon: Icon(
+                    isVideoCompleted
+                        ? Icons.arrow_forward_rounded
+                        : Icons.lock_outline_rounded,
+                    size: 16,
+                  ),
+                  label: Text(
+                    isVideoCompleted
+                        ? context.l10n.takeLessonQuizAction
+                        : context.l10n.completeVideoToUnlockQuiz,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
@@ -1487,39 +2106,28 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: isUnlocked
-                      ? AppColors.success
-                      : AppColors.surfaceVariant,
-                  foregroundColor: isUnlocked
-                      ? Colors.white
-                      : AppColors.textMuted,
-                  padding: const EdgeInsets.symmetric(
-                    vertical: AppSpacing.s12,
-                    horizontal: AppSpacing.s16,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(
-                      AppSpacing.radiusMedium,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isVideoCompleted
+                        ? AppColors.primary
+                        : AppColors.surfaceVariant,
+                    foregroundColor: isVideoCompleted
+                        ? Colors.white
+                        : AppColors.textMuted,
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.s12,
+                      horizontal: AppSpacing.s16,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.radiusMedium,
+                      ),
                     ),
                   ),
+                  onPressed: (isVideoCompleted && examId != null)
+                      ? () => _startLessonQuiz(examId)
+                      : null,
                 ),
-                onPressed: isUnlocked
-                    ? () {
-                        final examId = _groupExamId ?? widget.associatedExamId;
-                        if (_isTeacher) {
-                          context.push(examId != null 
-                              ? '${AppRoutes.teacherExams}?examId=$examId'
-                              : AppRoutes.teacherExams);
-                        } else {
-                          context.push(examId != null
-                              ? '${AppRoutes.studentExams}?examId=$examId'
-                              : AppRoutes.studentExams);
-                        }
-                      }
-                    : null,
-              ),
+              ],
             ],
           ),
         );
@@ -1613,7 +2221,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
 
           const SizedBox(height: AppSpacing.s12),
 
-          if (attachedFile != null) ...[
+          if (hasGroupPdf || attachedFile != null) ...[
             Container(
               padding: const EdgeInsets.all(AppSpacing.s12),
               decoration: BoxDecoration(
@@ -1644,7 +2252,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          hasGroupPdf ? _groupPdfFileName! : attachedFile.fileName,
+                          hasGroupPdf ? _groupPdfFileName! : (attachedFile?.fileName ?? 'Study Material'),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
@@ -1657,7 +2265,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                         Text(
                           hasGroupPdf 
                               ? 'PDF'
-                              : '${attachedFile.formattedFileSize} • PDF',
+                              : '${attachedFile?.formattedFileSize ?? ''} • PDF',
                           style: const TextStyle(
                             fontSize: 11,
                             color: AppColors.textSecondary,
@@ -1672,10 +2280,10 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
             ),
             const SizedBox(height: AppSpacing.s12),
             ElevatedButton.icon(
-              icon: const Icon(Icons.download_rounded, size: 16),
+              icon: const Icon(Icons.picture_as_pdf_rounded, size: 16),
               label: Flexible(
                 child: Text(
-                  context.l10n.viewAttachedPdf,
+                  context.l10n.openPdfAction,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),

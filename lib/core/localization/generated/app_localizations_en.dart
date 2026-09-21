@@ -2043,11 +2043,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addStudentSubmit => 'Add Student';
 
   @override
-  String get confirmRemoveMemberTitle => 'Confirm Removal';
+  String get confirmRemoveMemberTitle => 'Remove Student';
 
   @override
   String confirmRemoveMemberBody(String name) {
-    return 'Are you sure you want to remove student \"$name\" from this group?';
+    return 'Are you sure you want to remove student \"$name\" from this course?';
   }
 
   @override
@@ -2057,13 +2057,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loadingGroupDetail => 'Loading group details and members...';
 
   @override
-  String get groupDetailTitle => 'Group Details';
+  String get groupDetailTitle => 'Course Details';
 
   @override
-  String get groupNotFound => 'Group not found';
+  String get groupNotFound => 'Course not found';
 
   @override
-  String get backToGroups => 'Back to Groups';
+  String get backToGroups => 'Back to Courses';
 
   @override
   String get previousContentPolicy => 'Previous Content Policy:';
@@ -2075,7 +2075,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get previousContentDeniedLabel => 'Denied for new students (Deny)';
 
   @override
-  String get groupServicesAndTools => 'Group Services & Tools';
+  String get groupServicesAndTools => 'Course Tools';
 
   @override
   String get contentAndMaterials => 'Content & Notes';
@@ -2088,7 +2088,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String groupMembersCountHeader(int count) {
-    return 'Group Members ($count)';
+    return 'Enrolled Students ($count)';
   }
 
   @override
@@ -2735,7 +2735,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get changeFile => 'Change file';
 
   @override
-  String get lessonTitleLabel => 'Lesson Title *';
+  String get lessonTitleLabel => 'Lesson Title';
 
   @override
   String get lessonTitleHint => 'e.g. Trigonometric Functions - Part 1';
@@ -3065,11 +3065,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String scorePoints(int points) {
     return '$points pts';
-  }
-
-  @override
-  String passingScoreLabel(int score) {
-    return 'Passing Score to Unlock (%)';
   }
 
   @override
@@ -4590,6 +4585,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enableInlineQuiz => 'Enable required quiz to unlock next lecture';
 
   @override
+  String get passingScoreLabel => 'Passing Score';
+
+  @override
   String get questionTypeMcq => 'Multiple Choice';
 
   @override
@@ -4874,4 +4872,385 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get lessonQuizSequentialRequirement =>
       'This Lesson Quiz will be required for students to unlock the next lesson (if Sequential Learning is enabled).';
+
+  @override
+  String get videoLibraryTitle => 'Video Library';
+
+  @override
+  String get videoLibrarySubtitle =>
+      'Create videos once and reuse them across multiple courses.';
+
+  @override
+  String get addVideo => 'Add Video';
+
+  @override
+  String get filterUsedInCourses => 'Used in Courses';
+
+  @override
+  String usedInNCourses(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Used in $count courses',
+      one: 'Used in 1 course',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get notUsedInAnyCourse => 'Not used in any course';
+
+  @override
+  String get addToCourse => 'Add to Course';
+
+  @override
+  String get editVideo => 'Edit Video';
+
+  @override
+  String get videoAddedToLibrary => 'Video added to your library.';
+
+  @override
+  String get addToCourseAfterSave => 'Add to Course';
+
+  @override
+  String get selectCourse => 'Select Course';
+
+  @override
+  String get selectCourseSubtitle =>
+      'Choose which course to add this video to:';
+
+  @override
+  String nCoursesNLessons(int lessons, int students) {
+    return '$lessons Lessons · $students Students';
+  }
+
+  @override
+  String get addLesson => 'Add Lesson';
+
+  @override
+  String get addLessonTitle => 'Add Lesson';
+
+  @override
+  String get addLessonSubtitle => 'How would you like to add this lesson?';
+
+  @override
+  String get useExistingVideo => 'Use Existing Video';
+
+  @override
+  String get useExistingVideoSubtitle => 'Choose a video from your library';
+
+  @override
+  String get addNewVideoToLesson => 'Add New Video';
+
+  @override
+  String get addNewVideoToLessonSubtitle =>
+      'Create a new video for this course';
+
+  @override
+  String get lessonSetupTitle => 'Lesson Setup';
+
+  @override
+  String get studyMaterial => 'Study Material';
+
+  @override
+  String get uploadPdf => 'Upload PDF';
+
+  @override
+  String get replacePdf => 'Replace';
+
+  @override
+  String get removePdf => 'Remove';
+
+  @override
+  String get lessonQuizLabel => 'Lesson Quiz';
+
+  @override
+  String get lessonQuizHint => 'Select Lesson Quiz';
+
+  @override
+  String get createLessonQuiz => '+ Create Lesson Quiz';
+
+  @override
+  String useCourseDefault(int score) {
+    return 'Use course default — $score%';
+  }
+
+  @override
+  String get customPassingScore => 'Custom';
+
+  @override
+  String lessonAddedToCourse(String course) {
+    return 'Lesson added to $course.';
+  }
+
+  @override
+  String get lessonUpdatedSuccess => 'Lesson updated successfully.';
+
+  @override
+  String get manageLessons => 'Manage Lessons';
+
+  @override
+  String get courseBuilderTitle => 'Course Builder';
+
+  @override
+  String get sequentialLearningLabel => 'Sequential Learning';
+
+  @override
+  String get sequentialLearningDescription =>
+      'Students must complete each lesson\'s video and pass the lesson quiz before the next lesson becomes available.';
+
+  @override
+  String get defaultLessonPassingScore => 'Default Lesson Quiz Passing Score';
+
+  @override
+  String get learningProgression => 'Learning Progression';
+
+  @override
+  String get noLessonsYet => 'No lessons yet';
+
+  @override
+  String get noLessonsYetSubtitle =>
+      'Start building your course by adding a video lesson.';
+
+  @override
+  String get addFirstLesson => 'Add First Lesson';
+
+  @override
+  String get videoPickerTitle => 'Select Video';
+
+  @override
+  String get videoPickerSearchHint => 'Search videos...';
+
+  @override
+  String lessonNumber(int n) {
+    return 'Lesson $n';
+  }
+
+  @override
+  String get hasStudyMaterial => 'Study Material';
+
+  @override
+  String get hasLessonQuiz => 'Lesson Quiz';
+
+  @override
+  String get editLesson => 'Edit Lesson';
+
+  @override
+  String get deleteLesson => 'Delete Lesson';
+
+  @override
+  String nLessonsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Lessons',
+      one: '1 Lesson',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String nStudentsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Students',
+      one: '1 Student',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get duplicateVideoInCourse =>
+      'This video is already part of this course.';
+
+  @override
+  String get couldNotAddLesson =>
+      'We couldn\'t add this lesson. Please try again.';
+
+  @override
+  String get couldNotUpdateLesson =>
+      'We couldn\'t update this lesson. Please try again.';
+
+  @override
+  String get noCoursesAvailable => 'No courses available.';
+
+  @override
+  String get noCoursesAvailableSubtitle =>
+      'Create a course first, then add videos to it.';
+
+  @override
+  String get videoNotAvailable => 'Video not available';
+
+  @override
+  String get allVideosUsed => 'All videos are being used';
+
+  @override
+  String get allVideosUsedSubtitle =>
+      'All your videos are currently used in at least one course.';
+
+  @override
+  String get noUnusedVideos => 'No unused videos';
+
+  @override
+  String get videoLibraryEmpty => 'Your Video Library is empty';
+
+  @override
+  String get videoLibraryEmptySubtitle =>
+      'Add your first teaching video and reuse it across your courses.';
+
+  @override
+  String usedInMoreCourses(int count) {
+    return '+ $count more';
+  }
+
+  @override
+  String get myCoursesTitle => 'My Courses';
+
+  @override
+  String get myCoursesSubtitle =>
+      'Access all your enrolled courses and track your progress';
+
+  @override
+  String get openCourseAction => 'Open Course';
+
+  @override
+  String get noEnrolledCoursesTitle => 'No courses yet';
+
+  @override
+  String get noEnrolledCoursesSubtitle =>
+      'Your courses will appear here once you are enrolled.';
+
+  @override
+  String get courseBeingPreparedTitle => 'This course is being prepared.';
+
+  @override
+  String get courseBeingPreparedSubtitle =>
+      'Your lessons will appear here soon.';
+
+  @override
+  String get startCourseAction => 'Start Course';
+
+  @override
+  String get continueLessonAction => 'Continue Lesson';
+
+  @override
+  String get takeLessonQuizAction => 'Start Lesson Quiz';
+
+  @override
+  String get retryLessonQuizAction => 'Retry Lesson Quiz';
+
+  @override
+  String get reviewCourseAction => 'Review Course';
+
+  @override
+  String get reviewLessonAction => 'Review Lesson';
+
+  @override
+  String get continueToNextLessonAction => 'Continue to Next Lesson';
+
+  @override
+  String completeLessonToUnlock(int n) {
+    return 'Complete Lesson $n to unlock this lesson.';
+  }
+
+  @override
+  String get availableStatus => 'Available';
+
+  @override
+  String get lessonQuizReadyTitle => 'Your lesson quiz is ready.';
+
+  @override
+  String get lessonQuizReadyDesc =>
+      'Test your understanding of this lesson to unlock the next one.';
+
+  @override
+  String get quizNotPassedTitle => 'Quiz not passed';
+
+  @override
+  String get quizNotPassedDesc => 'You can review the lesson and try again.';
+
+  @override
+  String get lessonCompletedCongrats => 'Lesson completed!';
+
+  @override
+  String get passedQuizNotice => 'You passed the lesson quiz.';
+
+  @override
+  String nextLessonLabel(String title) {
+    return 'Next lesson: $title';
+  }
+
+  @override
+  String get previousLessonAction => 'Previous Lesson';
+
+  @override
+  String get nextLessonAction => 'Next Lesson';
+
+  @override
+  String lessonXofY(int current, int total) {
+    return 'Lesson $current of $total';
+  }
+
+  @override
+  String get lessonMaterialTitle => 'Lesson Material';
+
+  @override
+  String get openPdfAction => 'Open PDF';
+
+  @override
+  String get completeVideoToUnlockQuiz =>
+      'Complete the video to unlock the lesson quiz.';
+
+  @override
+  String get videoCompletedTitle => 'Video completed';
+
+  @override
+  String get courseAssessmentsTitle => 'Course Assessments';
+
+  @override
+  String get lessonQuizzesSectionTitle => 'Lesson Quizzes';
+
+  @override
+  String get lessonQuizzesSectionDesc =>
+      'Completed as part of your lesson progression.';
+
+  @override
+  String get generalExamsSectionTitle => 'General Exams';
+
+  @override
+  String get generalExamsSectionDesc => 'Additional course-wide assessments.';
+
+  @override
+  String lessonsCompletedRatio(int completed, int total) {
+    return '$completed of $total lessons completed';
+  }
+
+  @override
+  String percentComplete(int pct) {
+    return '$pct% Complete';
+  }
+
+  @override
+  String get viewLessonsAction => 'View Lessons';
+
+  @override
+  String get courseLessonsTitle => 'Course Lessons';
+
+  @override
+  String get addLessonButton => 'Add Lesson';
+
+  @override
+  String get courseBuilderEmptyTitle => 'No Lessons Yet';
+
+  @override
+  String get courseBuilderEmptySubtitle =>
+      'Start building your course by adding a lesson.';
+
+  @override
+  String get sequentialLearning => 'Sequential Learning';
+
+  @override
+  String get sequentialLearningDesc =>
+      'Students must complete each lesson\'s video and pass the lesson quiz before the next lesson unlocks.';
 }

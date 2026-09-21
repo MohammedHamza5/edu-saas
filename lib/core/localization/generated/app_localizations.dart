@@ -3832,13 +3832,13 @@ abstract class AppLocalizations {
   /// Dialog title
   ///
   /// In en, this message translates to:
-  /// **'Confirm Removal'**
+  /// **'Remove Student'**
   String get confirmRemoveMemberTitle;
 
   /// Dialog content
   ///
   /// In en, this message translates to:
-  /// **'Are you sure you want to remove student \"{name}\" from this group?'**
+  /// **'Are you sure you want to remove student \"{name}\" from this course?'**
   String confirmRemoveMemberBody(String name);
 
   /// Button text
@@ -3856,19 +3856,19 @@ abstract class AppLocalizations {
   /// App bar title
   ///
   /// In en, this message translates to:
-  /// **'Group Details'**
+  /// **'Course Details'**
   String get groupDetailTitle;
 
   /// Error message
   ///
   /// In en, this message translates to:
-  /// **'Group not found'**
+  /// **'Course not found'**
   String get groupNotFound;
 
   /// Tooltip
   ///
   /// In en, this message translates to:
-  /// **'Back to Groups'**
+  /// **'Back to Courses'**
   String get backToGroups;
 
   /// Label
@@ -3892,7 +3892,7 @@ abstract class AppLocalizations {
   /// Card header
   ///
   /// In en, this message translates to:
-  /// **'Group Services & Tools'**
+  /// **'Course Tools'**
   String get groupServicesAndTools;
 
   /// Button label
@@ -3916,7 +3916,7 @@ abstract class AppLocalizations {
   /// Header title with count
   ///
   /// In en, this message translates to:
-  /// **'Group Members ({count})'**
+  /// **'Enrolled Students ({count})'**
   String groupMembersCountHeader(int count);
 
   /// Button label
@@ -5020,7 +5020,7 @@ abstract class AppLocalizations {
   /// Form label for video title
   ///
   /// In en, this message translates to:
-  /// **'Lesson Title *'**
+  /// **'Lesson Title'**
   String get lessonTitleLabel;
 
   /// Form hint for video title
@@ -5580,12 +5580,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{points} pts'**
   String scorePoints(int points);
-
-  /// Passing score badge label
-  ///
-  /// In en, this message translates to:
-  /// **'Passing Score to Unlock (%)'**
-  String passingScoreLabel(int score);
 
   /// Version and attempts label
   ///
@@ -8221,6 +8215,12 @@ abstract class AppLocalizations {
   /// **'Enable required quiz to unlock next lecture'**
   String get enableInlineQuiz;
 
+  /// No description provided for @passingScoreLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Passing Score'**
+  String get passingScoreLabel;
+
   /// No description provided for @questionTypeMcq.
   ///
   /// In en, this message translates to:
@@ -8730,6 +8730,642 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This Lesson Quiz will be required for students to unlock the next lesson (if Sequential Learning is enabled).'**
   String get lessonQuizSequentialRequirement;
+
+  /// No description provided for @videoLibraryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Video Library'**
+  String get videoLibraryTitle;
+
+  /// No description provided for @videoLibrarySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create videos once and reuse them across multiple courses.'**
+  String get videoLibrarySubtitle;
+
+  /// No description provided for @addVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Video'**
+  String get addVideo;
+
+  /// No description provided for @filterUsedInCourses.
+  ///
+  /// In en, this message translates to:
+  /// **'Used in Courses'**
+  String get filterUsedInCourses;
+
+  /// No description provided for @usedInNCourses.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{Used in 1 course} other{Used in {count} courses}}'**
+  String usedInNCourses(int count);
+
+  /// No description provided for @notUsedInAnyCourse.
+  ///
+  /// In en, this message translates to:
+  /// **'Not used in any course'**
+  String get notUsedInAnyCourse;
+
+  /// No description provided for @addToCourse.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to Course'**
+  String get addToCourse;
+
+  /// No description provided for @editVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Video'**
+  String get editVideo;
+
+  /// No description provided for @videoAddedToLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Video added to your library.'**
+  String get videoAddedToLibrary;
+
+  /// No description provided for @addToCourseAfterSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to Course'**
+  String get addToCourseAfterSave;
+
+  /// No description provided for @selectCourse.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Course'**
+  String get selectCourse;
+
+  /// No description provided for @selectCourseSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose which course to add this video to:'**
+  String get selectCourseSubtitle;
+
+  /// No description provided for @nCoursesNLessons.
+  ///
+  /// In en, this message translates to:
+  /// **'{lessons} Lessons · {students} Students'**
+  String nCoursesNLessons(int lessons, int students);
+
+  /// No description provided for @addLesson.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Lesson'**
+  String get addLesson;
+
+  /// No description provided for @addLessonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Lesson'**
+  String get addLessonTitle;
+
+  /// No description provided for @addLessonSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How would you like to add this lesson?'**
+  String get addLessonSubtitle;
+
+  /// No description provided for @useExistingVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Existing Video'**
+  String get useExistingVideo;
+
+  /// No description provided for @useExistingVideoSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a video from your library'**
+  String get useExistingVideoSubtitle;
+
+  /// No description provided for @addNewVideoToLesson.
+  ///
+  /// In en, this message translates to:
+  /// **'Add New Video'**
+  String get addNewVideoToLesson;
+
+  /// No description provided for @addNewVideoToLessonSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a new video for this course'**
+  String get addNewVideoToLessonSubtitle;
+
+  /// No description provided for @lessonSetupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Lesson Setup'**
+  String get lessonSetupTitle;
+
+  /// No description provided for @studyMaterial.
+  ///
+  /// In en, this message translates to:
+  /// **'Study Material'**
+  String get studyMaterial;
+
+  /// No description provided for @uploadPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload PDF'**
+  String get uploadPdf;
+
+  /// No description provided for @replacePdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace'**
+  String get replacePdf;
+
+  /// No description provided for @removePdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get removePdf;
+
+  /// No description provided for @lessonQuizLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Lesson Quiz'**
+  String get lessonQuizLabel;
+
+  /// No description provided for @lessonQuizHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Lesson Quiz'**
+  String get lessonQuizHint;
+
+  /// No description provided for @createLessonQuiz.
+  ///
+  /// In en, this message translates to:
+  /// **'+ Create Lesson Quiz'**
+  String get createLessonQuiz;
+
+  /// No description provided for @useCourseDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Use course default — {score}%'**
+  String useCourseDefault(int score);
+
+  /// No description provided for @customPassingScore.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get customPassingScore;
+
+  /// No description provided for @lessonAddedToCourse.
+  ///
+  /// In en, this message translates to:
+  /// **'Lesson added to {course}.'**
+  String lessonAddedToCourse(String course);
+
+  /// No description provided for @lessonUpdatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Lesson updated successfully.'**
+  String get lessonUpdatedSuccess;
+
+  /// No description provided for @manageLessons.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Lessons'**
+  String get manageLessons;
+
+  /// No description provided for @courseBuilderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Course Builder'**
+  String get courseBuilderTitle;
+
+  /// No description provided for @sequentialLearningLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sequential Learning'**
+  String get sequentialLearningLabel;
+
+  /// No description provided for @sequentialLearningDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Students must complete each lesson\'s video and pass the lesson quiz before the next lesson becomes available.'**
+  String get sequentialLearningDescription;
+
+  /// No description provided for @defaultLessonPassingScore.
+  ///
+  /// In en, this message translates to:
+  /// **'Default Lesson Quiz Passing Score'**
+  String get defaultLessonPassingScore;
+
+  /// No description provided for @learningProgression.
+  ///
+  /// In en, this message translates to:
+  /// **'Learning Progression'**
+  String get learningProgression;
+
+  /// No description provided for @noLessonsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No lessons yet'**
+  String get noLessonsYet;
+
+  /// No description provided for @noLessonsYetSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start building your course by adding a video lesson.'**
+  String get noLessonsYetSubtitle;
+
+  /// No description provided for @addFirstLesson.
+  ///
+  /// In en, this message translates to:
+  /// **'Add First Lesson'**
+  String get addFirstLesson;
+
+  /// No description provided for @videoPickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Video'**
+  String get videoPickerTitle;
+
+  /// No description provided for @videoPickerSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search videos...'**
+  String get videoPickerSearchHint;
+
+  /// No description provided for @lessonNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Lesson {n}'**
+  String lessonNumber(int n);
+
+  /// No description provided for @hasStudyMaterial.
+  ///
+  /// In en, this message translates to:
+  /// **'Study Material'**
+  String get hasStudyMaterial;
+
+  /// No description provided for @hasLessonQuiz.
+  ///
+  /// In en, this message translates to:
+  /// **'Lesson Quiz'**
+  String get hasLessonQuiz;
+
+  /// No description provided for @editLesson.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Lesson'**
+  String get editLesson;
+
+  /// No description provided for @deleteLesson.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Lesson'**
+  String get deleteLesson;
+
+  /// No description provided for @nLessonsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 Lesson} other{{count} Lessons}}'**
+  String nLessonsCount(int count);
+
+  /// No description provided for @nStudentsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 Student} other{{count} Students}}'**
+  String nStudentsCount(int count);
+
+  /// No description provided for @duplicateVideoInCourse.
+  ///
+  /// In en, this message translates to:
+  /// **'This video is already part of this course.'**
+  String get duplicateVideoInCourse;
+
+  /// No description provided for @couldNotAddLesson.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t add this lesson. Please try again.'**
+  String get couldNotAddLesson;
+
+  /// No description provided for @couldNotUpdateLesson.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t update this lesson. Please try again.'**
+  String get couldNotUpdateLesson;
+
+  /// No description provided for @noCoursesAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No courses available.'**
+  String get noCoursesAvailable;
+
+  /// No description provided for @noCoursesAvailableSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a course first, then add videos to it.'**
+  String get noCoursesAvailableSubtitle;
+
+  /// No description provided for @videoNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Video not available'**
+  String get videoNotAvailable;
+
+  /// No description provided for @allVideosUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'All videos are being used'**
+  String get allVideosUsed;
+
+  /// No description provided for @allVideosUsedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'All your videos are currently used in at least one course.'**
+  String get allVideosUsedSubtitle;
+
+  /// No description provided for @noUnusedVideos.
+  ///
+  /// In en, this message translates to:
+  /// **'No unused videos'**
+  String get noUnusedVideos;
+
+  /// No description provided for @videoLibraryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Video Library is empty'**
+  String get videoLibraryEmpty;
+
+  /// No description provided for @videoLibraryEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first teaching video and reuse it across your courses.'**
+  String get videoLibraryEmptySubtitle;
+
+  /// No description provided for @usedInMoreCourses.
+  ///
+  /// In en, this message translates to:
+  /// **'+ {count} more'**
+  String usedInMoreCourses(int count);
+
+  /// No description provided for @myCoursesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My Courses'**
+  String get myCoursesTitle;
+
+  /// No description provided for @myCoursesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Access all your enrolled courses and track your progress'**
+  String get myCoursesSubtitle;
+
+  /// No description provided for @openCourseAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Course'**
+  String get openCourseAction;
+
+  /// No description provided for @noEnrolledCoursesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No courses yet'**
+  String get noEnrolledCoursesTitle;
+
+  /// No description provided for @noEnrolledCoursesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your courses will appear here once you are enrolled.'**
+  String get noEnrolledCoursesSubtitle;
+
+  /// No description provided for @courseBeingPreparedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This course is being prepared.'**
+  String get courseBeingPreparedTitle;
+
+  /// No description provided for @courseBeingPreparedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your lessons will appear here soon.'**
+  String get courseBeingPreparedSubtitle;
+
+  /// No description provided for @startCourseAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Course'**
+  String get startCourseAction;
+
+  /// No description provided for @continueLessonAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue Lesson'**
+  String get continueLessonAction;
+
+  /// No description provided for @takeLessonQuizAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Lesson Quiz'**
+  String get takeLessonQuizAction;
+
+  /// No description provided for @retryLessonQuizAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry Lesson Quiz'**
+  String get retryLessonQuizAction;
+
+  /// No description provided for @reviewCourseAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Review Course'**
+  String get reviewCourseAction;
+
+  /// No description provided for @reviewLessonAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Review Lesson'**
+  String get reviewLessonAction;
+
+  /// No description provided for @continueToNextLessonAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue to Next Lesson'**
+  String get continueToNextLessonAction;
+
+  /// No description provided for @completeLessonToUnlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete Lesson {n} to unlock this lesson.'**
+  String completeLessonToUnlock(int n);
+
+  /// No description provided for @availableStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get availableStatus;
+
+  /// No description provided for @lessonQuizReadyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your lesson quiz is ready.'**
+  String get lessonQuizReadyTitle;
+
+  /// No description provided for @lessonQuizReadyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Test your understanding of this lesson to unlock the next one.'**
+  String get lessonQuizReadyDesc;
+
+  /// No description provided for @quizNotPassedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiz not passed'**
+  String get quizNotPassedTitle;
+
+  /// No description provided for @quizNotPassedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'You can review the lesson and try again.'**
+  String get quizNotPassedDesc;
+
+  /// No description provided for @lessonCompletedCongrats.
+  ///
+  /// In en, this message translates to:
+  /// **'Lesson completed!'**
+  String get lessonCompletedCongrats;
+
+  /// No description provided for @passedQuizNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'You passed the lesson quiz.'**
+  String get passedQuizNotice;
+
+  /// No description provided for @nextLessonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Next lesson: {title}'**
+  String nextLessonLabel(String title);
+
+  /// No description provided for @previousLessonAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous Lesson'**
+  String get previousLessonAction;
+
+  /// No description provided for @nextLessonAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Next Lesson'**
+  String get nextLessonAction;
+
+  /// No description provided for @lessonXofY.
+  ///
+  /// In en, this message translates to:
+  /// **'Lesson {current} of {total}'**
+  String lessonXofY(int current, int total);
+
+  /// No description provided for @lessonMaterialTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Lesson Material'**
+  String get lessonMaterialTitle;
+
+  /// No description provided for @openPdfAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Open PDF'**
+  String get openPdfAction;
+
+  /// No description provided for @completeVideoToUnlockQuiz.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete the video to unlock the lesson quiz.'**
+  String get completeVideoToUnlockQuiz;
+
+  /// No description provided for @videoCompletedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Video completed'**
+  String get videoCompletedTitle;
+
+  /// No description provided for @courseAssessmentsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Course Assessments'**
+  String get courseAssessmentsTitle;
+
+  /// No description provided for @lessonQuizzesSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Lesson Quizzes'**
+  String get lessonQuizzesSectionTitle;
+
+  /// No description provided for @lessonQuizzesSectionDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed as part of your lesson progression.'**
+  String get lessonQuizzesSectionDesc;
+
+  /// No description provided for @generalExamsSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'General Exams'**
+  String get generalExamsSectionTitle;
+
+  /// No description provided for @generalExamsSectionDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional course-wide assessments.'**
+  String get generalExamsSectionDesc;
+
+  /// No description provided for @lessonsCompletedRatio.
+  ///
+  /// In en, this message translates to:
+  /// **'{completed} of {total} lessons completed'**
+  String lessonsCompletedRatio(int completed, int total);
+
+  /// No description provided for @percentComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'{pct}% Complete'**
+  String percentComplete(int pct);
+
+  /// No description provided for @viewLessonsAction.
+  ///
+  /// In en, this message translates to:
+  /// **'View Lessons'**
+  String get viewLessonsAction;
+
+  /// No description provided for @courseLessonsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Course Lessons'**
+  String get courseLessonsTitle;
+
+  /// No description provided for @addLessonButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Lesson'**
+  String get addLessonButton;
+
+  /// No description provided for @courseBuilderEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No Lessons Yet'**
+  String get courseBuilderEmptyTitle;
+
+  /// No description provided for @courseBuilderEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start building your course by adding a lesson.'**
+  String get courseBuilderEmptySubtitle;
+
+  /// No description provided for @sequentialLearning.
+  ///
+  /// In en, this message translates to:
+  /// **'Sequential Learning'**
+  String get sequentialLearning;
+
+  /// No description provided for @sequentialLearningDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Students must complete each lesson\'s video and pass the lesson quiz before the next lesson unlocks.'**
+  String get sequentialLearningDesc;
 }
 
 class _AppLocalizationsDelegate
