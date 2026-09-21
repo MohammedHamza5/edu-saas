@@ -1,5 +1,6 @@
 import '../../../../core/errors/result.dart';
 import '../entities/content_entity.dart';
+import '../entities/lesson_assignment_entity.dart';
 
 /// Contract for Academic Content operations
 abstract class ContentRepository {
@@ -84,5 +85,19 @@ abstract class ContentRepository {
   Future<Result<void>> linkLessonExam({
     required String contentId,
     required String examId,
+  });
+
+  /// Fetches the course progress for a specific group and student
+  Future<Result<List<LessonAssignmentEntity>>> getGroupCourseProgress({
+    required String groupId,
+    String? studentId,
+  });
+
+  /// Manually unlocks a lesson for a specific student in a group
+  Future<Result<void>> manualUnlockLesson({
+    required String studentId,
+    required String groupId,
+    required String contentId,
+    String? reason,
   });
 }

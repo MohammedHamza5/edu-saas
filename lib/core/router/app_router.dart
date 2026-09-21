@@ -402,12 +402,14 @@ class AppRouter {
             pageBuilder: (BuildContext context, GoRouterState state) {
               final groupId = state.uri.queryParameters['groupId'];
               final groupName = state.uri.queryParameters['name'];
+              final examId = state.uri.queryParameters['examId'];
               return NoTransitionPage(
                 child: BlocProvider(
                   create: (_) => InjectionContainer.createExamsCubit(),
                   child: TeacherExamsPage(
                     groupId: groupId,
                     groupName: groupName,
+                    initialExamId: examId,
                   ),
                 ),
               );
@@ -469,13 +471,15 @@ class AppRouter {
           ),
           GoRoute(
             path: studentExams,
-            pageBuilder: (BuildContext context, GoRouterState state) =>
-                NoTransitionPage(
-              child: BlocProvider(
-                create: (_) => InjectionContainer.createExamsCubit(),
-                child: const StudentExamsPage(),
-              ),
-            ),
+            pageBuilder: (BuildContext context, GoRouterState state) {
+              final examId = state.uri.queryParameters['examId'];
+              return NoTransitionPage(
+                child: BlocProvider(
+                  create: (_) => InjectionContainer.createExamsCubit(),
+                  child: StudentExamsPage(initialExamId: examId),
+                ),
+              );
+            },
           ),
           GoRoute(
             path: studentAttendance,
@@ -493,8 +497,15 @@ class AppRouter {
               final groupId = GroupSlugResolver.toId(rawGroupId);
               final groupName = (state.extra as String?) ?? state.uri.queryParameters['name'];
               return NoTransitionPage(
-                child: BlocProvider(
-                  create: (_) => InjectionContainer.createContentCubit(),
+                child: MultiBlocProvider(
+                  providers: [
+                    BlocProvider(
+                      create: (_) => InjectionContainer.createCourseProgressCubit(),
+                    ),
+                    BlocProvider(
+                      create: (_) => InjectionContainer.createContentCubit(), // Keep this for MaterialViewerSheet requirements (getSignedUrl)
+                    ),
+                  ],
                   child: StudentContentFeedPage(
                     groupId: groupId,
                     groupName: groupName,

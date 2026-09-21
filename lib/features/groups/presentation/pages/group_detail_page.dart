@@ -17,6 +17,8 @@ import '../../domain/entities/group_member_entity.dart';
 import '../cubit/groups_cubit.dart';
 import '../cubit/groups_state.dart';
 import '../widgets/add_member_dialog.dart';
+import '../widgets/course_settings_dialog.dart';
+import '../../../content/presentation/widgets/student_course_progress_sheet.dart';
 
 class GroupDetailPage extends StatefulWidget {
   final String groupId;
@@ -49,9 +51,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(context.l10n.confirmRemoveMemberTitle),
-        content: Text(
-          context.l10n.confirmRemoveMemberBody(studentName),
-        ),
+        content: Text(context.l10n.confirmRemoveMemberBody(studentName)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
@@ -94,9 +94,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
     return BlocBuilder<GroupsCubit, GroupsState>(
       builder: (context, state) {
         if (state is GroupsLoading) {
-          return const Scaffold(
-            body: AppLoadingView.profile(),
-          );
+          return const Scaffold(body: AppLoadingView.profile());
         }
 
         GroupEntity? group = widget.initialGroup;
@@ -135,16 +133,18 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
                   ? context.pop()
                   : context.go(AppRoutes.groupsList),
             ),
-            title: Text(
-              group.name,
-              overflow: TextOverflow.ellipsis,
-            ),
+            title: Text(group.name, overflow: TextOverflow.ellipsis),
             actions: [
               IconButton(
                 icon: const Icon(Icons.refresh_rounded),
                 tooltip: context.l10n.refresh,
                 onPressed: () =>
                     context.read<GroupsCubit>().loadGroupDetail(widget.groupId),
+              ),
+              IconButton(
+                icon: const Icon(Icons.settings_rounded),
+                tooltip: context.l10n.courseSettingsTitle,
+                onPressed: () => CourseSettingsDialog.show(context, group!),
               ),
             ],
           ),
@@ -242,8 +242,12 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
                                     ),
                                     AppBadge(
                                       label: group.isPreviousContentAllowed
-                                          ? context.l10n.previousContentAllowedLabel
-                                          : context.l10n.previousContentDeniedLabel,
+                                          ? context
+                                                .l10n
+                                                .previousContentAllowedLabel
+                                          : context
+                                                .l10n
+                                                .previousContentDeniedLabel,
                                       variant: group.isPreviousContentAllowed
                                           ? AppBadgeVariant.active
                                           : AppBadgeVariant.neutral,
@@ -269,8 +273,11 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
                       children: [
                         Row(
                           children: [
-                            const Icon(Icons.dashboard_customize_rounded,
-                                size: 18, color: AppColors.primary),
+                            const Icon(
+                              Icons.dashboard_customize_rounded,
+                              size: 18,
+                              color: AppColors.primary,
+                            ),
                             const SizedBox(width: AppSpacing.s8),
                             Expanded(
                               child: Text(
@@ -291,7 +298,10 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
                           runSpacing: AppSpacing.s8,
                           children: [
                             ElevatedButton.icon(
-                              icon: const Icon(Icons.folder_shared_rounded, size: 16),
+                              icon: const Icon(
+                                Icons.folder_shared_rounded,
+                                size: 16,
+                              ),
                               label: Text(context.l10n.contentAndMaterials),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.primary,
@@ -302,8 +312,13 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
                               ),
                             ),
                             ElevatedButton.icon(
-                              icon: const Icon(Icons.assignment_rounded, size: 16),
-                              label: Text(context.l10n.assignmentsAndSubmissions),
+                              icon: const Icon(
+                                Icons.assignment_rounded,
+                                size: 16,
+                              ),
+                              label: Text(
+                                context.l10n.assignmentsAndSubmissions,
+                              ),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.warning,
                                 foregroundColor: Colors.white,
@@ -324,7 +339,10 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
                               ),
                             ),
                             OutlinedButton.icon(
-                              icon: const Icon(Icons.campaign_rounded, size: 16),
+                              icon: const Icon(
+                                Icons.campaign_rounded,
+                                size: 16,
+                              ),
                               label: Text(context.l10n.sendGroupAnnouncement),
                               onPressed: () => context.go(
                                 '${AppRoutes.sendAnnouncement}?groupId=${widget.groupId}',
@@ -358,7 +376,9 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
                             const SizedBox(width: AppSpacing.s8),
                             Flexible(
                               child: Text(
-                                context.l10n.groupMembersCountHeader(allMembers.length),
+                                context.l10n.groupMembersCountHeader(
+                                  allMembers.length,
+                                ),
                                 style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w700,
@@ -389,10 +409,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
                             AddMemberDialog.show(context, widget.groupId),
                       ),
                       ElevatedButton.icon(
-                        icon: const Icon(
-                          Icons.fact_check_rounded,
-                          size: 16,
-                        ),
+                        icon: const Icon(Icons.fact_check_rounded, size: 16),
                         label: Text(context.l10n.recordAttendanceAction),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
@@ -473,6 +490,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
                         final member = members[index];
                         return _MemberRowCard(
                           member: member,
+                          groupId: widget.groupId,
                           onRemove: () => _confirmRemoveMember(
                             member.studentId,
                             member.studentName,
@@ -493,9 +511,14 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
 /// Interactive Member Row Card with smooth hover physics & tactile remove
 class _MemberRowCard extends StatefulWidget {
   final GroupMemberEntity member;
+  final String groupId;
   final VoidCallback onRemove;
 
-  const _MemberRowCard({required this.member, required this.onRemove});
+  const _MemberRowCard({
+    required this.member,
+    required this.groupId,
+    required this.onRemove,
+  });
 
   @override
   State<_MemberRowCard> createState() => _MemberRowCardState();
@@ -512,88 +535,98 @@ class _MemberRowCardState extends State<_MemberRowCard> {
       cursor: MouseCursor.defer,
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        curve: Curves.easeOutCubic,
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-          border: Border.all(
-            color: _isHovered
-                ? AppColors.primary.withValues(alpha: 0.3)
-                : AppColors.border,
-            width: _isHovered ? 1.5 : 1.0,
+      child: GestureDetector(
+        onTap: () {
+          StudentCourseProgressSheet.show(
+            context,
+            groupId: widget.groupId,
+            studentId: member.studentId,
+            studentName: member.studentName,
+          );
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          curve: Curves.easeOutCubic,
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+            border: Border.all(
+              color: _isHovered
+                  ? AppColors.primary.withValues(alpha: 0.3)
+                  : AppColors.border,
+              width: _isHovered ? 1.5 : 1.0,
+            ),
+            boxShadow: _isHovered
+                ? [
+                    const BoxShadow(
+                      color: Color(0x080F172A),
+                      blurRadius: 10,
+                      offset: Offset(0, 3),
+                    ),
+                  ]
+                : const [],
           ),
-          boxShadow: _isHovered
-              ? [
-                  const BoxShadow(
-                    color: Color(0x080F172A),
-                    blurRadius: 10,
-                    offset: Offset(0, 3),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.s16,
+            vertical: AppSpacing.s12,
+          ),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 18,
+                backgroundColor: AppColors.primaryLight.withValues(alpha: 0.18),
+                child: Text(
+                  member.studentName.isNotEmpty ? member.studentName[0] : 'S',
+                  style: const TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
                   ),
-                ]
-              : const [],
-        ),
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.s16,
-          vertical: AppSpacing.s12,
-        ),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 18,
-              backgroundColor: AppColors.primaryLight.withValues(alpha: 0.18),
-              child: Text(
-                member.studentName.isNotEmpty ? member.studentName[0] : 'S',
-                style: const TextStyle(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
                 ),
               ),
-            ),
-            const SizedBox(width: AppSpacing.s12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    member.studentName,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  if (member.studentEmail != null) ...[
-                    const SizedBox(height: 2),
+              const SizedBox(width: AppSpacing.s12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     Text(
-                      member.studentEmail!,
+                      member.studentName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        fontSize: 12,
-                        color: AppColors.textSecondary,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
                       ),
                     ),
+                    if (member.studentEmail != null) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        member.studentEmail!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
                   ],
-                ],
-              ),
-            ),
-            Tooltip(
-              message: context.l10n.removeFromGroupTooltip,
-              child: IconButton(
-                icon: const Icon(
-                  Icons.person_remove_outlined,
-                  color: AppColors.error,
-                  size: 20,
                 ),
-                onPressed: widget.onRemove,
               ),
-            ),
-          ],
+              Tooltip(
+                message: context.l10n.removeFromGroupTooltip,
+                child: IconButton(
+                  icon: const Icon(
+                    Icons.person_remove_outlined,
+                    color: AppColors.error,
+                    size: 20,
+                  ),
+                  onPressed: widget.onRemove,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

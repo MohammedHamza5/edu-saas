@@ -54,9 +54,7 @@ abstract interface class ContentRemoteDataSource {
   });
 
   /// Updates sort_order for multiple items atomically
-  Future<void> reorderContentItems({
-    required List<String> contentIdsInOrder,
-  });
+  Future<void> reorderContentItems({required List<String> contentIdsInOrder});
 
   /// Deletes a content item (and cascading file attachment)
   Future<void> deleteContent(String contentId);
@@ -84,6 +82,20 @@ abstract interface class ContentRemoteDataSource {
   Future<void> linkLessonExam({
     required String contentId,
     required String examId,
+  });
+
+  /// Fetches the course progress for a group
+  Future<List<Map<String, dynamic>>> getGroupCourseProgress({
+    required String groupId,
+    String? studentId,
+  });
+
+  /// Manually unlocks a lesson for a specific student in a group
+  Future<void> manualUnlockLesson({
+    required String studentId,
+    required String groupId,
+    required String contentId,
+    String? reason,
   });
 }
 
@@ -122,7 +134,9 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
       }
     }
 
-    var query = _safeClient.from('content').select(
+    var query = _safeClient
+        .from('content')
+        .select(
           '*, files(*), videos(id, status, provider_video_id, provider), '
           'content_groups(group_id, groups(name)), '
           'associated_exam:exams!content_associated_exam_id_fkey(id, title), '
@@ -157,7 +171,9 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
       if (cfg != null) {
         FileAttachmentModel? customFile = m.file as FileAttachmentModel?;
         if (cfg['file'] != null && cfg['file'] is Map<String, dynamic>) {
-          customFile = FileAttachmentModel.fromJson(cfg['file'] as Map<String, dynamic>);
+          customFile = FileAttachmentModel.fromJson(
+            cfg['file'] as Map<String, dynamic>,
+          );
         }
 
         String? assocExamId = m.associatedExamId;
@@ -175,29 +191,35 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
           prereqExamId = cfg['prerequisite_exam_id'] as String?;
           final prereqObj = cfg['prerequisite_exam'] as Map<String, dynamic>?;
           prereqExamTitle = prereqObj?['title'] as String? ?? prereqExamTitle;
-          prereqPassingScore = (prereqObj?['passing_score'] as num?)?.toInt() ?? prereqPassingScore;
+          prereqPassingScore =
+              (prereqObj?['passing_score'] as num?)?.toInt() ??
+              prereqPassingScore;
         }
 
         int sortOrder = m.sortOrder;
-        if (cfg['sort_order'] != null && (cfg['sort_order'] as num).toInt() > 0) {
+        if (cfg['sort_order'] != null &&
+            (cfg['sort_order'] as num).toInt() > 0) {
           sortOrder = (cfg['sort_order'] as num).toInt();
         }
 
         String title = m.title;
-        if (cfg['custom_title'] != null && cfg['custom_title'].toString().trim().isNotEmpty) {
+        if (cfg['custom_title'] != null &&
+            cfg['custom_title'].toString().trim().isNotEmpty) {
           title = cfg['custom_title'].toString().trim();
         }
 
-        models[i] = m.copyWith(
-          title: title,
-          file: customFile,
-          associatedExamId: assocExamId,
-          associatedExamTitle: assocExamTitle,
-          prerequisiteExamId: prereqExamId,
-          prerequisiteExamTitle: prereqExamTitle,
-          prerequisitePassingScore: prereqPassingScore,
-          sortOrder: sortOrder,
-        ) as ContentModel;
+        models[i] =
+            m.copyWith(
+                  title: title,
+                  file: customFile,
+                  associatedExamId: assocExamId,
+                  associatedExamTitle: assocExamTitle,
+                  prerequisiteExamId: prereqExamId,
+                  prerequisiteExamTitle: prereqExamTitle,
+                  prerequisitePassingScore: prereqPassingScore,
+                  sortOrder: sortOrder,
+                )
+                as ContentModel;
       }
     }
 
@@ -272,27 +294,36 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
         String? previousLessonVideoId;
         for (int i = 0; i < models.length; i++) {
           final item = models[i];
-          final isVideoCompleted = item.videoId == null || completedVideoIds.contains(item.videoId);
-          final progressPct = item.videoId != null ? (videoProgressMap[item.videoId] ?? 0.0) : 0.0;
-          final isExamPassed = item.associatedExamId != null && passedExamIds.contains(item.associatedExamId);
+          final isVideoCompleted =
+              item.videoId == null || completedVideoIds.contains(item.videoId);
+          final progressPct = item.videoId != null
+              ? (videoProgressMap[item.videoId] ?? 0.0)
+              : 0.0;
+          final isExamPassed =
+              item.associatedExamId != null &&
+              passedExamIds.contains(item.associatedExamId);
 
           bool locked = false;
           if (item.prerequisiteExamId != null) {
             locked = !passedExamIds.contains(item.prerequisiteExamId);
           } else if (enforceSeq && i > 0) {
-            if (previousLessonExamId != null && !passedExamIds.contains(previousLessonExamId)) {
+            if (previousLessonExamId != null &&
+                !passedExamIds.contains(previousLessonExamId)) {
               locked = true;
-            } else if (previousLessonVideoId != null && !completedVideoIds.contains(previousLessonVideoId)) {
+            } else if (previousLessonVideoId != null &&
+                !completedVideoIds.contains(previousLessonVideoId)) {
               locked = true;
             }
           }
 
-          models[i] = models[i].copyWith(
-            isLocked: locked,
-            isVideoCompleted: isVideoCompleted,
-            videoProgressPercentage: progressPct,
-            isExamPassed: isExamPassed,
-          ) as ContentModel;
+          models[i] =
+              models[i].copyWith(
+                    isLocked: locked,
+                    isVideoCompleted: isVideoCompleted,
+                    videoProgressPercentage: progressPct,
+                    isExamPassed: isExamPassed,
+                  )
+                  as ContentModel;
 
           previousLessonExamId = item.associatedExamId;
           previousLessonVideoId = item.videoId;
@@ -414,7 +445,8 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
       'sort_order': order ?? 0,
       if (publishedAt != null) 'published_at': publishedAt,
       if (associatedExamId != null) 'associated_exam_id': associatedExamId,
-      if (prerequisiteExamId != null) 'prerequisite_exam_id': prerequisiteExamId,
+      if (prerequisiteExamId != null)
+        'prerequisite_exam_id': prerequisiteExamId,
       'created_at': now,
       'updated_at': now,
     };
@@ -430,11 +462,13 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     FileAttachmentModel? attachedFile;
     if (storagePath != null && fileName != null && mimeType != null) {
       if (fileBytes != null && fileBytes.isNotEmpty) {
-        await _safeClient.storage.from('group-content').uploadBinary(
-          storagePath,
-          Uint8List.fromList(fileBytes),
-          fileOptions: FileOptions(contentType: mimeType, upsert: true),
-        );
+        await _safeClient.storage
+            .from('group-content')
+            .uploadBinary(
+              storagePath,
+              Uint8List.fromList(fileBytes),
+              fileOptions: FileOptions(contentType: mimeType, upsert: true),
+            );
       }
 
       final filePayload = {
@@ -492,9 +526,7 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     String? prerequisiteExamId,
   }) async {
     final now = DateTime.now().toUtc().toIso8601String();
-    final updatePayload = <String, dynamic>{
-      'updated_at': now,
-    };
+    final updatePayload = <String, dynamic>{'updated_at': now};
 
     if (title != null) updatePayload['title'] = title;
     if (description != null) updatePayload['description'] = description;
@@ -523,11 +555,13 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
 
     if (storagePath != null && fileName != null && mimeType != null) {
       if (fileBytes != null && fileBytes.isNotEmpty) {
-        await _safeClient.storage.from('group-content').uploadBinary(
-          storagePath,
-          Uint8List.fromList(fileBytes),
-          fileOptions: FileOptions(contentType: mimeType, upsert: true),
-        );
+        await _safeClient.storage
+            .from('group-content')
+            .uploadBinary(
+              storagePath,
+              Uint8List.fromList(fileBytes),
+              fileOptions: FileOptions(contentType: mimeType, upsert: true),
+            );
       }
 
       final tenantId = res['tenant_id'] as String;
@@ -540,13 +574,16 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
 
       if (list.isNotEmpty) {
         final existingId = list.first['id'] as String;
-        await _safeClient.from('files').update({
-          'storage_path': storagePath,
-          'file_name': fileName,
-          'mime_type': mimeType,
-          'file_size': fileSize ?? (fileBytes?.length ?? 0),
-          'created_at': now,
-        }).eq('id', existingId);
+        await _safeClient
+            .from('files')
+            .update({
+              'storage_path': storagePath,
+              'file_name': fileName,
+              'mime_type': mimeType,
+              'file_size': fileSize ?? (fileBytes?.length ?? 0),
+              'created_at': now,
+            })
+            .eq('id', existingId);
       } else {
         await _safeClient.from('files').insert({
           'tenant_id': tenantId,
@@ -585,10 +622,7 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
       updatePayload['published_at'] = now;
     }
 
-    await _safeClient
-        .from('content')
-        .update(updatePayload)
-        .eq('id', contentId);
+    await _safeClient.from('content').update(updatePayload).eq('id', contentId);
   }
 
   @override
@@ -665,9 +699,46 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     required String contentId,
     required String examId,
   }) async {
-    await _safeClient.from('content').update({
-      'associated_exam_id': examId,
-      'updated_at': DateTime.now().toUtc().toIso8601String(),
-    }).eq('id', contentId);
+    await _safeClient
+        .from('content')
+        .update({
+          'associated_exam_id': examId,
+          'updated_at': DateTime.now().toUtc().toIso8601String(),
+        })
+        .eq('id', contentId);
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getGroupCourseProgress({
+    required String groupId,
+    String? studentId,
+  }) async {
+    final response = await _safeClient.rpc<List<dynamic>>(
+      'get_group_course_progress',
+      params: {
+        'p_group_id': groupId,
+        if (studentId != null) 'p_student_id': studentId,
+      },
+    );
+
+    return response.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+  }
+
+  @override
+  Future<void> manualUnlockLesson({
+    required String studentId,
+    required String groupId,
+    required String contentId,
+    String? reason,
+  }) async {
+    await _safeClient.rpc<void>(
+      'manual_unlock_lesson',
+      params: {
+        'p_student_id': studentId,
+        'p_group_id': groupId,
+        'p_content_id': contentId,
+        if (reason != null && reason.isNotEmpty) 'p_reason': reason,
+      },
+    );
   }
 }

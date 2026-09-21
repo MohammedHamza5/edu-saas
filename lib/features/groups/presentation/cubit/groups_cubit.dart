@@ -260,4 +260,45 @@ class GroupsCubit extends Cubit<GroupsState> {
       },
     );
   }
+
+  Future<bool> updateGroupSettings({
+    required String groupId,
+    required bool enforceSequentialLearning,
+    required int defaultPassingScore,
+  }) async {
+    final result = await _repository.updateGroup(
+      id: groupId,
+      enforceSequentialLearning: enforceSequentialLearning,
+      defaultPassingScore: defaultPassingScore,
+    );
+
+    if (isClosed) return false;
+
+    return result.when(
+      onSuccess: (updated) {
+        AppCache.groups.invalidate(_cacheKeyGroups);
+        if (state is GroupsLoaded) {
+          final current = state as GroupsLoaded;
+          if (!isClosed) {
+            final idx = current.groups.indexWhere((g) => g.id == updated.id);
+            if (idx != -1) {
+              final newGroups = List<GroupEntity>.from(current.groups);
+              newGroups[idx] = updated;
+              AppCache.groups.put(_cacheKeyGroups, newGroups);
+              emit(current.copyWith(
+                groups: newGroups,
+                selectedGroup:
+                    current.selectedGroup?.id == updated.id ? updated : null,
+              ));
+            }
+          }
+        }
+        return true;
+      },
+      onFailure: (failure) {
+        if (!isClosed) emit(GroupsError(failure.message));
+        return false;
+      },
+    );
+  }
 }

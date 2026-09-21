@@ -73,8 +73,10 @@ class VideosRepositoryImpl implements VideosRepository {
     required String studentId,
     required int progressSeconds,
     required int durationSeconds,
+    int furthestPositionSeconds = 0,
     int actualWatchSeconds = 0,
     bool isSkipped = false,
+    List<int>? newSegment,
   }) async {
     try {
       final progress = await _remoteDataSource.updateVideoProgress(
@@ -82,8 +84,10 @@ class VideosRepositoryImpl implements VideosRepository {
         studentId: studentId,
         progressSeconds: progressSeconds,
         durationSeconds: durationSeconds,
+        furthestPositionSeconds: furthestPositionSeconds,
         actualWatchSeconds: actualWatchSeconds,
         isSkipped: isSkipped,
+        newSegment: newSegment,
       );
       return Result.success(progress);
     } on ServerException catch (e) {
@@ -176,6 +180,24 @@ class VideosRepositoryImpl implements VideosRepository {
         title: title,
       );
       return Result.success(video);
+    } on ServerException catch (e) {
+      return Result.failure(ServerFailure(e.message, code: e.code));
+    } catch (e) {
+      return Result.failure(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<Map<String, dynamic>?>> getLessonContext({
+    required String contentId,
+    required String groupId,
+  }) async {
+    try {
+      final ctx = await _remoteDataSource.getLessonContext(
+        contentId: contentId,
+        groupId: groupId,
+      );
+      return Result.success(ctx);
     } on ServerException catch (e) {
       return Result.failure(ServerFailure(e.message, code: e.code));
     } catch (e) {

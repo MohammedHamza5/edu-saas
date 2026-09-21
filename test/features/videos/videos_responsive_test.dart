@@ -69,13 +69,27 @@ class _FakeVideosRepository implements VideosRepository {
   }
 
   @override
+  Future<Result<Map<String, dynamic>?>> getLessonContext({
+    required String contentId,
+    required String groupId,
+  }) async {
+    return const Success({
+      'video_id': 'vid-123',
+      'exam_id': null,
+      'exam_passing_score': 60,
+    });
+  }
+
+  @override
   Future<Result<VideoProgressEntity>> updateVideoProgress({
     required String videoId,
     required String studentId,
     required int progressSeconds,
     required int durationSeconds,
+    int furthestPositionSeconds = 0,
     int actualWatchSeconds = 0,
     bool isSkipped = false,
+    List<int>? newSegment,
   }) async {
     return Success(progress);
   }

@@ -18,14 +18,15 @@ abstract interface class VideosRepository {
     required String studentId,
   });
 
-  /// Updates or records student watch progress (Throttled UPSERT).
   Future<Result<VideoProgressEntity>> updateVideoProgress({
     required String videoId,
     required String studentId,
     required int progressSeconds,
     required int durationSeconds,
+    int furthestPositionSeconds = 0,
     int actualWatchSeconds = 0,
     bool isSkipped = false,
+    List<int>? newSegment,
   });
 
   /// Direct Upload for Teachers: creates Bunny video object and uploads binary data.
@@ -56,5 +57,11 @@ abstract interface class VideosRepository {
     required String contentId,
     required String youtubeUrl,
     String? title,
+  });
+
+  /// جلب بيانات الدرس الخاصة بمجموعة محددة (PDF، Exam، PassingScore)
+  Future<Result<Map<String, dynamic>?>> getLessonContext({
+    required String contentId,
+    required String groupId,
   });
 }

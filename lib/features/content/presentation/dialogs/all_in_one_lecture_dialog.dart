@@ -825,6 +825,15 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
                 ],
               ),
             ),
+            const SizedBox(height: AppSpacing.s8),
+            Text(
+              context.l10n.lessonQuizSequentialRequirement,
+              style: const TextStyle(
+                fontSize: 11,
+                color: AppColors.textSecondary,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
             const SizedBox(height: AppSpacing.s14),
 
             // Passing score percentage

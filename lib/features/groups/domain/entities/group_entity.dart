@@ -11,6 +11,8 @@ class GroupEntity extends Equatable {
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final int membersCount;
+  final bool enforceSequentialLearning;
+  final int defaultPassingScore;
 
   const GroupEntity({
     required this.id,
@@ -23,6 +25,8 @@ class GroupEntity extends Equatable {
     this.createdAt,
     this.updatedAt,
     this.membersCount = 0,
+    this.enforceSequentialLearning = true,
+    this.defaultPassingScore = 60,
   });
 
   bool get isPreviousContentAllowed => previousContentAccess == 'allow';
@@ -39,6 +43,8 @@ class GroupEntity extends Equatable {
     DateTime? createdAt,
     DateTime? updatedAt,
     int? membersCount,
+    bool? enforceSequentialLearning,
+    int? defaultPassingScore,
   }) {
     return GroupEntity(
       id: id ?? this.id,
@@ -52,6 +58,8 @@ class GroupEntity extends Equatable {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       membersCount: membersCount ?? this.membersCount,
+      enforceSequentialLearning: enforceSequentialLearning ?? this.enforceSequentialLearning,
+      defaultPassingScore: defaultPassingScore ?? this.defaultPassingScore,
     );
   }
 
@@ -67,5 +75,7 @@ class GroupEntity extends Equatable {
     createdAt,
     updatedAt,
     membersCount,
+    enforceSequentialLearning,
+    defaultPassingScore,
   ];
 }

@@ -19,6 +19,8 @@ abstract interface class GroupsRepository {
     String? description,
     String? previousContentAccess,
     String? status,
+    bool? enforceSequentialLearning,
+    int? defaultPassingScore,
   });
 
   Future<Result<List<GroupMemberEntity>>> getGroupMembers(String groupId);

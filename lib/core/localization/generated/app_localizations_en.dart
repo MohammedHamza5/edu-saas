@@ -4626,8 +4626,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moveDownAction => 'Move Down';
 
   @override
-  String get quizGateNotice =>
-      '🔒 Quiz locked: Complete watching the lecture first';
+  String get quizGateNotice => 'Must pass previous exam';
 
   @override
   String get quizUnlockedReady => '🟢 Quiz ready: Start now';
@@ -4820,4 +4819,59 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get distributeToGroupsAction => 'Distribute to Groups';
+
+  @override
+  String get courseProgressTitle => 'Course Progress';
+
+  @override
+  String get noContentYet => 'No content yet';
+
+  @override
+  String get manualUnlockAction => 'Manual Unlock';
+
+  @override
+  String get manualUnlockTitle => 'Manual Unlock';
+
+  @override
+  String get manualUnlockWarningText1 => 'You are about to unlock the lesson ';
+
+  @override
+  String get manualUnlockWarningText2 => ' for the student ';
+
+  @override
+  String get manualUnlockWarningText3 =>
+      ' as an exception without requiring the previous exam. This action will be recorded.';
+
+  @override
+  String get manualUnlockReasonLabel => 'Reason (Optional)';
+
+  @override
+  String get manualUnlockReasonHint =>
+      'Example: Student passed the exam on paper';
+
+  @override
+  String get manualUnlockConfirm => 'Confirm Unlock';
+
+  @override
+  String get courseSettingsTitle => 'Course Settings';
+
+  @override
+  String get enforceSequentialLearning => 'Enforce Sequential Learning';
+
+  @override
+  String get enforceSequentialLearningDesc =>
+      'Students must pass quizzes to unlock next lessons';
+
+  @override
+  String get defaultPassingScore => 'Default Passing Score (%)';
+
+  @override
+  String get passingScoreOverride => 'Passing Score Override (%)';
+
+  @override
+  String get passingScoreDefaultHint => 'Course Default';
+
+  @override
+  String get lessonQuizSequentialRequirement =>
+      'This Lesson Quiz will be required for students to unlock the next lesson (if Sequential Learning is enabled).';
 }

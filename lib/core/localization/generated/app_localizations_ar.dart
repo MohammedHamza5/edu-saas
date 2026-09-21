@@ -4594,8 +4594,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get moveDownAction => 'تحريك لأسفل';
 
   @override
-  String get quizGateNotice =>
-      '🔒 الكويز مقفول: يجب إنهاء مشاهدة المحاضرة أولاً';
+  String get quizGateNotice => 'يجب اجتياز الاختبار السابق';
 
   @override
   String get quizUnlockedReady => '🟢 الكويز متاح: ابدأ الاختبار الآن';
@@ -4788,4 +4787,58 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get distributeToGroupsAction => 'توزيع على المجموعات';
+
+  @override
+  String get courseProgressTitle => 'تقدم الدورة';
+
+  @override
+  String get noContentYet => 'لا يوجد محتوى بعد';
+
+  @override
+  String get manualUnlockAction => 'فتح يدوي';
+
+  @override
+  String get manualUnlockTitle => 'فتح قفل الدرس يدوياً';
+
+  @override
+  String get manualUnlockWarningText1 => 'أنت على وشك فتح الدرس ';
+
+  @override
+  String get manualUnlockWarningText2 => ' للطالب ';
+
+  @override
+  String get manualUnlockWarningText3 =>
+      ' استثناءً دون الحاجة لاجتياز الاختبار السابق. سيتم تسجيل هذا الإجراء.';
+
+  @override
+  String get manualUnlockReasonLabel => 'السبب (اختياري)';
+
+  @override
+  String get manualUnlockReasonHint => 'مثال: أتم الطالب الاختبار ورقياً';
+
+  @override
+  String get manualUnlockConfirm => 'تأكيد الفتح';
+
+  @override
+  String get courseSettingsTitle => 'إعدادات الدورة';
+
+  @override
+  String get enforceSequentialLearning => 'فرض التعلم المتسلسل';
+
+  @override
+  String get enforceSequentialLearningDesc =>
+      'يجب على الطلاب اجتياز الاختبارات لفتح الدروس التالية';
+
+  @override
+  String get defaultPassingScore => 'درجة النجاح الافتراضية (%)';
+
+  @override
+  String get passingScoreOverride => 'درجة نجاح مخصصة (%)';
+
+  @override
+  String get passingScoreDefaultHint => 'الافتراضي للدورة';
+
+  @override
+  String get lessonQuizSequentialRequirement =>
+      'هذا الاختبار سيكون شرطاً للطلاب لفتح الدرس التالي (إذا كان التعلم المتسلسل مفعلاً).';
 }

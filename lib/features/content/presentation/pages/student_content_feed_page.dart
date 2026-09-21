@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -12,10 +13,13 @@ import '../../../../core/widgets/app_error_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/responsive_container.dart';
-import '../../../groups/domain/entities/group_entity.dart';
+import 'package:edu_saas/features/groups/domain/entities/group_entity.dart';
 import '../../domain/entities/content_entity.dart';
-import '../cubit/content_cubit.dart';
-import '../cubit/content_state.dart';
+import '../../domain/entities/file_attachment_entity.dart';
+import '../../domain/entities/lesson_assignment_entity.dart';
+import '../../domain/repositories/content_repository.dart';
+import '../cubit/course_progress_cubit.dart';
+import '../cubit/course_progress_state.dart';
 import '../widgets/material_viewer_sheet.dart';
 import '../widgets/student_lesson_tile.dart';
 import '../widgets/student_mission_command_deck.dart';
@@ -51,9 +55,9 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
     _activeGroupId = widget.groupId;
     _activeGroupName = widget.groupName;
     _fetchStudentGroups();
-    context.read<ContentCubit>().loadGroupContent(
+    context.read<CourseProgressCubit>().loadCourseProgress(
           _activeGroupId,
-          isStudent: true,
+          studentId: InjectionContainer.supabaseClient.auth.currentUser?.id,
         );
     _scrollController.addListener(_onScroll);
   }
@@ -86,18 +90,13 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
   }
 
   void _onScroll() {
-    if (_scrollController.hasClients &&
-        _scrollController.position.pixels >=
-            _scrollController.position.maxScrollExtent - 200) {
-      context.read<ContentCubit>().loadMoreContent();
-    }
+    // Pagination is not needed for the course progress as it returns the whole sequence
   }
 
-  Future<void> _handleContentTap(ContentEntity item) async {
+  Future<void> _handleContentTap(LessonAssignmentEntity item) async {
     if (item.isLocked) {
-      final examTitle =
-          item.prerequisiteExamTitle ?? context.l10n.prerequisiteExamBadge;
-      final passScore = item.prerequisitePassingScore ?? 60;
+      final examTitle = context.l10n.prerequisiteExamBadge;
+      const passScore = 60;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: AppColors.error,
@@ -116,11 +115,11 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
 
     switch (item.type) {
       case ContentType.video:
-        final encodedTitle = item.associatedExamTitle != null 
-            ? Uri.encodeComponent(item.associatedExamTitle!) 
+        final encodedTitle = item.lessonExamTitle != null 
+            ? Uri.encodeComponent(item.lessonExamTitle!) 
             : '';
         await context.push(
-          '${AppRoutes.videoPlayer}?id=${item.id}&associatedExamId=${item.associatedExamId ?? ''}&associatedExamTitle=$encodedTitle',
+          '${AppRoutes.videoPlayer}?id=${item.contentId}&associatedExamId=${item.lessonExamId ?? ''}&associatedExamTitle=$encodedTitle',
         );
         break;
       case ContentType.assignment:
@@ -133,11 +132,40 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
       case ContentType.image:
         await MaterialViewerSheet.show(
           context,
-          content: item,
+          content: ContentEntity(
+            id: item.contentId,
+            tenantId: '',
+            groupId: item.groupId,
+            title: item.title,
+            type: item.type,
+            status: ContentStatus.published,
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+            file: item.pdfFileId != null
+                ? FileAttachmentEntity(
+                    id: item.pdfFileId!,
+                    tenantId: '',
+                    contentId: item.contentId,
+                    fileName: item.pdfFileName ?? '',
+                    storagePath: item.pdfStoragePath ?? '',
+                    mimeType: '',
+                    fileSize: 0,
+                    createdAt: DateTime.now(),
+                  )
+                : null,
+          ),
           onGetSignedUrl: (storagePath) =>
-              context.read<ContentCubit>().getSignedUrl(storagePath),
+              context.read<ContentRepository>().getSignedFileUrl(storagePath: storagePath).then((value) => value.dataOrNull ?? ''),
         );
         break;
+    }
+
+    // Refresh course progress when returning from any content view (Phase E)
+    if (mounted) {
+      unawaited(context.read<CourseProgressCubit>().loadCourseProgress(
+        _activeGroupId,
+        studentId: InjectionContainer.supabaseClient.auth.currentUser?.id,
+      ));
     }
   }
 
@@ -178,17 +206,16 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
             tooltip: context.l10n.refreshContent,
-            onPressed: () => context.read<ContentCubit>().loadGroupContent(
+            onPressed: () => context.read<CourseProgressCubit>().loadCourseProgress(
                   _activeGroupId,
-                  isStudent: true,
-                  forceRefresh: true,
+                  studentId: InjectionContainer.supabaseClient.auth.currentUser?.id,
                 ),
           ),
         ],
       ),
-      body: BlocConsumer<ContentCubit, ContentState>(
+      body: BlocConsumer<CourseProgressCubit, CourseProgressState>(
         listener: (context, state) {
-          if (state is ContentError) {
+          if (state is CourseProgressError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
@@ -198,38 +225,35 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
           }
         },
         builder: (context, state) {
-          if (state is ContentLoading) {
+          if (state is CourseProgressLoading) {
             return const AppLoadingView.cardsGrid(count: 4, columns: 2);
           }
 
-          if (state is ContentError) {
+          if (state is CourseProgressError) {
             return AppErrorView(
               message: state.message,
-              onRetry: () => context.read<ContentCubit>().loadGroupContent(
+              onRetry: () => context.read<CourseProgressCubit>().loadCourseProgress(
                     _activeGroupId,
-                    isStudent: true,
-                    forceRefresh: true,
+                    studentId: InjectionContainer.supabaseClient.auth.currentUser?.id,
                   ),
             );
           }
 
-          if (state is ContentLoaded) {
-            final allPublished = state.items
-                .where((i) => i.status == ContentStatus.published)
-                .toList();
+          if (state is CourseProgressLoaded) {
+            final allPublished = state.lessons;
 
-            final completedCount = allPublished.where((i) => i.isCompleted).length;
+            final completedCount = allPublished.where((i) => i.isEffectivelyCompleted).length;
             final totalPublishedCount = allPublished.length;
             final overallProgressPct = totalPublishedCount > 0
                 ? ((completedCount / totalPublishedCount) * 100).toInt()
                 : 0;
 
             // Find immediate next mission/lesson
-            ContentEntity? nextLesson;
+            LessonAssignmentEntity? nextLesson;
             int? nextLessonIndex;
             for (int i = 0; i < allPublished.length; i++) {
               final it = allPublished[i];
-              if (!it.isCompleted && !it.isLocked) {
+              if (!it.isEffectivelyCompleted && !it.isLocked) {
                 nextLesson = it;
                 nextLessonIndex = i + 1;
                 break;
@@ -238,7 +262,7 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
             if (nextLesson == null) {
               for (int i = 0; i < allPublished.length; i++) {
                 final it = allPublished[i];
-                if (!it.isCompleted) {
+                if (!it.isEffectivelyCompleted) {
                   nextLesson = it;
                   nextLessonIndex = i + 1;
                   break;
@@ -253,7 +277,6 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                     .where((i) => i.type == _selectedTypeFilter)
                     .toList();
 
-            // Filter by live search query
             if (_searchQuery.isNotEmpty) {
               items = items
                   .where((i) =>
@@ -262,8 +285,8 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                               ?.toLowerCase()
                               .contains(_searchQuery.toLowerCase()) ??
                           false) ||
-                      (i.file?.fileName
-                              .toLowerCase()
+                      (i.pdfFileName
+                              ?.toLowerCase()
                               .contains(_searchQuery.toLowerCase()) ??
                           false))
                   .toList();
@@ -277,10 +300,9 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                 ),
                 child: RefreshIndicator(
                   onRefresh: () async =>
-                      context.read<ContentCubit>().loadGroupContent(
+                      context.read<CourseProgressCubit>().loadCourseProgress(
                             _activeGroupId,
-                            isStudent: true,
-                            forceRefresh: true,
+                            studentId: InjectionContainer.supabaseClient.auth.currentUser?.id,
                           ),
                   child: CustomScrollView(
                     controller: _scrollController,
@@ -331,10 +353,10 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                                             _searchQuery = '';
                                           });
                                           context
-                                              .read<ContentCubit>()
-                                              .loadGroupContent(
+                                              .read<CourseProgressCubit>()
+                                              .loadCourseProgress(
                                                 g.id,
-                                                isStudent: true,
+                                                studentId: InjectionContainer.supabaseClient.auth.currentUser?.id,
                                               );
                                         }
                                       },
@@ -550,39 +572,51 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                             itemBuilder: (context, index) {
                               final item = items[index];
                               return StudentLessonTile(
-                                content: item,
+                                content: item.toContentEntity(),
                                 index: index + 1,
                                 isLast: index == items.length - 1,
                                 isRoadmapMode: _isRoadmapMode &&
                                     _selectedTypeFilter == null &&
                                     _searchQuery.isEmpty,
                                 onTap: () => _handleContentTap(item),
-                                onOpenHandout: item.file != null
-                                    ? () => MaterialViewerSheet.show(
+                                onOpenHandout: item.pdfFileId != null
+                                    ? () async {
+                                        await MaterialViewerSheet.show(
                                           context,
-                                          content: item,
+                                          content: ContentEntity(
+                                            id: item.contentId,
+                                            tenantId: '',
+                                            groupId: item.groupId,
+                                            title: item.title,
+                                            type: item.type,
+                                            status: ContentStatus.published,
+                                            createdAt: DateTime.now(),
+                                            updatedAt: DateTime.now(),
+                                            file: FileAttachmentEntity(
+                                              id: item.pdfFileId!,
+                                              tenantId: '',
+                                              contentId: item.contentId,
+                                              fileName: item.pdfFileName ?? '',
+                                              storagePath: item.pdfStoragePath ?? '',
+                                              mimeType: '',
+                                              fileSize: 0,
+                                              createdAt: DateTime.now(),
+                                            ),
+                                          ),
                                           onGetSignedUrl: (storagePath) =>
-                                              context
-                                                  .read<ContentCubit>()
-                                                  .getSignedUrl(storagePath),
-                                        )
+                                              context.read<ContentRepository>().getSignedFileUrl(storagePath: storagePath).then((value) => value.dataOrNull ?? ''),
+                                        );
+                                      }
                                     : null,
-                                onTakeQuiz: item.associatedExamId != null
-                                    ? () => context.push(AppRoutes.studentExams)
+                                onTakeQuiz: item.hasLessonExam
+                                    ? () {
+                                        context.push(
+                                          '${AppRoutes.studentExams}?examId=${item.lessonExamId}',
+                                        );
+                                      }
                                     : null,
                               );
                             },
-                          ),
-                        ),
-                      if (state.isLoadingMore)
-                        const SliverToBoxAdapter(
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(
-                              vertical: AppSpacing.s16,
-                            ),
-                            child: Center(
-                              child: AppLoadingView.compact(size: 24),
-                            ),
                           ),
                         ),
                     ],

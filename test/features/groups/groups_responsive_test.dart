@@ -101,10 +101,12 @@ class _FakeGroupsRepository implements GroupsRepository {
   Future<Result<GroupEntity>> updateGroup({
     required String id,
     String? name,
-    String? level,
     String? description,
-    String? previousContentAccess,
     String? status,
+    String? level,
+    String? previousContentAccess,
+    bool? enforceSequentialLearning,
+    int? defaultPassingScore,
   }) async {
     final idx = groups.indexWhere((g) => g.id == id);
     if (idx == -1) return Success(groups.first);

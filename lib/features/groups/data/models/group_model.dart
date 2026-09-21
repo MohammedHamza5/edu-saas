@@ -12,6 +12,8 @@ class GroupModel extends GroupEntity {
     super.createdAt,
     super.updatedAt,
     super.membersCount = 0,
+    super.enforceSequentialLearning = true,
+    super.defaultPassingScore = 60,
   });
 
   factory GroupModel.fromJson(Map<String, dynamic> json) {
@@ -45,6 +47,9 @@ class GroupModel extends GroupEntity {
           ? DateTime.tryParse(json['updated_at'] as String)
           : null,
       membersCount: count,
+      enforceSequentialLearning:
+          json['enforce_sequential_learning'] as bool? ?? true,
+      defaultPassingScore: json['default_passing_score'] as int? ?? 60,
     );
   }
 
@@ -55,6 +60,8 @@ class GroupModel extends GroupEntity {
       'description': description,
       'previous_content_access': previousContentAccess,
       'status': status,
+      'enforce_sequential_learning': enforceSequentialLearning,
+      'default_passing_score': defaultPassingScore,
     };
   }
 }

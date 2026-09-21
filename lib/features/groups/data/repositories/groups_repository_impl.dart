@@ -54,6 +54,8 @@ class GroupsRepositoryImpl implements GroupsRepository {
     String? description,
     String? previousContentAccess,
     String? status,
+    bool? enforceSequentialLearning,
+    int? defaultPassingScore,
   }) async {
     try {
       final group = await _remoteDataSource.updateGroup(
@@ -63,6 +65,8 @@ class GroupsRepositoryImpl implements GroupsRepository {
         description: description,
         previousContentAccess: previousContentAccess,
         status: status,
+        enforceSequentialLearning: enforceSequentialLearning,
+        defaultPassingScore: defaultPassingScore,
       );
       return Success(group);
     } on PostgrestException catch (e) {

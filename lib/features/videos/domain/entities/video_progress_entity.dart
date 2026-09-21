@@ -11,6 +11,12 @@ class VideoProgressEntity extends Equatable {
   final int actualWatchSeconds;
   final bool isSkipped;
   final DateTime lastWatchedAt;
+  /// أبعد نقطة وصل إليها الطالب (للعودة أو تتبع الاستئناف)
+  final int furthestPositionSeconds;
+  /// النسب المئوية للمشاهدة الفعلية المحسوبة بناء على فترات المشاهدة
+  final double watchedCoveragePercentage;
+  /// فترات المشاهدة [start, end]
+  final List<List<int>> watchedSegments;
 
   const VideoProgressEntity({
     this.id,
@@ -23,6 +29,9 @@ class VideoProgressEntity extends Equatable {
     this.actualWatchSeconds = 0,
     this.isSkipped = false,
     required this.lastWatchedAt,
+    this.furthestPositionSeconds = 0,
+    this.watchedCoveragePercentage = 0.0,
+    this.watchedSegments = const [],
   });
 
   /// Factory for a fresh zero-progress state
@@ -40,8 +49,14 @@ class VideoProgressEntity extends Equatable {
       actualWatchSeconds: 0,
       isSkipped: false,
       lastWatchedAt: DateTime.now(),
+      furthestPositionSeconds: 0,
+      watchedCoveragePercentage: 0.0,
+      watchedSegments: const [],
     );
   }
+
+  /// هل أكمل الطالب 90% من الفيديو فعلياً؟ (يعتمد الآن على completed التي يحسبها السيرفر أو watchedCoveragePercentage)
+  bool get hasWatched90Percent => completed || watchedCoveragePercentage >= 90.0;
 
   VideoProgressEntity copyWith({
     String? id,
@@ -54,6 +69,9 @@ class VideoProgressEntity extends Equatable {
     int? actualWatchSeconds,
     bool? isSkipped,
     DateTime? lastWatchedAt,
+    int? furthestPositionSeconds,
+    double? watchedCoveragePercentage,
+    List<List<int>>? watchedSegments,
   }) {
     return VideoProgressEntity(
       id: id ?? this.id,
@@ -66,6 +84,9 @@ class VideoProgressEntity extends Equatable {
       actualWatchSeconds: actualWatchSeconds ?? this.actualWatchSeconds,
       isSkipped: isSkipped ?? this.isSkipped,
       lastWatchedAt: lastWatchedAt ?? this.lastWatchedAt,
+      furthestPositionSeconds: furthestPositionSeconds ?? this.furthestPositionSeconds,
+      watchedCoveragePercentage: watchedCoveragePercentage ?? this.watchedCoveragePercentage,
+      watchedSegments: watchedSegments ?? this.watchedSegments,
     );
   }
 
@@ -81,5 +102,8 @@ class VideoProgressEntity extends Equatable {
         actualWatchSeconds,
         isSkipped,
         lastWatchedAt,
+        furthestPositionSeconds,
+        watchedCoveragePercentage,
+        watchedSegments,
       ];
 }

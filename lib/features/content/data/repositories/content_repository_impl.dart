@@ -1,6 +1,7 @@
 import '../../../../core/errors/failures.dart';
 import '../../../../core/errors/result.dart';
 import '../../domain/entities/content_entity.dart';
+import '../../domain/entities/lesson_assignment_entity.dart';
 import '../../domain/repositories/content_repository.dart';
 import '../datasources/content_remote_datasource.dart';
 
@@ -228,7 +229,49 @@ class ContentRepositoryImpl implements ContentRepository {
       return const Success(null);
     } catch (e) {
       return FailureResult(
-        ServerFailure('فشل في ربط اختبار الحصة: ${e.toString()}'),
+        ServerFailure('فشل في ربط الاختبار بالدرس: ${e.toString()}'),
+      );
+    }
+  }
+
+  @override
+  Future<Result<List<LessonAssignmentEntity>>> getGroupCourseProgress({
+    required String groupId,
+    String? studentId,
+  }) async {
+    try {
+      final data = await _remoteDataSource.getGroupCourseProgress(
+        groupId: groupId,
+        studentId: studentId,
+      );
+      
+      final lessons = data.map((Map<String, dynamic> e) => LessonAssignmentEntity.fromJson(e)).toList();
+      return Success(lessons);
+    } catch (e) {
+      return FailureResult(
+        ServerFailure('فشل في جلب تقدم الدورة: ${e.toString()}'),
+      );
+    }
+  }
+
+  @override
+  Future<Result<void>> manualUnlockLesson({
+    required String studentId,
+    required String groupId,
+    required String contentId,
+    String? reason,
+  }) async {
+    try {
+      await _remoteDataSource.manualUnlockLesson(
+        studentId: studentId,
+        groupId: groupId,
+        contentId: contentId,
+        reason: reason,
+      );
+      return const Success(null);
+    } catch (e) {
+      return FailureResult(
+        ServerFailure('فشل في إلغاء قفل الدرس: ${e.toString()}'),
       );
     }
   }

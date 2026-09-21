@@ -89,9 +89,11 @@ class VideosCubit extends Cubit<VideosState> {
     required String studentId,
     required int progressSeconds,
     required int durationSeconds,
+    int furthestPositionSeconds = 0,
     int actualWatchSeconds = 0,
     bool isSkipped = false,
     bool force = false,
+    List<int>? newSegment,
   }) async {
     if (durationSeconds <= 0) return;
 
@@ -118,8 +120,10 @@ class VideosCubit extends Cubit<VideosState> {
       studentId: studentId,
       progressSeconds: progressSeconds,
       durationSeconds: durationSeconds,
+      furthestPositionSeconds: furthestPositionSeconds,
       actualWatchSeconds: actualWatchSeconds,
       isSkipped: isSkipped,
+      newSegment: newSegment,
     );
 
     result.when(

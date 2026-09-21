@@ -28,8 +28,10 @@ abstract interface class VideosRemoteDataSource {
     required String studentId,
     required int progressSeconds,
     required int durationSeconds,
+    int furthestPositionSeconds = 0,
     int actualWatchSeconds = 0,
     bool isSkipped = false,
+    List<int>? newSegment,
   });
 
   Future<VideoModel> createAndUploadVideo({
@@ -58,6 +60,12 @@ abstract interface class VideosRemoteDataSource {
     required String contentId,
     required String fileName,
     required List<int> fileBytes,
+  });
+
+  /// جلب بيانات الدرس الخاصة بمجموعة محددة (PDF، Exam، PassingScore)
+  Future<Map<String, dynamic>?> getLessonContext({
+    required String contentId,
+    required String groupId,
   });
 }
 
@@ -257,91 +265,67 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
     required String studentId,
     required int progressSeconds,
     required int durationSeconds,
+    int furthestPositionSeconds = 0,
     int actualWatchSeconds = 0,
     bool isSkipped = false,
+    List<int>? newSegment,
   }) async {
     try {
       final actualVideoId = await _resolveVideoId(videoId);
 
-      final double percentage = durationSeconds > 0
-          ? ((progressSeconds / durationSeconds) * 100).clamp(0.0, 100.0)
-          : 0.0;
-
-      // Query existing progress to prevent overwriting higher percentage or completion
-      int existingActualWatch = 0;
-      double existingPercentage = 0.0;
-      bool existingCompleted = false;
-      int existingProgressSecs = 0;
-
-      try {
-        final existing = await _c
-            .from('video_progress')
-            .select('percentage, completed, actual_watch_seconds, progress_seconds')
-            .eq('video_id', actualVideoId)
-            .eq('student_id', studentId)
-            .maybeSingle();
-
-        if (existing != null) {
-          existingPercentage = (existing['percentage'] as num?)?.toDouble() ?? 0.0;
-          existingCompleted = existing['completed'] as bool? ?? false;
-          existingActualWatch = (existing['actual_watch_seconds'] as num?)?.toInt() ?? 0;
-          existingProgressSecs = (existing['progress_seconds'] as num?)?.toInt() ?? 0;
-        }
-      } catch (_) {}
-
-      final totalAccumulatedWatch = existingActualWatch + actualWatchSeconds;
-      final maxPercentage = percentage > existingPercentage ? percentage : existingPercentage;
-      final bool completed = existingCompleted || (maxPercentage >= 80.0 && !isSkipped);
-      final int effectiveProgressSeconds = progressSeconds > existingProgressSecs
-          ? progressSeconds
-          : (progressSeconds > 0 ? progressSeconds : existingProgressSecs);
-
-      // Get user tenant with multiple fail-safes
-      String? userTenant = _c.auth.currentUser?.userMetadata?['tenant_id'] as String?;
-      if (userTenant == null || userTenant.isEmpty) {
-        try {
-          final userRow = await _c.from('users').select('tenant_id').eq('id', studentId).maybeSingle();
-          userTenant = userRow?['tenant_id'] as String?;
-        } catch (_) {}
-      }
-      if (userTenant == null || userTenant.isEmpty) {
-        try {
-          final vidRow = await _c.from('videos').select('content(tenant_id)').eq('id', actualVideoId).maybeSingle();
-          final contentMap = vidRow?['content'] as Map<String, dynamic>?;
-          userTenant = contentMap?['tenant_id'] as String?;
-        } catch (_) {}
-      }
-      if (userTenant == null || userTenant.isEmpty) {
-        try {
-          final tenantRow = await _c.from('tenants').select('id').limit(1).maybeSingle();
-          userTenant = tenantRow?['id'] as String?;
-        } catch (_) {}
-      }
-
-      final payload = {
-        'tenant_id': userTenant ?? '11111111-1111-1111-1111-111111111111',
-        'video_id': actualVideoId,
-        'student_id': studentId,
-        'progress_seconds': effectiveProgressSeconds,
-        'duration_seconds': durationSeconds,
-        'percentage': double.parse(maxPercentage.toStringAsFixed(2)),
-        'completed': completed,
-        'actual_watch_seconds': totalAccumulatedWatch,
-        'is_skipped': isSkipped,
-        'last_watched_at': DateTime.now().toIso8601String(),
+      final rpcParams = {
+        'p_video_id': actualVideoId,
+        'p_duration_seconds': durationSeconds,
+        'p_resume_position_seconds': progressSeconds,
+        'p_new_segments': newSegment != null ? <List<int>>[newSegment] : <List<int>>[],
+        'p_actual_watch_seconds_added': actualWatchSeconds,
+        'p_is_skipped': isSkipped,
       };
 
-      final data = await _c
-          .from('video_progress')
-          .upsert(payload, onConflict: 'video_id,student_id')
-          .select()
-          .single();
+      final data = await _c.rpc<dynamic>('update_video_progress_v2', params: rpcParams);
 
-      return VideoProgressModel.fromJson(data);
+      if (data is Map<String, dynamic> && data['status'] == 'ok') {
+        // Since the RPC doesn't return the full model, we need to return a merged local state
+        // or just fetch it back if needed. The app usually just merges the response.
+        // Or we can return a model with just the fields we got.
+        return VideoProgressModel(
+          id: '',
+          videoId: actualVideoId,
+          studentId: studentId,
+          progressSeconds: (data['progress_seconds'] as num?)?.toInt() ?? progressSeconds,
+          durationSeconds: durationSeconds,
+          percentage: (data['watched_coverage_percentage'] as num?)?.toDouble() ?? 0.0,
+          completed: data['completed'] as bool? ?? false,
+          actualWatchSeconds: (data['actual_watch_seconds'] as num?)?.toInt() ?? 0,
+          isSkipped: isSkipped,
+          furthestPositionSeconds: (data['furthest_position_seconds'] as num?)?.toInt() ?? 0,
+          lastWatchedAt: DateTime.now(),
+        );
+      } else {
+        throw const ServerException('Failed to update progress');
+      }
     } on PostgrestException catch (e) {
       throw ServerException(e.message, code: e.code);
     } catch (e) {
       throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>?> getLessonContext({
+    required String contentId,
+    required String groupId,
+  }) async {
+    try {
+      final result = await _c.rpc<dynamic>(
+        'get_lesson_context',
+        params: {'p_content_id': contentId, 'p_group_id': groupId},
+      );
+      if (result is Map<String, dynamic>) return result;
+      return null;
+    } catch (e) {
+      // إذا لم يوجد context (الدرس لا ينتمي للمجموعة) — fallback آمن
+      return null;
     }
   }
 

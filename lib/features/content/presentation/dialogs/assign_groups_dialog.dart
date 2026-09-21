@@ -28,6 +28,7 @@ class _GroupCustomizationState {
   String? prerequisiteExamId;
   String? prerequisiteExamTitle;
   int sortOrder;
+  int? passingScoreOverride;
 
   _GroupCustomizationState({
     required this.groupId,
@@ -39,6 +40,7 @@ class _GroupCustomizationState {
     this.prerequisiteExamId,
     this.prerequisiteExamTitle,
     this.sortOrder = 1,
+    this.passingScoreOverride,
   });
 }
 
@@ -101,7 +103,7 @@ class _AssignGroupsDialogState extends State<AssignGroupsDialog> {
       final cgRes = await client
           .from('content_groups')
           .select(
-            'group_id, file_id, associated_exam_id, prerequisite_exam_id, sort_order, '
+            'group_id, file_id, associated_exam_id, prerequisite_exam_id, sort_order, passing_score_override, '
             'file:files!content_groups_file_id_fkey(id, file_name), '
             'associated_exam:exams!content_groups_associated_exam_id_fkey(id, title), '
             'prerequisite_exam:exams!content_groups_prerequisite_exam_id_fkey(id, title)',
@@ -124,6 +126,7 @@ class _AssignGroupsDialogState extends State<AssignGroupsDialog> {
           prerequisiteExamTitle: pObj?['title'] as String?,
           isSequentialLockEnabled: row['prerequisite_exam_id'] != null,
           sortOrder: (row['sort_order'] as num?)?.toInt() ?? 1,
+          passingScoreOverride: (row['passing_score_override'] as num?)?.toInt(),
         );
       }
 
@@ -228,6 +231,7 @@ class _AssignGroupsDialogState extends State<AssignGroupsDialog> {
           'associated_exam_id': customState.selectedExamId,
           'prerequisite_exam_id': customState.isSequentialLockEnabled ? customState.prerequisiteExamId : null,
           'sort_order': customState.sortOrder,
+          'passing_score_override': customState.passingScoreOverride,
         });
       }
 
@@ -410,6 +414,9 @@ class _AssignGroupsDialogState extends State<AssignGroupsDialog> {
                                   onSortOrderChanged: (val) {
                                     customState.sortOrder = val;
                                   },
+                                  onPassingScoreOverrideChanged: (val) {
+                                    customState.passingScoreOverride = val;
+                                  },
                                 );
                               },
                             );
@@ -463,6 +470,7 @@ class _SmartGroupCard extends StatelessWidget {
   final ValueChanged<bool> onLockToggled;
   final void Function(String? id, String? title) onPrereqExamChanged;
   final ValueChanged<int> onSortOrderChanged;
+  final ValueChanged<int?> onPassingScoreOverrideChanged;
 
   const _SmartGroupCard({
     required this.group,
@@ -475,6 +483,7 @@ class _SmartGroupCard extends StatelessWidget {
     required this.onLockToggled,
     required this.onPrereqExamChanged,
     required this.onSortOrderChanged,
+    required this.onPassingScoreOverrideChanged,
   });
 
   @override
@@ -669,6 +678,39 @@ class _SmartGroupCard extends StatelessWidget {
                         child: Text(
                           l10n.lockUntilPreviousQuizPassed,
                           style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.s12),
+                  // 4. Passing Score Override
+                  Row(
+                    children: [
+                      const Icon(Icons.score_rounded, size: 16, color: Colors.amber),
+                      const SizedBox(width: 6),
+                      Text(
+                        l10n.passingScoreOverride,
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: TextFormField(
+                          initialValue: customState.passingScoreOverride?.toString() ?? '',
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                            filled: true,
+                            fillColor: AppColors.surface,
+                            hintText: l10n.passingScoreDefaultHint,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(color: AppColors.border),
+                            ),
+                          ),
+                          onChanged: (val) {
+                            final score = int.tryParse(val.trim());
+                            onPassingScoreOverrideChanged(score);
+                          },
                         ),
                       ),
                     ],

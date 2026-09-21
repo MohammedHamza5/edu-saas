@@ -6,10 +6,18 @@ import 'package:flutter/material.dart';
 import '../../../../core/services/student_activity_tracker.dart';
 
 @JS('createYouTubePlayer')
-external JSObject _createYouTubePlayer(JSString videoId, JSString viewId, JSString origin);
+external JSObject _createYouTubePlayer(
+  JSString videoId,
+  JSString viewId,
+  JSString origin,
+);
 
 @JS('youtubePostMessage')
-external void _youtubePostMessage(JSString viewId, JSString method, JSAny? value);
+external void _youtubePostMessage(
+  JSString viewId,
+  JSString method,
+  JSAny? value,
+);
 
 @JS('onYouTubePlayerMessage')
 external set _onYouTubePlayerMessage(JSFunction? callback);
@@ -18,10 +26,21 @@ Widget buildYouTubeEmbedPlayer({
   required String embedUrl,
   required int initialProgressSeconds,
   void Function(int currentSeconds, int totalSeconds)? onProgress,
-  void Function(int currentSeconds, int totalSeconds, int actualWatchSeconds, bool isSkipped)? onMetricsProgress,
+  void Function(
+    int currentSeconds,
+    int totalSeconds,
+    int actualWatchSeconds,
+    bool isSkipped,
+  )?
+  onMetricsProgress,
   VoidCallback? onCompleted,
   void Function(void Function(int seconds) seekTo)? onSeekReady,
-  void Function(VoidCallback play, VoidCallback pause, VoidCallback togglePlayPause)? onPlaybackControlsReady,
+  void Function(
+    VoidCallback play,
+    VoidCallback pause,
+    VoidCallback togglePlayPause,
+  )?
+  onPlaybackControlsReady,
   ValueChanged<bool>? onFullscreenChanged,
 }) {
   return _YouTubeEmbedPlayerWeb(
@@ -40,10 +59,21 @@ class _YouTubeEmbedPlayerWeb extends StatefulWidget {
   final String embedUrl;
   final int initialProgressSeconds;
   final void Function(int currentSeconds, int totalSeconds)? onProgress;
-  final void Function(int currentSeconds, int totalSeconds, int actualWatchSeconds, bool isSkipped)? onMetricsProgress;
+  final void Function(
+    int currentSeconds,
+    int totalSeconds,
+    int actualWatchSeconds,
+    bool isSkipped,
+  )?
+  onMetricsProgress;
   final VoidCallback? onCompleted;
   final void Function(void Function(int seconds) seekTo)? onSeekReady;
-  final void Function(VoidCallback play, VoidCallback pause, VoidCallback togglePlayPause)? onPlaybackControlsReady;
+  final void Function(
+    VoidCallback play,
+    VoidCallback pause,
+    VoidCallback togglePlayPause,
+  )?
+  onPlaybackControlsReady;
   final ValueChanged<bool>? onFullscreenChanged;
 
   const _YouTubeEmbedPlayerWeb({
@@ -66,11 +96,16 @@ class _YouTubeEmbedPlayerWebState extends State<_YouTubeEmbedPlayerWeb> {
   late final String _viewType;
   bool _isPlaying = false;
   int _actualWatchSeconds = 0;
-  int _lastRecordedPosition = 0;
-  bool _isSkipped = false;
+  final bool _isSkipped = false;
   Timer? _watchHeartbeatTimer;
   int _lastDuration = 0;
   bool _hasSeekedInitial = false;
+
+  /// أبعد نقطة وصل إليها الطالب فعلياً (forward-only — لا تتراجع عند seek backward)
+  int _furthestPositionSeconds = 0;
+
+  /// هل صدرت إشعار الإكمال (90%) بالفعل (لمنع التكرار)
+  bool _completionFired = false;
 
   @override
   void initState() {
@@ -78,7 +113,7 @@ class _YouTubeEmbedPlayerWebState extends State<_YouTubeEmbedPlayerWeb> {
     _viewId = 'yt_${DateTime.now().microsecondsSinceEpoch}';
     _viewType = 'youtube-player-view-$_viewId';
 
-    _lastRecordedPosition = widget.initialProgressSeconds;
+    _furthestPositionSeconds = widget.initialProgressSeconds;
 
     // Extract YouTube video ID from embed URL
     final videoId = _extractVideoId(widget.embedUrl);
@@ -87,17 +122,14 @@ class _YouTubeEmbedPlayerWebState extends State<_YouTubeEmbedPlayerWeb> {
     final origin = Uri.base.origin;
 
     // Register iframe platform view factory
-    ui_web.platformViewRegistry.registerViewFactory(
-      _viewType,
-      (int id) {
-        try {
-          return _createYouTubePlayer(videoId.toJS, _viewId.toJS, origin.toJS);
-        } catch (e) {
-          debugPrint('[YouTubeEmbed] Error initializing player: $e');
-          rethrow;
-        }
-      },
-    );
+    ui_web.platformViewRegistry.registerViewFactory(_viewType, (int id) {
+      try {
+        return _createYouTubePlayer(videoId.toJS, _viewId.toJS, origin.toJS);
+      } catch (e) {
+        debugPrint('[YouTubeEmbed] Error initializing player: $e');
+        rethrow;
+      }
+    });
 
     // Register JS bridge message listener
     _setupMessageBridge();
@@ -115,11 +147,7 @@ class _YouTubeEmbedPlayerWebState extends State<_YouTubeEmbedPlayerWeb> {
       seekTo(seconds);
     });
 
-    widget.onPlaybackControlsReady?.call(
-      play,
-      pause,
-      togglePlayPause,
-    );
+    widget.onPlaybackControlsReady?.call(play, pause, togglePlayPause);
   }
 
   /// Extracts the 11-character YouTube video ID from any embed/watch/short URL.
@@ -138,7 +166,8 @@ class _YouTubeEmbedPlayerWebState extends State<_YouTubeEmbedPlayerWeb> {
 
     // Fallback: assume the URL itself is a video ID
     final cleanId = url.trim();
-    if (cleanId.length == 11 && RegExp(r'^[a-zA-Z0-9_-]{11}$').hasMatch(cleanId)) {
+    if (cleanId.length == 11 &&
+        RegExp(r'^[a-zA-Z0-9_-]{11}$').hasMatch(cleanId)) {
       return cleanId;
     }
 
@@ -161,18 +190,18 @@ class _YouTubeEmbedPlayerWebState extends State<_YouTubeEmbedPlayerWeb> {
 
             if (val is Map) {
               currentSeconds = (val['seconds'] as num?)?.toInt() ?? 0;
-              totalSeconds = (val['duration'] as num?)?.toInt() ?? _lastDuration;
+              totalSeconds =
+                  (val['duration'] as num?)?.toInt() ?? _lastDuration;
             } else if (val is num) {
               currentSeconds = val.toInt();
             }
 
             if (totalSeconds > 0) _lastDuration = totalSeconds;
 
-            // Detect forward skip > 25 seconds
-            if (currentSeconds - _lastRecordedPosition > 25) {
-              _isSkipped = true;
+            // تحرك عادي أو seek backward — نحدّث furthest فقط للأمام
+            if (currentSeconds > _furthestPositionSeconds) {
+              _furthestPositionSeconds = currentSeconds;
             }
-            _lastRecordedPosition = currentSeconds;
 
             widget.onProgress?.call(currentSeconds, totalSeconds);
             widget.onMetricsProgress?.call(
@@ -181,6 +210,15 @@ class _YouTubeEmbedPlayerWebState extends State<_YouTubeEmbedPlayerWeb> {
               _actualWatchSeconds,
               _isSkipped,
             );
+
+            // إشعار الإكمال عند 90% من furthest (بدون skip)
+            if (!_completionFired &&
+                !_isSkipped &&
+                totalSeconds > 0 &&
+                _furthestPositionSeconds >= (totalSeconds * 0.90).floor()) {
+              _completionFired = true;
+              widget.onCompleted?.call();
+            }
           } else if (event == 'play') {
             _isPlaying = true;
             if (widget.initialProgressSeconds > 3 && !_hasSeekedInitial) {
@@ -191,7 +229,14 @@ class _YouTubeEmbedPlayerWebState extends State<_YouTubeEmbedPlayerWeb> {
             _isPlaying = false;
           } else if (event == 'ended') {
             _isPlaying = false;
-            widget.onCompleted?.call();
+            // عند ended: نتأكد من تسجيل furthest = totalDuration
+            if (_lastDuration > 0 && _furthestPositionSeconds < _lastDuration) {
+              _furthestPositionSeconds = _lastDuration;
+            }
+            if (!_completionFired) {
+              _completionFired = true;
+              widget.onCompleted?.call();
+            }
           } else if (event == 'ready') {
             if (widget.initialProgressSeconds > 3 && !_hasSeekedInitial) {
               _hasSeekedInitial = true;
@@ -232,7 +277,6 @@ class _YouTubeEmbedPlayerWebState extends State<_YouTubeEmbedPlayerWeb> {
   void seekTo(int seconds) {
     try {
       _youtubePostMessage(_viewId.toJS, 'seekTo'.toJS, seconds.toJS);
-      _lastRecordedPosition = seconds;
     } catch (_) {}
   }
 

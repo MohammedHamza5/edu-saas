@@ -36,6 +36,7 @@ import '../../features/content/data/datasources/content_remote_datasource.dart';
 import '../../features/content/data/repositories/content_repository_impl.dart';
 import '../../features/content/domain/repositories/content_repository.dart';
 import '../../features/content/presentation/cubit/content_cubit.dart';
+import '../../features/content/presentation/cubit/course_progress_cubit.dart';
 import '../../features/videos/data/datasources/videos_remote_datasource.dart';
 import '../../features/videos/data/repositories/videos_repository_impl.dart';
 import '../../features/videos/domain/repositories/videos_repository.dart';
@@ -135,6 +136,8 @@ class InjectionContainer {
       VideosCubit(repository: videosRepository);
   static ContentCubit createContentCubit() =>
       ContentCubit(repository: contentRepository);
+  static CourseProgressCubit createCourseProgressCubit() =>
+      CourseProgressCubit(repository: contentRepository);
   static AssignmentsCubit createAssignmentsCubit() =>
       AssignmentsCubit(repository: assignmentsRepository);
   static ExamsCubit createExamsCubit() =>

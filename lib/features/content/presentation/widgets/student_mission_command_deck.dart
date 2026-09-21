@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../domain/entities/content_entity.dart';
+
+import '../../domain/entities/lesson_assignment_entity.dart';
 
 /// Hero Academic Mission Command Deck for Students.
 ///
 /// Anchors the top of the curriculum page to eliminate friction and focus
 /// student cognitive energy on exactly what to do next.
 class StudentMissionCommandDeck extends StatelessWidget {
-  final ContentEntity? nextLesson;
+  final LessonAssignmentEntity? nextLesson;
   final int? nextLessonIndex;
   final int completedCount;
   final int totalCount;

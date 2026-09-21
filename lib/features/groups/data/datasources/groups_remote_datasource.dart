@@ -20,6 +20,8 @@ abstract interface class GroupsRemoteDataSource {
     String? description,
     String? previousContentAccess,
     String? status,
+    bool? enforceSequentialLearning,
+    int? defaultPassingScore,
   });
 
   Future<List<GroupMemberModel>> getGroupMembers(String groupId);
@@ -103,6 +105,8 @@ class GroupsRemoteDataSourceImpl implements GroupsRemoteDataSource {
     String? description,
     String? previousContentAccess,
     String? status,
+    bool? enforceSequentialLearning,
+    int? defaultPassingScore,
   }) async {
     final updates = <String, dynamic>{};
     if (name != null) updates['name'] = name.trim();
@@ -112,6 +116,12 @@ class GroupsRemoteDataSourceImpl implements GroupsRemoteDataSource {
       updates['previous_content_access'] = previousContentAccess;
     }
     if (status != null) updates['status'] = status;
+    if (enforceSequentialLearning != null) {
+      updates['enforce_sequential_learning'] = enforceSequentialLearning;
+    }
+    if (defaultPassingScore != null) {
+      updates['default_passing_score'] = defaultPassingScore;
+    }
 
     final response = await _safeClient
         .from('groups')

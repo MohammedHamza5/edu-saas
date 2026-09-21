@@ -8284,7 +8284,7 @@ abstract class AppLocalizations {
   /// No description provided for @quizGateNotice.
   ///
   /// In en, this message translates to:
-  /// **'🔒 Quiz locked: Complete watching the lecture first'**
+  /// **'Must pass previous exam'**
   String get quizGateNotice;
 
   /// No description provided for @quizUnlockedReady.
@@ -8628,6 +8628,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Distribute to Groups'**
   String get distributeToGroupsAction;
+
+  /// No description provided for @courseProgressTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Course Progress'**
+  String get courseProgressTitle;
+
+  /// No description provided for @noContentYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No content yet'**
+  String get noContentYet;
+
+  /// No description provided for @manualUnlockAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual Unlock'**
+  String get manualUnlockAction;
+
+  /// No description provided for @manualUnlockTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual Unlock'**
+  String get manualUnlockTitle;
+
+  /// No description provided for @manualUnlockWarningText1.
+  ///
+  /// In en, this message translates to:
+  /// **'You are about to unlock the lesson '**
+  String get manualUnlockWarningText1;
+
+  /// No description provided for @manualUnlockWarningText2.
+  ///
+  /// In en, this message translates to:
+  /// **' for the student '**
+  String get manualUnlockWarningText2;
+
+  /// No description provided for @manualUnlockWarningText3.
+  ///
+  /// In en, this message translates to:
+  /// **' as an exception without requiring the previous exam. This action will be recorded.'**
+  String get manualUnlockWarningText3;
+
+  /// No description provided for @manualUnlockReasonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason (Optional)'**
+  String get manualUnlockReasonLabel;
+
+  /// No description provided for @manualUnlockReasonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Example: Student passed the exam on paper'**
+  String get manualUnlockReasonHint;
+
+  /// No description provided for @manualUnlockConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Unlock'**
+  String get manualUnlockConfirm;
+
+  /// No description provided for @courseSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Course Settings'**
+  String get courseSettingsTitle;
+
+  /// No description provided for @enforceSequentialLearning.
+  ///
+  /// In en, this message translates to:
+  /// **'Enforce Sequential Learning'**
+  String get enforceSequentialLearning;
+
+  /// No description provided for @enforceSequentialLearningDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Students must pass quizzes to unlock next lessons'**
+  String get enforceSequentialLearningDesc;
+
+  /// No description provided for @defaultPassingScore.
+  ///
+  /// In en, this message translates to:
+  /// **'Default Passing Score (%)'**
+  String get defaultPassingScore;
+
+  /// No description provided for @passingScoreOverride.
+  ///
+  /// In en, this message translates to:
+  /// **'Passing Score Override (%)'**
+  String get passingScoreOverride;
+
+  /// No description provided for @passingScoreDefaultHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Course Default'**
+  String get passingScoreDefaultHint;
+
+  /// No description provided for @lessonQuizSequentialRequirement.
+  ///
+  /// In en, this message translates to:
+  /// **'This Lesson Quiz will be required for students to unlock the next lesson (if Sequential Learning is enabled).'**
+  String get lessonQuizSequentialRequirement;
 }
 
 class _AppLocalizationsDelegate

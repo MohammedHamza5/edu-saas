@@ -20,7 +20,9 @@ import 'exam_intro_page.dart';
 enum StudentExamFilter { all, available, inProgress, completed }
 
 class StudentExamsPage extends StatefulWidget {
-  const StudentExamsPage({super.key});
+  final String? initialExamId;
+
+  const StudentExamsPage({super.key, this.initialExamId});
 
   @override
   State<StudentExamsPage> createState() => _StudentExamsPageState();
@@ -33,8 +35,35 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
   @override
   void initState() {
     super.initState();
-    _loadExams();
+    _loadExams().then((_) {
+      if (widget.initialExamId != null && mounted) {
+        final state = context.read<ExamsCubit>().state;
+        if (state is StudentExamsLoaded) {
+          try {
+            final exam = state.exams.firstWhere((e) => e.id == widget.initialExamId);
+            _openExamIntro(exam);
+          } catch (_) {
+            // Exam not found in the initial page, might be on another page or invalid.
+          }
+        }
+      }
+    });
     _scrollController.addListener(_onScroll);
+  }
+
+  void _openExamIntro(ExamEntity exam) async {
+    final cubit = context.read<ExamsCubit>();
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => BlocProvider.value(
+          value: cubit,
+          child: ExamIntroPage(exam: exam),
+        ),
+      ),
+    );
+    if (mounted && cubit.state is! ExamTakingState) {
+      await _loadExams(forceRefresh: true);
+    }
   }
 
   @override
@@ -190,20 +219,7 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
                                         return ExamCard(
                                           exam: exam,
                                           isTeacher: false,
-                                          onTap: () async {
-                                            final cubit = context.read<ExamsCubit>();
-                                            await Navigator.of(context).push<void>(
-                                              MaterialPageRoute<void>(
-                                                builder: (_) => BlocProvider.value(
-                                                  value: cubit,
-                                                  child: ExamIntroPage(exam: exam),
-                                                ),
-                                              ),
-                                            );
-                                            if (context.mounted && cubit.state is! ExamTakingState) {
-                                              await _loadExams(forceRefresh: true);
-                                            }
-                                          },
+                                          onTap: () => _openExamIntro(exam),
                                         );
                                       }).toList(),
                                     ),

@@ -12,6 +12,7 @@ import 'package:edu_saas/features/content/domain/entities/file_attachment_entity
 import 'package:edu_saas/features/content/domain/repositories/content_repository.dart';
 import 'package:edu_saas/features/content/presentation/cubit/content_cubit.dart';
 import 'package:edu_saas/features/content/presentation/cubit/content_state.dart';
+import 'package:edu_saas/features/content/domain/entities/lesson_assignment_entity.dart';
 import 'package:edu_saas/features/content/presentation/pages/student_content_feed_page.dart';
 import 'package:edu_saas/features/content/presentation/pages/teacher_content_library_page.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -44,6 +45,30 @@ class _FakeContentRepository implements ContentRepository {
       list = list.where((i) => i.status == statusFilter).toList();
     }
     return Success(list);
+  }
+
+  @override
+  Future<Result<List<LessonAssignmentEntity>>> getGroupCourseProgress({
+    required String groupId,
+    String? studentId,
+  }) async {
+    if (shouldFail) {
+      return const FailureResult(ServerFailure('Connection error'));
+    }
+    return const Success([]);
+  }
+
+  @override
+  Future<Result<void>> manualUnlockLesson({
+    required String studentId,
+    required String groupId,
+    required String contentId,
+    String? reason,
+  }) async {
+    if (shouldFail) {
+      return const FailureResult(ServerFailure('Failed to unlock lesson'));
+    }
+    return const Success(null);
   }
 
   @override

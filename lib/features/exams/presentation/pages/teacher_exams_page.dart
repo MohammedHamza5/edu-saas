@@ -27,8 +27,9 @@ import '../../../groups/presentation/cubit/groups_cubit.dart';
 class TeacherExamsPage extends StatefulWidget {
   final String? groupId;
   final String? groupName;
+  final String? initialExamId;
 
-  const TeacherExamsPage({super.key, this.groupId, this.groupName});
+  const TeacherExamsPage({super.key, this.groupId, this.groupName, this.initialExamId});
 
   @override
   State<TeacherExamsPage> createState() => _TeacherExamsPageState();
@@ -67,7 +68,17 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
     }
 
     if (_selectedGroupId != null) {
-      _loadExams();
+      _loadExams().then((_) {
+        if (widget.initialExamId != null && mounted) {
+          final state = context.read<ExamsCubit>().state;
+          if (state is TeacherExamsLoaded) {
+            try {
+              final exam = state.exams.firstWhere((e) => e.id == widget.initialExamId);
+              _openExamDetails(exam);
+            } catch (_) {}
+          }
+        }
+      });
     }
     try {
       context.read<GroupsCubit>().loadGroups();
@@ -99,6 +110,10 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
       _selectedGroupName = group.name;
     });
     _loadExams();
+  }
+
+  void _openExamDetails(ExamEntity exam) {
+    _showExamDetailsSheet(exam);
   }
 
   Future<void> _loadExams({bool forceRefresh = false}) async {

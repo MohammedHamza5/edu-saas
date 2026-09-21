@@ -12,6 +12,7 @@ class VideoProgressModel extends VideoProgressEntity {
     super.actualWatchSeconds = 0,
     super.isSkipped = false,
     required super.lastWatchedAt,
+    super.furthestPositionSeconds = 0,
   });
 
   factory VideoProgressModel.fromJson(Map<String, dynamic> json) {
@@ -28,6 +29,7 @@ class VideoProgressModel extends VideoProgressEntity {
       lastWatchedAt: json['last_watched_at'] != null
           ? DateTime.parse(json['last_watched_at'] as String)
           : DateTime.now(),
+      furthestPositionSeconds: json['furthest_position_seconds'] as int? ?? 0,
     );
   }
 
@@ -42,6 +44,7 @@ class VideoProgressModel extends VideoProgressEntity {
       'actual_watch_seconds': actualWatchSeconds,
       'is_skipped': isSkipped,
       'last_watched_at': lastWatchedAt.toIso8601String(),
+      'furthest_position_seconds': furthestPositionSeconds,
     };
     if (id != null) map['id'] = id;
     if (tenantId != null) map['tenant_id'] = tenantId;

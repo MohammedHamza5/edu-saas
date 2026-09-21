@@ -32,6 +32,8 @@ class VideoPlayerPage extends StatefulWidget {
   final String? studentId;
   final String? associatedExamId;
   final String? associatedExamTitle;
+  /// المجموعة التي يُشاهَد منها هذا الدرس (لجلب PDF الخاص بالمجموعة والاختبار المخصص)
+  final String? groupId;
 
   const VideoPlayerPage({
     super.key,
@@ -39,6 +41,7 @@ class VideoPlayerPage extends StatefulWidget {
     this.studentId,
     this.associatedExamId,
     this.associatedExamTitle,
+    this.groupId,
   });
 
   @override
@@ -58,6 +61,20 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   void Function(int seconds)? _seekTo;
   VoidCallback? _togglePlayPauseFn;
   bool _hasRecordedStarted = false;
+  /// أبعد نقطة مشاهدة لإرسالها مع كل update
+  int _furthestPositionSecs = 0;
+  
+  /// Segment tracking for watched coverage
+  int? _segmentStart;
+  int? _segmentEnd;
+
+  /// حالة ما بعد اكتمال الفيديو
+  bool _videoCompletedLocally = false;
+  /// بيانات الدرس الخاصة بالمجموعة (PDF + Exam من content_groups)
+  String? _groupPdfStoragePath;
+  String? _groupPdfFileName;
+  String? _groupExamId;
+  String? _groupExamTitle;
 
   @override
   void initState() {
@@ -67,6 +84,10 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     _activeStudentId = widget.studentId ?? authUser?.id ?? '';
     _isTeacher = authUser?.isTeacher ?? false;
     _loadVideo();
+    // جلب بيانات الدرس الخاصة بالمجموعة إذا توفرت
+    if (widget.groupId != null && !_isTeacher) {
+      _loadLessonContext();
+    }
 
     listenToFullscreenChange((isFull) {
       if (!kIsWeb && mounted && _isFullscreen != isFull) {
@@ -75,6 +96,29 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
         });
       }
     });
+  }
+
+  Future<void> _loadLessonContext() async {
+    try {
+      final result = await InjectionContainer.videosRepository.getLessonContext(
+        contentId: widget.videoId,  // videoId هنا هو content_id
+        groupId: widget.groupId!,
+      );
+      result.when(
+        onSuccess: (ctx) {
+          if (ctx != null && mounted) {
+            setState(() {
+              _groupPdfStoragePath = ctx['pdf_storage_path'] as String?;
+              _groupPdfFileName = ctx['pdf_file_name'] as String?;
+              // الاختبار المرتبط بالدرس (من content_groups) له الأولوية على widget.associatedExamId
+              _groupExamId = ctx['lesson_exam_id'] as String? ?? widget.associatedExamId;
+              _groupExamTitle = ctx['lesson_exam_title'] as String? ?? widget.associatedExamTitle;
+            });
+          }
+        },
+        onFailure: (_) {},
+      );
+    } catch (_) {}
   }
 
   void _handleFullscreenChanged(bool isFull) {
@@ -115,7 +159,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
             studentId: _activeStudentId,
             progressSeconds: pos,
             durationSeconds: dur,
+            furthestPositionSeconds: _furthestPositionSecs,
             force: true,
+            newSegment: _segmentStart != null && _segmentEnd != null ? [_segmentStart!, _segmentEnd!] : null,
           );
         } catch (_) {
           try {
@@ -124,6 +170,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
               studentId: _activeStudentId,
               progressSeconds: pos,
               durationSeconds: dur,
+              furthestPositionSeconds: _furthestPositionSecs,
+              newSegment: _segmentStart != null && _segmentEnd != null ? [_segmentStart!, _segmentEnd!] : null,
             );
           } catch (_) {}
         }
@@ -165,6 +213,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
             studentId: _activeStudentId,
             progressSeconds: pos,
             durationSeconds: dur,
+            furthestPositionSeconds: _furthestPositionSecs,
+            newSegment: _segmentStart != null && _segmentEnd != null ? [_segmentStart!, _segmentEnd!] : null,
           ),
         );
       }
@@ -316,6 +366,10 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                       if (!_isTeacher &&
                           _activeStudentId.isNotEmpty &&
                           video != null) {
+                        // تتبع furthest position محلياً
+                        if (currentSeconds > _furthestPositionSecs) {
+                          _furthestPositionSecs = currentSeconds;
+                        }
                         if (!_hasRecordedStarted && currentSeconds > 0) {
                           _hasRecordedStarted = true;
                           StudentActivityTracker.instance.recordActivity(
@@ -326,46 +380,73 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                         final dur = totalSeconds > 0
                             ? totalSeconds
                             : video.duration;
-                        context.read<VideosCubit>().updateProgress(
-                          videoId: video.id,
-                          studentId: _activeStudentId,
-                          progressSeconds: currentSeconds,
-                          durationSeconds: dur,
-                          actualWatchSeconds: actualWatch,
-                          isSkipped: isSkipped,
-                        );
+                        if (_segmentStart == null) {
+                          _segmentStart = currentSeconds;
+                          _segmentEnd = currentSeconds;
+                        }
+
+                        bool isSeek = false;
+                        if (_segmentEnd != null && (currentSeconds - _segmentEnd!).abs() > 2) {
+                          isSeek = true;
+                          // Force commit the old segment before starting a new one
+                          context.read<VideosCubit>().updateProgress(
+                            videoId: video.id,
+                            studentId: _activeStudentId,
+                            progressSeconds: currentSeconds,
+                            durationSeconds: dur,
+                            furthestPositionSeconds: _furthestPositionSecs,
+                            actualWatchSeconds: actualWatch,
+                            isSkipped: isSkipped,
+                            force: true,
+                            newSegment: [_segmentStart!, _segmentEnd!],
+                          );
+                          _segmentStart = currentSeconds;
+                          _segmentEnd = currentSeconds;
+                        } else {
+                          _segmentEnd = currentSeconds;
+                        }
+
+                        if (!isSeek) {
+                          context.read<VideosCubit>().updateProgress(
+                            videoId: video.id,
+                            studentId: _activeStudentId,
+                            progressSeconds: currentSeconds,
+                            durationSeconds: dur,
+                            furthestPositionSeconds: _furthestPositionSecs,
+                            actualWatchSeconds: actualWatch,
+                            isSkipped: isSkipped,
+                            newSegment: [_segmentStart!, _segmentEnd!],
+                          );
+                        }
                       }
                     },
                 onCompleted: () {
                   if (!_isTeacher &&
                       _activeStudentId.isNotEmpty &&
                       video != null) {
+                    final dur = _liveDurationSecs.value > 0
+                        ? _liveDurationSecs.value
+                        : video.duration;
+                    // تحديث التقدم بقيمة الإكمال الكاملة
                     context.read<VideosCubit>().updateProgress(
                       videoId: video.id,
                       studentId: _activeStudentId,
-                      progressSeconds: video.duration,
-                      durationSeconds: video.duration,
+                      progressSeconds: dur,
+                      durationSeconds: dur,
+                      furthestPositionSeconds: _furthestPositionSecs > 0
+                          ? _furthestPositionSecs
+                          : dur,
                       force: true,
+                      newSegment: _segmentStart != null && _segmentEnd != null ? [_segmentStart!, _segmentEnd!] : null,
                     );
                     StudentActivityTracker.instance.recordActivity(
                       eventType: 'video_completed',
                       contentId: video.contentId,
                     );
-                    if (widget.associatedExamId != null && mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          backgroundColor: AppColors.success,
-                          duration: const Duration(seconds: 6),
-                          content: Text(context.l10n.videoCompletedCongrats),
-                          action: SnackBarAction(
-                            label: context.l10n.takeQuizNowAction,
-                            textColor: Colors.white,
-                            onPressed: () {
-                              context.push(AppRoutes.studentExams);
-                            },
-                          ),
-                        ),
-                      );
+                    // عرض قسم الاختبار مباشرة في الصفحة
+                    final examId = _groupExamId ?? widget.associatedExamId;
+                    if (examId != null && mounted) {
+                      setState(() => _videoCompletedLocally = true);
                     }
                   }
                 },
@@ -411,7 +492,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                                       isCompleted,
                                     ),
                                     const SizedBox(height: AppSpacing.s16),
-                                    if (widget.associatedExamId != null) ...[
+                                    if ((_groupExamId ?? widget.associatedExamId) != null) ...[
                                       _buildAssociatedExamCard(
                                         theme,
                                         isCompleted,
@@ -444,7 +525,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                               isCompleted,
                             ),
                             const SizedBox(height: AppSpacing.s16),
-                            if (widget.associatedExamId != null) ...[
+                            if ((_groupExamId ?? widget.associatedExamId) != null) ...[
                               _buildAssociatedExamCard(theme, isCompleted),
                               const SizedBox(height: AppSpacing.s16),
                             ],
@@ -1259,8 +1340,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
         final livePos = _livePositionSecs.value;
         final liveDur = _liveDurationSecs.value;
         final pct = liveDur > 0 ? (livePos / liveDur) * 100 : 0.0;
-        final isUnlocked = _isTeacher || isInitiallyCompleted || pct >= 90.0;
+        final isUnlocked = _isTeacher || isInitiallyCompleted || _videoCompletedLocally || pct >= 90.0;
         final themeColor = isUnlocked ? AppColors.success : AppColors.warning;
+        final actualExamTitle = _groupExamTitle ?? widget.associatedExamTitle;
 
         return AppCard(
           variant: AppCardVariant.elevated,
@@ -1369,7 +1451,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            widget.associatedExamTitle ??
+                            actualExamTitle ??
                                 context.l10n.associatedExamBadge,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -1425,10 +1507,15 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                 ),
                 onPressed: isUnlocked
                     ? () {
+                        final examId = _groupExamId ?? widget.associatedExamId;
                         if (_isTeacher) {
-                          context.push(AppRoutes.teacherExams);
+                          context.push(examId != null 
+                              ? '${AppRoutes.teacherExams}?examId=$examId'
+                              : AppRoutes.teacherExams);
                         } else {
-                          context.push(AppRoutes.studentExams);
+                          context.push(examId != null
+                              ? '${AppRoutes.studentExams}?examId=$examId'
+                              : AppRoutes.studentExams);
                         }
                       }
                     : null,
@@ -1441,8 +1528,13 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   }
 
   Widget _buildAttachedMaterialCard(ThemeData theme, VideoEntity? video) {
+    // 1. الأولوية للـ PDF الخاص بالمجموعة (إذا دخلنا من group course)
+    final hasGroupPdf = _groupPdfStoragePath != null && _groupPdfFileName != null;
+    
+    // 2. الـ PDF الافتراضي المربوط بالفيديو نفسه
     final attachedFile = video?.attachedFile;
-    if (attachedFile == null && !_isTeacher) {
+    
+    if (!hasGroupPdf && attachedFile == null && !_isTeacher) {
       return const SizedBox.shrink();
     }
 
@@ -1552,7 +1644,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          attachedFile.fileName,
+                          hasGroupPdf ? _groupPdfFileName! : attachedFile.fileName,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
@@ -1563,7 +1655,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          '${attachedFile.formattedFileSize} • PDF',
+                          hasGroupPdf 
+                              ? 'PDF'
+                              : '${attachedFile.formattedFileSize} • PDF',
                           style: const TextStyle(
                             fontSize: 11,
                             color: AppColors.textSecondary,
@@ -1597,7 +1691,30 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                   borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
                 ),
               ),
-              onPressed: () => _handleOpenAttachedMaterial(video!),
+              onPressed: () {
+                if (hasGroupPdf) {
+                  // فتح PDF المجموعة
+                  final contentWrapper = ContentEntity(
+                    id: video!.contentId,
+                    tenantId: '',
+                    groupId: widget.groupId ?? '',
+                    title: video.title ?? _groupPdfFileName!,
+                    description: video.description,
+                    type: ContentType.pdf,
+                    status: ContentStatus.published,
+                    createdAt: video.createdAt,
+                    updatedAt: video.updatedAt,
+                  );
+                  final cubit = context.read<VideosCubit>();
+                  MaterialViewerSheet.show(
+                    context,
+                    content: contentWrapper,
+                    onGetSignedUrl: (_) => cubit.getSignedFileUrl(_groupPdfStoragePath!),
+                  );
+                } else {
+                  _handleOpenAttachedMaterial(video!);
+                }
+              },
             ),
             if (_isTeacher) ...[
               const SizedBox(height: AppSpacing.s8),
