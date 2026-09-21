@@ -1,4 +1,5 @@
 import '../../domain/entities/content_entity.dart';
+import '../../domain/entities/file_attachment_entity.dart';
 import 'file_attachment_model.dart';
 
 class ContentModel extends ContentEntity {
@@ -140,6 +141,102 @@ class ContentModel extends ContentEntity {
       isExamPassed: json['is_exam_passed'] == true,
     );
   }
+
+  factory ContentModel.fromEntity(ContentEntity entity) {
+    return ContentModel(
+      id: entity.id,
+      tenantId: entity.tenantId,
+      groupId: entity.groupId,
+      title: entity.title,
+      description: entity.description,
+      type: entity.type,
+      status: entity.status,
+      sortOrder: entity.sortOrder,
+      publishedAt: entity.publishedAt,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+      file: entity.file,
+      videoId: entity.videoId,
+      videoStatus: entity.videoStatus,
+      videoProviderId: entity.videoProviderId,
+      videoProvider: entity.videoProvider,
+      assignedGroupIds: entity.assignedGroupIds,
+      assignedGroupNames: entity.assignedGroupNames,
+      associatedExamId: entity.associatedExamId,
+      associatedExamTitle: entity.associatedExamTitle,
+      prerequisiteExamId: entity.prerequisiteExamId,
+      prerequisiteExamTitle: entity.prerequisiteExamTitle,
+      prerequisitePassingScore: entity.prerequisitePassingScore,
+      isLocked: entity.isLocked,
+      isVideoCompleted: entity.isVideoCompleted,
+      videoProgressPercentage: entity.videoProgressPercentage,
+      isExamPassed: entity.isExamPassed,
+    );
+  }
+
+  @override
+  ContentModel copyWith({
+    String? id,
+    String? tenantId,
+    Object? groupId = _sentinel,
+    String? title,
+    String? description,
+    ContentType? type,
+    ContentStatus? status,
+    int? sortOrder,
+    DateTime? publishedAt,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    FileAttachmentEntity? file,
+    Object? videoId = _sentinel,
+    Object? videoStatus = _sentinel,
+    Object? videoProviderId = _sentinel,
+    Object? videoProvider = _sentinel,
+    List<String>? assignedGroupIds,
+    List<String>? assignedGroupNames,
+    Object? associatedExamId = _sentinel,
+    Object? associatedExamTitle = _sentinel,
+    Object? prerequisiteExamId = _sentinel,
+    Object? prerequisiteExamTitle = _sentinel,
+    Object? prerequisitePassingScore = _sentinel,
+    bool? isLocked,
+    bool? isVideoCompleted,
+    double? videoProgressPercentage,
+    bool? isExamPassed,
+  }) {
+    final entity = super.copyWith(
+      id: id,
+      tenantId: tenantId,
+      groupId: groupId,
+      title: title,
+      description: description,
+      type: type,
+      status: status,
+      sortOrder: sortOrder,
+      publishedAt: publishedAt,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      file: file,
+      videoId: videoId,
+      videoStatus: videoStatus,
+      videoProviderId: videoProviderId,
+      videoProvider: videoProvider,
+      assignedGroupIds: assignedGroupIds,
+      assignedGroupNames: assignedGroupNames,
+      associatedExamId: associatedExamId,
+      associatedExamTitle: associatedExamTitle,
+      prerequisiteExamId: prerequisiteExamId,
+      prerequisiteExamTitle: prerequisiteExamTitle,
+      prerequisitePassingScore: prerequisitePassingScore,
+      isLocked: isLocked,
+      isVideoCompleted: isVideoCompleted,
+      videoProgressPercentage: videoProgressPercentage,
+      isExamPassed: isExamPassed,
+    );
+    return ContentModel.fromEntity(entity);
+  }
+
+  static const Object _sentinel = Object();
 
   Map<String, dynamic> toJson() {
     return {

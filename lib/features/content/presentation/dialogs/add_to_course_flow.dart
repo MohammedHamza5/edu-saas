@@ -10,7 +10,8 @@ import '../../../groups/presentation/cubit/groups_cubit.dart';
 import '../../../groups/presentation/cubit/groups_state.dart';
 import '../../domain/entities/content_entity.dart';
 import '../cubit/content_cubit.dart';
-import 'lesson_setup_sheet.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../core/router/app_routes.dart';
 
 /// Two-step flow for adding a video from the Video Library to a course.
 ///
@@ -63,46 +64,10 @@ class _AddToCourseFlowState extends State<AddToCourseFlow> {
     if (!mounted) return;
     Navigator.of(context).pop(); // close this dialog
 
-    final contentCubit = context.read<ContentCubit>();
-
-    final saved = await LessonSetupSheet.show(
-      context,
-      video: widget.video,
-      groupId: group.id,
-      groupName: group.name,
-      defaultPassingScore: group.defaultPassingScore,
-      onSave: ({
-        required contentId,
-        required groupId,
-        required lessonTitle,
-        required fileId,
-        required examId,
-        required passingScoreOverride,
-      }) async {
-        return contentCubit.assignContentToGroups(
-          contentId: contentId,
-          groupIds: [groupId],
-          groupConfigs: [
-            {
-              'group_id': groupId,
-              if (fileId != null) 'file_id': fileId,
-              if (examId != null) 'associated_exam_id': examId,
-              if (passingScoreOverride != null)
-                'passing_score_override': passingScoreOverride,
-            }
-          ],
-        );
-      },
+    context.go(
+      '${AppRoutes.teacherGroupContent.replaceAll(':groupId', group.id)}?name=${Uri.encodeComponent(group.name)}',
+      extra: widget.video,
     );
-
-    if (saved && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: AppColors.success,
-          content: Text(context.l10n.lessonAddedToCourse(group.name)),
-        ),
-      );
-    }
   }
 
   @override

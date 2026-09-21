@@ -30,8 +30,14 @@ import '../widgets/lesson_editor_pane.dart';
 class TeacherContentLibraryPage extends StatefulWidget {
   final String? groupId;
   final String? groupName;
+  final ContentEntity? preselectedVideo;
 
-  const TeacherContentLibraryPage({super.key, this.groupId, this.groupName});
+  const TeacherContentLibraryPage({
+    super.key,
+    this.groupId,
+    this.groupName,
+    this.preselectedVideo,
+  });
 
   @override
   State<TeacherContentLibraryPage> createState() =>
@@ -48,6 +54,10 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
   @override
   void initState() {
     super.initState();
+    if (widget.preselectedVideo != null) {
+      _isEditing = true;
+      _editingLesson = widget.preselectedVideo;
+    }
     final initialId = widget.groupId ?? TeacherGroupFilterBar.lastSelectedGroupId;
     GroupsState? groupsState;
     try {

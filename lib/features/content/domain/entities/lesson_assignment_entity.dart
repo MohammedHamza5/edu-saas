@@ -242,8 +242,8 @@ class LessonAssignmentEntity extends Equatable {
   factory LessonAssignmentEntity.fromJson(Map<String, dynamic> json) {
     return LessonAssignmentEntity(
       contentGroupId: json['content_group_id'] as String? ?? '',
-      contentId: json['content_id'] as String,
-      groupId: json['group_id'] as String,
+      contentId: json['content_id'] as String? ?? '',
+      groupId: json['group_id'] as String? ?? '',
       title: json['title'] as String? ?? '',
       description: json['description'] as String?,
       type: ContentType.values.firstWhere(

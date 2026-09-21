@@ -218,8 +218,7 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
                   prerequisiteExamTitle: prereqExamTitle,
                   prerequisitePassingScore: prereqPassingScore,
                   sortOrder: sortOrder,
-                )
-                as ContentModel;
+                );
       }
     }
 
@@ -322,8 +321,7 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
                     isVideoCompleted: isVideoCompleted,
                     videoProgressPercentage: progressPct,
                     isExamPassed: isExamPassed,
-                  )
-                  as ContentModel;
+                  );
 
           previousLessonExamId = item.associatedExamId;
           previousLessonVideoId = item.videoId;

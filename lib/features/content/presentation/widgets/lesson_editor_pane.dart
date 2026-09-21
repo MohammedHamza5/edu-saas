@@ -193,6 +193,7 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
           ? null
           : _titleController.text.trim();
 
+      if (!mounted) return;
       final cubit = context.read<ContentCubit>();
       await cubit.assignContentToGroups(
         contentId: _selectedVideo!.id,
@@ -200,6 +201,7 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
         groupConfigs: [
           {
             'group_id': widget.groupId,
+            if (lessonTitle != null) 'custom_title': lessonTitle,
             if (fileId != null) 'file_id': fileId,
             if (fileId == null && _removePdf) 'file_id': null,
             if (_selectedExamId != null) 'associated_exam_id': _selectedExamId,
@@ -215,8 +217,8 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('An error occurred while saving.'),
+          const SnackBar(
+            content: Text('An error occurred while saving.'),
             backgroundColor: AppColors.error,
           ),
         );
@@ -231,7 +233,7 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
     if (cubit.state is! ContentLoaded) {
       await cubit.loadCentralVideoBank();
     }
-    if (!context.mounted) return;
+    if (!mounted) return;
     final video = await VideoPickerSheet.show(context);
     if (video != null) {
       setState(() {
@@ -442,7 +444,7 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
                   if (_isLoadingExams)
                     const Center(child: CircularProgressIndicator())
                   else if (_availableExams.isEmpty)
-                    Text(
+                    const Text(
                       'No quizzes available in this group.',
                       style: TextStyle(color: AppColors.textMuted),
                     )
@@ -507,7 +509,7 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
                   else
                     Text(
                       'Using default group passing score (${widget.defaultPassingScore}%)',
-                      style: TextStyle(color: AppColors.textSecondary),
+                      style: const TextStyle(color: AppColors.textSecondary),
                     ),
                 ],
               ),

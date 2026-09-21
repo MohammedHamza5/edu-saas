@@ -230,9 +230,12 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
       body: BlocConsumer<CourseProgressCubit, CourseProgressState>(
         listener: (context, state) {
           if (state is CourseProgressError) {
+            final userFriendlyMessage = _isTechnicalError(state.message)
+                ? context.l10n.errorOccurred
+                : state.message;
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(state.message),
+                content: Text(userFriendlyMessage),
                 backgroundColor: AppColors.error,
               ),
             );
@@ -244,8 +247,11 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
           }
 
           if (state is CourseProgressError) {
+            final userFriendlyMessage = _isTechnicalError(state.message)
+                ? context.l10n.errorOccurred
+                : state.message;
             return AppErrorView(
-              message: state.message,
+              message: userFriendlyMessage,
               onRetry: () => context.read<CourseProgressCubit>().loadCourseProgress(
                     _activeGroupId,
                     studentId: InjectionContainer.supabaseClient.auth.currentUser?.id,
@@ -721,5 +727,16 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
         color: isSelected ? AppColors.primary : AppColors.textSecondary,
       ),
     );
+  }
+
+  bool _isTechnicalError(String message) {
+    final lower = message.toLowerCase();
+    return lower.contains('exception') ||
+        lower.contains('postgres') ||
+        lower.contains('sql') ||
+        lower.contains('syntax') ||
+        lower.contains('null') ||
+        lower.contains('undefined') ||
+        lower.contains('code:');
   }
 }

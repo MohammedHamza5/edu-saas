@@ -11,6 +11,7 @@ import '../theme/tenant_theme_cubit.dart';
 import 'language_switcher_button.dart';
 import '../../features/notifications/presentation/cubit/notifications_cubit.dart';
 import '../../features/notifications/presentation/cubit/notifications_state.dart';
+import '../../features/auth/presentation/cubit/auth_cubit.dart';
 import '../../features/students/presentation/cubit/students_cubit.dart';
 import '../../features/students/presentation/cubit/students_state.dart';
 import 'adaptive_scaffold.dart';
@@ -37,18 +38,18 @@ class TeacherShell extends StatelessWidget {
       return 2;
     }
     if (path.startsWith('/teacher/students/pending')) return 3;
-    if (path == '/teacher/groups' || path == '/teacher/groups/') return 4;
     if (path.startsWith('/teacher/attendance')) return 5;
-    if (path.contains('/videos') || path.contains('/content')) return 6;
-    if (path.contains('/assignments')) return 7;
-    if (path.contains('/exams')) return 8;
-    if (path.startsWith('/teacher/announcements')) return 9;
-    if (path.startsWith('/teacher/settings')) return 10;
-    if (path.startsWith('/teacher/groups/')) return 4; // Group detail fallback
+    if (path.contains('/content')) return 6;
+    if (path.contains('/videos')) return 7;
+    if (path.contains('/assignments')) return 8;
+    if (path.contains('/exams')) return 9;
+    if (path.startsWith('/teacher/announcements')) return 10;
+    if (path.startsWith('/teacher/settings')) return 11;
+    if (path.startsWith('/teacher/groups')) return 4;
     return 0;
   }
 
-  void _onNavigationChanged(BuildContext context, int index, bool isYouTube) {
+  void _onNavigationChanged(BuildContext context, int index) {
     final routes = [
       AppRoutes.teacherDashboard, // 0
       AppRoutes.notificationsCenter, // 1
@@ -56,11 +57,12 @@ class TeacherShell extends StatelessWidget {
       AppRoutes.pendingStudents, // 3
       AppRoutes.groupsList, // 4
       AppRoutes.teacherAttendance, // 5
-      isYouTube ? AppRoutes.teacherVideos : AppRoutes.teacherContent, // 6
-      AppRoutes.teacherAssignments, // 7
-      AppRoutes.teacherExams, // 8
-      AppRoutes.sendAnnouncement, // 9
-      AppRoutes.teacherSettings, // 10
+      AppRoutes.teacherContent, // 6 (Course Builder / Manage Lessons)
+      AppRoutes.teacherVideos, // 7 (Video Bank)
+      AppRoutes.teacherAssignments, // 8
+      AppRoutes.teacherExams, // 9
+      AppRoutes.sendAnnouncement, // 10
+      AppRoutes.teacherSettings, // 11
     ];
 
     if (index >= 0 && index < routes.length) {
@@ -77,14 +79,6 @@ class TeacherShell extends StatelessWidget {
     }
 
     final currentIndex = _computeIndex(currentLocation);
-
-    // Watch active video provider preference (YouTube vs Bunny Stream)
-    String activeProvider = TenantRegistry.defaultBranding.videoProvider;
-    try {
-      final branding = context.watch<TenantThemeCubit>().state;
-      activeProvider = branding.videoProvider;
-    } catch (_) {}
-    final isYouTube = activeProvider != 'bunny';
 
     // Watch live notification unread count
     int unreadNotifications = 0;
@@ -157,24 +151,22 @@ class TeacherShell extends StatelessWidget {
         ],
       ),
 
-      // Section 3: Academic Operations (Streaming channel dedicated to teacher's choice)
+      // Section 3: Academic Engine (Course Builder, Video Bank, Assignments, Exams, Announcements)
       AdaptiveSidebarSection(
         title: context.l10n.navSectionAcademic,
         destinations: [
-          if (isYouTube)
-            AdaptiveDestination(
-              icon: Icons.video_library_outlined,
-              selectedIcon: Icons.video_library_rounded,
-              label: context.l10n.videoBankTitle,
-              tooltip: context.l10n.videoBankTitle,
-            )
-          else
-            AdaptiveDestination(
-              icon: Icons.folder_shared_outlined,
-              selectedIcon: Icons.folder_shared_rounded,
-              label: context.l10n.contentLibraryTitle,
-              tooltip: context.l10n.contentLibraryTitle,
-            ),
+          AdaptiveDestination(
+            icon: Icons.auto_stories_outlined,
+            selectedIcon: Icons.auto_stories_rounded,
+            label: context.l10n.manageLessons,
+            tooltip: context.l10n.manageLessons,
+          ),
+          AdaptiveDestination(
+            icon: Icons.video_library_outlined,
+            selectedIcon: Icons.video_library_rounded,
+            label: context.l10n.videoBankTitle,
+            tooltip: context.l10n.videoBankTitle,
+          ),
           AdaptiveDestination(
             icon: Icons.assignment_outlined,
             selectedIcon: Icons.assignment_rounded,
@@ -213,7 +205,7 @@ class TeacherShell extends StatelessWidget {
     return AdaptiveScaffold(
       currentIndex: currentIndex,
       sections: sections,
-      onNavigationIndexChanged: (idx) => _onNavigationChanged(context, idx, isYouTube),
+      onNavigationIndexChanged: (idx) => _onNavigationChanged(context, idx),
       sidebarHeader: _buildSidebarHeader(context),
       sidebarFooter: _buildSidebarFooter(context),
       body: child,
@@ -309,7 +301,7 @@ class TeacherShell extends StatelessWidget {
                 ),
               );
               if (confirmed == true && context.mounted) {
-                await SupabaseService.client.auth.signOut();
+                await context.read<AuthCubit>().logout();
                 if (context.mounted) {
                   context.go(AppRoutes.login);
                 }

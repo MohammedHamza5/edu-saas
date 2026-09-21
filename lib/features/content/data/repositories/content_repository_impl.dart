@@ -249,7 +249,7 @@ class ContentRepositoryImpl implements ContentRepository {
       return Success(lessons);
     } catch (e) {
       return FailureResult(
-        ServerFailure('فشل في جلب تقدم الدورة: ${e.toString()}'),
+        ServerFailure('فشل في جلب تقدم الدورة', details: e.toString()),
       );
     }
   }
@@ -271,7 +271,7 @@ class ContentRepositoryImpl implements ContentRepository {
       return const Success(null);
     } catch (e) {
       return FailureResult(
-        ServerFailure('فشل في إلغاء قفل الدرس: ${e.toString()}'),
+        ServerFailure('فشل في إلغاء قفل الدرس', details: e.toString()),
       );
     }
   }

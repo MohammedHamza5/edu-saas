@@ -13,6 +13,7 @@ import '../theme/app_spacing.dart';
 import '../theme/tenant_theme_cubit.dart';
 import '../../features/notifications/presentation/cubit/notifications_cubit.dart';
 import '../../features/notifications/presentation/cubit/notifications_state.dart';
+import '../../features/auth/presentation/cubit/auth_cubit.dart';
 import 'adaptive_scaffold.dart';
 import 'app_logo.dart';
 import 'language_switcher_button.dart';
@@ -259,7 +260,7 @@ class StudentShell extends StatelessWidget {
                 ),
               );
               if (confirmed == true && context.mounted) {
-                await SupabaseService.client.auth.signOut();
+                await context.read<AuthCubit>().logout();
                 if (context.mounted) {
                   context.go(AppRoutes.login);
                 }

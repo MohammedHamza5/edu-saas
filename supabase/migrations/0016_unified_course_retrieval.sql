@@ -72,6 +72,18 @@ BEGIN
     ) THEN
       RAISE EXCEPTION 'NOT_AUTHORIZED';
     END IF;
+  ELSIF v_caller_role = 'parent' THEN
+    v_target_student := p_student_id;
+    IF v_target_student IS NULL OR NOT EXISTS (
+      SELECT 1 FROM public.parent_students ps
+      JOIN public.group_members gm ON gm.student_id = ps.student_id
+      WHERE ps.parent_id = v_caller_id
+        AND ps.student_id = v_target_student
+        AND gm.group_id = p_group_id
+        AND gm.status = 'active'
+    ) THEN
+      RAISE EXCEPTION 'NOT_AUTHORIZED';
+    END IF;
   ELSE
     RAISE EXCEPTION 'NOT_AUTHORIZED';
   END IF;
@@ -86,7 +98,7 @@ BEGIN
     SELECT 
       cg.id AS content_group_id,
       c.id AS content_id,
-      c.title,
+      COALESCE(cg.custom_title, c.title) AS title,
       c.description,
       cg.sort_order,
       c.type AS content_type,
@@ -100,8 +112,8 @@ BEGIN
       vp.progress_seconds AS video_progress_seconds,
       vp.furthest_position_seconds AS furthest_legitimate_position,
       vp.duration_seconds AS video_duration_seconds,
-      vp.percentage AS watched_coverage_percent,
-      COALESCE(vp.completed, false) AS video_completed,
+      vp.watched_coverage_percent,
+      COALESCE(vp.video_completed, false) AS video_completed,
       (
         SELECT MAX(ea.score) FROM public.exam_attempts ea
         WHERE ea.exam_id = cg.associated_exam_id AND ea.student_id = v_target_student AND ea.status = 'completed'
@@ -135,7 +147,19 @@ BEGIN
     LEFT JOIN public.files f ON f.id = cg.file_id
     LEFT JOIN public.exams e ON e.id = cg.associated_exam_id
     LEFT JOIN public.groups g ON g.id = p_group_id
-    LEFT JOIN public.video_progress vp ON vp.content_id = c.id AND vp.student_id = v_target_student
+    LEFT JOIN LATERAL (
+      SELECT 
+        COALESCE(vp.progress_seconds, 0) AS progress_seconds,
+        COALESCE(vp.furthest_position_seconds, 0) AS furthest_position_seconds,
+        COALESCE(vp.duration_seconds, v.duration, 0) AS duration_seconds,
+        COALESCE(vp.watched_coverage_percentage, vp.percentage, 0) AS watched_coverage_percent,
+        COALESCE(vp.completed, false) AS video_completed
+      FROM public.videos v
+      LEFT JOIN public.video_progress vp ON vp.video_id = v.id AND vp.student_id = v_target_student
+      WHERE v.content_id = c.id
+      ORDER BY v.created_at DESC
+      LIMIT 1
+    ) vp ON true
     WHERE cg.group_id = p_group_id
     ORDER BY cg.sort_order ASC
   ) LOOP
@@ -209,6 +233,7 @@ BEGIN
     v_result := v_result || jsonb_build_object(
       'content_group_id',              v_lesson_row.content_group_id,
       'content_id',                    v_lesson_row.content_id,
+      'group_id',                      p_group_id,
       'title',                         v_lesson_row.title,
       'description',                   v_lesson_row.description,
       'sort_order',                    v_lesson_row.sort_order,
@@ -226,6 +251,7 @@ BEGIN
       'progress_state',                v_progress_state,
       'unlock_source',                 v_unlock_source,
       
+      'last_position_seconds',         COALESCE(v_lesson_row.video_progress_seconds, 0),
       'video_progress_seconds',        COALESCE(v_lesson_row.video_progress_seconds, 0),
       'furthest_legitimate_position',  COALESCE(v_lesson_row.furthest_legitimate_position, 0),
       'video_duration_seconds',        COALESCE(v_lesson_row.video_duration_seconds, 0),

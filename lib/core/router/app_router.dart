@@ -28,6 +28,7 @@ import '../../features/videos/presentation/pages/video_player_page.dart';
 import '../../features/content/presentation/pages/teacher_content_library_page.dart';
 import '../../features/content/presentation/pages/teacher_video_bank_page.dart';
 import '../../features/content/presentation/pages/student_content_feed_page.dart';
+import '../../features/content/domain/entities/content_entity.dart';
 import '../../features/assignments/presentation/pages/teacher_assignments_page.dart';
 import '../../features/assignments/presentation/pages/student_assignments_page.dart';
 import '../../features/exams/presentation/pages/teacher_exams_page.dart';
@@ -319,12 +320,15 @@ class AppRouter {
             pageBuilder: (BuildContext context, GoRouterState state) {
               final groupId = state.uri.queryParameters['groupId'];
               final groupName = state.uri.queryParameters['name'];
+              final preselectedVideo =
+                  state.extra is ContentEntity ? state.extra as ContentEntity : null;
               return NoTransitionPage(
                 child: BlocProvider(
                   create: (_) => InjectionContainer.createContentCubit(),
                   child: TeacherContentLibraryPage(
                     groupId: groupId,
                     groupName: groupName,
+                    preselectedVideo: preselectedVideo,
                   ),
                 ),
               );
@@ -334,14 +338,20 @@ class AppRouter {
             path: teacherGroupContent,
             pageBuilder: (BuildContext context, GoRouterState state) {
               final rawGroupId = state.pathParameters['groupId'];
-              final groupId = rawGroupId != null ? GroupSlugResolver.toId(rawGroupId) : null;
-              final groupName = (state.extra as String?) ?? state.uri.queryParameters['name'];
+              final groupId =
+                  rawGroupId != null ? GroupSlugResolver.toId(rawGroupId) : null;
+              final extra = state.extra;
+              final groupName =
+                  (extra is String ? extra : null) ?? state.uri.queryParameters['name'];
+              final preselectedVideo =
+                  extra is ContentEntity ? extra : null;
               return NoTransitionPage(
                 child: BlocProvider(
                   create: (_) => InjectionContainer.createContentCubit(),
                   child: TeacherContentLibraryPage(
                     groupId: groupId,
                     groupName: groupName,
+                    preselectedVideo: preselectedVideo,
                   ),
                 ),
               );
