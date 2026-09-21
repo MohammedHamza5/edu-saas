@@ -9043,6 +9043,24 @@ abstract class AppLocalizations {
   /// **'Delete Lesson'**
   String get deleteLesson;
 
+  /// No description provided for @moveUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Move up'**
+  String get moveUp;
+
+  /// No description provided for @moveDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Move down'**
+  String get moveDown;
+
+  /// No description provided for @dragToReorder.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag to reorder'**
+  String get dragToReorder;
+
   /// No description provided for @nLessonsCount.
   ///
   /// In en, this message translates to:

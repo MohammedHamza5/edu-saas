@@ -6079,6 +6079,9 @@
   "hasLessonQuiz": "Lesson Quiz",
   "editLesson": "Edit Lesson",
   "deleteLesson": "Delete Lesson",
+  "moveUp": "Move up",
+  "moveDown": "Move down",
+  "dragToReorder": "Drag to reorder",
   "nLessonsCount": "{count, plural, one{1 Lesson} other{{count} Lessons}}",
   "@nLessonsCount": {
     "placeholders": {

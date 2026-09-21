@@ -1645,6 +1645,9 @@
   "hasLessonQuiz": "اختبار الدرس",
   "editLesson": "تعديل الدرس",
   "deleteLesson": "حذف الدرس",
+  "moveUp": "تحريك لأعلى",
+  "moveDown": "تحريك لأسفل",
+  "dragToReorder": "اسحب لإعادة الترتيب",
   "nLessonsCount": "{count, plural, one{درس واحد} other{{count} دروس}}",
   "@nLessonsCount": {
     "placeholders": {

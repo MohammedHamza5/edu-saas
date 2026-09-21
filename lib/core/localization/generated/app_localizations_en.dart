@@ -5051,6 +5051,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteLesson => 'Delete Lesson';
 
   @override
+  String get moveUp => 'Move up';
+
+  @override
+  String get moveDown => 'Move down';
+
+  @override
+  String get dragToReorder => 'Drag to reorder';
+
+  @override
   String nLessonsCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

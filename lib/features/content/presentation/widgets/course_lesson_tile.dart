@@ -30,6 +30,10 @@ class CourseLessonTile extends StatefulWidget {
 
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
+  final bool canMoveUp;
+  final bool canMoveDown;
+  final VoidCallback? onMoveUp;
+  final VoidCallback? onMoveDown;
 
   const CourseLessonTile({
     super.key,
@@ -40,6 +44,10 @@ class CourseLessonTile extends StatefulWidget {
     this.quizTitle,
     this.onEdit,
     this.onDelete,
+    this.canMoveUp = false,
+    this.canMoveDown = false,
+    this.onMoveUp,
+    this.onMoveDown,
   });
 
   @override
@@ -94,13 +102,74 @@ class _CourseLessonTileState extends State<CourseLessonTile> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Drag Handle
-              const Icon(
-                Icons.drag_indicator_rounded,
-                color: AppColors.textMuted,
-                size: 20,
+              // Drag Handle with proper ReorderableDragStartListener, grab cursor, and hit-testing
+              Tooltip(
+                message: l10n.dragToReorder,
+                child: MouseRegion(
+                  cursor: SystemMouseCursors.grab,
+                  child: ReorderableDragStartListener(
+                    index: widget.index,
+                    child: Container(
+                      color: Colors.transparent,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.s6,
+                        vertical: AppSpacing.s8,
+                      ),
+                      child: const Icon(
+                        Icons.drag_indicator_rounded,
+                        color: AppColors.textMuted,
+                        size: 22,
+                      ),
+                    ),
+                  ),
+                ),
               ),
-              const SizedBox(width: AppSpacing.s8),
+
+              // Move Up / Down Buttons
+              if (widget.onMoveUp != null || widget.onMoveDown != null) ...[
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Tooltip(
+                      message: l10n.moveUp,
+                      child: InkWell(
+                        onTap: widget.canMoveUp ? widget.onMoveUp : null,
+                        borderRadius: BorderRadius.circular(4),
+                        child: Padding(
+                          padding: const EdgeInsets.all(2),
+                          child: Icon(
+                            Icons.keyboard_arrow_up_rounded,
+                            size: 16,
+                            color: widget.canMoveUp
+                                ? AppColors.textSecondary
+                                : AppColors.textMuted.withValues(alpha: 0.25),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Tooltip(
+                      message: l10n.moveDown,
+                      child: InkWell(
+                        onTap: widget.canMoveDown ? widget.onMoveDown : null,
+                        borderRadius: BorderRadius.circular(4),
+                        child: Padding(
+                          padding: const EdgeInsets.all(2),
+                          child: Icon(
+                            Icons.keyboard_arrow_down_rounded,
+                            size: 16,
+                            color: widget.canMoveDown
+                                ? AppColors.textSecondary
+                                : AppColors.textMuted.withValues(alpha: 0.25),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(width: AppSpacing.s6),
+              ] else ...[
+                const SizedBox(width: AppSpacing.s6),
+              ],
 
               // Lesson Number Badge
               Container(
@@ -115,7 +184,7 @@ class _CourseLessonTileState extends State<CourseLessonTile> {
                 ),
                 child: Center(
                   child: Text(
-                    '${widget.index}',
+                    '${widget.index + 1}',
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w900,

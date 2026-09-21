@@ -386,6 +386,21 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                     newIdx,
                                   );
                                 },
+                                proxyDecorator: (child, index, animation) {
+                                  return AnimatedBuilder(
+                                    animation: animation,
+                                    builder: (context, child) {
+                                      return Material(
+                                        elevation: 8,
+                                        color: Colors.transparent,
+                                        shadowColor: Colors.black.withValues(alpha: 0.3),
+                                        borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                                        child: child,
+                                      );
+                                    },
+                                    child: child,
+                                  );
+                                },
                                 itemBuilder: (context, index) {
                                   final lesson = lessons[index];
                                   return CourseLessonTile(
@@ -395,6 +410,10 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                     lessonTitle: lesson.title, // If group configs had overrides, we'd pass it here
                                     hasPdf: lesson.file != null,
                                     quizTitle: lesson.associatedExamTitle,
+                                    canMoveUp: index > 0,
+                                    canMoveDown: index < lessons.length - 1,
+                                    onMoveUp: () => context.read<ContentCubit>().reorderItems(index, index - 1),
+                                    onMoveDown: () => context.read<ContentCubit>().reorderItems(index, index + 2),
                                     onEdit: () => _openEditLessonDialog(lesson),
                                     onDelete: () => _confirmDelete(lesson),
                                   );

@@ -20,6 +20,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:edu_saas/core/localization/generated/app_localizations.dart';
 
 import 'package:edu_saas/features/content/presentation/widgets/material_viewer_sheet.dart';
+import 'package:edu_saas/features/content/presentation/widgets/course_lesson_tile.dart';
 
 class _FakeContentRepository implements ContentRepository {
   List<ContentEntity> items;
@@ -627,6 +628,79 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('تعذر توليد رابط الوصول الآمن في الوقت الحالي'), findsOneWidget);
+    });
+
+    testWidgets('CourseLessonTile renders grab cursor, ReorderableDragStartListener, and 1-based index', (tester) async {
+      final sampleLesson = ContentEntity(
+        id: 'c-test-lesson',
+        tenantId: 't-1',
+        groupId: 'g-1',
+        title: 'المحاضرة التجريبية الأولى',
+        type: ContentType.video,
+        status: ContentStatus.published,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      bool movedUp = false;
+      bool movedDown = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          locale: const Locale('ar'),
+          supportedLocales: const [Locale('ar'), Locale('en')],
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          home: Scaffold(
+            body: CustomScrollView(
+              slivers: [
+                SliverReorderableList(
+                  itemCount: 1,
+                  onReorder: (_, __) {},
+                  itemBuilder: (context, index) => CourseLessonTile(
+                    key: const ValueKey('c-test-lesson'),
+                    content: sampleLesson,
+                    index: 0,
+                    canMoveUp: true,
+                    canMoveDown: true,
+                    onMoveUp: () => movedUp = true,
+                    onMoveDown: () => movedDown = true,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Verify 1-based index is rendered (should be "1", not "0")
+      expect(find.text('1'), findsOneWidget);
+      expect(find.text('0'), findsNothing);
+
+      // Verify ReorderableDragStartListener is present
+      expect(find.byType(ReorderableDragStartListener), findsOneWidget);
+
+      // Verify MouseRegion with grab cursor is present
+      final mouseRegionFinder = find.byWidgetPredicate(
+        (w) => w is MouseRegion && w.cursor == SystemMouseCursors.grab,
+      );
+      expect(mouseRegionFinder, findsOneWidget);
+
+      // Test move up button
+      await tester.tap(find.byIcon(Icons.keyboard_arrow_up_rounded));
+      await tester.pumpAndSettle();
+      expect(movedUp, isTrue);
+
+      // Test move down button
+      await tester.tap(find.byIcon(Icons.keyboard_arrow_down_rounded));
+      await tester.pumpAndSettle();
+      expect(movedDown, isTrue);
     });
   });
 }
