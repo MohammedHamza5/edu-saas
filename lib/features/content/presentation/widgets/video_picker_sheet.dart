@@ -18,20 +18,15 @@ class VideoPickerSheet extends StatefulWidget {
 
   /// Shows the picker and returns the selected [ContentEntity], or null if cancelled.
   static Future<ContentEntity?> show(BuildContext context) {
-    ContentCubit cubit;
-    try {
-      cubit = context.read<ContentCubit>();
-    } catch (_) {
-      cubit = InjectionContainer.createContentCubit();
-    }
+    final pickerCubit = InjectionContainer.createContentCubit();
 
     return showModalBottomSheet<ContentEntity>(
       context: context,
       isScrollControlled: true,
       useRootNavigator: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => BlocProvider.value(
-        value: cubit,
+      builder: (_) => BlocProvider(
+        create: (_) => pickerCubit..loadCentralVideoBank(forceRefresh: true),
         child: const VideoPickerSheet(),
       ),
     );
@@ -49,10 +44,7 @@ class _VideoPickerSheetState extends State<VideoPickerSheet> {
   @override
   void initState() {
     super.initState();
-    final cubit = context.read<ContentCubit>();
-    if (cubit.state is! ContentLoaded) {
-      cubit.loadCentralVideoBank();
-    }
+    context.read<ContentCubit>().loadCentralVideoBank(forceRefresh: true);
   }
 
   @override
@@ -164,7 +156,13 @@ class _VideoPickerSheetState extends State<VideoPickerSheet> {
                   return const Center(child: AppLoadingView());
                 }
                 final all = state is ContentLoaded
-                    ? state.items.where((i) => i.type == ContentType.video).toList()
+                    ? state.items
+                        .where((i) =>
+                            i.type == ContentType.video ||
+                            (i.videoProviderId != null &&
+                                i.videoProviderId!.isNotEmpty) ||
+                            (i.videoId != null && i.videoId!.isNotEmpty))
+                        .toList()
                     : <ContentEntity>[];
                 final filtered = _filter(all);
 

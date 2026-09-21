@@ -14,7 +14,7 @@ enum ContentType {
 
   static ContentType fromString(String val) {
     return switch (val.toLowerCase()) {
-      'video' => ContentType.video,
+      'video' || 'youtube' => ContentType.video,
       'pdf' => ContentType.pdf,
       'image' => ContentType.image,
       'assignment' => ContentType.assignment,

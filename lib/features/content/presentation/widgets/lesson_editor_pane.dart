@@ -11,7 +11,6 @@ import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../domain/entities/content_entity.dart';
 import '../cubit/content_cubit.dart';
-import '../cubit/content_state.dart';
 import '../dialogs/add_video_to_bank_dialog.dart';
 import 'video_picker_sheet.dart';
 
@@ -229,13 +228,8 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
   }
 
   Future<void> _pickVideoFromBank() async {
-    final cubit = context.read<ContentCubit>();
-    if (cubit.state is! ContentLoaded) {
-      await cubit.loadCentralVideoBank();
-    }
-    if (!mounted) return;
     final video = await VideoPickerSheet.show(context);
-    if (video != null) {
+    if (video != null && mounted) {
       setState(() {
         _selectedVideo = video;
         if (_titleController.text.isEmpty) {

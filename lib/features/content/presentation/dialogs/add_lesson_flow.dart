@@ -5,7 +5,6 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../domain/entities/content_entity.dart';
 import '../cubit/content_cubit.dart';
-import '../cubit/content_state.dart';
 import 'add_video_to_bank_dialog.dart';
 import 'lesson_setup_sheet.dart';
 import '../widgets/video_picker_sheet.dart';
@@ -80,13 +79,6 @@ class AddLessonFlow extends StatelessWidget {
     Navigator.of(context).pop(); // close choice dialog
 
     // Step 2a: Pick video from library
-    final contentCubit = context.read<ContentCubit>();
-    // Ensure bank is loaded
-    if (contentCubit.state is! ContentLoaded) {
-      await contentCubit.loadCentralVideoBank();
-    }
-
-    // ignore: use_build_context_synchronously
     final video = await VideoPickerSheet.show(context);
     if (video == null || !context.mounted) return;
 
@@ -129,7 +121,6 @@ class AddLessonFlow extends StatelessWidget {
     Navigator.of(context).pop(); // close choice dialog
 
     // Step 2b: Create new video in library
-    final contentCubit = context.read<ContentCubit>();
     ContentEntity? newVideo;
 
     await AddVideoToBankDialog.show(
@@ -140,10 +131,6 @@ class AddLessonFlow extends StatelessWidget {
     );
 
     if (newVideo == null || !context.mounted) return;
-
-    // Reload bank so the new video appears
-    await contentCubit.loadCentralVideoBank();
-    if (!context.mounted) return;
 
     // Step 3: Lesson setup with the newly created video
     final saved = await LessonSetupSheet.show(
