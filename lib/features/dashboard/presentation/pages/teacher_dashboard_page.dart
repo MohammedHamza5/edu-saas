@@ -63,7 +63,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
     // 2. Groups
     try {
       final cubit = context.read<GroupsCubit>();
-      if (cubit.state is GroupsLoaded || cubit.state is GroupsInitial) {
+      if (cubit.state is GroupsLoaded) {
         cubit.silentRefresh();
       } else {
         cubit.loadGroups();

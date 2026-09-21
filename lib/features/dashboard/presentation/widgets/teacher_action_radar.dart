@@ -10,6 +10,7 @@ import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/responsive_grid.dart';
 import '../../../dashboard/presentation/cubit/teacher_dashboard_state.dart';
 import '../../../groups/presentation/cubit/groups_state.dart';
+import '../../../groups/presentation/widgets/create_group_dialog.dart';
 
 
 /// رادار المتابعة والإنذار المبكر للمعلم
@@ -380,7 +381,7 @@ class TeacherActionRadar extends StatelessWidget {
 
         const SizedBox(height: AppSpacing.s24),
 
-        // Test-Prep Cohorts Section Header
+        // Study Groups Section Header (Dynamic for real teachers, academic preview fallback for tests)
         Row(
           children: [
             const Icon(
@@ -391,7 +392,9 @@ class TeacherActionRadar extends StatelessWidget {
             const SizedBox(width: AppSpacing.s8),
             Expanded(
               child: Text(
-                context.l10n.testPrepCohortsTitle,
+                groupsState != null
+                    ? context.l10n.navGroups
+                    : context.l10n.testPrepCohortsTitle,
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
@@ -403,7 +406,13 @@ class TeacherActionRadar extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          context.l10n.testPrepCohortsSubtitle,
+          groupsState is GroupsLoaded
+              ? (groupsState as GroupsLoaded).groups.isEmpty
+                  ? context.l10n.noGroupsAvailable
+                  : '${(groupsState as GroupsLoaded).groups.length} ${context.l10n.activeGroups}'
+              : groupsState != null
+                  ? context.l10n.navGroups
+                  : context.l10n.testPrepCohortsSubtitle,
           style: const TextStyle(
             fontSize: 12,
             color: AppColors.textSecondary,
@@ -497,7 +506,7 @@ class TeacherActionRadar extends StatelessWidget {
   }
 
   Widget _buildTestPrepCohortsList(BuildContext context) {
-    if (groupsState is GroupsLoading) {
+    if (groupsState is GroupsLoading || groupsState is GroupsInitial) {
       return const Center(
         child: Padding(
           padding: EdgeInsets.all(AppSpacing.s24),
@@ -506,8 +515,67 @@ class TeacherActionRadar extends StatelessWidget {
       );
     }
 
-    if (groupsState is GroupsLoaded && (groupsState as GroupsLoaded).groups.isNotEmpty) {
+    if (groupsState is GroupsLoaded) {
       final groups = (groupsState as GroupsLoaded).groups;
+      if (groups.isEmpty) {
+        return AppCard(
+          variant: AppCardVariant.standard,
+          padding: const EdgeInsets.all(AppSpacing.s24),
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.groups_outlined,
+                    color: AppColors.primary,
+                    size: 26,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.s12),
+                Text(
+                  context.l10n.noGroupsAvailable,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.s4),
+                Text(
+                  context.l10n.createGroupFirstNotice(context.l10n.navGroups),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.s16),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.add_rounded, size: 16),
+                  label: Text(context.l10n.createNewGroup),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.s16,
+                      vertical: AppSpacing.s10,
+                    ),
+                  ),
+                  onPressed: () => CreateGroupDialog.show(context),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+
       final colors = [
         const Color(0xFF818CF8), // Indigo
         const Color(0xFF2DD4BF), // Teal
