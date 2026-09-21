@@ -3889,6 +3889,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pickDateTooltip => 'Pick Specific Date';
 
   @override
+  String get todaySessionTooltip => 'Today';
+
+  @override
+  String get prevDayTooltip => 'Previous day';
+
+  @override
+  String get nextDayTooltip => 'Next day';
+
+  @override
+  String get sessionDateSubtitle => 'Attendance session date • Tap to change';
+
+  @override
   String get selectGroupToViewAttendanceMessage =>
       'Select a Study Group\nPlease choose a group from the list above to view students and monitor lecture completion.';
 
@@ -5253,4 +5265,60 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get sequentialLearningDesc =>
       'Students must complete each lesson\'s video and pass the lesson quiz before the next lesson unlocks.';
+
+  @override
+  String get lessonEditorErrorSelectVideo => 'Please select a video first.';
+
+  @override
+  String get lessonEditorErrorSaving => 'An error occurred while saving.';
+
+  @override
+  String get lessonEditorEditTitle => 'Edit Lesson';
+
+  @override
+  String get lessonEditorAddTitle => 'Add New Lesson';
+
+  @override
+  String get lessonEditorSourceVideo => 'Source Video';
+
+  @override
+  String get lessonEditorChangeVideo => 'Change Video';
+
+  @override
+  String get lessonEditorSelectFromLibrary => 'Select from Library';
+
+  @override
+  String get lessonEditorUploadNew => 'Upload New';
+
+  @override
+  String get lessonEditorLessonTitle => 'Lesson Title (Optional Override)';
+
+  @override
+  String get lessonEditorLessonTitleHint => 'Enter lesson title';
+
+  @override
+  String get lessonEditorStudyMaterial => 'Study Material (PDF)';
+
+  @override
+  String get lessonEditorUploadPdf => 'Upload PDF';
+
+  @override
+  String get lessonEditorLessonQuiz => 'Lesson Quiz';
+
+  @override
+  String get lessonEditorNoQuizzes => 'No quizzes available in this group.';
+
+  @override
+  String get lessonEditorNoQuiz => 'No Quiz';
+
+  @override
+  String get lessonEditorPassingScoreReq => 'Passing Score Requirements';
+
+  @override
+  String get lessonEditorCustomPassingScore => 'Custom Passing Score';
+
+  @override
+  String lessonEditorDefaultPassingScore(int score) {
+    return 'Using default group passing score ($score%)';
+  }
 }

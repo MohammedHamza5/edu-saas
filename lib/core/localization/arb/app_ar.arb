@@ -887,6 +887,10 @@
   "prevLectureTooltip": "المحاضرة السابقة",
   "nextLectureTooltip": "المحاضرة التالية",
   "pickDateTooltip": "اختيار تاريخ محدد",
+  "todaySessionTooltip": "اليوم الحالي",
+  "prevDayTooltip": "اليوم السابق",
+  "nextDayTooltip": "اليوم التالي",
+  "sessionDateSubtitle": "تاريخ جلسة الحضور • اضغط للتغيير",
   "selectGroupToViewAttendanceMessage": "اختر مجموعة دراسية\nيرجى اختيار مجموعة من القائمة بالأعلى لعرض الطلاب ومتابعة إتمام المشاهدة.",
   "noStudentsInGroupMessage": "لا يوجد طلاب في هذه المجموعة\nلم يتم إضافة أي طالب نشط إلى هذه المجموعة بعد.",
   "attendedLectureTitle": "أتموا المشاهدة (حاضر)",
@@ -1762,5 +1766,30 @@
   "manageLessons": "إدارة الدروس",
   "sequentialLearning": "التعلم التسلسلي",
   "sequentialLearningDesc": "يجب على الطلاب إكمال فيديو الدرس واجتياز الاختبار قبل أن يُفتح الدرس التالي.",
-  "defaultLessonPassingScore": "درجة النجاح الافتراضية للاختبار"
+  "defaultLessonPassingScore": "درجة النجاح الافتراضية للاختبار",
+  "lessonEditorErrorSelectVideo": "يرجى اختيار فيديو أولاً.",
+  "lessonEditorErrorSaving": "حدث خطأ أثناء الحفظ.",
+  "lessonEditorEditTitle": "تعديل الدرس",
+  "lessonEditorAddTitle": "إضافة درس جديد",
+  "lessonEditorSourceVideo": "الفيديو المصدر",
+  "lessonEditorChangeVideo": "تغيير الفيديو",
+  "lessonEditorSelectFromLibrary": "اختيار من المكتبة",
+  "lessonEditorUploadNew": "رفع جديد",
+  "lessonEditorLessonTitle": "عنوان الدرس (تجاوز اختياري)",
+  "lessonEditorLessonTitleHint": "أدخل عنوان الدرس",
+  "lessonEditorStudyMaterial": "المادة الدراسية (PDF)",
+  "lessonEditorUploadPdf": "رفع PDF",
+  "lessonEditorLessonQuiz": "اختبار الدرس",
+  "lessonEditorNoQuizzes": "لا توجد اختبارات متاحة في هذه المجموعة.",
+  "lessonEditorNoQuiz": "بدون اختبار",
+  "lessonEditorPassingScoreReq": "متطلبات درجة النجاح",
+  "lessonEditorCustomPassingScore": "درجة نجاح مخصصة",
+  "lessonEditorDefaultPassingScore": "استخدام درجة النجاح الافتراضية للمجموعة ({score}%)",
+  "@lessonEditorDefaultPassingScore": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  }
 }

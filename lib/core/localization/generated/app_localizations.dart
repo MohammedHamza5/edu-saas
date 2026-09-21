@@ -6997,6 +6997,30 @@ abstract class AppLocalizations {
   /// **'Pick Specific Date'**
   String get pickDateTooltip;
 
+  /// Jump to today tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get todaySessionTooltip;
+
+  /// Previous day tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Previous day'**
+  String get prevDayTooltip;
+
+  /// Next day tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Next day'**
+  String get nextDayTooltip;
+
+  /// Session date subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance session date • Tap to change'**
+  String get sessionDateSubtitle;
+
   /// Select group empty message
   ///
   /// In en, this message translates to:
@@ -9366,6 +9390,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Students must complete each lesson\'s video and pass the lesson quiz before the next lesson unlocks.'**
   String get sequentialLearningDesc;
+
+  /// Error when no video selected
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a video first.'**
+  String get lessonEditorErrorSelectVideo;
+
+  /// Error saving lesson
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred while saving.'**
+  String get lessonEditorErrorSaving;
+
+  /// Edit lesson dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Lesson'**
+  String get lessonEditorEditTitle;
+
+  /// Add new lesson dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Add New Lesson'**
+  String get lessonEditorAddTitle;
+
+  /// Source video section title
+  ///
+  /// In en, this message translates to:
+  /// **'Source Video'**
+  String get lessonEditorSourceVideo;
+
+  /// Tooltip to change video
+  ///
+  /// In en, this message translates to:
+  /// **'Change Video'**
+  String get lessonEditorChangeVideo;
+
+  /// Button to select video from library
+  ///
+  /// In en, this message translates to:
+  /// **'Select from Library'**
+  String get lessonEditorSelectFromLibrary;
+
+  /// Button to upload new video
+  ///
+  /// In en, this message translates to:
+  /// **'Upload New'**
+  String get lessonEditorUploadNew;
+
+  /// Lesson title field label
+  ///
+  /// In en, this message translates to:
+  /// **'Lesson Title (Optional Override)'**
+  String get lessonEditorLessonTitle;
+
+  /// Hint for lesson title field
+  ///
+  /// In en, this message translates to:
+  /// **'Enter lesson title'**
+  String get lessonEditorLessonTitleHint;
+
+  /// Study material section title
+  ///
+  /// In en, this message translates to:
+  /// **'Study Material (PDF)'**
+  String get lessonEditorStudyMaterial;
+
+  /// Upload PDF button
+  ///
+  /// In en, this message translates to:
+  /// **'Upload PDF'**
+  String get lessonEditorUploadPdf;
+
+  /// Lesson quiz section title
+  ///
+  /// In en, this message translates to:
+  /// **'Lesson Quiz'**
+  String get lessonEditorLessonQuiz;
+
+  /// Message when no quizzes are available
+  ///
+  /// In en, this message translates to:
+  /// **'No quizzes available in this group.'**
+  String get lessonEditorNoQuizzes;
+
+  /// Dropdown item for no quiz
+  ///
+  /// In en, this message translates to:
+  /// **'No Quiz'**
+  String get lessonEditorNoQuiz;
+
+  /// Passing score section title
+  ///
+  /// In en, this message translates to:
+  /// **'Passing Score Requirements'**
+  String get lessonEditorPassingScoreReq;
+
+  /// Custom passing score field label
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Passing Score'**
+  String get lessonEditorCustomPassingScore;
+
+  /// Message for default passing score
+  ///
+  /// In en, this message translates to:
+  /// **'Using default group passing score ({score}%)'**
+  String lessonEditorDefaultPassingScore(int score);
 }
 
 class _AppLocalizationsDelegate

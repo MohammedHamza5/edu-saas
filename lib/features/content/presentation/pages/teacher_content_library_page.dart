@@ -48,15 +48,15 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
   String? _selectedGroupId;
   String? _selectedGroupName;
 
-  bool _isEditing = false;
-  ContentEntity? _editingLesson;
-
   @override
   void initState() {
     super.initState();
     if (widget.preselectedVideo != null) {
-      _isEditing = true;
-      _editingLesson = widget.preselectedVideo;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_selectedGroupId != null) {
+          _openEditLessonDialog(widget.preselectedVideo);
+        }
+      });
     }
     final initialId = widget.groupId ?? TeacherGroupFilterBar.lastSelectedGroupId;
     GroupsState? groupsState;
@@ -107,29 +107,69 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
 
   void _handleAddLesson() {
     if (_selectedGroupId == null) return;
-    setState(() {
-      _isEditing = true;
-      _editingLesson = null;
-    });
+    _showLessonEditorSheet(null);
   }
 
-  void _openEditLessonDialog(ContentEntity content) {
+  void _openEditLessonDialog(ContentEntity? content) {
     if (_selectedGroupId == null) return;
-    setState(() {
-      _isEditing = true;
-      _editingLesson = content;
-    });
+    _showLessonEditorSheet(content);
   }
 
-  void _closeEditor() {
-    setState(() {
-      _isEditing = false;
-      _editingLesson = null;
-    });
+  void _showLessonEditorSheet(ContentEntity? lesson) {
+    if (_selectedGroupId == null) return;
+
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      useRootNavigator: true,
+      builder: (ctx) {
+        return Container(
+          height: MediaQuery.of(ctx).size.height * 0.9,
+          decoration: const BoxDecoration(
+            color: AppColors.background,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            children: [
+              // Handle
+              Center(
+                child: Container(
+                  margin: const EdgeInsets.only(top: 12, bottom: 12),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppColors.border,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: BlocProvider.value(
+                  value: context.read<ContentCubit>(),
+                  child: LessonEditorPane(
+                    editingLesson: lesson,
+                    groupId: _selectedGroupId!,
+                    groupName: _selectedGroupName ?? '',
+                    defaultPassingScore: 70,
+                    onSaved: () {
+                      Navigator.of(ctx).pop();
+                      _onLessonSaved();
+                    },
+                    onCancel: () {
+                      Navigator.of(ctx).pop();
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   Future<void> _onLessonSaved() async {
-    _closeEditor();
     await _loadContent(forceRefresh: true);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -179,9 +219,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
           icon: const Icon(Icons.arrow_back_rounded),
           tooltip: context.l10n.backTooltip,
           onPressed: () {
-            if (_isEditing && MediaQuery.of(context).size.width < 900) {
-              _closeEditor();
-            } else if (context.canPop()) {
+            if (context.canPop()) {
               context.pop();
             } else {
               context.go(AppRoutes.teacherDashboard);
@@ -411,46 +449,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                 );
               }
 
-              // Calculate Master-Detail layout based on screen width
-              final isWide = MediaQuery.of(context).size.width >= 900;
-              final showMaster = isWide || !_isEditing;
-              final showDetail = isWide || _isEditing;
-
-              return Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (showMaster)
-                    Expanded(
-                      flex: isWide ? 4 : 10,
-                      child: bodyContent,
-                    ),
-                  if (isWide && showDetail)
-                    const SizedBox(width: AppSpacing.s24),
-                  if (showDetail)
-                    Expanded(
-                      flex: isWide ? 6 : 10,
-                      child: _isEditing || isWide
-                          ? Padding(
-                              padding: EdgeInsets.only(
-                                top: AppSpacing.s12,
-                                bottom: isWide ? AppSpacing.s24 : 0,
-                              ),
-                              child: _selectedGroupId == null
-                                  ? const SizedBox.shrink()
-                                  : LessonEditorPane(
-                                      key: ValueKey(_editingLesson?.id ?? 'new'),
-                                      editingLesson: _editingLesson,
-                                      groupId: _selectedGroupId!,
-                                      groupName: _selectedGroupName ?? '',
-                                      defaultPassingScore: 70,
-                                      onSaved: _onLessonSaved,
-                                      onCancel: _closeEditor,
-                                    ),
-                            )
-                          : const SizedBox.shrink(),
-                    ),
-                ],
-              );
+              return bodyContent;
             },
           ),
         ),

@@ -127,7 +127,18 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
               final stats = state.stats;
 
               if (records.isEmpty) {
-                return _buildOnlineLecturesRoadmap(context);
+                return RefreshIndicator(
+                  onRefresh: () async => _loadData(),
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppSpacing.s24),
+                      child: AppEmptyView(
+                        message: context.l10n.noAttendanceRecordsMessage,
+                        icon: Icons.event_busy_rounded,
+                      ),
+                    ),
+                  ),
+                );
               }
 
               final displayedRecords = records.where((r) {
@@ -619,192 +630,6 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
     );
   }
 
-  static const List<Map<String, String>> _lectures = [
-    {
-      'title': 'المحاضرة 1: مراجعة الجبر والنسب والمعادلات',
-      'duration': 'ساعتان • 120 دقيقة',
-      'date': '2026/09/01',
-    },
-    {
-      'title': 'المحاضرة 2: الهندسة المستوية وحساب المثلثات',
-      'duration': 'ساعتان • 115 دقيقة',
-      'date': '2026/09/08',
-    },
-    {
-      'title': 'المحاضرة 3: الدوال التربيعية ومتعددات الحدود',
-      'duration': 'ساعتان • 125 دقيقة',
-      'date': '2026/09/15',
-    },
-    {
-      'title': 'المحاضرة 4: الإحصاء وتحليل البيانات والاحتمالات',
-      'duration': 'ساعتان • 110 دقيقة',
-      'date': '2026/09/22',
-    },
-    {
-      'title': 'المحاضرة 5: تطبيقات الدوال الأسية والجذور',
-      'duration': 'ساعتان • 130 دقيقة',
-      'date': '2026/09/29',
-    },
-    {
-      'title': 'المحاضرة 6: المتتاليات والمتسلسلات والأولمبياد',
-      'duration': 'ساعتان • 120 دقيقة',
-      'date': '2026/10/06',
-    },
-  ];
-
-  Widget _buildOnlineLecturesRoadmap(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return SingleChildScrollView(
-      padding: context.responsivePagePadding,
-      child: ResponsiveContainer(
-        maxWidth: ResponsiveBreakpoints.maxContentWidth,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header Card
-            AppCard(
-              variant: AppCardVariant.elevated,
-              padding: const EdgeInsets.all(AppSpacing.s16),
-              child: Row(
-                children: [
-                  Container(
-                    width: 46,
-                    height: 46,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                    ),
-                    child: const Icon(
-                      Icons.ondemand_video_rounded,
-                      color: AppColors.primary,
-                      size: 26,
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.s16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          context.l10n.lecturesRoadmapTitle,
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          context.l10n.lecturesRoadmapSubtitle,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: AppSpacing.s16),
-
-            // Section Title
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: Text(
-                context.l10n.previousSessionsTitle,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.s12),
-
-            // Lectures List
-            ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: _lectures.length,
-              separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.s12),
-              itemBuilder: (ctx, index) {
-                final lecture = _lectures[index];
-                return AppCard(
-                  variant: AppCardVariant.elevated,
-                  padding: const EdgeInsets.all(AppSpacing.s16),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 46,
-                        height: 46,
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryLight.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                        ),
-                        child: Center(
-                          child: Text(
-                            '${index + 1}',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.primary,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.s16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              lecture['title']!,
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.textPrimary,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '${lecture['date']} • ${lecture['duration']}',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: AppColors.success.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                          border: Border.all(
-                            color: AppColors.success.withValues(alpha: 0.25),
-                          ),
-                        ),
-                        child: Text(
-                          context.l10n.recordedSessionAvailable,
-                          style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.success,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }
 
 class _AttendanceHistoryItemCard extends StatefulWidget {

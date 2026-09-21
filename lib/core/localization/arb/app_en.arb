@@ -5269,6 +5269,22 @@
   "@pickDateTooltip": {
     "description": "Pick specific date tooltip"
   },
+  "todaySessionTooltip": "Today",
+  "@todaySessionTooltip": {
+    "description": "Jump to today tooltip"
+  },
+  "prevDayTooltip": "Previous day",
+  "@prevDayTooltip": {
+    "description": "Previous day tooltip"
+  },
+  "nextDayTooltip": "Next day",
+  "@nextDayTooltip": {
+    "description": "Next day tooltip"
+  },
+  "sessionDateSubtitle": "Attendance session date • Tap to change",
+  "@sessionDateSubtitle": {
+    "description": "Session date subtitle"
+  },
   "selectGroupToViewAttendanceMessage": "Select a Study Group\nPlease choose a group from the list above to view students and monitor lecture completion.",
   "@selectGroupToViewAttendanceMessage": {
     "description": "Select group empty message"
@@ -6184,5 +6200,83 @@
   "manageLessons": "Manage Lessons",
   "sequentialLearning": "Sequential Learning",
   "sequentialLearningDesc": "Students must complete each lesson's video and pass the lesson quiz before the next lesson unlocks.",
-  "defaultLessonPassingScore": "Default Lesson Quiz Passing Score"
+  "defaultLessonPassingScore": "Default Lesson Quiz Passing Score",
+  "lessonEditorErrorSelectVideo": "Please select a video first.",
+  "@lessonEditorErrorSelectVideo": {
+    "description": "Error when no video selected"
+  },
+  "lessonEditorErrorSaving": "An error occurred while saving.",
+  "@lessonEditorErrorSaving": {
+    "description": "Error saving lesson"
+  },
+  "lessonEditorEditTitle": "Edit Lesson",
+  "@lessonEditorEditTitle": {
+    "description": "Edit lesson dialog title"
+  },
+  "lessonEditorAddTitle": "Add New Lesson",
+  "@lessonEditorAddTitle": {
+    "description": "Add new lesson dialog title"
+  },
+  "lessonEditorSourceVideo": "Source Video",
+  "@lessonEditorSourceVideo": {
+    "description": "Source video section title"
+  },
+  "lessonEditorChangeVideo": "Change Video",
+  "@lessonEditorChangeVideo": {
+    "description": "Tooltip to change video"
+  },
+  "lessonEditorSelectFromLibrary": "Select from Library",
+  "@lessonEditorSelectFromLibrary": {
+    "description": "Button to select video from library"
+  },
+  "lessonEditorUploadNew": "Upload New",
+  "@lessonEditorUploadNew": {
+    "description": "Button to upload new video"
+  },
+  "lessonEditorLessonTitle": "Lesson Title (Optional Override)",
+  "@lessonEditorLessonTitle": {
+    "description": "Lesson title field label"
+  },
+  "lessonEditorLessonTitleHint": "Enter lesson title",
+  "@lessonEditorLessonTitleHint": {
+    "description": "Hint for lesson title field"
+  },
+  "lessonEditorStudyMaterial": "Study Material (PDF)",
+  "@lessonEditorStudyMaterial": {
+    "description": "Study material section title"
+  },
+  "lessonEditorUploadPdf": "Upload PDF",
+  "@lessonEditorUploadPdf": {
+    "description": "Upload PDF button"
+  },
+  "lessonEditorLessonQuiz": "Lesson Quiz",
+  "@lessonEditorLessonQuiz": {
+    "description": "Lesson quiz section title"
+  },
+  "lessonEditorNoQuizzes": "No quizzes available in this group.",
+  "@lessonEditorNoQuizzes": {
+    "description": "Message when no quizzes are available"
+  },
+  "lessonEditorNoQuiz": "No Quiz",
+  "@lessonEditorNoQuiz": {
+    "description": "Dropdown item for no quiz"
+  },
+  "lessonEditorPassingScoreReq": "Passing Score Requirements",
+  "@lessonEditorPassingScoreReq": {
+    "description": "Passing score section title"
+  },
+  "lessonEditorCustomPassingScore": "Custom Passing Score",
+  "@lessonEditorCustomPassingScore": {
+    "description": "Custom passing score field label"
+  },
+  "lessonEditorDefaultPassingScore": "Using default group passing score ({score}%)",
+  "@lessonEditorDefaultPassingScore": {
+    "description": "Message for default passing score",
+    "placeholders": {
+      "score": {
+        "type": "int",
+        "example": "70"
+      }
+    }
+  }
 }

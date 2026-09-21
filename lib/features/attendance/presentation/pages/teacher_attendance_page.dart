@@ -22,6 +22,7 @@ import '../cubit/attendance_state.dart';
 import '../widgets/attendance_stat_card.dart';
 import '../widgets/student_attendance_row_card.dart';
 import '../../../../core/widgets/teacher_group_filter_bar.dart';
+import '../../../groups/presentation/widgets/create_group_dialog.dart';
 
 class TeacherAttendancePage extends StatefulWidget {
   final String? initialGroupId;
@@ -44,57 +45,7 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   AttendanceStatus? _statusFilter;
-  int _selectedLectureIndex = 0;
 
-  static const List<Map<String, String>> _lectures = [
-    {
-      'title': 'المحاضرة 1: مراجعة الجبر والنسب والمعادلات',
-      'duration': 'ساعتان • 120 دقيقة',
-      'date': '2026/09/01',
-    },
-    {
-      'title': 'المحاضرة 2: الهندسة المستوية وحساب المثلثات',
-      'duration': 'ساعتان • 115 دقيقة',
-      'date': '2026/09/08',
-    },
-    {
-      'title': 'المحاضرة 3: الدوال التربيعية ومتعددات الحدود',
-      'duration': 'ساعتان • 125 دقيقة',
-      'date': '2026/09/15',
-    },
-    {
-      'title': 'المحاضرة 4: الإحصاء وتحليل البيانات والاحتمالات',
-      'duration': 'ساعتان • 110 دقيقة',
-      'date': '2026/09/22',
-    },
-    {
-      'title': 'المحاضرة 5: تطبيقات الدوال الأسية والجذور',
-      'duration': 'ساعتان • 130 دقيقة',
-      'date': '2026/09/29',
-    },
-    {
-      'title': 'المحاضرة 6: المتتاليات والمتسلسلات والأولمبياد',
-      'duration': 'ساعتان • 120 دقيقة',
-      'date': '2026/10/06',
-    },
-  ];
-
-  void _onLectureChanged(int newIndex) {
-    if (newIndex < 0 || newIndex >= _lectures.length) return;
-    setState(() {
-      _selectedLectureIndex = newIndex;
-      final parts = _lectures[newIndex]['date']!.split('/');
-      _selectedDate = DateTime(
-        int.parse(parts[0]),
-        int.parse(parts[1]),
-        int.parse(parts[2]),
-      );
-    });
-    _loadAttendance();
-  }
-
-  void _prevLecture() => _onLectureChanged(_selectedLectureIndex - 1);
-  void _nextLecture() => _onLectureChanged(_selectedLectureIndex + 1);
 
   @override
   void initState() {
@@ -141,6 +92,18 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
       _selectedDate = date;
     });
     _loadAttendance();
+  }
+
+  void _prevDay() {
+    _onDatePicked(_selectedDate.subtract(const Duration(days: 1)));
+  }
+
+  void _nextDay() {
+    _onDatePicked(_selectedDate.add(const Duration(days: 1)));
+  }
+
+  void _jumpToToday() {
+    _onDatePicked(DateTime.now());
   }
 
   Future<void> _loadAttendance({bool forceRefresh = false}) async {
@@ -272,7 +235,7 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
             );
 
             if (groupsCubit != null) {
-              bodyContent = BlocListener<GroupsCubit, GroupsState>(
+              return BlocConsumer<GroupsCubit, GroupsState>(
                 bloc: groupsCubit,
                 listener: (context, groupsState) {
                   if (groupsState is GroupsLoaded && groupsState.groups.isNotEmpty) {
@@ -290,7 +253,98 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
                     }
                   }
                 },
-                child: bodyContent,
+                builder: (context, groupsState) {
+                  if (groupsState is GroupsLoaded && groupsState.groups.isEmpty) {
+                    return Center(
+                      child: ResponsiveContainer(
+                        maxWidth: ResponsiveBreakpoints.maxContentWidth,
+                        child: Column(
+                          children: [
+                            _buildHeroHeader(context),
+                            Expanded(
+                              child: Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(AppSpacing.s24),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(AppSpacing.s32),
+                                    constraints: const BoxConstraints(maxWidth: 480),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.surface,
+                                      borderRadius: BorderRadius.circular(AppSpacing.radiusLarge),
+                                      border: Border.all(color: AppColors.border),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withValues(alpha: 0.03),
+                                          blurRadius: 10,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(AppSpacing.s16),
+                                          decoration: BoxDecoration(
+                                            color: AppColors.primary.withValues(alpha: 0.1),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Icon(
+                                            Icons.group_add_rounded,
+                                            size: 48,
+                                            color: AppColors.primary,
+                                          ),
+                                        ),
+                                        const SizedBox(height: AppSpacing.s20),
+                                        Text(
+                                          context.l10n.noGroupsYet,
+                                          style: const TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                            color: AppColors.textPrimary,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                        const SizedBox(height: AppSpacing.s8),
+                                        Text(
+                                          context.l10n.noGroupsCreatedYetDesc,
+                                          style: const TextStyle(
+                                            fontSize: 13,
+                                            color: AppColors.textSecondary,
+                                            height: 1.4,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                        const SizedBox(height: AppSpacing.s24),
+                                        ElevatedButton.icon(
+                                          onPressed: () => CreateGroupDialog.show(context),
+                                          icon: const Icon(Icons.add_rounded, size: 20),
+                                          label: Text(context.l10n.createGroupAction),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: AppColors.primary,
+                                            foregroundColor: Colors.white,
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: AppSpacing.s24,
+                                              vertical: AppSpacing.s12,
+                                            ),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+                  return bodyContent;
+                },
               );
             }
 
@@ -415,94 +469,8 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
     );
   }
 
-  void _showLecturePicker(BuildContext context) {
-    showModalBottomSheet<void>(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppSpacing.radiusLarge)),
-      ),
-      builder: (modalCtx) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.s16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.video_library_rounded, color: AppColors.primary, size: 22),
-                    const SizedBox(width: AppSpacing.s8),
-                    Text(
-                      context.l10n.selectRecordedLectureTitle,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.s12),
-                Flexible(
-                  child: ListView.separated(
-                    shrinkWrap: true,
-                    itemCount: _lectures.length,
-                    separatorBuilder: (_, __) => const Divider(height: 1),
-                    itemBuilder: (ctx, i) {
-                      final lec = _lectures[i];
-                      final isSelected = i == _selectedLectureIndex;
-                      return ListTile(
-                        selected: isSelected,
-                        selectedTileColor: AppColors.primary.withValues(alpha: 0.08),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                        ),
-                        leading: CircleAvatar(
-                          radius: 16,
-                          backgroundColor: isSelected ? AppColors.primary : AppColors.surfaceVariant,
-                          child: Text(
-                            '${i + 1}',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: isSelected ? Colors.white : AppColors.textPrimary,
-                            ),
-                          ),
-                        ),
-                        title: Text(
-                          lec['title']!,
-                          style: TextStyle(
-                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                            fontSize: 13,
-                          ),
-                        ),
-                        subtitle: Text(
-                          '${lec['duration']} • نُشرت: ${lec['date']}',
-                          style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
-                        ),
-                        trailing: isSelected
-                            ? const Icon(Icons.check_circle_rounded, color: AppColors.primary, size: 20)
-                            : null,
-                        onTap: () {
-                          Navigator.of(modalCtx).pop();
-                          _onLectureChanged(i);
-                        },
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   Widget _buildHeaderBar(BuildContext context, String formattedDate) {
     final isCompact = context.screenWidth < 600;
-    final currentLecture = _lectures[_selectedLectureIndex];
 
     final groupSelector = BlocBuilder<GroupsCubit, GroupsState>(
       builder: (context, groupsState) {
@@ -561,7 +529,7 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
       },
     );
 
-    final lectureSelectorSection = Container(
+    final dateSelectorSection = Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.s6,
         vertical: 4,
@@ -579,14 +547,14 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
               size: 22,
               color: AppColors.primary,
             ),
-            tooltip: context.l10n.prevLectureTooltip,
+            tooltip: context.l10n.prevDayTooltip,
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
-            onPressed: _selectedLectureIndex > 0 ? _prevLecture : null,
+            onPressed: _prevDay,
           ),
           Expanded(
             child: InkWell(
-              onTap: () => _showLecturePicker(context),
+              onTap: () => _selectDate(context),
               borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
               child: Padding(
                 padding: const EdgeInsets.symmetric(
@@ -596,8 +564,8 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
                 child: Row(
                   children: [
                     const Icon(
-                      Icons.play_circle_filled_rounded,
-                      size: 18,
+                      Icons.event_note_rounded,
+                      size: 20,
                       color: AppColors.primary,
                     ),
                     const SizedBox(width: AppSpacing.s8),
@@ -607,16 +575,16 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            currentLecture['title']!,
+                            formattedDate,
                             style: const TextStyle(
-                              fontSize: 12,
+                              fontSize: 13,
                               fontWeight: FontWeight.w700,
                               color: AppColors.textPrimary,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
-                            '${currentLecture['duration']} • ${currentLecture['date']}',
+                            context.l10n.sessionDateSubtitle,
                             style: const TextStyle(
                               fontSize: 10,
                               color: AppColors.textSecondary,
@@ -638,21 +606,21 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
               size: 22,
               color: AppColors.primary,
             ),
-            tooltip: context.l10n.nextLectureTooltip,
+            tooltip: context.l10n.nextDayTooltip,
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
-            onPressed: _selectedLectureIndex < _lectures.length - 1 ? _nextLecture : null,
+            onPressed: _nextDay,
           ),
           IconButton(
             icon: const Icon(
-              Icons.calendar_month_outlined,
+              Icons.today_rounded,
               size: 18,
-              color: AppColors.textSecondary,
+              color: AppColors.primary,
             ),
-            tooltip: context.l10n.pickDateTooltip,
+            tooltip: context.l10n.todaySessionTooltip,
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 32, minHeight: 34),
-            onPressed: () => _selectDate(context),
+            onPressed: _jumpToToday,
           ),
         ],
       ),
@@ -669,14 +637,14 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
               children: [
                 groupSelector,
                 const SizedBox(height: AppSpacing.s10),
-                lectureSelectorSection,
+                dateSelectorSection,
               ],
             )
           : Row(
               children: [
                 Expanded(flex: 3, child: groupSelector),
                 const SizedBox(width: AppSpacing.s12),
-                Expanded(flex: 4, child: lectureSelectorSection),
+                Expanded(flex: 4, child: dateSelectorSection),
               ],
             ),
     );

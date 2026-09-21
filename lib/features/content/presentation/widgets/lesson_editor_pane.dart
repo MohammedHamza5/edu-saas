@@ -173,7 +173,7 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
   Future<void> _handleSave() async {
     if (_selectedVideo == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a video first.')),
+        SnackBar(content: Text(context.l10n.lessonEditorErrorSelectVideo)),
       );
       return;
     }
@@ -217,8 +217,8 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('An error occurred while saving.'),
+          SnackBar(
+            content: Text(context.l10n.lessonEditorErrorSaving),
             backgroundColor: AppColors.error,
           ),
         );
@@ -266,7 +266,7 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
               children: [
                 Expanded(
                   child: Text(
-                    isEditing ? 'Edit Lesson' : 'Add New Lesson',
+                    isEditing ? context.l10n.lessonEditorEditTitle : context.l10n.lessonEditorAddTitle,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -291,7 +291,7 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
                 children: [
                   // 1. Source Video Selection
                   Text(
-                    'Source Video',
+                    context.l10n.lessonEditorSourceVideo,
                     style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
@@ -324,7 +324,7 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
                               icon: const Icon(Icons.change_circle_outlined,
                                   color: AppColors.primary),
                               onPressed: _pickVideoFromBank,
-                              tooltip: 'Change Video',
+                              tooltip: context.l10n.lessonEditorChangeVideo,
                             ),
                         ],
                       ),
@@ -334,7 +334,7 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
                       children: [
                         Expanded(
                           child: AppButton(
-                            text: 'Select from Library',
+                            text: context.l10n.lessonEditorSelectFromLibrary,
                             icon: Icons.video_library_rounded,
                             onPressed: _pickVideoFromBank,
                             variant: AppButtonVariant.outlined,
@@ -343,7 +343,7 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
                         const SizedBox(width: AppSpacing.s8),
                         Expanded(
                           child: AppButton(
-                            text: 'Upload New',
+                            text: context.l10n.lessonEditorUploadNew,
                             icon: Icons.cloud_upload_rounded,
                             onPressed: () async {
                               await AddVideoToBankDialog.show(
@@ -367,7 +367,7 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
 
                   // 2. Lesson Title
                   Text(
-                    'Lesson Title (Optional Override)',
+                    context.l10n.lessonEditorLessonTitle,
                     style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
@@ -375,13 +375,13 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
                   const SizedBox(height: AppSpacing.s8),
                   AppTextField(
                     controller: _titleController,
-                    hintText: _selectedVideo?.title ?? 'Enter lesson title',
+                    hintText: _selectedVideo?.title ?? context.l10n.lessonEditorLessonTitleHint,
                   ),
                   const SizedBox(height: AppSpacing.s24),
 
                   // 3. Attach PDF
                   Text(
-                    'Study Material (PDF)',
+                    context.l10n.lessonEditorStudyMaterial,
                     style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
@@ -425,7 +425,7 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
                     ),
                   ] else ...[
                     AppButton(
-                      text: 'Upload PDF',
+                      text: context.l10n.lessonEditorUploadPdf,
                       icon: Icons.upload_file_rounded,
                       onPressed: _pickPdf,
                       variant: AppButtonVariant.outlined,
@@ -435,7 +435,7 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
 
                   // 4. Attach Quiz
                   Text(
-                    'Lesson Quiz',
+                    context.l10n.lessonEditorLessonQuiz,
                     style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
@@ -444,9 +444,9 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
                   if (_isLoadingExams)
                     const Center(child: CircularProgressIndicator())
                   else if (_availableExams.isEmpty)
-                    const Text(
-                      'No quizzes available in this group.',
-                      style: TextStyle(color: AppColors.textMuted),
+                    Text(
+                      context.l10n.lessonEditorNoQuizzes,
+                      style: const TextStyle(color: AppColors.textMuted),
                     )
                   else
                     DropdownButtonFormField<String?>(
@@ -460,9 +460,9 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
                         ),
                       ),
                       items: [
-                        const DropdownMenuItem(
+                        DropdownMenuItem(
                           value: null,
-                          child: Text('No Quiz'),
+                          child: Text(context.l10n.lessonEditorNoQuiz),
                         ),
                         ..._availableExams.map((e) => DropdownMenuItem(
                               value: e['id'] as String,
@@ -478,7 +478,7 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
                     children: [
                       Expanded(
                         child: Text(
-                          'Passing Score Requirements',
+                          context.l10n.lessonEditorPassingScoreReq,
                           style: theme.textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.w700,
                           ),
@@ -497,7 +497,7 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
                     AppTextField(
                       controller: _customScoreController,
                       keyboardType: TextInputType.number,
-                      label: 'Custom Passing Score',
+                      label: context.l10n.lessonEditorCustomPassingScore,
                       suffixIcon: const Padding(
                         padding: EdgeInsets.symmetric(horizontal: 12.0),
                         child: Column(
@@ -508,7 +508,7 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
                     )
                   else
                     Text(
-                      'Using default group passing score (${widget.defaultPassingScore}%)',
+                      context.l10n.lessonEditorDefaultPassingScore(widget.defaultPassingScore),
                       style: const TextStyle(color: AppColors.textSecondary),
                     ),
                 ],

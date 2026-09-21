@@ -3858,6 +3858,18 @@ class AppLocalizationsAr extends AppLocalizations {
   String get pickDateTooltip => 'اختيار تاريخ محدد';
 
   @override
+  String get todaySessionTooltip => 'اليوم الحالي';
+
+  @override
+  String get prevDayTooltip => 'اليوم السابق';
+
+  @override
+  String get nextDayTooltip => 'اليوم التالي';
+
+  @override
+  String get sessionDateSubtitle => 'تاريخ جلسة الحضور • اضغط للتغيير';
+
+  @override
   String get selectGroupToViewAttendanceMessage =>
       'اختر مجموعة دراسية\nيرجى اختيار مجموعة من القائمة بالأعلى لعرض الطلاب ومتابعة إتمام المشاهدة.';
 
@@ -5215,4 +5227,60 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get sequentialLearningDesc =>
       'يجب على الطلاب إكمال فيديو الدرس واجتياز الاختبار قبل أن يُفتح الدرس التالي.';
+
+  @override
+  String get lessonEditorErrorSelectVideo => 'يرجى اختيار فيديو أولاً.';
+
+  @override
+  String get lessonEditorErrorSaving => 'حدث خطأ أثناء الحفظ.';
+
+  @override
+  String get lessonEditorEditTitle => 'تعديل الدرس';
+
+  @override
+  String get lessonEditorAddTitle => 'إضافة درس جديد';
+
+  @override
+  String get lessonEditorSourceVideo => 'الفيديو المصدر';
+
+  @override
+  String get lessonEditorChangeVideo => 'تغيير الفيديو';
+
+  @override
+  String get lessonEditorSelectFromLibrary => 'اختيار من المكتبة';
+
+  @override
+  String get lessonEditorUploadNew => 'رفع جديد';
+
+  @override
+  String get lessonEditorLessonTitle => 'عنوان الدرس (تجاوز اختياري)';
+
+  @override
+  String get lessonEditorLessonTitleHint => 'أدخل عنوان الدرس';
+
+  @override
+  String get lessonEditorStudyMaterial => 'المادة الدراسية (PDF)';
+
+  @override
+  String get lessonEditorUploadPdf => 'رفع PDF';
+
+  @override
+  String get lessonEditorLessonQuiz => 'اختبار الدرس';
+
+  @override
+  String get lessonEditorNoQuizzes => 'لا توجد اختبارات متاحة في هذه المجموعة.';
+
+  @override
+  String get lessonEditorNoQuiz => 'بدون اختبار';
+
+  @override
+  String get lessonEditorPassingScoreReq => 'متطلبات درجة النجاح';
+
+  @override
+  String get lessonEditorCustomPassingScore => 'درجة نجاح مخصصة';
+
+  @override
+  String lessonEditorDefaultPassingScore(int score) {
+    return 'استخدام درجة النجاح الافتراضية للمجموعة ($score%)';
+  }
 }
