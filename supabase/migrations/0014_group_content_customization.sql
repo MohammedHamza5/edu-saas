@@ -43,8 +43,7 @@ DECLARE
   v_custom_title text;
 BEGIN
   -- Authenticate & authorize caller
-  v_caller_role := public.current_user_role();
-  IF v_caller_role != 'teacher' THEN
+  IF NOT public.has_role('teacher') THEN
     RAISE EXCEPTION 'NOT_AUTHORIZED: Only teachers can distribute content to groups';
   END IF;
 
@@ -158,7 +157,7 @@ AS $$
 DECLARE
   v_caller_tenant uuid;
 BEGIN
-  IF public.current_user_role() != 'teacher' THEN
+  IF NOT public.has_role('teacher') THEN
     RAISE EXCEPTION 'NOT_AUTHORIZED: Only teachers can update content customizations';
   END IF;
 

@@ -14,13 +14,14 @@ import '../../../../core/widgets/responsive_container.dart';
 import '../../domain/entities/content_entity.dart';
 import '../cubit/content_cubit.dart';
 import '../cubit/content_state.dart';
-import '../dialogs/add_lesson_flow.dart';
-import '../dialogs/lesson_setup_sheet.dart';
+
 import '../widgets/course_lesson_tile.dart';
 import '../../../../core/widgets/teacher_group_filter_bar.dart';
 import '../../../groups/domain/entities/group_entity.dart';
 import '../../../groups/presentation/cubit/groups_cubit.dart';
 import '../../../groups/presentation/cubit/groups_state.dart';
+
+import '../widgets/lesson_editor_pane.dart';
 
 /// The Course Builder page (formerly TeacherContentLibraryPage).
 ///
@@ -40,6 +41,9 @@ class TeacherContentLibraryPage extends StatefulWidget {
 class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
   String? _selectedGroupId;
   String? _selectedGroupName;
+
+  bool _isEditing = false;
+  ContentEntity? _editingLesson;
 
   @override
   void initState() {
@@ -91,75 +95,33 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
     }
   }
 
-  Future<void> _handleAddLesson() async {
+  void _handleAddLesson() {
     if (_selectedGroupId == null) return;
-    final added = await AddLessonFlow.show(
-      context,
-      groupId: _selectedGroupId!,
-      groupName: _selectedGroupName ?? '',
-      defaultPassingScore: 70, // Default to 70% if no other info
-    );
-    
-    if (added && mounted) {
-      await _loadContent(forceRefresh: true);
-    }
+    setState(() {
+      _isEditing = true;
+      _editingLesson = null;
+    });
   }
 
-  Future<void> _openEditLessonDialog(ContentEntity content) async {
+  void _openEditLessonDialog(ContentEntity content) {
     if (_selectedGroupId == null) return;
-    
-    // In this MVP, we use LessonSetupSheet to edit existing configuration
-    // (Wait, LessonSetupSheet is technically for adding, but we can reuse it
-    // or just trigger the _openEditDialog if the backend logic for updating
-    // course configuration isn't built yet).
-    // The previous implementation updated the global Content entity. Let's
-    // stick to the existing cubit.updateContent for simplicity, but we wrap it
-    // in the new UX. Wait, actually, the previous code called CreateEditContentDialog.
-    // For now, we'll keep the new UI (Course Builder), but the "Edit" could just
-    // open the same CreateEditContentDialog, or we can use LessonSetupSheet.
-    // Let's use LessonSetupSheet since it handles title, attached PDF and quiz!
-    
-    final saved = await LessonSetupSheet.show(
-      context,
-      video: content,
-      groupId: _selectedGroupId!,
-      groupName: _selectedGroupName ?? '',
-      defaultPassingScore: 70,
-      existingLessonTitle: content.title,
-      existingFileId: content.file?.id,
-      existingFileName: content.file?.fileName,
-      existingExamId: content.associatedExamId,
-      existingExamTitle: content.associatedExamTitle,
-      existingPassingScore: 70, // This should come from content.passingScore if we had it mapped
-      onSave: ({
-        required contentId,
-        required groupId,
-        required lessonTitle,
-        required fileId,
-        required examId,
-        required passingScoreOverride,
-      }) async {
-        // Here we just update the global content title/associations for now,
-        // since the backend RPC 'assign_content_to_groups' might handle upsert.
-        return context.read<ContentCubit>().assignContentToGroups(
-          contentId: contentId,
-          groupIds: [_selectedGroupId!],
-          groupConfigs: [
-            {
-              'group_id': _selectedGroupId,
-              if (fileId != null) 'file_id': fileId,
-              if (examId != null) 'associated_exam_id': examId,
-              if (passingScoreOverride != null)
-                'passing_score_override': passingScoreOverride,
-            }
-          ],
-        );
-      },
-    );
+    setState(() {
+      _isEditing = true;
+      _editingLesson = content;
+    });
+  }
 
-    if (saved && mounted) {
-      await _loadContent(forceRefresh: true);
-      if (!mounted) return;
+  void _closeEditor() {
+    setState(() {
+      _isEditing = false;
+      _editingLesson = null;
+    });
+  }
+
+  Future<void> _onLessonSaved() async {
+    _closeEditor();
+    await _loadContent(forceRefresh: true);
+    if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(context.l10n.contentUpdatedToast)),
       );
@@ -206,9 +168,15 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
           tooltip: context.l10n.backTooltip,
-          onPressed: () => context.canPop()
-              ? context.pop()
-              : context.go(AppRoutes.teacherDashboard),
+          onPressed: () {
+            if (_isEditing && MediaQuery.of(context).size.width < 900) {
+              _closeEditor();
+            } else if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go(AppRoutes.teacherDashboard);
+            }
+          }
         ),
         title: Row(
           children: [
@@ -433,7 +401,46 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                 );
               }
 
-              return bodyContent;
+              // Calculate Master-Detail layout based on screen width
+              final isWide = MediaQuery.of(context).size.width >= 900;
+              final showMaster = isWide || !_isEditing;
+              final showDetail = isWide || _isEditing;
+
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (showMaster)
+                    Expanded(
+                      flex: isWide ? 4 : 10,
+                      child: bodyContent,
+                    ),
+                  if (isWide && showDetail)
+                    const SizedBox(width: AppSpacing.s24),
+                  if (showDetail)
+                    Expanded(
+                      flex: isWide ? 6 : 10,
+                      child: _isEditing || isWide
+                          ? Padding(
+                              padding: EdgeInsets.only(
+                                top: AppSpacing.s12,
+                                bottom: isWide ? AppSpacing.s24 : 0,
+                              ),
+                              child: _selectedGroupId == null
+                                  ? const SizedBox.shrink()
+                                  : LessonEditorPane(
+                                      key: ValueKey(_editingLesson?.id ?? 'new'),
+                                      editingLesson: _editingLesson,
+                                      groupId: _selectedGroupId!,
+                                      groupName: _selectedGroupName ?? '',
+                                      defaultPassingScore: 70,
+                                      onSaved: _onLessonSaved,
+                                      onCancel: _closeEditor,
+                                    ),
+                            )
+                          : const SizedBox.shrink(),
+                    ),
+                ],
+              );
             },
           ),
         ),
