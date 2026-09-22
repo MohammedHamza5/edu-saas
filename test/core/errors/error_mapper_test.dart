@@ -89,6 +89,66 @@ void main() {
       expect(error.canRetry, isTrue);
     });
 
+    test('resolves AuthException with invalid email address to emailInvalidError', () {
+      const exception = AuthException(
+        'Email address "test@gmail.com" is invalid',
+        code: 'email_address_invalid',
+        statusCode: '400',
+      );
+      final error = ErrorMapper.resolve(exception);
+
+      expect(error.type, FailureType.validation);
+      expect(error.canRetry, isFalse);
+      expect(error.icon, Icons.alternate_email_rounded);
+    });
+
+    test('resolves AuthFailure with email_address_invalid to emailInvalidError', () {
+      const failure = AuthFailure(
+        'Email address "test@gmail.com" is invalid',
+        code: 'email_address_invalid',
+      );
+      final error = ErrorMapper.resolve(failure);
+
+      expect(error.type, FailureType.validation);
+      expect(error.canRetry, isFalse);
+      expect(error.icon, Icons.alternate_email_rounded);
+    });
+
+    test('resolves raw string for invalid email to emailInvalidError', () {
+      final error = ErrorMapper.resolve('400: Email address "test@gmail.com" is invalid');
+
+      expect(error.type, FailureType.validation);
+      expect(error.canRetry, isFalse);
+      expect(error.icon, Icons.alternate_email_rounded);
+    });
+
+    test('resolves duplicate email registration to emailAlreadyExistsError', () {
+      const failure = AuthFailure('User already registered', code: 'user_already_exists');
+      final error = ErrorMapper.resolve(failure);
+
+      expect(error.type, FailureType.conflict);
+      expect(error.canRetry, isFalse);
+      expect(error.icon, Icons.person_off_rounded);
+    });
+
+    test('resolves weak password to weakPasswordError', () {
+      const failure = AuthFailure('Password should be at least 6 characters', code: 'weak_password');
+      final error = ErrorMapper.resolve(failure);
+
+      expect(error.type, FailureType.validation);
+      expect(error.canRetry, isFalse);
+      expect(error.icon, Icons.password_rounded);
+    });
+
+    test('resolves rate limit to rateLimitError', () {
+      const failure = AuthFailure('Rate limit exceeded', code: 'over_email_send_rate_limit');
+      final error = ErrorMapper.resolve(failure);
+
+      expect(error.type, FailureType.rateLimit);
+      expect(error.canRetry, isTrue);
+      expect(error.icon, Icons.hourglass_empty_rounded);
+    });
+
     test('generates clean diagnostic summary for tech support', () {
       const failure = NetworkFailure('Test failure', code: 'NET_TEST');
       final error = ErrorMapper.resolve(failure);
