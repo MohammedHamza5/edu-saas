@@ -96,7 +96,7 @@ class ErrorMapper {
       case FailureType.network:
         return _networkError(customCode ?? failure.code ?? 'NET_001', raw: failure);
       case FailureType.auth:
-        return _authError(failure.message, customCode ?? failure.code ?? 'AUTH_001', raw: failure);
+        return _mapAuthFailure(failure, customCode: customCode);
       case FailureType.sessionExpired:
         return _sessionExpiredError(customCode ?? failure.code ?? 'AUTH_401', raw: failure);
       case FailureType.permission:
@@ -122,12 +122,88 @@ class ErrorMapper {
     }
   }
 
+  static UserFriendlyError _mapAuthFailure(Failure failure, {String? customCode}) {
+    final code = (customCode ?? failure.code ?? '').toLowerCase();
+    final msg = failure.message.toLowerCase();
+
+    if (code == 'email_address_invalid' ||
+        msg.contains('email_address_invalid') ||
+        (msg.contains('email') && msg.contains('invalid')) ||
+        msg.contains('is invalid')) {
+      return _emailInvalidError(customCode ?? failure.code ?? 'AUTH_EMAIL_INVALID', raw: failure);
+    }
+    if (code == 'user_already_exists' ||
+        code == 'email_exists' ||
+        msg.contains('already registered') ||
+        msg.contains('user_already_exists') ||
+        msg.contains('already in use') ||
+        msg.contains('already exists')) {
+      return _emailAlreadyExistsError(customCode ?? failure.code ?? 'AUTH_DUP', raw: failure);
+    }
+    if (code == 'weak_password' ||
+        msg.contains('weak_password') ||
+        msg.contains('password should be at least') ||
+        msg.contains('password is too short')) {
+      return _weakPasswordError(customCode ?? failure.code ?? 'AUTH_WEAK_PW', raw: failure);
+    }
+    if (code == 'over_email_send_rate_limit' ||
+        code == 'rate_limit' ||
+        msg.contains('rate limit') ||
+        msg.contains('over_email_send_rate_limit')) {
+      return _rateLimitError(customCode ?? failure.code ?? 'AUTH_RATE_LIMIT', raw: failure);
+    }
+    if (code == 'invalid_credentials' ||
+        msg.contains('invalid login credentials') ||
+        msg.contains('invalid_credentials')) {
+      return _invalidCredentialsError(customCode ?? failure.code ?? 'AUTH_CREDS', raw: failure);
+    }
+    if (msg.contains('tenant_suspended')) {
+      return _tenantSuspendedError(customCode ?? 'TENANT_SUSPENDED', raw: failure);
+    }
+    if (msg.contains('user_suspended') || msg.contains('suspended')) {
+      return _userSuspendedError(customCode ?? 'USER_SUSPENDED', raw: failure);
+    }
+    if (msg.contains('user_rejected') || msg.contains('rejected')) {
+      return _userRejectedError(customCode ?? 'USER_REJECTED', raw: failure);
+    }
+    if (msg.contains('expired') || msg.contains('jwt')) {
+      return _sessionExpiredError(customCode ?? 'AUTH_EXPIRED', raw: failure);
+    }
+
+    return _authError(failure.message, customCode ?? failure.code ?? 'AUTH_001', raw: failure);
+  }
+
   static UserFriendlyError _mapException(Exception exception, {String? customCode}) {
     // ── Supabase Auth Exceptions ──
     if (exception is AuthException) {
       final msg = exception.message.toLowerCase();
-      final code = exception.statusCode ?? 'AUTH_001';
+      final code = (exception.code ?? exception.statusCode ?? 'AUTH_001').toLowerCase();
 
+      if (code == 'email_address_invalid' ||
+          msg.contains('email_address_invalid') ||
+          (msg.contains('email') && msg.contains('invalid')) ||
+          msg.contains('is invalid')) {
+        return _emailInvalidError(customCode ?? exception.code ?? 'AUTH_EMAIL_INVALID', raw: exception);
+      }
+      if (code == 'user_already_exists' ||
+          code == 'email_exists' ||
+          msg.contains('already registered') ||
+          msg.contains('user_already_exists') ||
+          msg.contains('already in use') ||
+          msg.contains('already exists')) {
+        return _emailAlreadyExistsError(customCode ?? exception.code ?? 'AUTH_DUP', raw: exception);
+      }
+      if (code == 'weak_password' ||
+          msg.contains('weak_password') ||
+          msg.contains('password should be at least') ||
+          msg.contains('password is too short')) {
+        return _weakPasswordError(customCode ?? exception.code ?? 'AUTH_WEAK_PW', raw: exception);
+      }
+      if (code == 'over_email_send_rate_limit' ||
+          msg.contains('rate limit') ||
+          msg.contains('over_email_send_rate_limit')) {
+        return _rateLimitError(customCode ?? exception.code ?? 'AUTH_RATE_LIMIT', raw: exception);
+      }
       if (msg.contains('invalid login credentials') || msg.contains('invalid_credentials')) {
         return _invalidCredentialsError(customCode ?? 'AUTH_CREDS', raw: exception);
       }
@@ -143,10 +219,8 @@ class ErrorMapper {
       if (msg.contains('expired') || msg.contains('jwt')) {
         return _sessionExpiredError(customCode ?? 'AUTH_EXPIRED', raw: exception);
       }
-      if (msg.contains('already registered') || msg.contains('unique') || msg.contains('email_exists')) {
-        return _authError(exception.message, customCode ?? 'AUTH_DUP', raw: exception);
-      }
-      return _authError(exception.message, customCode ?? code, raw: exception);
+
+      return _authError(exception.message, customCode ?? exception.code ?? exception.statusCode ?? 'AUTH_001', raw: exception);
     }
 
     // ── Supabase Postgrest Exceptions ──
@@ -240,6 +314,29 @@ class ErrorMapper {
     // Timeout
     if (lower.contains('timeoutexception') || lower.contains('timed out') || lower.contains('deadline exceeded')) {
       return _timeoutError(customCode ?? 'NET_TIMEOUT', raw: text);
+    }
+
+    // Email / Auth indicators
+    if (lower.contains('email_address_invalid') ||
+        (lower.contains('email') && lower.contains('invalid')) ||
+        (lower.contains('email address') && lower.contains('is invalid'))) {
+      return _emailInvalidError(customCode ?? 'AUTH_EMAIL_INVALID', raw: text);
+    }
+    if (lower.contains('user_already_exists') ||
+        lower.contains('already registered') ||
+        lower.contains('email already in use') ||
+        lower.contains('email_exists')) {
+      return _emailAlreadyExistsError(customCode ?? 'AUTH_DUP', raw: text);
+    }
+    if (lower.contains('weak_password') ||
+        lower.contains('password should be at least') ||
+        lower.contains('password is too short')) {
+      return _weakPasswordError(customCode ?? 'AUTH_WEAK_PW', raw: text);
+    }
+    if (lower.contains('over_email_send_rate_limit') ||
+        lower.contains('rate limit exceeded') ||
+        lower.contains('too many requests')) {
+      return _rateLimitError(customCode ?? 'RATE_429', raw: text);
     }
 
     // Auth indicators
@@ -467,12 +564,45 @@ class ErrorMapper {
         rawError: raw,
       );
 
+  static UserFriendlyError _emailInvalidError(String code, {dynamic raw}) => UserFriendlyError(
+        type: FailureType.validation,
+        code: code,
+        titleBuilder: (l10n) => l10n.errorEmailInvalidTitle,
+        messageBuilder: (l10n) => l10n.errorEmailInvalidMessage,
+        hintBuilder: (l10n) => l10n.errorEmailInvalidHint,
+        icon: Icons.alternate_email_rounded,
+        canRetry: false,
+        rawError: raw,
+      );
+
+  static UserFriendlyError _emailAlreadyExistsError(String code, {dynamic raw}) => UserFriendlyError(
+        type: FailureType.conflict,
+        code: code,
+        titleBuilder: (l10n) => l10n.errorEmailAlreadyExistsTitle,
+        messageBuilder: (l10n) => l10n.errorEmailAlreadyExistsMessage,
+        hintBuilder: (l10n) => l10n.errorEmailAlreadyExistsHint,
+        icon: Icons.person_off_rounded,
+        canRetry: false,
+        rawError: raw,
+      );
+
+  static UserFriendlyError _weakPasswordError(String code, {dynamic raw}) => UserFriendlyError(
+        type: FailureType.validation,
+        code: code,
+        titleBuilder: (l10n) => l10n.errorWeakPasswordTitle,
+        messageBuilder: (l10n) => l10n.errorWeakPasswordMessage,
+        hintBuilder: (l10n) => l10n.errorWeakPasswordHint,
+        icon: Icons.password_rounded,
+        canRetry: false,
+        rawError: raw,
+      );
+
   static UserFriendlyError _authError(String message, String code, {dynamic raw}) => UserFriendlyError(
         type: FailureType.auth,
         code: code,
-        titleBuilder: (l10n) => l10n.errorInvalidCredentialsTitle,
-        messageBuilder: (l10n) => message.isNotEmpty ? message : l10n.errorInvalidCredentialsMessage,
-        hintBuilder: (l10n) => l10n.errorInvalidCredentialsHint,
+        titleBuilder: (l10n) => l10n.errorAuthFailedTitle,
+        messageBuilder: (l10n) => message.isNotEmpty ? message : l10n.errorAuthFailedMessage,
+        hintBuilder: (l10n) => l10n.errorAuthFailedHint,
         icon: Icons.lock_outline_rounded,
         canRetry: false,
         rawError: raw,
@@ -481,9 +611,9 @@ class ErrorMapper {
   static UserFriendlyError _rateLimitError(String code, {dynamic raw}) => UserFriendlyError(
         type: FailureType.rateLimit,
         code: code,
-        titleBuilder: (l10n) => l10n.errorTimeoutTitle,
-        messageBuilder: (l10n) => l10n.errorTimeoutMessage,
-        hintBuilder: (l10n) => l10n.errorTimeoutHint,
+        titleBuilder: (l10n) => l10n.errorRateLimitTitle,
+        messageBuilder: (l10n) => l10n.errorRateLimitMessage,
+        hintBuilder: (l10n) => l10n.errorRateLimitHint,
         icon: Icons.hourglass_empty_rounded,
         canRetry: true,
         rawError: raw,

@@ -67,7 +67,7 @@ class _LoginPageState extends State<LoginPage> {
         } else if (state is AuthTenantSuspended) {
           context.go(AppRoutes.tenantSuspended);
         } else if (state is AuthError) {
-          AppFeedback.showError(context, state.message);
+          AppFeedback.showError(context, state.failure ?? state.message);
         }
       },
       builder: (context, state) {

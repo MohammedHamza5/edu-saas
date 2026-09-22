@@ -80,7 +80,7 @@ class AuthCubit extends Cubit<AuthState> {
           AppLogger.w(_tag, 'Tenant is suspended — emitting AuthTenantSuspended');
           emit(const AuthTenantSuspended());
         } else {
-          emit(AuthError(failure.message));
+          emit(AuthError(failure.message, failure: failure));
         }
       },
     );
@@ -120,7 +120,7 @@ class AuthCubit extends Cubit<AuthState> {
       },
       onFailure: (failure) {
         AppLogger.e(_tag, 'Student registration FAILED', error: '${failure.code}: ${failure.message}');
-        emit(AuthError(failure.message));
+        emit(AuthError(failure.message, failure: failure));
       },
     );
   }
@@ -150,7 +150,7 @@ class AuthCubit extends Cubit<AuthState> {
       },
       onFailure: (failure) {
         AppLogger.e(_tag, 'Password reset FAILED', error: '${failure.code}: ${failure.message}');
-        emit(AuthError(failure.message));
+        emit(AuthError(failure.message, failure: failure));
       },
     );
   }

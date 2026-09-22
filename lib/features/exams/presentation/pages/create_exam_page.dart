@@ -244,7 +244,7 @@ class _CreateExamPageState extends State<CreateExamPage> {
       );
     }).toList();
 
-    final success = await context.read<ExamsCubit>().createExam(
+    final createdExam = await context.read<ExamsCubit>().createExam(
           groupId: widget.groupId,
           title: _titleController.text.trim(),
           durationMinutes: int.tryParse(_durationController.text.trim()) ?? 60,
@@ -258,14 +258,14 @@ class _CreateExamPageState extends State<CreateExamPage> {
 
     if (!mounted) return;
 
-    if (success) {
+    if (createdExam != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(context.l10n.examBuiltAndPublishedSuccess),
           backgroundColor: AppColors.success,
         ),
       );
-      Navigator.of(context).pop();
+      Navigator.of(context).pop(createdExam);
     } else {
       final state = context.read<ExamsCubit>().state;
       String errorMsg = 'Failed';

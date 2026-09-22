@@ -28,6 +28,8 @@ class CourseLessonTile extends StatefulWidget {
   /// The lesson quiz name (if any)
   final String? quizTitle;
 
+  final bool isSelected;
+  final VoidCallback? onTap;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
   final bool canMoveUp;
@@ -39,6 +41,8 @@ class CourseLessonTile extends StatefulWidget {
     super.key,
     required this.content,
     required this.index,
+    this.isSelected = false,
+    this.onTap,
     this.lessonTitle,
     this.hasPdf = false,
     this.quizTitle,
@@ -66,6 +70,7 @@ class _CourseLessonTileState extends State<CourseLessonTile> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
+    final isSelected = widget.isSelected;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
@@ -74,34 +79,52 @@ class _CourseLessonTileState extends State<CourseLessonTile> {
         duration: const Duration(milliseconds: 150),
         margin: const EdgeInsets.only(bottom: AppSpacing.s8),
         decoration: BoxDecoration(
-          color: _isHovered
-              ? AppColors.surfaceVariant.withValues(alpha: 0.5)
-              : AppColors.surface,
+          color: isSelected
+              ? AppColors.primary.withValues(alpha: 0.1)
+              : _isHovered
+                  ? AppColors.surfaceVariant.withValues(alpha: 0.5)
+                  : AppColors.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
           border: Border.all(
-            color: _isHovered
-                ? AppColors.primary.withValues(alpha: 0.3)
-                : AppColors.border,
-            width: _isHovered ? 1.5 : 1,
+            color: isSelected
+                ? AppColors.primary
+                : _isHovered
+                    ? AppColors.primary.withValues(alpha: 0.4)
+                    : AppColors.border,
+            width: isSelected ? 2.0 : (_isHovered ? 1.5 : 1.0),
           ),
-          boxShadow: _isHovered
+          boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.08),
-                    blurRadius: 10,
+                    color: AppColors.primary.withValues(alpha: 0.15),
+                    blurRadius: 12,
                     offset: const Offset(0, 2),
                   ),
                 ]
-              : null,
+              : _isHovered
+                  ? [
+                      BoxShadow(
+                        color: AppColors.primary.withValues(alpha: 0.08),
+                        blurRadius: 10,
+                        offset: const Offset(0, 2),
+                      ),
+                    ]
+                  : null,
         ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.s12,
-            vertical: AppSpacing.s10,
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+          child: InkWell(
+            onTap: widget.onTap ?? widget.onEdit,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.s12,
+                vertical: AppSpacing.s10,
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
               // Drag Handle with proper ReorderableDragStartListener, grab cursor, and hit-testing
               Tooltip(
                 message: l10n.dragToReorder,
@@ -279,11 +302,13 @@ class _CourseLessonTileState extends State<CourseLessonTile> {
                 // Placeholder width to prevent layout jumps
                 const SizedBox(width: 76),
               ],
-            ],
+              ],
+            ),
           ),
         ),
       ),
-    );
+    ),
+  );
   }
 
   bool get _isMobile {

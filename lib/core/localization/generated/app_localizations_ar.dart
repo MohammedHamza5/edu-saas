@@ -2430,6 +2430,61 @@ class AppLocalizationsAr extends AppLocalizations {
       'تأكد من كتابة البريد الإلكتروني وكلمة المرور بدقة ثم حاول ثانية.';
 
   @override
+  String get errorEmailInvalidTitle => 'البريد الإلكتروني غير صالح';
+
+  @override
+  String get errorEmailInvalidMessage =>
+      'البريد الإلكتروني المدخل غير صالح أو غير معتمد لدى المنظومة.';
+
+  @override
+  String get errorEmailInvalidHint =>
+      'يرجى إدخال بريد إلكتروني حقيقي ونشط (تجنب العناوين الوهمية مثل test@...).';
+
+  @override
+  String get errorEmailAlreadyExistsTitle => 'البريد الإلكتروني مسجل مسبقاً';
+
+  @override
+  String get errorEmailAlreadyExistsMessage =>
+      'يوجد حساب مسجل بالفعل بهذا البريد الإلكتروني في المنصة.';
+
+  @override
+  String get errorEmailAlreadyExistsHint =>
+      'يمكنك تسجيل الدخول مباشرة بهذا البريد، أو استعادة كلمة المرور إذا نسيتها.';
+
+  @override
+  String get errorWeakPasswordTitle => 'كلمة المرور ضعيفة';
+
+  @override
+  String get errorWeakPasswordMessage =>
+      'يجب أن تتكون كلمة المرور من 6 خانات على الأقل وتلبي متطلبات الأمان.';
+
+  @override
+  String get errorWeakPasswordHint =>
+      'استخدم مزيجاً من الحروف والأرقام لضمان قوة كلمة المرور وحماية حسابك.';
+
+  @override
+  String get errorRateLimitTitle => 'محاولات كثيرة جداً';
+
+  @override
+  String get errorRateLimitMessage =>
+      'تم إرسال طلبات متعددة خلال فترة وجيزة. يرجى الانتظار بضع دقائق.';
+
+  @override
+  String get errorRateLimitHint =>
+      'يرجى الانتظار لمدة 5 دقائق قبل إعادة المحاولة.';
+
+  @override
+  String get errorAuthFailedTitle => 'تعذر التحقق من الحساب';
+
+  @override
+  String get errorAuthFailedMessage =>
+      'تعذر استكمال إجراءات التحقق من الحساب. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get errorAuthFailedHint =>
+      'تحقق من صحة البيانات المدخلة ثم أعد المحاولة.';
+
+  @override
   String get errorSessionExpiredTitle => 'انتهت صلاحية الجلسة';
 
   @override
@@ -5010,6 +5065,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get hasLessonQuiz => 'اختبار الدرس';
 
   @override
+  String get lessonEditorCreateQuiz => 'إنشاء اختبار جديد';
+
+  @override
   String get editLesson => 'تعديل الدرس';
 
   @override
@@ -5023,6 +5081,37 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get dragToReorder => 'اسحب لإعادة الترتيب';
+
+  @override
+  String get openFullPage => 'فتح في صفحة كاملة';
+
+  @override
+  String get courseSummary => 'ملخص المنهج';
+
+  @override
+  String get selectLessonToEdit =>
+      'اختر محاضرة لتعديل تفاصيلها أو أضف محاضرة جديدة';
+
+  @override
+  String get lessonAnalytics => 'تحليلات المحاضرة';
+
+  @override
+  String get backToCourse => 'العودة للمنهج';
+
+  @override
+  String get activeEditing => 'قيد التعديل الآن';
+
+  @override
+  String get lessonDetails => 'تفاصيل المحاضرة';
+
+  @override
+  String get lessonVideo => 'فيديو المحاضرة';
+
+  @override
+  String get lessonHandouts => 'المذكرات والمواد الدراسية';
+
+  @override
+  String get lessonQuizSettings => 'كويز الدرس ونسبة النجاح';
 
   @override
   String nLessonsCount(int count) {

@@ -98,7 +98,7 @@ class _RegisterStudentPageState extends State<RegisterStudentPage> {
         if (state is AuthPendingApproval) {
           context.go(AppRoutes.studentPending, extra: state.user.fullName);
         } else if (state is AuthError) {
-          AppFeedback.showError(context, state.message);
+          AppFeedback.showError(context, state.failure ?? state.message);
         }
       },
       builder: (context, state) {

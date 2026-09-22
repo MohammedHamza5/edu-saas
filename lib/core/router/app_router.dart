@@ -26,6 +26,7 @@ import '../../features/students/presentation/pages/students_list_page.dart';
 import '../../features/videos/presentation/cubit/videos_cubit.dart';
 import '../../features/videos/presentation/pages/video_player_page.dart';
 import '../../features/content/presentation/pages/teacher_content_library_page.dart';
+import '../../features/content/presentation/pages/teacher_lesson_details_page.dart';
 import '../../features/content/presentation/pages/teacher_video_bank_page.dart';
 import '../../features/content/presentation/pages/student_content_feed_page.dart';
 import '../../features/content/domain/entities/content_entity.dart';
@@ -81,6 +82,7 @@ class AppRouter {
   // Feature: Content routes
   static const String teacherContent = AppRoutes.teacherContent;
   static const String teacherGroupContent = AppRoutes.teacherGroupContent;
+  static const String teacherLessonDetails = AppRoutes.teacherLessonDetails;
   static const String studentGroupContent = AppRoutes.studentGroupContent;
 
   // Feature: Assignments routes
@@ -352,6 +354,25 @@ class AppRouter {
                     groupId: groupId,
                     groupName: groupName,
                     preselectedVideo: preselectedVideo,
+                  ),
+                ),
+              );
+            },
+          ),
+          GoRoute(
+            path: teacherLessonDetails,
+            pageBuilder: (BuildContext context, GoRouterState state) {
+              final rawGroupId = state.pathParameters['groupId']!;
+              final groupId = GroupSlugResolver.toId(rawGroupId);
+              final lessonId = state.pathParameters['lessonId']!;
+              final groupName = state.uri.queryParameters['name'];
+              return NoTransitionPage(
+                child: BlocProvider(
+                  create: (_) => InjectionContainer.createContentCubit(),
+                  child: TeacherLessonDetailsPage(
+                    groupId: groupId,
+                    lessonId: lessonId,
+                    groupName: groupName,
                   ),
                 ),
               );

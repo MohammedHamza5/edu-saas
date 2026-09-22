@@ -138,7 +138,7 @@ class ExamsCubit extends Cubit<ExamsState> {
   }
 
   /// Creates a new exam with initial questions and version (Teacher flow)
-  Future<bool> createExam({
+  Future<ExamEntity?> createExam({
     required String groupId,
     required String title,
     int durationMinutes = 60,
@@ -176,7 +176,7 @@ class ExamsCubit extends Cubit<ExamsState> {
       onSuccess: (created) {
         AppCache.exams.invalidate('teacher_exams_$groupId');
         loadGroupExams(groupId, forceRefresh: true);
-        return true;
+        return created;
       },
       onFailure: (failure) {
         if (currentState is TeacherExamsLoaded) {
@@ -187,7 +187,7 @@ class ExamsCubit extends Cubit<ExamsState> {
         } else {
           emit(ExamsError(failure.message));
         }
-        return false;
+        return null;
       },
     );
   }

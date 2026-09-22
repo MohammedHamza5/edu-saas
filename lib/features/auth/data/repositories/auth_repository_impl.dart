@@ -44,7 +44,7 @@ class AuthRepositoryImpl implements AuthRepository {
       if (e.message == 'TENANT_SUSPENDED') {
         return const FailureResult(AuthFailure('TENANT_SUSPENDED', code: 'TENANT_SUSPENDED'));
       }
-      return FailureResult(AuthFailure(e.message, code: e.statusCode));
+      return FailureResult(AuthFailure(e.message, code: e.code ?? e.statusCode));
     } catch (e) {
       return FailureResult(ServerFailure(e.toString()));
     }
@@ -70,7 +70,7 @@ class AuthRepositoryImpl implements AuthRepository {
       );
       return Success(user);
     } on AuthException catch (e) {
-      return FailureResult(AuthFailure(e.message, code: e.statusCode));
+      return FailureResult(AuthFailure(e.message, code: e.code ?? e.statusCode));
     } catch (e) {
       return FailureResult(ServerFailure(e.toString()));
     }
@@ -103,7 +103,7 @@ class AuthRepositoryImpl implements AuthRepository {
       await _remoteDataSource.resetPassword(email);
       return const Success(null);
     } on AuthException catch (e) {
-      return FailureResult(AuthFailure(e.message, code: e.statusCode));
+      return FailureResult(AuthFailure(e.message, code: e.code ?? e.statusCode));
     } catch (e) {
       return FailureResult(ServerFailure(e.toString()));
     }

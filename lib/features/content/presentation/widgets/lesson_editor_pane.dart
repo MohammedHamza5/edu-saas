@@ -13,6 +13,8 @@ import '../../domain/entities/content_entity.dart';
 import '../cubit/content_cubit.dart';
 import '../dialogs/add_video_to_bank_dialog.dart';
 import 'video_picker_sheet.dart';
+import '../../../exams/presentation/pages/create_exam_page.dart';
+import '../../../exams/domain/entities/exam_entity.dart';
 
 /// The Right-side Pane for the Master-Detail Course Builder UX.
 class LessonEditorPane extends StatefulWidget {
@@ -22,6 +24,8 @@ class LessonEditorPane extends StatefulWidget {
   final int defaultPassingScore;
   final VoidCallback onSaved;
   final VoidCallback onCancel;
+  final VoidCallback? onOpenFullPage;
+  final VoidCallback? onClose;
 
   const LessonEditorPane({
     super.key,
@@ -31,6 +35,8 @@ class LessonEditorPane extends StatefulWidget {
     required this.defaultPassingScore,
     required this.onSaved,
     required this.onCancel,
+    this.onOpenFullPage,
+    this.onClose,
   });
 
   @override
@@ -266,9 +272,31 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
                     ),
                   ),
                 ),
+                if (isEditing && widget.onOpenFullPage != null) ...[
+                  Tooltip(
+                    message: context.l10n.openFullPage,
+                    child: OutlinedButton.icon(
+                      onPressed: widget.onOpenFullPage,
+                      icon: const Icon(Icons.open_in_new_rounded, size: 14),
+                      label: Text(
+                        context.l10n.openFullPage,
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        minimumSize: Size.zero,
+                        side: BorderSide(color: AppColors.primary.withValues(alpha: 0.5)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.s8),
+                ],
                 IconButton(
                   icon: const Icon(Icons.close_rounded),
-                  onPressed: widget.onCancel,
+                  onPressed: widget.onClose ?? widget.onCancel,
                   tooltip: context.l10n.cancel,
                 ),
               ],
@@ -465,6 +493,29 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
                       ],
                       onChanged: (val) => setState(() => _selectedExamId = val),
                     ),
+                  const SizedBox(height: AppSpacing.s12),
+                  AppButton(
+                    text: context.l10n.lessonEditorCreateQuiz,
+                    icon: Icons.add_circle_outline_rounded,
+                    onPressed: () async {
+                      final created = await Navigator.push<ExamEntity?>(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => CreateExamPage(groupId: widget.groupId),
+                        ),
+                      );
+                      if (created != null && mounted) {
+                        setState(() {
+                          _availableExams.add({
+                            'id': created.id,
+                            'title': created.title,
+                          });
+                          _selectedExamId = created.id;
+                        });
+                      }
+                    },
+                    variant: AppButtonVariant.outlined,
+                  ),
                   const SizedBox(height: AppSpacing.s24),
 
                   // 5. Passing Score

@@ -702,5 +702,48 @@ void main() {
       await tester.pumpAndSettle();
       expect(movedDown, isTrue);
     });
+
+    testWidgets('CourseLessonTile supports isSelected state and onTap selection callback', (tester) async {
+      final sampleLesson = ContentEntity(
+        id: 'c-test-lesson',
+        tenantId: 't-1',
+        groupId: 'g-1',
+        title: 'المحاضرة التجريبية الأولى',
+        type: ContentType.video,
+        status: ContentStatus.published,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      bool tapped = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          locale: const Locale('ar'),
+          supportedLocales: const [Locale('ar'), Locale('en')],
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          home: Scaffold(
+            body: CourseLessonTile(
+              content: sampleLesson,
+              index: 0,
+              isSelected: true,
+              onTap: () => tapped = true,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('المحاضرة التجريبية الأولى'));
+      await tester.pumpAndSettle();
+
+      expect(tapped, isTrue);
+    });
   });
 }

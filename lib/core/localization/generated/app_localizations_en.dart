@@ -2441,6 +2441,59 @@ class AppLocalizationsEn extends AppLocalizations {
       'Please double-check your email and password, then try again.';
 
   @override
+  String get errorEmailInvalidTitle => 'Invalid Email Address';
+
+  @override
+  String get errorEmailInvalidMessage =>
+      'The email address entered is invalid or not accepted by the system.';
+
+  @override
+  String get errorEmailInvalidHint =>
+      'Please enter a valid, active email address (avoid placeholder or dummy addresses like test@...).';
+
+  @override
+  String get errorEmailAlreadyExistsTitle => 'Email Already Registered';
+
+  @override
+  String get errorEmailAlreadyExistsMessage =>
+      'An account with this email address already exists.';
+
+  @override
+  String get errorEmailAlreadyExistsHint =>
+      'Try signing in with this email, or recover your password if you forgot it.';
+
+  @override
+  String get errorWeakPasswordTitle => 'Weak Password';
+
+  @override
+  String get errorWeakPasswordMessage =>
+      'The password must be at least 6 characters long and meet complexity requirements.';
+
+  @override
+  String get errorWeakPasswordHint =>
+      'Use a mix of letters, numbers, and symbols for a stronger password.';
+
+  @override
+  String get errorRateLimitTitle => 'Too Many Attempts';
+
+  @override
+  String get errorRateLimitMessage =>
+      'Too many requests have been made in a short time. Please wait a moment.';
+
+  @override
+  String get errorRateLimitHint => 'Please wait 5 minutes before trying again.';
+
+  @override
+  String get errorAuthFailedTitle => 'Authentication Error';
+
+  @override
+  String get errorAuthFailedMessage =>
+      'Could not complete the authentication request. Please try again.';
+
+  @override
+  String get errorAuthFailedHint => 'Check your details and try again shortly.';
+
+  @override
   String get errorSessionExpiredTitle => 'Session Expired';
 
   @override
@@ -5045,6 +5098,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hasLessonQuiz => 'Lesson Quiz';
 
   @override
+  String get lessonEditorCreateQuiz => 'Create New Quiz';
+
+  @override
   String get editLesson => 'Edit Lesson';
 
   @override
@@ -5058,6 +5114,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dragToReorder => 'Drag to reorder';
+
+  @override
+  String get openFullPage => 'Open Full Page';
+
+  @override
+  String get courseSummary => 'Course Summary';
+
+  @override
+  String get selectLessonToEdit =>
+      'Select a lesson to edit details or add a new one';
+
+  @override
+  String get lessonAnalytics => 'Lesson Analytics';
+
+  @override
+  String get backToCourse => 'Back to Course';
+
+  @override
+  String get activeEditing => 'Currently Editing';
+
+  @override
+  String get lessonDetails => 'Lesson Details';
+
+  @override
+  String get lessonVideo => 'Lesson Video';
+
+  @override
+  String get lessonHandouts => 'Handouts & Materials';
+
+  @override
+  String get lessonQuizSettings => 'Quiz & Passing Score';
 
   @override
   String nLessonsCount(int count) {

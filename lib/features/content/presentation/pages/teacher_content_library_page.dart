@@ -7,6 +7,7 @@ import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/responsive_breakpoints.dart';
+import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_empty_view.dart';
 import '../../../../core/widgets/app_error_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
@@ -47,6 +48,9 @@ class TeacherContentLibraryPage extends StatefulWidget {
 class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
   String? _selectedGroupId;
   String? _selectedGroupName;
+  String? _selectedLessonId;
+  ContentEntity? _selectedLesson;
+  bool _isAddingLesson = false;
 
   @override
   void initState() {
@@ -92,6 +96,9 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
     setState(() {
       _selectedGroupId = group.id;
       _selectedGroupName = group.name;
+      _selectedLesson = null;
+      _selectedLessonId = null;
+      _isAddingLesson = false;
     });
     _loadContent();
   }
@@ -107,12 +114,30 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
 
   void _handleAddLesson() {
     if (_selectedGroupId == null) return;
-    _showLessonEditorSheet(null);
+    final isDesktop = MediaQuery.of(context).size.width >= 960;
+    if (isDesktop) {
+      setState(() {
+        _selectedLesson = null;
+        _selectedLessonId = null;
+        _isAddingLesson = true;
+      });
+    } else {
+      _showLessonEditorSheet(null);
+    }
   }
 
   void _openEditLessonDialog(ContentEntity? content) {
     if (_selectedGroupId == null) return;
-    _showLessonEditorSheet(content);
+    final isDesktop = MediaQuery.of(context).size.width >= 960;
+    if (isDesktop) {
+      setState(() {
+        _selectedLesson = content;
+        _selectedLessonId = content?.id;
+        _isAddingLesson = (content == null);
+      });
+    } else {
+      _showLessonEditorSheet(content);
+    }
   }
 
   void _showLessonEditorSheet(ContentEntity? lesson) {
@@ -152,6 +177,14 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                     groupId: _selectedGroupId!,
                     groupName: _selectedGroupName ?? '',
                     defaultPassingScore: 70,
+                    onOpenFullPage: lesson != null
+                        ? () {
+                            Navigator.of(ctx).pop();
+                            context.push(
+                              '/teacher/groups/$_selectedGroupId/lessons/${lesson.id}?name=${Uri.encodeComponent(_selectedGroupName ?? "")}',
+                            );
+                          }
+                        : null,
                     onSaved: () {
                       Navigator.of(ctx).pop();
                       _onLessonSaved();
@@ -172,6 +205,11 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
   Future<void> _onLessonSaved() async {
     await _loadContent(forceRefresh: true);
     if (mounted) {
+      setState(() {
+        _selectedLesson = null;
+        _selectedLessonId = null;
+        _isAddingLesson = false;
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(context.l10n.contentUpdatedToast)),
       );
@@ -254,7 +292,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
           ),
         ],
       ),
-      floatingActionButton: _selectedGroupId == null
+      floatingActionButton: (_selectedGroupId == null || MediaQuery.of(context).size.width >= 960)
           ? null
           : FloatingActionButton.extended(
               onPressed: _handleAddLesson,
@@ -340,8 +378,9 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                   if (state is ContentLoaded) {
                     // Only show Videos as Lessons in Course Builder
                     final lessons = state.items.where((i) => i.type == ContentType.video).toList();
+                    final isDesktop = MediaQuery.of(context).size.width >= 960;
 
-                    return RefreshIndicator(
+                    final Widget masterList = RefreshIndicator(
                       onRefresh: () => _loadContent(forceRefresh: true),
                       child: CustomScrollView(
                         physics: const AlwaysScrollableScrollPhysics(),
@@ -403,10 +442,13 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                 },
                                 itemBuilder: (context, index) {
                                   final lesson = lessons[index];
+                                  final isSelected = _selectedLessonId == lesson.id;
                                   return CourseLessonTile(
                                     key: ValueKey(lesson.id),
                                     content: lesson,
                                     index: index,
+                                    isSelected: isSelected,
+                                    onTap: () => _openEditLessonDialog(lesson),
                                     lessonTitle: lesson.title, // If group configs had overrides, we'd pass it here
                                     hasPdf: lesson.file != null,
                                     quizTitle: lesson.associatedExamTitle,
@@ -423,6 +465,57 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                         ],
                       ),
                     );
+
+                    if (isDesktop && _selectedGroupId != null) {
+                      return Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(child: masterList),
+                          const SizedBox(width: AppSpacing.s16),
+                          SizedBox(
+                            width: 440,
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: AppSpacing.s12, bottom: AppSpacing.s24),
+                              child: (_selectedLesson != null || _isAddingLesson)
+                                  ? LessonEditorPane(
+                                      key: ValueKey(_selectedLesson?.id ?? 'new_lesson'),
+                                      editingLesson: _selectedLesson,
+                                      groupId: _selectedGroupId!,
+                                      groupName: _selectedGroupName ?? '',
+                                      defaultPassingScore: 70,
+                                      onOpenFullPage: _selectedLesson != null
+                                          ? () {
+                                              context.push(
+                                                '/teacher/groups/$_selectedGroupId/lessons/${_selectedLesson!.id}?name=${Uri.encodeComponent(_selectedGroupName ?? "")}',
+                                              );
+                                            }
+                                          : null,
+                                      onSaved: () {
+                                        _onLessonSaved();
+                                      },
+                                      onCancel: () {
+                                        setState(() {
+                                          _selectedLesson = null;
+                                          _selectedLessonId = null;
+                                          _isAddingLesson = false;
+                                        });
+                                      },
+                                      onClose: () {
+                                        setState(() {
+                                          _selectedLesson = null;
+                                          _selectedLessonId = null;
+                                          _isAddingLesson = false;
+                                        });
+                                      },
+                                    )
+                                  : _buildInspectorPlaceholder(lessons),
+                            ),
+                          ),
+                        ],
+                      );
+                    }
+
+                    return masterList;
                   }
 
                   // Default state
@@ -473,6 +566,117 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildInspectorPlaceholder(List<ContentEntity> lessons) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.s24),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Center(
+            child: Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.08),
+                shape: BoxShape.circle,
+              ),
+              child: const Center(
+                child: Icon(
+                  Icons.auto_stories_rounded,
+                  color: AppColors.primary,
+                  size: 28,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.s16),
+          Text(
+            l10n.courseSummary,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.s8),
+          Text(
+            l10n.selectLessonToEdit,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: AppColors.textSecondary,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.s24),
+          const Divider(height: 1),
+          const SizedBox(height: AppSpacing.s24),
+          _buildSummaryStatRow(
+            icon: Icons.video_collection_rounded,
+            title: l10n.nLessonsCount(lessons.length),
+            color: AppColors.primary,
+          ),
+          const SizedBox(height: AppSpacing.s12),
+          _buildSummaryStatRow(
+            icon: Icons.picture_as_pdf_rounded,
+            title: '${lessons.where((l) => l.file != null).length} ${l10n.hasStudyMaterial}',
+            color: const Color(0xFFEA580C),
+          ),
+          const SizedBox(height: AppSpacing.s12),
+          _buildSummaryStatRow(
+            icon: Icons.quiz_rounded,
+            title: '${lessons.where((l) => l.associatedExamTitle != null).length} ${l10n.hasLessonQuiz}',
+            color: AppColors.success,
+          ),
+          const SizedBox(height: AppSpacing.s32),
+          AppButton(
+            text: l10n.addLessonButton,
+            icon: Icons.add_rounded,
+            onPressed: _handleAddLesson,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryStatRow({
+    required IconData icon,
+    required String title,
+    required Color color,
+  }) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Icon(icon, size: 16, color: color),
+        ),
+        const SizedBox(width: AppSpacing.s12),
+        Expanded(
+          child: Text(
+            title,
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

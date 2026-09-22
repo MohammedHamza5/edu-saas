@@ -3277,6 +3277,66 @@
   "@errorInvalidCredentialsHint": {
     "description": "Hint for invalid credentials"
   },
+  "errorEmailInvalidTitle": "Invalid Email Address",
+  "@errorEmailInvalidTitle": {
+    "description": "Error title when email address is invalid or not accepted"
+  },
+  "errorEmailInvalidMessage": "The email address entered is invalid or not accepted by the system.",
+  "@errorEmailInvalidMessage": {
+    "description": "Error message when email address is invalid or rejected"
+  },
+  "errorEmailInvalidHint": "Please enter a valid, active email address (avoid placeholder or dummy addresses like test@...).",
+  "@errorEmailInvalidHint": {
+    "description": "Hint when email address is invalid"
+  },
+  "errorEmailAlreadyExistsTitle": "Email Already Registered",
+  "@errorEmailAlreadyExistsTitle": {
+    "description": "Error title when email is already registered"
+  },
+  "errorEmailAlreadyExistsMessage": "An account with this email address already exists.",
+  "@errorEmailAlreadyExistsMessage": {
+    "description": "Error message when email is already registered"
+  },
+  "errorEmailAlreadyExistsHint": "Try signing in with this email, or recover your password if you forgot it.",
+  "@errorEmailAlreadyExistsHint": {
+    "description": "Hint when email is already registered"
+  },
+  "errorWeakPasswordTitle": "Weak Password",
+  "@errorWeakPasswordTitle": {
+    "description": "Error title when password does not meet security requirements"
+  },
+  "errorWeakPasswordMessage": "The password must be at least 6 characters long and meet complexity requirements.",
+  "@errorWeakPasswordMessage": {
+    "description": "Error message when password is too weak"
+  },
+  "errorWeakPasswordHint": "Use a mix of letters, numbers, and symbols for a stronger password.",
+  "@errorWeakPasswordHint": {
+    "description": "Hint when password is weak"
+  },
+  "errorRateLimitTitle": "Too Many Attempts",
+  "@errorRateLimitTitle": {
+    "description": "Error title when rate limit is exceeded"
+  },
+  "errorRateLimitMessage": "Too many requests have been made in a short time. Please wait a moment.",
+  "@errorRateLimitMessage": {
+    "description": "Error message when rate limit is exceeded"
+  },
+  "errorRateLimitHint": "Please wait 5 minutes before trying again.",
+  "@errorRateLimitHint": {
+    "description": "Hint when rate limit is exceeded"
+  },
+  "errorAuthFailedTitle": "Authentication Error",
+  "@errorAuthFailedTitle": {
+    "description": "Error title for general auth failures"
+  },
+  "errorAuthFailedMessage": "Could not complete the authentication request. Please try again.",
+  "@errorAuthFailedMessage": {
+    "description": "Error message for general auth failures"
+  },
+  "errorAuthFailedHint": "Check your details and try again shortly.",
+  "@errorAuthFailedHint": {
+    "description": "Hint for general auth failures"
+  },
   "errorSessionExpiredTitle": "Session Expired",
   "@errorSessionExpiredTitle": {
     "description": "Error title when auth session expired"
@@ -6077,11 +6137,22 @@
   },
   "hasStudyMaterial": "Study Material",
   "hasLessonQuiz": "Lesson Quiz",
+  "lessonEditorCreateQuiz": "Create New Quiz",
   "editLesson": "Edit Lesson",
   "deleteLesson": "Delete Lesson",
   "moveUp": "Move up",
   "moveDown": "Move down",
   "dragToReorder": "Drag to reorder",
+  "openFullPage": "Open Full Page",
+  "courseSummary": "Course Summary",
+  "selectLessonToEdit": "Select a lesson to edit details or add a new one",
+  "lessonAnalytics": "Lesson Analytics",
+  "backToCourse": "Back to Course",
+  "activeEditing": "Currently Editing",
+  "lessonDetails": "Lesson Details",
+  "lessonVideo": "Lesson Video",
+  "lessonHandouts": "Handouts & Materials",
+  "lessonQuizSettings": "Quiz & Passing Score",
   "nLessonsCount": "{count, plural, one{1 Lesson} other{{count} Lessons}}",
   "@nLessonsCount": {
     "placeholders": {

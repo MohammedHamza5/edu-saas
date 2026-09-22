@@ -4513,6 +4513,96 @@ abstract class AppLocalizations {
   /// **'Please double-check your email and password, then try again.'**
   String get errorInvalidCredentialsHint;
 
+  /// Error title when email address is invalid or not accepted
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid Email Address'**
+  String get errorEmailInvalidTitle;
+
+  /// Error message when email address is invalid or rejected
+  ///
+  /// In en, this message translates to:
+  /// **'The email address entered is invalid or not accepted by the system.'**
+  String get errorEmailInvalidMessage;
+
+  /// Hint when email address is invalid
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid, active email address (avoid placeholder or dummy addresses like test@...).'**
+  String get errorEmailInvalidHint;
+
+  /// Error title when email is already registered
+  ///
+  /// In en, this message translates to:
+  /// **'Email Already Registered'**
+  String get errorEmailAlreadyExistsTitle;
+
+  /// Error message when email is already registered
+  ///
+  /// In en, this message translates to:
+  /// **'An account with this email address already exists.'**
+  String get errorEmailAlreadyExistsMessage;
+
+  /// Hint when email is already registered
+  ///
+  /// In en, this message translates to:
+  /// **'Try signing in with this email, or recover your password if you forgot it.'**
+  String get errorEmailAlreadyExistsHint;
+
+  /// Error title when password does not meet security requirements
+  ///
+  /// In en, this message translates to:
+  /// **'Weak Password'**
+  String get errorWeakPasswordTitle;
+
+  /// Error message when password is too weak
+  ///
+  /// In en, this message translates to:
+  /// **'The password must be at least 6 characters long and meet complexity requirements.'**
+  String get errorWeakPasswordMessage;
+
+  /// Hint when password is weak
+  ///
+  /// In en, this message translates to:
+  /// **'Use a mix of letters, numbers, and symbols for a stronger password.'**
+  String get errorWeakPasswordHint;
+
+  /// Error title when rate limit is exceeded
+  ///
+  /// In en, this message translates to:
+  /// **'Too Many Attempts'**
+  String get errorRateLimitTitle;
+
+  /// Error message when rate limit is exceeded
+  ///
+  /// In en, this message translates to:
+  /// **'Too many requests have been made in a short time. Please wait a moment.'**
+  String get errorRateLimitMessage;
+
+  /// Hint when rate limit is exceeded
+  ///
+  /// In en, this message translates to:
+  /// **'Please wait 5 minutes before trying again.'**
+  String get errorRateLimitHint;
+
+  /// Error title for general auth failures
+  ///
+  /// In en, this message translates to:
+  /// **'Authentication Error'**
+  String get errorAuthFailedTitle;
+
+  /// Error message for general auth failures
+  ///
+  /// In en, this message translates to:
+  /// **'Could not complete the authentication request. Please try again.'**
+  String get errorAuthFailedMessage;
+
+  /// Hint for general auth failures
+  ///
+  /// In en, this message translates to:
+  /// **'Check your details and try again shortly.'**
+  String get errorAuthFailedHint;
+
   /// Error title when auth session expired
   ///
   /// In en, this message translates to:
@@ -9031,6 +9121,12 @@ abstract class AppLocalizations {
   /// **'Lesson Quiz'**
   String get hasLessonQuiz;
 
+  /// No description provided for @lessonEditorCreateQuiz.
+  ///
+  /// In en, this message translates to:
+  /// **'Create New Quiz'**
+  String get lessonEditorCreateQuiz;
+
   /// No description provided for @editLesson.
   ///
   /// In en, this message translates to:
@@ -9060,6 +9156,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Drag to reorder'**
   String get dragToReorder;
+
+  /// No description provided for @openFullPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Full Page'**
+  String get openFullPage;
+
+  /// No description provided for @courseSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Course Summary'**
+  String get courseSummary;
+
+  /// No description provided for @selectLessonToEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a lesson to edit details or add a new one'**
+  String get selectLessonToEdit;
+
+  /// No description provided for @lessonAnalytics.
+  ///
+  /// In en, this message translates to:
+  /// **'Lesson Analytics'**
+  String get lessonAnalytics;
+
+  /// No description provided for @backToCourse.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Course'**
+  String get backToCourse;
+
+  /// No description provided for @activeEditing.
+  ///
+  /// In en, this message translates to:
+  /// **'Currently Editing'**
+  String get activeEditing;
+
+  /// No description provided for @lessonDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Lesson Details'**
+  String get lessonDetails;
+
+  /// No description provided for @lessonVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Lesson Video'**
+  String get lessonVideo;
+
+  /// No description provided for @lessonHandouts.
+  ///
+  /// In en, this message translates to:
+  /// **'Handouts & Materials'**
+  String get lessonHandouts;
+
+  /// No description provided for @lessonQuizSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiz & Passing Score'**
+  String get lessonQuizSettings;
 
   /// No description provided for @nLessonsCount.
   ///
