@@ -57,6 +57,7 @@ abstract class ContentRepository {
   /// Reorders content items within a group atomically
   Future<Result<void>> reorderContentItems({
     required List<String> contentIdsInOrder,
+    String? groupId,
   });
 
   /// Deletes a content item

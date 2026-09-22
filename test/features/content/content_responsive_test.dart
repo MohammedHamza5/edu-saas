@@ -131,6 +131,7 @@ class _FakeContentRepository implements ContentRepository {
   @override
   Future<Result<void>> reorderContentItems({
     required List<String> contentIdsInOrder,
+    String? groupId,
   }) async {
     return const Success(null);
   }

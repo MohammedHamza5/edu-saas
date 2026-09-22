@@ -307,10 +307,16 @@ class ContentCubit extends Cubit<ContentState> {
     emit(current.copyWith(items: list, isReordering: true));
 
     final ids = list.map((e) => e.id).toList();
-    final result = await _repository.reorderContentItems(contentIdsInOrder: ids);
+    final result = await _repository.reorderContentItems(
+      contentIdsInOrder: ids,
+      groupId: _currentGroupId,
+    );
 
     switch (result) {
       case Success():
+        if (_currentGroupId != null) {
+          AppCache.content.invalidatePrefix(_currentGroupId!);
+        }
         emit(current.copyWith(items: list, isReordering: false));
       case FailureResult(:final failure):
         emit(ContentError(failure.message));

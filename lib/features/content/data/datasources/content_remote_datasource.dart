@@ -53,8 +53,11 @@ abstract interface class ContentRemoteDataSource {
     required String status,
   });
 
-  /// Updates sort_order for multiple items atomically
-  Future<void> reorderContentItems({required List<String> contentIdsInOrder});
+  /// Updates sort_order for multiple items atomically (across content and content_groups)
+  Future<void> reorderContentItems({
+    required List<String> contentIdsInOrder,
+    String? groupId,
+  });
 
   /// Deletes a content item (and cascading file attachment)
   Future<void> deleteContent(String contentId);
@@ -626,12 +629,17 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
   @override
   Future<void> reorderContentItems({
     required List<String> contentIdsInOrder,
+    String? groupId,
   }) async {
     // ⚡ Performance: RPC واحد بدلاً من N رحلات HTTP
     // ترتيب 10 عناصر = 10 × ~400ms = 4s  →  RPC واحد = ~80ms
+    // يُحدّث كلاً من جدول content وجدول content_groups لضمان تزامن الطالب والمعلم 100%
     await _safeClient.rpc<void>(
       'reorder_content_items',
-      params: {'p_ids': contentIdsInOrder},
+      params: {
+        'p_ids': contentIdsInOrder,
+        if (groupId != null) 'p_group_id': groupId,
+      },
     );
   }
 

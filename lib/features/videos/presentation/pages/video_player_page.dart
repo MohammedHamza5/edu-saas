@@ -230,16 +230,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     }
   }
 
-  bool _isFlushingProgress = false;
-
-  Future<void> _flushProgressAndExit({
-    LessonAssignmentEntity? thenNavigateToLesson,
-    int? lessonIndex,
-    int? totalLessons,
-  }) async {
-    if (_isFlushingProgress) return;
-    _isFlushingProgress = true;
-
+  Future<void> _forceFlushProgressToDB() async {
     if (!_isTeacher && _activeStudentId.isNotEmpty && _currentVideo != null) {
       final pos = _livePositionSecs.value;
       final dur = _liveDurationSecs.value > 0
@@ -270,6 +261,19 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
         }
       }
     }
+  }
+
+  bool _isFlushingProgress = false;
+
+  Future<void> _flushProgressAndExit({
+    LessonAssignmentEntity? thenNavigateToLesson,
+    int? lessonIndex,
+    int? totalLessons,
+  }) async {
+    if (_isFlushingProgress) return;
+    _isFlushingProgress = true;
+
+    await _forceFlushProgressToDB();
 
     if (mounted) {
       if (thenNavigateToLesson != null) {
@@ -296,13 +300,39 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
 
   Future<void> _openLesson(LessonAssignmentEntity lesson, int lessonIndex, int totalLessons) async {
     if (lesson.isLocked) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: AppColors.error,
-          content: Text(context.l10n.completeLessonToUnlock(lessonIndex > 1 ? lessonIndex - 1 : 1)),
+      unawaited(
+        showDialog<void>(
+          context: context,
+          barrierDismissible: false,
+          builder: (_) => const Center(child: CircularProgressIndicator()),
         ),
       );
-      return;
+
+      await _forceFlushProgressToDB();
+      await _loadLessonContext();
+
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+
+      final updatedLesson = _courseLessons.firstWhere(
+        (l) => l.contentId == lesson.contentId,
+        orElse: () => lesson,
+      );
+
+      if (updatedLesson.isLocked) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: AppColors.error,
+              content: Text(context.l10n.completeLessonToUnlock(lessonIndex > 1 ? lessonIndex - 1 : 1)),
+            ),
+          );
+        }
+        return;
+      }
+      
+      lesson = updatedLesson;
     }
 
     await _flushProgressAndExit(

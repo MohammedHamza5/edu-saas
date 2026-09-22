@@ -135,10 +135,12 @@ class ContentRepositoryImpl implements ContentRepository {
   @override
   Future<Result<void>> reorderContentItems({
     required List<String> contentIdsInOrder,
+    String? groupId,
   }) async {
     try {
       await _remoteDataSource.reorderContentItems(
         contentIdsInOrder: contentIdsInOrder,
+        groupId: groupId,
       );
       return const Success(null);
     } catch (e) {

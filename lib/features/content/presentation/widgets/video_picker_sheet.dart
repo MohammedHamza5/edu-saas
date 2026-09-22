@@ -14,10 +14,11 @@ import '../cubit/content_state.dart';
 /// A bottom sheet that shows all videos in the central Video Bank,
 /// allowing the teacher to pick one for adding as a lesson.
 class VideoPickerSheet extends StatefulWidget {
-  const VideoPickerSheet({super.key});
+  final Set<String>? excludedVideoIds;
+  const VideoPickerSheet({super.key, this.excludedVideoIds});
 
   /// Shows the picker and returns the selected [ContentEntity], or null if cancelled.
-  static Future<ContentEntity?> show(BuildContext context) {
+  static Future<ContentEntity?> show(BuildContext context, {Set<String>? excludedVideoIds}) {
     final pickerCubit = InjectionContainer.createContentCubit();
 
     return showModalBottomSheet<ContentEntity>(
@@ -27,7 +28,7 @@ class VideoPickerSheet extends StatefulWidget {
       backgroundColor: Colors.transparent,
       builder: (_) => BlocProvider(
         create: (_) => pickerCubit..loadCentralVideoBank(forceRefresh: true),
-        child: const VideoPickerSheet(),
+        child: VideoPickerSheet(excludedVideoIds: excludedVideoIds),
       ),
     );
   }
@@ -158,10 +159,11 @@ class _VideoPickerSheetState extends State<VideoPickerSheet> {
                 final all = state is ContentLoaded
                     ? state.items
                         .where((i) =>
-                            i.type == ContentType.video ||
+                            (i.type == ContentType.video ||
                             (i.videoProviderId != null &&
                                 i.videoProviderId!.isNotEmpty) ||
-                            (i.videoId != null && i.videoId!.isNotEmpty))
+                            (i.videoId != null && i.videoId!.isNotEmpty)) &&
+                            !(widget.excludedVideoIds?.contains(i.id) ?? false))
                         .toList()
                     : <ContentEntity>[];
                 final filtered = _filter(all);
