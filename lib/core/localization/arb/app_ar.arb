@@ -1665,6 +1665,8 @@
   "moveDown": "تحريك لأسفل",
   "dragToReorder": "اسحب لإعادة الترتيب",
   "openFullPage": "فتح في صفحة كاملة",
+  "showInspector": "إظهار لوحة التعديل",
+  "hideInspector": "إخفاء لوحة التعديل",
   "courseSummary": "ملخص المنهج",
   "selectLessonToEdit": "اختر محاضرة لتعديل تفاصيلها أو أضف محاضرة جديدة",
   "lessonAnalytics": "تحليلات المحاضرة",

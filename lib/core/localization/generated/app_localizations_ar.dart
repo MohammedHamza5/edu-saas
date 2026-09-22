@@ -5086,6 +5086,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get openFullPage => 'فتح في صفحة كاملة';
 
   @override
+  String get showInspector => 'إظهار لوحة التعديل';
+
+  @override
+  String get hideInspector => 'إخفاء لوحة التعديل';
+
+  @override
   String get courseSummary => 'ملخص المنهج';
 
   @override

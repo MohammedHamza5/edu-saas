@@ -9163,6 +9163,18 @@ abstract class AppLocalizations {
   /// **'Open Full Page'**
   String get openFullPage;
 
+  /// No description provided for @showInspector.
+  ///
+  /// In en, this message translates to:
+  /// **'Show Editor Panel'**
+  String get showInspector;
+
+  /// No description provided for @hideInspector.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide Editor Panel'**
+  String get hideInspector;
+
   /// No description provided for @courseSummary.
   ///
   /// In en, this message translates to:

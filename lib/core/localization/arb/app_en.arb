@@ -6144,6 +6144,8 @@
   "moveDown": "Move down",
   "dragToReorder": "Drag to reorder",
   "openFullPage": "Open Full Page",
+  "showInspector": "Show Editor Panel",
+  "hideInspector": "Hide Editor Panel",
   "courseSummary": "Course Summary",
   "selectLessonToEdit": "Select a lesson to edit details or add a new one",
   "lessonAnalytics": "Lesson Analytics",

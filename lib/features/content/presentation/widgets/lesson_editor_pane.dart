@@ -275,17 +275,23 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
                 if (isEditing && widget.onOpenFullPage != null) ...[
                   Tooltip(
                     message: context.l10n.openFullPage,
-                    child: OutlinedButton.icon(
+                    child: ElevatedButton.icon(
                       onPressed: widget.onOpenFullPage,
                       icon: const Icon(Icons.open_in_new_rounded, size: 14),
                       label: Text(
                         context.l10n.openFullPage,
-                        style: const TextStyle(fontSize: 12),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                      style: OutlinedButton.styleFrom(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary.withValues(alpha: 0.12),
+                        foregroundColor: AppColors.primary,
+                        elevation: 0,
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                         minimumSize: Size.zero,
-                        side: BorderSide(color: AppColors.primary.withValues(alpha: 0.5)),
+                        side: BorderSide(color: AppColors.primary.withValues(alpha: 0.4)),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(6),
                         ),

@@ -5119,6 +5119,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get openFullPage => 'Open Full Page';
 
   @override
+  String get showInspector => 'Show Editor Panel';
+
+  @override
+  String get hideInspector => 'Hide Editor Panel';
+
+  @override
   String get courseSummary => 'Course Summary';
 
   @override

@@ -32,6 +32,7 @@ class CourseLessonTile extends StatefulWidget {
   final VoidCallback? onTap;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
+  final VoidCallback? onOpenFullPage;
   final bool canMoveUp;
   final bool canMoveDown;
   final VoidCallback? onMoveUp;
@@ -48,6 +49,7 @@ class CourseLessonTile extends StatefulWidget {
     this.quizTitle,
     this.onEdit,
     this.onDelete,
+    this.onOpenFullPage,
     this.canMoveUp = false,
     this.canMoveDown = false,
     this.onMoveUp,
@@ -282,26 +284,36 @@ class _CourseLessonTileState extends State<CourseLessonTile> {
                 ),
               ),
 
-              // Action Buttons (visible on hover or always on mobile)
-              if (_isHovered || _isMobile) ...[
-                const SizedBox(width: AppSpacing.s4),
-                _buildActionButton(
-                  icon: Icons.edit_rounded,
-                  color: AppColors.primary,
-                  tooltip: l10n.editLesson,
-                  onTap: widget.onEdit,
-                ),
-                const SizedBox(width: AppSpacing.s4),
-                _buildActionButton(
-                  icon: Icons.delete_outline_rounded,
-                  color: AppColors.error,
-                  tooltip: l10n.deleteLesson,
-                  onTap: widget.onDelete,
-                ),
-              ] else ...[
-                // Placeholder width to prevent layout jumps
-                const SizedBox(width: 76),
-              ],
+              // Action Buttons (Always visible, polished with tooltips and touch/hover targets)
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (widget.onOpenFullPage != null) ...[
+                    _buildActionButton(
+                      icon: Icons.open_in_new_rounded,
+                      color: AppColors.primary,
+                      tooltip: l10n.openFullPage,
+                      onTap: widget.onOpenFullPage,
+                    ),
+                    const SizedBox(width: AppSpacing.s6),
+                  ],
+                  _buildActionButton(
+                    icon: Icons.edit_rounded,
+                    color: AppColors.primary,
+                    tooltip: l10n.editLesson,
+                    onTap: widget.onEdit ?? widget.onTap,
+                  ),
+                  if (widget.onDelete != null) ...[
+                    const SizedBox(width: AppSpacing.s6),
+                    _buildActionButton(
+                      icon: Icons.delete_outline_rounded,
+                      color: AppColors.error,
+                      tooltip: l10n.deleteLesson,
+                      onTap: widget.onDelete,
+                    ),
+                  ],
+                ],
+              ),
               ],
             ),
           ),
@@ -309,14 +321,6 @@ class _CourseLessonTileState extends State<CourseLessonTile> {
       ),
     ),
   );
-  }
-
-  bool get _isMobile {
-    try {
-      return MediaQuery.of(context).size.width < 600;
-    } catch (_) {
-      return false;
-    }
   }
 
   Widget _buildMiniChip({
@@ -361,16 +365,24 @@ class _CourseLessonTileState extends State<CourseLessonTile> {
   }) {
     return Tooltip(
       message: tooltip,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(6),
-        child: Container(
-          padding: const EdgeInsets.all(6),
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.08),
-            borderRadius: BorderRadius.circular(6),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(6),
+          hoverColor: color.withValues(alpha: 0.15),
+          child: Container(
+            padding: const EdgeInsets.all(7),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(
+                color: color.withValues(alpha: 0.25),
+                width: 1,
+              ),
+            ),
+            child: Icon(icon, size: 16, color: color),
           ),
-          child: Icon(icon, size: 16, color: color),
         ),
       ),
     );
