@@ -7,22 +7,26 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_empty_view.dart';
 import '../../../students/domain/entities/student_entity.dart';
+import '../../../students/domain/repositories/students_repository.dart';
 import '../cubit/groups_cubit.dart';
 
 class AddMemberDialog extends StatefulWidget {
   final String groupId;
   final Set<String>? existingMemberIds;
+  final StudentsRepository? studentsRepository;
 
   const AddMemberDialog({
     super.key,
     required this.groupId,
     this.existingMemberIds,
+    this.studentsRepository,
   });
 
   static Future<bool?> show(
     BuildContext context,
     String groupId, {
     Set<String>? existingMemberIds,
+    StudentsRepository? studentsRepository,
   }) {
     return showDialog<bool>(
       context: context,
@@ -32,6 +36,7 @@ class AddMemberDialog extends StatefulWidget {
         child: AddMemberDialog(
           groupId: groupId,
           existingMemberIds: existingMemberIds,
+          studentsRepository: studentsRepository,
         ),
       ),
     );
@@ -69,7 +74,8 @@ class _AddMemberDialogState extends State<AddMemberDialog> {
     });
 
     try {
-      final result = await InjectionContainer.studentsRepository.getStudents(
+      final repo = widget.studentsRepository ?? InjectionContainer.studentsRepository;
+      final result = await repo.getStudents(
         status: 'active',
         pageSize: 100,
       );

@@ -9,10 +9,57 @@ import 'package:edu_saas/features/groups/domain/repositories/groups_repository.d
 import 'package:edu_saas/features/groups/presentation/cubit/groups_cubit.dart';
 import 'package:edu_saas/features/groups/presentation/cubit/groups_state.dart';
 import 'package:edu_saas/features/groups/presentation/pages/groups_list_page.dart';
+import 'package:edu_saas/features/groups/presentation/widgets/add_member_dialog.dart';
 import 'package:edu_saas/features/groups/presentation/widgets/create_group_dialog.dart';
+import 'package:edu_saas/features/students/domain/entities/student_360_entity.dart';
+import 'package:edu_saas/features/students/domain/entities/student_entity.dart';
+import 'package:edu_saas/features/students/domain/repositories/students_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+class FakeStudentsRepository implements StudentsRepository {
+  List<StudentEntity> students = [];
+
+  @override
+  Future<Result<List<StudentEntity>>> getStudents({
+    String? status,
+    String? searchQuery,
+    int page = 0,
+    int pageSize = 25,
+  }) async {
+    return Success(students);
+  }
+
+  @override
+  Future<Result<List<StudentEntity>>> getPendingStudents() async => const Success([]);
+
+  @override
+  Future<Result<StudentEntity>> changeStudentStatus({
+    required String studentId,
+    required String action,
+  }) async => throw UnimplementedError();
+
+  @override
+  Future<Result<Student360Entity>> getStudent360(String studentId) async =>
+      throw UnimplementedError();
+
+  @override
+  Future<Result<StudentEntity>> getStudent(String studentId) async =>
+      throw UnimplementedError();
+
+  @override
+  Future<Result<void>> assignStudentToGroup({
+    required String studentId,
+    required String groupId,
+    required bool add,
+  }) async => const Success(null);
+
+  @override
+  Future<Result<List<StudentGroupInfo>>> getAvailableGroupsForStudent(
+    String studentId,
+  ) async => const Success([]);
+}
 
 class FakeGroupsRepository implements GroupsRepository {
   List<GroupEntity> groups = [];
@@ -377,6 +424,138 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('المسار أو التصنيف المخصص'), findsOneWidget);
+    });
+  });
+
+  group('AddMemberDialog Widget Tests', () {
+    late FakeStudentsRepository fakeStudentsRepo;
+
+    final sampleStudents = [
+      const StudentEntity(
+        id: 'std-1',
+        fullName: 'Ahmed Ali',
+        email: 'ahmed@example.com',
+        phone: '01012345678',
+        role: 'student',
+        status: 'active',
+        tenantId: '11111111-1111-1111-1111-111111111111',
+      ),
+      const StudentEntity(
+        id: 'std-2',
+        fullName: 'Sara Mohamed',
+        email: 'sara@example.com',
+        phone: '01098765432',
+        role: 'student',
+        status: 'active',
+        tenantId: '11111111-1111-1111-1111-111111111111',
+      ),
+      const StudentEntity(
+        id: 'std-3',
+        fullName: 'Khaled Omar',
+        email: 'khaled@example.com',
+        phone: '01122334455',
+        role: 'student',
+        status: 'active',
+        tenantId: '11111111-1111-1111-1111-111111111111',
+      ),
+    ];
+
+    setUp(() {
+      fakeStudentsRepo = FakeStudentsRepository()..students = sampleStudents;
+    });
+
+    Widget createAddMemberDialogUnderTest({
+      required GroupsCubit cubit,
+      Set<String>? existingMemberIds,
+    }) {
+      return MaterialApp(
+        theme: AppTheme.lightTheme,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('ar'),
+        home: Scaffold(
+          body: BlocProvider<GroupsCubit>.value(
+            value: cubit,
+            child: Builder(
+              builder: (ctx) => ElevatedButton(
+                onPressed: () => AddMemberDialog.show(
+                  ctx,
+                  'grp-1',
+                  existingMemberIds: existingMemberIds,
+                  studentsRepository: fakeStudentsRepo,
+                ),
+                child: const Text('Open Add Member'),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets('renders active students list and filters out existing group members',
+        (tester) async {
+      await tester.pumpWidget(createAddMemberDialogUnderTest(
+        cubit: groupsCubit,
+        existingMemberIds: {'std-1'}, // std-1 is already in the group
+      ));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Open Add Member'));
+      await tester.pumpAndSettle();
+
+      // std-1 should NOT appear because it is already a member
+      expect(find.text('Ahmed Ali'), findsNothing);
+
+      // std-2 and std-3 should appear
+      expect(find.text('Sara Mohamed'), findsOneWidget);
+      expect(find.text('Khaled Omar'), findsOneWidget);
+    });
+
+    testWidgets('allows searching students in real-time', (tester) async {
+      await tester.pumpWidget(createAddMemberDialogUnderTest(
+        cubit: groupsCubit,
+      ));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Open Add Member'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Ahmed Ali'), findsOneWidget);
+      expect(find.text('Sara Mohamed'), findsOneWidget);
+
+      // Search for 'Sara'
+      await tester.enterText(find.byType(TextField), 'Sara');
+      await tester.pumpAndSettle();
+
+      expect(find.text('Sara Mohamed'), findsOneWidget);
+      expect(find.text('Ahmed Ali'), findsNothing);
+    });
+
+    testWidgets('selecting student and clicking add calls cubit.addMember',
+        (tester) async {
+      await tester.pumpWidget(createAddMemberDialogUnderTest(
+        cubit: groupsCubit,
+      ));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Open Add Member'));
+      await tester.pumpAndSettle();
+
+      // Tap on Sara Mohamed to select
+      await tester.tap(find.text('Sara Mohamed'));
+      await tester.pumpAndSettle();
+
+      // Tap Add to group button
+      await tester.tap(find.text('إضافة إلى المجموعة'));
+      await tester.pumpAndSettle();
+
+      // Dialog should be dismissed
+      expect(find.text('Sara Mohamed'), findsNothing);
+      // Member should be in fakeRepo
+      expect(
+        fakeRepo.membersByGroup['grp-1']?.any((m) => m.studentId == 'std-2'),
+        isTrue,
+      );
     });
   });
 }
