@@ -1,5 +1,18 @@
 {
   "projects": {
     "default": "ed-sentre"
-  }
+  },
+  "targets": {
+    "ed-sentre": {
+      "hosting": {
+        "prod": [
+          "antounios"
+        ],
+        "test": [
+          "antounios-test"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

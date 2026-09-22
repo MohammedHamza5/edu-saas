@@ -28,6 +28,13 @@ class TenantResolver {
 
     // 2. Check host and subdomain
     final host = uri.host.toLowerCase();
+
+    // Isolated Testing / Sandbox Environment
+    if (host.contains('antounios-test') || host.contains('staging')) {
+      return '11111111-1111-1111-1111-111111111111';
+    }
+
+    // Official Production Environment (Dr. Antounios Ashraf)
     if (host.contains('antounios') || host.contains('edsentre')) {
       return defaultTenantId;
     }
