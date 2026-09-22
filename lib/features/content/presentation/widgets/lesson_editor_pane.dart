@@ -15,6 +15,8 @@ import '../dialogs/add_video_to_bank_dialog.dart';
 import 'video_picker_sheet.dart';
 import '../../../exams/presentation/pages/create_exam_page.dart';
 import '../../../exams/domain/entities/exam_entity.dart';
+import '../../../exams/presentation/cubit/exams_cubit.dart';
+import '../../../../core/di/injection_container.dart';
 
 /// The Right-side Pane for the Master-Detail Course Builder UX.
 class LessonEditorPane extends StatefulWidget {
@@ -507,7 +509,15 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
                       final created = await Navigator.push<ExamEntity?>(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => CreateExamPage(groupId: widget.groupId),
+                          builder: (_) => BlocProvider<ExamsCubit>(
+                            create: (_) => ExamsCubit(
+                              repository: InjectionContainer.examsRepository,
+                            ),
+                            child: CreateExamPage(
+                              groupId: widget.groupId,
+                              groupName: widget.groupName,
+                            ),
+                          ),
                         ),
                       );
                       if (created != null && mounted) {

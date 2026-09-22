@@ -22,8 +22,6 @@ import '../../../groups/domain/entities/group_entity.dart';
 import '../../../groups/presentation/cubit/groups_cubit.dart';
 import '../../../groups/presentation/cubit/groups_state.dart';
 
-import '../widgets/lesson_editor_pane.dart';
-
 /// The Course Builder page (formerly TeacherContentLibraryPage).
 ///
 /// Here the teacher selects a Course (Group) and manages the sequential
@@ -48,9 +46,6 @@ class TeacherContentLibraryPage extends StatefulWidget {
 class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
   String? _selectedGroupId;
   String? _selectedGroupName;
-  String? _selectedLessonId;
-  ContentEntity? _selectedLesson;
-  bool _isAddingLesson = false;
 
   @override
   void initState() {
@@ -58,7 +53,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
     if (widget.preselectedVideo != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (_selectedGroupId != null) {
-          _openEditLessonDialog(widget.preselectedVideo);
+          _openEditLessonPage(widget.preselectedVideo!);
         }
       });
     }
@@ -96,9 +91,6 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
     setState(() {
       _selectedGroupId = group.id;
       _selectedGroupName = group.name;
-      _selectedLesson = null;
-      _selectedLessonId = null;
-      _isAddingLesson = false;
     });
     _loadContent();
   }
@@ -112,107 +104,23 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
     }
   }
 
-  void _handleAddLesson() {
+  Future<void> _handleAddLesson() async {
     if (_selectedGroupId == null) return;
-    final isDesktop = MediaQuery.of(context).size.width >= 960;
-    if (isDesktop) {
-      setState(() {
-        _selectedLesson = null;
-        _selectedLessonId = null;
-        _isAddingLesson = true;
-      });
-    } else {
-      _showLessonEditorSheet(null);
-    }
-  }
-
-  void _openEditLessonDialog(ContentEntity? content) {
-    if (_selectedGroupId == null) return;
-    final isDesktop = MediaQuery.of(context).size.width >= 960;
-    if (isDesktop) {
-      setState(() {
-        _selectedLesson = content;
-        _selectedLessonId = content?.id;
-        _isAddingLesson = (content == null);
-      });
-    } else {
-      _showLessonEditorSheet(content);
-    }
-  }
-
-  void _showLessonEditorSheet(ContentEntity? lesson) {
-    if (_selectedGroupId == null) return;
-
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      useRootNavigator: true,
-      builder: (ctx) {
-        return Container(
-          height: MediaQuery.of(ctx).size.height * 0.9,
-          decoration: const BoxDecoration(
-            color: AppColors.background,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          child: Column(
-            children: [
-              // Handle
-              Center(
-                child: Container(
-                  margin: const EdgeInsets.only(top: 12, bottom: 12),
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: AppColors.border,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              Expanded(
-                child: BlocProvider.value(
-                  value: context.read<ContentCubit>(),
-                  child: LessonEditorPane(
-                    editingLesson: lesson,
-                    groupId: _selectedGroupId!,
-                    groupName: _selectedGroupName ?? '',
-                    defaultPassingScore: 70,
-                    onOpenFullPage: lesson != null
-                        ? () {
-                            Navigator.of(ctx).pop();
-                            context.push(
-                              '/teacher/groups/$_selectedGroupId/lessons/${lesson.id}?name=${Uri.encodeComponent(_selectedGroupName ?? "")}',
-                            );
-                          }
-                        : null,
-                    onSaved: () {
-                      Navigator.of(ctx).pop();
-                      _onLessonSaved();
-                    },
-                    onCancel: () {
-                      Navigator.of(ctx).pop();
-                    },
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
+    await context.push(
+      '/teacher/groups/$_selectedGroupId/lessons/new?name=${Uri.encodeComponent(_selectedGroupName ?? "")}',
     );
+    if (mounted) {
+      await _loadContent(forceRefresh: true);
+    }
   }
 
-  Future<void> _onLessonSaved() async {
-    await _loadContent(forceRefresh: true);
+  Future<void> _openEditLessonPage(ContentEntity lesson) async {
+    if (_selectedGroupId == null) return;
+    await context.push(
+      '/teacher/groups/$_selectedGroupId/lessons/${lesson.id}?name=${Uri.encodeComponent(_selectedGroupName ?? "")}',
+    );
     if (mounted) {
-      setState(() {
-        _selectedLesson = null;
-        _selectedLessonId = null;
-        _isAddingLesson = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.contentUpdatedToast)),
-      );
+      await _loadContent(forceRefresh: true);
     }
   }
 
@@ -403,13 +311,12 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                       },
                                       itemBuilder: (context, index) {
                                         final lesson = lessons[index];
-                                        final isSelected = _selectedLessonId == lesson.id;
                                         return CourseLessonTile(
                                           key: ValueKey(lesson.id),
                                           content: lesson,
                                           index: index,
-                                          isSelected: isSelected,
-                                          onTap: () => _openEditLessonDialog(lesson),
+                                          isSelected: false,
+                                          onTap: () => _openEditLessonPage(lesson),
                                           lessonTitle: lesson.title,
                                           hasPdf: lesson.file != null,
                                           quizTitle: lesson.associatedExamTitle,
@@ -417,11 +324,8 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                           canMoveDown: index < lessons.length - 1,
                                           onMoveUp: () => context.read<ContentCubit>().reorderItems(index, index - 1),
                                           onMoveDown: () => context.read<ContentCubit>().reorderItems(index, index + 2),
-                                          onEdit: () => _openEditLessonDialog(lesson),
+                                          onEdit: () => _openEditLessonPage(lesson),
                                           onDelete: () => _confirmDelete(lesson),
-                                          onOpenFullPage: () => context.push(
-                                            '/teacher/groups/$_selectedGroupId/lessons/${lesson.id}?name=${Uri.encodeComponent(_selectedGroupName ?? "")}',
-                                          ),
                                         );
                                       },
                                     ),
@@ -507,29 +411,6 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                               icon: Icons.add_rounded,
                                               onPressed: _handleAddLesson,
                                             ),
-                                            if (_selectedLesson == null && !_isAddingLesson && lessons.isNotEmpty) ...[
-                                              const SizedBox(width: AppSpacing.s8),
-                                              Tooltip(
-                                                message: context.l10n.showInspector,
-                                                child: OutlinedButton.icon(
-                                                  onPressed: () {
-                                                    setState(() {
-                                                      _selectedLesson = lessons.first;
-                                                      _selectedLessonId = lessons.first.id;
-                                                    });
-                                                  },
-                                                  icon: const Icon(Icons.tune_rounded, size: 16),
-                                                  label: Text(context.l10n.showInspector),
-                                                  style: OutlinedButton.styleFrom(
-                                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                                                    side: BorderSide(color: AppColors.primary.withValues(alpha: 0.4)),
-                                                    shape: RoundedRectangleBorder(
-                                                      borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
                                           ],
                                         )
                                       : Column(
@@ -590,54 +471,9 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                 ),
                               ),
 
-                              // Content Area: Split view on desktop if editing, else full-width list
+                              // Content Area: Clean, full-width course syllabus
                               Expanded(
-                                child: (isDesktop && _selectedGroupId != null && (_selectedLesson != null || _isAddingLesson))
-                                    ? Row(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Expanded(child: masterList),
-                                          const SizedBox(width: AppSpacing.s16),
-                                          SizedBox(
-                                            width: 440,
-                                            child: Padding(
-                                              padding: const EdgeInsets.only(bottom: AppSpacing.s24),
-                                              child: LessonEditorPane(
-                                                key: ValueKey(_selectedLesson?.id ?? 'new_lesson'),
-                                                editingLesson: _selectedLesson,
-                                                groupId: _selectedGroupId!,
-                                                groupName: _selectedGroupName ?? '',
-                                                defaultPassingScore: 70,
-                                                onOpenFullPage: _selectedLesson != null
-                                                    ? () {
-                                                        context.push(
-                                                          '/teacher/groups/$_selectedGroupId/lessons/${_selectedLesson!.id}?name=${Uri.encodeComponent(_selectedGroupName ?? "")}',
-                                                        );
-                                                      }
-                                                    : null,
-                                                onSaved: () {
-                                                  _onLessonSaved();
-                                                },
-                                                onCancel: () {
-                                                  setState(() {
-                                                    _selectedLesson = null;
-                                                    _selectedLessonId = null;
-                                                    _isAddingLesson = false;
-                                                  });
-                                                },
-                                                onClose: () {
-                                                  setState(() {
-                                                    _selectedLesson = null;
-                                                    _selectedLessonId = null;
-                                                    _isAddingLesson = false;
-                                                  });
-                                                },
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      )
-                                    : masterList,
+                                child: masterList,
                               ),
                             ],
                           );

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -6,17 +7,21 @@ import '../../../../core/network/supabase_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_card.dart';
+import '../../../../core/widgets/app_empty_view.dart';
 import '../../domain/entities/content_entity.dart';
 import '../cubit/content_cubit.dart';
 import '../cubit/content_state.dart';
 import '../widgets/lesson_editor_pane.dart';
 
-/// Full-Page Deep Work View for an individual Course Lesson.
+/// Full-page dedicated workspace for a single Lesson/Lecture in the Course Builder.
 ///
-/// Route: /teacher/groups/:groupId/lessons/:lessonId
+/// Provides:
+/// 1. Top Breadcrumb & Back to Syllabus navigation (`← العودة للمنهج`).
+/// 2. Tab 1: Comprehensive Lesson Editor (Video, Title, PDF Handout, Quiz, Gating).
+/// 3. Tab 2: 100% Real Live Analytics from Supabase (Zero mock/fake numbers).
 class TeacherLessonDetailsPage extends StatefulWidget {
   final String groupId;
-  final String lessonId;
+  final String lessonId; // Can be a UUID or 'new'
   final String? groupName;
 
   const TeacherLessonDetailsPage({
@@ -34,15 +39,14 @@ class TeacherLessonDetailsPage extends StatefulWidget {
 class _TeacherLessonDetailsPageState extends State<TeacherLessonDetailsPage>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
-
   ContentEntity? _lesson;
   bool _isLoading = true;
 
-  // Analytics state
+  // Real Analytics State (100% fetched from Supabase, NO mock numbers)
+  int _totalStudents = 0;
   int _totalViews = 0;
   int _completedStudents = 0;
-  int _totalStudents = 0;
-  double _averageQuizScore = 0.0;
+  double? _averageQuizScore; // null if no quiz attached or no completed attempts
 
   @override
   void initState() {
@@ -59,6 +63,16 @@ class _TeacherLessonDetailsPageState extends State<TeacherLessonDetailsPage>
 
   Future<void> _loadLessonData() async {
     setState(() => _isLoading = true);
+
+    if (widget.lessonId == 'new') {
+      _lesson = null;
+      _totalStudents = 0;
+      _totalViews = 0;
+      _completedStudents = 0;
+      _averageQuizScore = null;
+      if (mounted) setState(() => _isLoading = false);
+      return;
+    }
 
     try {
       final cubit = context.read<ContentCubit>();
@@ -84,20 +98,76 @@ class _TeacherLessonDetailsPageState extends State<TeacherLessonDetailsPage>
   }
 
   Future<void> _loadAnalytics() async {
+    if (widget.lessonId == 'new') return;
+
     try {
       final client = SupabaseService.client;
+
+      // 1. Total students in this group (active)
       final countRes = await client
           .from('group_members')
           .select('id')
-          .eq('group_id', widget.groupId);
-
+          .eq('group_id', widget.groupId)
+          .eq('status', 'active');
       final total = (countRes as List).length;
+
+      // 2. Video views & completions
+      int views = 0;
+      int completed = 0;
+      String? vId = _lesson?.videoId;
+      if (vId == null) {
+        final videoRes = await client
+            .from('videos')
+            .select('id')
+            .eq('content_id', widget.lessonId)
+            .maybeSingle();
+        if (videoRes != null && videoRes['id'] != null) {
+          vId = videoRes['id'] as String;
+        }
+      }
+
+      if (vId != null) {
+        final vpRes = await client
+            .from('video_progress')
+            .select('completed, progress_seconds')
+            .eq('video_id', vId);
+        final list = vpRes as List;
+        views = list.where((r) => (r['progress_seconds'] as int? ?? 0) > 0).length;
+        completed = list.where((r) => r['completed'] == true).length;
+      }
+
+      // 3. Quiz average percentage
+      double? avgScore;
+      final examId = _lesson?.associatedExamId;
+      if (examId != null) {
+        final attemptsRes = await client
+            .from('exam_attempts')
+            .select('percentage')
+            .eq('exam_id', examId)
+            .inFilter('status', ['submitted', 'completed']);
+        final attempts = attemptsRes as List;
+        if (attempts.isNotEmpty) {
+          double sum = 0;
+          int validCount = 0;
+          for (final a in attempts) {
+            final p = a['percentage'];
+            if (p != null) {
+              sum += (p is num ? p.toDouble() : double.tryParse(p.toString()) ?? 0);
+              validCount++;
+            }
+          }
+          if (validCount > 0) {
+            avgScore = sum / validCount;
+          }
+        }
+      }
+
       if (mounted) {
         setState(() {
           _totalStudents = total;
-          _totalViews = total > 0 ? (total * 0.85).round() : 0;
-          _completedStudents = total > 0 ? (total * 0.70).round() : 0;
-          _averageQuizScore = 84.5;
+          _totalViews = views;
+          _completedStudents = completed;
+          _averageQuizScore = avgScore;
         });
       }
     } catch (_) {}
@@ -115,6 +185,7 @@ class _TeacherLessonDetailsPageState extends State<TeacherLessonDetailsPage>
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
+    final isNew = widget.lessonId == 'new';
 
     if (_isLoading) {
       return const Scaffold(
@@ -123,7 +194,9 @@ class _TeacherLessonDetailsPageState extends State<TeacherLessonDetailsPage>
       );
     }
 
-    final lessonTitle = _lesson?.title ?? l10n.lessonDetails;
+    final displayHeaderTitle = isNew
+        ? l10n.lessonEditorAddTitle
+        : '${widget.groupName ?? ""} / ${_lesson?.title ?? l10n.lessonDetails}';
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -159,7 +232,7 @@ class _TeacherLessonDetailsPageState extends State<TeacherLessonDetailsPage>
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        '${widget.groupName ?? ""} / $lessonTitle',
+                        displayHeaderTitle,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: AppColors.textPrimary,
@@ -169,7 +242,7 @@ class _TeacherLessonDetailsPageState extends State<TeacherLessonDetailsPage>
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        l10n.lessonDetails,
+                        isNew ? l10n.addLessonButton : l10n.editLessonTitle,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: AppColors.textSecondary,
                           fontSize: 12,
@@ -223,11 +296,15 @@ class _TeacherLessonDetailsPageState extends State<TeacherLessonDetailsPage>
                         onSaved: () {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text(l10n.save),
+                              content: Text(l10n.contentUpdatedToast),
                               backgroundColor: AppColors.success,
                             ),
                           );
-                          _loadLessonData();
+                          if (isNew) {
+                            _navigateBack();
+                          } else {
+                            _loadLessonData();
+                          }
                         },
                         onCancel: _navigateBack,
                         onClose: _navigateBack,
@@ -236,7 +313,7 @@ class _TeacherLessonDetailsPageState extends State<TeacherLessonDetailsPage>
                   ),
                 ),
 
-                // Tab 2: Analytics & Student Progress
+                // Tab 2: Analytics & Student Progress (100% Real Supabase Data)
                 _buildAnalyticsTab(),
               ],
             ),
@@ -246,9 +323,30 @@ class _TeacherLessonDetailsPageState extends State<TeacherLessonDetailsPage>
     );
   }
 
-  // --- TAB 2: ANALYTICS & STUDENT PROGRESS ---
+  // --- TAB 2: ANALYTICS & STUDENT PROGRESS (REAL SUPABASE DATA) ---
   Widget _buildAnalyticsTab() {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
+
+    if (widget.lessonId == 'new' || _lesson == null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.s32),
+          child: AppEmptyView(
+            message: l10n.analyticsAvailableAfterPublish,
+            icon: Icons.analytics_outlined,
+          ),
+        ),
+      );
+    }
+
+    final quizScoreText = _averageQuizScore != null
+        ? '${_averageQuizScore!.toStringAsFixed(1)}%'
+        : l10n.noDataDash;
+
+    final quizSubtitle = _lesson?.associatedExamId == null
+        ? l10n.noAssociatedQuiz
+        : (_averageQuizScore == null ? l10n.noAttemptsYet : null);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSpacing.s24),
@@ -263,7 +361,7 @@ class _TeacherLessonDetailsPageState extends State<TeacherLessonDetailsPage>
                 children: [
                   Expanded(
                     child: _buildMetricCard(
-                      title: 'إجمالي المشاهدات',
+                      title: l10n.totalViews,
                       value: '$_totalViews',
                       icon: Icons.visibility_rounded,
                       color: AppColors.primary,
@@ -272,7 +370,7 @@ class _TeacherLessonDetailsPageState extends State<TeacherLessonDetailsPage>
                   const SizedBox(width: AppSpacing.s16),
                   Expanded(
                     child: _buildMetricCard(
-                      title: 'أكملوا المحاضرة',
+                      title: l10n.completedLesson,
                       value: '$_completedStudents / $_totalStudents',
                       icon: Icons.check_circle_rounded,
                       color: AppColors.success,
@@ -281,8 +379,9 @@ class _TeacherLessonDetailsPageState extends State<TeacherLessonDetailsPage>
                   const SizedBox(width: AppSpacing.s16),
                   Expanded(
                     child: _buildMetricCard(
-                      title: 'متوسط درجات الكويز',
-                      value: '$_averageQuizScore%',
+                      title: l10n.averageQuizScore,
+                      value: quizScoreText,
+                      subtitle: quizSubtitle,
                       icon: Icons.emoji_events_rounded,
                       color: const Color(0xFFF59E0B),
                     ),
@@ -297,7 +396,7 @@ class _TeacherLessonDetailsPageState extends State<TeacherLessonDetailsPage>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'إحصائيات إنجاز الطلاب للدرس',
+                        l10n.studentLessonProgressStats,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -317,7 +416,9 @@ class _TeacherLessonDetailsPageState extends State<TeacherLessonDetailsPage>
                       ),
                       const SizedBox(height: AppSpacing.s8),
                       Text(
-                        'نسبة الإكمال الكلية: ${_totalStudents > 0 ? ((_completedStudents / _totalStudents) * 100).toInt() : 0}% من طلاب المجموعة',
+                        l10n.overallCompletionRate(_totalStudents > 0
+                            ? ((_completedStudents / _totalStudents) * 100).toInt()
+                            : 0),
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: AppColors.textSecondary,
                         ),
@@ -336,6 +437,7 @@ class _TeacherLessonDetailsPageState extends State<TeacherLessonDetailsPage>
   Widget _buildMetricCard({
     required String title,
     required String value,
+    String? subtitle,
     required IconData icon,
     required Color color,
   }) {
@@ -374,6 +476,18 @@ class _TeacherLessonDetailsPageState extends State<TeacherLessonDetailsPage>
                       color: color,
                     ),
                   ),
+                  if (subtitle != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: const TextStyle(
+                        fontSize: 10,
+                        color: AppColors.textMuted,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ],
               ),
             ),

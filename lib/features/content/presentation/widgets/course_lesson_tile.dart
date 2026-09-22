@@ -284,19 +284,10 @@ class _CourseLessonTileState extends State<CourseLessonTile> {
                 ),
               ),
 
-              // Action Buttons (Always visible, polished with tooltips and touch/hover targets)
+              // Action Buttons (Edit and Delete)
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (widget.onOpenFullPage != null) ...[
-                    _buildActionButton(
-                      icon: Icons.open_in_new_rounded,
-                      color: AppColors.primary,
-                      tooltip: l10n.openFullPage,
-                      onTap: widget.onOpenFullPage,
-                    ),
-                    const SizedBox(width: AppSpacing.s6),
-                  ],
                   _buildActionButton(
                     icon: Icons.edit_rounded,
                     color: AppColors.primary,
