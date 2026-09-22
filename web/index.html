@@ -749,11 +749,12 @@
           var data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
           if (data && data.event === 'infoDelivery' && data.info) {
             if (typeof data.info.currentTime === 'number') {
+              var dur = (typeof data.info.duration === 'number' && data.info.duration > 0) ? Math.floor(data.info.duration) : null;
               notifyYouTubeFlutter({
                 event: 'timeupdate',
                 value: {
                   seconds: Math.floor(data.info.currentTime),
-                  duration: Math.floor(data.info.duration || 0)
+                  duration: dur
                 }
               });
             }
@@ -826,7 +827,7 @@
                           event: 'timeupdate',
                           value: {
                             seconds: Math.floor(t),
-                            duration: (typeof d === 'number' && d > 0) ? Math.floor(d) : 0
+                            duration: (typeof d === 'number' && d > 0) ? Math.floor(d) : null
                           }
                         });
                       }

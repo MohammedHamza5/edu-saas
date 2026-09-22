@@ -225,7 +225,7 @@ void main() {
 
         // 1. Verify Page Title and CDN Badge rendered
         expect(find.text('مشاهدة الدرس التعليمي'), findsOneWidget);
-        expect(find.text('Bunny CDN آمن'), findsOneWidget);
+        expect(find.text('بث سحابي محمي'), findsOneWidget);
 
         // 2. Verify Academic Stats Card
         expect(find.text('التقدم الأكاديمي للدرس'), findsWidgets);

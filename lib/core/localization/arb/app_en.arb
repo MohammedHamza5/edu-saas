@@ -1428,7 +1428,7 @@
   "@selectVideoFileAction": {
     "description": "Choose video button"
   },
-  "uploadingVideoNotice": "Uploading video to Bunny Stream...",
+  "uploadingVideoNotice": "Uploading video to secure cloud storage...",
   "@uploadingVideoNotice": {
     "description": "Upload notice"
   },
@@ -3514,9 +3514,9 @@
   "@watchLessonTitle": {
     "description": "Title in app bar for video lesson"
   },
-  "secureCdnBadge": "Secure Bunny CDN",
+  "secureCdnBadge": "Protected Stream",
   "@secureCdnBadge": {
-    "description": "Badge showing secure CDN provider"
+    "description": "Badge showing secure video stream"
   },
   "loadingVideo": "Loading video...",
   "@loadingVideo": {
@@ -3599,9 +3599,9 @@
   "@defaultLessonTitle": {
     "description": "Default title when video title is null"
   },
-  "protectedStreamCdnNotice": "Protected stream via Bunny Stream CDN",
+  "protectedStreamCdnNotice": "Secure, encrypted educational stream",
   "@protectedStreamCdnNotice": {
-    "description": "CDN streaming notice"
+    "description": "Encrypted streaming notice"
   },
   "lessonNotesAndTopics": "Lesson Notes & Topics:",
   "@lessonNotesAndTopics": {
@@ -3645,7 +3645,7 @@
   "@videoPleaseSelectFile": {
     "description": "Validation error when no file picked"
   },
-  "videoUploadSuccessToast": "Video uploaded to Bunny Stream successfully and is processing!",
+  "videoUploadSuccessToast": "Video uploaded successfully and is processing in the cloud!",
   "@videoUploadSuccessToast": {
     "description": "Toast on video upload success"
   },
@@ -3661,7 +3661,7 @@
   "@teacherVideoNotUploadedTitle": {
     "description": "Title for teacher when video is not uploaded"
   },
-  "teacherVideoNotUploadedDesc": "Lesson created, but the video file has not been uploaded to Bunny Stream yet. You can upload it now so students can watch.",
+  "teacherVideoNotUploadedDesc": "Lesson created, but the video file has not been uploaded to the streaming server yet. You can upload it now so students can watch.",
   "@teacherVideoNotUploadedDesc": {
     "description": "Description for teacher when video is not uploaded"
   },
@@ -3681,7 +3681,7 @@
   "@uploadNewLessonVideo": {
     "description": "Title of video upload dialog"
   },
-  "fastEncryptedCdnHosting": "Fast and encrypted hosting via Bunny CDN",
+  "fastEncryptedCdnHosting": "Fast and encrypted high-performance hosting",
   "@fastEncryptedCdnHosting": {
     "description": "Subtitle in video upload dialog"
   },
@@ -3721,7 +3721,7 @@
   "@lessonNotesHint": {
     "description": "Form hint for video description"
   },
-  "uploadingVideoToCdn": "Uploading video to Bunny Stream...",
+  "uploadingVideoToCdn": "Uploading video to secure cloud storage...",
   "@uploadingVideoToCdn": {
     "description": "Status text while uploading"
   },
@@ -5548,7 +5548,7 @@
   "@settingsServiceCardDesc": {
     "description": "Settings dashboard card description"
   },
-  "videoStreamingNotice": "Video files will be uploaded and streamed via high-speed Bunny Stream CDN after creating the item using the 'Upload Video' action.",
+  "videoStreamingNotice": "Video files will be uploaded and streamed securely at high speed after creating the item using the 'Upload Video' action.",
   "@videoStreamingNotice": {
     "description": "Notice in create content dialog for video items"
   },
@@ -5560,7 +5560,7 @@
   "@doNotClosePageWarning": {
     "description": "Warning not to close page during file upload"
   },
-  "videoUploadDoNotCloseWarning": "Video is being uploaded and encrypted on the CDN. Please stay on this page until upload reaches 100%.",
+  "videoUploadDoNotCloseWarning": "Video is being uploaded and encrypted. Please stay on this page until upload reaches 100%.",
   "@videoUploadDoNotCloseWarning": {
     "description": "Warning not to close page during video upload"
   },
@@ -5662,7 +5662,7 @@
   "invalidYoutubeUrl": "Invalid YouTube URL",
   "videoLinkedSuccessToast": "Video Linked Successfully",
   "youtubeTabTitle": "YouTube Video",
-  "bunnyTabTitle": "Bunny CDN",
+  "bunnyTabTitle": "Cloud Video",
   "youtubeUrlLabel": "YouTube Video URL",
   "youtubeUrlHint": "Paste YouTube link e.g. https://youtu.be/...",
   "youtubeUnlistedAdvice": "Use Unlisted videos for privacy",
@@ -5760,7 +5760,7 @@
   "attachVideoMaterialHint": "Select a PDF file",
   "addNewMaterialTitle": "Add New Material",
   "uploadBunnyVideoTitle": "Upload Video",
-  "uploadBunnyVideoSubtitle": "Upload directly to Bunny CDN",
+  "uploadBunnyVideoSubtitle": "Upload directly to secure platform storage",
   "uploadPdfFileTitle": "Upload PDF",
   "uploadPdfFileSubtitle": "Upload documents and notes",
   "imagesCategory": "Images",
@@ -5880,7 +5880,7 @@
   "streamingProviderSettingDesc": "Select the authorized provider to stream your lectures to students",
   "providerYoutubeLabel": "YouTube (Unlisted)",
   "providerYoutubeDesc": "Fast & free hosting with instant linking via video URL",
-  "providerBunnyLabel": "Bunny Stream (Private Encrypted CDN)",
+  "providerBunnyLabel": "Platform Secure Cloud (Encrypted HLS)",
   "providerBunnyDesc": "High security & anti-download protection with HLS streaming",
   "providerUpdatedToast": "Streaming provider updated successfully",
   "allInOneStudioTitle": "All-in-One Lecture Studio",
@@ -5945,7 +5945,7 @@
   "takeQuizNowAction": "Take Lecture Quiz Now 📝",
   "quizPassedUnlockNext": "Congratulations! You passed the quiz and unlocked the next lecture 🚀",
   "videoSourceYoutube": "YouTube",
-  "videoSourceBunny": "Bunny CDN",
+  "videoSourceBunny": "Platform Cloud Video",
   "videoSourceNone": "No Video",
   "videoSourceLabel": "Video Source",
   "changeVideoFileAction": "Change Video File",

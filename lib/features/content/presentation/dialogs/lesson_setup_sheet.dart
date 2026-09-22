@@ -379,8 +379,8 @@ class _LessonSetupSheetState extends State<LessonSetupSheet> {
                         ),
                         Text(
                           widget.video.videoProvider == 'youtube'
-                              ? 'YouTube'
-                              : 'Bunny Stream',
+                              ? context.l10n.videoSourceYoutube
+                              : context.l10n.videoSourceBunny,
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: AppColors.textSecondary,
                             fontSize: 11,

@@ -11,7 +11,7 @@ class TenantRegistry {
 
   /// Premier Tenant: Dr. Antounios Ashraf — Exclusive American Math Platform
   static final TenantBranding drAntouniosBranding = TenantBranding.fromPrimary(
-    tenantId: 'd3b07384-d113-460b-8d14-04666f77ecfa',
+    tenantId: 'ea5caf8b-112f-4044-b9ad-798d5ab025c3',
     brandName: 'منصة د. أنطونيوس أشرف',
     brandNameEn: 'Dr. Antounios Ashraf Platform',
     teacherName: 'د. أنطونيوس أشرف',
@@ -38,10 +38,13 @@ class TenantRegistry {
   /// Map of registered tenants by UUID / identifier / domain
   static final Map<String, TenantBranding> _registeredTenants = {
     'default': drAntouniosBranding,
+    'ea5caf8b-112f-4044-b9ad-798d5ab025c3': drAntouniosBranding,
     'd3b07384-d113-460b-8d14-04666f77ecfa': drAntouniosBranding,
     'teacher-1-slot': drAntouniosBranding,
     'antounios': drAntouniosBranding,
     'antounios.edsentre.com': drAntouniosBranding,
+    'antounios.web.app': drAntouniosBranding,
+    'edsentre.com': drAntouniosBranding,
   };
 
   /// Registers or updates a teacher branding in the runtime registry

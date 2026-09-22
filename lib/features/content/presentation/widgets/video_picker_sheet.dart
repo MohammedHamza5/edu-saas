@@ -258,13 +258,15 @@ class _VideoPickerSheetState extends State<VideoPickerSheet> {
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                   const SizedBox(height: 2),
-                                  Text(
-                                    video.videoProvider == 'youtube' ? 'YouTube' : 'Bunny Stream',
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: AppColors.textSecondary,
-                                      fontSize: 11,
-                                    ),
-                                  ),
+                                   Text(
+                                     video.videoProvider == 'youtube'
+                                         ? context.l10n.videoSourceYoutube
+                                         : context.l10n.videoSourceBunny,
+                                     style: theme.textTheme.bodySmall?.copyWith(
+                                       color: AppColors.textSecondary,
+                                       fontSize: 11,
+                                     ),
+                                   ),
                                 ],
                               ),
                             ),

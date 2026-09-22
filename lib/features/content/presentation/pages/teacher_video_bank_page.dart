@@ -613,7 +613,9 @@ class _VideoLibraryCardState extends State<_VideoLibraryCard> {
                       borderRadius: BorderRadius.circular(5),
                     ),
                     child: Text(
-                      v.videoProvider == 'youtube' ? 'YouTube' : 'Bunny',
+                      v.videoProvider == 'youtube'
+                          ? l10n.videoSourceYoutube
+                          : l10n.videoSourceBunny,
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 9,

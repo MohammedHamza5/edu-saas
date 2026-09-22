@@ -130,12 +130,19 @@ class _BunnyEmbedPlayerWebState extends State<_BunnyEmbedPlayerWeb> {
               currentSeconds = (val['seconds'] as num?)?.toInt() ??
                   (val['currentTime'] as num?)?.toInt() ??
                   0;
-              totalSeconds = (val['duration'] as num?)?.toInt() ?? _lastDuration;
+              final durVal = (val['duration'] as num?)?.toInt() ?? 0;
+              if (durVal > 0) {
+                totalSeconds = durVal;
+                _lastDuration = durVal;
+              } else {
+                totalSeconds = _lastDuration;
+              }
             } else if (val is num) {
               currentSeconds = val.toInt();
             }
 
             if (totalSeconds > 0) _lastDuration = totalSeconds;
+            final effectiveDuration = totalSeconds > 0 ? totalSeconds : _lastDuration;
 
             // Detect forward skip > 25 seconds
             if (currentSeconds - _lastRecordedPosition > 25) {
@@ -143,10 +150,10 @@ class _BunnyEmbedPlayerWebState extends State<_BunnyEmbedPlayerWeb> {
             }
             _lastRecordedPosition = currentSeconds;
 
-            widget.onProgress?.call(currentSeconds, totalSeconds);
+            widget.onProgress?.call(currentSeconds, effectiveDuration);
             widget.onMetricsProgress?.call(
               currentSeconds,
-              totalSeconds,
+              effectiveDuration,
               _actualWatchSeconds,
               _isSkipped,
             );

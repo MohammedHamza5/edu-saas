@@ -1065,7 +1065,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get selectVideoFileAction => 'اختر ملف الفيديو (MP4, MOV)';
 
   @override
-  String get uploadingVideoNotice => 'جارٍ رفع الفيديو إلى Bunny Stream...';
+  String get uploadingVideoNotice => 'جارٍ رفع الفيديو إلى السحابة المشفرة...';
 
   @override
   String get processingVideoNotice =>
@@ -2638,7 +2638,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get watchLessonTitle => 'مشاهدة الدرس التعليمي';
 
   @override
-  String get secureCdnBadge => 'Bunny CDN آمن';
+  String get secureCdnBadge => 'بث سحابي محمي';
 
   @override
   String get loadingVideo => 'جاري تحميل الفيديو...';
@@ -2696,7 +2696,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get defaultLessonTitle => 'الدرس التعليمي';
 
   @override
-  String get protectedStreamCdnNotice => 'بث محمي وموثوق عبر Bunny Stream CDN';
+  String get protectedStreamCdnNotice => 'بث تعليمي محمي وموثوق عالي الدقة';
 
   @override
   String get lessonNotesAndTopics => 'ملاحظات ومحاور الدرس:';
@@ -2728,7 +2728,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get videoUploadSuccessToast =>
-      'تم رفع الفيديو إلى Bunny Stream بنجاح وجاري معالجته سحابياً!';
+      'تم رفع الفيديو بنجاح وجاري معالجته سحابياً!';
 
   @override
   String get videoPendingUploadTitle => 'الدرس قيد التجهيز';
@@ -2757,7 +2757,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get uploadNewLessonVideo => 'رفع درس فيديو جديد';
 
   @override
-  String get fastEncryptedCdnHosting => 'استضافة سريعة ومشفرة عبر Bunny CDN';
+  String get fastEncryptedCdnHosting => 'استضافة سريعة ومشفرة بأعلى جودة';
 
   @override
   String get openingDocuments => 'جاري فتح المستندات...';
@@ -2789,7 +2789,7 @@ class AppLocalizationsAr extends AppLocalizations {
       'نقاط الدرس المهمة، القوانين المذكورة، والواجب المرتبط...';
 
   @override
-  String get uploadingVideoToCdn => 'جاري رفع الفيديو إلى Bunny Stream...';
+  String get uploadingVideoToCdn => 'جاري رفع الفيديو إلى السحابة المشفرة...';
 
   @override
   String uploadingWithPercentage(int percent) {
@@ -4074,7 +4074,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get videoStreamingNotice =>
-      'ملفات الفيديو يتم رفعها وبثها تلقائياً عبر شبكة Bunny Stream فائقة السرعة فور إنشاء العنصر عبر زر \'رفع فيديو\'.';
+      'ملفات الفيديو يتم رفعها وبثها تلقائياً بتقنيات سحابية فائقة السرعة فور إنشاء العنصر عبر زر \'رفع فيديو\'.';
 
   @override
   String get uploadingFileKeepPageOpen => 'جاري رفع الملف إلى السحابة...';
@@ -4222,7 +4222,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get youtubeTabTitle => 'فيديو يوتيوب';
 
   @override
-  String get bunnyTabTitle => 'خوادم المنصة (Bunny)';
+  String get bunnyTabTitle => 'رفع فيديو للمنصة';
 
   @override
   String get youtubeUrlLabel => 'رابط فيديو يوتيوب';
@@ -4571,7 +4571,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get providerYoutubeDesc => 'استضافة سريعة وسهلة عبر وضع رابط الفيديو';
 
   @override
-  String get providerBunnyLabel => 'سيرفرات Bunny الخاصة (مشفرة CDN)';
+  String get providerBunnyLabel => 'سيرفرات المنصة المشفرة (HLS فائق الحماية)';
 
   @override
   String get providerBunnyDesc =>
@@ -4687,7 +4687,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get videoSourceYoutube => 'يوتيوب';
 
   @override
-  String get videoSourceBunny => 'Bunny CDN';
+  String get videoSourceBunny => 'فيديو المنصة (سحابي)';
 
   @override
   String get videoSourceNone => 'بدون فيديو';

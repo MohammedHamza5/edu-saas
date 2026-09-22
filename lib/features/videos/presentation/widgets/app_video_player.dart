@@ -75,10 +75,12 @@ class _AppVideoPlayerState extends State<AppVideoPlayer> {
       kIsWeb &&
       !_isYouTubeEmbed;
 
+  bool get _isEmbedPlayer => _isYouTubeEmbed || _isBunnyEmbed;
+
   @override
   void initState() {
     super.initState();
-    if (!_isBunnyEmbed) {
+    if (!_isEmbedPlayer) {
       _initializePlayer();
     }
   }
@@ -87,7 +89,7 @@ class _AppVideoPlayerState extends State<AppVideoPlayer> {
   void didUpdateWidget(AppVideoPlayer oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.streamUrl != widget.streamUrl) {
-      if (!_isBunnyEmbed) {
+      if (!_isEmbedPlayer) {
         _controller?.dispose();
         _watchHeartbeatTimer?.cancel();
         _isInitialized = false;
@@ -807,6 +809,7 @@ class _AppVideoPlayerState extends State<AppVideoPlayer> {
                                             // Elapsed / Total Duration (e.g. 01:38 / 13:57)
                                             Text(
                                               '${_formatDuration(val.position)} / ${_formatDuration(val.duration > Duration.zero ? val.duration : Duration(seconds: widget.totalDurationSeconds ?? 0))}',
+                                              textDirection: TextDirection.ltr,
                                               style: const TextStyle(
                                                 color: Colors.white,
                                                 fontSize: 12,

@@ -409,7 +409,7 @@ void main() {
 
       expect(find.text('درس الإحصاء والاحتمالات'), findsOneWidget);
       expect(find.text('15:00'), findsOneWidget);
-      expect(find.text('Bunny CDN آمن'), findsOneWidget);
+      expect(find.text('بث سحابي محمي'), findsOneWidget);
 
       await tester.tap(find.byType(VideoCard), warnIfMissed: false);
       expect(tapped, isTrue);

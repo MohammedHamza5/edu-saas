@@ -1067,7 +1067,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectVideoFileAction => 'Choose Video File (MP4, MOV)';
 
   @override
-  String get uploadingVideoNotice => 'Uploading video to Bunny Stream...';
+  String get uploadingVideoNotice =>
+      'Uploading video to secure cloud storage...';
 
   @override
   String get processingVideoNotice =>
@@ -2650,7 +2651,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get watchLessonTitle => 'Watch Educational Lesson';
 
   @override
-  String get secureCdnBadge => 'Secure Bunny CDN';
+  String get secureCdnBadge => 'Protected Stream';
 
   @override
   String get loadingVideo => 'Loading video...';
@@ -2708,8 +2709,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get defaultLessonTitle => 'Educational Lesson';
 
   @override
-  String get protectedStreamCdnNotice =>
-      'Protected stream via Bunny Stream CDN';
+  String get protectedStreamCdnNotice => 'Secure, encrypted educational stream';
 
   @override
   String get lessonNotesAndTopics => 'Lesson Notes & Topics:';
@@ -2741,7 +2741,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get videoUploadSuccessToast =>
-      'Video uploaded to Bunny Stream successfully and is processing!';
+      'Video uploaded successfully and is processing in the cloud!';
 
   @override
   String get videoPendingUploadTitle => 'Lesson Under Preparation';
@@ -2755,7 +2755,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get teacherVideoNotUploadedDesc =>
-      'Lesson created, but the video file has not been uploaded to Bunny Stream yet. You can upload it now so students can watch.';
+      'Lesson created, but the video file has not been uploaded to the streaming server yet. You can upload it now so students can watch.';
 
   @override
   String get teacherVideoNotUploadedBadge => 'Pending Video Upload';
@@ -2772,7 +2772,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fastEncryptedCdnHosting =>
-      'Fast and encrypted hosting via Bunny CDN';
+      'Fast and encrypted high-performance hosting';
 
   @override
   String get openingDocuments => 'Opening file picker...';
@@ -2803,7 +2803,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lessonNotesHint => 'Important takeaways, formulas, homework...';
 
   @override
-  String get uploadingVideoToCdn => 'Uploading video to Bunny Stream...';
+  String get uploadingVideoToCdn =>
+      'Uploading video to secure cloud storage...';
 
   @override
   String uploadingWithPercentage(int percent) {
@@ -4104,7 +4105,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get videoStreamingNotice =>
-      'Video files will be uploaded and streamed via high-speed Bunny Stream CDN after creating the item using the \'Upload Video\' action.';
+      'Video files will be uploaded and streamed securely at high speed after creating the item using the \'Upload Video\' action.';
 
   @override
   String get uploadingFileKeepPageOpen => 'Uploading file to cloud storage...';
@@ -4115,7 +4116,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get videoUploadDoNotCloseWarning =>
-      'Video is being uploaded and encrypted on the CDN. Please stay on this page until upload reaches 100%.';
+      'Video is being uploaded and encrypted. Please stay on this page until upload reaches 100%.';
 
   @override
   String get sequentialLearningSectionTitle => 'Sequential Learning & Exams';
@@ -4251,7 +4252,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get youtubeTabTitle => 'YouTube Video';
 
   @override
-  String get bunnyTabTitle => 'Bunny CDN';
+  String get bunnyTabTitle => 'Cloud Video';
 
   @override
   String get youtubeUrlLabel => 'YouTube Video URL';
@@ -4406,7 +4407,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get uploadBunnyVideoTitle => 'Upload Video';
 
   @override
-  String get uploadBunnyVideoSubtitle => 'Upload directly to Bunny CDN';
+  String get uploadBunnyVideoSubtitle =>
+      'Upload directly to secure platform storage';
 
   @override
   String get uploadPdfFileTitle => 'Upload PDF';
@@ -4600,7 +4602,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Fast & free hosting with instant linking via video URL';
 
   @override
-  String get providerBunnyLabel => 'Bunny Stream (Private Encrypted CDN)';
+  String get providerBunnyLabel => 'Platform Secure Cloud (Encrypted HLS)';
 
   @override
   String get providerBunnyDesc =>
@@ -4717,7 +4719,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get videoSourceYoutube => 'YouTube';
 
   @override
-  String get videoSourceBunny => 'Bunny CDN';
+  String get videoSourceBunny => 'Platform Cloud Video';
 
   @override
   String get videoSourceNone => 'No Video';

@@ -705,12 +705,16 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                       vertical: AppSpacing.s4,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withAlpha(20),
+                      color: _currentVideo?.isYouTube == true
+                          ? const Color(0xFFFF0000).withAlpha(15)
+                          : AppColors.primary.withAlpha(20),
                       borderRadius: BorderRadius.circular(
                         AppSpacing.radiusFull,
                       ),
                       border: Border.all(
-                        color: AppColors.primary.withAlpha(60),
+                        color: _currentVideo?.isYouTube == true
+                            ? const Color(0xFFFF0000).withAlpha(60)
+                            : AppColors.primary.withAlpha(60),
                       ),
                     ),
                     child: Row(
@@ -728,7 +732,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                         const SizedBox(width: 4),
                         Text(
                           _currentVideo?.isYouTube == true
-                              ? 'Protected Streaming'
+                              ? context.l10n.videoSourceBadgeYouTube
                               : context.l10n.secureCdnBadge,
                           style: TextStyle(
                             fontSize: 11,
@@ -783,8 +787,12 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                 isFullscreen: _isFullscreen,
                 videoTitle: video?.title,
                 onProgress: (current, total) {
-                  _livePositionSecs.value = current;
-                  _liveDurationSecs.value = total;
+                  if (current >= 0 && current != _livePositionSecs.value) {
+                    _livePositionSecs.value = current;
+                  }
+                  if (total > 0 && total != _liveDurationSecs.value) {
+                    _liveDurationSecs.value = total;
+                  }
                   if (!_isPlayingNotifier.value && current > 0) {
                     _isPlayingNotifier.value = true;
                   }
@@ -1250,17 +1258,22 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     return AnimatedBuilder(
       animation: Listenable.merge([_livePositionSecs, _liveDurationSecs]),
       builder: (context, _) {
-        final livePos = _livePositionSecs.value > 0
-            ? _livePositionSecs.value
-            : (progress?.progressSeconds ?? 0);
         final liveDur = _liveDurationSecs.value > 0
             ? _liveDurationSecs.value
-            : (video?.duration ?? progress?.durationSeconds ?? 0);
+            : ((video?.duration != null && video!.duration > 0)
+                ? video.duration
+                : (progress?.durationSeconds ?? 0));
+        final livePos = _livePositionSecs.value;
+        final effectivePos = (_livePositionSecs.value == 0 &&
+                (progress?.progressSeconds ?? 0) > 0 &&
+                !_isPlayingNotifier.value)
+            ? progress!.progressSeconds
+            : livePos;
         final pct = liveDur > 0
-            ? ((livePos / liveDur) * 100).clamp(0.0, 100.0)
+            ? ((effectivePos / liveDur) * 100).clamp(0.0, 100.0)
             : (progress?.percentage ?? 0.0);
         final completed = isCompleted || pct >= 95.0;
-        final remainingSecs = (liveDur - livePos).clamp(0, liveDur);
+        final remainingSecs = liveDur > 0 ? (liveDur - effectivePos).clamp(0, liveDur) : 0;
 
         return AppCard(
           variant: AppCardVariant.elevated,
@@ -1441,7 +1454,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                                 ],
                               ),
                               child: Text(
-                                '${_formatTime(livePos)} / ${_formatTime(liveDur)}',
+                                '${_formatTime(effectivePos)} / ${_formatTime(liveDur)}',
+                                textDirection: TextDirection.ltr,
                                 style: const TextStyle(
                                   color: AppColors.primary,
                                   fontSize: 12,
@@ -1453,7 +1467,10 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                             ),
                             const SizedBox(height: 6),
                             InkWell(
-                              onTap: () => _seekTo?.call(0),
+                              onTap: () {
+                                _seekTo?.call(0);
+                                _livePositionSecs.value = 0;
+                              },
                               borderRadius: BorderRadius.circular(4),
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(
@@ -1786,7 +1803,11 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       animation: Listenable.merge([_livePositionSecs, _liveDurationSecs]),
       builder: (context, _) {
         final livePos = _livePositionSecs.value;
-        final liveDur = _liveDurationSecs.value;
+        final liveDur = _liveDurationSecs.value > 0
+            ? _liveDurationSecs.value
+            : ((_currentVideo?.duration != null && _currentVideo!.duration > 0)
+                ? _currentVideo!.duration
+                : 0);
         final pct = liveDur > 0 ? (livePos / liveDur) * 100 : 0.0;
         final isVideoCompleted = _isTeacher || isInitiallyCompleted || _videoCompletedLocally || pct >= 90.0;
         final exam = _lessonExam;
@@ -2455,15 +2476,21 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
           const SizedBox(height: AppSpacing.s8),
           Row(
             children: [
-              const Icon(
-                Icons.verified_user_rounded,
+              Icon(
+                video?.isYouTube == true
+                    ? Icons.play_circle_fill_rounded
+                    : Icons.verified_user_rounded,
                 size: 14,
-                color: AppColors.primary,
+                color: video?.isYouTube == true
+                    ? const Color(0xFFFF0000)
+                    : AppColors.primary,
               ),
               const SizedBox(width: 4),
               Expanded(
                 child: Text(
-                  context.l10n.protectedStreamCdnNotice,
+                  video?.isYouTube == true
+                      ? context.l10n.videoSourceBadgeYouTube
+                      : context.l10n.protectedStreamCdnNotice,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(

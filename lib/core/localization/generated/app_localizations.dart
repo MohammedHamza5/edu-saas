@@ -2111,7 +2111,7 @@ abstract class AppLocalizations {
   /// Upload notice
   ///
   /// In en, this message translates to:
-  /// **'Uploading video to Bunny Stream...'**
+  /// **'Uploading video to secure cloud storage...'**
   String get uploadingVideoNotice;
 
   /// Processing notice
@@ -4861,10 +4861,10 @@ abstract class AppLocalizations {
   /// **'Watch Educational Lesson'**
   String get watchLessonTitle;
 
-  /// Badge showing secure CDN provider
+  /// Badge showing secure video stream
   ///
   /// In en, this message translates to:
-  /// **'Secure Bunny CDN'**
+  /// **'Protected Stream'**
   String get secureCdnBadge;
 
   /// Loading video text
@@ -4969,10 +4969,10 @@ abstract class AppLocalizations {
   /// **'Educational Lesson'**
   String get defaultLessonTitle;
 
-  /// CDN streaming notice
+  /// Encrypted streaming notice
   ///
   /// In en, this message translates to:
-  /// **'Protected stream via Bunny Stream CDN'**
+  /// **'Secure, encrypted educational stream'**
   String get protectedStreamCdnNotice;
 
   /// Header for lesson notes
@@ -5026,7 +5026,7 @@ abstract class AppLocalizations {
   /// Toast on video upload success
   ///
   /// In en, this message translates to:
-  /// **'Video uploaded to Bunny Stream successfully and is processing!'**
+  /// **'Video uploaded successfully and is processing in the cloud!'**
   String get videoUploadSuccessToast;
 
   /// Title when video is pending upload
@@ -5050,7 +5050,7 @@ abstract class AppLocalizations {
   /// Description for teacher when video is not uploaded
   ///
   /// In en, this message translates to:
-  /// **'Lesson created, but the video file has not been uploaded to Bunny Stream yet. You can upload it now so students can watch.'**
+  /// **'Lesson created, but the video file has not been uploaded to the streaming server yet. You can upload it now so students can watch.'**
   String get teacherVideoNotUploadedDesc;
 
   /// Badge for pending video upload
@@ -5080,7 +5080,7 @@ abstract class AppLocalizations {
   /// Subtitle in video upload dialog
   ///
   /// In en, this message translates to:
-  /// **'Fast and encrypted hosting via Bunny CDN'**
+  /// **'Fast and encrypted high-performance hosting'**
   String get fastEncryptedCdnHosting;
 
   /// Picker loading state
@@ -5140,7 +5140,7 @@ abstract class AppLocalizations {
   /// Status text while uploading
   ///
   /// In en, this message translates to:
-  /// **'Uploading video to Bunny Stream...'**
+  /// **'Uploading video to secure cloud storage...'**
   String get uploadingVideoToCdn;
 
   /// Button label while uploading
@@ -7366,7 +7366,7 @@ abstract class AppLocalizations {
   /// Notice in create content dialog for video items
   ///
   /// In en, this message translates to:
-  /// **'Video files will be uploaded and streamed via high-speed Bunny Stream CDN after creating the item using the \'Upload Video\' action.'**
+  /// **'Video files will be uploaded and streamed securely at high speed after creating the item using the \'Upload Video\' action.'**
   String get videoStreamingNotice;
 
   /// Notice while uploading file
@@ -7384,7 +7384,7 @@ abstract class AppLocalizations {
   /// Warning not to close page during video upload
   ///
   /// In en, this message translates to:
-  /// **'Video is being uploaded and encrypted on the CDN. Please stay on this page until upload reaches 100%.'**
+  /// **'Video is being uploaded and encrypted. Please stay on this page until upload reaches 100%.'**
   String get videoUploadDoNotCloseWarning;
 
   /// No description provided for @sequentialLearningSectionTitle.
@@ -7624,7 +7624,7 @@ abstract class AppLocalizations {
   /// No description provided for @bunnyTabTitle.
   ///
   /// In en, this message translates to:
-  /// **'Bunny CDN'**
+  /// **'Cloud Video'**
   String get bunnyTabTitle;
 
   /// No description provided for @youtubeUrlLabel.
@@ -7900,7 +7900,7 @@ abstract class AppLocalizations {
   /// No description provided for @uploadBunnyVideoSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Upload directly to Bunny CDN'**
+  /// **'Upload directly to secure platform storage'**
   String get uploadBunnyVideoSubtitle;
 
   /// No description provided for @uploadPdfFileTitle.
@@ -8242,7 +8242,7 @@ abstract class AppLocalizations {
   /// No description provided for @providerBunnyLabel.
   ///
   /// In en, this message translates to:
-  /// **'Bunny Stream (Private Encrypted CDN)'**
+  /// **'Platform Secure Cloud (Encrypted HLS)'**
   String get providerBunnyLabel;
 
   /// No description provided for @providerBunnyDesc.
@@ -8446,7 +8446,7 @@ abstract class AppLocalizations {
   /// No description provided for @videoSourceBunny.
   ///
   /// In en, this message translates to:
-  /// **'Bunny CDN'**
+  /// **'Platform Cloud Video'**
   String get videoSourceBunny;
 
   /// No description provided for @videoSourceNone.

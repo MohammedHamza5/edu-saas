@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/config/tenant_registry.dart';
+import '../../../../core/config/tenant_resolver.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -58,9 +59,8 @@ class _RegisterStudentPageState extends State<RegisterStudentPage> {
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
 
-    // Canonical Tenant ID for default American System Academy
-    final tenantId =
-        widget.tenantId ?? '11111111-1111-1111-1111-111111111111';
+    // Canonical Tenant ID dynamically resolved by subdomain / domain (e.g. antounios.edsentre.com)
+    final tenantId = widget.tenantId ?? TenantResolver.resolveTenantId();
 
     final effectiveTrack = _selectedTrack == 'custom'
         ? _customTrackController.text.trim()
