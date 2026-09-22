@@ -5881,10 +5881,10 @@ abstract class AppLocalizations {
   /// **'New draft version created and previous version frozen'**
   String get newVersionCreatedSuccess;
 
-  /// Empty attempts title
+  /// Label when no students have completed the quiz yet
   ///
   /// In en, this message translates to:
-  /// **'No submissions yet'**
+  /// **'No completed attempts yet'**
   String get noAttemptsYet;
 
   /// Empty attempts subtitle
@@ -9684,6 +9684,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Using default group passing score ({score}%)'**
   String lessonEditorDefaultPassingScore(int score);
+
+  /// Total views for a lesson
+  ///
+  /// In en, this message translates to:
+  /// **'Total Views'**
+  String get totalViews;
+
+  /// Number of students who completed the lesson
+  ///
+  /// In en, this message translates to:
+  /// **'Completed Lesson'**
+  String get completedLesson;
+
+  /// Average quiz score for the lesson
+  ///
+  /// In en, this message translates to:
+  /// **'Average Quiz Score'**
+  String get averageQuizScore;
+
+  /// Title for student lesson progress card
+  ///
+  /// In en, this message translates to:
+  /// **'Student Lesson Progress'**
+  String get studentLessonProgressStats;
+
+  /// Overall lesson completion rate
+  ///
+  /// In en, this message translates to:
+  /// **'Overall completion: {rate}% of group students'**
+  String overallCompletionRate(int rate);
+
+  /// Dash for empty or unavailable data
+  ///
+  /// In en, this message translates to:
+  /// **'—'**
+  String get noDataDash;
+
+  /// Label when no quiz is attached to the lesson
+  ///
+  /// In en, this message translates to:
+  /// **'No associated quiz'**
+  String get noAssociatedQuiz;
+
+  /// Message when analytics are not yet available
+  ///
+  /// In en, this message translates to:
+  /// **'Analytics will appear once students start watching the lecture.'**
+  String get analyticsAvailableAfterPublish;
+
+  /// Title for editing a lesson
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Lesson'**
+  String get editLessonTitle;
+
+  /// Placeholder for searching students in add member dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Search students by name, email, or phone...'**
+  String get searchStudentsPlaceholder;
+
+  /// Title when no students can be added to group
+  ///
+  /// In en, this message translates to:
+  /// **'No Available Students'**
+  String get noAvailableStudentsToEnroll;
+
+  /// Description when no students can be added to group
+  ///
+  /// In en, this message translates to:
+  /// **'All active students in your academy are already enrolled in this group, or no active students exist yet.'**
+  String get noAvailableStudentsToEnrollDesc;
+
+  /// Text while loading students in dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Loading academy students...'**
+  String get loadingAcademyStudents;
+
+  /// Instruction in add member dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Select a student to add to this group'**
+  String get selectStudentPrompt;
+
+  /// Button text to add selected student to group
+  ///
+  /// In en, this message translates to:
+  /// **'Add to Group'**
+  String get addSelectedStudentAction;
 }
 
 class _AppLocalizationsDelegate

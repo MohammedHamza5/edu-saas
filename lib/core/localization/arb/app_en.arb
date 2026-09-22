@@ -6354,5 +6354,74 @@
         "example": "70"
       }
     }
+  },
+  "totalViews": "Total Views",
+  "@totalViews": {
+    "description": "Total views for a lesson"
+  },
+  "completedLesson": "Completed Lesson",
+  "@completedLesson": {
+    "description": "Number of students who completed the lesson"
+  },
+  "averageQuizScore": "Average Quiz Score",
+  "@averageQuizScore": {
+    "description": "Average quiz score for the lesson"
+  },
+  "studentLessonProgressStats": "Student Lesson Progress",
+  "@studentLessonProgressStats": {
+    "description": "Title for student lesson progress card"
+  },
+  "overallCompletionRate": "Overall completion: {rate}% of group students",
+  "@overallCompletionRate": {
+    "description": "Overall lesson completion rate",
+    "placeholders": {
+      "rate": {
+        "type": "int"
+      }
+    }
+  },
+  "noDataDash": "—",
+  "@noDataDash": {
+    "description": "Dash for empty or unavailable data"
+  },
+  "noAssociatedQuiz": "No associated quiz",
+  "@noAssociatedQuiz": {
+    "description": "Label when no quiz is attached to the lesson"
+  },
+  "noAttemptsYet": "No completed attempts yet",
+  "@noAttemptsYet": {
+    "description": "Label when no students have completed the quiz yet"
+  },
+  "analyticsAvailableAfterPublish": "Analytics will appear once students start watching the lecture.",
+  "@analyticsAvailableAfterPublish": {
+    "description": "Message when analytics are not yet available"
+  },
+  "editLessonTitle": "Edit Lesson",
+  "@editLessonTitle": {
+    "description": "Title for editing a lesson"
+  },
+  "searchStudentsPlaceholder": "Search students by name, email, or phone...",
+  "@searchStudentsPlaceholder": {
+    "description": "Placeholder for searching students in add member dialog"
+  },
+  "noAvailableStudentsToEnroll": "No Available Students",
+  "@noAvailableStudentsToEnroll": {
+    "description": "Title when no students can be added to group"
+  },
+  "noAvailableStudentsToEnrollDesc": "All active students in your academy are already enrolled in this group, or no active students exist yet.",
+  "@noAvailableStudentsToEnrollDesc": {
+    "description": "Description when no students can be added to group"
+  },
+  "loadingAcademyStudents": "Loading academy students...",
+  "@loadingAcademyStudents": {
+    "description": "Text while loading students in dialog"
+  },
+  "selectStudentPrompt": "Select a student to add to this group",
+  "@selectStudentPrompt": {
+    "description": "Instruction in add member dialog"
+  },
+  "addSelectedStudentAction": "Add to Group",
+  "@addSelectedStudentAction": {
+    "description": "Button text to add selected student to group"
   }
 }

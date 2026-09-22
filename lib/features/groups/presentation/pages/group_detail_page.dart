@@ -370,8 +370,11 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
                             ),
                           ),
                         ),
-                        onPressed: () =>
-                            AddMemberDialog.show(context, widget.groupId),
+                        onPressed: () => AddMemberDialog.show(
+                          context,
+                          widget.groupId,
+                          existingMemberIds: allMembers.map((m) => m.studentId).toSet(),
+                        ),
                       ),
                       ElevatedButton.icon(
                         icon: const Icon(Icons.fact_check_rounded, size: 16),
@@ -430,8 +433,11 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
                     AppEmptyView(
                       message: context.l10n.noStudentsInGroupYet,
                       actionText: context.l10n.addFirstStudent,
-                      onAction: () =>
-                          AddMemberDialog.show(context, widget.groupId),
+                      onAction: () => AddMemberDialog.show(
+                        context,
+                        widget.groupId,
+                        existingMemberIds: allMembers.map((m) => m.studentId).toSet(),
+                      ),
                     )
                   else if (members.isEmpty)
                     AppEmptyView(

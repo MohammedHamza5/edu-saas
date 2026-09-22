@@ -3221,7 +3221,7 @@ class AppLocalizationsAr extends AppLocalizations {
       'تم إنشاء مسودة جديدة مع تجميد النسخة السابقة';
 
   @override
-  String get noAttemptsYet => 'لا توجد محاولات تسليم حتى الآن';
+  String get noAttemptsYet => 'لا توجد محاولات مكتملة بعد';
 
   @override
   String get noAttemptsYetSubtitle =>
@@ -5387,4 +5387,54 @@ class AppLocalizationsAr extends AppLocalizations {
   String lessonEditorDefaultPassingScore(int score) {
     return 'استخدام درجة النجاح الافتراضية للمجموعة ($score%)';
   }
+
+  @override
+  String get totalViews => 'إجمالي المشاهدات';
+
+  @override
+  String get completedLesson => 'أكملوا المحاضرة';
+
+  @override
+  String get averageQuizScore => 'متوسط درجات الكويز';
+
+  @override
+  String get studentLessonProgressStats => 'إحصائيات إنجاز الطلاب للدرس';
+
+  @override
+  String overallCompletionRate(int rate) {
+    return 'نسبة الإكمال الكلية: $rate% من طلاب المجموعة';
+  }
+
+  @override
+  String get noDataDash => '—';
+
+  @override
+  String get noAssociatedQuiz => 'لا يوجد اختبار مرتبط';
+
+  @override
+  String get analyticsAvailableAfterPublish =>
+      'ستتوفر التحليلات بمجرد بدء الطلاب بمشاهدة المحاضرة.';
+
+  @override
+  String get editLessonTitle => 'تعديل المحاضرة';
+
+  @override
+  String get searchStudentsPlaceholder =>
+      'ابحث عن طالب بالاسم، البريد أو الهاتف...';
+
+  @override
+  String get noAvailableStudentsToEnroll => 'لا يوجد طلاب متاحون للإضافة';
+
+  @override
+  String get noAvailableStudentsToEnrollDesc =>
+      'جميع الطلاب النشطين في الأكاديمية مسجلون بالفعل في هذه المجموعة، أو لا يوجد طلاب نشطون حالياً.';
+
+  @override
+  String get loadingAcademyStudents => 'جاري تحميل طلاب الأكاديمية...';
+
+  @override
+  String get selectStudentPrompt => 'اختر طالباً لإضافته إلى هذه المجموعة';
+
+  @override
+  String get addSelectedStudentAction => 'إضافة إلى المجموعة';
 }

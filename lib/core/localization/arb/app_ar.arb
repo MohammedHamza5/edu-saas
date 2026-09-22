@@ -1822,5 +1822,28 @@
         "type": "int"
       }
     }
-  }
+  },
+  "totalViews": "إجمالي المشاهدات",
+  "completedLesson": "أكملوا المحاضرة",
+  "averageQuizScore": "متوسط درجات الكويز",
+  "studentLessonProgressStats": "إحصائيات إنجاز الطلاب للدرس",
+  "overallCompletionRate": "نسبة الإكمال الكلية: {rate}% من طلاب المجموعة",
+  "@overallCompletionRate": {
+    "placeholders": {
+      "rate": {
+        "type": "int"
+      }
+    }
+  },
+  "noDataDash": "—",
+  "noAssociatedQuiz": "لا يوجد اختبار مرتبط",
+  "noAttemptsYet": "لا توجد محاولات مكتملة بعد",
+  "analyticsAvailableAfterPublish": "ستتوفر التحليلات بمجرد بدء الطلاب بمشاهدة المحاضرة.",
+  "editLessonTitle": "تعديل المحاضرة",
+  "searchStudentsPlaceholder": "ابحث عن طالب بالاسم، البريد أو الهاتف...",
+  "noAvailableStudentsToEnroll": "لا يوجد طلاب متاحون للإضافة",
+  "noAvailableStudentsToEnrollDesc": "جميع الطلاب النشطين في الأكاديمية مسجلون بالفعل في هذه المجموعة، أو لا يوجد طلاب نشطون حالياً.",
+  "loadingAcademyStudents": "جاري تحميل طلاب الأكاديمية...",
+  "selectStudentPrompt": "اختر طالباً لإضافته إلى هذه المجموعة",
+  "addSelectedStudentAction": "إضافة إلى المجموعة"
 }

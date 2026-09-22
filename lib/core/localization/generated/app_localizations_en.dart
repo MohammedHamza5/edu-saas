@@ -3236,7 +3236,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'New draft version created and previous version frozen';
 
   @override
-  String get noAttemptsYet => 'No submissions yet';
+  String get noAttemptsYet => 'No completed attempts yet';
 
   @override
   String get noAttemptsYetSubtitle =>
@@ -5423,4 +5423,54 @@ class AppLocalizationsEn extends AppLocalizations {
   String lessonEditorDefaultPassingScore(int score) {
     return 'Using default group passing score ($score%)';
   }
+
+  @override
+  String get totalViews => 'Total Views';
+
+  @override
+  String get completedLesson => 'Completed Lesson';
+
+  @override
+  String get averageQuizScore => 'Average Quiz Score';
+
+  @override
+  String get studentLessonProgressStats => 'Student Lesson Progress';
+
+  @override
+  String overallCompletionRate(int rate) {
+    return 'Overall completion: $rate% of group students';
+  }
+
+  @override
+  String get noDataDash => '—';
+
+  @override
+  String get noAssociatedQuiz => 'No associated quiz';
+
+  @override
+  String get analyticsAvailableAfterPublish =>
+      'Analytics will appear once students start watching the lecture.';
+
+  @override
+  String get editLessonTitle => 'Edit Lesson';
+
+  @override
+  String get searchStudentsPlaceholder =>
+      'Search students by name, email, or phone...';
+
+  @override
+  String get noAvailableStudentsToEnroll => 'No Available Students';
+
+  @override
+  String get noAvailableStudentsToEnrollDesc =>
+      'All active students in your academy are already enrolled in this group, or no active students exist yet.';
+
+  @override
+  String get loadingAcademyStudents => 'Loading academy students...';
+
+  @override
+  String get selectStudentPrompt => 'Select a student to add to this group';
+
+  @override
+  String get addSelectedStudentAction => 'Add to Group';
 }
