@@ -68,9 +68,10 @@ class NoiseDetector:
         y0 = span.bbox[1]
         y1 = span.bbox[3]
 
-        # Top 60pt = header zone
-        if y1 <= 60.0:
-            if any(k in text for k in ("Tg:", "DigitSAT", "Aug", "2026", "Name:", "Class:")):
+        # Top 85pt = header zone
+        if y1 <= 85.0:
+            lower_text = text.lower()
+            if any(k in lower_text for k in ("tg:", "digitsat", "digital sat", "aug", "2026", "name:", "class:", "session", "solid shapes")):
                 return "header"
 
         # Bottom 60pt = footer zone

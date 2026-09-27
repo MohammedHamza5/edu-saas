@@ -89,7 +89,7 @@ class OptionsTerminatedSegmenter:
                 anchors.sort(key=lambda a: a.bbox[1])
                 opt_groups.sort(key=lambda g: g.bbox[3])
 
-                prev_y = 60.0  # below header
+                prev_y = max(80.0, anchors[0].bbox[1] - 10.0) if anchors else 80.0  # below header, at first anchor
                 for q_idx, anchor in enumerate(anchors):
                     opt_grp = opt_groups[q_idx] if q_idx < len(opt_groups) else None
                     curr_opt_y = opt_grp.bbox[3] if opt_grp else anchor.bbox[3] + 100.0

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/config/app_config.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -514,29 +515,98 @@ class _ReviewConsolePageState extends State<ReviewConsolePage> {
             ),
             Builder(
               builder: (context) {
-                final rawCrop =
+                String? rawCrop =
                     rev.provenance['crop_url']?.toString() ??
                     rev.provenance['image_url']?.toString();
-                final cropUrl = rawCrop;
+
+                if (rawCrop == null || rawCrop.isEmpty) {
+                  for (final block in rev.stemBlocks) {
+                    final type = block['type']?.toString();
+                    if (type == 'asset') {
+                      final val = block['crop_asset'] ?? block['path'] ?? block['url'];
+                      if (val != null && val.toString().isNotEmpty) {
+                        rawCrop = val.toString();
+                        break;
+                      }
+                    }
+                  }
+                }
+
+                final cropUrl = _resolveStorageUrl(rawCrop);
                 if (cropUrl == null || cropUrl.isEmpty) {
                   return const SizedBox.shrink();
                 }
+
                 return Padding(
                   padding: const EdgeInsets.only(
-                    top: AppSpacing.s12,
-                    bottom: AppSpacing.s12,
+                    top: AppSpacing.s16,
+                    bottom: AppSpacing.s16,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        l10n.originalEvidence,
-                        style: theme.textTheme.labelLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.picture_as_pdf_outlined,
+                            size: 16,
+                            color: theme.colorScheme.primary,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            l10n.originalEvidence,
+                            style: theme.textTheme.labelLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: theme.colorScheme.primary,
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: AppSpacing.s8),
-                      MathContentView(text: '', assetUrl: cropUrl),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                        child: Container(
+                          width: double.infinity,
+                          constraints: const BoxConstraints(maxHeight: 320),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                            border: Border.all(color: theme.colorScheme.outlineVariant),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withAlpha(12),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: CachedNetworkImage(
+                            imageUrl: cropUrl,
+                            fit: BoxFit.contain,
+                            placeholder: (_, __) => const Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(24),
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              ),
+                            ),
+                            errorWidget: (_, __, ___) => Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.broken_image_outlined, color: AppColors.error),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      l10n.imageNotAccessible,
+                                      style: const TextStyle(color: AppColors.error, fontSize: 12),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 );
@@ -1149,7 +1219,20 @@ class _ReviewConsolePageState extends State<ReviewConsolePage> {
   String? _resolveStorageUrl(String? raw) {
     if (raw == null || raw.isEmpty) return null;
     if (raw.startsWith('http://') || raw.startsWith('https://')) return raw;
-    final clean = raw.startsWith('/') ? raw.substring(1) : raw;
+    var clean = raw.startsWith('/') ? raw.substring(1) : raw;
+
+    // Normalize crop URLs to the current question's real documentId
+    try {
+      final state = context.read<QuestionBankCubit>().state;
+      if (state is QuestionBankReviewLoaded && clean.startsWith('crops/')) {
+        final parts = clean.split('/');
+        if (parts.length >= 3) {
+          final filename = parts.sublist(2).join('/');
+          clean = 'crops/${state.question.documentId}/$filename';
+        }
+      }
+    } catch (_) {}
+
     return '${AppConfig.supabaseUrl}/storage/v1/object/public/qb-documents/$clean';
   }
 
