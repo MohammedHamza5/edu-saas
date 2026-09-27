@@ -153,7 +153,9 @@ class _GroupsListPageState extends State<GroupsListPage> {
                       itemBuilder: (context, index) {
                         final filter = _filters[index];
                         final isAll = filter == 'ALL';
-                        final filterLabel = isAll ? context.l10n.filterAll : filter;
+                        final filterLabel = isAll
+                            ? context.l10n.filterAll
+                            : filter;
                         final isSelected =
                             (state.filterLevel == null && isAll) ||
                             state.filterLevel == filter;

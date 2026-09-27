@@ -34,7 +34,9 @@ class _GradeSubmissionPageState extends State<GradeSubmissionPage> {
   void initState() {
     super.initState();
     _scoreController = TextEditingController(
-      text: widget.submission.score != null ? widget.submission.score.toString() : '',
+      text: widget.submission.score != null
+          ? widget.submission.score.toString()
+          : '',
     );
     _feedbackController = TextEditingController(
       text: widget.submission.teacherFeedback ?? '',
@@ -58,26 +60,23 @@ class _GradeSubmissionPageState extends State<GradeSubmissionPage> {
 
     final successMsg = context.l10n.gradeSavedSuccess;
     final success = await context.read<AssignmentsCubit>().gradeSubmission(
-          submissionId: widget.submission.id,
-          score: score,
-          feedback: feedback,
-        );
+      submissionId: widget.submission.id,
+      score: score,
+      feedback: feedback,
+    );
 
     if (mounted && success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(successMsg),
-          backgroundColor: AppColors.success,
-        ),
+        SnackBar(content: Text(successMsg), backgroundColor: AppColors.success),
       );
       Navigator.of(context).pop();
     }
   }
 
   Future<void> _openFile(SubmissionFileEntity file) async {
-    final signedUrl = await context
-        .read<AssignmentsCubit>()
-        .getFileSignedUrl(file.storagePath);
+    final signedUrl = await context.read<AssignmentsCubit>().getFileSignedUrl(
+      file.storagePath,
+    );
 
     if (!mounted) return;
 
@@ -149,11 +148,17 @@ class _GradeSubmissionPageState extends State<GradeSubmissionPage> {
                           children: [
                             CircleAvatar(
                               radius: 24,
-                              backgroundColor:
-                                  AppColors.primary.withValues(alpha: 0.1),
+                              backgroundColor: AppColors.primary.withValues(
+                                alpha: 0.1,
+                              ),
                               child: Text(
                                 widget.submission.studentName.isNotEmpty
-                                    ? widget.submission.studentName.characters.first.toUpperCase()
+                                    ? widget
+                                          .submission
+                                          .studentName
+                                          .characters
+                                          .first
+                                          .toUpperCase()
                                     : context.l10n.studentInitialDefault,
                                 style: const TextStyle(
                                   color: AppColors.primary,
@@ -175,7 +180,8 @@ class _GradeSubmissionPageState extends State<GradeSubmissionPage> {
                                       color: AppColors.textPrimary,
                                     ),
                                   ),
-                                  if (widget.submission.studentEmail != null) ...[
+                                  if (widget.submission.studentEmail !=
+                                      null) ...[
                                     const SizedBox(height: 2),
                                     Text(
                                       widget.submission.studentEmail!,
@@ -197,10 +203,13 @@ class _GradeSubmissionPageState extends State<GradeSubmissionPage> {
                                 color: widget.submission.status.color
                                     .withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(
-                                    AppSpacing.radiusSmall),
+                                  AppSpacing.radiusSmall,
+                                ),
                               ),
                               child: Text(
-                                widget.submission.status.localizedLabel(context),
+                                widget.submission.status.localizedLabel(
+                                  context,
+                                ),
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
@@ -217,14 +226,20 @@ class _GradeSubmissionPageState extends State<GradeSubmissionPage> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              context.l10n.studentSubmittedAt(dateFormat.format(widget.submission.submittedAt)),
+                              context.l10n.studentSubmittedAt(
+                                dateFormat.format(
+                                  widget.submission.submittedAt,
+                                ),
+                              ),
                               style: const TextStyle(
                                 fontSize: 12,
                                 color: AppColors.textSecondary,
                               ),
                             ),
                             Text(
-                              context.l10n.studentAttemptNumber(widget.submission.attemptNumber.toString()),
+                              context.l10n.studentAttemptNumber(
+                                widget.submission.attemptNumber.toString(),
+                              ),
                               style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
@@ -256,8 +271,9 @@ class _GradeSubmissionPageState extends State<GradeSubmissionPage> {
                       padding: const EdgeInsets.all(AppSpacing.s16),
                       decoration: BoxDecoration(
                         color: AppColors.surfaceVariant,
-                        borderRadius:
-                            BorderRadius.circular(AppSpacing.radiusMedium),
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusMedium,
+                        ),
                       ),
                       child: Center(
                         child: Text(
@@ -281,8 +297,8 @@ class _GradeSubmissionPageState extends State<GradeSubmissionPage> {
                                 file.isPdf
                                     ? Icons.picture_as_pdf_outlined
                                     : file.isImage
-                                        ? Icons.image_outlined
-                                        : Icons.insert_drive_file_outlined,
+                                    ? Icons.image_outlined
+                                    : Icons.insert_drive_file_outlined,
                                 color: file.isPdf
                                     ? AppColors.error
                                     : AppColors.primary,
@@ -341,7 +357,9 @@ class _GradeSubmissionPageState extends State<GradeSubmissionPage> {
 
                   AppTextField(
                     controller: _scoreController,
-                    labelText: context.l10n.scoreFieldLabel(widget.assignment.maxScore.toString()),
+                    labelText: context.l10n.scoreFieldLabel(
+                      widget.assignment.maxScore.toString(),
+                    ),
                     hintText: context.l10n.scoreFieldHint,
                     keyboardType: TextInputType.number,
                     prefixIcon: const Icon(Icons.grade_outlined),
@@ -354,7 +372,9 @@ class _GradeSubmissionPageState extends State<GradeSubmissionPage> {
                         return context.l10n.scoreMustBeInteger;
                       }
                       if (val < 0 || val > widget.assignment.maxScore) {
-                        return context.l10n.scoreRangeError(widget.assignment.maxScore.toString());
+                        return context.l10n.scoreRangeError(
+                          widget.assignment.maxScore.toString(),
+                        );
                       }
                       return null;
                     },

@@ -24,12 +24,15 @@ class FakeAuthRepository implements AuthRepository {
     required String password,
   }) async {
     if (throwTenantSuspended) {
-      return const FailureResult(AuthFailure('TENANT_SUSPENDED', code: 'TENANT_SUSPENDED'));
+      return const FailureResult(
+        AuthFailure('TENANT_SUSPENDED', code: 'TENANT_SUSPENDED'),
+      );
     }
     if (throwInvalidCredentials) {
       return const FailureResult(AuthFailure('Invalid login credentials'));
     }
-    final user = currentUser ??
+    final user =
+        currentUser ??
         const UserEntity(
           id: 'test-user-id',
           tenantId: '11111111-1111-1111-1111-111111111111',
@@ -98,31 +101,43 @@ void main() {
       expect(authCubit.state, const AuthInitial());
     });
 
-    test('checkAuthStatus emits AuthUnauthenticated when no user is logged in', () async {
-      fakeRepo.currentUser = null;
-      await authCubit.checkAuthStatus();
-      expect(authCubit.state, const AuthUnauthenticated());
-    });
+    test(
+      'checkAuthStatus emits AuthUnauthenticated when no user is logged in',
+      () async {
+        fakeRepo.currentUser = null;
+        await authCubit.checkAuthStatus();
+        expect(authCubit.state, const AuthUnauthenticated());
+      },
+    );
 
-    test('login with valid student credentials emits AuthAuthenticated', () async {
-      fakeRepo.currentUser = const UserEntity(
-        id: 'student-id',
-        tenantId: '11111111-1111-1111-1111-111111111111',
-        role: UserRole.student,
-        fullName: 'Omar',
-        email: 'student@al-nour.edu',
-        status: UserStatus.active,
-      );
+    test(
+      'login with valid student credentials emits AuthAuthenticated',
+      () async {
+        fakeRepo.currentUser = const UserEntity(
+          id: 'student-id',
+          tenantId: '11111111-1111-1111-1111-111111111111',
+          role: UserRole.student,
+          fullName: 'Omar',
+          email: 'student@al-nour.edu',
+          status: UserStatus.active,
+        );
 
-      await authCubit.login(email: 'student@al-nour.edu', password: 'Password123!');
-      expect(authCubit.state, isA<AuthAuthenticated>());
-      final state = authCubit.state as AuthAuthenticated;
-      expect(state.user.role, UserRole.student);
-    });
+        await authCubit.login(
+          email: 'student@al-nour.edu',
+          password: 'Password123!',
+        );
+        expect(authCubit.state, isA<AuthAuthenticated>());
+        final state = authCubit.state as AuthAuthenticated;
+        expect(state.user.role, UserRole.student);
+      },
+    );
 
     test('login when tenant is suspended emits AuthTenantSuspended', () async {
       fakeRepo.throwTenantSuspended = true;
-      await authCubit.login(email: 'user@suspended.edu', password: 'Password123!');
+      await authCubit.login(
+        email: 'user@suspended.edu',
+        password: 'Password123!',
+      );
       expect(authCubit.state, const AuthTenantSuspended());
     });
 
@@ -155,7 +170,9 @@ void main() {
       );
     }
 
-    testWidgets('renders email, password fields and login button', (tester) async {
+    testWidgets('renders email, password fields and login button', (
+      tester,
+    ) async {
       await tester.pumpWidget(createWidgetUnderTest());
       await tester.pumpAndSettle();
 
@@ -163,17 +180,20 @@ void main() {
       expect(find.byType(AppButton), findsOneWidget);
     });
 
-    testWidgets('shows validation error when fields are empty on login submit', (tester) async {
-      await tester.pumpWidget(createWidgetUnderTest());
-      await tester.pumpAndSettle();
+    testWidgets(
+      'shows validation error when fields are empty on login submit',
+      (tester) async {
+        await tester.pumpWidget(createWidgetUnderTest());
+        await tester.pumpAndSettle();
 
-      final appButton = find.byType(AppButton);
-      await tester.ensureVisible(appButton);
-      await tester.tap(appButton);
-      await tester.pumpAndSettle();
+        final appButton = find.byType(AppButton);
+        await tester.ensureVisible(appButton);
+        await tester.tap(appButton);
+        await tester.pumpAndSettle();
 
-      expect(find.text('يرجى إدخال بريد إلكتروني صحيح'), findsOneWidget);
-    });
+        expect(find.text('يرجى إدخال بريد إلكتروني صحيح'), findsOneWidget);
+      },
+    );
   });
 
   group('RegisterStudentPage American System Tracks Tests', () {
@@ -190,7 +210,9 @@ void main() {
       );
     }
 
-    testWidgets('renders all American System track choice chips', (tester) async {
+    testWidgets('renders all American System track choice chips', (
+      tester,
+    ) async {
       await tester.pumpWidget(createWidgetUnderTest());
       await tester.pumpAndSettle();
 
@@ -202,7 +224,9 @@ void main() {
       expect(find.text('مخصص'), findsOneWidget);
     });
 
-    testWidgets('tapping مخصص displays custom track input field', (tester) async {
+    testWidgets('tapping مخصص displays custom track input field', (
+      tester,
+    ) async {
       await tester.pumpWidget(createWidgetUnderTest());
       await tester.pumpAndSettle();
 

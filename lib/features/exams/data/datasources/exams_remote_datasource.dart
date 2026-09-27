@@ -12,10 +12,7 @@ abstract interface class ExamsRemoteDataSource {
     int page = 0,
     int pageSize = 15,
   });
-  Future<List<ExamModel>> getStudentExams({
-    int page = 0,
-    int pageSize = 15,
-  });
+  Future<List<ExamModel>> getStudentExams({int page = 0, int pageSize = 15});
   Future<ExamModel> getExamDetails(String examId);
   Future<ExamModel> createExam({
     required String groupId,
@@ -97,8 +94,10 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
 
     for (final item in list) {
       final map = Map<String, dynamic>.from(item as Map<String, dynamic>);
-      if (map['exam_attempts'] is List && (map['exam_attempts'] as List).isNotEmpty) {
-        final countMap = (map['exam_attempts'] as List).first as Map<String, dynamic>;
+      if (map['exam_attempts'] is List &&
+          (map['exam_attempts'] as List).isNotEmpty) {
+        final countMap =
+            (map['exam_attempts'] as List).first as Map<String, dynamic>;
         map['attempts_count'] = countMap['count'] ?? 0;
       } else {
         map['attempts_count'] = 0;
@@ -173,7 +172,9 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
     final list = response as List<dynamic>;
     if (list.isEmpty) return [];
 
-    final examIds = list.map((item) => (item as Map<String, dynamic>)['id'] as String).toList();
+    final examIds = list
+        .map((item) => (item as Map<String, dynamic>)['id'] as String)
+        .toList();
 
     // Fetch all student attempts in 1 batch query instead of N sequential loop queries
     final allAttempts = await _safeClient
@@ -484,8 +485,13 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
       }
 
       final rawQuestions = map['questions'] as List<dynamic>?;
-      final parsedQuestions = rawQuestions
-              ?.map((q) => ExamQuestionModel.fromJson(Map<String, dynamic>.from(q as Map)))
+      final parsedQuestions =
+          rawQuestions
+              ?.map(
+                (q) => ExamQuestionModel.fromJson(
+                  Map<String, dynamic>.from(q as Map),
+                ),
+              )
               .toList() ??
           <ExamQuestionModel>[];
 

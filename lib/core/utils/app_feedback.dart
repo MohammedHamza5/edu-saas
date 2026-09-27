@@ -22,7 +22,8 @@ class AppFeedback {
   }) {
     final l10n = AppLocalizations.of(context);
     final resolvedError = ErrorMapper.resolve(
-      error ?? (l10n != null ? l10n.errorOccurred : 'An unexpected error occurred'),
+      error ??
+          (l10n != null ? l10n.errorOccurred : 'An unexpected error occurred'),
     );
 
     final title = resolvedError.title(context);
@@ -49,7 +50,9 @@ class AppFeedback {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
           side: BorderSide(
-            color: isDark ? const Color(0xFFEF4444).withValues(alpha: 0.5) : const Color(0xFFFCA5A5),
+            color: isDark
+                ? const Color(0xFFEF4444).withValues(alpha: 0.5)
+                : const Color(0xFFFCA5A5),
             width: 1.2,
           ),
         ),
@@ -90,7 +93,9 @@ class AppFeedback {
                     style: TextStyle(
                       fontSize: 12,
                       height: 1.35,
-                      color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                      color: isDark
+                          ? AppColors.textSecondaryDark
+                          : AppColors.textSecondary,
                     ),
                   ),
                 ],
@@ -138,7 +143,9 @@ class AppFeedback {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
           side: BorderSide(
-            color: isDark ? const Color(0xFF10B981).withValues(alpha: 0.5) : const Color(0xFF6EE7B7),
+            color: isDark
+                ? const Color(0xFF10B981).withValues(alpha: 0.5)
+                : const Color(0xFF6EE7B7),
             width: 1.2,
           ),
         ),
@@ -181,7 +188,9 @@ class AppFeedback {
                     style: TextStyle(
                       fontSize: 12,
                       height: 1.35,
-                      color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                      color: isDark
+                          ? AppColors.textSecondaryDark
+                          : AppColors.textSecondary,
                     ),
                   ),
                 ],
@@ -222,7 +231,9 @@ class AppFeedback {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
           side: BorderSide(
-            color: isDark ? const Color(0xFFF59E0B).withValues(alpha: 0.5) : const Color(0xFFFCD34D),
+            color: isDark
+                ? const Color(0xFFF59E0B).withValues(alpha: 0.5)
+                : const Color(0xFFFCD34D),
             width: 1.2,
           ),
         ),
@@ -265,7 +276,9 @@ class AppFeedback {
                     style: TextStyle(
                       fontSize: 12,
                       height: 1.35,
-                      color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                      color: isDark
+                          ? AppColors.textSecondaryDark
+                          : AppColors.textSecondary,
                     ),
                   ),
                 ],

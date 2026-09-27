@@ -110,7 +110,10 @@ class GroupsCubit extends Cubit<GroupsState> {
     );
   }
 
-  Future<void> loadGroupDetail(String groupId, {bool forceRefresh = false}) async {
+  Future<void> loadGroupDetail(
+    String groupId, {
+    bool forceRefresh = false,
+  }) async {
     if (state is! GroupsLoaded) {
       await loadGroups();
     }
@@ -118,7 +121,10 @@ class GroupsCubit extends Cubit<GroupsState> {
     await loadGroupMembers(groupId, forceRefresh: forceRefresh);
   }
 
-  Future<void> loadGroupMembers(String groupId, {bool forceRefresh = false}) async {
+  Future<void> loadGroupMembers(
+    String groupId, {
+    bool forceRefresh = false,
+  }) async {
     if (state is GroupsLoaded) {
       final current = state as GroupsLoaded;
       GroupEntity? group;
@@ -138,7 +144,12 @@ class GroupsCubit extends Cubit<GroupsState> {
       }
       final cachedMembers = AppCache.groups.getStale(membersCacheKey);
       if (cachedMembers != null) {
-        emit(current.copyWith(selectedGroup: group, groupMembers: (cachedMembers as List).cast()));
+        emit(
+          current.copyWith(
+            selectedGroup: group,
+            groupMembers: (cachedMembers as List).cast(),
+          ),
+        );
         if (!forceRefresh && AppCache.groups.has(membersCacheKey)) return;
       }
 
@@ -285,11 +296,14 @@ class GroupsCubit extends Cubit<GroupsState> {
               final newGroups = List<GroupEntity>.from(current.groups);
               newGroups[idx] = updated;
               AppCache.groups.put(_cacheKeyGroups, newGroups);
-              emit(current.copyWith(
-                groups: newGroups,
-                selectedGroup:
-                    current.selectedGroup?.id == updated.id ? updated : null,
-              ));
+              emit(
+                current.copyWith(
+                  groups: newGroups,
+                  selectedGroup: current.selectedGroup?.id == updated.id
+                      ? updated
+                      : null,
+                ),
+              );
             }
           }
         }

@@ -16,10 +16,7 @@ class AppBlocObserver extends BlocObserver {
   @override
   void onCreate(BlocBase<dynamic> bloc) {
     super.onCreate(bloc);
-    AppLogger.b(
-      'BlocObserver',
-      'Created ${bloc.runtimeType}',
-    );
+    AppLogger.b('BlocObserver', 'Created ${bloc.runtimeType}');
   }
 
   @override
@@ -36,7 +33,10 @@ class AppBlocObserver extends BlocObserver {
   }
 
   @override
-  void onTransition(Bloc<dynamic, dynamic> bloc, Transition<dynamic, dynamic> transition) {
+  void onTransition(
+    Bloc<dynamic, dynamic> bloc,
+    Transition<dynamic, dynamic> transition,
+  ) {
     super.onTransition(bloc, transition);
     AppLogger.b(
       bloc.runtimeType.toString(),
@@ -63,9 +63,6 @@ class AppBlocObserver extends BlocObserver {
   @override
   void onClose(BlocBase<dynamic> bloc) {
     super.onClose(bloc);
-    AppLogger.b(
-      'BlocObserver',
-      'Disposed ${bloc.runtimeType}',
-    );
+    AppLogger.b('BlocObserver', 'Disposed ${bloc.runtimeType}');
   }
 }

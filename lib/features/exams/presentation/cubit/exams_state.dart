@@ -81,18 +81,18 @@ final class TeacherExamsLoaded extends ExamsState {
 
   @override
   List<Object?> get props => [
-        groupId,
-        exams,
-        selectedExam,
-        attempts,
-        selectedAttempt,
-        isLoadingAttempts,
-        isCreating,
-        actionSuccess,
-        hasMore,
-        isLoadingMore,
-        message,
-      ];
+    groupId,
+    exams,
+    selectedExam,
+    attempts,
+    selectedAttempt,
+    isLoadingAttempts,
+    isCreating,
+    actionSuccess,
+    hasMore,
+    isLoadingMore,
+    message,
+  ];
 }
 
 final class StudentExamsLoaded extends ExamsState {
@@ -128,12 +128,12 @@ final class StudentExamsLoaded extends ExamsState {
 
   @override
   List<Object?> get props => [
-        exams,
-        selectedExam,
-        hasMore,
-        isLoadingMore,
-        message,
-      ];
+    exams,
+    selectedExam,
+    hasMore,
+    isLoadingMore,
+    message,
+  ];
 }
 
 final class ExamTakingState extends ExamsState {
@@ -199,18 +199,18 @@ final class ExamTakingState extends ExamsState {
 
   @override
   List<Object?> get props => [
-        exam,
-        attempt,
-        questions,
-        currentQuestionIndex,
-        answers,
-        remainingSeconds,
-        isSubmitting,
-        isExpired,
-        submitSuccess,
-        submitResult,
-        errorMessage,
-      ];
+    exam,
+    attempt,
+    questions,
+    currentQuestionIndex,
+    answers,
+    remainingSeconds,
+    isSubmitting,
+    isExpired,
+    submitSuccess,
+    submitResult,
+    errorMessage,
+  ];
 }
 
 final class ExamsError extends ExamsState {

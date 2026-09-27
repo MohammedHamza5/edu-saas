@@ -40,15 +40,13 @@ class _AcademicAuthScaffoldState extends State<AcademicAuthScaffold>
       parent: _entranceController,
       curve: Curves.easeOut,
     );
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.05),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _entranceController,
-        curve: Curves.easeOutCubic,
-      ),
-    );
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.05), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _entranceController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
     _entranceController.forward();
   }
 
@@ -207,7 +205,9 @@ class _AcademicAuthScaffoldState extends State<AcademicAuthScaffold>
                             filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
                             child: Container(
                               decoration: BoxDecoration(
-                                color: const Color(0xFF0F172A).withValues(alpha: 0.82),
+                                color: const Color(
+                                  0xFF0F172A,
+                                ).withValues(alpha: 0.82),
                                 borderRadius: BorderRadius.circular(
                                   AppSpacing.radiusLarge + 6,
                                 ),
@@ -242,7 +242,8 @@ class _AcademicAuthScaffoldState extends State<AcademicAuthScaffold>
                                     height: 4,
                                     child: Container(
                                       decoration: BoxDecoration(
-                                        gradient: mathTokens.primaryButtonGradient,
+                                        gradient:
+                                            mathTokens.primaryButtonGradient,
                                       ),
                                     ),
                                   ),
@@ -258,66 +259,105 @@ class _AcademicAuthScaffoldState extends State<AcademicAuthScaffold>
                                     child: Theme(
                                       data: Theme.of(context).copyWith(
                                         brightness: Brightness.dark,
-                                        colorScheme: Theme.of(context).colorScheme.copyWith(
-                                          brightness: Brightness.dark,
-                                          surface: const Color(0xFF131C35),
-                                          onSurface: Colors.white,
-                                          primary: branding.primaryLight,
-                                        ),
-                                        inputDecorationTheme: InputDecorationTheme(
-                                          filled: true,
-                                          fillColor: const Color(0xFF1E293B).withValues(alpha: 0.7),
-                                          border: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                                            borderSide: BorderSide(
-                                              color: Colors.white.withValues(alpha: 0.15),
+                                        colorScheme: Theme.of(context)
+                                            .colorScheme
+                                            .copyWith(
+                                              brightness: Brightness.dark,
+                                              surface: const Color(0xFF131C35),
+                                              onSurface: Colors.white,
+                                              primary: branding.primaryLight,
                                             ),
-                                          ),
-                                          enabledBorder: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                                            borderSide: BorderSide(
-                                              color: Colors.white.withValues(alpha: 0.15),
+                                        inputDecorationTheme:
+                                            InputDecorationTheme(
+                                              filled: true,
+                                              fillColor: const Color(
+                                                0xFF1E293B,
+                                              ).withValues(alpha: 0.7),
+                                              border: OutlineInputBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                      AppSpacing.radiusSmall,
+                                                    ),
+                                                borderSide: BorderSide(
+                                                  color: Colors.white
+                                                      .withValues(alpha: 0.15),
+                                                ),
+                                              ),
+                                              enabledBorder: OutlineInputBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                      AppSpacing.radiusSmall,
+                                                    ),
+                                                borderSide: BorderSide(
+                                                  color: Colors.white
+                                                      .withValues(alpha: 0.15),
+                                                ),
+                                              ),
+                                              focusedBorder: OutlineInputBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                      AppSpacing.radiusSmall,
+                                                    ),
+                                                borderSide: BorderSide(
+                                                  color: branding.primaryLight,
+                                                  width: 1.8,
+                                                ),
+                                              ),
+                                              errorBorder: OutlineInputBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                      AppSpacing.radiusSmall,
+                                                    ),
+                                                borderSide: const BorderSide(
+                                                  color: Color(0xFFF87171),
+                                                ),
+                                              ),
+                                              focusedErrorBorder:
+                                                  OutlineInputBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          AppSpacing
+                                                              .radiusSmall,
+                                                        ),
+                                                    borderSide:
+                                                        const BorderSide(
+                                                          color: Color(
+                                                            0xFFF87171,
+                                                          ),
+                                                          width: 1.8,
+                                                        ),
+                                                  ),
+                                              contentPadding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: AppSpacing.s16,
+                                                    vertical: AppSpacing.s14,
+                                                  ),
+                                              labelStyle: const TextStyle(
+                                                color: Color(0xFF94A3B8),
+                                                fontSize: 14,
+                                              ),
+                                              floatingLabelStyle: TextStyle(
+                                                color: branding.primaryLight,
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                              prefixIconColor: const Color(
+                                                0xFF94A3B8,
+                                              ),
+                                              suffixIconColor: const Color(
+                                                0xFF94A3B8,
+                                              ),
                                             ),
-                                          ),
-                                          focusedBorder: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                                            borderSide: BorderSide(
-                                              color: branding.primaryLight,
-                                              width: 1.8,
+                                        textSelectionTheme:
+                                            TextSelectionThemeData(
+                                              cursorColor:
+                                                  branding.primaryLight,
+                                              selectionColor: branding
+                                                  .primaryColor
+                                                  .withValues(alpha: 0.45),
+                                              selectionHandleColor:
+                                                  branding.primaryLight,
                                             ),
-                                          ),
-                                          errorBorder: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                                            borderSide: const BorderSide(color: Color(0xFFF87171)),
-                                          ),
-                                          focusedErrorBorder: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                                            borderSide: const BorderSide(
-                                              color: Color(0xFFF87171),
-                                              width: 1.8,
-                                            ),
-                                          ),
-                                          contentPadding: const EdgeInsets.symmetric(
-                                            horizontal: AppSpacing.s16,
-                                            vertical: AppSpacing.s14,
-                                          ),
-                                          labelStyle: const TextStyle(
-                                            color: Color(0xFF94A3B8),
-                                            fontSize: 14,
-                                          ),
-                                          floatingLabelStyle: TextStyle(
-                                            color: branding.primaryLight,
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                          prefixIconColor: const Color(0xFF94A3B8),
-                                          suffixIconColor: const Color(0xFF94A3B8),
-                                        ),
-                                        textSelectionTheme: TextSelectionThemeData(
-                                          cursorColor: branding.primaryLight,
-                                          selectionColor: branding.primaryColor.withValues(alpha: 0.45),
-                                          selectionHandleColor: branding.primaryLight,
-                                        ),
                                       ),
                                       child: widget.child,
                                     ),

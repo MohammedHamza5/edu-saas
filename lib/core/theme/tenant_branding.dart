@@ -135,7 +135,8 @@ class TenantBranding extends Equatable {
         .toColor();
 
     // Mid shade for smooth gradients
-    final gradientMid = Color.lerp(primaryColor, primaryLight, 0.45) ?? primaryColor;
+    final gradientMid =
+        Color.lerp(primaryColor, primaryLight, 0.45) ?? primaryColor;
     final gradientEnd = primaryLight;
 
     final effectiveSecondary = secondaryColor ?? primaryLight;
@@ -153,8 +154,10 @@ class TenantBranding extends Equatable {
       academicTrackEn: academicTrackEn,
       tagline: tagline,
       taglineEn: taglineEn,
-      welcomeMessage: welcomeMessage ?? 'مرحباً بك في منصة $brandName التعليمية',
-      welcomeMessageEn: welcomeMessageEn ?? 'Welcome to $brandNameEn Academic Platform',
+      welcomeMessage:
+          welcomeMessage ?? 'مرحباً بك في منصة $brandName التعليمية',
+      welcomeMessageEn:
+          welcomeMessageEn ?? 'Welcome to $brandNameEn Academic Platform',
       signatureSymbol: signatureSymbol ?? '∑',
       primaryColor: primaryColor,
       primaryDark: primaryDark,
@@ -288,34 +291,34 @@ class TenantBranding extends Equatable {
 
   @override
   List<Object?> get props => [
-        tenantId,
-        brandName,
-        brandNameEn,
-        teacherName,
-        teacherNameEn,
-        subjectTitle,
-        subjectTitleEn,
-        academicTrack,
-        academicTrackEn,
-        tagline,
-        taglineEn,
-        welcomeMessage,
-        welcomeMessageEn,
-        signatureSymbol,
-        primaryColor,
-        primaryDark,
-        primaryLight,
-        secondaryColor,
-        gradientStart,
-        gradientMid,
-        gradientEnd,
-        accentGlow,
-        cardBorderColor,
-        logoUrl,
-        logoAsset,
-        avatarUrl,
-        supportPhone,
-        supportEmail,
-        videoProvider,
-      ];
+    tenantId,
+    brandName,
+    brandNameEn,
+    teacherName,
+    teacherNameEn,
+    subjectTitle,
+    subjectTitleEn,
+    academicTrack,
+    academicTrackEn,
+    tagline,
+    taglineEn,
+    welcomeMessage,
+    welcomeMessageEn,
+    signatureSymbol,
+    primaryColor,
+    primaryDark,
+    primaryLight,
+    secondaryColor,
+    gradientStart,
+    gradientMid,
+    gradientEnd,
+    accentGlow,
+    cardBorderColor,
+    logoUrl,
+    logoAsset,
+    avatarUrl,
+    supportPhone,
+    supportEmail,
+    videoProvider,
+  ];
 }

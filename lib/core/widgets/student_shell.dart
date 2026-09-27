@@ -32,10 +32,14 @@ class StudentShell extends StatelessWidget {
 
   int _computeIndex(String path) {
     if (path == '/student' || path == '/student/') return 0;
-    if (path.startsWith('/notifications') || path.startsWith('/student/notifications')) return 1;
+    if (path.startsWith('/notifications') ||
+        path.startsWith('/student/notifications')) {
+      return 1;
+    }
     if (path.contains('/content')) return 2;
     if (path.startsWith('/student/assignments')) return 3;
     if (path.startsWith('/student/exams')) return 4;
+    if (path.startsWith('/student/attendance')) return 5;
     return 0;
   }
 
@@ -56,6 +60,9 @@ class StudentShell extends StatelessWidget {
       case 4:
         context.go(AppRoutes.studentExams);
         break;
+      case 5:
+        context.go(AppRoutes.studentAttendance);
+        break;
     }
   }
 
@@ -75,12 +82,101 @@ class StudentShell extends StatelessWidget {
       return;
     }
 
-    // Direct 1-tap navigation to the student's assigned group content
-    final g = groups.first;
-    final slug = GroupSlugResolver.toSlug(g.id, g.name);
-    context.go(
-      AppRoutes.studentGroupContent.replaceAll(':groupId', slug),
-      extra: g.name,
+    if (groups.length == 1) {
+      final g = groups.first;
+      final slug = GroupSlugResolver.toSlug(g.id, g.name);
+      context.go(
+        AppRoutes.studentGroupContent.replaceAll(':groupId', slug),
+        extra: g.name,
+      );
+      return;
+    }
+
+    _showCourseSelectorSheet(context, groups);
+  }
+
+  void _showCourseSelectorSheet(
+    BuildContext context,
+    List<dynamic> groups,
+  ) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppSpacing.radiusLarge),
+        ),
+      ),
+      builder: (ctx) {
+        return Padding(
+          padding: const EdgeInsets.all(AppSpacing.s20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                context.l10n.selectCourseTitle,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.s4),
+              Text(
+                context.l10n.selectCoursePrompt,
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.s16),
+              ...groups.map((g) {
+                final slug = GroupSlugResolver.toSlug(g.id as String, g.name as String);
+                return Container(
+                  margin: const EdgeInsets.only(bottom: AppSpacing.s8),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: AppColors.primary.withValues(alpha: 0.15),
+                    ),
+                    borderRadius: BorderRadius.circular(
+                      AppSpacing.radiusMedium,
+                    ),
+                  ),
+                  child: ListTile(
+                    leading: const CircleAvatar(
+                      backgroundColor: AppColors.primaryLight,
+                      child: Icon(
+                        Icons.school_rounded,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    title: Text(
+                      g.name as String,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(g.level as String),
+                    trailing: const Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      size: 16,
+                    ),
+                    onTap: () {
+                      Navigator.pop(ctx);
+                      context.go(
+                        AppRoutes.studentGroupContent.replaceAll(
+                          ':groupId',
+                          slug,
+                        ),
+                        extra: g.name,
+                      );
+                    },
+                  ),
+                );
+              }),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -157,6 +253,13 @@ class StudentShell extends StatelessWidget {
             subtitle: context.l10n.studentNavExamsSubtitle,
             tooltip: context.l10n.examsListTitle,
           ),
+          AdaptiveDestination(
+            icon: Icons.fact_check_outlined,
+            selectedIcon: Icons.fact_check_rounded,
+            label: context.l10n.studentAttendanceTitle,
+            subtitle: context.l10n.studentAttendanceHistory,
+            tooltip: context.l10n.studentAttendanceTitle,
+          ),
         ],
       ),
     ];
@@ -189,7 +292,8 @@ class StudentShell extends StatelessWidget {
         size: 42,
         showName: true,
         platformName: context.l10n.studentPortal,
-        subtitle: '${branding.localizedBrandName(context)} • ${context.l10n.academicMathematics}',
+        subtitle:
+            '${branding.localizedBrandName(context)} • ${context.l10n.academicMathematics}',
         nameColor: Colors.white,
       ),
     );
@@ -197,7 +301,8 @@ class StudentShell extends StatelessWidget {
 
   Widget _buildSidebarFooter(BuildContext context) {
     final theme = Theme.of(context);
-    final userEmail = SupabaseService.currentUser?.email ?? context.l10n.roleStudent;
+    final userEmail =
+        SupabaseService.currentUser?.email ?? context.l10n.roleStudent;
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.s8),

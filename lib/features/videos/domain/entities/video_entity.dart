@@ -22,7 +22,8 @@ enum VideoStatus {
   String toDbString() => name;
 
   bool get isReady => this == VideoStatus.ready;
-  bool get isProcessing => this == VideoStatus.processing || this == VideoStatus.uploading;
+  bool get isProcessing =>
+      this == VideoStatus.processing || this == VideoStatus.uploading;
   bool get isFailed => this == VideoStatus.failed;
 }
 
@@ -106,18 +107,18 @@ class VideoEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        contentId,
-        title,
-        description,
-        provider,
-        providerVideoId,
-        thumbnailUrl,
-        duration,
-        status,
-        playbackUrl,
-        attachedFile,
-        createdAt,
-        updatedAt,
-      ];
+    id,
+    contentId,
+    title,
+    description,
+    provider,
+    providerVideoId,
+    thumbnailUrl,
+    duration,
+    status,
+    playbackUrl,
+    attachedFile,
+    createdAt,
+    updatedAt,
+  ];
 }

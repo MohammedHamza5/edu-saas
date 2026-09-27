@@ -30,7 +30,8 @@ class _FakeGroupsRepository implements GroupsRepository {
       tenantId: '11111111-1111-1111-1111-111111111111',
       name: 'EST I Intensive Group',
       level: 'EST',
-      description: 'Comprehensive EST I curriculum with focus on problem solving',
+      description:
+          'Comprehensive EST I curriculum with focus on problem solving',
       previousContentAccess: 'deny',
       status: 'active',
       createdAt: DateTime.now().subtract(const Duration(days: 15)),
@@ -73,7 +74,8 @@ class _FakeGroupsRepository implements GroupsRepository {
   };
 
   @override
-  Future<Result<List<GroupEntity>>> getGroups() async => Success(List.from(groups));
+  Future<Result<List<GroupEntity>>> getGroups() async =>
+      Success(List.from(groups));
 
   @override
   Future<Result<GroupEntity>> createGroup({
@@ -114,8 +116,9 @@ class _FakeGroupsRepository implements GroupsRepository {
   }
 
   @override
-  Future<Result<List<GroupMemberEntity>>> getGroupMembers(String groupId) async =>
-      Success(membersByGroup[groupId] ?? []);
+  Future<Result<List<GroupMemberEntity>>> getGroupMembers(
+    String groupId,
+  ) async => Success(membersByGroup[groupId] ?? []);
 
   @override
   Future<Result<GroupMemberEntity>> addMemberToGroup({
@@ -170,73 +173,74 @@ void main() {
           size: size,
           padding: const EdgeInsets.only(top: 24, bottom: 16),
         ),
-        child: BlocProvider<GroupsCubit>.value(
-          value: cubit,
-          child: child,
-        ),
+        child: BlocProvider<GroupsCubit>.value(value: cubit, child: child),
       ),
     );
   }
 
   group('GroupsListPage Multi-Device Responsive Tests', () {
     for (final entry in testViewports.entries) {
-      testWidgets('Renders GroupsListPage cleanly on ${entry.key} with zero overflow',
-          (tester) async {
-        final repo = _FakeGroupsRepository();
-        final cubit = GroupsCubit(repository: repo);
+      testWidgets(
+        'Renders GroupsListPage cleanly on ${entry.key} with zero overflow',
+        (tester) async {
+          final repo = _FakeGroupsRepository();
+          final cubit = GroupsCubit(repository: repo);
 
-        tester.view.physicalSize = entry.value;
-        tester.view.devicePixelRatio = 1.0;
-        addTearDown(() {
-          tester.view.resetPhysicalSize();
-          tester.view.resetDevicePixelRatio();
-          cubit.close();
-        });
+          tester.view.physicalSize = entry.value;
+          tester.view.devicePixelRatio = 1.0;
+          addTearDown(() {
+            tester.view.resetPhysicalSize();
+            tester.view.resetDevicePixelRatio();
+            cubit.close();
+          });
 
-        await tester.pumpWidget(
-          buildTestWidget(
-            child: const GroupsListPage(),
-            cubit: cubit,
-            size: entry.value,
-          ),
-        );
-        await tester.pumpAndSettle();
+          await tester.pumpWidget(
+            buildTestWidget(
+              child: const GroupsListPage(),
+              cubit: cubit,
+              size: entry.value,
+            ),
+          );
+          await tester.pumpAndSettle();
 
-        expect(find.byType(GroupsListPage), findsOneWidget);
-        expect(tester.takeException(), isNull);
-      });
+          expect(find.byType(GroupsListPage), findsOneWidget);
+          expect(tester.takeException(), isNull);
+        },
+      );
     }
   });
 
   group('GroupDetailPage Multi-Device Responsive Tests', () {
     for (final entry in testViewports.entries) {
-      testWidgets('Renders GroupDetailPage cleanly on ${entry.key} with zero overflow',
-          (tester) async {
-        final repo = _FakeGroupsRepository();
-        final cubit = GroupsCubit(repository: repo);
+      testWidgets(
+        'Renders GroupDetailPage cleanly on ${entry.key} with zero overflow',
+        (tester) async {
+          final repo = _FakeGroupsRepository();
+          final cubit = GroupsCubit(repository: repo);
 
-        tester.view.physicalSize = entry.value;
-        tester.view.devicePixelRatio = 1.0;
-        addTearDown(() {
-          tester.view.resetPhysicalSize();
-          tester.view.resetDevicePixelRatio();
-          cubit.close();
-        });
+          tester.view.physicalSize = entry.value;
+          tester.view.devicePixelRatio = 1.0;
+          addTearDown(() {
+            tester.view.resetPhysicalSize();
+            tester.view.resetDevicePixelRatio();
+            cubit.close();
+          });
 
-        await tester.pumpWidget(
-          buildTestWidget(
-            child: GroupDetailPage(
-              groupId: 'grp-sat-1',
-              initialGroup: repo.groups.first,
+          await tester.pumpWidget(
+            buildTestWidget(
+              child: GroupDetailPage(
+                groupId: 'grp-sat-1',
+                initialGroup: repo.groups.first,
+              ),
+              cubit: cubit,
+              size: entry.value,
             ),
-            cubit: cubit,
-            size: entry.value,
-          ),
-        );
-        await tester.pumpAndSettle();
+          );
+          await tester.pumpAndSettle();
 
-        expect(tester.takeException(), isNull);
-      });
+          expect(tester.takeException(), isNull);
+        },
+      );
     }
   });
 }

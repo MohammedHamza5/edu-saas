@@ -99,8 +99,14 @@ class _AnimatedMathBackgroundState extends State<AnimatedMathBackground>
   @override
   Widget build(BuildContext context) {
     final mathTokens = Theme.of(context).extension<MathTokens>();
-    final effectiveGridColor = widget.gridColor ?? mathTokens?.gridLineColor ?? const Color(0xFF1E293B);
-    final effectiveWaveColor = widget.waveColor ?? mathTokens?.statisticHighlightColor ?? const Color(0xFF38BDF8);
+    final effectiveGridColor =
+        widget.gridColor ??
+        mathTokens?.gridLineColor ??
+        const Color(0xFF1E293B);
+    final effectiveWaveColor =
+        widget.waveColor ??
+        mathTokens?.statisticHighlightColor ??
+        const Color(0xFF38BDF8);
 
     final reduceMotion =
         MediaQuery.maybeOf(context)?.disableAnimations ?? false;
@@ -174,7 +180,9 @@ class _AnimatedMathPainter extends CustomPainter {
   // Cached paint objects to eliminate GC pressure per frame
   static final Paint _basePaint = Paint()..style = PaintingStyle.stroke;
   static final Paint _nodePaint = Paint()..style = PaintingStyle.fill;
-  static final Paint _wavePaint = Paint()..style = PaintingStyle.stroke..strokeCap = StrokeCap.round;
+  static final Paint _wavePaint = Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeCap = StrokeCap.round;
   static final Paint _secondaryPaint = Paint()..style = PaintingStyle.stroke;
   static final Paint _axesPaint = Paint();
   static final Paint _originPaint = Paint()..style = PaintingStyle.stroke;
@@ -204,7 +212,10 @@ class _AnimatedMathPainter extends CustomPainter {
     required this.showNodes,
   });
 
-  static List<TextPainter> _getOrCreateFormulas(Color gridColor, double opacity) {
+  static List<TextPainter> _getOrCreateFormulas(
+    Color gridColor,
+    double opacity,
+  ) {
     if (_cachedFormulas != null &&
         _lastFormulaColor == gridColor &&
         _lastFormulaOpacity == opacity) {
@@ -254,20 +265,36 @@ class _AnimatedMathPainter extends CustomPainter {
 
     // Vertical Lines
     int colIndex = 0;
-    for (double x = -spacing + offsetX; x <= size.width + spacing; x += spacing) {
+    for (
+      double x = -spacing + offsetX;
+      x <= size.width + spacing;
+      x += spacing
+    ) {
       if (x >= 0 && x <= size.width) {
         final isMajor = (colIndex % 4 == 0);
-        canvas.drawLine(Offset(x, 0), Offset(x, size.height), isMajor ? majorPaint : _basePaint);
+        canvas.drawLine(
+          Offset(x, 0),
+          Offset(x, size.height),
+          isMajor ? majorPaint : _basePaint,
+        );
       }
       colIndex++;
     }
 
     // Horizontal Lines
     int rowIndex = 0;
-    for (double y = -spacing + offsetY; y <= size.height + spacing; y += spacing) {
+    for (
+      double y = -spacing + offsetY;
+      y <= size.height + spacing;
+      y += spacing
+    ) {
       if (y >= 0 && y <= size.height) {
         final isMajor = (rowIndex % 4 == 0);
-        canvas.drawLine(Offset(0, y), Offset(size.width, y), isMajor ? majorPaint : _basePaint);
+        canvas.drawLine(
+          Offset(0, y),
+          Offset(size.width, y),
+          isMajor ? majorPaint : _basePaint,
+        );
       }
       rowIndex++;
     }
@@ -279,7 +306,8 @@ class _AnimatedMathPainter extends CustomPainter {
         for (double y = -step + offsetY; y <= size.height + step; y += step) {
           if (x >= 0 && x <= size.width && y >= 0 && y <= size.height) {
             final phase = (x / 200.0) + (y / 200.0) + (progress * 2 * math.pi);
-            final pulseAlpha = opacity * (1.2 + 0.8 * math.sin(phase)).clamp(0.0, 1.0);
+            final pulseAlpha =
+                opacity * (1.2 + 0.8 * math.sin(phase)).clamp(0.0, 1.0);
             _nodePaint.color = gridColor.withValues(alpha: pulseAlpha * 2.2);
 
             final radius = 1.0 + 0.5 * math.sin(phase);
@@ -304,7 +332,9 @@ class _AnimatedMathPainter extends CustomPainter {
       for (double x = 0; x <= size.width; x += 6.0) {
         final envelope = math.sin((x / size.width) * math.pi);
         final y1 = midY + amplitude * math.sin(k * x - omegaT) * envelope;
-        final y2 = midY + (amplitude * 0.45) * math.cos(2 * k * x - 1.5 * omegaT) * envelope;
+        final y2 =
+            midY +
+            (amplitude * 0.45) * math.cos(2 * k * x - 1.5 * omegaT) * envelope;
 
         if (first) {
           wavePath.moveTo(x, y1);

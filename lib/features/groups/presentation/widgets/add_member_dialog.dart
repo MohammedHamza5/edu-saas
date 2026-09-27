@@ -74,18 +74,18 @@ class _AddMemberDialogState extends State<AddMemberDialog> {
     });
 
     try {
-      final repo = widget.studentsRepository ?? InjectionContainer.studentsRepository;
-      final result = await repo.getStudents(
-        status: 'active',
-        pageSize: 100,
-      );
+      final repo =
+          widget.studentsRepository ?? InjectionContainer.studentsRepository;
+      final result = await repo.getStudents(status: 'active', pageSize: 100);
 
       if (!mounted) return;
 
       result.when(
         onSuccess: (students) {
           final existing = widget.existingMemberIds ?? {};
-          final filtered = students.where((s) => !existing.contains(s.id)).toList();
+          final filtered = students
+              .where((s) => !existing.contains(s.id))
+              .toList();
           setState(() {
             _availableStudents = filtered;
             _isLoading = false;
@@ -267,12 +267,19 @@ class _AddMemberDialogState extends State<AddMemberDialog> {
                   padding: const EdgeInsets.symmetric(vertical: 24),
                   child: Column(
                     children: [
-                      const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 36),
+                      const Icon(
+                        Icons.error_outline_rounded,
+                        color: AppColors.error,
+                        size: 36,
+                      ),
                       const SizedBox(height: 8),
                       Text(
                         _errorMessage!,
                         textAlign: TextAlign.center,
-                        style: const TextStyle(color: AppColors.error, fontSize: 13),
+                        style: const TextStyle(
+                          color: AppColors.error,
+                          fontSize: 13,
+                        ),
                       ),
                       const SizedBox(height: 12),
                       OutlinedButton.icon(
@@ -298,7 +305,10 @@ class _AddMemberDialogState extends State<AddMemberDialog> {
                   child: Center(
                     child: Text(
                       context.l10n.noStudentsMatchSearch,
-                      style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ),
                 )
@@ -308,7 +318,8 @@ class _AddMemberDialogState extends State<AddMemberDialog> {
                   child: ListView.separated(
                     shrinkWrap: true,
                     itemCount: filteredList.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.s8),
+                    separatorBuilder: (_, __) =>
+                        const SizedBox(height: AppSpacing.s8),
                     itemBuilder: (context, index) {
                       final student = filteredList[index];
                       final isSelected = _selectedStudent?.id == student.id;
@@ -319,7 +330,9 @@ class _AddMemberDialogState extends State<AddMemberDialog> {
                             _selectedStudent = student;
                           });
                         },
-                        borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusSmall,
+                        ),
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 150),
                           padding: const EdgeInsets.symmetric(
@@ -330,7 +343,9 @@ class _AddMemberDialogState extends State<AddMemberDialog> {
                             color: isSelected
                                 ? AppColors.primary.withValues(alpha: 0.08)
                                 : AppColors.surface,
-                            borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.radiusSmall,
+                            ),
                             border: Border.all(
                               color: isSelected
                                   ? AppColors.primary
@@ -344,13 +359,17 @@ class _AddMemberDialogState extends State<AddMemberDialog> {
                                 radius: 18,
                                 backgroundColor: isSelected
                                     ? AppColors.primary
-                                    : AppColors.primaryLight.withValues(alpha: 0.15),
+                                    : AppColors.primaryLight.withValues(
+                                        alpha: 0.15,
+                                      ),
                                 child: Text(
                                   student.initials,
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
-                                    color: isSelected ? Colors.white : AppColors.primary,
+                                    color: isSelected
+                                        ? Colors.white
+                                        : AppColors.primary,
                                   ),
                                 ),
                               ),
@@ -363,7 +382,9 @@ class _AddMemberDialogState extends State<AddMemberDialog> {
                                       student.fullName,
                                       style: TextStyle(
                                         fontSize: 14,
-                                        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                                        fontWeight: isSelected
+                                            ? FontWeight.w700
+                                            : FontWeight.w600,
                                         color: AppColors.textPrimary,
                                       ),
                                     ),

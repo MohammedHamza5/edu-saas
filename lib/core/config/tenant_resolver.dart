@@ -17,10 +17,13 @@ class TenantResolver {
     final uri = currentUri ?? Uri.base;
 
     // 1. Check query parameters explicitly
-    final queryTenant = uri.queryParameters['tenant'] ?? uri.queryParameters['tenant_id'];
+    final queryTenant =
+        uri.queryParameters['tenant'] ?? uri.queryParameters['tenant_id'];
     if (queryTenant != null && queryTenant.trim().isNotEmpty) {
       final clean = queryTenant.trim();
-      if (clean == 'antounios' || clean == 'dr-antounios' || clean == 'drantounios') {
+      if (clean == 'antounios' ||
+          clean == 'dr-antounios' ||
+          clean == 'drantounios') {
         return defaultTenantId;
       }
       return clean;

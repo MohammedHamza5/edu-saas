@@ -26,7 +26,8 @@ class AcademicHeroBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mathTokens = Theme.of(context).extension<MathTokens>() ?? MathTokens.light;
+    final mathTokens =
+        Theme.of(context).extension<MathTokens>() ?? MathTokens.light;
 
     return Container(
       decoration: BoxDecoration(
@@ -40,9 +41,7 @@ class AcademicHeroBanner extends StatelessWidget {
           // Mathematical formula watermark in the background
           Positioned.fill(
             child: IgnorePointer(
-              child: CustomPaint(
-                painter: _BannerMathWatermarkPainter(),
-              ),
+              child: CustomPaint(painter: _BannerMathWatermarkPainter()),
             ),
           ),
 
@@ -73,7 +72,9 @@ class AcademicHeroBanner extends StatelessWidget {
                               ),
                               decoration: BoxDecoration(
                                 color: Colors.white.withValues(alpha: 0.14),
-                                borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                                borderRadius: BorderRadius.circular(
+                                  AppSpacing.radiusSmall,
+                                ),
                                 border: Border.all(
                                   color: Colors.white.withValues(alpha: 0.22),
                                   width: 1,
@@ -115,7 +116,9 @@ class AcademicHeroBanner extends StatelessWidget {
                               ),
                               decoration: BoxDecoration(
                                 color: Colors.white.withValues(alpha: 0.10),
-                                borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                                borderRadius: BorderRadius.circular(
+                                  AppSpacing.radiusSmall,
+                                ),
                               ),
                               child: Text(
                                 badgeText!,
@@ -190,10 +193,8 @@ class _BannerMathWatermarkPainter extends CustomPainter {
     // Right-aligned watermark text
     for (int i = 0; i < formulas.length; i++) {
       final span = TextSpan(text: formulas[i], style: textStyle);
-      final tp = TextPainter(
-        text: span,
-        textDirection: TextDirection.ltr,
-      )..layout();
+      final tp = TextPainter(text: span, textDirection: TextDirection.ltr)
+        ..layout();
 
       final dy = 12.0 + (i * 24.0);
       if (dy + tp.height < size.height + 20) {

@@ -202,7 +202,9 @@ class _YouTubeEmbedPlayerWebState extends State<_YouTubeEmbedPlayerWeb> {
             }
 
             if (totalSeconds > 0) _lastDuration = totalSeconds;
-            final effectiveDuration = totalSeconds > 0 ? totalSeconds : _lastDuration;
+            final effectiveDuration = totalSeconds > 0
+                ? totalSeconds
+                : _lastDuration;
 
             // تحرك عادي أو seek backward — نحدّث furthest فقط للأمام
             if (currentSeconds > _furthestPositionSeconds) {

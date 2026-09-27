@@ -14,7 +14,8 @@ class ExamVersionModel extends ExamVersionEntity {
 
   factory ExamVersionModel.fromJson(Map<String, dynamic> json) {
     final rawQuestions = json['questions'] ?? json['exam_questions'];
-    final questionsList = (rawQuestions as List<dynamic>?)
+    final questionsList =
+        (rawQuestions as List<dynamic>?)
             ?.map((q) => ExamQuestionModel.fromJson(q as Map<String, dynamic>))
             .toList() ??
         <ExamQuestionModel>[];

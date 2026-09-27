@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import '../theme/responsive_breakpoints.dart';
 
-typedef ResponsiveWidgetBuilder = Widget Function(
-  BuildContext context,
-  BoxConstraints constraints,
-);
+typedef ResponsiveWidgetBuilder =
+    Widget Function(BuildContext context, BoxConstraints constraints);
 
 /// A declarative widget that switches layouts based on available constraints width.
 /// Ideal for swapping layouts between Mobile (Single Column), Tablet (Two Columns / Split),
@@ -27,11 +25,14 @@ class ResponsiveBuilder extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final screenType = ResponsiveBreakpoints.getScreenType(constraints.maxWidth);
+        final screenType = ResponsiveBreakpoints.getScreenType(
+          constraints.maxWidth,
+        );
 
         switch (screenType) {
           case DeviceScreenType.large:
-            if (largeDesktop != null) return largeDesktop!(context, constraints);
+            if (largeDesktop != null)
+              return largeDesktop!(context, constraints);
             if (desktop != null) return desktop!(context, constraints);
             if (tablet != null) return tablet!(context, constraints);
             return mobile(context, constraints);

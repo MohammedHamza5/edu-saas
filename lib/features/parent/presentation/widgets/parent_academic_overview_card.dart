@@ -77,7 +77,10 @@ class ParentAcademicOverviewCard extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.s6),
                 Text(
-                  context.l10n.attendedClassesRatio(summary.presentCount, summary.totalClasses),
+                  context.l10n.attendedClassesRatio(
+                    summary.presentCount,
+                    summary.totalClasses,
+                  ),
                   style: const TextStyle(
                     fontSize: 11,
                     color: AppColors.textSecondary,

@@ -27,10 +27,8 @@ class _FakeContentRepository implements ContentRepository {
   bool shouldFail;
   final String? signedUrlResult;
 
-  _FakeContentRepository({
-    this.items = const [],
-    this.shouldFail = false,
-  }) : signedUrlResult = 'https://storage.example.com/signed/test.pdf';
+  _FakeContentRepository({this.items = const [], this.shouldFail = false})
+    : signedUrlResult = 'https://storage.example.com/signed/test.pdf';
 
   @override
   Future<Result<List<ContentEntity>>> getGroupContent({
@@ -58,18 +56,22 @@ class _FakeContentRepository implements ContentRepository {
       return const FailureResult(ServerFailure('Connection error'));
     }
     final list = items
-        .where((i) => i.groupId == groupId && i.status == ContentStatus.published)
-        .map((i) => LessonAssignmentEntity(
-              contentGroupId: 'cg-${i.id}',
-              contentId: i.id,
-              groupId: i.groupId ?? '',
-              title: i.title,
-              description: i.description,
-              type: i.type,
-              sortOrder: i.sortOrder,
-              access: LessonAccess.unlocked,
-              progress: LessonProgress.notStarted,
-            ))
+        .where(
+          (i) => i.groupId == groupId && i.status == ContentStatus.published,
+        )
+        .map(
+          (i) => LessonAssignmentEntity(
+            contentGroupId: 'cg-${i.id}',
+            contentId: i.id,
+            groupId: i.groupId ?? '',
+            title: i.title,
+            description: i.description,
+            type: i.type,
+            sortOrder: i.sortOrder,
+            access: LessonAccess.unlocked,
+            progress: LessonProgress.notStarted,
+          ),
+        )
         .toList();
     return Success(list);
   }
@@ -273,6 +275,39 @@ class _FakeContentRepository implements ContentRepository {
     }
     return const Success(null);
   }
+
+  @override
+  Future<Result<void>> toggleLessonVisibility({
+    required String contentId,
+    required String groupId,
+    required bool isPublished,
+  }) async {
+    if (shouldFail) {
+      return const FailureResult(ServerFailure('Failed to toggle visibility'));
+    }
+    final index = items.indexWhere((i) => i.id == contentId);
+    if (index != -1) {
+      items[index] = items[index].copyWith(isPublishedInGroup: isPublished);
+    }
+    return const Success(null);
+  }
+
+  @override
+  Future<Result<void>> toggleAllLessonsVisibility({
+    required String groupId,
+    required bool isPublished,
+  }) async {
+    if (shouldFail) {
+      return const FailureResult(ServerFailure('Failed to toggle visibility'));
+    }
+    items = items.map((i) {
+      if (i.groupId == groupId) {
+        return i.copyWith(isPublishedInGroup: isPublished);
+      }
+      return i;
+    }).toList();
+    return const Success(null);
+  }
 }
 
 void main() {
@@ -398,7 +433,7 @@ void main() {
             'mime_type': 'application/pdf',
             'file_size': 512000,
             'created_at': '2026-09-08T10:00:00.000Z',
-          }
+          },
         ],
       };
 
@@ -435,17 +470,20 @@ void main() {
       expect(loaded.archivedCount, 1);
     });
 
-    test('loadGroupContent with isStudent: true filters published items only', () async {
-      final repo = _FakeContentRepository(items: List.from(mockContentList));
-      final cubit = ContentCubit(repository: repo);
+    test(
+      'loadGroupContent with isStudent: true filters published items only',
+      () async {
+        final repo = _FakeContentRepository(items: List.from(mockContentList));
+        final cubit = ContentCubit(repository: repo);
 
-      await cubit.loadGroupContent('g-1', isStudent: true);
+        await cubit.loadGroupContent('g-1', isStudent: true);
 
-      expect(cubit.state, isA<ContentLoaded>());
-      final loaded = cubit.state as ContentLoaded;
-      expect(loaded.items.length, 1);
-      expect(loaded.items.first.title, 'مذكرة الهندسة الفراغية');
-    });
+        expect(cubit.state, isA<ContentLoaded>());
+        final loaded = cubit.state as ContentLoaded;
+        expect(loaded.items.length, 1);
+        expect(loaded.items.first.title, 'مذكرة الهندسة الفراغية');
+      },
+    );
 
     test('reorderItems modifies list order in cubit state', () async {
       final repo = _FakeContentRepository(items: List.from(mockContentList));
@@ -465,127 +503,183 @@ void main() {
       await cubit.loadGroupContent('g-1');
 
       expect(cubit.state, isA<ContentError>());
-      expect((cubit.state as ContentError).message, contains('Connection error'));
+      expect(
+        (cubit.state as ContentError).message,
+        contains('Connection error'),
+      );
     });
+
+    test(
+      'toggleLessonVisibility updates item visibility in cubit state',
+      () async {
+        final repo = _FakeContentRepository(items: List.from(mockContentList));
+        final cubit = ContentCubit(repository: repo);
+
+        await cubit.loadGroupContent('g-1');
+        final success = await cubit.toggleLessonVisibility(
+          contentId: 'c-101',
+          groupId: 'g-1',
+          isPublished: false,
+        );
+
+        expect(success, isTrue);
+        final state = cubit.state as ContentLoaded;
+        final item = state.items.firstWhere((i) => i.id == 'c-101');
+        expect(item.isPublishedInGroup, isFalse);
+        expect(item.isDraft, isTrue);
+      },
+    );
+
+    test(
+      'toggleAllLessonsVisibility bulk updates all items in cubit state',
+      () async {
+        final repo = _FakeContentRepository(items: List.from(mockContentList));
+        final cubit = ContentCubit(repository: repo);
+
+        await cubit.loadGroupContent('g-1');
+        final success = await cubit.toggleAllLessonsVisibility(
+          groupId: 'g-1',
+          isPublished: true,
+        );
+
+        expect(success, isTrue);
+        final state = cubit.state as ContentLoaded;
+        for (final item in state.items) {
+          expect(item.isPublishedInGroup, isTrue);
+        }
+      },
+    );
   });
 
   group('Content UI Widget Tests', () {
-    testWidgets('TeacherContentLibraryPage renders list of items and add lesson button',
-        (tester) async {
-      tester.view.physicalSize = const Size(1200, 1600);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.resetPhysicalSize);
+    testWidgets(
+      'TeacherContentLibraryPage renders list of items and add lesson button',
+      (tester) async {
+        tester.view.physicalSize = const Size(1200, 1600);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
 
-      final repo = _FakeContentRepository(items: List.from(mockContentList));
+        final repo = _FakeContentRepository(items: List.from(mockContentList));
 
-      await tester.pumpWidget(
-        buildTestWidget(
-          child: const TeacherContentLibraryPage(
-            groupId: 'g-1',
-            groupName: 'مجموعة SAT المتقدمة',
+        await tester.pumpWidget(
+          buildTestWidget(
+            child: const TeacherContentLibraryPage(
+              groupId: 'g-1',
+              groupName: 'مجموعة SAT المتقدمة',
+            ),
+            repository: repo,
           ),
-          repository: repo,
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.textContaining('مجموعة SAT المتقدمة'), findsWidgets);
-      expect(find.text('فيديو شرح المتجهات'), findsOneWidget);
-      expect(find.text('إضافة درس'), findsOneWidget);
-    });
+        expect(find.textContaining('مجموعة SAT المتقدمة'), findsWidgets);
+        expect(find.text('فيديو شرح المتجهات'), findsOneWidget);
+        expect(find.text('إضافة درس'), findsOneWidget);
+      },
+    );
 
-    testWidgets('TeacherContentLibraryPage renders empty state when group has no content',
-        (tester) async {
-      final repo = _FakeContentRepository(items: []);
+    testWidgets(
+      'TeacherContentLibraryPage renders empty state when group has no content',
+      (tester) async {
+        final repo = _FakeContentRepository(items: []);
 
-      await tester.pumpWidget(
-        buildTestWidget(
-          child: const TeacherContentLibraryPage(groupId: 'g-empty'),
-          repository: repo,
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('لا توجد دروس بعد'), findsOneWidget);
-    });
-
-    testWidgets('StudentContentFeedPage renders published content feed and type chips',
-        (tester) async {
-      final repo = _FakeContentRepository(items: List.from(mockContentList));
-
-      await tester.pumpWidget(
-        buildTestWidget(
-          child: const StudentContentFeedPage(
-            groupId: 'g-1',
-            groupName: 'مجموعة SAT',
+        await tester.pumpWidget(
+          buildTestWidget(
+            child: const TeacherContentLibraryPage(groupId: 'g-empty'),
+            repository: repo,
           ),
-          repository: repo,
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.textContaining('مجموعة SAT'), findsWidgets);
-      expect(find.text('مذكرة الهندسة الفراغية'), findsWidgets);
-      // Student feed must never show draft or archived items
-      expect(find.text('فيديو شرح المتجهات'), findsNothing);
-      expect(find.text('مخطط الإحداثيات الكارتيزية'), findsNothing);
-    });
+        expect(find.text('لا توجد دروس بعد'), findsOneWidget);
+      },
+    );
 
-    testWidgets('MaterialViewerSheet renders file details and download button',
-        (tester) async {
-      final sampleItem = ContentEntity(
-        id: 'c-test-sheet',
-        tenantId: 't-1',
-        groupId: 'g-1',
-        title: 'مذكرة قوانين التفاضل',
-        description: 'شرح مفصل للمشتقات وتطبيقاتها الهندسية',
-        type: ContentType.pdf,
-        status: ContentStatus.published,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-        file: FileAttachmentEntity(
-          id: 'f-test',
+    testWidgets(
+      'StudentContentFeedPage renders published content feed and type chips',
+      (tester) async {
+        final repo = _FakeContentRepository(items: List.from(mockContentList));
+
+        await tester.pumpWidget(
+          buildTestWidget(
+            child: const StudentContentFeedPage(
+              groupId: 'g-1',
+              groupName: 'مجموعة SAT',
+            ),
+            repository: repo,
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.textContaining('مجموعة SAT'), findsWidgets);
+        expect(find.text('مذكرة الهندسة الفراغية'), findsWidgets);
+        // Student feed must never show draft or archived items
+        expect(find.text('فيديو شرح المتجهات'), findsNothing);
+        expect(find.text('مخطط الإحداثيات الكارتيزية'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'MaterialViewerSheet renders file details and download button',
+      (tester) async {
+        final sampleItem = ContentEntity(
+          id: 'c-test-sheet',
           tenantId: 't-1',
-          contentId: 'c-test-sheet',
-          storagePath: 'groups/g-1/content/calculus.pdf',
-          fileName: 'Calculus_Summary.pdf',
-          mimeType: 'application/pdf',
-          fileSize: 1024 * 1024 * 2, // 2MB
-          createdAt: DateTime.fromMillisecondsSinceEpoch(0),
-        ),
-      );
+          groupId: 'g-1',
+          title: 'مذكرة قوانين التفاضل',
+          description: 'شرح مفصل للمشتقات وتطبيقاتها الهندسية',
+          type: ContentType.pdf,
+          status: ContentStatus.published,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+          file: FileAttachmentEntity(
+            id: 'f-test',
+            tenantId: 't-1',
+            contentId: 'c-test-sheet',
+            storagePath: 'groups/g-1/content/calculus.pdf',
+            fileName: 'Calculus_Summary.pdf',
+            mimeType: 'application/pdf',
+            fileSize: 1024 * 1024 * 2, // 2MB
+            createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+          ),
+        );
 
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: AppTheme.lightTheme,
-          locale: const Locale('ar'),
-          supportedLocales: const [Locale('ar'), Locale('en')],
-          localizationsDelegates: const [
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          home: Scaffold(
-            body: MaterialViewerSheet(
-              content: sampleItem,
-              onGetSignedUrl: (path) async =>
-                  'https://signed.supabase.co/files/$path?token=abc',
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: AppTheme.lightTheme,
+            locale: const Locale('ar'),
+            supportedLocales: const [Locale('ar'), Locale('en')],
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            home: Scaffold(
+              body: MaterialViewerSheet(
+                content: sampleItem,
+                onGetSignedUrl: (path) async =>
+                    'https://signed.supabase.co/files/$path?token=abc',
+              ),
             ),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.text('مذكرة قوانين التفاضل'), findsOneWidget);
-      expect(find.text('شرح مفصل للمشتقات وتطبيقاتها الهندسية'), findsOneWidget);
-      expect(find.text('Calculus_Summary.pdf'), findsOneWidget);
-      expect(find.text('تنزيل / فتح الملف'), findsOneWidget);
-      expect(find.text('نسخ الرابط الآمن'), findsOneWidget);
-    });
+        expect(find.text('مذكرة قوانين التفاضل'), findsOneWidget);
+        expect(
+          find.text('شرح مفصل للمشتقات وتطبيقاتها الهندسية'),
+          findsOneWidget,
+        );
+        expect(find.text('Calculus_Summary.pdf'), findsOneWidget);
+        expect(find.text('تنزيل / فتح الملف'), findsOneWidget);
+        expect(find.text('نسخ الرابط الآمن'), findsOneWidget);
+      },
+    );
 
-    testWidgets('MaterialViewerSheet shows error when URL generation fails',
-        (tester) async {
+    testWidgets('MaterialViewerSheet shows error when URL generation fails', (
+      tester,
+    ) async {
       final sampleItem = ContentEntity(
         id: 'c-test-fail',
         tenantId: 't-1',
@@ -628,123 +722,184 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('تعذر توليد رابط الوصول الآمن في الوقت الحالي'), findsOneWidget);
+      expect(
+        find.text('تعذر توليد رابط الوصول الآمن في الوقت الحالي'),
+        findsOneWidget,
+      );
     });
 
-    testWidgets('CourseLessonTile renders grab cursor, ReorderableDragStartListener, and 1-based index', (tester) async {
-      final sampleLesson = ContentEntity(
-        id: 'c-test-lesson',
-        tenantId: 't-1',
-        groupId: 'g-1',
-        title: 'المحاضرة التجريبية الأولى',
-        type: ContentType.video,
-        status: ContentStatus.published,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
+    testWidgets(
+      'CourseLessonTile renders grab cursor, ReorderableDragStartListener, and 1-based index',
+      (tester) async {
+        final sampleLesson = ContentEntity(
+          id: 'c-test-lesson',
+          tenantId: 't-1',
+          groupId: 'g-1',
+          title: 'المحاضرة التجريبية الأولى',
+          type: ContentType.video,
+          status: ContentStatus.published,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
 
-      bool movedUp = false;
-      bool movedDown = false;
+        bool movedUp = false;
+        bool movedDown = false;
 
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: AppTheme.lightTheme,
-          locale: const Locale('ar'),
-          supportedLocales: const [Locale('ar'), Locale('en')],
-          localizationsDelegates: const [
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          home: Scaffold(
-            body: CustomScrollView(
-              slivers: [
-                SliverReorderableList(
-                  itemCount: 1,
-                  onReorder: (_, __) {},
-                  itemBuilder: (context, index) => CourseLessonTile(
-                    key: const ValueKey('c-test-lesson'),
-                    content: sampleLesson,
-                    index: 0,
-                    canMoveUp: true,
-                    canMoveDown: true,
-                    onMoveUp: () => movedUp = true,
-                    onMoveDown: () => movedDown = true,
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: AppTheme.lightTheme,
+            locale: const Locale('ar'),
+            supportedLocales: const [Locale('ar'), Locale('en')],
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            home: Scaffold(
+              body: CustomScrollView(
+                slivers: [
+                  SliverReorderableList(
+                    itemCount: 1,
+                    onReorder: (_, __) {},
+                    itemBuilder: (context, index) => CourseLessonTile(
+                      key: const ValueKey('c-test-lesson'),
+                      content: sampleLesson,
+                      index: 0,
+                      canMoveUp: true,
+                      canMoveDown: true,
+                      onMoveUp: () => movedUp = true,
+                      onMoveDown: () => movedDown = true,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      // Verify 1-based index is rendered (should be "1", not "0")
-      expect(find.text('1'), findsOneWidget);
-      expect(find.text('0'), findsNothing);
+        // Verify 1-based index is rendered (should be "1", not "0")
+        expect(find.text('1'), findsOneWidget);
+        expect(find.text('0'), findsNothing);
 
-      // Verify ReorderableDragStartListener is present
-      expect(find.byType(ReorderableDragStartListener), findsOneWidget);
+        // Verify ReorderableDragStartListener is present
+        expect(find.byType(ReorderableDragStartListener), findsOneWidget);
 
-      // Verify MouseRegion with grab cursor is present
-      final mouseRegionFinder = find.byWidgetPredicate(
-        (w) => w is MouseRegion && w.cursor == SystemMouseCursors.grab,
-      );
-      expect(mouseRegionFinder, findsOneWidget);
+        // Verify MouseRegion with grab cursor is present
+        final mouseRegionFinder = find.byWidgetPredicate(
+          (w) => w is MouseRegion && w.cursor == SystemMouseCursors.grab,
+        );
+        expect(mouseRegionFinder, findsOneWidget);
 
-      // Test move up button
-      await tester.tap(find.byIcon(Icons.keyboard_arrow_up_rounded));
-      await tester.pumpAndSettle();
-      expect(movedUp, isTrue);
+        // Test move up button
+        await tester.tap(find.byIcon(Icons.keyboard_arrow_up_rounded));
+        await tester.pumpAndSettle();
+        expect(movedUp, isTrue);
 
-      // Test move down button
-      await tester.tap(find.byIcon(Icons.keyboard_arrow_down_rounded));
-      await tester.pumpAndSettle();
-      expect(movedDown, isTrue);
-    });
+        // Test move down button
+        await tester.tap(find.byIcon(Icons.keyboard_arrow_down_rounded));
+        await tester.pumpAndSettle();
+        expect(movedDown, isTrue);
+      },
+    );
 
-    testWidgets('CourseLessonTile supports isSelected state and onTap selection callback', (tester) async {
-      final sampleLesson = ContentEntity(
-        id: 'c-test-lesson',
-        tenantId: 't-1',
-        groupId: 'g-1',
-        title: 'المحاضرة التجريبية الأولى',
-        type: ContentType.video,
-        status: ContentStatus.published,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
+    testWidgets(
+      'CourseLessonTile supports isSelected state and onTap selection callback',
+      (tester) async {
+        final sampleLesson = ContentEntity(
+          id: 'c-test-lesson',
+          tenantId: 't-1',
+          groupId: 'g-1',
+          title: 'المحاضرة التجريبية الأولى',
+          type: ContentType.video,
+          status: ContentStatus.published,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
 
-      bool tapped = false;
+        bool tapped = false;
 
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: AppTheme.lightTheme,
-          locale: const Locale('ar'),
-          supportedLocales: const [Locale('ar'), Locale('en')],
-          localizationsDelegates: const [
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          home: Scaffold(
-            body: CourseLessonTile(
-              content: sampleLesson,
-              index: 0,
-              isSelected: true,
-              onTap: () => tapped = true,
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: AppTheme.lightTheme,
+            locale: const Locale('ar'),
+            supportedLocales: const [Locale('ar'), Locale('en')],
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            home: Scaffold(
+              body: CourseLessonTile(
+                content: sampleLesson,
+                index: 0,
+                isSelected: true,
+                onTap: () => tapped = true,
+              ),
             ),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      await tester.tap(find.text('المحاضرة التجريبية الأولى'));
-      await tester.pumpAndSettle();
+        await tester.tap(find.text('المحاضرة التجريبية الأولى'));
+        await tester.pumpAndSettle();
 
-      expect(tapped, isTrue);
-    });
+        expect(tapped, isTrue);
+      },
+    );
+
+    testWidgets(
+      'CourseLessonTile renders visibility status chip and triggers onToggleVisibility',
+      (tester) async {
+        final publishedLesson = ContentEntity(
+          id: 'c-vis-1',
+          tenantId: 't-1',
+          groupId: 'g-1',
+          title: 'محاضرة حساب المثلثات',
+          type: ContentType.video,
+          status: ContentStatus.published,
+          isPublishedInGroup: true,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+
+        bool toggled = false;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: AppTheme.lightTheme,
+            locale: const Locale('ar'),
+            supportedLocales: const [Locale('ar'), Locale('en')],
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            home: Scaffold(
+              body: CourseLessonTile(
+                content: publishedLesson,
+                index: 0,
+                onToggleVisibility: () => toggled = true,
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Check published status chip is rendered
+        expect(find.text('منشور'), findsOneWidget);
+        // Check eye icon is rendered
+        expect(find.byIcon(Icons.visibility_rounded), findsWidgets);
+
+        // Tap the visibility toggle button
+        await tester.tap(find.byTooltip('إخفاء المحاضرة عن الطلاب'));
+        await tester.pumpAndSettle();
+
+        expect(toggled, isTrue);
+      },
+    );
   });
 }

@@ -40,7 +40,8 @@ class LessonSetupSheet extends StatefulWidget {
     required String? fileId,
     required String? examId,
     required int? passingScoreOverride,
-  }) onSave;
+  })
+  onSave;
 
   const LessonSetupSheet({
     super.key,
@@ -70,7 +71,8 @@ class LessonSetupSheet extends StatefulWidget {
       required String? fileId,
       required String? examId,
       required int? passingScoreOverride,
-    }) onSave,
+    })
+    onSave,
     String? existingLessonTitle,
     String? existingFileId,
     String? existingFileName,
@@ -201,28 +203,37 @@ class _LessonSetupSheetState extends State<LessonSetupSheet> {
     final client = SupabaseService.client;
     final tenantId = widget.video.tenantId;
     final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final safeName = _pickedFile!.name
-        .toLowerCase()
-        .replaceAll(RegExp(r'[^a-z0-9_.-]'), '_');
+    final safeName = _pickedFile!.name.toLowerCase().replaceAll(
+      RegExp(r'[^a-z0-9_.-]'),
+      '_',
+    );
     final storagePath =
         'group_handouts/${widget.groupId}_${timestamp}_$safeName';
 
-    await client.storage.from('group-content').uploadBinary(
+    await client.storage
+        .from('group-content')
+        .uploadBinary(
           storagePath,
           Uint8List.fromList(_pickedFileBytes!),
-          fileOptions:
-              const FileOptions(contentType: 'application/pdf', upsert: true),
+          fileOptions: const FileOptions(
+            contentType: 'application/pdf',
+            upsert: true,
+          ),
         );
 
-    final fileRes = await client.from('files').insert({
-      'tenant_id': tenantId,
-      'content_id': widget.video.id,
-      'storage_path': storagePath,
-      'file_name': _pickedFile!.name,
-      'mime_type': 'application/pdf',
-      'file_size': _pickedFile!.size,
-      'created_at': DateTime.now().toUtc().toIso8601String(),
-    }).select('id').single();
+    final fileRes = await client
+        .from('files')
+        .insert({
+          'tenant_id': tenantId,
+          'content_id': widget.video.id,
+          'storage_path': storagePath,
+          'file_name': _pickedFile!.name,
+          'mime_type': 'application/pdf',
+          'file_size': _pickedFile!.size,
+          'created_at': DateTime.now().toUtc().toIso8601String(),
+        })
+        .select('id')
+        .single();
 
     return fileRes['id'] as String?;
   }
@@ -235,13 +246,14 @@ class _LessonSetupSheetState extends State<LessonSetupSheet> {
       final fileId = await _uploadPdfIfNeeded();
       final passingScore = _useCustomScore
           ? (int.tryParse(_customScoreController.text.trim()) ??
-              widget.defaultPassingScore)
+                widget.defaultPassingScore)
           : null;
 
       final success = await widget.onSave(
         contentId: widget.video.id,
         groupId: widget.groupId,
-        lessonTitle: _titleController.text.trim().isEmpty ||
+        lessonTitle:
+            _titleController.text.trim().isEmpty ||
                 _titleController.text.trim() == widget.video.title
             ? null
             : _titleController.text.trim(),
@@ -276,8 +288,8 @@ class _LessonSetupSheetState extends State<LessonSetupSheet> {
     final theme = Theme.of(context);
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
-    final hasPdf = !_removePdf &&
-        (_pickedFile != null || _currentFileName != null);
+    final hasPdf =
+        !_removePdf && (_pickedFile != null || _currentFileName != null);
     final pdfName = _pickedFile?.name ?? _currentFileName;
 
     return Container(
@@ -299,7 +311,10 @@ class _LessonSetupSheetState extends State<LessonSetupSheet> {
             // Handle
             Center(
               child: Container(
-                margin: const EdgeInsets.only(top: AppSpacing.s8, bottom: AppSpacing.s16),
+                margin: const EdgeInsets.only(
+                  top: AppSpacing.s8,
+                  bottom: AppSpacing.s16,
+                ),
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
@@ -403,8 +418,11 @@ class _LessonSetupSheetState extends State<LessonSetupSheet> {
             const SizedBox(height: AppSpacing.s20),
 
             // Study Material (PDF)
-            _buildSectionLabel(l10n.studyMaterial, Icons.picture_as_pdf_rounded,
-                const Color(0xFFEA580C)),
+            _buildSectionLabel(
+              l10n.studyMaterial,
+              Icons.picture_as_pdf_rounded,
+              const Color(0xFFEA580C),
+            ),
             const SizedBox(height: AppSpacing.s8),
             if (hasPdf) ...[
               Container(
@@ -418,8 +436,11 @@ class _LessonSetupSheetState extends State<LessonSetupSheet> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.picture_as_pdf_rounded,
-                        color: Color(0xFFEA580C), size: 20),
+                    const Icon(
+                      Icons.picture_as_pdf_rounded,
+                      color: Color(0xFFEA580C),
+                      size: 20,
+                    ),
                     const SizedBox(width: AppSpacing.s8),
                     Expanded(
                       child: Text(
@@ -434,8 +455,10 @@ class _LessonSetupSheetState extends State<LessonSetupSheet> {
                     ),
                     TextButton(
                       onPressed: _pickPdf,
-                      child: Text(l10n.replacePdf,
-                          style: const TextStyle(fontSize: 12)),
+                      child: Text(
+                        l10n.replacePdf,
+                        style: const TextStyle(fontSize: 12),
+                      ),
                     ),
                     TextButton(
                       onPressed: () => setState(() {
@@ -444,9 +467,12 @@ class _LessonSetupSheetState extends State<LessonSetupSheet> {
                         _pickedFileBytes = null;
                       }),
                       style: TextButton.styleFrom(
-                          foregroundColor: AppColors.error),
-                      child: Text(l10n.removePdf,
-                          style: const TextStyle(fontSize: 12)),
+                        foregroundColor: AppColors.error,
+                      ),
+                      child: Text(
+                        l10n.removePdf,
+                        style: const TextStyle(fontSize: 12),
+                      ),
                     ),
                   ],
                 ),
@@ -458,8 +484,7 @@ class _LessonSetupSheetState extends State<LessonSetupSheet> {
                 onPressed: _pickPdf,
                 style: OutlinedButton.styleFrom(
                   foregroundColor: const Color(0xFFEA580C),
-                  side: const BorderSide(
-                      color: Color(0xFFEA580C), width: 1.2),
+                  side: const BorderSide(color: Color(0xFFEA580C), width: 1.2),
                   padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
               ),
@@ -468,7 +493,10 @@ class _LessonSetupSheetState extends State<LessonSetupSheet> {
 
             // Lesson Quiz
             _buildSectionLabel(
-                l10n.lessonQuizLabel, Icons.quiz_rounded, AppColors.primary),
+              l10n.lessonQuizLabel,
+              Icons.quiz_rounded,
+              AppColors.primary,
+            ),
             const SizedBox(height: AppSpacing.s8),
             if (_isLoadingExams)
               const LinearProgressIndicator()
@@ -478,7 +506,9 @@ class _LessonSetupSheetState extends State<LessonSetupSheet> {
                 decoration: InputDecoration(
                   hintText: l10n.lessonQuizHint,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                    borderRadius: BorderRadius.circular(
+                      AppSpacing.radiusMedium,
+                    ),
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 14,
@@ -515,15 +545,18 @@ class _LessonSetupSheetState extends State<LessonSetupSheet> {
                   padding: const EdgeInsets.all(AppSpacing.s10),
                   decoration: BoxDecoration(
                     color: AppColors.primary.withValues(alpha: 0.05),
-                    borderRadius:
-                        BorderRadius.circular(AppSpacing.radiusSmall),
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
                     border: Border.all(
-                        color: AppColors.primary.withValues(alpha: 0.2)),
+                      color: AppColors.primary.withValues(alpha: 0.2),
+                    ),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.info_outline_rounded,
-                          size: 14, color: AppColors.primary),
+                      const Icon(
+                        Icons.info_outline_rounded,
+                        size: 14,
+                        color: AppColors.primary,
+                      ),
                       const SizedBox(width: AppSpacing.s8),
                       Expanded(
                         child: Text(
@@ -543,7 +576,10 @@ class _LessonSetupSheetState extends State<LessonSetupSheet> {
 
             // Passing Score
             _buildSectionLabel(
-                l10n.passingScoreLabel, Icons.percent_rounded, AppColors.success),
+              l10n.passingScoreLabel,
+              Icons.percent_rounded,
+              AppColors.success,
+            ),
             const SizedBox(height: AppSpacing.s8),
             Column(
               children: [
@@ -615,8 +651,7 @@ class _LessonSetupSheetState extends State<LessonSetupSheet> {
                       width: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        valueColor:
-                            AlwaysStoppedAnimation<Color>(Colors.white),
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       ),
                     )
                   : Text(

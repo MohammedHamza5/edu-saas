@@ -9,7 +9,8 @@ class AppTheme {
   AppTheme._();
 
   /// Default baseline theme
-  static ThemeData get lightTheme => fromBranding(TenantBranding.defaultAcademic());
+  static ThemeData get lightTheme =>
+      fromBranding(TenantBranding.defaultAcademic());
 
   /// Builds a bespoke, high-performance [ThemeData] and [MathTokens] customized
   /// to the specific teacher / tenant's visual branding.
@@ -93,9 +94,7 @@ class AppTheme {
       colorScheme: colorScheme,
       scaffoldBackgroundColor: AppColors.background,
       textTheme: AppTypography.textTheme,
-      extensions: <ThemeExtension<dynamic>>[
-        dynamicMathTokens,
-      ],
+      extensions: <ThemeExtension<dynamic>>[dynamicMathTokens],
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.surface,
         foregroundColor: AppColors.textPrimary,
@@ -125,7 +124,9 @@ class AppTheme {
         modalBackgroundColor: AppColors.surfaceElevated,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(AppSpacing.radiusLarge)),
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(AppSpacing.radiusLarge),
+          ),
           side: BorderSide(color: AppColors.border, width: 1),
         ),
       ),
@@ -179,10 +180,7 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
           ),
-          textStyle: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-          ),
+          textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
@@ -307,9 +305,7 @@ class AppTheme {
         mouseCursor: WidgetStateMouseCursor.clickable,
       ),
       segmentedButtonTheme: const SegmentedButtonThemeData(
-        style: ButtonStyle(
-          mouseCursor: WidgetStateMouseCursor.clickable,
-        ),
+        style: ButtonStyle(mouseCursor: WidgetStateMouseCursor.clickable),
       ),
     );
   }

@@ -8,13 +8,16 @@ abstract class StudentDashboardRemoteDataSource {
   Future<StudentDashboardStats> getStudentDashboardStats(String studentId);
 }
 
-class StudentDashboardRemoteDataSourceImpl implements StudentDashboardRemoteDataSource {
+class StudentDashboardRemoteDataSourceImpl
+    implements StudentDashboardRemoteDataSource {
   final SupabaseClient _supabase;
 
   StudentDashboardRemoteDataSourceImpl(this._supabase);
 
   @override
-  Future<StudentDashboardStats> getStudentDashboardStats(String studentId) async {
+  Future<StudentDashboardStats> getStudentDashboardStats(
+    String studentId,
+  ) async {
     try {
       // Execute all core queries concurrently via Future.wait
       // 1. Core student metrics & video telemetry (RPC get_student_360 with fallback)
@@ -68,7 +71,9 @@ class StudentDashboardRemoteDataSourceImpl implements StudentDashboardRemoteData
     }
   }
 
-  Future<_CoreDashboardData> _fetchCoreStatsWithFallback(String studentId) async {
+  Future<_CoreDashboardData> _fetchCoreStatsWithFallback(
+    String studentId,
+  ) async {
     // 1. Fast path: Supabase RPC get_student_360 (single round-trip for 6 metrics)
     try {
       final result = await _supabase.rpc<dynamic>(
@@ -106,17 +111,23 @@ class StudentDashboardRemoteDataSourceImpl implements StudentDashboardRemoteData
 
         // Attendance Percentage
         final attTotal = (data['attendance_total'] as num?)?.toDouble() ?? 0;
-        final attPresent = (data['attendance_present'] as num?)?.toDouble() ?? 0;
-        final attendancePercentage = attTotal > 0 ? (attPresent / attTotal) * 100 : 0.0;
+        final attPresent =
+            (data['attendance_present'] as num?)?.toDouble() ?? 0;
+        final attendancePercentage = attTotal > 0
+            ? (attPresent / attTotal) * 100
+            : 0.0;
 
         // Exam Average
-        final examAverage = (data['exam_avg_percentage'] as num?)?.toDouble() ?? 0.0;
+        final examAverage =
+            (data['exam_avg_percentage'] as num?)?.toDouble() ?? 0.0;
 
         // Assignments Submitted
-        final assignmentsSubmitted = (data['submissions_total'] as num?)?.toInt() ?? 0;
+        final assignmentsSubmitted =
+            (data['submissions_total'] as num?)?.toInt() ?? 0;
 
         // Video Percentage
-        final videoPercentage = (data['video_avg_percentage'] as num?)?.toDouble() ?? 0.0;
+        final videoPercentage =
+            (data['video_avg_percentage'] as num?)?.toDouble() ?? 0.0;
 
         // Continue learning video from video_insights
         ContinueLearningItem? continueItem;
@@ -125,11 +136,13 @@ class StudentDashboardRemoteDataSourceImpl implements StudentDashboardRemoteData
           for (final vi in insights) {
             if (vi is Map<String, dynamic>) {
               final completed = vi['completed'] == true;
-              final progressSec = (vi['progress_seconds'] as num?)?.toInt() ?? 0;
+              final progressSec =
+                  (vi['progress_seconds'] as num?)?.toInt() ?? 0;
               if (!completed && progressSec > 0) {
                 final videoId = (vi['video_id'] as String?) ?? '';
                 final title = (vi['video_title'] as String?) ?? 'Video Lesson';
-                final durationSec = (vi['duration_seconds'] as num?)?.toInt() ?? 0;
+                final durationSec =
+                    (vi['duration_seconds'] as num?)?.toInt() ?? 0;
                 final pct = (vi['percentage'] as num?)?.toDouble() ?? 0.0;
 
                 continueItem = ContinueLearningItem(
@@ -289,7 +302,8 @@ class StudentDashboardRemoteDataSourceImpl implements StudentDashboardRemoteData
       final vidMap = videoProgressResponse['videos'];
       if (vidMap is Map<String, dynamic>) {
         final contentMap = vidMap['content'];
-        if (contentMap is Map<String, dynamic> && contentMap['status'] == 'published') {
+        if (contentMap is Map<String, dynamic> &&
+            contentMap['status'] == 'published') {
           final title = (contentMap['title'] as String?) ?? 'Video Lesson';
           final contentId = (contentMap['id'] as String?) ?? '';
           final groupsMap = contentMap['groups'];
@@ -301,8 +315,8 @@ class StudentDashboardRemoteDataSourceImpl implements StudentDashboardRemoteData
               (videoProgressResponse['progress_seconds'] as num?)?.toInt() ?? 0;
           final durationSec =
               (videoProgressResponse['duration_seconds'] as num?)?.toInt() ??
-                  (vidMap['duration'] as num?)?.toInt() ??
-                  0;
+              (vidMap['duration'] as num?)?.toInt() ??
+              0;
           final pct =
               (videoProgressResponse['percentage'] as num?)?.toDouble() ?? 0.0;
 
@@ -432,15 +446,17 @@ class StudentDashboardRemoteDataSourceImpl implements StudentDashboardRemoteData
             gName = groups['name'] as String;
           }
 
-          urgentTasks.add(UrgentTaskItem(
-            id: assignmentId,
-            title: (content['title'] as String?) ?? 'Homework',
-            groupName: gName,
-            taskType: 'assignment',
-            dueAt: dueAt,
-            status: 'pending',
-            maxScore: (a['max_score'] as num?)?.toInt(),
-          ));
+          urgentTasks.add(
+            UrgentTaskItem(
+              id: assignmentId,
+              title: (content['title'] as String?) ?? 'Homework',
+              groupName: gName,
+              taskType: 'assignment',
+              dueAt: dueAt,
+              status: 'pending',
+              maxScore: (a['max_score'] as num?)?.toInt(),
+            ),
+          );
         }
       }
     }
@@ -468,15 +484,17 @@ class StudentDashboardRemoteDataSourceImpl implements StudentDashboardRemoteData
             gName = groups['name'] as String;
           }
 
-          urgentTasks.add(UrgentTaskItem(
-            id: examId,
-            title: (content['title'] as String?) ?? 'Assessment',
-            groupName: gName,
-            taskType: 'exam',
-            dueAt: endAt,
-            status: 'available',
-            maxScore: (ex['max_score'] as num?)?.toInt(),
-          ));
+          urgentTasks.add(
+            UrgentTaskItem(
+              id: examId,
+              title: (content['title'] as String?) ?? 'Assessment',
+              groupName: gName,
+              taskType: 'exam',
+              dueAt: endAt,
+              status: 'available',
+              maxScore: (ex['max_score'] as num?)?.toInt(),
+            ),
+          );
         }
       }
     }

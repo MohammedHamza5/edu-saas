@@ -38,13 +38,11 @@ class _AcademicShimmerState extends State<AcademicShimmer>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: widget.duration,
-    );
+    _controller = AnimationController(vsync: this, duration: widget.duration);
 
-    final isTest =
-        WidgetsBinding.instance.runtimeType.toString().contains('Test');
+    final isTest = WidgetsBinding.instance.runtimeType.toString().contains(
+      'Test',
+    );
     if (!isTest) {
       _controller.repeat();
     } else {
@@ -121,14 +119,11 @@ class AppSkeleton extends StatelessWidget {
     this.color,
   });
 
-  const AppSkeleton.circle({
-    super.key,
-    required double size,
-    this.color,
-  })  : width = size,
-        height = size,
-        borderRadius = null,
-        shape = BoxShape.circle;
+  const AppSkeleton.circle({super.key, required double size, this.color})
+    : width = size,
+      height = size,
+      borderRadius = null,
+      shape = BoxShape.circle;
 
   const AppSkeleton.rect({
     super.key,
@@ -177,7 +172,9 @@ class AcademicCardSkeleton extends StatelessWidget {
                 AppSkeleton.rect(
                   height: 22,
                   width: 65,
-                  borderRadius: BorderRadius.all(Radius.circular(AppSpacing.radiusFull)),
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(AppSpacing.radiusFull),
+                  ),
                 ),
               ],
             ),
@@ -194,13 +191,17 @@ class AcademicCardSkeleton extends StatelessWidget {
                 AppSkeleton.rect(
                   height: 24,
                   width: 72,
-                  borderRadius: BorderRadius.all(Radius.circular(AppSpacing.radiusSmall)),
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(AppSpacing.radiusSmall),
+                  ),
                 ),
                 SizedBox(width: AppSpacing.s8),
                 AppSkeleton.rect(
                   height: 24,
                   width: 72,
-                  borderRadius: BorderRadius.all(Radius.circular(AppSpacing.radiusSmall)),
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(AppSpacing.radiusSmall),
+                  ),
                 ),
               ],
             ),
@@ -257,7 +258,9 @@ class AcademicListTileSkeleton extends StatelessWidget {
               const AppSkeleton.rect(
                 height: 24,
                 width: 68,
-                borderRadius: BorderRadius.all(Radius.circular(AppSpacing.radiusFull)),
+                borderRadius: BorderRadius.all(
+                  Radius.circular(AppSpacing.radiusFull),
+                ),
               ),
           ],
         ),
@@ -303,7 +306,9 @@ class AcademicProfileSkeleton extends StatelessWidget {
                   AppSkeleton.rect(
                     height: 32,
                     width: 90,
-                    borderRadius: BorderRadius.all(Radius.circular(AppSpacing.radiusMedium)),
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(AppSpacing.radiusMedium),
+                    ),
                   ),
                 ],
               ),
@@ -406,10 +411,7 @@ class AcademicDashboardSkeleton extends StatelessWidget {
             desktopColumns: 3,
             spacing: AppSpacing.s16,
             runSpacing: AppSpacing.s16,
-            children: List.generate(
-              3,
-              (_) => const AcademicCardSkeleton(),
-            ),
+            children: List.generate(3, (_) => const AcademicCardSkeleton()),
           ),
         ],
       ),
@@ -467,10 +469,7 @@ class AppSkeletonListItem extends StatelessWidget {
 class AppSkeletonCard extends StatelessWidget {
   final double height;
 
-  const AppSkeletonCard({
-    super.key,
-    this.height = 120,
-  });
+  const AppSkeletonCard({super.key, this.height = 120});
 
   @override
   Widget build(BuildContext context) {

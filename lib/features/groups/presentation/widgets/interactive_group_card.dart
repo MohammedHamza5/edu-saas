@@ -79,10 +79,7 @@ class _InteractiveGroupCardState extends State<InteractiveGroupCard> {
           onTap:
               widget.onTap ??
               () {
-                context.go(
-                  '${AppRoutes.groupsList}/${group.id}',
-                  extra: group,
-                );
+                context.go('${AppRoutes.groupsList}/${group.id}', extra: group);
               },
           child: AnimatedScale(
             scale: scale,
@@ -245,7 +242,9 @@ class _InteractiveGroupCardState extends State<InteractiveGroupCard> {
                                   // Content Policy Pill
                                   AppBadge(
                                     label: group.isPreviousContentAllowed
-                                        ? context.l10n.previousContentAllowedPill
+                                        ? context
+                                              .l10n
+                                              .previousContentAllowedPill
                                         : context.l10n.newOnlyPill,
                                     variant: group.isPreviousContentAllowed
                                         ? AppBadgeVariant.active

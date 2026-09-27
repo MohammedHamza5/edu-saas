@@ -143,7 +143,9 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
                     children: _levels.map((level) {
                       final isSelected = _selectedLevel == level;
                       final isCustom = level == 'CUSTOM';
-                      final labelText = isCustom ? context.l10n.customTrack : level;
+                      final labelText = isCustom
+                          ? context.l10n.customTrack
+                          : level;
                       return ChoiceChip(
                         label: Text(labelText),
                         selected: isSelected,

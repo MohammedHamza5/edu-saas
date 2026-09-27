@@ -37,17 +37,38 @@ class AppLogger {
   /// 🔍 DEBUG — Low-level implementation detail (only in debug mode)
   static void d(String tag, String message, {Object? data}) {
     if (!kDebugMode) return;
-    _log(level: 'DEBUG', tag: tag, message: message, data: data, color: _gray, emoji: '🔍');
+    _log(
+      level: 'DEBUG',
+      tag: tag,
+      message: message,
+      data: data,
+      color: _gray,
+      emoji: '🔍',
+    );
   }
 
   /// ℹ️ INFO — Important lifecycle or business event
   static void i(String tag, String message, {Object? data}) {
-    _log(level: 'INFO ', tag: tag, message: message, data: data, color: _cyan, emoji: 'ℹ️');
+    _log(
+      level: 'INFO ',
+      tag: tag,
+      message: message,
+      data: data,
+      color: _cyan,
+      emoji: 'ℹ️',
+    );
   }
 
   /// ⚠️ WARNING — Something unexpected but non-fatal
   static void w(String tag, String message, {Object? data}) {
-    _log(level: 'WARN ', tag: tag, message: message, data: data, color: _yellow, emoji: '⚠️');
+    _log(
+      level: 'WARN ',
+      tag: tag,
+      message: message,
+      data: data,
+      color: _yellow,
+      emoji: '⚠️',
+    );
   }
 
   /// ❌ ERROR — Fatal or serious error with optional stack trace
@@ -86,22 +107,50 @@ class AppLogger {
 
   /// ✅ SUCCESS — Successful completion of an important operation
   static void s(String tag, String message, {Object? data}) {
-    _log(level: 'OK   ', tag: tag, message: message, data: data, color: _green, emoji: '✅');
+    _log(
+      level: 'OK   ',
+      tag: tag,
+      message: message,
+      data: data,
+      color: _green,
+      emoji: '✅',
+    );
   }
 
   /// 🌐 NETWORK — HTTP/Supabase request/response tracking
   static void n(String tag, String message, {Object? data}) {
-    _log(level: 'NET  ', tag: tag, message: message, data: data, color: _blue, emoji: '🌐');
+    _log(
+      level: 'NET  ',
+      tag: tag,
+      message: message,
+      data: data,
+      color: _blue,
+      emoji: '🌐',
+    );
   }
 
   /// 🧩 BLOC — Cubit/Bloc state transition
   static void b(String tag, String message, {Object? data}) {
-    _log(level: 'BLOC ', tag: tag, message: message, data: data, color: _magenta, emoji: '🧩');
+    _log(
+      level: 'BLOC ',
+      tag: tag,
+      message: message,
+      data: data,
+      color: _magenta,
+      emoji: '🧩',
+    );
   }
 
   /// 🛣️ ROUTER — Navigation event
   static void r(String tag, String message, {Object? data}) {
-    _log(level: 'ROUTE', tag: tag, message: message, data: data, color: _cyan, emoji: '🛣️');
+    _log(
+      level: 'ROUTE',
+      tag: tag,
+      message: message,
+      data: data,
+      color: _cyan,
+      emoji: '🛣️',
+    );
   }
 
   // ─── Separators (for visual grouping) ─────────────────────────────────────
@@ -141,11 +190,7 @@ class AppLogger {
       }
     }
 
-    developer.log(
-      message,
-      name: tag,
-      time: DateTime.now(),
-    );
+    developer.log(message, name: tag, time: DateTime.now());
   }
 
   static String _timestamp() {

@@ -11,8 +11,8 @@ class LocaleCubit extends Cubit<Locale> {
   final FlutterSecureStorage _storage;
 
   LocaleCubit({FlutterSecureStorage? storage})
-      : _storage = storage ?? const FlutterSecureStorage(),
-        super(const Locale('ar')) {
+    : _storage = storage ?? const FlutterSecureStorage(),
+      super(const Locale('ar')) {
     _loadSavedLocale();
   }
 
@@ -31,20 +31,26 @@ class LocaleCubit extends Cubit<Locale> {
   }
 
   Future<void> setLocale(Locale newLocale) async {
-    if (newLocale.languageCode != 'en' && newLocale.languageCode != 'ar') return;
+    if (newLocale.languageCode != 'en' && newLocale.languageCode != 'ar')
+      return;
     if (state == newLocale) return;
 
     emit(newLocale);
     try {
       await _storage.write(key: _storageKey, value: newLocale.languageCode);
-      AppLogger.i('LocaleCubit', 'Saved locale changed to: ${newLocale.languageCode}');
+      AppLogger.i(
+        'LocaleCubit',
+        'Saved locale changed to: ${newLocale.languageCode}',
+      );
     } catch (e) {
       AppLogger.w('LocaleCubit', 'Failed to save locale to storage', data: e);
     }
   }
 
   Future<void> toggleLocale() async {
-    final nextLocale = state.languageCode == 'en' ? const Locale('ar') : const Locale('en');
+    final nextLocale = state.languageCode == 'en'
+        ? const Locale('ar')
+        : const Locale('en');
     await setLocale(nextLocale);
   }
 

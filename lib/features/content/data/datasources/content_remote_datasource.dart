@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:dio/dio.dart' as dio;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/network/supabase_service.dart';
 import '../models/content_model.dart';
@@ -100,6 +101,19 @@ abstract interface class ContentRemoteDataSource {
     required String contentId,
     String? reason,
   });
+
+  /// Toggles visibility (draft vs published) of a lesson within a specific group
+  Future<void> toggleLessonVisibility({
+    required String contentId,
+    required String groupId,
+    required bool isPublished,
+  });
+
+  /// Bulk toggles visibility of all lessons in a specific group
+  Future<void> toggleAllLessonsVisibility({
+    required String groupId,
+    required bool isPublished,
+  });
 }
 
 class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
@@ -120,7 +134,7 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     final junctionRes = await _safeClient
         .from('content_groups')
         .select(
-          'content_id, file_id, associated_exam_id, prerequisite_exam_id, sort_order, custom_title, '
+          'content_id, file_id, associated_exam_id, prerequisite_exam_id, sort_order, custom_title, is_published, '
           'file:files!content_groups_file_id_fkey(*), '
           'associated_exam:exams!content_groups_associated_exam_id_fkey(id, title), '
           'prerequisite_exam:exams!content_groups_prerequisite_exam_id_fkey(id, title, passing_score)',
@@ -141,7 +155,7 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
         .from('content')
         .select(
           '*, files(*), videos(id, status, provider_video_id, provider), '
-          'content_groups(group_id, groups(name)), '
+          'content_groups(group_id, is_published, groups(name)), '
           'associated_exam:exams!content_associated_exam_id_fkey(id, title), '
           'prerequisite_exam:exams!content_prerequisite_exam_id_fkey(id, title, passing_score)',
         );
@@ -211,17 +225,22 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
           title = cfg['custom_title'].toString().trim();
         }
 
-        models[i] =
-            m.copyWith(
-                  title: title,
-                  file: customFile,
-                  associatedExamId: assocExamId,
-                  associatedExamTitle: assocExamTitle,
-                  prerequisiteExamId: prereqExamId,
-                  prerequisiteExamTitle: prereqExamTitle,
-                  prerequisitePassingScore: prereqPassingScore,
-                  sortOrder: sortOrder,
-                );
+        bool isPublishedInGroup = m.isPublishedInGroup;
+        if (cfg['is_published'] != null) {
+          isPublishedInGroup = cfg['is_published'] == true;
+        }
+
+        models[i] = m.copyWith(
+          title: title,
+          file: customFile,
+          associatedExamId: assocExamId,
+          associatedExamTitle: assocExamTitle,
+          prerequisiteExamId: prereqExamId,
+          prerequisiteExamTitle: prereqExamTitle,
+          prerequisitePassingScore: prereqPassingScore,
+          sortOrder: sortOrder,
+          isPublishedInGroup: isPublishedInGroup,
+        );
       }
     }
 
@@ -318,13 +337,12 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
             }
           }
 
-          models[i] =
-              models[i].copyWith(
-                    isLocked: locked,
-                    isVideoCompleted: isVideoCompleted,
-                    videoProgressPercentage: progressPct,
-                    isExamPassed: isExamPassed,
-                  );
+          models[i] = models[i].copyWith(
+            isLocked: locked,
+            isVideoCompleted: isVideoCompleted,
+            videoProgressPercentage: progressPct,
+            isExamPassed: isExamPassed,
+          );
 
           previousLessonExamId = item.associatedExamId;
           previousLessonVideoId = item.videoId;
@@ -402,6 +420,60 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     );
   }
 
+  Future<({String path, String provider})> _uploadMaterialFile({
+    required String fileName,
+    required String mimeType,
+    required List<int> fileBytes,
+    required String defaultStoragePath,
+  }) async {
+    try {
+      final r2Res = await _safeClient.functions.invoke(
+        'r2-storage',
+        body: {
+          'action': 'get-upload-url',
+          'file_name': fileName,
+          'content_type': mimeType,
+        },
+      );
+
+      if (r2Res.status == 200 && r2Res.data is Map<String, dynamic>) {
+        final data = r2Res.data as Map<String, dynamic>;
+        final uploadUrl = data['upload_url'] as String?;
+        final r2Path = data['storage_path'] as String?;
+
+        if (uploadUrl != null && r2Path != null) {
+          final dioClient = dio.Dio();
+          final uploadRes = await dioClient.put<dynamic>(
+            uploadUrl,
+            data: Stream.fromIterable([fileBytes]),
+            options: dio.Options(
+              headers: {
+                dio.Headers.contentTypeHeader: mimeType,
+                dio.Headers.contentLengthHeader: fileBytes.length,
+              },
+            ),
+          );
+
+          if (uploadRes.statusCode == 200 || uploadRes.statusCode == 201) {
+            return (path: r2Path, provider: 'r2');
+          }
+        }
+      }
+    } catch (_) {
+      // In case R2 is not configured or Edge Function is unavailable, fallback to Supabase
+    }
+
+    // Fallback to Supabase Private Storage 'group-content'
+    await _safeClient.storage
+        .from('group-content')
+        .uploadBinary(
+          defaultStoragePath,
+          fileBytes is Uint8List ? fileBytes : Uint8List.fromList(fileBytes),
+          fileOptions: FileOptions(contentType: mimeType, upsert: true),
+        );
+    return (path: defaultStoragePath, provider: 'supabase');
+  }
+
   Future<ContentModel> _createContentInternal({
     String? groupId,
     required String title,
@@ -462,23 +534,28 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
 
     FileAttachmentModel? attachedFile;
     if (storagePath != null && fileName != null && mimeType != null) {
+      String finalStoragePath = storagePath;
+      String storageProvider = 'supabase';
+
       if (fileBytes != null && fileBytes.isNotEmpty) {
-        await _safeClient.storage
-            .from('group-content')
-            .uploadBinary(
-              storagePath,
-              Uint8List.fromList(fileBytes),
-              fileOptions: FileOptions(contentType: mimeType, upsert: true),
-            );
+        final uploadResult = await _uploadMaterialFile(
+          fileName: fileName,
+          mimeType: mimeType,
+          fileBytes: fileBytes,
+          defaultStoragePath: storagePath,
+        );
+        finalStoragePath = uploadResult.path;
+        storageProvider = uploadResult.provider;
       }
 
       final filePayload = {
         'tenant_id': tenantId,
         'content_id': contentId,
-        'storage_path': storagePath,
+        'storage_path': finalStoragePath,
         'file_name': fileName,
         'mime_type': mimeType,
         'file_size': fileSize ?? (fileBytes?.length ?? 0),
+        'storage_provider': storageProvider,
         'created_at': now,
       };
 
@@ -555,14 +632,18 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
         .single();
 
     if (storagePath != null && fileName != null && mimeType != null) {
+      String finalStoragePath = storagePath;
+      String storageProvider = 'supabase';
+
       if (fileBytes != null && fileBytes.isNotEmpty) {
-        await _safeClient.storage
-            .from('group-content')
-            .uploadBinary(
-              storagePath,
-              Uint8List.fromList(fileBytes),
-              fileOptions: FileOptions(contentType: mimeType, upsert: true),
-            );
+        final uploadResult = await _uploadMaterialFile(
+          fileName: fileName,
+          mimeType: mimeType,
+          fileBytes: fileBytes,
+          defaultStoragePath: storagePath,
+        );
+        finalStoragePath = uploadResult.path;
+        storageProvider = uploadResult.provider;
       }
 
       final tenantId = res['tenant_id'] as String;
@@ -578,10 +659,11 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
         await _safeClient
             .from('files')
             .update({
-              'storage_path': storagePath,
+              'storage_path': finalStoragePath,
               'file_name': fileName,
               'mime_type': mimeType,
               'file_size': fileSize ?? (fileBytes?.length ?? 0),
+              'storage_provider': storageProvider,
               'created_at': now,
             })
             .eq('id', existingId);
@@ -589,10 +671,11 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
         await _safeClient.from('files').insert({
           'tenant_id': tenantId,
           'content_id': contentId,
-          'storage_path': storagePath,
+          'storage_path': finalStoragePath,
           'file_name': fileName,
           'mime_type': mimeType,
           'file_size': fileSize ?? (fileBytes?.length ?? 0),
+          'storage_provider': storageProvider,
           'created_at': now,
         });
       }
@@ -653,6 +736,25 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     required String storagePath,
     int expiresInSeconds = 900,
   }) async {
+    if (storagePath.startsWith('materials/')) {
+      try {
+        final r2Res = await _safeClient.functions.invoke(
+          'r2-storage',
+          body: {'action': 'get-download-url', 'storage_path': storagePath},
+        );
+
+        if (r2Res.status == 200 && r2Res.data is Map<String, dynamic>) {
+          final data = r2Res.data as Map<String, dynamic>;
+          final downloadUrl = data['download_url'] as String?;
+          if (downloadUrl != null && downloadUrl.isNotEmpty) {
+            return downloadUrl;
+          }
+        }
+      } catch (_) {
+        // Fallback to Supabase Storage if invocation fails
+      }
+    }
+
     final signedUrl = await _safeClient.storage
         .from('group-content')
         .createSignedUrl(storagePath, expiresInSeconds);
@@ -745,6 +847,33 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
         'p_content_id': contentId,
         if (reason != null && reason.isNotEmpty) 'p_reason': reason,
       },
+    );
+  }
+
+  @override
+  Future<void> toggleLessonVisibility({
+    required String contentId,
+    required String groupId,
+    required bool isPublished,
+  }) async {
+    await _safeClient.rpc<void>(
+      'toggle_lesson_group_visibility',
+      params: {
+        'p_content_id': contentId,
+        'p_group_id': groupId,
+        'p_is_published': isPublished,
+      },
+    );
+  }
+
+  @override
+  Future<void> toggleAllLessonsVisibility({
+    required String groupId,
+    required bool isPublished,
+  }) async {
+    await _safeClient.rpc<void>(
+      'toggle_group_all_content_visibility',
+      params: {'p_group_id': groupId, 'p_is_published': isPublished},
     );
   }
 }

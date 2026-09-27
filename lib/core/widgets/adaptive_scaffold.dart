@@ -33,10 +33,7 @@ class AdaptiveSidebarSection {
   final String? title;
   final List<AdaptiveDestination> destinations;
 
-  const AdaptiveSidebarSection({
-    this.title,
-    required this.destinations,
-  });
+  const AdaptiveSidebarSection({this.title, required this.destinations});
 }
 
 /// Adaptive scaffold delivering:
@@ -68,9 +65,9 @@ class AdaptiveScaffold extends StatelessWidget {
     this.floatingActionButton,
     this.actions,
   }) : assert(
-          destinations != null || sections != null,
-          'Either destinations or sections must be provided',
-        );
+         destinations != null || sections != null,
+         'Either destinations or sections must be provided',
+       );
 
   /// Flat list of all destinations across all sections.
   List<AdaptiveDestination> get resolvedDestinations {
@@ -118,9 +115,7 @@ class AdaptiveScaffold extends StatelessWidget {
       elevation: 0,
       scrolledUnderElevation: 0,
       titleSpacing: 0,
-      shape: const Border(
-        bottom: BorderSide(color: _sidebarBorder, width: 1),
-      ),
+      shape: const Border(bottom: BorderSide(color: _sidebarBorder, width: 1)),
       leading: Builder(
         builder: (ctx) => IconButton(
           icon: const Icon(Icons.menu_rounded, color: Colors.white, size: 24),
@@ -165,7 +160,8 @@ class AdaptiveScaffold extends StatelessWidget {
               child: Row(
                 children: [
                   Expanded(
-                    child: sidebarHeader ??
+                    child:
+                        sidebarHeader ??
                         Text(
                           AppLocalizations.of(context)?.appTitle ?? 'EduSaaS',
                           style: const TextStyle(
@@ -177,8 +173,14 @@ class AdaptiveScaffold extends StatelessWidget {
                   ),
                   Builder(
                     builder: (ctx) => IconButton(
-                      icon: const Icon(Icons.close_rounded, color: Color(0xFF94A3B8), size: 22),
-                      tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+                      icon: const Icon(
+                        Icons.close_rounded,
+                        color: Color(0xFF94A3B8),
+                        size: 22,
+                      ),
+                      tooltip: MaterialLocalizations.of(
+                        context,
+                      ).closeButtonTooltip,
                       onPressed: () => Navigator.of(ctx).pop(),
                     ),
                   ),
@@ -186,9 +188,7 @@ class AdaptiveScaffold extends StatelessWidget {
               ),
             ),
             const Divider(height: 1, color: _sidebarDivider),
-            Expanded(
-              child: _buildCategorizedItems(context, isDrawer: true),
-            ),
+            Expanded(child: _buildCategorizedItems(context, isDrawer: true)),
             if (sidebarFooter != null) ...[
               const Divider(height: 1, color: _sidebarDivider),
               Padding(
@@ -211,14 +211,24 @@ class AdaptiveScaffold extends StatelessWidget {
       body: Row(
         children: [
           NavigationRail(
-            selectedIndex: currentIndex.clamp(0, all.isEmpty ? 0 : all.length - 1),
+            selectedIndex: currentIndex.clamp(
+              0,
+              all.isEmpty ? 0 : all.length - 1,
+            ),
             onDestinationSelected: onNavigationIndexChanged,
             labelType: NavigationRailLabelType.all,
             backgroundColor: _sidebarBg,
             unselectedIconTheme: const IconThemeData(color: Color(0xFF94A3B8)),
             selectedIconTheme: const IconThemeData(color: Color(0xFF38BDF8)),
-            unselectedLabelTextStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
-            selectedLabelTextStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11),
+            unselectedLabelTextStyle: const TextStyle(
+              color: Color(0xFF94A3B8),
+              fontSize: 11,
+            ),
+            selectedLabelTextStyle: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 11,
+            ),
             indicatorColor: const Color(0xFF1E293B),
             leading: sidebarHeader != null
                 ? SizedBox(
@@ -231,10 +241,7 @@ class AdaptiveScaffold extends StatelessWidget {
                       child: Center(
                         child: FittedBox(
                           fit: BoxFit.scaleDown,
-                          child: SizedBox(
-                            width: 256,
-                            child: sidebarHeader,
-                          ),
+                          child: SizedBox(width: 256, child: sidebarHeader),
                         ),
                       ),
                     ),
@@ -251,10 +258,7 @@ class AdaptiveScaffold extends StatelessWidget {
                           child: Center(
                             child: FittedBox(
                               fit: BoxFit.scaleDown,
-                              child: SizedBox(
-                                width: 256,
-                                child: sidebarFooter,
-                              ),
+                              child: SizedBox(width: 256, child: sidebarFooter),
                             ),
                           ),
                         ),
@@ -273,7 +277,10 @@ class AdaptiveScaffold extends StatelessWidget {
                   ],
                 );
               } else if (d.badgeCount != null && d.badgeCount! > 0) {
-                iconWidget = Badge(label: Text('${d.badgeCount}'), child: iconWidget);
+                iconWidget = Badge(
+                  label: Text('${d.badgeCount}'),
+                  child: iconWidget,
+                );
               }
 
               Widget selectedIconWidget = Icon(d.selectedIcon ?? d.icon);
@@ -286,7 +293,10 @@ class AdaptiveScaffold extends StatelessWidget {
                   ],
                 );
               } else if (d.badgeCount != null && d.badgeCount! > 0) {
-                selectedIconWidget = Badge(label: Text('${d.badgeCount}'), child: selectedIconWidget);
+                selectedIconWidget = Badge(
+                  label: Text('${d.badgeCount}'),
+                  child: selectedIconWidget,
+                );
               }
 
               return NavigationRailDestination(
@@ -297,9 +307,7 @@ class AdaptiveScaffold extends StatelessWidget {
             }).toList(),
           ),
           const VerticalDivider(width: 1, thickness: 1, color: _sidebarBorder),
-          Expanded(
-            child: _buildWorkspaceBody(context),
-          ),
+          Expanded(child: _buildWorkspaceBody(context)),
         ],
       ),
     );
@@ -347,9 +355,7 @@ class AdaptiveScaffold extends StatelessWidget {
               ],
             ),
           ),
-          Expanded(
-            child: _buildWorkspaceBody(context),
-          ),
+          Expanded(child: _buildWorkspaceBody(context)),
         ],
       ),
     );
@@ -366,16 +372,19 @@ class AdaptiveScaffold extends StatelessWidget {
         showCartesianAxes: true,
         showFormulas: true,
         child: Theme(
-          data: Theme.of(context).copyWith(
-            scaffoldBackgroundColor: Colors.transparent,
-          ),
+          data: Theme.of(
+            context,
+          ).copyWith(scaffoldBackgroundColor: Colors.transparent),
           child: body,
         ),
       ),
     );
   }
 
-  Widget _buildCategorizedItems(BuildContext context, {required bool isDrawer}) {
+  Widget _buildCategorizedItems(
+    BuildContext context, {
+    required bool isDrawer,
+  }) {
     if (sections != null && sections!.isNotEmpty) {
       int globalIndex = 0;
       final List<Widget> widgets = [];
@@ -479,10 +488,10 @@ class _DesktopNavTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bgColor = isSelected
-        ? const Color(0xFF1E293B)
-        : Colors.transparent;
-    final fgColor = isSelected ? const Color(0xFF38BDF8) : const Color(0xFFCBD5E1);
+    final bgColor = isSelected ? const Color(0xFF1E293B) : Colors.transparent;
+    final fgColor = isSelected
+        ? const Color(0xFF38BDF8)
+        : const Color(0xFFCBD5E1);
     const textColor = Colors.white;
     const inactiveTextColor = Color(0xFFE2E8F0);
 
@@ -509,7 +518,10 @@ class _DesktopNavTile extends StatelessWidget {
             color: bgColor,
             borderRadius: BorderRadius.circular(10),
             border: isSelected
-                ? Border.all(color: const Color(0xFF38BDF8).withValues(alpha: 0.45), width: 1)
+                ? Border.all(
+                    color: const Color(0xFF38BDF8).withValues(alpha: 0.45),
+                    width: 1,
+                  )
                 : null,
             boxShadow: isSelected
                 ? [
@@ -556,7 +568,9 @@ class _DesktopNavTile extends StatelessWidget {
                       item.label,
                       style: TextStyle(
                         color: isSelected ? textColor : inactiveTextColor,
-                        fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                        fontWeight: isSelected
+                            ? FontWeight.w800
+                            : FontWeight.w600,
                         fontSize: 14.5,
                       ),
                       maxLines: 1,
@@ -584,7 +598,10 @@ class _DesktopNavTile extends StatelessWidget {
                 item.badge!
               else if (item.badgeCount != null && item.badgeCount! > 0)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 7,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.error,
                     borderRadius: BorderRadius.circular(10),

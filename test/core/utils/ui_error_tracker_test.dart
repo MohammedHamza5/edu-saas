@@ -58,7 +58,9 @@ void main() {
       expect(report.widgetTreePath, contains('StudentExamsPage'));
     });
 
-    testWidgets('AppUiErrorWidget renders developer diagnostic card in test', (tester) async {
+    testWidgets('AppUiErrorWidget renders developer diagnostic card in test', (
+      tester,
+    ) async {
       final details = FlutterErrorDetails(
         exception: Exception('Division by zero in formula calculation'),
         stack: StackTrace.fromString(
@@ -69,9 +71,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: AppUiErrorWidget(details: details),
-          ),
+          home: Scaffold(body: AppUiErrorWidget(details: details)),
         ),
       );
 

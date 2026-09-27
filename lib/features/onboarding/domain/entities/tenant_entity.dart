@@ -26,13 +26,13 @@ class TenantEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        name,
-        logoUrl,
-        email,
-        phone,
-        status,
-        createdAt,
-        updatedAt,
-      ];
+    id,
+    name,
+    logoUrl,
+    email,
+    phone,
+    status,
+    createdAt,
+    updatedAt,
+  ];
 }

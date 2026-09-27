@@ -57,7 +57,8 @@ class AssignmentModel extends AssignmentEntity {
       mySubmission = AssignmentSubmissionModel.fromJson(
         json['my_submission'] as Map<String, dynamic>,
       );
-    } else if (json['assignment_submissions'] is List && (json['assignment_submissions'] as List).isNotEmpty) {
+    } else if (json['assignment_submissions'] is List &&
+        (json['assignment_submissions'] as List).isNotEmpty) {
       final first = (json['assignment_submissions'] as List).first;
       if (first is Map<String, dynamic>) {
         mySubmission = AssignmentSubmissionModel.fromJson(first);
@@ -72,7 +73,9 @@ class AssignmentModel extends AssignmentEntity {
       groupName: groupName,
       title: title.isNotEmpty ? title : 'واجب بدون عنوان',
       instructions: json['instructions'] as String?,
-      dueAt: json['due_at'] != null ? DateTime.parse(json['due_at'] as String) : null,
+      dueAt: json['due_at'] != null
+          ? DateTime.parse(json['due_at'] as String)
+          : null,
       allowLateSubmission: json['allow_late_submission'] as bool? ?? false,
       maxScore: (json['max_score'] as num?)?.toInt() ?? 100,
       createdAt: DateTime.parse(json['created_at'] as String),

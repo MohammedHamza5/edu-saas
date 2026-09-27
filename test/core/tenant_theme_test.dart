@@ -41,17 +41,20 @@ void main() {
       expect(branding.primaryLight, isNot(equals(customPrimary)));
     });
 
-    test('TenantRegistry resolves registered tenants and falls back to default', () {
-      final defaultTenant = TenantRegistry.resolve('default');
-      expect(defaultTenant.brandName, 'منصة د. أنطونيوس أشرف');
-      expect(defaultTenant.teacherName, 'د. أنطونيوس أشرف');
+    test(
+      'TenantRegistry resolves registered tenants and falls back to default',
+      () {
+        final defaultTenant = TenantRegistry.resolve('default');
+        expect(defaultTenant.brandName, 'منصة د. أنطونيوس أشرف');
+        expect(defaultTenant.teacherName, 'د. أنطونيوس أشرف');
 
-      final unknownTenant = TenantRegistry.resolve('unknown-uuid-123');
-      expect(unknownTenant.brandName, 'منصة د. أنطونيوس أشرف');
+        final unknownTenant = TenantRegistry.resolve('unknown-uuid-123');
+        expect(unknownTenant.brandName, 'منصة د. أنطونيوس أشرف');
 
-      final teacherOne = TenantRegistry.resolve('teacher-1-slot');
-      expect(teacherOne.teacherName, 'د. أنطونيوس أشرف');
-    });
+        final teacherOne = TenantRegistry.resolve('teacher-1-slot');
+        expect(teacherOne.teacherName, 'د. أنطونيوس أشرف');
+      },
+    );
 
     test('AppTheme.fromBranding correctly embeds dynamic MathTokens', () {
       const customPrimary = Color(0xFF7C3AED); // Royal Purple

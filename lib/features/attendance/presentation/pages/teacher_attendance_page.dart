@@ -46,14 +46,14 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
   String _searchQuery = '';
   AttendanceStatus? _statusFilter;
 
-
   @override
   void initState() {
     super.initState();
     _attendanceCubit =
         widget.attendanceCubit ?? InjectionContainer.createAttendanceCubit();
 
-    final initialId = widget.initialGroupId ?? TeacherGroupFilterBar.lastSelectedGroupId;
+    final initialId =
+        widget.initialGroupId ?? TeacherGroupFilterBar.lastSelectedGroupId;
     final groupsState = context.read<GroupsCubit>().state;
     if (initialId != null) {
       _selectedGroupId = initialId;
@@ -175,7 +175,10 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
   @override
   Widget build(BuildContext context) {
     final locale = Localizations.localeOf(context).languageCode;
-    final dateStr = DateFormat('yyyy/MM/dd - EEEE', locale).format(_selectedDate);
+    final dateStr = DateFormat(
+      'yyyy/MM/dd - EEEE',
+      locale,
+    ).format(_selectedDate);
 
     return BlocProvider.value(
       value: _attendanceCubit,
@@ -194,7 +197,9 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
                 if (state is TeacherAttendanceLoaded && state.saveSuccess) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(state.message ?? context.l10n.attendanceSavedSuccess),
+                      content: Text(
+                        state.message ?? context.l10n.attendanceSavedSuccess,
+                      ),
                       backgroundColor: AppColors.success,
                       behavior: SnackBarBehavior.floating,
                     ),
@@ -225,7 +230,10 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
 
                         // Main Content
                         Expanded(
-                          child: _buildAttendanceContent(context, attendanceState),
+                          child: _buildAttendanceContent(
+                            context,
+                            attendanceState,
+                          ),
                         ),
                       ],
                     ),
@@ -238,14 +246,23 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
               return BlocConsumer<GroupsCubit, GroupsState>(
                 bloc: groupsCubit,
                 listener: (context, groupsState) {
-                  if (groupsState is GroupsLoaded && groupsState.groups.isNotEmpty) {
+                  if (groupsState is GroupsLoaded &&
+                      groupsState.groups.isNotEmpty) {
                     if (_selectedGroupId == null ||
-                        !groupsState.groups.any((g) => g.id == _selectedGroupId)) {
-                      final targetGroup = (widget.initialGroupId != null &&
-                              groupsState.groups.any((g) => g.id == widget.initialGroupId))
-                          ? groupsState.groups.firstWhere((g) => g.id == widget.initialGroupId)
+                        !groupsState.groups.any(
+                          (g) => g.id == _selectedGroupId,
+                        )) {
+                      final targetGroup =
+                          (widget.initialGroupId != null &&
+                              groupsState.groups.any(
+                                (g) => g.id == widget.initialGroupId,
+                              ))
+                          ? groupsState.groups.firstWhere(
+                              (g) => g.id == widget.initialGroupId,
+                            )
                           : groupsState.groups.first;
-                      TeacherGroupFilterBar.lastSelectedGroupId = targetGroup.id;
+                      TeacherGroupFilterBar.lastSelectedGroupId =
+                          targetGroup.id;
                       setState(() {
                         _selectedGroupId = targetGroup.id;
                       });
@@ -254,7 +271,8 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
                   }
                 },
                 builder: (context, groupsState) {
-                  if (groupsState is GroupsLoaded && groupsState.groups.isEmpty) {
+                  if (groupsState is GroupsLoaded &&
+                      groupsState.groups.isEmpty) {
                     return Center(
                       child: ResponsiveContainer(
                         maxWidth: ResponsiveBreakpoints.maxContentWidth,
@@ -266,15 +284,25 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
                                 child: Padding(
                                   padding: const EdgeInsets.all(AppSpacing.s24),
                                   child: Container(
-                                    padding: const EdgeInsets.all(AppSpacing.s32),
-                                    constraints: const BoxConstraints(maxWidth: 480),
+                                    padding: const EdgeInsets.all(
+                                      AppSpacing.s32,
+                                    ),
+                                    constraints: const BoxConstraints(
+                                      maxWidth: 480,
+                                    ),
                                     decoration: BoxDecoration(
                                       color: AppColors.surface,
-                                      borderRadius: BorderRadius.circular(AppSpacing.radiusLarge),
-                                      border: Border.all(color: AppColors.border),
+                                      borderRadius: BorderRadius.circular(
+                                        AppSpacing.radiusLarge,
+                                      ),
+                                      border: Border.all(
+                                        color: AppColors.border,
+                                      ),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: Colors.black.withValues(alpha: 0.03),
+                                          color: Colors.black.withValues(
+                                            alpha: 0.03,
+                                          ),
                                           blurRadius: 10,
                                           offset: const Offset(0, 4),
                                         ),
@@ -284,9 +312,13 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Container(
-                                          padding: const EdgeInsets.all(AppSpacing.s16),
+                                          padding: const EdgeInsets.all(
+                                            AppSpacing.s16,
+                                          ),
                                           decoration: BoxDecoration(
-                                            color: AppColors.primary.withValues(alpha: 0.1),
+                                            color: AppColors.primary.withValues(
+                                              alpha: 0.1,
+                                            ),
                                             shape: BoxShape.circle,
                                           ),
                                           child: const Icon(
@@ -317,9 +349,15 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
                                         ),
                                         const SizedBox(height: AppSpacing.s24),
                                         ElevatedButton.icon(
-                                          onPressed: () => CreateGroupDialog.show(context),
-                                          icon: const Icon(Icons.add_rounded, size: 20),
-                                          label: Text(context.l10n.createGroupAction),
+                                          onPressed: () =>
+                                              CreateGroupDialog.show(context),
+                                          icon: const Icon(
+                                            Icons.add_rounded,
+                                            size: 20,
+                                          ),
+                                          label: Text(
+                                            context.l10n.createGroupAction,
+                                          ),
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: AppColors.primary,
                                             foregroundColor: Colors.white,
@@ -328,7 +366,10 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
                                               vertical: AppSpacing.s12,
                                             ),
                                             shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                    AppSpacing.radiusMedium,
+                                                  ),
                                             ),
                                           ),
                                         ),
@@ -366,9 +407,7 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
       ),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        border: const Border(
-          bottom: BorderSide(color: AppColors.border),
-        ),
+        border: const Border(bottom: BorderSide(color: AppColors.border)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
@@ -522,7 +561,10 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
           child: Center(
             child: Text(
               context.l10n.loadingGroups,
-              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+              style: const TextStyle(
+                fontSize: 12,
+                color: AppColors.textSecondary,
+              ),
             ),
           ),
         );
@@ -594,7 +636,10 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
                         ],
                       ),
                     ),
-                    const Icon(Icons.arrow_drop_down_rounded, color: AppColors.textSecondary),
+                    const Icon(
+                      Icons.arrow_drop_down_rounded,
+                      color: AppColors.textSecondary,
+                    ),
                   ],
                 ),
               ),
@@ -716,7 +761,9 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
                 AttendanceStatCard(
                   title: context.l10n.attendedLectureTitle,
                   value: '${stats.presentCount}',
-                  subtitle: context.l10n.completedWatchSubtitle(stats.totalSessions),
+                  subtitle: context.l10n.completedWatchSubtitle(
+                    stats.totalSessions,
+                  ),
                   color: AppColors.success,
                   icon: Icons.check_circle_rounded,
                 ),
@@ -783,7 +830,9 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
                     scrollDirection: Axis.horizontal,
                     children: [
                       FilterChip(
-                        label: Text(context.l10n.filterAllCount(students.length)),
+                        label: Text(
+                          context.l10n.filterAllCount(students.length),
+                        ),
                         selected: _statusFilter == null,
                         selectedColor: AppColors.primaryLight.withValues(
                           alpha: 0.25,
@@ -802,7 +851,9 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
                       ),
                       const SizedBox(width: AppSpacing.s8),
                       FilterChip(
-                        label: Text(context.l10n.filterPresentCount(stats.presentCount)),
+                        label: Text(
+                          context.l10n.filterPresentCount(stats.presentCount),
+                        ),
                         selected: _statusFilter == AttendanceStatus.present,
                         selectedColor: AppColors.success.withValues(alpha: 0.2),
                         checkmarkColor: AppColors.success,
@@ -824,7 +875,9 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
                       ),
                       const SizedBox(width: AppSpacing.s8),
                       FilterChip(
-                        label: Text(context.l10n.filterLateCount(stats.lateCount)),
+                        label: Text(
+                          context.l10n.filterLateCount(stats.lateCount),
+                        ),
                         selected: _statusFilter == AttendanceStatus.late,
                         selectedColor: AppColors.warning.withValues(alpha: 0.2),
                         checkmarkColor: AppColors.warning,
@@ -846,7 +899,9 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
                       ),
                       const SizedBox(width: AppSpacing.s8),
                       FilterChip(
-                        label: Text(context.l10n.filterAbsentCount(stats.absentCount)),
+                        label: Text(
+                          context.l10n.filterAbsentCount(stats.absentCount),
+                        ),
                         selected: _statusFilter == AttendanceStatus.absent,
                         selectedColor: AppColors.error.withValues(alpha: 0.2),
                         checkmarkColor: AppColors.error,

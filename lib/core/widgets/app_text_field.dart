@@ -56,7 +56,9 @@ class _AppTextFieldState extends State<AppTextField> {
       effectiveSuffixIcon = IconButton(
         mouseCursor: SystemMouseCursors.click,
         icon: Icon(
-          _obscureText ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+          _obscureText
+              ? Icons.visibility_outlined
+              : Icons.visibility_off_outlined,
           color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
           size: 20,
         ),
@@ -68,7 +70,8 @@ class _AppTextFieldState extends State<AppTextField> {
       );
     }
 
-    final textColor = widget.style?.color ??
+    final textColor =
+        widget.style?.color ??
         (Theme.of(context).brightness == Brightness.dark
             ? Colors.white
             : AppColors.textPrimary);

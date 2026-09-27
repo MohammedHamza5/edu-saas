@@ -3,10 +3,7 @@ import 'content_entity.dart';
 import 'file_attachment_entity.dart';
 
 /// إمكانية وصول الطالب للدرس
-enum LessonAccess {
-  locked,
-  unlocked,
-}
+enum LessonAccess { locked, unlocked }
 
 /// حالة تقدم الطالب في الدرس
 enum LessonProgress {
@@ -19,14 +16,10 @@ enum LessonProgress {
 }
 
 /// مصدر فتح الدرس
-enum UnlockSource {
-  firstLesson,
-  prerequisiteCompletion,
-  manualOverride,
-}
+enum UnlockSource { firstLesson, prerequisiteCompletion, manualOverride }
 
 /// تمثيل درس واحد معيَّن لمجموعة محددة (صف من content_groups)
-/// 
+///
 /// Video مستقل + Group Settings + حالة الطالب = LessonAssignment
 class LessonAssignmentEntity extends Equatable {
   /// معرّف صف content_groups
@@ -95,6 +88,9 @@ class LessonAssignmentEntity extends Equatable {
   /// هل تم فتحه يدوياً من المعلم
   final bool isManuallyUnlocked;
 
+  /// هل المحاضرة منشورة للطلاب في هذه المجموعة أم مسودة مخفية
+  final bool isPublished;
+
   const LessonAssignmentEntity({
     required this.contentGroupId,
     required this.contentId,
@@ -121,13 +117,16 @@ class LessonAssignmentEntity extends Equatable {
     this.examBestScore,
     this.examPassed = false,
     this.isManuallyUnlocked = false,
+    this.isPublished = true,
   });
 
+  bool get isDraft => !isPublished;
+
   /// هل أكمل الطالب 90% فعلياً؟
-  bool get hasWatched90Percent =>
-      videoDurationSeconds > 0
-          ? furthestLegitimatePositionSeconds >= (videoDurationSeconds * 0.90).floor()
-          : videoCompleted;
+  bool get hasWatched90Percent => videoDurationSeconds > 0
+      ? furthestLegitimatePositionSeconds >=
+            (videoDurationSeconds * 0.90).floor()
+      : videoCompleted;
 
   /// هل يوجد PDF مرتبط بهذا الدرس في هذه المجموعة؟
   bool get hasPdf => pdfFileId != null && pdfFileName != null;
@@ -152,7 +151,8 @@ class LessonAssignmentEntity extends Equatable {
       title: title,
       description: description,
       type: type,
-      status: ContentStatus.published,
+      status: isPublished ? ContentStatus.published : ContentStatus.draft,
+      isPublishedInGroup: isPublished,
       sortOrder: sortOrder,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
@@ -205,6 +205,7 @@ class LessonAssignmentEntity extends Equatable {
     double? examBestScore,
     bool? examPassed,
     bool? isManuallyUnlocked,
+    bool? isPublished,
   }) {
     return LessonAssignmentEntity(
       contentGroupId: contentGroupId ?? this.contentGroupId,
@@ -230,12 +231,13 @@ class LessonAssignmentEntity extends Equatable {
       lastPositionSeconds: lastPositionSeconds ?? this.lastPositionSeconds,
       furthestLegitimatePositionSeconds:
           furthestLegitimatePositionSeconds ??
-              this.furthestLegitimatePositionSeconds,
+          this.furthestLegitimatePositionSeconds,
       videoDurationSeconds: videoDurationSeconds ?? this.videoDurationSeconds,
       videoCompleted: videoCompleted ?? this.videoCompleted,
       examBestScore: examBestScore ?? this.examBestScore,
       examPassed: examPassed ?? this.examPassed,
       isManuallyUnlocked: isManuallyUnlocked ?? this.isManuallyUnlocked,
+      isPublished: isPublished ?? this.isPublished,
     );
   }
 
@@ -264,14 +266,17 @@ class LessonAssignmentEntity extends Equatable {
       unlockSource: _parseUnlockSource(json['unlock_source'] as String?),
       watchedCoveragePercent:
           (json['watched_coverage_percent'] as num?)?.toDouble() ?? 0.0,
-      lastPositionSeconds: (json['last_position_seconds'] as num?)?.toInt() ?? 0,
+      lastPositionSeconds:
+          (json['last_position_seconds'] as num?)?.toInt() ?? 0,
       furthestLegitimatePositionSeconds:
           (json['furthest_legitimate_position'] as num?)?.toInt() ?? 0,
-      videoDurationSeconds: (json['video_duration_seconds'] as num?)?.toInt() ?? 0,
+      videoDurationSeconds:
+          (json['video_duration_seconds'] as num?)?.toInt() ?? 0,
       videoCompleted: json['video_completed'] as bool? ?? false,
       examBestScore: (json['exam_best_score'] as num?)?.toDouble(),
       examPassed: json['exam_passed'] as bool? ?? false,
       isManuallyUnlocked: json['is_manually_unlocked'] as bool? ?? false,
+      isPublished: json['is_published'] as bool? ?? true,
     );
   }
 
@@ -313,30 +318,31 @@ class LessonAssignmentEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        contentGroupId,
-        contentId,
-        groupId,
-        title,
-        description,
-        type,
-        sortOrder,
-        pdfFileId,
-        pdfFileName,
-        pdfStoragePath,
-        lessonExamId,
-        lessonExamTitle,
-        effectivePassingScore,
-        prerequisiteExamId,
-        access,
-        progress,
-        unlockSource,
-        watchedCoveragePercent,
-        lastPositionSeconds,
-        furthestLegitimatePositionSeconds,
-        videoDurationSeconds,
-        videoCompleted,
-        examBestScore,
-        examPassed,
-        isManuallyUnlocked,
-      ];
+    contentGroupId,
+    contentId,
+    groupId,
+    title,
+    description,
+    type,
+    sortOrder,
+    pdfFileId,
+    pdfFileName,
+    pdfStoragePath,
+    lessonExamId,
+    lessonExamTitle,
+    effectivePassingScore,
+    prerequisiteExamId,
+    access,
+    progress,
+    unlockSource,
+    watchedCoveragePercent,
+    lastPositionSeconds,
+    furthestLegitimatePositionSeconds,
+    videoDurationSeconds,
+    videoCompleted,
+    examBestScore,
+    examPassed,
+    isManuallyUnlocked,
+    isPublished,
+  ];
 }

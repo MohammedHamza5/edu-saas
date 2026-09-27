@@ -53,7 +53,9 @@ class _StudentAssignmentsPageState extends State<StudentAssignmentsPage> {
   }
 
   Future<void> _loadAssignments({bool forceRefresh = false}) async {
-    await context.read<AssignmentsCubit>().loadStudentAssignments(forceRefresh: forceRefresh);
+    await context.read<AssignmentsCubit>().loadStudentAssignments(
+      forceRefresh: forceRefresh,
+    );
   }
 
   List<AssignmentEntity> _filterAssignments(List<AssignmentEntity> list) {
@@ -146,7 +148,9 @@ class _StudentAssignmentsPageState extends State<StudentAssignmentsPage> {
                             _buildFilterChip(
                               context.l10n.filterPendingSubmission,
                               StudentAssignmentFilter.pending,
-                              state.assignments.where((a) => !a.hasSubmitted).length,
+                              state.assignments
+                                  .where((a) => !a.hasSubmitted)
+                                  .length,
                             ),
                             const SizedBox(width: AppSpacing.s8),
                             _buildFilterChip(
@@ -160,7 +164,9 @@ class _StudentAssignmentsPageState extends State<StudentAssignmentsPage> {
                             _buildFilterChip(
                               context.l10n.filterReviewed,
                               StudentAssignmentFilter.reviewed,
-                              state.assignments.where((a) => a.isReviewed).length,
+                              state.assignments
+                                  .where((a) => a.isReviewed)
+                                  .length,
                             ),
                           ],
                         ),
@@ -174,12 +180,14 @@ class _StudentAssignmentsPageState extends State<StudentAssignmentsPage> {
                           ? Center(
                               child: AppEmptyView(
                                 message: context.l10n.noAssignmentsInFilter,
-                                subtitle: context.l10n.noAssignmentsInFilterSubtitle,
+                                subtitle:
+                                    context.l10n.noAssignmentsInFilterSubtitle,
                                 icon: Icons.filter_list_off_outlined,
                               ),
                             )
                           : RefreshIndicator(
-                              onRefresh: () => _loadAssignments(forceRefresh: true),
+                              onRefresh: () =>
+                                  _loadAssignments(forceRefresh: true),
                               child: SingleChildScrollView(
                                 controller: _scrollController,
                                 physics: const AlwaysScrollableScrollPhysics(),
@@ -199,20 +207,28 @@ class _StudentAssignmentsPageState extends State<StudentAssignmentsPage> {
                                           onTap: () {
                                             Navigator.of(context)
                                                 .push<void>(
-                                              MaterialPageRoute<void>(
-                                                builder: (_) => BlocProvider.value(
-                                                  value: context.read<AssignmentsCubit>(),
-                                                  child: AssignmentSubmissionPage(
-                                                    assignment: assignment,
+                                                  MaterialPageRoute<void>(
+                                                    builder: (_) =>
+                                                        BlocProvider.value(
+                                                          value: context
+                                                              .read<
+                                                                AssignmentsCubit
+                                                              >(),
+                                                          child:
+                                                              AssignmentSubmissionPage(
+                                                                assignment:
+                                                                    assignment,
+                                                              ),
+                                                        ),
                                                   ),
-                                                ),
-                                              ),
-                                            )
+                                                )
                                                 .then((_) {
-                                              if (context.mounted) {
-                                                _loadAssignments(forceRefresh: true);
-                                              }
-                                            });
+                                                  if (context.mounted) {
+                                                    _loadAssignments(
+                                                      forceRefresh: true,
+                                                    );
+                                                  }
+                                                });
                                           },
                                         );
                                       }).toList(),
@@ -223,7 +239,9 @@ class _StudentAssignmentsPageState extends State<StudentAssignmentsPage> {
                                           vertical: AppSpacing.s16,
                                         ),
                                         child: Center(
-                                          child: AppLoadingView.compact(size: 24),
+                                          child: AppLoadingView.compact(
+                                            size: 24,
+                                          ),
                                         ),
                                       ),
                                   ],
@@ -244,7 +262,10 @@ class _StudentAssignmentsPageState extends State<StudentAssignmentsPage> {
   }
 
   Widget _buildFilterChip(
-      String label, StudentAssignmentFilter filter, int count) {
+    String label,
+    StudentAssignmentFilter filter,
+    int count,
+  ) {
     final isSelected = _activeFilter == filter;
     return ChoiceChip(
       label: Text('$label ($count)'),

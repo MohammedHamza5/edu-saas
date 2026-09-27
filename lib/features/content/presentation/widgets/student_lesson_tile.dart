@@ -45,31 +45,27 @@ class _StudentLessonTileState extends State<StudentLessonTile> {
 
   bool get isLocked => lesson?.isLocked ?? content.isLocked;
 
-  bool get isCompleted =>
-      (lesson != null)
-          ? lesson!.progress == LessonProgress.completed
-          : content.isCompleted;
+  bool get isCompleted => (lesson != null)
+      ? lesson!.progress == LessonProgress.completed
+      : content.isCompleted;
 
-  bool get isQuizFailed =>
-      lesson?.progress == LessonProgress.quizFailed;
+  bool get isQuizFailed => lesson?.progress == LessonProgress.quizFailed;
 
   bool get isQuizReady =>
       lesson?.progress == LessonProgress.quizAvailable ||
       lesson?.progress == LessonProgress.videoCompleted;
 
-  bool get isInProgress =>
-      (lesson != null)
-          ? lesson!.progress == LessonProgress.inProgress
-          : (content.videoProgressPercentage > 0 && !isCompleted);
+  bool get isInProgress => (lesson != null)
+      ? lesson!.progress == LessonProgress.inProgress
+      : (content.videoProgressPercentage > 0 && !isCompleted);
 
-  bool get isAvailable =>
-      (lesson != null)
-          ? (lesson!.access == LessonAccess.unlocked &&
-              !isCompleted &&
-              !isQuizReady &&
-              !isQuizFailed &&
-              !isInProgress)
-          : (!isLocked && !isCompleted && !isInProgress);
+  bool get isAvailable => (lesson != null)
+      ? (lesson!.access == LessonAccess.unlocked &&
+            !isCompleted &&
+            !isQuizReady &&
+            !isQuizFailed &&
+            !isInProgress)
+      : (!isLocked && !isCompleted && !isInProgress);
 
   Color get _statusAccentColor {
     if (isCompleted) return AppColors.success;
@@ -85,7 +81,9 @@ class _StudentLessonTileState extends State<StudentLessonTile> {
     final tileContent = MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
-      cursor: isLocked ? SystemMouseCursors.forbidden : SystemMouseCursors.click,
+      cursor: isLocked
+          ? SystemMouseCursors.forbidden
+          : SystemMouseCursors.click,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeOutCubic,
@@ -100,17 +98,17 @@ class _StudentLessonTileState extends State<StudentLessonTile> {
           color: isLocked
               ? AppColors.surfaceVariant.withAlpha(40)
               : _isHovered
-                  ? AppColors.surfaceVariant.withAlpha(80)
-                  : AppColors.surface,
+              ? AppColors.surfaceVariant.withAlpha(80)
+              : AppColors.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
           border: Border.all(
             color: isLocked
                 ? AppColors.error.withAlpha(40)
                 : _isHovered
-                    ? AppColors.primary.withAlpha(120)
-                    : isCompleted
-                        ? AppColors.success.withAlpha(50)
-                        : AppColors.border,
+                ? AppColors.primary.withAlpha(120)
+                : isCompleted
+                ? AppColors.success.withAlpha(50)
+                : AppColors.border,
             width: _isHovered ? 1.5 : 1.0,
           ),
           boxShadow: _isHovered && !isLocked
@@ -168,7 +166,8 @@ class _StudentLessonTileState extends State<StudentLessonTile> {
                         _buildStatusBadge(context),
 
                         // Handout Chip (Instant PDF access)
-                        if (content.file != null && widget.onOpenHandout != null)
+                        if (content.file != null &&
+                            widget.onOpenHandout != null)
                           InkWell(
                             onTap: widget.onOpenHandout,
                             borderRadius: BorderRadius.circular(4),
@@ -221,16 +220,18 @@ class _StudentLessonTileState extends State<StudentLessonTile> {
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: (content.isExamPassed
-                                        ? AppColors.success
-                                        : AppColors.primary)
-                                    .withAlpha(18),
+                                color:
+                                    (content.isExamPassed
+                                            ? AppColors.success
+                                            : AppColors.primary)
+                                        .withAlpha(18),
                                 borderRadius: BorderRadius.circular(4),
                                 border: Border.all(
-                                  color: (content.isExamPassed
-                                          ? AppColors.success
-                                          : AppColors.primary)
-                                      .withAlpha(60),
+                                  color:
+                                      (content.isExamPassed
+                                              ? AppColors.success
+                                              : AppColors.primary)
+                                          .withAlpha(60),
                                 ),
                               ),
                               child: Row(
@@ -303,8 +304,8 @@ class _StudentLessonTileState extends State<StudentLessonTile> {
                   color: widget.index == 1
                       ? Colors.transparent
                       : (isCompleted
-                          ? AppColors.success.withAlpha(150)
-                          : AppColors.border),
+                            ? AppColors.success.withAlpha(150)
+                            : AppColors.border),
                 ),
                 // Node indicator
                 Container(
@@ -314,8 +315,8 @@ class _StudentLessonTileState extends State<StudentLessonTile> {
                     color: isCompleted
                         ? AppColors.success
                         : isLocked
-                            ? AppColors.error
-                            : AppColors.primary,
+                        ? AppColors.error
+                        : AppColors.primary,
                     shape: BoxShape.circle,
                     border: Border.all(color: Colors.white, width: 2),
                     boxShadow: [
@@ -333,8 +334,8 @@ class _StudentLessonTileState extends State<StudentLessonTile> {
                     color: widget.isLast
                         ? Colors.transparent
                         : (isCompleted
-                            ? AppColors.success.withAlpha(150)
-                            : AppColors.border),
+                              ? AppColors.success.withAlpha(150)
+                              : AppColors.border),
                   ),
                 ),
               ],
@@ -355,7 +356,10 @@ class _StudentLessonTileState extends State<StudentLessonTile> {
         decoration: BoxDecoration(
           color: AppColors.success.withAlpha(25),
           shape: BoxShape.circle,
-          border: Border.all(color: AppColors.success.withAlpha(90), width: 1.5),
+          border: Border.all(
+            color: AppColors.success.withAlpha(90),
+            width: 1.5,
+          ),
         ),
         child: const Icon(
           Icons.check_rounded,
@@ -374,11 +378,7 @@ class _StudentLessonTileState extends State<StudentLessonTile> {
           shape: BoxShape.circle,
           border: Border.all(color: AppColors.error.withAlpha(70), width: 1.5),
         ),
-        child: const Icon(
-          Icons.lock_rounded,
-          color: AppColors.error,
-          size: 18,
-        ),
+        child: const Icon(Icons.lock_rounded, color: AppColors.error, size: 18),
       );
     }
 
@@ -411,30 +411,30 @@ class _StudentLessonTileState extends State<StudentLessonTile> {
   Widget _buildContentTypePill(BuildContext context) {
     final (label, icon, color) = switch (content.type) {
       ContentType.video => (
-          context.l10n.contentTypeVideo,
-          Icons.play_circle_outline_rounded,
-          AppColors.primary,
-        ),
+        context.l10n.contentTypeVideo,
+        Icons.play_circle_outline_rounded,
+        AppColors.primary,
+      ),
       ContentType.assignment => (
-          context.l10n.contentTypeAssignment,
-          Icons.assignment_outlined,
-          AppColors.warning,
-        ),
+        context.l10n.contentTypeAssignment,
+        Icons.assignment_outlined,
+        AppColors.warning,
+      ),
       ContentType.exam => (
-          context.l10n.contentTypeExam,
-          Icons.quiz_outlined,
-          AppColors.success,
-        ),
+        context.l10n.contentTypeExam,
+        Icons.quiz_outlined,
+        AppColors.success,
+      ),
       ContentType.pdf => (
-          context.l10n.contentTypePdf,
-          Icons.picture_as_pdf_outlined,
-          const Color(0xFFEA580C),
-        ),
+        context.l10n.contentTypePdf,
+        Icons.picture_as_pdf_outlined,
+        const Color(0xFFEA580C),
+      ),
       ContentType.image => (
-          context.l10n.contentTypeImage,
-          Icons.image_outlined,
-          Colors.purple,
-        ),
+        context.l10n.contentTypeImage,
+        Icons.image_outlined,
+        Colors.purple,
+      ),
     };
 
     return Container(
@@ -472,7 +472,11 @@ class _StudentLessonTileState extends State<StudentLessonTile> {
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.lock_outline_rounded, size: 11, color: AppColors.textMuted),
+          const Icon(
+            Icons.lock_outline_rounded,
+            size: 11,
+            color: AppColors.textMuted,
+          ),
           const SizedBox(width: 4),
           Flexible(
             child: Text(
@@ -494,7 +498,11 @@ class _StudentLessonTileState extends State<StudentLessonTile> {
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.check_circle_rounded, size: 11, color: AppColors.success),
+          const Icon(
+            Icons.check_circle_rounded,
+            size: 11,
+            color: AppColors.success,
+          ),
           const SizedBox(width: 3),
           Flexible(
             child: Text(
@@ -517,7 +525,11 @@ class _StudentLessonTileState extends State<StudentLessonTile> {
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.warning_amber_rounded, size: 11, color: AppColors.warning),
+          const Icon(
+            Icons.warning_amber_rounded,
+            size: 11,
+            color: AppColors.warning,
+          ),
           const SizedBox(width: 3),
           Flexible(
             child: Text(
@@ -559,12 +571,18 @@ class _StudentLessonTileState extends State<StudentLessonTile> {
       );
     }
 
-    final pct = (lesson?.watchedCoveragePercent ?? content.videoProgressPercentage).toInt();
+    final pct =
+        (lesson?.watchedCoveragePercent ?? content.videoProgressPercentage)
+            .toInt();
     if (pct > 0) {
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.timelapse_rounded, size: 11, color: AppColors.primary),
+          const Icon(
+            Icons.timelapse_rounded,
+            size: 11,
+            color: AppColors.primary,
+          ),
           const SizedBox(width: 3),
           Flexible(
             child: Text(
@@ -586,7 +604,11 @@ class _StudentLessonTileState extends State<StudentLessonTile> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Icon(Icons.play_circle_outline_rounded, size: 11, color: AppColors.primary),
+        const Icon(
+          Icons.play_circle_outline_rounded,
+          size: 11,
+          color: AppColors.primary,
+        ),
         const SizedBox(width: 3),
         Flexible(
           child: Text(
@@ -613,7 +635,11 @@ class _StudentLessonTileState extends State<StudentLessonTile> {
           color: AppColors.surfaceVariant,
           shape: BoxShape.circle,
         ),
-        child: const Icon(Icons.lock_rounded, size: 15, color: AppColors.textMuted),
+        child: const Icon(
+          Icons.lock_rounded,
+          size: 15,
+          color: AppColors.textMuted,
+        ),
       );
     }
 
@@ -635,8 +661,8 @@ class _StudentLessonTileState extends State<StudentLessonTile> {
         isCompleted
             ? Icons.replay_rounded
             : isQuizReady
-                ? Icons.quiz_rounded
-                : Icons.play_arrow_rounded,
+            ? Icons.quiz_rounded
+            : Icons.play_arrow_rounded,
         size: isCompleted ? 16 : 18,
         color: isCompleted ? AppColors.textSecondary : AppColors.primary,
       ),

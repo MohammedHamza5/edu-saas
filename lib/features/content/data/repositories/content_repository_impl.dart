@@ -8,9 +8,8 @@ import '../datasources/content_remote_datasource.dart';
 class ContentRepositoryImpl implements ContentRepository {
   final ContentRemoteDataSource _remoteDataSource;
 
-  ContentRepositoryImpl({
-    required ContentRemoteDataSource remoteDataSource,
-  }) : _remoteDataSource = remoteDataSource;
+  ContentRepositoryImpl({required ContentRemoteDataSource remoteDataSource})
+    : _remoteDataSource = remoteDataSource;
 
   @override
   Future<Result<List<ContentEntity>>> getGroupContent({
@@ -246,8 +245,10 @@ class ContentRepositoryImpl implements ContentRepository {
         groupId: groupId,
         studentId: studentId,
       );
-      
-      final lessons = data.map((Map<String, dynamic> e) => LessonAssignmentEntity.fromJson(e)).toList();
+
+      final lessons = data
+          .map((Map<String, dynamic> e) => LessonAssignmentEntity.fromJson(e))
+          .toList();
       return Success(lessons);
     } catch (e) {
       return FailureResult(
@@ -274,6 +275,47 @@ class ContentRepositoryImpl implements ContentRepository {
     } catch (e) {
       return FailureResult(
         ServerFailure('فشل في إلغاء قفل الدرس', details: e.toString()),
+      );
+    }
+  }
+
+  @override
+  Future<Result<void>> toggleLessonVisibility({
+    required String contentId,
+    required String groupId,
+    required bool isPublished,
+  }) async {
+    try {
+      await _remoteDataSource.toggleLessonVisibility(
+        contentId: contentId,
+        groupId: groupId,
+        isPublished: isPublished,
+      );
+      return const Success(null);
+    } catch (e) {
+      return FailureResult(
+        ServerFailure('فشل في تحديث حالة ظهور المحاضرة', details: e.toString()),
+      );
+    }
+  }
+
+  @override
+  Future<Result<void>> toggleAllLessonsVisibility({
+    required String groupId,
+    required bool isPublished,
+  }) async {
+    try {
+      await _remoteDataSource.toggleAllLessonsVisibility(
+        groupId: groupId,
+        isPublished: isPublished,
+      );
+      return const Success(null);
+    } catch (e) {
+      return FailureResult(
+        ServerFailure(
+          'فشل في تحديث حالة ظهور جميع المحاضرات',
+          details: e.toString(),
+        ),
       );
     }
   }

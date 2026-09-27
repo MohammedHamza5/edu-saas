@@ -95,7 +95,8 @@ class AcademicPerformanceCard extends StatelessWidget {
                   context,
                   icon: Icons.ondemand_video_rounded,
                   color: AppColors.warning,
-                  value: '${stats.videoCompletionPercentage.toStringAsFixed(1)}%',
+                  value:
+                      '${stats.videoCompletionPercentage.toStringAsFixed(1)}%',
                   label: context.l10n.statVideoProgress,
                 ),
               ),
@@ -129,10 +130,7 @@ class AcademicPerformanceCard extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 12,
-            color: AppColors.textSecondary,
-          ),
+          style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
         ),
       ],
     );

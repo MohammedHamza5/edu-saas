@@ -22,13 +22,16 @@ class VideoModel extends VideoEntity {
     // If content object is joined in the query:
     final content = json['content'] as Map<String, dynamic>?;
     final title = json['title'] as String? ?? content?['title'] as String?;
-    final description = json['description'] as String? ?? content?['description'] as String?;
+    final description =
+        json['description'] as String? ?? content?['description'] as String?;
 
     FileAttachmentModel? attachedFile;
     final rawFiles = content?['files'] ?? json['files'];
     if (rawFiles != null) {
       if (rawFiles is List && rawFiles.isNotEmpty) {
-        attachedFile = FileAttachmentModel.fromJson(rawFiles.first as Map<String, dynamic>);
+        attachedFile = FileAttachmentModel.fromJson(
+          rawFiles.first as Map<String, dynamic>,
+        );
       } else if (rawFiles is Map<String, dynamic>) {
         attachedFile = FileAttachmentModel.fromJson(rawFiles);
       }

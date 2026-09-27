@@ -19,7 +19,8 @@ class FakeOnboardingRepository implements OnboardingRepository {
 
   @override
   Future<Result<OnboardingResult>> provisionTenant(
-      ProvisionTenantParams params) async {
+    ProvisionTenantParams params,
+  ) async {
     if (shouldFail) {
       return const FailureResult(ServerFailure('فشل إنشاء المستأجر والمعلم'));
     }
@@ -98,9 +99,17 @@ void main() {
         isA<OnboardingLoading>(),
         isA<OnboardingSuccess>()
             .having((s) => s.result.tenant.name, 'name', 'Elite Math Academy')
-            .having((s) => s.result.teacher.fullName, 'fullName', 'Dr. Ahmed Menshawy')
+            .having(
+              (s) => s.result.teacher.fullName,
+              'fullName',
+              'Dr. Ahmed Menshawy',
+            )
             .having((s) => s.result.teacher.role, 'role', UserRole.teacher)
-            .having((s) => s.result.teacher.status, 'status', UserStatus.active),
+            .having(
+              (s) => s.result.teacher.status,
+              'status',
+              UserStatus.active,
+            ),
       ];
 
       final expectation = expectLater(cubit.stream, emitsInOrder(expected));
@@ -123,7 +132,10 @@ void main() {
       final expected = [
         isA<OnboardingLoading>(),
         isA<OnboardingError>().having(
-            (s) => s.message, 'message', 'فشل إنشاء المستأجر والمعلم'),
+          (s) => s.message,
+          'message',
+          'فشل إنشاء المستأجر والمعلم',
+        ),
       ];
 
       final expectation = expectLater(cubit.stream, emitsInOrder(expected));
@@ -135,10 +147,7 @@ void main() {
 
     test('loadTenants emits Loading then TenantsListLoaded', () async {
       fakeRepo.mockTenants = [
-        const TenantEntity(
-          id: 'tenant-1',
-          name: 'First Academy',
-        ),
+        const TenantEntity(id: 'tenant-1', name: 'First Academy'),
       ];
 
       final expected = [
@@ -192,8 +201,9 @@ void main() {
       expect(find.text('إنشاء وتهيئة المركز التعليمي'), findsOneWidget);
     });
 
-    testWidgets('shows validation errors when submitting empty form',
-        (tester) async {
+    testWidgets('shows validation errors when submitting empty form', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(1200, 1600);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -213,8 +223,9 @@ void main() {
       expect(find.text('يرجى إدخال بريد إلكتروني صحيح'), findsOneWidget);
     });
 
-    testWidgets('shows success card when provisioning succeeds',
-        (tester) async {
+    testWidgets('shows success card when provisioning succeeds', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(1200, 1600);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -225,10 +236,7 @@ void main() {
 
       // Trigger success state directly
       const mockResult = OnboardingResult(
-        tenant: TenantEntity(
-          id: 'tenant-12345',
-          name: 'Al-Farouk Math Center',
-        ),
+        tenant: TenantEntity(id: 'tenant-12345', name: 'Al-Farouk Math Center'),
         teacher: UserEntity(
           id: 'teacher-12345',
           tenantId: 'tenant-12345',

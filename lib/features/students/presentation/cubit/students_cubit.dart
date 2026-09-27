@@ -21,8 +21,8 @@ class StudentsCubit extends Cubit<StudentsState> {
   static const _cacheKeyPending = 'pending';
 
   StudentsCubit({required StudentsRepository repository})
-      : _repository = repository,
-        super(const StudentsInitial());
+    : _repository = repository,
+      super(const StudentsInitial());
 
   // ── Load list ─────────────────────────────────────────────────────────────
 
@@ -46,13 +46,15 @@ class StudentsCubit extends Cubit<StudentsState> {
     // ── Stale-While-Revalidate: show cached data instantly ──────────────
     final cachedPayload = AppCache.students.getStale(cacheKey);
     if (cachedPayload is _StudentsCachePayload) {
-      emit(StudentsLoaded(
-        students: cachedPayload.students,
-        filterStatus: _currentStatus,
-        searchQuery: _currentSearch,
-        hasMore: cachedPayload.hasMore,
-        pendingCount: cachedPayload.pendingCount,
-      ));
+      emit(
+        StudentsLoaded(
+          students: cachedPayload.students,
+          filterStatus: _currentStatus,
+          searchQuery: _currentSearch,
+          hasMore: cachedPayload.hasMore,
+          pendingCount: cachedPayload.pendingCount,
+        ),
+      );
       // If cache is still fresh and not an explicit refresh, skip network
       if (!refresh && AppCache.students.has(cacheKey)) return;
       // Otherwise continue to refresh silently (no loading state emitted)
@@ -84,19 +86,24 @@ class StudentsCubit extends Cubit<StudentsState> {
       onSuccess: (List<StudentEntity> students) {
         if (!isClosed) {
           // Cache the result
-          AppCache.students.put(cacheKey, _StudentsCachePayload(
-            students: students,
-            hasMore: students.length == _pageSize,
-            pendingCount: pending,
-          ));
+          AppCache.students.put(
+            cacheKey,
+            _StudentsCachePayload(
+              students: students,
+              hasMore: students.length == _pageSize,
+              pendingCount: pending,
+            ),
+          );
 
-          emit(StudentsLoaded(
-            students: students,
-            filterStatus: _currentStatus,
-            searchQuery: _currentSearch,
-            hasMore: students.length == _pageSize,
-            pendingCount: pending,
-          ));
+          emit(
+            StudentsLoaded(
+              students: students,
+              filterStatus: _currentStatus,
+              searchQuery: _currentSearch,
+              hasMore: students.length == _pageSize,
+              pendingCount: pending,
+            ),
+          );
         }
       },
       onFailure: (Failure failure) {
@@ -135,19 +142,24 @@ class StudentsCubit extends Cubit<StudentsState> {
     studentsResult.when(
       onSuccess: (List<StudentEntity> students) {
         if (!isClosed) {
-          AppCache.students.put(cacheKey, _StudentsCachePayload(
-            students: students,
-            hasMore: students.length == _pageSize,
-            pendingCount: pending,
-          ));
+          AppCache.students.put(
+            cacheKey,
+            _StudentsCachePayload(
+              students: students,
+              hasMore: students.length == _pageSize,
+              pendingCount: pending,
+            ),
+          );
 
-          emit(StudentsLoaded(
-            students: students,
-            filterStatus: _currentStatus,
-            searchQuery: _currentSearch,
-            hasMore: students.length == _pageSize,
-            pendingCount: pending,
-          ));
+          emit(
+            StudentsLoaded(
+              students: students,
+              filterStatus: _currentStatus,
+              searchQuery: _currentSearch,
+              hasMore: students.length == _pageSize,
+              pendingCount: pending,
+            ),
+          );
         }
       },
       onFailure: (_) {}, // Silent — don't show error on background refresh
@@ -176,11 +188,13 @@ class StudentsCubit extends Cubit<StudentsState> {
     result.when(
       onSuccess: (newStudents) {
         if (!isClosed) {
-          emit(current.copyWith(
-            students: [...current.students, ...newStudents],
-            hasMore: newStudents.length == _pageSize,
-            isLoadingMore: false,
-          ));
+          emit(
+            current.copyWith(
+              students: [...current.students, ...newStudents],
+              hasMore: newStudents.length == _pageSize,
+              isLoadingMore: false,
+            ),
+          );
         }
       },
       onFailure: (failure) {
@@ -316,7 +330,10 @@ class StudentsCubit extends Cubit<StudentsState> {
 
     if (studentResult.isFailure) {
       final msg = studentResult.failureOrNull!.message;
-      AppLogger.e('StudentsCubit', 'Failed to load student profile ($studentId): $msg');
+      AppLogger.e(
+        'StudentsCubit',
+        'Failed to load student profile ($studentId): $msg',
+      );
       if (!isClosed) emit(StudentsError(msg));
       return;
     }
@@ -365,15 +382,18 @@ class StudentsCubit extends Cubit<StudentsState> {
     }
     final student = studentResult.data;
 
-    final currentGroups = stats360Result.dataOrNull?.groups ?? <StudentGroupInfo>[];
+    final currentGroups =
+        stats360Result.dataOrNull?.groups ?? <StudentGroupInfo>[];
     final available = availableResult.dataOrNull ?? <StudentGroupInfo>[];
 
     if (!isClosed) {
-      emit(AssignGroupsLoaded(
-        student: student,
-        currentGroups: currentGroups,
-        availableGroups: available,
-      ));
+      emit(
+        AssignGroupsLoaded(
+          student: student,
+          currentGroups: currentGroups,
+          availableGroups: available,
+        ),
+      );
     }
   }
 

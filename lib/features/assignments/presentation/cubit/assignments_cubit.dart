@@ -12,11 +12,14 @@ class AssignmentsCubit extends Cubit<AssignmentsState> {
   int _studentPage = 0;
 
   AssignmentsCubit({required AssignmentsRepository repository})
-      : _repository = repository,
-        super(const AssignmentsInitial());
+    : _repository = repository,
+      super(const AssignmentsInitial());
 
   /// Loads assignments for a specific group (Teacher flow) with instant SWR cache
-  Future<void> loadGroupAssignments(String groupId, {bool forceRefresh = false}) async {
+  Future<void> loadGroupAssignments(
+    String groupId, {
+    bool forceRefresh = false,
+  }) async {
     _teacherPage = 0;
     final cacheKey = 'teacher_group_$groupId';
     if (forceRefresh) {
@@ -26,12 +29,15 @@ class AssignmentsCubit extends Cubit<AssignmentsState> {
     // ── Stale-While-Revalidate: Instant display from memory cache ──────────
     final cached = AppCache.assignments.getStale(cacheKey);
     if (cached is List<AssignmentEntity>) {
-      emit(TeacherAssignmentsLoaded(
-        groupId: groupId,
-        assignments: cached,
-        hasMore: cached.length >= _pageSize,
-      ));
-      if (!forceRefresh && AppCache.assignments.has(cacheKey)) return; // Fresh cache, skip network
+      emit(
+        TeacherAssignmentsLoaded(
+          groupId: groupId,
+          assignments: cached,
+          hasMore: cached.length >= _pageSize,
+        ),
+      );
+      if (!forceRefresh && AppCache.assignments.has(cacheKey))
+        return; // Fresh cache, skip network
     } else {
       emit(const AssignmentsLoading());
     }
@@ -45,12 +51,14 @@ class AssignmentsCubit extends Cubit<AssignmentsState> {
     result.when(
       onSuccess: (assignments) {
         AppCache.assignments.put(cacheKey, assignments);
-        emit(TeacherAssignmentsLoaded(
-          groupId: groupId,
-          assignments: assignments,
-          hasMore: assignments.length == _pageSize,
-          isLoadingMore: false,
-        ));
+        emit(
+          TeacherAssignmentsLoaded(
+            groupId: groupId,
+            assignments: assignments,
+            hasMore: assignments.length == _pageSize,
+            isLoadingMore: false,
+          ),
+        );
       },
       onFailure: (failure) {
         if (state is! TeacherAssignmentsLoaded) {
@@ -64,7 +72,10 @@ class AssignmentsCubit extends Cubit<AssignmentsState> {
   Future<void> loadMoreTeacherAssignments() async {
     final currentState = state;
     if (currentState is! TeacherAssignmentsLoaded) return;
-    if (!currentState.hasMore || currentState.isLoadingMore || currentState.groupId == null) return;
+    if (!currentState.hasMore ||
+        currentState.isLoadingMore ||
+        currentState.groupId == null)
+      return;
 
     emit(currentState.copyWith(isLoadingMore: true));
     final nextPage = _teacherPage + 1;
@@ -81,12 +92,17 @@ class AssignmentsCubit extends Cubit<AssignmentsState> {
       onSuccess: (newAssignments) {
         _teacherPage = nextPage;
         final allAssignments = [...currentState.assignments, ...newAssignments];
-        AppCache.assignments.put('teacher_group_${currentState.groupId}', allAssignments);
-        emit(currentState.copyWith(
-          assignments: allAssignments,
-          hasMore: newAssignments.length == _pageSize,
-          isLoadingMore: false,
-        ));
+        AppCache.assignments.put(
+          'teacher_group_${currentState.groupId}',
+          allAssignments,
+        );
+        emit(
+          currentState.copyWith(
+            assignments: allAssignments,
+            hasMore: newAssignments.length == _pageSize,
+            isLoadingMore: false,
+          ),
+        );
       },
       onFailure: (failure) {
         emit(currentState.copyWith(isLoadingMore: false));
@@ -99,27 +115,33 @@ class AssignmentsCubit extends Cubit<AssignmentsState> {
     final currentState = state;
     if (currentState is! TeacherAssignmentsLoaded) return;
 
-    emit(currentState.copyWith(
-      selectedAssignment: assignment,
-      isLoadingSubmissions: true,
-    ));
+    emit(
+      currentState.copyWith(
+        selectedAssignment: assignment,
+        isLoadingSubmissions: true,
+      ),
+    );
 
     final result = await _repository.getSubmissions(assignment.id);
 
     result.when(
       onSuccess: (submissions) {
-        emit(currentState.copyWith(
-          selectedAssignment: assignment,
-          submissions: submissions,
-          isLoadingSubmissions: false,
-        ));
+        emit(
+          currentState.copyWith(
+            selectedAssignment: assignment,
+            submissions: submissions,
+            isLoadingSubmissions: false,
+          ),
+        );
       },
       onFailure: (failure) {
-        emit(currentState.copyWith(
-          selectedAssignment: assignment,
-          isLoadingSubmissions: false,
-          message: failure.message,
-        ));
+        emit(
+          currentState.copyWith(
+            selectedAssignment: assignment,
+            isLoadingSubmissions: false,
+            message: failure.message,
+          ),
+        );
       },
     );
   }
@@ -158,10 +180,9 @@ class AssignmentsCubit extends Cubit<AssignmentsState> {
       },
       onFailure: (failure) {
         if (currentState is TeacherAssignmentsLoaded) {
-          emit(currentState.copyWith(
-            isCreating: false,
-            message: failure.message,
-          ));
+          emit(
+            currentState.copyWith(isCreating: false, message: failure.message),
+          );
         } else {
           emit(AssignmentsError(failure.message));
         }
@@ -204,21 +225,25 @@ class AssignmentsCubit extends Cubit<AssignmentsState> {
           );
         }
 
-        emit(currentState.copyWith(
-          submissions: updatedSubmissions,
-          selectedAssignment: updatedAssignment,
-          isGrading: false,
-          actionSuccess: true,
-          message: 'تم حفظ التقييم بنجاح',
-        ));
+        emit(
+          currentState.copyWith(
+            submissions: updatedSubmissions,
+            selectedAssignment: updatedAssignment,
+            isGrading: false,
+            actionSuccess: true,
+            message: 'تم حفظ التقييم بنجاح',
+          ),
+        );
         return true;
       },
       onFailure: (failure) {
-        emit(currentState.copyWith(
-          isGrading: false,
-          actionSuccess: false,
-          message: failure.message,
-        ));
+        emit(
+          currentState.copyWith(
+            isGrading: false,
+            actionSuccess: false,
+            message: failure.message,
+          ),
+        );
         return false;
       },
     );
@@ -238,12 +263,15 @@ class AssignmentsCubit extends Cubit<AssignmentsState> {
       if (cached.isEmpty) {
         emit(const AssignmentsEmpty(message: 'لا توجد واجبات مطلوبة حالياً'));
       } else {
-        emit(StudentAssignmentsLoaded(
-          assignments: cached,
-          hasMore: cached.length >= _pageSize,
-        ));
+        emit(
+          StudentAssignmentsLoaded(
+            assignments: cached,
+            hasMore: cached.length >= _pageSize,
+          ),
+        );
       }
-      if (!forceRefresh && AppCache.assignments.has(cacheKey)) return; // Fresh cache, skip network
+      if (!forceRefresh && AppCache.assignments.has(cacheKey))
+        return; // Fresh cache, skip network
     } else {
       emit(const AssignmentsLoading());
     }
@@ -259,11 +287,13 @@ class AssignmentsCubit extends Cubit<AssignmentsState> {
         if (assignments.isEmpty) {
           emit(const AssignmentsEmpty(message: 'لا توجد واجبات مطلوبة حالياً'));
         } else {
-          emit(StudentAssignmentsLoaded(
-            assignments: assignments,
-            hasMore: assignments.length == _pageSize,
-            isLoadingMore: false,
-          ));
+          emit(
+            StudentAssignmentsLoaded(
+              assignments: assignments,
+              hasMore: assignments.length == _pageSize,
+              isLoadingMore: false,
+            ),
+          );
         }
       },
       onFailure: (failure) {
@@ -295,11 +325,13 @@ class AssignmentsCubit extends Cubit<AssignmentsState> {
         _studentPage = nextPage;
         final allAssignments = [...currentState.assignments, ...newAssignments];
         AppCache.assignments.put('student_assignments_all', allAssignments);
-        emit(currentState.copyWith(
-          assignments: allAssignments,
-          hasMore: newAssignments.length == _pageSize,
-          isLoadingMore: false,
-        ));
+        emit(
+          currentState.copyWith(
+            assignments: allAssignments,
+            hasMore: newAssignments.length == _pageSize,
+            isLoadingMore: false,
+          ),
+        );
       },
       onFailure: (failure) {
         emit(currentState.copyWith(isLoadingMore: false));
@@ -340,25 +372,32 @@ class AssignmentsCubit extends Cubit<AssignmentsState> {
           return a;
         }).toList();
 
-        final updatedSelected = currentState.selectedAssignment?.id == assignmentId
-            ? currentState.selectedAssignment!.copyWith(mySubmission: submission)
+        final updatedSelected =
+            currentState.selectedAssignment?.id == assignmentId
+            ? currentState.selectedAssignment!.copyWith(
+                mySubmission: submission,
+              )
             : currentState.selectedAssignment;
 
-        emit(currentState.copyWith(
-          assignments: updatedAssignments,
-          selectedAssignment: updatedSelected,
-          isSubmitting: false,
-          submitSuccess: true,
-          message: 'تم تسليم الواجب بنجاح!',
-        ));
+        emit(
+          currentState.copyWith(
+            assignments: updatedAssignments,
+            selectedAssignment: updatedSelected,
+            isSubmitting: false,
+            submitSuccess: true,
+            message: 'تم تسليم الواجب بنجاح!',
+          ),
+        );
         return true;
       },
       onFailure: (failure) {
-        emit(currentState.copyWith(
-          isSubmitting: false,
-          submitSuccess: false,
-          message: failure.message,
-        ));
+        emit(
+          currentState.copyWith(
+            isSubmitting: false,
+            submitSuccess: false,
+            message: failure.message,
+          ),
+        );
         return false;
       },
     );
@@ -367,9 +406,6 @@ class AssignmentsCubit extends Cubit<AssignmentsState> {
   /// Requests a temporary signed URL for a file
   Future<String?> getFileSignedUrl(String storagePath) async {
     final result = await _repository.getSubmissionFileSignedUrl(storagePath);
-    return result.when(
-      onSuccess: (url) => url,
-      onFailure: (_) => null,
-    );
+    return result.when(onSuccess: (url) => url, onFailure: (_) => null);
   }
 }

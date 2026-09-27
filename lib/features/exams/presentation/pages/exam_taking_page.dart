@@ -31,7 +31,12 @@ class ExamTakingPage extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(context.l10n.answeredQuestionsCount(state.answeredCount, state.totalQuestions)),
+            Text(
+              context.l10n.answeredQuestionsCount(
+                state.answeredCount,
+                state.totalQuestions,
+              ),
+            ),
             if (unanswered > 0) ...[
               const SizedBox(height: AppSpacing.s8),
               Text(
@@ -57,7 +62,10 @@ class ExamTakingPage extends StatelessWidget {
               Navigator.of(ctx).pop();
               context.read<ExamsCubit>().submitExam();
             },
-            child: Text(context.l10n.yesSubmitExam, style: const TextStyle(color: Colors.white)),
+            child: Text(
+              context.l10n.yesSubmitExam,
+              style: const TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),
@@ -107,12 +115,19 @@ class ExamTakingPage extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.error_outline_rounded, size: 56, color: AppColors.error),
+                    const Icon(
+                      Icons.error_outline_rounded,
+                      size: 56,
+                      color: AppColors.error,
+                    ),
                     const SizedBox(height: AppSpacing.s16),
                     Text(
                       state.message,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: AppSpacing.s24),
                     ElevatedButton.icon(
@@ -159,7 +174,8 @@ class ExamTakingPage extends StatelessWidget {
                 IconButton(
                   icon: const Icon(Icons.menu_book_rounded),
                   tooltip: context.l10n.referenceSheetTooltip,
-                  onPressed: () => SatExamToolsSheet.showReferenceSheet(context),
+                  onPressed: () =>
+                      SatExamToolsSheet.showReferenceSheet(context),
                 ),
                 // Built-in SAT Calculator
                 IconButton(
@@ -182,14 +198,18 @@ class ExamTakingPage extends StatelessWidget {
                         ? AppColors.error.withValues(alpha: 0.15)
                         : AppColors.surfaceVariant,
                     borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                    border: isUrgent ? Border.all(color: AppColors.error) : null,
+                    border: isUrgent
+                        ? Border.all(color: AppColors.error)
+                        : null,
                   ),
                   child: Row(
                     children: [
                       Icon(
                         Icons.timer_outlined,
                         size: 16,
-                        color: isUrgent ? AppColors.error : AppColors.textPrimary,
+                        color: isUrgent
+                            ? AppColors.error
+                            : AppColors.textPrimary,
                       ),
                       const SizedBox(width: AppSpacing.s6),
                       Text(
@@ -197,7 +217,9 @@ class ExamTakingPage extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
-                          color: isUrgent ? AppColors.error : AppColors.textPrimary,
+                          color: isUrgent
+                              ? AppColors.error
+                              : AppColors.textPrimary,
                         ),
                       ),
                     ],
@@ -213,7 +235,9 @@ class ExamTakingPage extends StatelessWidget {
                       ? (state.currentQuestionIndex + 1) / state.totalQuestions
                       : 0,
                   backgroundColor: AppColors.surfaceVariant,
-                  valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+                  valueColor: const AlwaysStoppedAnimation<Color>(
+                    AppColors.primary,
+                  ),
                   minHeight: 4,
                 ),
 
@@ -227,7 +251,10 @@ class ExamTakingPage extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        context.l10n.questionProgress(qIndex + 1, state.totalQuestions),
+                        context.l10n.questionProgress(
+                          qIndex + 1,
+                          state.totalQuestions,
+                        ),
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
@@ -235,7 +262,10 @@ class ExamTakingPage extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        context.l10n.solvedCount(state.answeredCount, state.totalQuestions),
+                        context.l10n.solvedCount(
+                          state.answeredCount,
+                          state.totalQuestions,
+                        ),
                         style: const TextStyle(
                           fontSize: 12,
                           color: AppColors.textMuted,
@@ -260,7 +290,8 @@ class ExamTakingPage extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Container(
                                     padding: const EdgeInsets.symmetric(
@@ -269,11 +300,14 @@ class ExamTakingPage extends StatelessWidget {
                                     ),
                                     decoration: BoxDecoration(
                                       color: AppColors.surfaceVariant,
-                                      borderRadius:
-                                          BorderRadius.circular(AppSpacing.radiusSmall),
+                                      borderRadius: BorderRadius.circular(
+                                        AppSpacing.radiusSmall,
+                                      ),
                                     ),
                                     child: Text(
-                                      question.questionType.localizedLabel(context),
+                                      question.questionType.localizedLabel(
+                                        context,
+                                      ),
                                       style: const TextStyle(
                                         fontSize: 11,
                                         color: AppColors.textSecondary,
@@ -320,18 +354,22 @@ class ExamTakingPage extends StatelessWidget {
                         ...question.options.asMap().entries.map((optEntry) {
                           final optIdx = optEntry.key;
                           final option = optEntry.value;
-                          final isSelected = state.answers[question.id] == option.id;
+                          final isSelected =
+                              state.answers[question.id] == option.id;
 
                           return Padding(
-                            padding: const EdgeInsets.only(bottom: AppSpacing.s10),
+                            padding: const EdgeInsets.only(
+                              bottom: AppSpacing.s10,
+                            ),
                             child: QuestionOptionTile(
                               option: option,
                               index: optIdx,
                               isSelected: isSelected,
                               onTap: () {
-                                context
-                                    .read<ExamsCubit>()
-                                    .selectAnswer(question.id, option.id);
+                                context.read<ExamsCubit>().selectAnswer(
+                                  question.id,
+                                  option.id,
+                                );
                               },
                             ),
                           );
@@ -346,7 +384,9 @@ class ExamTakingPage extends StatelessWidget {
                   padding: const EdgeInsets.all(AppSpacing.s16),
                   decoration: BoxDecoration(
                     color: AppColors.surface,
-                    border: const Border(top: BorderSide(color: AppColors.border)),
+                    border: const Border(
+                      top: BorderSide(color: AppColors.border),
+                    ),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.03),
@@ -362,7 +402,9 @@ class ExamTakingPage extends StatelessWidget {
                         Expanded(
                           child: OutlinedButton.icon(
                             onPressed: () {
-                              context.read<ExamsCubit>().goToQuestion(qIndex - 1);
+                              context.read<ExamsCubit>().goToQuestion(
+                                qIndex - 1,
+                              );
                             },
                             icon: const Icon(Icons.arrow_forward, size: 16),
                             label: Text(context.l10n.previousQuestion),
@@ -382,7 +424,9 @@ class ExamTakingPage extends StatelessWidget {
                               foregroundColor: Colors.white,
                             ),
                             onPressed: () {
-                              context.read<ExamsCubit>().goToQuestion(qIndex + 1);
+                              context.read<ExamsCubit>().goToQuestion(
+                                qIndex + 1,
+                              );
                             },
                             icon: const Icon(Icons.arrow_back, size: 16),
                             label: Text(context.l10n.nextQuestion),
@@ -398,7 +442,10 @@ class ExamTakingPage extends StatelessWidget {
                             onPressed: state.isSubmitting
                                 ? null
                                 : () => _confirmSubmit(context, state),
-                            icon: const Icon(Icons.check_circle_outline, size: 16),
+                            icon: const Icon(
+                              Icons.check_circle_outline,
+                              size: 16,
+                            ),
                             label: state.isSubmitting
                                 ? const AppLoadingView.compact(
                                     size: 16,

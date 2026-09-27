@@ -23,7 +23,8 @@ class AppEmptyView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final displayMessage = message ?? (l10n != null ? l10n.emptyData : 'No data');
+    final displayMessage =
+        message ?? (l10n != null ? l10n.emptyData : 'No data');
 
     return Center(
       child: Padding(
@@ -37,11 +38,7 @@ class AppEmptyView extends StatelessWidget {
                 color: AppColors.surfaceVariant,
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                icon,
-                color: AppColors.textMuted,
-                size: 48,
-              ),
+              child: Icon(icon, color: AppColors.textMuted, size: 48),
             ),
             const SizedBox(height: AppSpacing.s16),
             Text(

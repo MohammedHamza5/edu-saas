@@ -28,10 +28,14 @@ class DioClient {
     dio.interceptors.add(_createLoggingInterceptor());
     dio.interceptors.add(_createAuthInterceptor());
 
-    AppLogger.i('DioClient', 'HTTP client initialized', data: {
-      'baseUrl': AppConfig.supabaseUrl,
-      'timeouts': '15s connect / 15s receive / 15s send',
-    });
+    AppLogger.i(
+      'DioClient',
+      'HTTP client initialized',
+      data: {
+        'baseUrl': AppConfig.supabaseUrl,
+        'timeouts': '15s connect / 15s receive / 15s send',
+      },
+    );
   }
 
   /// 📡 Logging Interceptor — logs every request, response, and error
@@ -42,7 +46,9 @@ class DioClient {
           'HTTP→',
           '${options.method} ${options.path}',
           data: {
-            'queryParams': options.queryParameters.isNotEmpty ? options.queryParameters : null,
+            'queryParams': options.queryParameters.isNotEmpty
+                ? options.queryParameters
+                : null,
             'hasBody': options.data != null,
           },
         );
@@ -56,9 +62,7 @@ class DioClient {
           AppLogger.n(
             'HTTP←',
             '${response.statusCode} ${response.requestOptions.method} ${response.requestOptions.path}',
-            data: {
-              'dataType': response.data.runtimeType.toString(),
-            },
+            data: {'dataType': response.data.runtimeType.toString()},
           );
         } else {
           AppLogger.w(
@@ -76,11 +80,15 @@ class DioClient {
           error: error,
           stackTrace: error.stackTrace,
         );
-        AppLogger.d('HTTP⚠', 'Error detail', data: {
-          'type': error.type.name,
-          'statusCode': error.response?.statusCode,
-          'responseBody': error.response?.data,
-        });
+        AppLogger.d(
+          'HTTP⚠',
+          'Error detail',
+          data: {
+            'type': error.type.name,
+            'statusCode': error.response?.statusCode,
+            'responseBody': error.response?.data,
+          },
+        );
         return handler.next(error);
       },
     );
@@ -98,7 +106,8 @@ class DioClient {
           return handler.reject(
             DioException(
               requestOptions: options,
-              error: 'Cleartext HTTP connection blocked by enterprise security policy.',
+              error:
+                  'Cleartext HTTP connection blocked by enterprise security policy.',
             ),
           );
         }
@@ -108,7 +117,10 @@ class DioClient {
           options.headers['Authorization'] = 'Bearer $token';
           AppLogger.d('DioClient', 'Auth token injected into request');
         } else {
-          AppLogger.d('DioClient', 'No auth token found — sending unauthenticated request');
+          AppLogger.d(
+            'DioClient',
+            'No auth token found — sending unauthenticated request',
+          );
         }
 
         return handler.next(options);
@@ -116,11 +128,19 @@ class DioClient {
       onError: (DioException error, handler) async {
         // Handle 401 Unauthorized with Mutex queue
         if (error.response?.statusCode == 401) {
-          AppLogger.w('DioClient', '401 Unauthorized — attempting token refresh');
+          AppLogger.w(
+            'DioClient',
+            '401 Unauthorized — attempting token refresh',
+          );
           final refreshed = await _handleTokenRefresh();
           if (refreshed) {
-            AppLogger.s('DioClient', 'Token refreshed — retrying original request');
-            final newToken = await SecureStorageHelper.read(key: 'access_token');
+            AppLogger.s(
+              'DioClient',
+              'Token refreshed — retrying original request',
+            );
+            final newToken = await SecureStorageHelper.read(
+              key: 'access_token',
+            );
             final retryOptions = error.requestOptions;
             retryOptions.headers['Authorization'] = 'Bearer $newToken';
 
@@ -128,11 +148,18 @@ class DioClient {
               final response = await dio.fetch<dynamic>(retryOptions);
               return handler.resolve(response);
             } catch (e) {
-              AppLogger.e('DioClient', 'Retry after token refresh also failed', error: e);
+              AppLogger.e(
+                'DioClient',
+                'Retry after token refresh also failed',
+                error: e,
+              );
               return handler.next(error);
             }
           } else {
-            AppLogger.w('DioClient', 'Token refresh failed — user will be logged out');
+            AppLogger.w(
+              'DioClient',
+              'Token refresh failed — user will be logged out',
+            );
           }
         }
         return handler.next(error);
@@ -143,7 +170,10 @@ class DioClient {
   /// Mutex lock for token refresh - guarantees only 1 refresh call even if 10 requests 401 concurrently
   static Future<bool> _handleTokenRefresh() async {
     if (_refreshCompleter != null) {
-      AppLogger.d('DioClient', 'Token refresh already in progress — waiting for result');
+      AppLogger.d(
+        'DioClient',
+        'Token refresh already in progress — waiting for result',
+      );
       return await _refreshCompleter!.future;
     }
 
@@ -152,7 +182,10 @@ class DioClient {
     try {
       final refreshToken = await SecureStorageHelper.read(key: 'refresh_token');
       if (refreshToken == null || refreshToken.isEmpty) {
-        AppLogger.w('DioClient', 'No refresh_token found in secure storage — cannot refresh');
+        AppLogger.w(
+          'DioClient',
+          'No refresh_token found in secure storage — cannot refresh',
+        );
         _refreshCompleter!.complete(false);
         return false;
       }
@@ -162,7 +195,12 @@ class DioClient {
       _refreshCompleter!.complete(false);
       return false;
     } catch (e, st) {
-      AppLogger.e('DioClient', 'Token refresh threw an exception', error: e, stackTrace: st);
+      AppLogger.e(
+        'DioClient',
+        'Token refresh threw an exception',
+        error: e,
+        stackTrace: st,
+      );
       _refreshCompleter!.complete(false);
       return false;
     } finally {

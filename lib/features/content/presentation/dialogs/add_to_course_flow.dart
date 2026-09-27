@@ -24,8 +24,10 @@ class AddToCourseFlow extends StatefulWidget {
 
   const AddToCourseFlow({super.key, required this.video});
 
-  static Future<bool> show(BuildContext context,
-      {required ContentEntity video}) async {
+  static Future<bool> show(
+    BuildContext context, {
+    required ContentEntity video,
+  }) async {
     final groupsCubit = context.read<GroupsCubit>();
     final contentCubit = context.read<ContentCubit>();
 
@@ -77,10 +79,10 @@ class _AddToCourseFlowState extends State<AddToCourseFlow> {
 
     return Dialog(
       shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.radiusLarge)),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLarge),
+      ),
       elevation: 4,
-      insetPadding:
-          const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 480, maxHeight: 580),
         child: Padding(
@@ -96,11 +98,15 @@ class _AddToCourseFlowState extends State<AddToCourseFlow> {
                     padding: const EdgeInsets.all(AppSpacing.s8),
                     decoration: BoxDecoration(
                       color: AppColors.primary.withValues(alpha: 0.1),
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusSmall),
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.radiusSmall,
+                      ),
                     ),
-                    child: const Icon(Icons.school_rounded,
-                        color: AppColors.primary, size: 22),
+                    child: const Icon(
+                      Icons.school_rounded,
+                      color: AppColors.primary,
+                      size: 22,
+                    ),
                   ),
                   const SizedBox(width: AppSpacing.s12),
                   Expanded(
@@ -109,13 +115,15 @@ class _AddToCourseFlowState extends State<AddToCourseFlow> {
                       children: [
                         Text(
                           l10n.selectCourse,
-                          style: theme.textTheme.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.bold),
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         Text(
                           l10n.selectCourseSubtitle,
                           style: theme.textTheme.bodySmall?.copyWith(
-                              color: AppColors.textSecondary),
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                       ],
                     ),
@@ -138,8 +146,11 @@ class _AddToCourseFlowState extends State<AddToCourseFlow> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.play_circle_fill_rounded,
-                        color: AppColors.primary, size: 18),
+                    const Icon(
+                      Icons.play_circle_fill_rounded,
+                      color: AppColors.primary,
+                      size: 18,
+                    ),
                     const SizedBox(width: AppSpacing.s8),
                     Expanded(
                       child: Text(
@@ -179,11 +190,14 @@ class _AddToCourseFlowState extends State<AddToCourseFlow> {
                         ),
                       );
                     }
-                    final groups = state is GroupsLoaded ? state.groups : <GroupEntity>[];
+                    final groups = state is GroupsLoaded
+                        ? state.groups
+                        : <GroupEntity>[];
                     return ListView.builder(
                       shrinkWrap: true,
                       padding: const EdgeInsets.symmetric(
-                          vertical: AppSpacing.s8),
+                        vertical: AppSpacing.s8,
+                      ),
                       itemCount: groups.length,
                       itemBuilder: (context, index) {
                         final group = groups[index];

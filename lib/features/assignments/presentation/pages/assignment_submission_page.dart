@@ -14,13 +14,11 @@ import '../cubit/assignments_state.dart';
 class AssignmentSubmissionPage extends StatefulWidget {
   final AssignmentEntity assignment;
 
-  const AssignmentSubmissionPage({
-    super.key,
-    required this.assignment,
-  });
+  const AssignmentSubmissionPage({super.key, required this.assignment});
 
   @override
-  State<AssignmentSubmissionPage> createState() => _AssignmentSubmissionPageState();
+  State<AssignmentSubmissionPage> createState() =>
+      _AssignmentSubmissionPageState();
 }
 
 class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
@@ -85,16 +83,13 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
 
     final successMsg = context.l10n.assignmentSubmittedSuccess;
     final success = await context.read<AssignmentsCubit>().submitAssignment(
-          assignmentId: widget.assignment.id,
-          files: filesToUpload,
-        );
+      assignmentId: widget.assignment.id,
+      files: filesToUpload,
+    );
 
     if (mounted && success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(successMsg),
-          backgroundColor: AppColors.success,
-        ),
+        SnackBar(content: Text(successMsg), backgroundColor: AppColors.success),
       );
       Navigator.of(context).pop();
     }
@@ -108,7 +103,8 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
     final isReviewed = mySub?.isReviewed ?? false;
     final isSubmitted = mySub != null;
     final isOverdue = assignment.isOverdue;
-    final canSubmit = !isReviewed && (!isOverdue || assignment.allowLateSubmission);
+    final canSubmit =
+        !isReviewed && (!isOverdue || assignment.allowLateSubmission);
 
     return Scaffold(
       appBar: AppBar(
@@ -149,7 +145,9 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
                                 if (assignment.groupName != null) ...[
                                   const SizedBox(height: AppSpacing.s4),
                                   Text(
-                                    context.l10n.groupLabelPrefix(assignment.groupName!),
+                                    context.l10n.groupLabelPrefix(
+                                      assignment.groupName!,
+                                    ),
                                     style: const TextStyle(
                                       fontSize: 13,
                                       color: AppColors.textMuted,
@@ -166,10 +164,14 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
                             ),
                             decoration: BoxDecoration(
                               color: AppColors.primary.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.radiusSmall,
+                              ),
                             ),
                             child: Text(
-                              context.l10n.maxScorePoints(assignment.maxScore.toString()),
+                              context.l10n.maxScorePoints(
+                                assignment.maxScore.toString(),
+                              ),
                               style: const TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
@@ -188,18 +190,26 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
                           Icon(
                             Icons.calendar_today_outlined,
                             size: 16,
-                            color: isOverdue ? AppColors.error : AppColors.textMuted,
+                            color: isOverdue
+                                ? AppColors.error
+                                : AppColors.textMuted,
                           ),
                           const SizedBox(width: AppSpacing.s6),
                           Expanded(
                             child: Text(
                               assignment.dueAt != null
-                                  ? context.l10n.deadlinePrefix(dateFormat.format(assignment.dueAt!))
+                                  ? context.l10n.deadlinePrefix(
+                                      dateFormat.format(assignment.dueAt!),
+                                    )
                                   : context.l10n.noDueDateSpecified,
                               style: TextStyle(
                                 fontSize: 13,
-                                fontWeight: isOverdue ? FontWeight.bold : FontWeight.normal,
-                                color: isOverdue ? AppColors.error : AppColors.textSecondary,
+                                fontWeight: isOverdue
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                                color: isOverdue
+                                    ? AppColors.error
+                                    : AppColors.textSecondary,
                               ),
                             ),
                           ),
@@ -210,11 +220,18 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
                         const SizedBox(height: AppSpacing.s6),
                         Row(
                           children: [
-                            const Icon(Icons.info_outline, size: 14, color: AppColors.info),
+                            const Icon(
+                              Icons.info_outline,
+                              size: 14,
+                              color: AppColors.info,
+                            ),
                             const SizedBox(width: AppSpacing.s6),
                             Text(
                               context.l10n.lateSubmissionAllowedNotice,
-                              style: const TextStyle(fontSize: 12, color: AppColors.info),
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppColors.info,
+                              ),
                             ),
                           ],
                         ),
@@ -276,7 +293,11 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
                           children: [
                             Row(
                               children: [
-                                Icon(mySub.status.icon, color: mySub.status.color, size: 20),
+                                Icon(
+                                  mySub.status.icon,
+                                  color: mySub.status.color,
+                                  size: 20,
+                                ),
                                 const SizedBox(width: AppSpacing.s8),
                                 Text(
                                   mySub.status.localizedLabel(context),
@@ -296,8 +317,9 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
                                 ),
                                 decoration: BoxDecoration(
                                   color: AppColors.success,
-                                  borderRadius:
-                                      BorderRadius.circular(AppSpacing.radiusSmall),
+                                  borderRadius: BorderRadius.circular(
+                                    AppSpacing.radiusSmall,
+                                  ),
                                 ),
                                 child: Text(
                                   context.l10n.gradeScorePrefix(
@@ -320,7 +342,10 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
                             dateFormat.format(mySub.submittedAt),
                             mySub.attemptNumber.toString(),
                           ),
-                          style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textMuted,
+                          ),
                         ),
 
                         // Teacher Feedback if available
@@ -331,8 +356,11 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
                           const SizedBox(height: AppSpacing.s12),
                           Row(
                             children: [
-                              const Icon(Icons.rate_review_outlined,
-                                  size: 16, color: AppColors.primary),
+                              const Icon(
+                                Icons.rate_review_outlined,
+                                size: 16,
+                                color: AppColors.primary,
+                              ),
                               const SizedBox(width: AppSpacing.s6),
                               Text(
                                 context.l10n.teacherFeedbackTitle,
@@ -377,7 +405,10 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
                       ),
                       TextButton.icon(
                         onPressed: _pickFiles,
-                        icon: const Icon(Icons.add_photo_alternate_outlined, size: 18),
+                        icon: const Icon(
+                          Icons.add_photo_alternate_outlined,
+                          size: 18,
+                        ),
                         label: Text(context.l10n.selectFilesBtn),
                       ),
                     ],
@@ -387,7 +418,9 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
                   if (_selectedFiles.isEmpty)
                     InkWell(
                       onTap: _pickFiles,
-                      borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.radiusMedium,
+                      ),
                       child: Container(
                         width: double.infinity,
                         padding: const EdgeInsets.symmetric(
@@ -396,7 +429,9 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
                         ),
                         decoration: BoxDecoration(
                           color: AppColors.surfaceVariant,
-                          borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.radiusMedium,
+                          ),
                           border: Border.all(
                             color: AppColors.border,
                             style: BorderStyle.solid,
@@ -421,7 +456,10 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
                             const SizedBox(height: AppSpacing.s4),
                             Text(
                               context.l10n.maxFileSizeNotice,
-                              style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textMuted,
+                              ),
                             ),
                           ],
                         ),
@@ -443,7 +481,9 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
                                 isPdf
                                     ? Icons.picture_as_pdf_outlined
                                     : Icons.image_outlined,
-                                color: isPdf ? AppColors.error : AppColors.primary,
+                                color: isPdf
+                                    ? AppColors.error
+                                    : AppColors.primary,
                                 size: 28,
                               ),
                               const SizedBox(width: AppSpacing.s12),
@@ -473,8 +513,10 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
                                 ),
                               ),
                               IconButton(
-                                icon: const Icon(Icons.delete_outline,
-                                    color: AppColors.error),
+                                icon: const Icon(
+                                  Icons.delete_outline,
+                                  color: AppColors.error,
+                                ),
                                 onPressed: () => _removeFile(idx),
                               ),
                             ],
@@ -494,14 +536,20 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
                     variant: AppButtonVariant.primary,
                     icon: Icons.check_circle_outline,
                   ),
-                ] else if (isOverdue && !assignment.allowLateSubmission && !isSubmitted) ...[
+                ] else if (isOverdue &&
+                    !assignment.allowLateSubmission &&
+                    !isSubmitted) ...[
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(AppSpacing.s16),
                     decoration: BoxDecoration(
                       color: AppColors.error.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                      border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.radiusMedium,
+                      ),
+                      border: Border.all(
+                        color: AppColors.error.withValues(alpha: 0.3),
+                      ),
                     ),
                     child: Row(
                       children: [

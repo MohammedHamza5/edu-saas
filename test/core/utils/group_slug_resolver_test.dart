@@ -43,11 +43,17 @@ void main() {
       expect(GroupSlugResolver.toSlug(customId), customId);
     });
 
-    test('dynamically generates slugs from group names if not pre-registered', () {
-      const newGroupId = 'new-group-1234';
-      final slug = GroupSlugResolver.toSlug(newGroupId, 'Physics & Mechanics Level 1');
-      expect(slug, 'physics-mechanics-level-1');
-      expect(GroupSlugResolver.toId('physics-mechanics-level-1'), newGroupId);
-    });
+    test(
+      'dynamically generates slugs from group names if not pre-registered',
+      () {
+        const newGroupId = 'new-group-1234';
+        final slug = GroupSlugResolver.toSlug(
+          newGroupId,
+          'Physics & Mechanics Level 1',
+        );
+        expect(slug, 'physics-mechanics-level-1');
+        expect(GroupSlugResolver.toId('physics-mechanics-level-1'), newGroupId);
+      },
+    );
   });
 }

@@ -80,14 +80,18 @@ class _TeacherVideoBankPageState extends State<TeacherVideoBankPage> {
   Future<void> _addVideo() async {
     final added = await AddVideoToBankDialog.show(context);
     if (added == true && mounted) {
-      await context.read<ContentCubit>().loadCentralVideoBank(forceRefresh: true);
+      await context.read<ContentCubit>().loadCentralVideoBank(
+        forceRefresh: true,
+      );
     }
   }
 
   Future<void> _addToCourse(ContentEntity video) async {
     await AddToCourseFlow.show(context, video: video);
     if (mounted) {
-      await context.read<ContentCubit>().loadCentralVideoBank(forceRefresh: true);
+      await context.read<ContentCubit>().loadCentralVideoBank(
+        forceRefresh: true,
+      );
     }
   }
 
@@ -114,7 +118,9 @@ class _TeacherVideoBankPageState extends State<TeacherVideoBankPage> {
     if (confirmed == true && mounted) {
       await context.read<ContentCubit>().deleteContent(item.id);
       if (mounted) {
-        await context.read<ContentCubit>().loadCentralVideoBank(forceRefresh: true);
+        await context.read<ContentCubit>().loadCentralVideoBank(
+          forceRefresh: true,
+        );
       }
     }
   }
@@ -131,8 +137,9 @@ class _TeacherVideoBankPageState extends State<TeacherVideoBankPage> {
           if (state is ContentError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: AppColors.error),
+                content: Text(state.message),
+                backgroundColor: AppColors.error,
+              ),
             );
           }
         },
@@ -143,8 +150,9 @@ class _TeacherVideoBankPageState extends State<TeacherVideoBankPage> {
           if (state is ContentError && state is! ContentLoaded) {
             return AppErrorView(
               message: state.message,
-              onRetry: () =>
-                  context.read<ContentCubit>().loadCentralVideoBank(forceRefresh: true),
+              onRetry: () => context.read<ContentCubit>().loadCentralVideoBank(
+                forceRefresh: true,
+              ),
             );
           }
 
@@ -156,8 +164,9 @@ class _TeacherVideoBankPageState extends State<TeacherVideoBankPage> {
           final unusedCount = all.where((i) => i.isUnassigned).length;
 
           return RefreshIndicator(
-            onRefresh: () =>
-                context.read<ContentCubit>().loadCentralVideoBank(forceRefresh: true),
+            onRefresh: () => context.read<ContentCubit>().loadCentralVideoBank(
+              forceRefresh: true,
+            ),
             child: CustomScrollView(
               slivers: [
                 // ─── Header Banner ──────────────────────────────────────────
@@ -165,8 +174,11 @@ class _TeacherVideoBankPageState extends State<TeacherVideoBankPage> {
                   child: Container(
                     color: AppColors.surface,
                     padding: const EdgeInsets.fromLTRB(
-                        AppSpacing.s24, AppSpacing.s16,
-                        AppSpacing.s24, AppSpacing.s16),
+                      AppSpacing.s24,
+                      AppSpacing.s16,
+                      AppSpacing.s24,
+                      AppSpacing.s16,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -192,14 +204,16 @@ class _TeacherVideoBankPageState extends State<TeacherVideoBankPage> {
                                 children: [
                                   Text(
                                     l10n.videoLibraryTitle,
-                                    style: theme.textTheme.titleLarge
-                                        ?.copyWith(fontWeight: FontWeight.bold),
+                                    style: theme.textTheme.titleLarge?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
                                     l10n.videoLibrarySubtitle,
-                                    style: theme.textTheme.bodySmall
-                                        ?.copyWith(color: AppColors.textSecondary),
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: AppColors.textSecondary,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -224,8 +238,9 @@ class _TeacherVideoBankPageState extends State<TeacherVideoBankPage> {
                         // Search
                         TextField(
                           controller: _searchController,
-                          onChanged: (v) =>
-                              setState(() => _searchQuery = v.trim().toLowerCase()),
+                          onChanged: (v) => setState(
+                            () => _searchQuery = v.trim().toLowerCase(),
+                          ),
                           decoration: InputDecoration(
                             hintText: l10n.videoPickerSearchHint,
                             prefixIcon: const Icon(Icons.search_rounded),
@@ -239,9 +254,13 @@ class _TeacherVideoBankPageState extends State<TeacherVideoBankPage> {
                                   )
                                 : null,
                             filled: true,
-                            fillColor: AppColors.surfaceVariant.withValues(alpha: 0.4),
+                            fillColor: AppColors.surfaceVariant.withValues(
+                              alpha: 0.4,
+                            ),
                             contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 12),
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
                               borderSide: BorderSide.none,
@@ -282,7 +301,8 @@ class _TeacherVideoBankPageState extends State<TeacherVideoBankPage> {
                 ),
 
                 const SliverToBoxAdapter(
-                    child: SizedBox(height: AppSpacing.s16)),
+                  child: SizedBox(height: AppSpacing.s16),
+                ),
 
                 // ─── Content ──────────────────────────────────────────────
                 if (filtered.isEmpty)
@@ -303,32 +323,31 @@ class _TeacherVideoBankPageState extends State<TeacherVideoBankPage> {
                 else
                   SliverPadding(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.s16),
+                      horizontal: AppSpacing.s16,
+                    ),
                     sliver: SliverGrid(
                       gridDelegate:
                           const SliverGridDelegateWithMaxCrossAxisExtent(
-                        maxCrossAxisExtent: 380,
-                        mainAxisSpacing: AppSpacing.s16,
-                        crossAxisSpacing: AppSpacing.s16,
-                        mainAxisExtent: 340,
-                      ),
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          final video = filtered[index];
-                          return _VideoLibraryCard(
-                            key: ValueKey('lib_${video.id}'),
-                            video: video,
-                            onAddToCourse: () => _addToCourse(video),
-                            onDelete: () => _handleDelete(video),
-                          );
-                        },
-                        childCount: filtered.length,
-                      ),
+                            maxCrossAxisExtent: 380,
+                            mainAxisSpacing: AppSpacing.s16,
+                            crossAxisSpacing: AppSpacing.s16,
+                            mainAxisExtent: 340,
+                          ),
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        final video = filtered[index];
+                        return _VideoLibraryCard(
+                          key: ValueKey('lib_${video.id}'),
+                          video: video,
+                          onAddToCourse: () => _addToCourse(video),
+                          onDelete: () => _handleDelete(video),
+                        );
+                      }, childCount: filtered.length),
                     ),
                   ),
 
                 const SliverToBoxAdapter(
-                    child: SizedBox(height: AppSpacing.s32)),
+                  child: SizedBox(height: AppSpacing.s32),
+                ),
               ],
             ),
           );
@@ -530,14 +549,14 @@ class _VideoLibraryCardState extends State<_VideoLibraryCard> {
                     color: AppColors.primary.withValues(alpha: 0.1),
                     blurRadius: 16,
                     offset: const Offset(0, 4),
-                  )
+                  ),
                 ]
               : [
                   const BoxShadow(
                     color: AppColors.shadowSoft,
                     blurRadius: 4,
                     offset: Offset(0, 1),
-                  )
+                  ),
                 ],
         ),
         clipBehavior: Clip.hardEdge,
@@ -583,8 +602,10 @@ class _VideoLibraryCardState extends State<_VideoLibraryCard> {
                   top: 8,
                   start: 8,
                   child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: isUsed ? AppColors.primary : Colors.amber.shade700,
                       borderRadius: BorderRadius.circular(6),
@@ -606,8 +627,10 @@ class _VideoLibraryCardState extends State<_VideoLibraryCard> {
                   top: 8,
                   end: 8,
                   child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: 0.6),
                       borderRadius: BorderRadius.circular(5),
@@ -650,12 +673,14 @@ class _VideoLibraryCardState extends State<_VideoLibraryCard> {
                         spacing: 4,
                         runSpacing: 4,
                         children: [
-                          ...v.assignedGroupNames.take(2).map((name) =>
-                              _CourseBadge(name: name)),
+                          ...v.assignedGroupNames
+                              .take(2)
+                              .map((name) => _CourseBadge(name: name)),
                           if (v.assignedGroupNames.length > 2)
                             _CourseBadge(
                               name: l10n.usedInMoreCourses(
-                                  v.assignedGroupNames.length - 2),
+                                v.assignedGroupNames.length - 2,
+                              ),
                               isOverflow: true,
                             ),
                         ],
@@ -679,39 +704,52 @@ class _VideoLibraryCardState extends State<_VideoLibraryCard> {
             // ── Actions Row ──────────────────────────
             Padding(
               padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.s8, vertical: 6),
+                horizontal: AppSpacing.s8,
+                vertical: 6,
+              ),
               child: Row(
                 children: [
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: widget.onAddToCourse,
-                      icon: const Icon(Icons.add_circle_outline_rounded,
-                          size: 15),
+                      icon: const Icon(
+                        Icons.add_circle_outline_rounded,
+                        size: 15,
+                      ),
                       label: Text(
                         l10n.addToCourse,
                         style: const TextStyle(fontSize: 12),
                       ),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 6),
+                          horizontal: 8,
+                          vertical: 6,
+                        ),
                         side: BorderSide(
-                            color: AppColors.primary.withValues(alpha: 0.4)),
+                          color: AppColors.primary.withValues(alpha: 0.4),
+                        ),
                         foregroundColor: AppColors.primary,
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8)),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                         minimumSize: const Size(0, 34),
                       ),
                     ),
                   ),
                   const SizedBox(width: AppSpacing.s6),
                   IconButton(
-                    icon: const Icon(Icons.delete_outline_rounded,
-                        size: 18, color: AppColors.error),
+                    icon: const Icon(
+                      Icons.delete_outline_rounded,
+                      size: 18,
+                      color: AppColors.error,
+                    ),
                     tooltip: l10n.deleteAction,
                     onPressed: widget.onDelete,
                     padding: EdgeInsets.zero,
-                    constraints:
-                        const BoxConstraints(minWidth: 34, minHeight: 34),
+                    constraints: const BoxConstraints(
+                      minWidth: 34,
+                      minHeight: 34,
+                    ),
                   ),
                 ],
               ),
@@ -726,8 +764,11 @@ class _VideoLibraryCardState extends State<_VideoLibraryCard> {
     return Container(
       color: AppColors.surfaceVariant,
       child: const Center(
-        child: Icon(Icons.videocam_rounded,
-            size: 40, color: AppColors.textMuted),
+        child: Icon(
+          Icons.videocam_rounded,
+          size: 40,
+          color: AppColors.textMuted,
+        ),
       ),
     );
   }

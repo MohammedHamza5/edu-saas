@@ -19,6 +19,7 @@ import '../widgets/exam_card.dart';
 import 'exam_intro_page.dart';
 
 enum StudentExamFilter { all, available, inProgress, completed }
+
 enum AssessmentTypeFilter { all, lessonQuizzes, generalExams }
 
 class StudentExamsPage extends StatefulWidget {
@@ -44,7 +45,9 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
         final state = context.read<ExamsCubit>().state;
         if (state is StudentExamsLoaded) {
           try {
-            final exam = state.exams.firstWhere((e) => e.id == widget.initialExamId);
+            final exam = state.exams.firstWhere(
+              (e) => e.id == widget.initialExamId,
+            );
             _openExamIntro(exam);
           } catch (_) {
             // Exam not found in the initial page, might be on another page or invalid.
@@ -103,14 +106,18 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
       }
     } catch (_) {}
     if (mounted) {
-      await context.read<ExamsCubit>().loadStudentExams(forceRefresh: forceRefresh);
+      await context.read<ExamsCubit>().loadStudentExams(
+        forceRefresh: forceRefresh,
+      );
     }
   }
 
   bool _isLessonQuiz(ExamEntity exam) {
     if (_lessonExamIds.contains(exam.id)) return true;
     final lower = exam.title.toLowerCase();
-    return lower.contains('quiz') || lower.contains('درس') || lower.contains('lesson');
+    return lower.contains('quiz') ||
+        lower.contains('درس') ||
+        lower.contains('lesson');
   }
 
   List<ExamEntity> _filterExams(List<ExamEntity> list) {
@@ -129,7 +136,9 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
       case StudentExamFilter.inProgress:
         return result.where((e) => e.hasActiveAttempt).toList();
       case StudentExamFilter.completed:
-        return result.where((e) => e.hasAttempted && !e.hasActiveAttempt).toList();
+        return result
+            .where((e) => e.hasAttempted && !e.hasActiveAttempt)
+            .toList();
     }
   }
 
@@ -186,7 +195,9 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
           if (state is StudentExamsLoaded) {
             final filtered = _filterExams(state.exams);
             final lessonQuizzes = filtered.where(_isLessonQuiz).toList();
-            final generalExams = filtered.where((e) => !_isLessonQuiz(e)).toList();
+            final generalExams = filtered
+                .where((e) => !_isLessonQuiz(e))
+                .toList();
 
             return Center(
               child: ResponsiveContainer(
@@ -219,7 +230,9 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
                             _buildCategoryChip(
                               context.l10n.generalExamsSectionTitle,
                               AssessmentTypeFilter.generalExams,
-                              state.exams.where((e) => !_isLessonQuiz(e)).length,
+                              state.exams
+                                  .where((e) => !_isLessonQuiz(e))
+                                  .length,
                             ),
                           ],
                         ),
@@ -236,12 +249,20 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
                         scrollDirection: Axis.horizontal,
                         child: Row(
                           children: [
-                            _buildFilterChip(context.l10n.filterAll, StudentExamFilter.all, filtered.length),
+                            _buildFilterChip(
+                              context.l10n.filterAll,
+                              StudentExamFilter.all,
+                              filtered.length,
+                            ),
                             const SizedBox(width: AppSpacing.s8),
                             _buildFilterChip(
                               context.l10n.filterAvailable,
                               StudentExamFilter.available,
-                              filtered.where((e) => !e.hasAttempted || e.canTakeExam).length,
+                              filtered
+                                  .where(
+                                    (e) => !e.hasAttempted || e.canTakeExam,
+                                  )
+                                  .length,
                             ),
                             const SizedBox(width: AppSpacing.s8),
                             _buildFilterChip(
@@ -253,7 +274,12 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
                             _buildFilterChip(
                               context.l10n.filterCompleted,
                               StudentExamFilter.completed,
-                              filtered.where((e) => e.hasAttempted && !e.hasActiveAttempt).length,
+                              filtered
+                                  .where(
+                                    (e) =>
+                                        e.hasAttempted && !e.hasActiveAttempt,
+                                  )
+                                  .length,
                             ),
                           ],
                         ),
@@ -278,14 +304,20 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
                                 physics: const AlwaysScrollableScrollPhysics(),
                                 padding: const EdgeInsets.all(AppSpacing.s16),
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
                                   children: [
-                                    if (_typeFilter == AssessmentTypeFilter.all) ...[
+                                    if (_typeFilter ==
+                                        AssessmentTypeFilter.all) ...[
                                       if (lessonQuizzes.isNotEmpty) ...[
                                         _buildSectionHeader(
                                           context,
-                                          title: context.l10n.lessonQuizzesSectionTitle,
-                                          subtitle: context.l10n.lessonQuizzesSectionDesc,
+                                          title: context
+                                              .l10n
+                                              .lessonQuizzesSectionTitle,
+                                          subtitle: context
+                                              .l10n
+                                              .lessonQuizzesSectionDesc,
                                           icon: Icons.quiz_rounded,
                                           color: AppColors.primary,
                                         ),
@@ -296,19 +328,28 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
                                       if (generalExams.isNotEmpty) ...[
                                         _buildSectionHeader(
                                           context,
-                                          title: context.l10n.generalExamsSectionTitle,
-                                          subtitle: context.l10n.generalExamsSectionDesc,
+                                          title: context
+                                              .l10n
+                                              .generalExamsSectionTitle,
+                                          subtitle: context
+                                              .l10n
+                                              .generalExamsSectionDesc,
                                           icon: Icons.assignment_rounded,
                                           color: const Color(0xFF0D9488),
                                         ),
                                         const SizedBox(height: AppSpacing.s8),
                                         _buildExamsGrid(generalExams),
                                       ],
-                                    ] else if (_typeFilter == AssessmentTypeFilter.lessonQuizzes) ...[
+                                    ] else if (_typeFilter ==
+                                        AssessmentTypeFilter.lessonQuizzes) ...[
                                       _buildSectionHeader(
                                         context,
-                                        title: context.l10n.lessonQuizzesSectionTitle,
-                                        subtitle: context.l10n.lessonQuizzesSectionDesc,
+                                        title: context
+                                            .l10n
+                                            .lessonQuizzesSectionTitle,
+                                        subtitle: context
+                                            .l10n
+                                            .lessonQuizzesSectionDesc,
                                         icon: Icons.quiz_rounded,
                                         color: AppColors.primary,
                                       ),
@@ -317,8 +358,12 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
                                     ] else ...[
                                       _buildSectionHeader(
                                         context,
-                                        title: context.l10n.generalExamsSectionTitle,
-                                        subtitle: context.l10n.generalExamsSectionDesc,
+                                        title: context
+                                            .l10n
+                                            .generalExamsSectionTitle,
+                                        subtitle: context
+                                            .l10n
+                                            .generalExamsSectionDesc,
                                         icon: Icons.assignment_rounded,
                                         color: const Color(0xFF0D9488),
                                       ),
@@ -331,7 +376,9 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
                                           vertical: AppSpacing.s16,
                                         ),
                                         child: Center(
-                                          child: AppLoadingView.compact(size: 24),
+                                          child: AppLoadingView.compact(
+                                            size: 24,
+                                          ),
                                         ),
                                       ),
                                   ],
@@ -415,7 +462,11 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
     );
   }
 
-  Widget _buildCategoryChip(String label, AssessmentTypeFilter filter, int count) {
+  Widget _buildCategoryChip(
+    String label,
+    AssessmentTypeFilter filter,
+    int count,
+  ) {
     final isSelected = _typeFilter == filter;
     return ChoiceChip(
       label: Text('$label ($count)'),

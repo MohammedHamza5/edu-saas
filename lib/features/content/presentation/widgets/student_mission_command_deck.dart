@@ -35,7 +35,10 @@ class StudentMissionCommandDeck extends StatelessWidget {
     final isAllCompleted = totalCount > 0 && completedCount >= totalCount;
 
     return Container(
-      margin: const EdgeInsets.only(top: AppSpacing.s12, bottom: AppSpacing.s16),
+      margin: const EdgeInsets.only(
+        top: AppSpacing.s12,
+        bottom: AppSpacing.s16,
+      ),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: AlignmentDirectional.topStart,
@@ -329,7 +332,10 @@ class StudentMissionCommandDeck extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppColors.success.withAlpha(30),
             shape: BoxShape.circle,
-            border: Border.all(color: AppColors.success.withAlpha(90), width: 2),
+            border: Border.all(
+              color: AppColors.success.withAlpha(90),
+              width: 2,
+            ),
           ),
           child: const Icon(
             Icons.emoji_events_rounded,

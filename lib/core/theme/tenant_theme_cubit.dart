@@ -9,13 +9,19 @@ import 'tenant_branding.dart';
 /// a tenant is switched, or an authenticated user's tenant is detected.
 class TenantThemeCubit extends Cubit<TenantBranding> {
   TenantThemeCubit({TenantBranding? initialBranding})
-      : super(initialBranding ?? TenantRegistry.defaultBranding) {
-    AppLogger.i('TenantThemeCubit', 'Initialized with tenant: ${state.brandName} (${state.tenantId})');
+    : super(initialBranding ?? TenantRegistry.defaultBranding) {
+    AppLogger.i(
+      'TenantThemeCubit',
+      'Initialized with tenant: ${state.brandName} (${state.tenantId})',
+    );
   }
 
   /// Sets the active tenant branding directly
   void setBranding(TenantBranding branding) {
-    AppLogger.i('TenantThemeCubit', 'Switching branding to: ${branding.brandName} (${branding.tenantId})');
+    AppLogger.i(
+      'TenantThemeCubit',
+      'Switching branding to: ${branding.brandName} (${branding.tenantId})',
+    );
     emit(branding);
   }
 
@@ -23,7 +29,10 @@ class TenantThemeCubit extends Cubit<TenantBranding> {
   void loadForTenant(String? tenantId) {
     final branding = TenantRegistry.resolve(tenantId);
     if (branding != state) {
-      AppLogger.i('TenantThemeCubit', 'Loaded tenant branding: ${branding.brandName} for id: $tenantId');
+      AppLogger.i(
+        'TenantThemeCubit',
+        'Loaded tenant branding: ${branding.brandName} for id: $tenantId',
+      );
       emit(branding);
     }
   }

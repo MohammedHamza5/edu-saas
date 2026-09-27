@@ -241,9 +241,13 @@ class _Student360PageState extends State<Student360Page> {
                                 Row(
                                   children: [
                                     Container(
-                                      padding: const EdgeInsets.all(AppSpacing.s8),
+                                      padding: const EdgeInsets.all(
+                                        AppSpacing.s8,
+                                      ),
                                       decoration: BoxDecoration(
-                                        color: const Color(0xFF25D366).withValues(alpha: 0.15),
+                                        color: const Color(
+                                          0xFF25D366,
+                                        ).withValues(alpha: 0.15),
                                         shape: BoxShape.circle,
                                       ),
                                       child: const Icon(
@@ -277,8 +281,13 @@ class _Student360PageState extends State<Student360Page> {
                                 SizedBox(
                                   width: double.infinity,
                                   child: ElevatedButton.icon(
-                                    icon: const Icon(Icons.share_rounded, size: 16),
-                                    label: Text(context.l10n.createAndShareReport),
+                                    icon: const Icon(
+                                      Icons.share_rounded,
+                                      size: 16,
+                                    ),
+                                    label: Text(
+                                      context.l10n.createAndShareReport,
+                                    ),
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: const Color(0xFF25D366),
                                       foregroundColor: Colors.white,
@@ -292,22 +301,44 @@ class _Student360PageState extends State<Student360Page> {
                                       ),
                                     ),
                                     onPressed: () {
-                                      final report = WhatsAppReportGenerator.generateStudentWeeklyReport(
-                                        studentName: student.fullName,
-                                        groupName: stats.groups.isNotEmpty ? stats.groups.first.groupName : null,
-                                        attendanceRate: (stats.attendancePercentage / 100).clamp(0.0, 1.0),
-                                        videoWatchRate: (stats.videoCompletionPercentage / 100).clamp(0.0, 1.0),
-                                        completedAssignments: stats.assignmentsSubmitted,
-                                        totalAssignments: stats.assignmentsSubmitted > 0 ? stats.assignmentsSubmitted : 4,
-                                        mockExamScore: stats.examAverage > 0 ? (stats.examAverage * 8).round() : 740,
-                                        activeStudyMinutes: stats.todayActiveMinutes,
-                                        engagementQualityText: _getEngagementText(stats.engagementQuality),
-                                      );
+                                      final report =
+                                          WhatsAppReportGenerator.generateStudentWeeklyReport(
+                                            studentName: student.fullName,
+                                            groupName: stats.groups.isNotEmpty
+                                                ? stats.groups.first.groupName
+                                                : null,
+                                            attendanceRate:
+                                                (stats.attendancePercentage /
+                                                        100)
+                                                    .clamp(0.0, 1.0),
+                                            videoWatchRate:
+                                                (stats.videoCompletionPercentage /
+                                                        100)
+                                                    .clamp(0.0, 1.0),
+                                            completedAssignments:
+                                                stats.assignmentsSubmitted,
+                                            totalAssignments:
+                                                stats.assignmentsSubmitted > 0
+                                                ? stats.assignmentsSubmitted
+                                                : 4,
+                                            mockExamScore: stats.examAverage > 0
+                                                ? (stats.examAverage * 8)
+                                                      .round()
+                                                : 740,
+                                            activeStudyMinutes:
+                                                stats.todayActiveMinutes,
+                                            engagementQualityText:
+                                                _getEngagementText(
+                                                  stats.engagementQuality,
+                                                ),
+                                          );
                                       WhatsAppReportGenerator.showReportPreviewDialog(
                                         context,
                                         studentName: student.fullName,
                                         reportText: report,
-                                        phone: (student.parentPhone != null && student.parentPhone!.isNotEmpty)
+                                        phone:
+                                            (student.parentPhone != null &&
+                                                student.parentPhone!.isNotEmpty)
                                             ? student.parentPhone
                                             : student.phone,
                                       );
@@ -322,7 +353,9 @@ class _Student360PageState extends State<Student360Page> {
                               Container(
                                 padding: const EdgeInsets.all(AppSpacing.s8),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF25D366).withValues(alpha: 0.15),
+                                  color: const Color(
+                                    0xFF25D366,
+                                  ).withValues(alpha: 0.15),
                                   shape: BoxShape.circle,
                                 ),
                                 child: const Icon(
@@ -372,22 +405,42 @@ class _Student360PageState extends State<Student360Page> {
                                   ),
                                 ),
                                 onPressed: () {
-                                  final report = WhatsAppReportGenerator.generateStudentWeeklyReport(
-                                    studentName: student.fullName,
-                                    groupName: stats.groups.isNotEmpty ? stats.groups.first.groupName : null,
-                                    attendanceRate: (stats.attendancePercentage / 100).clamp(0.0, 1.0),
-                                    videoWatchRate: (stats.videoCompletionPercentage / 100).clamp(0.0, 1.0),
-                                    completedAssignments: stats.assignmentsSubmitted,
-                                    totalAssignments: stats.assignmentsSubmitted > 0 ? stats.assignmentsSubmitted : 4,
-                                    mockExamScore: stats.examAverage > 0 ? (stats.examAverage * 8).round() : 740,
-                                    activeStudyMinutes: stats.todayActiveMinutes,
-                                    engagementQualityText: _getEngagementText(stats.engagementQuality),
-                                  );
+                                  final report =
+                                      WhatsAppReportGenerator.generateStudentWeeklyReport(
+                                        studentName: student.fullName,
+                                        groupName: stats.groups.isNotEmpty
+                                            ? stats.groups.first.groupName
+                                            : null,
+                                        attendanceRate:
+                                            (stats.attendancePercentage / 100)
+                                                .clamp(0.0, 1.0),
+                                        videoWatchRate:
+                                            (stats.videoCompletionPercentage /
+                                                    100)
+                                                .clamp(0.0, 1.0),
+                                        completedAssignments:
+                                            stats.assignmentsSubmitted,
+                                        totalAssignments:
+                                            stats.assignmentsSubmitted > 0
+                                            ? stats.assignmentsSubmitted
+                                            : 4,
+                                        mockExamScore: stats.examAverage > 0
+                                            ? (stats.examAverage * 8).round()
+                                            : 740,
+                                        activeStudyMinutes:
+                                            stats.todayActiveMinutes,
+                                        engagementQualityText:
+                                            _getEngagementText(
+                                              stats.engagementQuality,
+                                            ),
+                                      );
                                   WhatsAppReportGenerator.showReportPreviewDialog(
                                     context,
                                     studentName: student.fullName,
                                     reportText: report,
-                                    phone: (student.parentPhone != null && student.parentPhone!.isNotEmpty)
+                                    phone:
+                                        (student.parentPhone != null &&
+                                            student.parentPhone!.isNotEmpty)
                                         ? student.parentPhone
                                         : student.phone,
                                   );
@@ -427,7 +480,9 @@ class _Student360PageState extends State<Student360Page> {
                           icon: Icons.assignment_turned_in_rounded,
                           label: context.l10n.submittedHomeworksLabel,
                           value: '${stats.assignmentsSubmitted}',
-                          subtitle: context.l10n.reviewedSubtitle(stats.assignmentsReviewed),
+                          subtitle: context.l10n.reviewedSubtitle(
+                            stats.assignmentsReviewed,
+                          ),
                           progress: stats.assignmentsSubmitted > 0
                               ? (stats.assignmentsReviewed /
                                         stats.assignmentsSubmitted)
@@ -461,7 +516,9 @@ class _Student360PageState extends State<Student360Page> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Expanded(
-                          child: _SectionTitle(context.l10n.enrolledStudyGroups),
+                          child: _SectionTitle(
+                            context.l10n.enrolledStudyGroups,
+                          ),
                         ),
                         TextButton.icon(
                           onPressed: () => context.push(
@@ -517,7 +574,9 @@ class _Student360PageState extends State<Student360Page> {
                                                   ),
                                                 ),
                                                 Text(
-                                                  context.l10n.joinedDateLabel(_formatDate(g.joinedAt)),
+                                                  context.l10n.joinedDateLabel(
+                                                    _formatDate(g.joinedAt),
+                                                  ),
                                                   style: const TextStyle(
                                                     fontSize: 11,
                                                     color: AppColors.textMuted,
@@ -541,7 +600,9 @@ class _Student360PageState extends State<Student360Page> {
                     const SizedBox(height: AppSpacing.s20),
 
                     // ── Smart Engagement Telemetry ────────────────────────
-                    const _SectionTitle('تتبع الحضور والتفاعل الفعلي (Smart Telemetry)'),
+                    const _SectionTitle(
+                      'تتبع الحضور والتفاعل الفعلي (Smart Telemetry)',
+                    ),
                     const SizedBox(height: AppSpacing.s8),
                     _SmartEngagementCard(stats: stats),
 
@@ -554,11 +615,14 @@ class _Student360PageState extends State<Student360Page> {
                     // ── Activity Timeline Section ─────────────────────────
                     if (stats.recentActivities.isNotEmpty) ...[
                       const SizedBox(height: AppSpacing.s20),
-                      _ActivityTimelineSection(activities: stats.recentActivities),
+                      _ActivityTimelineSection(
+                        activities: stats.recentActivities,
+                      ),
                     ],
 
                     // ── Last activity fallback ─────────────────────────────
-                    if (stats.lastActivityAt != null && stats.recentActivities.isEmpty) ...[
+                    if (stats.lastActivityAt != null &&
+                        stats.recentActivities.isEmpty) ...[
                       const SizedBox(height: AppSpacing.s20),
                       _SectionTitle(context.l10n.lastRecordedActivity),
                       const SizedBox(height: AppSpacing.s8),
@@ -765,7 +829,9 @@ class _AccountActions extends StatelessWidget {
                 final ok = await _confirm(
                   context,
                   title: context.l10n.suspendStudentConfirmTitle,
-                  body: context.l10n.suspendStudentConfirmBody(student.fullName),
+                  body: context.l10n.suspendStudentConfirmBody(
+                    student.fullName,
+                  ),
                   label: context.l10n.suspendStudentAction,
                   color: AppColors.warning,
                 );
@@ -798,7 +864,9 @@ class _AccountActions extends StatelessWidget {
                 final ok = await _confirm(
                   context,
                   title: context.l10n.activateStudentConfirmTitle,
-                  body: context.l10n.activateStudentConfirmBody(student.fullName),
+                  body: context.l10n.activateStudentConfirmBody(
+                    student.fullName,
+                  ),
                   label: context.l10n.activateStudentAction,
                   color: AppColors.success,
                 );
@@ -826,7 +894,9 @@ class _AccountActions extends StatelessWidget {
                 final ok = await _confirm(
                   context,
                   title: context.l10n.approveStudentConfirmTitle,
-                  body: context.l10n.approveStudentConfirmBody(student.fullName),
+                  body: context.l10n.approveStudentConfirmBody(
+                    student.fullName,
+                  ),
                   label: context.l10n.approveStudentAction,
                   color: AppColors.success,
                 );
@@ -948,11 +1018,16 @@ class _SmartEngagementCard extends StatelessWidget {
             builder: (context, constraints) {
               final isNarrow = constraints.maxWidth < 420;
               final badgeWidget = Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: qualityColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-                  border: Border.all(color: qualityColor.withValues(alpha: 0.3)),
+                  border: Border.all(
+                    color: qualityColor.withValues(alpha: 0.3),
+                  ),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -981,7 +1056,9 @@ class _SmartEngagementCard extends StatelessWidget {
                           padding: const EdgeInsets.all(AppSpacing.s8),
                           decoration: BoxDecoration(
                             color: AppColors.primary.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.radiusSmall,
+                            ),
                           ),
                           child: const Icon(
                             Icons.insights_rounded,
@@ -1022,7 +1099,9 @@ class _SmartEngagementCard extends StatelessWidget {
                     padding: const EdgeInsets.all(AppSpacing.s8),
                     decoration: BoxDecoration(
                       color: AppColors.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.radiusSmall,
+                      ),
                     ),
                     child: const Icon(
                       Icons.insights_rounded,
@@ -1075,7 +1154,9 @@ class _SmartEngagementCard extends StatelessWidget {
                     if (idleMins > 0)
                       Expanded(
                         flex: idleMins,
-                        child: Container(color: AppColors.warning.withValues(alpha: 0.7)),
+                        child: Container(
+                          color: AppColors.warning.withValues(alpha: 0.7),
+                        ),
                       ),
                   ],
                 ),
@@ -1087,21 +1168,44 @@ class _SmartEngagementCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Container(width: 8, height: 8, decoration: const BoxDecoration(color: AppColors.success, shape: BoxShape.circle)),
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        color: AppColors.success,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
                     const SizedBox(width: 4),
                     Text(
-                      context.l10n.activeMinutesWithRatio(activeMins, activeRatio),
-                      style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                      context.l10n.activeMinutesWithRatio(
+                        activeMins,
+                        activeRatio,
+                      ),
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ],
                 ),
                 Row(
                   children: [
-                    Container(width: 8, height: 8, decoration: BoxDecoration(color: AppColors.warning.withValues(alpha: 0.7), shape: BoxShape.circle)),
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: AppColors.warning.withValues(alpha: 0.7),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
                     const SizedBox(width: 4),
                     Text(
                       context.l10n.idleMinutesWithCount(idleMins),
-                      style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ],
                 ),
@@ -1141,7 +1245,9 @@ class _SmartEngagementCard extends StatelessWidget {
                   child: _MiniTelemetryItem(
                     icon: Icons.login_rounded,
                     label: context.l10n.firstLoginLabel,
-                    value: stats.firstSeenToday != null ? _formatTimeOnly(context, stats.firstSeenToday!) : '—',
+                    value: stats.firstSeenToday != null
+                        ? _formatTimeOnly(context, stats.firstSeenToday!)
+                        : '—',
                   ),
                 ),
                 Container(width: 1, height: 30, color: AppColors.border),
@@ -1149,7 +1255,9 @@ class _SmartEngagementCard extends StatelessWidget {
                   child: _MiniTelemetryItem(
                     icon: Icons.date_range_rounded,
                     label: context.l10n.active7DaysLabel,
-                    value: context.l10n.minutesShort(stats.totalActiveMinutes7d),
+                    value: context.l10n.minutesShort(
+                      stats.totalActiveMinutes7d,
+                    ),
                     valueColor: AppColors.primary,
                   ),
                 ),
@@ -1163,7 +1271,9 @@ class _SmartEngagementCard extends StatelessWidget {
 
   static String _formatTimeOnly(BuildContext context, DateTime dt) {
     final hour = dt.hour > 12 ? dt.hour - 12 : (dt.hour == 0 ? 12 : dt.hour);
-    final period = dt.hour >= 12 ? context.l10n.pmPeriod : context.l10n.amPeriod;
+    final period = dt.hour >= 12
+        ? context.l10n.pmPeriod
+        : context.l10n.amPeriod;
     return '${hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')} $period';
   }
 }
@@ -1198,10 +1308,7 @@ class _MiniTelemetryItem extends StatelessWidget {
         const SizedBox(height: 2),
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 10,
-            color: AppColors.textSecondary,
-          ),
+          style: const TextStyle(fontSize: 10, color: AppColors.textSecondary),
         ),
       ],
     );
@@ -1235,62 +1342,106 @@ class _VideoInsightsSection extends StatelessWidget {
                   Row(
                     children: [
                       Icon(
-                        item.completed ? Icons.check_circle_rounded : Icons.play_circle_fill_rounded,
-                        color: item.completed ? AppColors.success : AppColors.primary,
+                        item.completed
+                            ? Icons.check_circle_rounded
+                            : Icons.play_circle_fill_rounded,
+                        color: item.completed
+                            ? AppColors.success
+                            : AppColors.primary,
                         size: 20,
                       ),
                       const SizedBox(width: AppSpacing.s8),
                       Expanded(
                         child: Text(
                           item.videoTitle,
-                          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                          ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       if (isSkipped)
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: AppColors.error.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-                            border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.radiusFull,
+                            ),
+                            border: Border.all(
+                              color: AppColors.error.withValues(alpha: 0.3),
+                            ),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.fast_forward_rounded, size: 12, color: AppColors.error),
+                              const Icon(
+                                Icons.fast_forward_rounded,
+                                size: 12,
+                                color: AppColors.error,
+                              ),
                               const SizedBox(width: 3),
                               Text(
                                 context.l10n.videoFastForwardWarning,
-                                style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.error),
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.error,
+                                ),
                               ),
                             ],
                           ),
                         )
                       else if (item.completed)
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: AppColors.success.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-                            border: Border.all(color: AppColors.success.withValues(alpha: 0.3)),
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.radiusFull,
+                            ),
+                            border: Border.all(
+                              color: AppColors.success.withValues(alpha: 0.3),
+                            ),
                           ),
                           child: Text(
                             context.l10n.videoCompletedHonest,
-                            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.success),
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.success,
+                            ),
                           ),
                         )
                       else
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: AppColors.info.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.radiusFull,
+                            ),
                           ),
                           child: Text(
-                            context.l10n.videoPercentageCompleted(item.percentage.toStringAsFixed(0)),
-                            style: const TextStyle(fontSize: 10, color: AppColors.info, fontWeight: FontWeight.w600),
+                            context.l10n.videoPercentageCompleted(
+                              item.percentage.toStringAsFixed(0),
+                            ),
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: AppColors.info,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                     ],
@@ -1314,19 +1465,29 @@ class _VideoInsightsSection extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          context.l10n.actualWatchMinutesRatio(item.actualWatchMinutes, item.durationMinutes),
+                          context.l10n.actualWatchMinutesRatio(
+                            item.actualWatchMinutes,
+                            item.durationMinutes,
+                          ),
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
-                            color: isSkipped ? AppColors.error : AppColors.textSecondary,
+                            color: isSkipped
+                                ? AppColors.error
+                                : AppColors.textSecondary,
                           ),
                         ),
                       ),
                       const SizedBox(width: AppSpacing.s8),
                       Text(
-                        context.l10n.lastWatchedLabel(_formatShortDate(item.lastWatchedAt)),
-                        style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+                        context.l10n.lastWatchedLabel(
+                          _formatShortDate(item.lastWatchedAt),
+                        ),
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: AppColors.textMuted,
+                        ),
                       ),
                     ],
                   ),
@@ -1339,7 +1500,8 @@ class _VideoInsightsSection extends StatelessWidget {
     );
   }
 
-  static String _formatShortDate(DateTime dt) => '${dt.day}/${dt.month} ${dt.hour}:${dt.minute.toString().padLeft(2, '0')}';
+  static String _formatShortDate(DateTime dt) =>
+      '${dt.day}/${dt.month} ${dt.hour}:${dt.minute.toString().padLeft(2, '0')}';
 }
 
 class _ActivityTimelineSection extends StatelessWidget {
@@ -1358,17 +1520,48 @@ class _ActivityTimelineSection extends StatelessWidget {
         _SectionTitle(context.l10n.activityTimelineTitle),
         const SizedBox(height: AppSpacing.s8),
         AppCard(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s12, vertical: AppSpacing.s8),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.s12,
+            vertical: AppSpacing.s8,
+          ),
           child: Column(
             children: activities.take(8).map((act) {
               final (label, icon, color) = switch (act.eventType) {
-                'login' => (context.l10n.eventLogin, Icons.login_rounded, AppColors.info),
-                'content_opened' => (context.l10n.eventContentOpened, Icons.menu_book_rounded, AppColors.primary),
-                'video_started' => (context.l10n.eventVideoStarted, Icons.play_circle_outline_rounded, AppColors.primary),
-                'video_completed' => (context.l10n.eventVideoCompleted, Icons.check_circle_outline_rounded, AppColors.success),
-                'assignment_submitted' => (context.l10n.eventAssignmentSubmitted, Icons.assignment_turned_in_outlined, AppColors.success),
-                'exam_started' => (context.l10n.eventExamStarted, Icons.timer_outlined, AppColors.warning),
-                'exam_submitted' => (context.l10n.eventExamSubmitted, Icons.grading_rounded, AppColors.success),
+                'login' => (
+                  context.l10n.eventLogin,
+                  Icons.login_rounded,
+                  AppColors.info,
+                ),
+                'content_opened' => (
+                  context.l10n.eventContentOpened,
+                  Icons.menu_book_rounded,
+                  AppColors.primary,
+                ),
+                'video_started' => (
+                  context.l10n.eventVideoStarted,
+                  Icons.play_circle_outline_rounded,
+                  AppColors.primary,
+                ),
+                'video_completed' => (
+                  context.l10n.eventVideoCompleted,
+                  Icons.check_circle_outline_rounded,
+                  AppColors.success,
+                ),
+                'assignment_submitted' => (
+                  context.l10n.eventAssignmentSubmitted,
+                  Icons.assignment_turned_in_outlined,
+                  AppColors.success,
+                ),
+                'exam_started' => (
+                  context.l10n.eventExamStarted,
+                  Icons.timer_outlined,
+                  AppColors.warning,
+                ),
+                'exam_submitted' => (
+                  context.l10n.eventExamSubmitted,
+                  Icons.grading_rounded,
+                  AppColors.success,
+                ),
                 _ => (act.eventType, Icons.circle, AppColors.textSecondary),
               };
 
@@ -1393,12 +1586,18 @@ class _ActivityTimelineSection extends StatelessWidget {
                         children: [
                           Text(
                             label,
-                            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                            ),
                           ),
                           if (itemTitle != null)
                             Text(
                               itemTitle,
-                              style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: AppColors.textSecondary,
+                              ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -1407,7 +1606,10 @@ class _ActivityTimelineSection extends StatelessWidget {
                     ),
                     Text(
                       _formatRelativeTime(context, act.createdAt),
-                      style: const TextStyle(fontSize: 10, color: AppColors.textMuted),
+                      style: const TextStyle(
+                        fontSize: 10,
+                        color: AppColors.textMuted,
+                      ),
                     ),
                   ],
                 ),

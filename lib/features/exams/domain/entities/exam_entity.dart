@@ -236,14 +236,14 @@ class ExamQuestionEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        examVersionId,
-        questionText,
-        questionType,
-        points,
-        sortOrder,
-        options,
-      ];
+    id,
+    examVersionId,
+    questionText,
+    questionType,
+    points,
+    sortOrder,
+    options,
+  ];
 }
 
 class ExamVersionEntity extends Equatable {
@@ -292,14 +292,14 @@ class ExamVersionEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        examId,
-        versionNumber,
-        status,
-        createdAt,
-        publishedAt,
-        questions,
-      ];
+    id,
+    examId,
+    versionNumber,
+    status,
+    createdAt,
+    publishedAt,
+    questions,
+  ];
 }
 
 class ExamAnswerEntity extends Equatable {
@@ -323,14 +323,14 @@ class ExamAnswerEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        attemptId,
-        questionId,
-        selectedOptionId,
-        isCorrect,
-        pointsEarned,
-        answeredAt,
-      ];
+    id,
+    attemptId,
+    questionId,
+    selectedOptionId,
+    isCorrect,
+    pointsEarned,
+    answeredAt,
+  ];
 }
 
 class ExamAttemptEntity extends Equatable {
@@ -403,19 +403,19 @@ class ExamAttemptEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        examId,
-        examVersionId,
-        studentId,
-        studentName,
-        startedAt,
-        submittedAt,
-        status,
-        score,
-        percentage,
-        answers,
-        questions,
-      ];
+    id,
+    examId,
+    examVersionId,
+    studentId,
+    studentName,
+    startedAt,
+    submittedAt,
+    status,
+    score,
+    percentage,
+    answers,
+    questions,
+  ];
 }
 
 class ExamEntity extends Equatable {
@@ -468,15 +468,18 @@ class ExamEntity extends Equatable {
     if (myLatestAttempt == null) return false;
     if (!myLatestAttempt!.isInProgress) return false;
     // An attempt is only active if it has not exceeded the exam duration
-    final elapsedMinutes =
-        DateTime.now().difference(myLatestAttempt!.startedAt).inMinutes;
+    final elapsedMinutes = DateTime.now()
+        .difference(myLatestAttempt!.startedAt)
+        .inMinutes;
     return elapsedMinutes < durationMinutes;
   }
+
   bool get canTakeExam {
     if (!hasAttempted) return true;
     if (hasActiveAttempt) return true; // Resume
     return allowRetake;
   }
+
   bool get isPublished => activeVersion?.isPublished ?? (activeVersion != null);
   String? get description => null;
 
@@ -528,25 +531,25 @@ class ExamEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        contentId,
-        tenantId,
-        groupId,
-        groupName,
-        title,
-        durationMinutes,
-        maxScore,
-        passingScore,
-        shuffleQuestions,
-        showResult,
-        allowRetake,
-        startAt,
-        endAt,
-        createdAt,
-        updatedAt,
-        activeVersion,
-        attemptsCount,
-        myLatestAttempt,
-        myBestScore,
-      ];
+    id,
+    contentId,
+    tenantId,
+    groupId,
+    groupName,
+    title,
+    durationMinutes,
+    maxScore,
+    passingScore,
+    shuffleQuestions,
+    showResult,
+    allowRetake,
+    startAt,
+    endAt,
+    createdAt,
+    updatedAt,
+    activeVersion,
+    attemptsCount,
+    myLatestAttempt,
+    myBestScore,
+  ];
 }

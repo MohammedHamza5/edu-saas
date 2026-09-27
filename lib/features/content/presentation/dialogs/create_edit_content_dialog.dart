@@ -26,7 +26,8 @@ class CreateEditContentDialog extends StatefulWidget {
     List<int>? fileBytes,
     String? associatedExamId,
     String? prerequisiteExamId,
-  }) onSave;
+  })
+  onSave;
 
   const CreateEditContentDialog({
     super.key,
@@ -64,10 +65,12 @@ class _CreateEditContentDialogState extends State<CreateEditContentDialog> {
     super.initState();
     final content = widget.initialContent;
     _titleController = TextEditingController(text: content?.title ?? '');
-    _descriptionController =
-        TextEditingController(text: content?.description ?? '');
-    _fileNameController =
-        TextEditingController(text: content?.file?.fileName ?? '');
+    _descriptionController = TextEditingController(
+      text: content?.description ?? '',
+    );
+    _fileNameController = TextEditingController(
+      text: content?.file?.fileName ?? '',
+    );
 
     _selectedType = content?.type ?? widget.initialType ?? ContentType.pdf;
     _selectedStatus = content?.status ?? ContentStatus.draft;
@@ -107,13 +110,15 @@ class _CreateEditContentDialogState extends State<CreateEditContentDialog> {
 
   Future<void> _pickFile() async {
     try {
-      final isPdfOrVideo = _selectedType == ContentType.pdf || _selectedType == ContentType.video;
+      final isPdfOrVideo =
+          _selectedType == ContentType.pdf ||
+          _selectedType == ContentType.video;
       final result = await FilePicker.platform.pickFiles(
         type: isPdfOrVideo
             ? FileType.custom
             : _selectedType == ContentType.image
-                ? FileType.image
-                : FileType.any,
+            ? FileType.image
+            : FileType.any,
         allowedExtensions: isPdfOrVideo ? ['pdf', 'doc', 'docx'] : null,
         withData: true,
       );
@@ -149,21 +154,27 @@ class _CreateEditContentDialogState extends State<CreateEditContentDialog> {
     String? mimeType;
     int? fileSize;
 
-    if (_hasAttachment &&
-        _fileNameController.text.trim().isNotEmpty) {
+    if (_hasAttachment && _fileNameController.text.trim().isNotEmpty) {
       fileName = _fileNameController.text.trim();
-      final sanitizedName =
-          fileName.toLowerCase().replaceAll(RegExp(r'[^a-z0-9_.-]'), '_');
+      final sanitizedName = fileName.toLowerCase().replaceAll(
+        RegExp(r'[^a-z0-9_.-]'),
+        '_',
+      );
       storagePath =
           'groups/${widget.groupId}/content/${DateTime.now().millisecondsSinceEpoch}_$sanitizedName';
       final lower = fileName.toLowerCase();
-      mimeType = (lower.endsWith('.pdf') || _selectedType == ContentType.pdf || _selectedType == ContentType.video)
+      mimeType =
+          (lower.endsWith('.pdf') ||
+              _selectedType == ContentType.pdf ||
+              _selectedType == ContentType.video)
           ? 'application/pdf'
-          : (_selectedType == ContentType.image || lower.endsWith('.jpg') || lower.endsWith('.jpeg'))
-              ? 'image/jpeg'
-              : lower.endsWith('.png')
-                  ? 'image/png'
-                  : 'application/octet-stream';
+          : (_selectedType == ContentType.image ||
+                lower.endsWith('.jpg') ||
+                lower.endsWith('.jpeg'))
+          ? 'image/jpeg'
+          : lower.endsWith('.png')
+          ? 'image/png'
+          : 'application/octet-stream';
       fileSize = _pickedFileSize ?? (1024 * 500); // 500KB fallback
     }
 
@@ -199,453 +210,527 @@ class _CreateEditContentDialogState extends State<CreateEditContentDialog> {
     return PopScope(
       canPop: !_isLoading,
       child: Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-      ),
-      insetPadding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.s16,
-        vertical: AppSpacing.s24,
-      ),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 540),
-        child: SizedBox(
-          width: double.infinity,
-          child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.s20),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Header
-                Row(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+        ),
+        insetPadding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.s16,
+          vertical: AppSpacing.s24,
+        ),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 540),
+          child: SizedBox(
+            width: double.infinity,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(AppSpacing.s20),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(AppSpacing.s8),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withAlpha(25),
-                        borderRadius:
-                            BorderRadius.circular(AppSpacing.radiusSmall),
-                      ),
-                      child: Icon(
-                        isEdit
-                            ? Icons.edit_note_rounded
-                            : Icons.post_add_rounded,
-                        color: AppColors.primary,
-                        size: 24,
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.s12),
-                    Expanded(
-                      child: Text(
-                        isEdit
-                            ? context.l10n.editContentDialogTitle
-                            : context.l10n.newContentDialogTitle,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close_rounded),
-                      onPressed: _isLoading ? null : () => Navigator.of(context).pop(false),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: AppSpacing.s16),
-
-                // Title Field
-                AppTextField(
-                  controller: _titleController,
-                  labelText: context.l10n.contentTitleInputLabel,
-                  hintText: context.l10n.contentTitleInputHint,
-                  prefixIcon: const Icon(Icons.title_rounded),
-                  validator: (val) {
-                    if (val == null || val.trim().isEmpty) {
-                      return context.l10n.contentTitleRequired;
-                    }
-                    return null;
-                  },
-                ),
-
-                const SizedBox(height: AppSpacing.s12),
-
-                // Description Field
-                AppTextField(
-                  controller: _descriptionController,
-                  labelText: context.l10n.contentDescInputLabel,
-                  hintText: context.l10n.contentDescInputHint,
-                  maxLines: 2,
-                  prefixIcon: const Icon(Icons.notes_rounded),
-                ),
-
-                const SizedBox(height: AppSpacing.s16),
-
-                // Type Selection
-                Text(
-                  context.l10n.materialTypeLabel,
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.s6),
-                Wrap(
-                  spacing: AppSpacing.s8,
-                  runSpacing: AppSpacing.s6,
-                  children: ContentType.values.map((type) {
-                    final isSelected = _selectedType == type;
-                    return ChoiceChip(
-                      label: Text(type.localizedLabel(context)),
-                      selected: isSelected,
-                      selectedColor: AppColors.primary.withAlpha(30),
-                      onSelected: (selected) {
-                        if (selected) setState(() => _selectedType = type);
-                      },
-                      labelStyle: TextStyle(
-                        fontSize: 12,
-                        fontWeight:
-                            isSelected ? FontWeight.bold : FontWeight.normal,
-                        color: isSelected
-                            ? AppColors.primary
-                            : AppColors.textSecondary,
-                      ),
-                    );
-                  }).toList(),
-                ),
-
-                const SizedBox(height: AppSpacing.s16),
-
-                // Publication Status Selection
-                Text(
-                  context.l10n.publicationStatusLabel,
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.s6),
-                Wrap(
-                  spacing: AppSpacing.s8,
-                  runSpacing: AppSpacing.s6,
-                  children: [
-                    ChoiceChip(
-                      label: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.edit_note_rounded,
-                              size: 14, color: AppColors.warning),
-                          const SizedBox(width: 4),
-                          Text(context.l10n.draftPrivateNotice),
-                        ],
-                      ),
-                      selected: _selectedStatus == ContentStatus.draft,
-                      selectedColor: AppColors.warning.withAlpha(30),
-                      onSelected: (selected) {
-                        if (selected) {
-                          setState(
-                              () => _selectedStatus = ContentStatus.draft);
-                        }
-                      },
-                    ),
-                    ChoiceChip(
-                      label: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.check_circle_rounded,
-                              size: 14, color: AppColors.success),
-                          const SizedBox(width: 4),
-                          Text(context.l10n.publishImmediateNotice),
-                        ],
-                      ),
-                      selected: _selectedStatus == ContentStatus.published,
-                      selectedColor: AppColors.success.withAlpha(30),
-                      onSelected: (selected) {
-                        if (selected) {
-                          setState(
-                              () => _selectedStatus = ContentStatus.published);
-                        }
-                      },
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: AppSpacing.s16),
-
-                if (_selectedType == ContentType.video) ...[
-                  Container(
-                    padding: const EdgeInsets.all(AppSpacing.s12),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withAlpha(15),
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusSmall),
-                      border: Border.all(color: AppColors.primary.withAlpha(40)),
-                    ),
-                    child: Row(
+                    // Header
+                    Row(
                       children: [
-                        const Icon(Icons.info_outline_rounded,
-                            size: 20, color: AppColors.primary),
-                        const SizedBox(width: AppSpacing.s10),
-                        Expanded(
-                          child: Text(
-                            context.l10n.videoStreamingNotice,
-                            style: const TextStyle(
-                                fontSize: 12,
-                                color: AppColors.textSecondary,
-                                height: 1.4),
+                        Container(
+                          padding: const EdgeInsets.all(AppSpacing.s8),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withAlpha(25),
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.radiusSmall,
+                            ),
+                          ),
+                          child: Icon(
+                            isEdit
+                                ? Icons.edit_note_rounded
+                                : Icons.post_add_rounded,
+                            color: AppColors.primary,
+                            size: 24,
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.s12),
-                ],
-
-                // Attachment Section (for all materials, including video lesson notes)
-                AppCard(
-                  variant: AppCardVariant.standard,
-                  padding: const EdgeInsets.all(AppSpacing.s12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      CheckboxListTile(
-                        title: Text(
-                          _selectedType == ContentType.video
-                              ? context.l10n.attachVideoMaterialNotice
-                              : context.l10n.attachMaterialFile,
-                          style: const TextStyle(
-                              fontSize: 13, fontWeight: FontWeight.bold),
-                        ),
-                        subtitle: _selectedType == ContentType.video
-                            ? Text(
-                                context.l10n.attachVideoMaterialHint,
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  color: AppColors.textSecondary,
-                                ),
-                              )
-                            : null,
-                        value: _hasAttachment,
-                        activeColor: AppColors.primary,
-                        contentPadding: EdgeInsets.zero,
-                        onChanged: (val) {
-                          setState(() => _hasAttachment = val ?? false);
-                        },
-                      ),
-                      if (_hasAttachment) ...[
-                        const SizedBox(height: AppSpacing.s6),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: AppTextField(
-                                controller: _fileNameController,
-                                labelText: context.l10n.attachedFileNameLabel,
-                                hintText: context.l10n.attachedFileNameHint,
-                                prefixIcon:
-                                    const Icon(Icons.attach_file_rounded),
-                                validator: (val) {
-                                  if (_hasAttachment &&
-                                      (val == null || val.trim().isEmpty)) {
-                                    return context.l10n.fileNameRequired;
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
-                            const SizedBox(width: AppSpacing.s8),
-                            SizedBox(
-                              height: 48,
-                              child: ElevatedButton.icon(
-                                onPressed: _pickFile,
-                                icon: const Icon(Icons.file_upload_outlined,
-                                    size: 18),
-                                label: Text(context.l10n.browseFileAction),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.surfaceVariant,
-                                  foregroundColor: AppColors.textPrimary,
-                                  elevation: 0,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(
-                                        AppSpacing.radiusSmall),
-                                    side: const BorderSide(
-                                        color: AppColors.border),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: AppSpacing.s24),
-
-                if (_isLoading) ...[
-                  Container(
-                    padding: const EdgeInsets.all(AppSpacing.s12),
-                    decoration: BoxDecoration(
-                      color: AppColors.warning.withAlpha(20),
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusSmall),
-                      border: Border.all(color: AppColors.warning.withAlpha(80)),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Icon(Icons.warning_amber_rounded,
-                            size: 20, color: AppColors.warning),
-                        const SizedBox(width: AppSpacing.s10),
+                        const SizedBox(width: AppSpacing.s12),
                         Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          child: Text(
+                            isEdit
+                                ? context.l10n.editContentDialogTitle
+                                : context.l10n.newContentDialogTitle,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close_rounded),
+                          onPressed: _isLoading
+                              ? null
+                              : () => Navigator.of(context).pop(false),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: AppSpacing.s16),
+
+                    // Title Field
+                    AppTextField(
+                      controller: _titleController,
+                      labelText: context.l10n.contentTitleInputLabel,
+                      hintText: context.l10n.contentTitleInputHint,
+                      prefixIcon: const Icon(Icons.title_rounded),
+                      validator: (val) {
+                        if (val == null || val.trim().isEmpty) {
+                          return context.l10n.contentTitleRequired;
+                        }
+                        return null;
+                      },
+                    ),
+
+                    const SizedBox(height: AppSpacing.s12),
+
+                    // Description Field
+                    AppTextField(
+                      controller: _descriptionController,
+                      labelText: context.l10n.contentDescInputLabel,
+                      hintText: context.l10n.contentDescInputHint,
+                      maxLines: 2,
+                      prefixIcon: const Icon(Icons.notes_rounded),
+                    ),
+
+                    const SizedBox(height: AppSpacing.s16),
+
+                    // Type Selection
+                    Text(
+                      context.l10n.materialTypeLabel,
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.s6),
+                    Wrap(
+                      spacing: AppSpacing.s8,
+                      runSpacing: AppSpacing.s6,
+                      children: ContentType.values.map((type) {
+                        final isSelected = _selectedType == type;
+                        return ChoiceChip(
+                          label: Text(type.localizedLabel(context)),
+                          selected: isSelected,
+                          selectedColor: AppColors.primary.withAlpha(30),
+                          onSelected: (selected) {
+                            if (selected) setState(() => _selectedType = type);
+                          },
+                          labelStyle: TextStyle(
+                            fontSize: 12,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                            color: isSelected
+                                ? AppColors.primary
+                                : AppColors.textSecondary,
+                          ),
+                        );
+                      }).toList(),
+                    ),
+
+                    const SizedBox(height: AppSpacing.s16),
+
+                    // Publication Status Selection
+                    Text(
+                      context.l10n.publicationStatusLabel,
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.s6),
+                    Wrap(
+                      spacing: AppSpacing.s8,
+                      runSpacing: AppSpacing.s6,
+                      children: [
+                        ChoiceChip(
+                          label: Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text(
-                                context.l10n.uploadingFileKeepPageOpen,
+                              const Icon(
+                                Icons.edit_note_rounded,
+                                size: 14,
+                                color: AppColors.warning,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(context.l10n.draftPrivateNotice),
+                            ],
+                          ),
+                          selected: _selectedStatus == ContentStatus.draft,
+                          selectedColor: AppColors.warning.withAlpha(30),
+                          onSelected: (selected) {
+                            if (selected) {
+                              setState(
+                                () => _selectedStatus = ContentStatus.draft,
+                              );
+                            }
+                          },
+                        ),
+                        ChoiceChip(
+                          label: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.check_circle_rounded,
+                                size: 14,
+                                color: AppColors.success,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(context.l10n.publishImmediateNotice),
+                            ],
+                          ),
+                          selected: _selectedStatus == ContentStatus.published,
+                          selectedColor: AppColors.success.withAlpha(30),
+                          onSelected: (selected) {
+                            if (selected) {
+                              setState(
+                                () => _selectedStatus = ContentStatus.published,
+                              );
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: AppSpacing.s16),
+
+                    if (_selectedType == ContentType.video) ...[
+                      Container(
+                        padding: const EdgeInsets.all(AppSpacing.s12),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withAlpha(15),
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.radiusSmall,
+                          ),
+                          border: Border.all(
+                            color: AppColors.primary.withAlpha(40),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.info_outline_rounded,
+                              size: 20,
+                              color: AppColors.primary,
+                            ),
+                            const SizedBox(width: AppSpacing.s10),
+                            Expanded(
+                              child: Text(
+                                context.l10n.videoStreamingNotice,
                                 style: const TextStyle(
                                   fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.textPrimary,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                context.l10n.doNotClosePageWarning,
-                                style: const TextStyle(
-                                  fontSize: 11,
                                   color: AppColors.textSecondary,
                                   height: 1.4,
                                 ),
                               ),
-                              const SizedBox(height: AppSpacing.s8),
-                              const LinearProgressIndicator(
-                                minHeight: 4,
-                                backgroundColor: AppColors.surfaceVariant,
-                                valueColor:
-                                    AlwaysStoppedAnimation<Color>(AppColors.primary),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.s12),
+                    ],
+
+                    // Attachment Section (for all materials, including video lesson notes)
+                    AppCard(
+                      variant: AppCardVariant.standard,
+                      padding: const EdgeInsets.all(AppSpacing.s12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          CheckboxListTile(
+                            title: Text(
+                              _selectedType == ContentType.video
+                                  ? context.l10n.attachVideoMaterialNotice
+                                  : context.l10n.attachMaterialFile,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
                               ),
-                            ],
+                            ),
+                            subtitle: _selectedType == ContentType.video
+                                ? Text(
+                                    context.l10n.attachVideoMaterialHint,
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  )
+                                : null,
+                            value: _hasAttachment,
+                            activeColor: AppColors.primary,
+                            contentPadding: EdgeInsets.zero,
+                            onChanged: (val) {
+                              setState(() => _hasAttachment = val ?? false);
+                            },
                           ),
+                          if (_hasAttachment) ...[
+                            const SizedBox(height: AppSpacing.s6),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: AppTextField(
+                                    controller: _fileNameController,
+                                    labelText:
+                                        context.l10n.attachedFileNameLabel,
+                                    hintText: context.l10n.attachedFileNameHint,
+                                    prefixIcon: const Icon(
+                                      Icons.attach_file_rounded,
+                                    ),
+                                    validator: (val) {
+                                      if (_hasAttachment &&
+                                          (val == null || val.trim().isEmpty)) {
+                                        return context.l10n.fileNameRequired;
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(width: AppSpacing.s8),
+                                SizedBox(
+                                  height: 48,
+                                  child: ElevatedButton.icon(
+                                    onPressed: _pickFile,
+                                    icon: const Icon(
+                                      Icons.file_upload_outlined,
+                                      size: 18,
+                                    ),
+                                    label: Text(context.l10n.browseFileAction),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.surfaceVariant,
+                                      foregroundColor: AppColors.textPrimary,
+                                      elevation: 0,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                          AppSpacing.radiusSmall,
+                                        ),
+                                        side: const BorderSide(
+                                          color: AppColors.border,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: AppSpacing.s24),
+
+                    if (_isLoading) ...[
+                      Container(
+                        padding: const EdgeInsets.all(AppSpacing.s12),
+                        decoration: BoxDecoration(
+                          color: AppColors.warning.withAlpha(20),
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.radiusSmall,
+                          ),
+                          border: Border.all(
+                            color: AppColors.warning.withAlpha(80),
+                          ),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(
+                              Icons.warning_amber_rounded,
+                              size: 20,
+                              color: AppColors.warning,
+                            ),
+                            const SizedBox(width: AppSpacing.s10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    context.l10n.uploadingFileKeepPageOpen,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.textPrimary,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    context.l10n.doNotClosePageWarning,
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      color: AppColors.textSecondary,
+                                      height: 1.4,
+                                    ),
+                                  ),
+                                  const SizedBox(height: AppSpacing.s8),
+                                  const LinearProgressIndicator(
+                                    minHeight: 4,
+                                    backgroundColor: AppColors.surfaceVariant,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      AppColors.primary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.s16),
+                    ],
+                    // Sequential Learning Section
+                    AppCard(
+                      variant: AppCardVariant.standard,
+                      padding: const EdgeInsets.all(AppSpacing.s12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            context.l10n.sequentialLearningSectionTitle,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.s12),
+
+                          // Associated Exam
+                          if (_isLoadingExams)
+                            const Center(
+                              child: SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                            )
+                          else
+                            DropdownButtonFormField<String?>(
+                              value:
+                                  _availableExams.any(
+                                    (e) => e['id'] == _selectedAssociatedExamId,
+                                  )
+                                  ? _selectedAssociatedExamId
+                                  : null,
+                              isExpanded: true,
+                              decoration: InputDecoration(
+                                labelText: context.l10n.associatedExamLabel,
+                                border: const OutlineInputBorder(),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: AppSpacing.s12,
+                                ),
+                              ),
+                              items: [
+                                DropdownMenuItem(
+                                  value: null,
+                                  child: Text(
+                                    context.l10n.noneOption,
+                                    style: const TextStyle(
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ),
+                                ..._availableExams.map((exam) {
+                                  return DropdownMenuItem(
+                                    value: exam['id'] as String,
+                                    child: Text(
+                                      exam['title'] as String,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  );
+                                }),
+                              ],
+                              onChanged: (val) {
+                                setState(() => _selectedAssociatedExamId = val);
+                              },
+                            ),
+
+                          const SizedBox(height: AppSpacing.s12),
+
+                          // Prerequisite Exam
+                          if (!_isLoadingExams)
+                            DropdownButtonFormField<String?>(
+                              value:
+                                  _availableExams.any(
+                                    (e) =>
+                                        e['id'] == _selectedPrerequisiteExamId,
+                                  )
+                                  ? _selectedPrerequisiteExamId
+                                  : null,
+                              isExpanded: true,
+                              decoration: InputDecoration(
+                                labelText: context.l10n.prerequisiteExamLabel,
+                                border: const OutlineInputBorder(),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: AppSpacing.s12,
+                                ),
+                              ),
+                              items: [
+                                DropdownMenuItem(
+                                  value: null,
+                                  child: Text(
+                                    context.l10n.noneOption,
+                                    style: const TextStyle(
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ),
+                                ..._availableExams.map((exam) {
+                                  return DropdownMenuItem(
+                                    value: exam['id'] as String,
+                                    child: Text(
+                                      exam['title'] as String,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  );
+                                }),
+                              ],
+                              onChanged: (val) {
+                                setState(
+                                  () => _selectedPrerequisiteExamId = val,
+                                );
+                              },
+                            ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.s24),
+
+                    // Action Buttons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: _isLoading
+                              ? null
+                              : () => Navigator.of(context).pop(false),
+                          child: Text(context.l10n.cancel),
+                        ),
+                        const SizedBox(width: AppSpacing.s12),
+                        AppButton(
+                          text: isEdit
+                              ? context.l10n.saveChanges
+                              : context.l10n.createAndSave,
+                          icon: isEdit
+                              ? Icons.check_circle_outline_rounded
+                              : Icons.add_circle_outline_rounded,
+                          isLoading: _isLoading,
+                          onPressed: _handleSubmit,
                         ),
                       ],
                     ),
-                  ),
-                  const SizedBox(height: AppSpacing.s16),
-                ],
-                // Sequential Learning Section
-                AppCard(
-                  variant: AppCardVariant.standard,
-                  padding: const EdgeInsets.all(AppSpacing.s12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        context.l10n.sequentialLearningSectionTitle,
-                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: AppSpacing.s12),
-                      
-                      // Associated Exam
-                      if (_isLoadingExams)
-                        const Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)))
-                      else
-                        DropdownButtonFormField<String?>(
-                          value: _availableExams.any((e) => e['id'] == _selectedAssociatedExamId) ? _selectedAssociatedExamId : null,
-                          isExpanded: true,
-                          decoration: InputDecoration(
-                            labelText: context.l10n.associatedExamLabel,
-                            border: const OutlineInputBorder(),
-                            contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.s12),
-                          ),
-                          items: [
-                            DropdownMenuItem(
-                              value: null,
-                              child: Text(context.l10n.noneOption, style: const TextStyle(color: AppColors.textSecondary)),
-                            ),
-                            ..._availableExams.map((exam) {
-                              return DropdownMenuItem(
-                                value: exam['id'] as String,
-                                child: Text(
-                                  exam['title'] as String,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              );
-                            }),
-                          ],
-                          onChanged: (val) {
-                            setState(() => _selectedAssociatedExamId = val);
-                          },
-                        ),
-
-                      const SizedBox(height: AppSpacing.s12),
-
-                      // Prerequisite Exam
-                      if (!_isLoadingExams)
-                        DropdownButtonFormField<String?>(
-                          value: _availableExams.any((e) => e['id'] == _selectedPrerequisiteExamId) ? _selectedPrerequisiteExamId : null,
-                          isExpanded: true,
-                          decoration: InputDecoration(
-                            labelText: context.l10n.prerequisiteExamLabel,
-                            border: const OutlineInputBorder(),
-                            contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.s12),
-                          ),
-                          items: [
-                            DropdownMenuItem(
-                              value: null,
-                              child: Text(context.l10n.noneOption, style: const TextStyle(color: AppColors.textSecondary)),
-                            ),
-                            ..._availableExams.map((exam) {
-                              return DropdownMenuItem(
-                                value: exam['id'] as String,
-                                child: Text(
-                                  exam['title'] as String,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              );
-                            }),
-                          ],
-                          onChanged: (val) {
-                            setState(() => _selectedPrerequisiteExamId = val);
-                          },
-                        ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.s24),
-
-                // Action Buttons
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: _isLoading
-                          ? null
-                          : () => Navigator.of(context).pop(false),
-                      child: Text(context.l10n.cancel),
-                    ),
-                    const SizedBox(width: AppSpacing.s12),
-                    AppButton(
-                      text: isEdit ? context.l10n.saveChanges : context.l10n.createAndSave,
-                      icon: isEdit
-                          ? Icons.check_circle_outline_rounded
-                          : Icons.add_circle_outline_rounded,
-                      isLoading: _isLoading,
-                      onPressed: _handleSubmit,
-                    ),
                   ],
                 ),
-              ],
+              ),
             ),
           ),
         ),
       ),
-    ),
-  ),
-);
+    );
   }
 }

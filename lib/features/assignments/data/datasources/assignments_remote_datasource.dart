@@ -105,8 +105,9 @@ class AssignmentsRemoteDataSourceImpl implements AssignmentsRemoteDataSource {
       final assignmentId = map['id'] as String;
       final subsList = subsByAssignment[assignmentId] ?? [];
       map['submissions_count'] = subsList.length;
-      map['reviewed_count'] =
-          subsList.where((s) => s['status'] == 'reviewed').length;
+      map['reviewed_count'] = subsList
+          .where((s) => s['status'] == 'reviewed')
+          .length;
 
       results.add(AssignmentModel.fromJson(map));
     }
@@ -165,7 +166,9 @@ class AssignmentsRemoteDataSourceImpl implements AssignmentsRemoteDataSource {
     final list = response as List<dynamic>;
     if (list.isEmpty) return [];
 
-    final assignmentIds = list.map((item) => (item as Map<String, dynamic>)['id'] as String).toList();
+    final assignmentIds = list
+        .map((item) => (item as Map<String, dynamic>)['id'] as String)
+        .toList();
 
     // Fetch all student submissions in 1 batch query instead of N sequential loop queries
     final allSubmissions = await _safeClient
@@ -270,7 +273,9 @@ class AssignmentsRemoteDataSourceImpl implements AssignmentsRemoteDataSource {
   }
 
   @override
-  Future<List<AssignmentSubmissionModel>> getSubmissions(String assignmentId) async {
+  Future<List<AssignmentSubmissionModel>> getSubmissions(
+    String assignmentId,
+  ) async {
     final response = await _safeClient
         .from('assignment_submissions')
         .select('''
@@ -292,12 +297,17 @@ class AssignmentsRemoteDataSourceImpl implements AssignmentsRemoteDataSource {
 
     final list = response as List<dynamic>;
     return list
-        .map((item) => AssignmentSubmissionModel.fromJson(item as Map<String, dynamic>))
+        .map(
+          (item) =>
+              AssignmentSubmissionModel.fromJson(item as Map<String, dynamic>),
+        )
         .toList();
   }
 
   @override
-  Future<AssignmentSubmissionModel?> getMySubmission(String assignmentId) async {
+  Future<AssignmentSubmissionModel?> getMySubmission(
+    String assignmentId,
+  ) async {
     final currentUserId = _safeClient.auth.currentUser?.id;
     if (currentUserId == null) return null;
 
@@ -432,7 +442,8 @@ class AssignmentsRemoteDataSourceImpl implements AssignmentsRemoteDataSource {
 
     int nextAttempt = 1;
     if ((existingSubs as List).isNotEmpty) {
-      nextAttempt = ((existingSubs.first['attempt_number'] as num?)?.toInt() ?? 0) + 1;
+      nextAttempt =
+          ((existingSubs.first['attempt_number'] as num?)?.toInt() ?? 0) + 1;
     }
 
     // 3. Insert submission record
@@ -454,10 +465,16 @@ class AssignmentsRemoteDataSourceImpl implements AssignmentsRemoteDataSource {
     // 4. Upload files to private storage bucket 'submission-files'
     for (final file in files) {
       final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final cleanName = file.fileName.replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_');
-      final storagePath = '$assignmentId/$currentUserId/${timestamp}_$cleanName';
+      final cleanName = file.fileName.replaceAll(
+        RegExp(r'[^a-zA-Z0-9._-]'),
+        '_',
+      );
+      final storagePath =
+          '$assignmentId/$currentUserId/${timestamp}_$cleanName';
 
-      await _safeClient.storage.from('submission-files').uploadBinary(
+      await _safeClient.storage
+          .from('submission-files')
+          .uploadBinary(
             storagePath,
             Uint8List.fromList(file.bytes),
             fileOptions: FileOptions(contentType: file.mimeType, upsert: true),

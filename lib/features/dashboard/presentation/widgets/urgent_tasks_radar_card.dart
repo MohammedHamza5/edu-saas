@@ -10,10 +10,7 @@ import '../../domain/entities/student_dashboard_stats.dart';
 class UrgentTasksRadarCard extends StatelessWidget {
   final List<UrgentTaskItem> tasks;
 
-  const UrgentTasksRadarCard({
-    super.key,
-    required this.tasks,
-  });
+  const UrgentTasksRadarCard({super.key, required this.tasks});
 
   String _formatDueRemaining(BuildContext context, DateTime dueAt) {
     final now = DateTime.now();
@@ -172,16 +169,23 @@ class UrgentTasksRadarCard extends StatelessWidget {
                         width: 36,
                         height: 36,
                         decoration: BoxDecoration(
-                          color: (isAssignment ? AppColors.primary : const Color(0xFF7C3AED))
-                              .withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                          color:
+                              (isAssignment
+                                      ? AppColors.primary
+                                      : const Color(0xFF7C3AED))
+                                  .withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.radiusSmall,
+                          ),
                         ),
                         child: Icon(
                           isAssignment
                               ? Icons.assignment_rounded
                               : Icons.quiz_rounded,
                           size: 18,
-                          color: isAssignment ? AppColors.primary : const Color(0xFF7C3AED),
+                          color: isAssignment
+                              ? AppColors.primary
+                              : const Color(0xFF7C3AED),
                         ),
                       ),
                       const SizedBox(width: AppSpacing.s12),
@@ -221,7 +225,9 @@ class UrgentTasksRadarCard extends StatelessWidget {
                           ),
                           decoration: BoxDecoration(
                             color: urgencyColor.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.radiusSmall,
+                            ),
                             border: Border.all(
                               color: urgencyColor.withValues(alpha: 0.25),
                             ),

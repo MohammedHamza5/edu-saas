@@ -15,7 +15,8 @@ class StudentActivityTracker with WidgetsBindingObserver {
   StudentActivityTracker._();
   static final StudentActivityTracker instance = StudentActivityTracker._();
 
-  static const int _idleThresholdSeconds = 120; // 2 minutes without input = idle
+  static const int _idleThresholdSeconds =
+      120; // 2 minutes without input = idle
   static const int _heartbeatIntervalSeconds = 60; // flush to backend every 60s
 
   Timer? _oneSecondTimer;
@@ -60,15 +61,20 @@ class StudentActivityTracker with WidgetsBindingObserver {
     _oneSecondTimer = Timer.periodic(const Duration(seconds: 1), _onSecondTick);
 
     // 60-second periodic heartbeat flush
-    _heartbeatTimer =
-        Timer.periodic(const Duration(seconds: _heartbeatIntervalSeconds), (_) {
-      flushHeartbeat();
-    });
+    _heartbeatTimer = Timer.periodic(
+      const Duration(seconds: _heartbeatIntervalSeconds),
+      (_) {
+        flushHeartbeat();
+      },
+    );
 
     // Record login activity event on start
     recordActivity(eventType: 'login');
 
-    AppLogger.i('StudentActivityTracker', 'Tracker started for student: ${user.id}');
+    AppLogger.i(
+      'StudentActivityTracker',
+      'Tracker started for student: ${user.id}',
+    );
   }
 
   /// Stops tracking and flushes any remaining telemetry
@@ -93,7 +99,10 @@ class StudentActivityTracker with WidgetsBindingObserver {
     _lastInteractionTime = DateTime.now();
     if (_isIdle) {
       _isIdle = false;
-      AppLogger.d('StudentActivityTracker', 'User transitioned from IDLE to ACTIVE');
+      AppLogger.d(
+        'StudentActivityTracker',
+        'User transitioned from IDLE to ACTIVE',
+      );
     }
   }
 
@@ -117,8 +126,9 @@ class StudentActivityTracker with WidgetsBindingObserver {
   void _onSecondTick(Timer timer) {
     if (!_isRunning) return;
 
-    final secondsSinceInteraction =
-        DateTime.now().difference(_lastInteractionTime).inSeconds;
+    final secondsSinceInteraction = DateTime.now()
+        .difference(_lastInteractionTime)
+        .inSeconds;
 
     if (secondsSinceInteraction >= _idleThresholdSeconds) {
       _isIdle = true;
@@ -152,11 +162,14 @@ class StudentActivityTracker with WidgetsBindingObserver {
       final client = SupabaseService.client;
       if (client.auth.currentUser == null) return;
 
-      await client.rpc<void>('record_student_heartbeat', params: {
-        'p_active_seconds': activeToSend,
-        'p_idle_seconds': idleToSend,
-        'p_current_route': null,
-      });
+      await client.rpc<void>(
+        'record_student_heartbeat',
+        params: {
+          'p_active_seconds': activeToSend,
+          'p_idle_seconds': idleToSend,
+          'p_current_route': null,
+        },
+      );
 
       AppLogger.d(
         'StudentActivityTracker',
@@ -185,15 +198,22 @@ class StudentActivityTracker with WidgetsBindingObserver {
 
       registerUserInteraction();
 
-      final validContentId = (contentId != null && contentId.trim().isNotEmpty) ? contentId.trim() : null;
-      final validGroupId = (groupId != null && groupId.trim().isNotEmpty) ? groupId.trim() : null;
+      final validContentId = (contentId != null && contentId.trim().isNotEmpty)
+          ? contentId.trim()
+          : null;
+      final validGroupId = (groupId != null && groupId.trim().isNotEmpty)
+          ? groupId.trim()
+          : null;
 
-      await client.rpc<void>('record_activity_event', params: {
-        'p_event_type': eventType,
-        'p_content_id': validContentId,
-        'p_group_id': validGroupId,
-        'p_metadata': metadata ?? {},
-      });
+      await client.rpc<void>(
+        'record_activity_event',
+        params: {
+          'p_event_type': eventType,
+          'p_content_id': validContentId,
+          'p_group_id': validGroupId,
+          'p_metadata': metadata ?? {},
+        },
+      );
 
       AppLogger.d(
         'StudentActivityTracker',
@@ -201,7 +221,10 @@ class StudentActivityTracker with WidgetsBindingObserver {
         data: {'event_type': eventType, 'content_id': validContentId},
       );
     } catch (e) {
-      AppLogger.w('StudentActivityTracker', 'Failed to record activity $eventType: $e');
+      AppLogger.w(
+        'StudentActivityTracker',
+        'Failed to record activity $eventType: $e',
+      );
     }
   }
 }

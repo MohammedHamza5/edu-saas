@@ -20,9 +20,7 @@ void main() {
       'content': {
         'id': '27335428-5e04-4e57-a812-87fed98e12ed',
         'title': 'تجريبي',
-        'groups': {
-          'name': 'SAT Advanced Prep',
-        },
+        'groups': {'name': 'SAT Advanced Prep'},
         'status': 'published',
         'group_id': '22222222-2222-2222-2222-222222222222',
         'description': null,
@@ -38,15 +36,15 @@ void main() {
         },
       ],
       'exam_attempts': [
-        {
-          'count': 0,
-        },
+        {'count': 0},
       ],
     };
 
     final map = Map<String, dynamic>.from(rawItem);
-    if (map['exam_attempts'] is List && (map['exam_attempts'] as List).isNotEmpty) {
-      final countMap = (map['exam_attempts'] as List).first as Map<String, dynamic>;
+    if (map['exam_attempts'] is List &&
+        (map['exam_attempts'] as List).isNotEmpty) {
+      final countMap =
+          (map['exam_attempts'] as List).first as Map<String, dynamic>;
       map['attempts_count'] = countMap['count'] ?? 0;
     } else {
       map['attempts_count'] = 0;

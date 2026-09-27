@@ -35,7 +35,9 @@ final class AuthPendingApproval extends AuthState {
 
 final class AuthTenantSuspended extends AuthState {
   final String message;
-  const AuthTenantSuspended({this.message = 'This institutional account is suspended'});
+  const AuthTenantSuspended({
+    this.message = 'This institutional account is suspended',
+  });
 
   @override
   List<Object?> get props => [message];

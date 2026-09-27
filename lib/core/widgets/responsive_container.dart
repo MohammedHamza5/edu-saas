@@ -54,10 +54,7 @@ class ResponsiveContainer extends StatelessWidget {
     );
 
     if (padding != null) {
-      content = Padding(
-        padding: padding!,
-        child: content,
-      );
+      content = Padding(padding: padding!, child: content);
     }
 
     return content;

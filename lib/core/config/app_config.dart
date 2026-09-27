@@ -45,10 +45,7 @@ class AppConfig {
       final val = dotenv.env['BUNNY_API_KEY'];
       if (val != null && val.isNotEmpty) return val;
     }
-    return const String.fromEnvironment(
-      'BUNNY_API_KEY',
-      defaultValue: '',
-    );
+    return const String.fromEnvironment('BUNNY_API_KEY', defaultValue: '');
   }
 
   static String get bunnyCdnHostname {
@@ -67,10 +64,7 @@ class AppConfig {
       final val = dotenv.env['BUNNY_TOKEN_KEY'];
       if (val != null && val.isNotEmpty) return val;
     }
-    return const String.fromEnvironment(
-      'BUNNY_TOKEN_KEY',
-      defaultValue: '',
-    );
+    return const String.fromEnvironment('BUNNY_TOKEN_KEY', defaultValue: '');
   }
 
   static String get defaultVideoProvider {
@@ -95,4 +89,3 @@ class AppConfig {
   /// Whether both providers are shown for teacher selection.
   static bool get showBothProviders => defaultVideoProvider == 'both';
 }
-

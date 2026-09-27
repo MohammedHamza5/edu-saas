@@ -90,24 +90,26 @@ class SubmissionFileEntity extends Equatable {
 
   String get formattedSize {
     if (fileSize < 1024) return '$fileSize B';
-    if (fileSize < 1024 * 1024) return '${(fileSize / 1024).toStringAsFixed(1)} KB';
+    if (fileSize < 1024 * 1024)
+      return '${(fileSize / 1024).toStringAsFixed(1)} KB';
     return '${(fileSize / (1024 * 1024)).toStringAsFixed(1)} MB';
   }
 
-  bool get isPdf => mimeType.contains('pdf') || fileName.toLowerCase().endsWith('.pdf');
+  bool get isPdf =>
+      mimeType.contains('pdf') || fileName.toLowerCase().endsWith('.pdf');
   bool get isImage => mimeType.startsWith('image/');
 
   @override
   List<Object?> get props => [
-        id,
-        submissionId,
-        storagePath,
-        fileName,
-        mimeType,
-        fileSize,
-        signedUrl,
-        createdAt,
-      ];
+    id,
+    submissionId,
+    storagePath,
+    fileName,
+    mimeType,
+    fileSize,
+    signedUrl,
+    createdAt,
+  ];
 }
 
 class AssignmentSubmissionEntity extends Equatable {
@@ -184,20 +186,20 @@ class AssignmentSubmissionEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        assignmentId,
-        studentId,
-        studentName,
-        studentEmail,
-        attemptNumber,
-        submittedAt,
-        status,
-        score,
-        teacherFeedback,
-        reviewedAt,
-        reviewedBy,
-        files,
-      ];
+    id,
+    assignmentId,
+    studentId,
+    studentName,
+    studentEmail,
+    attemptNumber,
+    submittedAt,
+    status,
+    score,
+    teacherFeedback,
+    reviewedAt,
+    reviewedBy,
+    files,
+  ];
 }
 
 class AssignmentEntity extends Equatable {
@@ -279,20 +281,20 @@ class AssignmentEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        contentId,
-        tenantId,
-        groupId,
-        groupName,
-        title,
-        instructions,
-        dueAt,
-        allowLateSubmission,
-        maxScore,
-        createdAt,
-        updatedAt,
-        submissionsCount,
-        reviewedCount,
-        mySubmission,
-      ];
+    id,
+    contentId,
+    tenantId,
+    groupId,
+    groupName,
+    title,
+    instructions,
+    dueAt,
+    allowLateSubmission,
+    maxScore,
+    createdAt,
+    updatedAt,
+    submissionsCount,
+    reviewedCount,
+    mySubmission,
+  ];
 }

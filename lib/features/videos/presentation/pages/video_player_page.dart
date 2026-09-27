@@ -36,6 +36,7 @@ class VideoPlayerPage extends StatefulWidget {
   final String? studentId;
   final String? associatedExamId;
   final String? associatedExamTitle;
+
   /// المجموعة التي يُشاهَد منها هذا الدرس (لجلب PDF الخاص بالمجموعة والاختبار المخصص)
   final String? groupId;
   final String? groupName;
@@ -71,15 +72,17 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   void Function(int seconds)? _seekTo;
   VoidCallback? _togglePlayPauseFn;
   bool _hasRecordedStarted = false;
+
   /// أبعد نقطة مشاهدة لإرسالها مع كل update
   int _furthestPositionSecs = 0;
-  
+
   /// Segment tracking for watched coverage
   int? _segmentStart;
   int? _segmentEnd;
 
   /// حالة ما بعد اكتمال الفيديو
   bool _videoCompletedLocally = false;
+
   /// بيانات الدرس الخاصة بالمجموعة (PDF + Exam من content_groups)
   String? _groupPdfStoragePath;
   String? _groupPdfFileName;
@@ -113,11 +116,14 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   Future<void> _loadLessonContext() async {
     try {
       if (widget.groupId != null && !_isTeacher) {
-        final lessonsResult = await InjectionContainer.contentRepository.getGroupCourseProgress(
-          groupId: widget.groupId!,
-          studentId: _activeStudentId,
-        );
-        if (lessonsResult.isSuccess && lessonsResult.dataOrNull != null && mounted) {
+        final lessonsResult = await InjectionContainer.contentRepository
+            .getGroupCourseProgress(
+              groupId: widget.groupId!,
+              studentId: _activeStudentId,
+            );
+        if (lessonsResult.isSuccess &&
+            lessonsResult.dataOrNull != null &&
+            mounted) {
           setState(() {
             _courseLessons = lessonsResult.dataOrNull!;
           });
@@ -125,15 +131,19 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       }
 
       if (widget.groupId != null) {
-        final result = await InjectionContainer.videosRepository.getLessonContext(
-          contentId: widget.videoId,  // videoId هنا هو content_id
-          groupId: widget.groupId!,
-        );
+        final result = await InjectionContainer.videosRepository
+            .getLessonContext(
+              contentId: widget.videoId, // videoId هنا هو content_id
+              groupId: widget.groupId!,
+            );
         result.when(
           onSuccess: (ctx) {
             if (ctx != null && mounted) {
-              final examId = ctx['lesson_exam_id'] as String? ?? widget.associatedExamId;
-              final examTitle = ctx['lesson_exam_title'] as String? ?? widget.associatedExamTitle;
+              final examId =
+                  ctx['lesson_exam_id'] as String? ?? widget.associatedExamId;
+              final examTitle =
+                  ctx['lesson_exam_title'] as String? ??
+                  widget.associatedExamTitle;
               setState(() {
                 _groupPdfStoragePath = ctx['pdf_storage_path'] as String?;
                 _groupPdfFileName = ctx['pdf_file_name'] as String?;
@@ -141,8 +151,12 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                 _groupExamTitle = examTitle;
               });
               if (examId != null && examId.isNotEmpty) {
-                InjectionContainer.examsRepository.getExamDetails(examId).then((examResult) {
-                  if (examResult.isSuccess && examResult.dataOrNull != null && mounted) {
+                InjectionContainer.examsRepository.getExamDetails(examId).then((
+                  examResult,
+                ) {
+                  if (examResult.isSuccess &&
+                      examResult.dataOrNull != null &&
+                      mounted) {
                     setState(() {
                       _lessonExam = examResult.dataOrNull;
                     });
@@ -154,7 +168,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
           onFailure: (_) {},
         );
       } else if (widget.associatedExamId != null) {
-        final examResult = await InjectionContainer.examsRepository.getExamDetails(widget.associatedExamId!);
+        final examResult = await InjectionContainer.examsRepository
+            .getExamDetails(widget.associatedExamId!);
         if (examResult.isSuccess && examResult.dataOrNull != null && mounted) {
           setState(() {
             _lessonExam = examResult.dataOrNull;
@@ -173,7 +188,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
           builder: (_) => const Center(child: CircularProgressIndicator()),
         ),
       );
-      final result = await InjectionContainer.examsRepository.getExamDetails(examId);
+      final result = await InjectionContainer.examsRepository.getExamDetails(
+        examId,
+      );
       if (mounted) Navigator.of(context).pop();
 
       if (result.isSuccess && result.dataOrNull != null) {
@@ -196,7 +213,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               backgroundColor: AppColors.error,
-              content: Text(result.failureOrNull?.message ?? context.l10n.errorOccurred),
+              content: Text(
+                result.failureOrNull?.message ?? context.l10n.errorOccurred,
+              ),
             ),
           );
         }
@@ -204,7 +223,10 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(backgroundColor: AppColors.error, content: Text(e.toString())),
+          SnackBar(
+            backgroundColor: AppColors.error,
+            content: Text(e.toString()),
+          ),
         );
       }
     }
@@ -245,7 +267,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
             durationSeconds: dur,
             furthestPositionSeconds: _furthestPositionSecs,
             force: true,
-            newSegment: _segmentStart != null && _segmentEnd != null ? [_segmentStart!, _segmentEnd!] : null,
+            newSegment: _segmentStart != null && _segmentEnd != null
+                ? [_segmentStart!, _segmentEnd!]
+                : null,
           );
         } catch (_) {
           try {
@@ -255,7 +279,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
               progressSeconds: pos,
               durationSeconds: dur,
               furthestPositionSeconds: _furthestPositionSecs,
-              newSegment: _segmentStart != null && _segmentEnd != null ? [_segmentStart!, _segmentEnd!] : null,
+              newSegment: _segmentStart != null && _segmentEnd != null
+                  ? [_segmentStart!, _segmentEnd!]
+                  : null,
             );
           } catch (_) {}
         }
@@ -298,7 +324,11 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     }
   }
 
-  Future<void> _openLesson(LessonAssignmentEntity lesson, int lessonIndex, int totalLessons) async {
+  Future<void> _openLesson(
+    LessonAssignmentEntity lesson,
+    int lessonIndex,
+    int totalLessons,
+  ) async {
     if (lesson.isLocked) {
       unawaited(
         showDialog<void>(
@@ -325,13 +355,17 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               backgroundColor: AppColors.error,
-              content: Text(context.l10n.completeLessonToUnlock(lessonIndex > 1 ? lessonIndex - 1 : 1)),
+              content: Text(
+                context.l10n.completeLessonToUnlock(
+                  lessonIndex > 1 ? lessonIndex - 1 : 1,
+                ),
+              ),
             ),
           );
         }
         return;
       }
-      
+
       lesson = updatedLesson;
     }
 
@@ -343,23 +377,34 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   }
 
   Widget _buildSequentialNavigationBar(ThemeData theme) {
-    if (_courseLessons.isEmpty && widget.lessonIndex == null) return const SizedBox.shrink();
+    if (_courseLessons.isEmpty && widget.lessonIndex == null)
+      return const SizedBox.shrink();
 
     final currentIndex = _courseLessons.isNotEmpty
         ? _courseLessons.indexWhere((l) => l.contentId == widget.videoId)
         : (widget.lessonIndex != null ? widget.lessonIndex! - 1 : -1);
 
-    final totalCount = _courseLessons.isNotEmpty ? _courseLessons.length : (widget.totalLessons ?? 1);
-    final displayIndex = (currentIndex >= 0 ? currentIndex + 1 : (widget.lessonIndex ?? 1));
+    final totalCount = _courseLessons.isNotEmpty
+        ? _courseLessons.length
+        : (widget.totalLessons ?? 1);
+    final displayIndex = (currentIndex >= 0
+        ? currentIndex + 1
+        : (widget.lessonIndex ?? 1));
 
-    final prevLesson = currentIndex > 0 ? _courseLessons[currentIndex - 1] : null;
-    final nextLesson = (currentIndex >= 0 && currentIndex < _courseLessons.length - 1)
+    final prevLesson = currentIndex > 0
+        ? _courseLessons[currentIndex - 1]
+        : null;
+    final nextLesson =
+        (currentIndex >= 0 && currentIndex < _courseLessons.length - 1)
         ? _courseLessons[currentIndex + 1]
         : null;
 
     return Container(
       margin: const EdgeInsets.only(top: AppSpacing.s12, bottom: AppSpacing.s8),
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s12, vertical: AppSpacing.s8),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.s12,
+        vertical: AppSpacing.s8,
+      ),
       decoration: BoxDecoration(
         color: AppColors.surfaceVariant.withAlpha(50),
         borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
@@ -371,12 +416,16 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
           // Previous Lesson Button
           if (prevLesson != null)
             TextButton.icon(
-              onPressed: () => _openLesson(prevLesson, displayIndex - 1, totalCount),
+              onPressed: () =>
+                  _openLesson(prevLesson, displayIndex - 1, totalCount),
               icon: const Icon(Icons.arrow_back_rounded, size: 16),
               label: Text(context.l10n.previousLessonAction),
               style: TextButton.styleFrom(
                 foregroundColor: AppColors.textPrimary,
-                textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+                textStyle: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12,
+                ),
               ),
             )
           else
@@ -400,7 +449,11 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                   ),
                   if (_courseLessons.isNotEmpty) ...[
                     const SizedBox(width: 4),
-                    const Icon(Icons.format_list_bulleted_rounded, size: 14, color: AppColors.primary),
+                    const Icon(
+                      Icons.format_list_bulleted_rounded,
+                      size: 14,
+                      color: AppColors.primary,
+                    ),
                   ],
                 ],
               ),
@@ -410,16 +463,23 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
           // Next Lesson Button
           if (nextLesson != null)
             TextButton.icon(
-              onPressed: () => _openLesson(nextLesson, displayIndex + 1, totalCount),
+              onPressed: () =>
+                  _openLesson(nextLesson, displayIndex + 1, totalCount),
               icon: Icon(
-                nextLesson.isLocked ? Icons.lock_outline_rounded : Icons.arrow_forward_rounded,
+                nextLesson.isLocked
+                    ? Icons.lock_outline_rounded
+                    : Icons.arrow_forward_rounded,
                 size: 16,
-                color: nextLesson.isLocked ? AppColors.textMuted : AppColors.primary,
+                color: nextLesson.isLocked
+                    ? AppColors.textMuted
+                    : AppColors.primary,
               ),
               label: Text(
                 context.l10n.nextLessonAction,
                 style: TextStyle(
-                  color: nextLesson.isLocked ? AppColors.textMuted : AppColors.primary,
+                  color: nextLesson.isLocked
+                      ? AppColors.textMuted
+                      : AppColors.primary,
                   fontWeight: FontWeight.w600,
                   fontSize: 12,
                 ),
@@ -440,14 +500,20 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       backgroundColor: Colors.transparent,
       builder: (modalContext) {
         final theme = Theme.of(modalContext);
-        final completedCount = _courseLessons.where((l) => l.isEffectivelyCompleted).length;
+        final completedCount = _courseLessons
+            .where((l) => l.isEffectivelyCompleted)
+            .length;
         final totalCount = _courseLessons.length;
-        final pct = totalCount > 0 ? ((completedCount / totalCount) * 100).toInt() : 0;
+        final pct = totalCount > 0
+            ? ((completedCount / totalCount) * 100).toInt()
+            : 0;
 
         return Container(
           decoration: BoxDecoration(
             color: theme.scaffoldBackgroundColor,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(AppSpacing.radiusLarge)),
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(AppSpacing.radiusLarge),
+            ),
           ),
           padding: const EdgeInsets.all(AppSpacing.s20),
           constraints: BoxConstraints(
@@ -472,7 +538,10 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          context.l10n.lessonsCompletedRatio(completedCount, totalCount),
+                          context.l10n.lessonsCompletedRatio(
+                            completedCount,
+                            totalCount,
+                          ),
                           style: const TextStyle(
                             fontSize: 12,
                             color: AppColors.textSecondary,
@@ -498,7 +567,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                   value: totalCount > 0 ? completedCount / totalCount : 0,
                   minHeight: 6,
                   backgroundColor: AppColors.surfaceVariant,
-                  valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+                  valueColor: const AlwaysStoppedAnimation<Color>(
+                    AppColors.primary,
+                  ),
                 ),
               ),
               const SizedBox(height: AppSpacing.s16),
@@ -510,7 +581,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                 child: ListView.separated(
                   shrinkWrap: true,
                   itemCount: _courseLessons.length,
-                  separatorBuilder: (_, __) => const Divider(height: 1, color: AppColors.border),
+                  separatorBuilder: (_, __) =>
+                      const Divider(height: 1, color: AppColors.border),
                   itemBuilder: (ctx, i) {
                     final item = _courseLessons[i];
                     final isCurrent = item.contentId == widget.videoId;
@@ -519,52 +591,62 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
 
                     return ListTile(
                       dense: true,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
                       leading: CircleAvatar(
                         radius: 14,
                         backgroundColor: isCompleted
                             ? AppColors.success.withAlpha(25)
                             : isCurrent
-                                ? AppColors.primary.withAlpha(25)
-                                : isLocked
-                                    ? AppColors.surfaceVariant
-                                    : AppColors.primary.withAlpha(15),
+                            ? AppColors.primary.withAlpha(25)
+                            : isLocked
+                            ? AppColors.surfaceVariant
+                            : AppColors.primary.withAlpha(15),
                         child: Icon(
                           isCompleted
                               ? Icons.check_rounded
                               : isCurrent
-                                  ? Icons.play_arrow_rounded
-                                  : isLocked
-                                      ? Icons.lock_rounded
-                                      : Icons.radio_button_unchecked_rounded,
+                              ? Icons.play_arrow_rounded
+                              : isLocked
+                              ? Icons.lock_rounded
+                              : Icons.radio_button_unchecked_rounded,
                           size: 14,
                           color: isCompleted
                               ? AppColors.success
                               : isCurrent
-                                  ? AppColors.primary
-                                  : isLocked
-                                      ? AppColors.textMuted
-                                      : AppColors.primary,
+                              ? AppColors.primary
+                              : isLocked
+                              ? AppColors.textMuted
+                              : AppColors.primary,
                         ),
                       ),
                       title: Text(
                         '${i + 1}. ${item.title}',
                         style: TextStyle(
                           fontSize: 13,
-                          fontWeight: isCurrent ? FontWeight.bold : FontWeight.w500,
+                          fontWeight: isCurrent
+                              ? FontWeight.bold
+                              : FontWeight.w500,
                           color: isCurrent
                               ? AppColors.primary
                               : isLocked
-                                  ? AppColors.textMuted
-                                  : AppColors.textPrimary,
+                              ? AppColors.textMuted
+                              : AppColors.textPrimary,
                         ),
                       ),
                       trailing: isCurrent
                           ? Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
                                 color: AppColors.primary.withAlpha(20),
-                                borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+                                borderRadius: BorderRadius.circular(
+                                  AppSpacing.radiusFull,
+                                ),
                               ),
                               child: Text(
                                 context.l10n.statusInProgress,
@@ -576,10 +658,18 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                               ),
                             )
                           : isCompleted
-                              ? const Icon(Icons.check_circle_rounded, size: 16, color: AppColors.success)
-                              : isLocked
-                                  ? const Icon(Icons.lock_outline_rounded, size: 16, color: AppColors.textMuted)
-                                  : null,
+                          ? const Icon(
+                              Icons.check_circle_rounded,
+                              size: 16,
+                              color: AppColors.success,
+                            )
+                          : isLocked
+                          ? const Icon(
+                              Icons.lock_outline_rounded,
+                              size: 16,
+                              color: AppColors.textMuted,
+                            )
+                          : null,
                       onTap: () {
                         Navigator.of(modalContext).pop();
                         if (!isCurrent) {
@@ -624,7 +714,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
             progressSeconds: pos,
             durationSeconds: dur,
             furthestPositionSeconds: _furthestPositionSecs,
-            newSegment: _segmentStart != null && _segmentEnd != null ? [_segmentStart!, _segmentEnd!] : null,
+            newSegment: _segmentStart != null && _segmentEnd != null
+                ? [_segmentStart!, _segmentEnd!]
+                : null,
           ),
         );
       }
@@ -664,14 +756,17 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      widget.groupName ?? _currentVideo?.title ?? context.l10n.watchLessonTitle,
+                      widget.groupName ??
+                          _currentVideo?.title ??
+                          context.l10n.watchLessonTitle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    if (widget.lessonIndex != null && widget.totalLessons != null)
+                    if (widget.lessonIndex != null &&
+                        widget.totalLessons != null)
                       Text(
                         '${context.l10n.lessonXofY(widget.lessonIndex!, widget.totalLessons!)} · ${_currentVideo?.title ?? ''}',
                         maxLines: 1,
@@ -682,7 +777,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                           fontWeight: FontWeight.normal,
                         ),
                       )
-                    else if (_currentVideo?.title != null && widget.groupName != null)
+                    else if (_currentVideo?.title != null &&
+                        widget.groupName != null)
                       Text(
                         _currentVideo!.title!,
                         maxLines: 1,
@@ -832,7 +928,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                         }
 
                         bool isSeek = false;
-                        if (_segmentEnd != null && (currentSeconds - _segmentEnd!).abs() > 2) {
+                        if (_segmentEnd != null &&
+                            (currentSeconds - _segmentEnd!).abs() > 2) {
                           isSeek = true;
                           // Force commit the old segment before starting a new one
                           context.read<VideosCubit>().updateProgress(
@@ -883,7 +980,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                           ? _furthestPositionSecs
                           : dur,
                       force: true,
-                      newSegment: _segmentStart != null && _segmentEnd != null ? [_segmentStart!, _segmentEnd!] : null,
+                      newSegment: _segmentStart != null && _segmentEnd != null
+                          ? [_segmentStart!, _segmentEnd!]
+                          : null,
                     );
                     StudentActivityTracker.instance.recordActivity(
                       eventType: 'video_completed',
@@ -925,7 +1024,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                               Expanded(
                                 flex: 7,
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
                                   children: [
                                     videoPlayerWidget,
                                     _buildSequentialNavigationBar(theme),
@@ -947,7 +1047,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                                       isCompleted,
                                     ),
                                     const SizedBox(height: AppSpacing.s16),
-                                    if ((_groupExamId ?? widget.associatedExamId) != null) ...[
+                                    if ((_groupExamId ??
+                                            widget.associatedExamId) !=
+                                        null) ...[
                                       _buildAssociatedExamCard(
                                         theme,
                                         isCompleted,
@@ -981,7 +1083,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                               isCompleted,
                             ),
                             const SizedBox(height: AppSpacing.s16),
-                            if ((_groupExamId ?? widget.associatedExamId) != null) ...[
+                            if ((_groupExamId ?? widget.associatedExamId) !=
+                                null) ...[
                               _buildAssociatedExamCard(theme, isCompleted),
                               const SizedBox(height: AppSpacing.s16),
                             ],
@@ -1261,10 +1364,11 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
         final liveDur = _liveDurationSecs.value > 0
             ? _liveDurationSecs.value
             : ((video?.duration != null && video!.duration > 0)
-                ? video.duration
-                : (progress?.durationSeconds ?? 0));
+                  ? video.duration
+                  : (progress?.durationSeconds ?? 0));
         final livePos = _livePositionSecs.value;
-        final effectivePos = (_livePositionSecs.value == 0 &&
+        final effectivePos =
+            (_livePositionSecs.value == 0 &&
                 (progress?.progressSeconds ?? 0) > 0 &&
                 !_isPlayingNotifier.value)
             ? progress!.progressSeconds
@@ -1273,7 +1377,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
             ? ((effectivePos / liveDur) * 100).clamp(0.0, 100.0)
             : (progress?.percentage ?? 0.0);
         final completed = isCompleted || pct >= 95.0;
-        final remainingSecs = liveDur > 0 ? (liveDur - effectivePos).clamp(0, liveDur) : 0;
+        final remainingSecs = liveDur > 0
+            ? (liveDur - effectivePos).clamp(0, liveDur)
+            : 0;
 
         return AppCard(
           variant: AppCardVariant.elevated,
@@ -1806,12 +1912,20 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
         final liveDur = _liveDurationSecs.value > 0
             ? _liveDurationSecs.value
             : ((_currentVideo?.duration != null && _currentVideo!.duration > 0)
-                ? _currentVideo!.duration
-                : 0);
+                  ? _currentVideo!.duration
+                  : 0);
         final pct = liveDur > 0 ? (livePos / liveDur) * 100 : 0.0;
-        final isVideoCompleted = _isTeacher || isInitiallyCompleted || _videoCompletedLocally || pct >= 90.0;
+        final isVideoCompleted =
+            _isTeacher ||
+            isInitiallyCompleted ||
+            _videoCompletedLocally ||
+            pct >= 90.0;
         final exam = _lessonExam;
-        final actualExamTitle = exam?.title ?? _groupExamTitle ?? widget.associatedExamTitle ?? context.l10n.associatedExamBadge;
+        final actualExamTitle =
+            exam?.title ??
+            _groupExamTitle ??
+            widget.associatedExamTitle ??
+            context.l10n.associatedExamBadge;
         final examId = exam?.id ?? _groupExamId ?? widget.associatedExamId;
 
         // Determine quiz attempt state
@@ -1820,16 +1934,20 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
         final isSubmitted = latestAttempt != null && latestAttempt.isSubmitted;
         final isPassed = isSubmitted && latestAttempt.isPassed(passingScore);
         final isFailed = isSubmitted && !isPassed;
-        final scorePct = latestAttempt?.percentage?.toInt() ?? 
-            (latestAttempt?.score != null && (exam?.maxScore ?? 100) > 0 
-                ? ((latestAttempt!.score! / (exam?.maxScore ?? 100)) * 100).toInt() 
+        final scorePct =
+            latestAttempt?.percentage?.toInt() ??
+            (latestAttempt?.score != null && (exam?.maxScore ?? 100) > 0
+                ? ((latestAttempt!.score! / (exam?.maxScore ?? 100)) * 100)
+                      .toInt()
                 : null);
 
         // Find next lesson if available
         LessonAssignmentEntity? nextLesson;
         int? nextLessonIndex;
         if (_courseLessons.isNotEmpty) {
-          final cIdx = _courseLessons.indexWhere((l) => l.contentId == widget.videoId);
+          final cIdx = _courseLessons.indexWhere(
+            (l) => l.contentId == widget.videoId,
+          );
           if (cIdx >= 0 && cIdx < _courseLessons.length - 1) {
             nextLesson = _courseLessons[cIdx + 1];
             nextLessonIndex = cIdx + 2;
@@ -1894,10 +2012,10 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                           isPassed
                               ? Icons.check_circle_rounded
                               : isFailed
-                                  ? Icons.cancel_rounded
-                                  : isVideoCompleted
-                                      ? Icons.quiz_rounded
-                                      : Icons.lock_outline_rounded,
+                              ? Icons.cancel_rounded
+                              : isVideoCompleted
+                              ? Icons.quiz_rounded
+                              : Icons.lock_outline_rounded,
                           size: 11,
                           color: themeColor,
                         ),
@@ -1906,10 +2024,10 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                           isPassed
                               ? 'COMPLETED'
                               : isFailed
-                                  ? 'FAILED'
-                                  : isVideoCompleted
-                                      ? 'QUIZ'
-                                      : 'LOCKED',
+                              ? 'FAILED'
+                              : isVideoCompleted
+                              ? 'QUIZ'
+                              : 'LOCKED',
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
@@ -2014,8 +2132,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                         isPassed
                             ? Icons.verified_rounded
                             : isVideoCompleted
-                                ? Icons.quiz_rounded
-                                : Icons.lock_rounded,
+                            ? Icons.quiz_rounded
+                            : Icons.lock_rounded,
                         size: 22,
                         color: themeColor,
                       ),
@@ -2109,7 +2227,10 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                   children: [
                     Expanded(
                       child: OutlinedButton.icon(
-                        icon: const Icon(Icons.play_circle_outline_rounded, size: 16),
+                        icon: const Icon(
+                          Icons.play_circle_outline_rounded,
+                          size: 16,
+                        ),
                         label: Text(
                           context.l10n.reviewLessonAction,
                           maxLines: 1,
@@ -2188,11 +2309,12 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
 
   Widget _buildAttachedMaterialCard(ThemeData theme, VideoEntity? video) {
     // 1. الأولوية للـ PDF الخاص بالمجموعة (إذا دخلنا من group course)
-    final hasGroupPdf = _groupPdfStoragePath != null && _groupPdfFileName != null;
-    
+    final hasGroupPdf =
+        _groupPdfStoragePath != null && _groupPdfFileName != null;
+
     // 2. الـ PDF الافتراضي المربوط بالفيديو نفسه
     final attachedFile = video?.attachedFile;
-    
+
     if (!hasGroupPdf && attachedFile == null && !_isTeacher) {
       return const SizedBox.shrink();
     }
@@ -2303,7 +2425,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          hasGroupPdf ? _groupPdfFileName! : (attachedFile?.fileName ?? 'Study Material'),
+                          hasGroupPdf
+                              ? _groupPdfFileName!
+                              : (attachedFile?.fileName ?? 'Study Material'),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
@@ -2314,7 +2438,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          hasGroupPdf 
+                          hasGroupPdf
                               ? 'PDF'
                               : '${attachedFile?.formattedFileSize ?? ''} • PDF',
                           style: const TextStyle(
@@ -2368,7 +2492,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                   MaterialViewerSheet.show(
                     context,
                     content: contentWrapper,
-                    onGetSignedUrl: (_) => cubit.getSignedFileUrl(_groupPdfStoragePath!),
+                    onGetSignedUrl: (_) =>
+                        cubit.getSignedFileUrl(_groupPdfStoragePath!),
                   );
                 } else {
                   _handleOpenAttachedMaterial(video!);

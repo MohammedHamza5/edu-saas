@@ -17,9 +17,7 @@ class MathBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox.expand(
-      child: CustomPaint(
-        painter: _MathBackgroundPainter(),
-      ),
+      child: CustomPaint(painter: _MathBackgroundPainter()),
     );
   }
 }

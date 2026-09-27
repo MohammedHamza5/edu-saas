@@ -46,8 +46,12 @@ class _TeacherSettingsPageState extends State<TeacherSettingsPage> {
     _academyNameController = TextEditingController(text: branding.brandName);
     _subjectController = TextEditingController(text: branding.subjectTitle);
     _taglineController = TextEditingController(text: branding.tagline);
-    _supportPhoneController = TextEditingController(text: branding.supportPhone ?? '');
-    _supportEmailController = TextEditingController(text: branding.supportEmail ?? '');
+    _supportPhoneController = TextEditingController(
+      text: branding.supportPhone ?? '',
+    );
+    _supportEmailController = TextEditingController(
+      text: branding.supportEmail ?? '',
+    );
     _selectedVideoProvider = branding.videoProvider;
     _loadTenantProvider();
   }
@@ -65,7 +69,9 @@ class _TeacherSettingsPageState extends State<TeacherSettingsPage> {
         setState(() {
           _selectedVideoProvider = prov;
         });
-        final updated = TenantRegistry.defaultBranding.copyWith(videoProvider: prov);
+        final updated = TenantRegistry.defaultBranding.copyWith(
+          videoProvider: prov,
+        );
         TenantRegistry.register(updated);
         try {
           context.read<TenantThemeCubit>().setBranding(updated);
@@ -88,7 +94,9 @@ class _TeacherSettingsPageState extends State<TeacherSettingsPage> {
           .update({'video_provider': newProvider})
           .eq('id', tenantId);
 
-      final updated = TenantRegistry.defaultBranding.copyWith(videoProvider: newProvider);
+      final updated = TenantRegistry.defaultBranding.copyWith(
+        videoProvider: newProvider,
+      );
       TenantRegistry.register(updated);
       if (mounted) {
         try {
@@ -164,7 +172,9 @@ class _TeacherSettingsPageState extends State<TeacherSettingsPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            isAr ? 'تم حفظ وتحديث بيانات الأكاديمية بنجاح' : 'Academy profile updated successfully',
+            isAr
+                ? 'تم حفظ وتحديث بيانات الأكاديمية بنجاح'
+                : 'Academy profile updated successfully',
           ),
           backgroundColor: AppColors.success,
           behavior: SnackBarBehavior.floating,
@@ -201,7 +211,10 @@ class _TeacherSettingsPageState extends State<TeacherSettingsPage> {
               isAr
                   ? 'سيتم إرسال رابط تعيين كلمة المرور الجديدة إلى بريدك الإلكتروني.'
                   : 'A password reset link will be sent to your registered email address.',
-              style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+              style: const TextStyle(
+                fontSize: 13,
+                color: AppColors.textSecondary,
+              ),
             ),
           ],
         ),
@@ -307,13 +320,19 @@ class _TeacherSettingsPageState extends State<TeacherSettingsPage> {
                       AppTextField(
                         label: l10n.settingsAcademyNameLabel,
                         controller: _academyNameController,
-                        prefixIcon: const Icon(Icons.business_rounded, size: 20),
+                        prefixIcon: const Icon(
+                          Icons.business_rounded,
+                          size: 20,
+                        ),
                       ),
                       const SizedBox(height: AppSpacing.s16),
                       AppTextField(
                         label: l10n.settingsSubjectLabel,
                         controller: _subjectController,
-                        prefixIcon: const Icon(Icons.menu_book_rounded, size: 20),
+                        prefixIcon: const Icon(
+                          Icons.menu_book_rounded,
+                          size: 20,
+                        ),
                       ),
                       const SizedBox(height: AppSpacing.s16),
                       AppTextField(
@@ -328,7 +347,10 @@ class _TeacherSettingsPageState extends State<TeacherSettingsPage> {
                             child: AppTextField(
                               label: l10n.settingsSupportPhoneLabel,
                               controller: _supportPhoneController,
-                              prefixIcon: const Icon(Icons.phone_rounded, size: 20),
+                              prefixIcon: const Icon(
+                                Icons.phone_rounded,
+                                size: 20,
+                              ),
                             ),
                           ),
                           const SizedBox(width: AppSpacing.s16),
@@ -336,7 +358,10 @@ class _TeacherSettingsPageState extends State<TeacherSettingsPage> {
                             child: AppTextField(
                               label: l10n.settingsSupportEmailLabel,
                               controller: _supportEmailController,
-                              prefixIcon: const Icon(Icons.email_rounded, size: 20),
+                              prefixIcon: const Icon(
+                                Icons.email_rounded,
+                                size: 20,
+                              ),
                             ),
                           ),
                         ],
@@ -385,7 +410,8 @@ class _TeacherSettingsPageState extends State<TeacherSettingsPage> {
                                   subtitle: l10n.providerYoutubeDesc,
                                   icon: Icons.play_circle_fill_rounded,
                                   iconColor: const Color(0xFFFF0000),
-                                  isSelected: _selectedVideoProvider == 'youtube',
+                                  isSelected:
+                                      _selectedVideoProvider == 'youtube',
                                 ),
                                 const SizedBox(height: AppSpacing.s12),
                                 _buildProviderOptionCard(
@@ -410,7 +436,8 @@ class _TeacherSettingsPageState extends State<TeacherSettingsPage> {
                                   subtitle: l10n.providerYoutubeDesc,
                                   icon: Icons.play_circle_fill_rounded,
                                   iconColor: const Color(0xFFFF0000),
-                                  isSelected: _selectedVideoProvider == 'youtube',
+                                  isSelected:
+                                      _selectedVideoProvider == 'youtube',
                                 ),
                               ),
                               const SizedBox(width: AppSpacing.s16),
@@ -490,7 +517,9 @@ class _TeacherSettingsPageState extends State<TeacherSettingsPage> {
                         children: [
                           CircleAvatar(
                             radius: 28,
-                            backgroundColor: AppColors.primary.withValues(alpha: 0.12),
+                            backgroundColor: AppColors.primary.withValues(
+                              alpha: 0.12,
+                            ),
                             child: const Text(
                               '∑',
                               style: TextStyle(
@@ -515,7 +544,11 @@ class _TeacherSettingsPageState extends State<TeacherSettingsPage> {
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  currentUser?.email ?? (TenantRegistry.defaultBranding.supportEmail ?? ''),
+                                  currentUser?.email ??
+                                      (TenantRegistry
+                                              .defaultBranding
+                                              .supportEmail ??
+                                          ''),
                                   style: const TextStyle(
                                     fontSize: 13,
                                     color: AppColors.textSecondary,
@@ -535,11 +568,16 @@ class _TeacherSettingsPageState extends State<TeacherSettingsPage> {
                         children: [
                           OutlinedButton.icon(
                             onPressed: _showPasswordResetDialog,
-                            icon: const Icon(Icons.lock_outline_rounded, size: 18),
+                            icon: const Icon(
+                              Icons.lock_outline_rounded,
+                              size: 18,
+                            ),
                             label: Text(l10n.settingsChangePasswordBtn),
                             style: OutlinedButton.styleFrom(
                               foregroundColor: AppColors.textPrimary,
-                              side: const BorderSide(color: AppColors.borderDark),
+                              side: const BorderSide(
+                                color: AppColors.borderDark,
+                              ),
                               padding: const EdgeInsets.symmetric(
                                 horizontal: AppSpacing.s16,
                                 vertical: AppSpacing.s12,
@@ -551,13 +589,19 @@ class _TeacherSettingsPageState extends State<TeacherSettingsPage> {
                           ),
                           OutlinedButton.icon(
                             onPressed: () => context.read<AuthCubit>().logout(),
-                            icon: const Icon(Icons.logout_rounded, size: 18, color: AppColors.error),
+                            icon: const Icon(
+                              Icons.logout_rounded,
+                              size: 18,
+                              color: AppColors.error,
+                            ),
                             label: Text(
                               l10n.settingsSignOutBtn,
                               style: const TextStyle(color: AppColors.error),
                             ),
                             style: OutlinedButton.styleFrom(
-                              side: BorderSide(color: AppColors.error.withValues(alpha: 0.4)),
+                              side: BorderSide(
+                                color: AppColors.error.withValues(alpha: 0.4),
+                              ),
                               padding: const EdgeInsets.symmetric(
                                 horizontal: AppSpacing.s16,
                                 vertical: AppSpacing.s12,
@@ -638,7 +682,9 @@ class _TeacherSettingsPageState extends State<TeacherSettingsPage> {
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.s16),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withValues(alpha: 0.08) : Colors.transparent,
+          color: isSelected
+              ? AppColors.primary.withValues(alpha: 0.08)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected ? AppColors.primary : AppColors.borderDark,
@@ -648,7 +694,9 @@ class _TeacherSettingsPageState extends State<TeacherSettingsPage> {
         child: Row(
           children: [
             Icon(
-              isSelected ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
+              isSelected
+                  ? Icons.check_circle_rounded
+                  : Icons.radio_button_unchecked_rounded,
               color: isSelected ? AppColors.primary : AppColors.textMuted,
               size: 22,
             ),
@@ -662,7 +710,9 @@ class _TeacherSettingsPageState extends State<TeacherSettingsPage> {
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
-                      color: isSelected ? AppColors.primary : AppColors.textPrimary,
+                      color: isSelected
+                          ? AppColors.primary
+                          : AppColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -692,12 +742,16 @@ class _TeacherSettingsPageState extends State<TeacherSettingsPage> {
     required bool isSelected,
   }) {
     return InkWell(
-      onTap: _isUpdatingProvider ? null : () => _updateVideoProvider(providerKey),
+      onTap: _isUpdatingProvider
+          ? null
+          : () => _updateVideoProvider(providerKey),
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.s16),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withValues(alpha: 0.08) : Colors.transparent,
+          color: isSelected
+              ? AppColors.primary.withValues(alpha: 0.08)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected ? AppColors.primary : AppColors.borderDark,
@@ -724,7 +778,9 @@ class _TeacherSettingsPageState extends State<TeacherSettingsPage> {
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
-                      color: isSelected ? AppColors.primary : AppColors.textPrimary,
+                      color: isSelected
+                          ? AppColors.primary
+                          : AppColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -747,7 +803,9 @@ class _TeacherSettingsPageState extends State<TeacherSettingsPage> {
               )
             else
               Icon(
-                isSelected ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
+                isSelected
+                    ? Icons.check_circle_rounded
+                    : Icons.radio_button_unchecked_rounded,
                 color: isSelected ? AppColors.primary : AppColors.textMuted,
                 size: 22,
               ),

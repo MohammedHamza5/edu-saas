@@ -1,0 +1,511 @@
+{
+  "document_path": "tests\\fixtures\\trail_august.pdf",
+  "sha256": "c36366a632b8d2dc3fc6a938631672a59d2edf88bbb9ae811684e9966c3a8ae9",
+  "page_count": 16,
+  "pages": [
+    {
+      "page_no": 1,
+      "width_pt": 595.28,
+      "height_pt": 841.89,
+      "rotation": 0,
+      "n_chars": 75,
+      "n_spans": 22,
+      "fonts": [
+        "CMBX12",
+        "CMR12",
+        "Helvetica-Bold"
+      ],
+      "font_families": [
+        "ComputerModern/LaTeX",
+        "Helvetica"
+      ],
+      "n_embedded_images": 0,
+      "image_dpi_min": null,
+      "image_dpi_median": null,
+      "n_drawings": 2,
+      "rotated_text_span_count": 2,
+      "has_answer_key_pattern": false,
+      "is_cover": true,
+      "page_class": "cover",
+      "text_trust": 1.0,
+      "coverage_text": 0.1555,
+      "coverage_raster": 0.0
+    },
+    {
+      "page_no": 2,
+      "width_pt": 595.28,
+      "height_pt": 841.89,
+      "rotation": 0,
+      "n_chars": 987,
+      "n_spans": 433,
+      "fonts": [
+        "CMBX12",
+        "CMMI12",
+        "CMMI8",
+        "CMR12",
+        "CMR8",
+        "CMSY10",
+        "Helvetica-Bold",
+        "SFRM1200"
+      ],
+      "font_families": [
+        "ComputerModern/LaTeX",
+        "Helvetica",
+        "SFRM1200"
+      ],
+      "n_embedded_images": 0,
+      "image_dpi_min": null,
+      "image_dpi_median": null,
+      "n_drawings": 5,
+      "rotated_text_span_count": 2,
+      "has_answer_key_pattern": false,
+      "is_cover": false,
+      "page_class": "native_vector",
+      "text_trust": 1.0,
+      "coverage_text": 0.2949,
+      "coverage_raster": 0.0
+    },
+    {
+      "page_no": 3,
+      "width_pt": 595.28,
+      "height_pt": 841.89,
+      "rotation": 0,
+      "n_chars": 682,
+      "n_spans": 250,
+      "fonts": [
+        "CMBX12",
+        "CMMI12",
+        "CMR12",
+        "CMSY10",
+        "CMTI10",
+        "Helvetica-Bold"
+      ],
+      "font_families": [
+        "ComputerModern/LaTeX",
+        "Helvetica"
+      ],
+      "n_embedded_images": 0,
+      "image_dpi_min": null,
+      "image_dpi_median": null,
+      "n_drawings": 17,
+      "rotated_text_span_count": 2,
+      "has_answer_key_pattern": false,
+      "is_cover": false,
+      "page_class": "native_vector",
+      "text_trust": 1.0,
+      "coverage_text": 0.2433,
+      "coverage_raster": 0.0
+    },
+    {
+      "page_no": 4,
+      "width_pt": 595.28,
+      "height_pt": 841.89,
+      "rotation": 0,
+      "n_chars": 1172,
+      "n_spans": 354,
+      "fonts": [
+        "CMBX12",
+        "CMR12",
+        "CMR6",
+        "Helvetica-Bold"
+      ],
+      "font_families": [
+        "ComputerModern/LaTeX",
+        "Helvetica"
+      ],
+      "n_embedded_images": 0,
+      "image_dpi_min": null,
+      "image_dpi_median": null,
+      "n_drawings": 44,
+      "rotated_text_span_count": 4,
+      "has_answer_key_pattern": false,
+      "is_cover": false,
+      "page_class": "native_vector",
+      "text_trust": 1.0,
+      "coverage_text": 0.3047,
+      "coverage_raster": 0.0
+    },
+    {
+      "page_no": 5,
+      "width_pt": 595.28,
+      "height_pt": 841.89,
+      "rotation": 0,
+      "n_chars": 912,
+      "n_spans": 265,
+      "fonts": [
+        "CMBX12",
+        "CMEX10",
+        "CMMI12",
+        "CMMI8",
+        "CMR12",
+        "CMR8",
+        "CMSY10",
+        "CMTI10",
+        "Helvetica-Bold"
+      ],
+      "font_families": [
+        "ComputerModern/LaTeX",
+        "Helvetica"
+      ],
+      "n_embedded_images": 0,
+      "image_dpi_min": null,
+      "image_dpi_median": null,
+      "n_drawings": 14,
+      "rotated_text_span_count": 2,
+      "has_answer_key_pattern": false,
+      "is_cover": false,
+      "page_class": "native_vector",
+      "text_trust": 1.0,
+      "coverage_text": 0.2766,
+      "coverage_raster": 0.0
+    },
+    {
+      "page_no": 6,
+      "width_pt": 595.28,
+      "height_pt": 841.89,
+      "rotation": 0,
+      "n_chars": 747,
+      "n_spans": 303,
+      "fonts": [
+        "CMBX12",
+        "CMMI12",
+        "CMMI6",
+        "CMMI8",
+        "CMR12",
+        "CMR6",
+        "Helvetica-Bold"
+      ],
+      "font_families": [
+        "ComputerModern/LaTeX",
+        "Helvetica"
+      ],
+      "n_embedded_images": 0,
+      "image_dpi_min": null,
+      "image_dpi_median": null,
+      "n_drawings": 37,
+      "rotated_text_span_count": 2,
+      "has_answer_key_pattern": false,
+      "is_cover": false,
+      "page_class": "native_vector",
+      "text_trust": 1.0,
+      "coverage_text": 0.2477,
+      "coverage_raster": 0.0
+    },
+    {
+      "page_no": 7,
+      "width_pt": 595.28,
+      "height_pt": 841.89,
+      "rotation": 0,
+      "n_chars": 943,
+      "n_spans": 437,
+      "fonts": [
+        "CMBX12",
+        "CMMI12",
+        "CMR12",
+        "CMR8",
+        "CMSY10",
+        "Helvetica-Bold"
+      ],
+      "font_families": [
+        "ComputerModern/LaTeX",
+        "Helvetica"
+      ],
+      "n_embedded_images": 0,
+      "image_dpi_min": null,
+      "image_dpi_median": null,
+      "n_drawings": 16,
+      "rotated_text_span_count": 2,
+      "has_answer_key_pattern": false,
+      "is_cover": false,
+      "page_class": "native_vector",
+      "text_trust": 1.0,
+      "coverage_text": 0.2872,
+      "coverage_raster": 0.0
+    },
+    {
+      "page_no": 8,
+      "width_pt": 595.28,
+      "height_pt": 841.89,
+      "rotation": 0,
+      "n_chars": 918,
+      "n_spans": 420,
+      "fonts": [
+        "CMBX12",
+        "CMMI12",
+        "CMR12",
+        "CMR8",
+        "CMSY10",
+        "Helvetica-Bold"
+      ],
+      "font_families": [
+        "ComputerModern/LaTeX",
+        "Helvetica"
+      ],
+      "n_embedded_images": 0,
+      "image_dpi_min": null,
+      "image_dpi_median": null,
+      "n_drawings": 10,
+      "rotated_text_span_count": 2,
+      "has_answer_key_pattern": false,
+      "is_cover": false,
+      "page_class": "native_vector",
+      "text_trust": 1.0,
+      "coverage_text": 0.2868,
+      "coverage_raster": 0.0
+    },
+    {
+      "page_no": 9,
+      "width_pt": 595.28,
+      "height_pt": 841.89,
+      "rotation": 0,
+      "n_chars": 67,
+      "n_spans": 17,
+      "fonts": [
+        "CMBX12",
+        "CMR12",
+        "Helvetica-Bold"
+      ],
+      "font_families": [
+        "ComputerModern/LaTeX",
+        "Helvetica"
+      ],
+      "n_embedded_images": 0,
+      "image_dpi_min": null,
+      "image_dpi_median": null,
+      "n_drawings": 2,
+      "rotated_text_span_count": 2,
+      "has_answer_key_pattern": false,
+      "is_cover": true,
+      "page_class": "cover",
+      "text_trust": 1.0,
+      "coverage_text": 0.1509,
+      "coverage_raster": 0.0
+    },
+    {
+      "page_no": 10,
+      "width_pt": 595.28,
+      "height_pt": 841.89,
+      "rotation": 0,
+      "n_chars": 623,
+      "n_spans": 303,
+      "fonts": [
+        "CMBX12",
+        "CMMI12",
+        "CMMI8",
+        "CMR12",
+        "CMR8",
+        "CMSY10",
+        "Helvetica-Bold"
+      ],
+      "font_families": [
+        "ComputerModern/LaTeX",
+        "Helvetica"
+      ],
+      "n_embedded_images": 0,
+      "image_dpi_min": null,
+      "image_dpi_median": null,
+      "n_drawings": 12,
+      "rotated_text_span_count": 2,
+      "has_answer_key_pattern": false,
+      "is_cover": false,
+      "page_class": "native_vector",
+      "text_trust": 1.0,
+      "coverage_text": 0.2412,
+      "coverage_raster": 0.0
+    },
+    {
+      "page_no": 11,
+      "width_pt": 595.28,
+      "height_pt": 841.89,
+      "rotation": 0,
+      "n_chars": 768,
+      "n_spans": 310,
+      "fonts": [
+        "CMBX12",
+        "CMMI12",
+        "CMR12",
+        "CMR8",
+        "CMSY10",
+        "Helvetica-Bold"
+      ],
+      "font_families": [
+        "ComputerModern/LaTeX",
+        "Helvetica"
+      ],
+      "n_embedded_images": 0,
+      "image_dpi_min": null,
+      "image_dpi_median": null,
+      "n_drawings": 6,
+      "rotated_text_span_count": 2,
+      "has_answer_key_pattern": false,
+      "is_cover": false,
+      "page_class": "native_vector",
+      "text_trust": 1.0,
+      "coverage_text": 0.2604,
+      "coverage_raster": 0.0
+    },
+    {
+      "page_no": 12,
+      "width_pt": 595.28,
+      "height_pt": 841.89,
+      "rotation": 0,
+      "n_chars": 524,
+      "n_spans": 259,
+      "fonts": [
+        "CMBX12",
+        "CMEX10",
+        "CMMI12",
+        "CMR12",
+        "CMSY10",
+        "CMSY8",
+        "Helvetica-Bold",
+        "MSAM10"
+      ],
+      "font_families": [
+        "ComputerModern/LaTeX",
+        "Helvetica",
+        "MSAM10"
+      ],
+      "n_embedded_images": 0,
+      "image_dpi_min": null,
+      "image_dpi_median": null,
+      "n_drawings": 6,
+      "rotated_text_span_count": 2,
+      "has_answer_key_pattern": false,
+      "is_cover": false,
+      "page_class": "native_vector",
+      "text_trust": 1.0,
+      "coverage_text": 0.2273,
+      "coverage_raster": 0.0
+    },
+    {
+      "page_no": 13,
+      "width_pt": 595.28,
+      "height_pt": 841.89,
+      "rotation": 0,
+      "n_chars": 908,
+      "n_spans": 394,
+      "fonts": [
+        "CMBX12",
+        "CMMI12",
+        "CMMI6",
+        "CMMI8",
+        "CMR12",
+        "CMR6",
+        "CMR8",
+        "CMSY10",
+        "Helvetica-Bold"
+      ],
+      "font_families": [
+        "ComputerModern/LaTeX",
+        "Helvetica"
+      ],
+      "n_embedded_images": 0,
+      "image_dpi_min": null,
+      "image_dpi_median": null,
+      "n_drawings": 30,
+      "rotated_text_span_count": 2,
+      "has_answer_key_pattern": false,
+      "is_cover": false,
+      "page_class": "native_vector",
+      "text_trust": 1.0,
+      "coverage_text": 0.2799,
+      "coverage_raster": 0.0
+    },
+    {
+      "page_no": 14,
+      "width_pt": 595.28,
+      "height_pt": 841.89,
+      "rotation": 0,
+      "n_chars": 610,
+      "n_spans": 259,
+      "fonts": [
+        "CMBX12",
+        "CMMI12",
+        "CMMI8",
+        "CMR10",
+        "CMR12",
+        "Helvetica-Bold"
+      ],
+      "font_families": [
+        "ComputerModern/LaTeX",
+        "Helvetica"
+      ],
+      "n_embedded_images": 0,
+      "image_dpi_min": null,
+      "image_dpi_median": null,
+      "n_drawings": 22,
+      "rotated_text_span_count": 2,
+      "has_answer_key_pattern": false,
+      "is_cover": false,
+      "page_class": "native_vector",
+      "text_trust": 1.0,
+      "coverage_text": 0.2353,
+      "coverage_raster": 0.0
+    },
+    {
+      "page_no": 15,
+      "width_pt": 595.28,
+      "height_pt": 841.89,
+      "rotation": 0,
+      "n_chars": 683,
+      "n_spans": 295,
+      "fonts": [
+        "CMBX12",
+        "CMMI12",
+        "CMR12",
+        "CMR8",
+        "CMSY10",
+        "Helvetica-Bold"
+      ],
+      "font_families": [
+        "ComputerModern/LaTeX",
+        "Helvetica"
+      ],
+      "n_embedded_images": 0,
+      "image_dpi_min": null,
+      "image_dpi_median": null,
+      "n_drawings": 12,
+      "rotated_text_span_count": 2,
+      "has_answer_key_pattern": false,
+      "is_cover": false,
+      "page_class": "native_vector",
+      "text_trust": 1.0,
+      "coverage_text": 0.251,
+      "coverage_raster": 0.0
+    },
+    {
+      "page_no": 16,
+      "width_pt": 595.28,
+      "height_pt": 841.89,
+      "rotation": 0,
+      "n_chars": 215,
+      "n_spans": 98,
+      "fonts": [
+        "CMBX12",
+        "CMEX10",
+        "CMMI12",
+        "CMR12",
+        "CMR8",
+        "CMSY10",
+        "Helvetica-Bold"
+      ],
+      "font_families": [
+        "ComputerModern/LaTeX",
+        "Helvetica"
+      ],
+      "n_embedded_images": 0,
+      "image_dpi_min": null,
+      "image_dpi_median": null,
+      "n_drawings": 7,
+      "rotated_text_span_count": 2,
+      "has_answer_key_pattern": false,
+      "is_cover": false,
+      "page_class": "native_vector",
+      "text_trust": 1.0,
+      "coverage_text": 0.1734,
+      "coverage_raster": 0.0
+    }
+  ],
+  "dominant_class": "native_vector"
+}

@@ -10,10 +10,7 @@ import '../../domain/entities/student_dashboard_stats.dart';
 class ContinueLearningCard extends StatelessWidget {
   final ContinueLearningItem item;
 
-  const ContinueLearningCard({
-    super.key,
-    required this.item,
-  });
+  const ContinueLearningCard({super.key, required this.item});
 
   String _formatSeconds(int totalSeconds) {
     final minutes = totalSeconds ~/ 60;
@@ -41,7 +38,10 @@ class ContinueLearningCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
@@ -137,7 +137,9 @@ class ContinueLearningCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      context.l10n.resumeAtTime('$currentPosFormatted / $durationFormatted'),
+                      context.l10n.resumeAtTime(
+                        '$currentPosFormatted / $durationFormatted',
+                      ),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: AppColors.textSecondary,
                         fontWeight: FontWeight.w500,
@@ -179,7 +181,9 @@ class ContinueLearningCard extends StatelessWidget {
                   value: pctValue,
                   minHeight: 6,
                   backgroundColor: AppColors.border,
-                  valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+                  valueColor: const AlwaysStoppedAnimation<Color>(
+                    AppColors.primary,
+                  ),
                 ),
               ),
             ],
@@ -192,7 +196,9 @@ class ContinueLearningCard extends StatelessWidget {
             child: ElevatedButton.icon(
               onPressed: () {
                 final encodedGroup = Uri.encodeComponent(item.groupName);
-                context.push('${AppRoutes.videoPlayer}?id=${item.videoId}&groupName=$encodedGroup');
+                context.push(
+                  '${AppRoutes.videoPlayer}?id=${item.videoId}&groupName=$encodedGroup',
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
@@ -208,8 +214,8 @@ class ContinueLearningCard extends StatelessWidget {
                 item.percentage == 0
                     ? context.l10n.startCourseAction
                     : item.percentage >= 100
-                        ? context.l10n.reviewLessonAction
-                        : context.l10n.continueLessonAction,
+                    ? context.l10n.reviewLessonAction
+                    : context.l10n.continueLessonAction,
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 14,

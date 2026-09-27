@@ -21,6 +21,8 @@ dependencies:
   # Backend & Network
   supabase_flutter: ^2.8.4
   dio: ^5.8.0+1
+  http: ^1.2.2
+  http_parser: ^4.1.2
 
   # Routing
   go_router: ^14.8.1
@@ -44,6 +46,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   video_player: ^2.10.1
   crypto: ^3.0.7
+  flutter_math_fork: ^0.7.4
 
 dev_dependencies:
   flutter_test:

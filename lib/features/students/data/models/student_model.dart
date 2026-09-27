@@ -37,16 +37,16 @@ class StudentModel extends StudentEntity {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'tenant_id': tenantId,
-        'full_name': fullName,
-        'email': email,
-        'phone': phone,
-        'parent_phone': parentPhone,
-        'avatar_url': avatarUrl,
-        'status': status,
-        'role': role,
-      };
+    'id': id,
+    'tenant_id': tenantId,
+    'full_name': fullName,
+    'email': email,
+    'phone': phone,
+    'parent_phone': parentPhone,
+    'avatar_url': avatarUrl,
+    'status': status,
+    'role': role,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -72,7 +72,10 @@ class Student360Model extends Student360Entity {
   });
 
   /// Build from JSON returned by `get_student_360` RPC or fallback queries.
-  factory Student360Model.fromJson(Map<String, dynamic> data, String studentId) {
+  factory Student360Model.fromJson(
+    Map<String, dynamic> data,
+    String studentId,
+  ) {
     // 1. Groups
     final rawGroups = data['groups'] as List<dynamic>? ?? [];
     final groups = rawGroups.map((e) {
@@ -144,7 +147,7 @@ class Student360Model extends Student360Entity {
         isSkipped: map['is_skipped'] == true,
         lastWatchedAt: map['last_watched_at'] != null
             ? DateTime.tryParse(map['last_watched_at'].toString()) ??
-                DateTime.now()
+                  DateTime.now()
             : DateTime.now(),
       );
     }).toList();
@@ -181,14 +184,17 @@ class StudentGroupInfoModel extends StudentGroupInfo {
   factory StudentGroupInfoModel.fromJson(Map<String, dynamic> json) {
     // joined via group_members join with groups table or rpc
     final groupData = json['groups'];
-    final groupJson =
-        groupData is Map ? Map<String, dynamic>.from(groupData) : null;
+    final groupJson = groupData is Map
+        ? Map<String, dynamic>.from(groupData)
+        : null;
     return StudentGroupInfoModel(
       groupId: json['group_id']?.toString() ?? '',
-      groupName: groupJson?['name']?.toString() ??
+      groupName:
+          groupJson?['name']?.toString() ??
           json['group_name']?.toString() ??
           '',
-      groupLevel: groupJson?['level']?.toString() ??
+      groupLevel:
+          groupJson?['level']?.toString() ??
           json['group_level']?.toString() ??
           '',
       joinedAt: json['joined_at'] != null

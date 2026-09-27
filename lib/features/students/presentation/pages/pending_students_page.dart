@@ -44,16 +44,18 @@ class _PendingStudentsPageState extends State<PendingStudentsPage> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
           tooltip: context.l10n.backToStudentsList,
-          onPressed: () =>
-              context.canPop() ? context.pop() : context.go(AppRoutes.studentsList),
+          onPressed: () => context.canPop()
+              ? context.pop()
+              : context.go(AppRoutes.studentsList),
         ),
         title: Text(context.l10n.newRegistrationRequests),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
             tooltip: context.l10n.refresh,
-            onPressed: () =>
-                context.read<StudentsCubit>().loadPendingStudents(refresh: true),
+            onPressed: () => context.read<StudentsCubit>().loadPendingStudents(
+              refresh: true,
+            ),
           ),
         ],
       ),
@@ -94,8 +96,9 @@ class _PendingStudentsPageState extends State<PendingStudentsPage> {
           if (state is StudentsError) {
             return AppErrorView(
               message: state.message,
-              onRetry: () =>
-                  context.read<StudentsCubit>().loadPendingStudents(refresh: true),
+              onRetry: () => context.read<StudentsCubit>().loadPendingStudents(
+                refresh: true,
+              ),
             );
           }
 
@@ -117,55 +120,59 @@ class _PendingStudentsPageState extends State<PendingStudentsPage> {
                   physics: const AlwaysScrollableScrollPhysics(),
                   padding: const EdgeInsets.all(AppSpacing.s16),
                   itemCount: state.pending.length + 1,
-                separatorBuilder: (_, __) =>
-                    const SizedBox(height: AppSpacing.s12),
-                itemBuilder: (context, index) {
-                  if (index == 0) {
-                    // Guidance banner
-                    return Container(
-                      padding: const EdgeInsets.all(AppSpacing.s12),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.05),
-                        borderRadius: BorderRadius.circular(
-                          AppSpacing.radiusMedium,
-                        ),
-                        border: Border.all(
-                          color: AppColors.primaryLight.withValues(alpha: 0.3),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.info_outline_rounded,
-                            size: 18,
-                            color: AppColors.primary,
+                  separatorBuilder: (_, __) =>
+                      const SizedBox(height: AppSpacing.s12),
+                  itemBuilder: (context, index) {
+                    if (index == 0) {
+                      // Guidance banner
+                      return Container(
+                        padding: const EdgeInsets.all(AppSpacing.s12),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.05),
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.radiusMedium,
                           ),
-                          const SizedBox(width: AppSpacing.s8),
-                          Expanded(
-                            child: Text(
-                              context.l10n.pendingGuidanceBanner(state.pending.length),
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: AppColors.textPrimary,
-                                height: 1.4,
-                              ),
+                          border: Border.all(
+                            color: AppColors.primaryLight.withValues(
+                              alpha: 0.3,
                             ),
                           ),
-                        ],
-                      ),
-                    );
-                  }
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.info_outline_rounded,
+                              size: 18,
+                              color: AppColors.primary,
+                            ),
+                            const SizedBox(width: AppSpacing.s8),
+                            Expanded(
+                              child: Text(
+                                context.l10n.pendingGuidanceBanner(
+                                  state.pending.length,
+                                ),
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.textPrimary,
+                                  height: 1.4,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
 
-                  final student = state.pending[index - 1];
-                  return _PendingCard(
-                    student: student,
-                    onApprove: () => _act(context, student, 'approve'),
-                    onReject: () => _act(context, student, 'reject'),
-                  );
-                },
+                    final student = state.pending[index - 1];
+                    return _PendingCard(
+                      student: student,
+                      onApprove: () => _act(context, student, 'approve'),
+                      onReject: () => _act(context, student, 'reject'),
+                    );
+                  },
+                ),
               ),
-            ),
-          );
+            );
           }
 
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -327,7 +334,8 @@ class _PendingCard extends StatelessWidget {
                         ],
                       ),
                     ],
-                    if (student.parentPhone != null && student.parentPhone!.isNotEmpty) ...[
+                    if (student.parentPhone != null &&
+                        student.parentPhone!.isNotEmpty) ...[
                       const SizedBox(height: 2),
                       Row(
                         children: [
@@ -437,4 +445,3 @@ class _PendingCard extends StatelessWidget {
     );
   }
 }
-

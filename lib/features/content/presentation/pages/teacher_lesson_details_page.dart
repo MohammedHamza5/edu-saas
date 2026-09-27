@@ -46,7 +46,8 @@ class _TeacherLessonDetailsPageState extends State<TeacherLessonDetailsPage>
   int _totalStudents = 0;
   int _totalViews = 0;
   int _completedStudents = 0;
-  double? _averageQuizScore; // null if no quiz attached or no completed attempts
+  double?
+  _averageQuizScore; // null if no quiz attached or no completed attempts
 
   @override
   void initState() {
@@ -132,7 +133,9 @@ class _TeacherLessonDetailsPageState extends State<TeacherLessonDetailsPage>
             .select('completed, progress_seconds')
             .eq('video_id', vId);
         final list = vpRes as List;
-        views = list.where((r) => (r['progress_seconds'] as int? ?? 0) > 0).length;
+        views = list
+            .where((r) => (r['progress_seconds'] as int? ?? 0) > 0)
+            .length;
         completed = list.where((r) => r['completed'] == true).length;
       }
 
@@ -152,7 +155,9 @@ class _TeacherLessonDetailsPageState extends State<TeacherLessonDetailsPage>
           for (final a in attempts) {
             final p = a['percentage'];
             if (p != null) {
-              sum += (p is num ? p.toDouble() : double.tryParse(p.toString()) ?? 0);
+              sum += (p is num
+                  ? p.toDouble()
+                  : double.tryParse(p.toString()) ?? 0);
               validCount++;
             }
           }
@@ -220,9 +225,12 @@ class _TeacherLessonDetailsPageState extends State<TeacherLessonDetailsPage>
                   label: Text(l10n.backToCourse),
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(
-                        color: AppColors.primary.withValues(alpha: 0.3)),
+                      color: AppColors.primary.withValues(alpha: 0.3),
+                    ),
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 8),
+                      horizontal: 14,
+                      vertical: 8,
+                    ),
                   ),
                 ),
                 const SizedBox(width: AppSpacing.s16),
@@ -241,12 +249,67 @@ class _TeacherLessonDetailsPageState extends State<TeacherLessonDetailsPage>
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 2),
-                      Text(
-                        isNew ? l10n.addLessonButton : l10n.editLessonTitle,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
-                          fontSize: 12,
-                        ),
+                      Row(
+                        children: [
+                          Text(
+                            isNew ? l10n.addLessonButton : l10n.editLessonTitle,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: AppColors.textSecondary,
+                              fontSize: 12,
+                            ),
+                          ),
+                          if (_lesson != null) ...[
+                            const SizedBox(width: AppSpacing.s8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color:
+                                    (_lesson!.isPublished
+                                            ? AppColors.success
+                                            : AppColors.warning)
+                                        .withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(4),
+                                border: Border.all(
+                                  color:
+                                      (_lesson!.isPublished
+                                              ? AppColors.success
+                                              : AppColors.warning)
+                                          .withValues(alpha: 0.3),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    _lesson!.isPublished
+                                        ? Icons.visibility_rounded
+                                        : Icons.visibility_off_rounded,
+                                    size: 11,
+                                    color: _lesson!.isPublished
+                                        ? AppColors.success
+                                        : AppColors.warning,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    _lesson!.isPublished
+                                        ? l10n.lessonVisibilityPublished
+                                        : l10n.lessonVisibilityDraft,
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      color: _lesson!.isPublished
+                                          ? AppColors.success
+                                          : AppColors.warning,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                     ],
                   ),
@@ -410,15 +473,19 @@ class _TeacherLessonDetailsPageState extends State<TeacherLessonDetailsPage>
                               : 0.0,
                           minHeight: 10,
                           backgroundColor: AppColors.border,
-                          valueColor:
-                              const AlwaysStoppedAnimation(AppColors.primary),
+                          valueColor: const AlwaysStoppedAnimation(
+                            AppColors.primary,
+                          ),
                         ),
                       ),
                       const SizedBox(height: AppSpacing.s8),
                       Text(
-                        l10n.overallCompletionRate(_totalStudents > 0
-                            ? ((_completedStudents / _totalStudents) * 100).toInt()
-                            : 0),
+                        l10n.overallCompletionRate(
+                          _totalStudents > 0
+                              ? ((_completedStudents / _totalStudents) * 100)
+                                    .toInt()
+                              : 0,
+                        ),
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: AppColors.textSecondary,
                         ),

@@ -13,10 +13,7 @@ import '../../../../core/widgets/language_switcher_button.dart';
 class StudentPendingPage extends StatelessWidget {
   final String? studentName;
 
-  const StudentPendingPage({
-    super.key,
-    this.studentName,
-  });
+  const StudentPendingPage({super.key, this.studentName});
 
   @override
   Widget build(BuildContext context) {

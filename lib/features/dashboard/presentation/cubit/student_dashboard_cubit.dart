@@ -6,8 +6,8 @@ class StudentDashboardCubit extends Cubit<StudentDashboardState> {
   final StudentDashboardRepository _repository;
 
   StudentDashboardCubit({required StudentDashboardRepository repository})
-      : _repository = repository,
-        super(StudentDashboardInitial());
+    : _repository = repository,
+      super(StudentDashboardInitial());
 
   Future<void> loadDashboardStats(
     String studentId, {

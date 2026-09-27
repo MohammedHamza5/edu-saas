@@ -7,10 +7,7 @@ import '../theme/app_spacing.dart';
 class LanguageSwitcherButton extends StatelessWidget {
   final bool compact;
 
-  const LanguageSwitcherButton({
-    super.key,
-    this.compact = false,
-  });
+  const LanguageSwitcherButton({super.key, this.compact = false});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +19,10 @@ class LanguageSwitcherButton extends StatelessWidget {
       cubit = context.watch<LocaleCubit>();
     } catch (_) {}
 
-    final locale = cubit?.state ?? Localizations.maybeLocaleOf(context) ?? const Locale('ar');
+    final locale =
+        cubit?.state ??
+        Localizations.maybeLocaleOf(context) ??
+        const Locale('ar');
     final isEn = locale.languageCode == 'en';
 
     if (compact) {
@@ -48,7 +48,10 @@ class LanguageSwitcherButton extends StatelessWidget {
 
     return OutlinedButton.icon(
       style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s12, vertical: AppSpacing.s8),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.s12,
+          vertical: AppSpacing.s8,
+        ),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
         ),

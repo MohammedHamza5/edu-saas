@@ -23,7 +23,9 @@ enum VideoSourceType { youtube, bunny, none }
 class InlineQuizQuestionData {
   QuestionType type;
   final TextEditingController questionController = TextEditingController();
-  final TextEditingController pointsController = TextEditingController(text: '1');
+  final TextEditingController pointsController = TextEditingController(
+    text: '1',
+  );
 
   // MCQ Options
   final TextEditingController optA = TextEditingController();
@@ -247,17 +249,20 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
       final hasVideo = _selectedSource != VideoSourceType.none;
 
       // 1. Create content record
-      final contentRes = await InjectionContainer.contentRepository.createContent(
-        groupId: widget.groupId,
-        title: title,
-        description: description.isNotEmpty ? description : null,
-        type: hasVideo ? ContentType.video : ContentType.pdf,
-        status: ContentStatus.published,
-        sortOrder: widget.nextSortOrder,
-      );
+      final contentRes = await InjectionContainer.contentRepository
+          .createContent(
+            groupId: widget.groupId,
+            title: title,
+            description: description.isNotEmpty ? description : null,
+            type: hasVideo ? ContentType.video : ContentType.pdf,
+            status: ContentStatus.published,
+            sortOrder: widget.nextSortOrder,
+          );
 
       if (!contentRes.isSuccess || contentRes.dataOrNull == null) {
-        throw Exception(contentRes.failureOrNull?.message ?? 'Failed to create lecture');
+        throw Exception(
+          contentRes.failureOrNull?.message ?? 'Failed to create lecture',
+        );
       }
 
       final content = contentRes.dataOrNull!;
@@ -272,25 +277,34 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
           title: title,
         );
         if (!yRes.isSuccess) {
-          throw Exception(yRes.failureOrNull?.message ?? 'Failed to link YouTube video');
+          throw Exception(
+            yRes.failureOrNull?.message ?? 'Failed to link YouTube video',
+          );
         }
-      } else if (_selectedSource == VideoSourceType.bunny && _bunnyFileBytes != null) {
+      } else if (_selectedSource == VideoSourceType.bunny &&
+          _bunnyFileBytes != null) {
         setState(() => _loadingMessage = context.l10n.uploadingVideoNotice);
-        final bRes = await InjectionContainer.videosRepository.createAndUploadVideo(
-          contentId: contentId,
-          title: title,
-          videoBytes: _bunnyFileBytes!,
-          fileName: _pickedBunnyFile?.name ?? 'video.mp4',
-        );
+        final bRes = await InjectionContainer.videosRepository
+            .createAndUploadVideo(
+              contentId: contentId,
+              title: title,
+              videoBytes: _bunnyFileBytes!,
+              fileName: _pickedBunnyFile?.name ?? 'video.mp4',
+            );
         if (!bRes.isSuccess) {
-          throw Exception(bRes.failureOrNull?.message ?? 'Failed to upload video');
+          throw Exception(
+            bRes.failureOrNull?.message ?? 'Failed to upload video',
+          );
         }
       }
 
       // 3. PDF Handout Upload
       if (_pickedHandoutFile != null && _handoutFileBytes != null) {
         setState(() => _loadingMessage = context.l10n.uploadingNotice);
-        final safeName = _pickedHandoutFile!.name.replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_');
+        final safeName = _pickedHandoutFile!.name.replaceAll(
+          RegExp(r'[^a-zA-Z0-9._-]'),
+          '_',
+        );
         final storagePath = 'groups/${widget.groupId}/$contentId/$safeName';
 
         await SupabaseService.client.storage
@@ -298,7 +312,10 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
             .uploadBinary(
               storagePath,
               _handoutFileBytes!,
-              fileOptions: const FileOptions(contentType: 'application/pdf', upsert: true),
+              fileOptions: const FileOptions(
+                contentType: 'application/pdf',
+                upsert: true,
+              ),
             );
 
         await SupabaseService.client.from('files').insert({
@@ -321,38 +338,82 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
           final pts = int.tryParse(q.pointsController.text.trim()) ?? 1;
 
           if (q.type == QuestionType.multipleChoice) {
-            questionsPayload.add(ExamQuestionModel(
-              id: '',
-              examVersionId: '',
-              questionText: q.questionController.text.trim(),
-              questionType: QuestionType.multipleChoice,
-              points: pts,
-              sortOrder: i + 1,
-              options: [
-                QuestionOptionModel(id: '', questionId: '', optionText: q.optA.text.trim(), sortOrder: 1, isCorrect: q.correctIndex == 0),
-                QuestionOptionModel(id: '', questionId: '', optionText: q.optB.text.trim(), sortOrder: 2, isCorrect: q.correctIndex == 1),
-                QuestionOptionModel(id: '', questionId: '', optionText: q.optC.text.trim(), sortOrder: 3, isCorrect: q.correctIndex == 2),
-                QuestionOptionModel(id: '', questionId: '', optionText: q.optD.text.trim(), sortOrder: 4, isCorrect: q.correctIndex == 3),
-              ],
-            ));
+            questionsPayload.add(
+              ExamQuestionModel(
+                id: '',
+                examVersionId: '',
+                questionText: q.questionController.text.trim(),
+                questionType: QuestionType.multipleChoice,
+                points: pts,
+                sortOrder: i + 1,
+                options: [
+                  QuestionOptionModel(
+                    id: '',
+                    questionId: '',
+                    optionText: q.optA.text.trim(),
+                    sortOrder: 1,
+                    isCorrect: q.correctIndex == 0,
+                  ),
+                  QuestionOptionModel(
+                    id: '',
+                    questionId: '',
+                    optionText: q.optB.text.trim(),
+                    sortOrder: 2,
+                    isCorrect: q.correctIndex == 1,
+                  ),
+                  QuestionOptionModel(
+                    id: '',
+                    questionId: '',
+                    optionText: q.optC.text.trim(),
+                    sortOrder: 3,
+                    isCorrect: q.correctIndex == 2,
+                  ),
+                  QuestionOptionModel(
+                    id: '',
+                    questionId: '',
+                    optionText: q.optD.text.trim(),
+                    sortOrder: 4,
+                    isCorrect: q.correctIndex == 3,
+                  ),
+                ],
+              ),
+            );
           } else {
-            questionsPayload.add(ExamQuestionModel(
-              id: '',
-              examVersionId: '',
-              questionText: q.questionController.text.trim(),
-              questionType: QuestionType.trueFalse,
-              points: pts,
-              sortOrder: i + 1,
-              options: [
-                QuestionOptionModel(id: '', questionId: '', optionText: 'True', sortOrder: 1, isCorrect: q.isTrueCorrect),
-                QuestionOptionModel(id: '', questionId: '', optionText: 'False', sortOrder: 2, isCorrect: !q.isTrueCorrect),
-              ],
-            ));
+            questionsPayload.add(
+              ExamQuestionModel(
+                id: '',
+                examVersionId: '',
+                questionText: q.questionController.text.trim(),
+                questionType: QuestionType.trueFalse,
+                points: pts,
+                sortOrder: i + 1,
+                options: [
+                  QuestionOptionModel(
+                    id: '',
+                    questionId: '',
+                    optionText: 'True',
+                    sortOrder: 1,
+                    isCorrect: q.isTrueCorrect,
+                  ),
+                  QuestionOptionModel(
+                    id: '',
+                    questionId: '',
+                    optionText: 'False',
+                    sortOrder: 2,
+                    isCorrect: !q.isTrueCorrect,
+                  ),
+                ],
+              ),
+            );
           }
         }
 
-        final totalScore = questionsPayload.fold<int>(0, (sum, q) => sum + q.points);
-        final passingScore = int.tryParse(_passingScoreController.text.trim()) ?? 60;
+        final totalScore = questionsPayload.fold<int>(
+          0,
+          (sum, q) => sum + q.points,
+        );
+        final passingScore =
+            int.tryParse(_passingScoreController.text.trim()) ?? 60;
 
         final examRes = await InjectionContainer.examsRepository.createExam(
           groupId: widget.groupId,
@@ -433,7 +494,9 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
                       ),
                       decoration: const BoxDecoration(
                         color: AppColors.surface,
-                        border: Border(bottom: BorderSide(color: AppColors.border)),
+                        border: Border(
+                          bottom: BorderSide(color: AppColors.border),
+                        ),
                       ),
                       child: Row(
                         children: [
@@ -441,7 +504,9 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
                             padding: const EdgeInsets.all(AppSpacing.s8),
                             decoration: BoxDecoration(
                               color: AppColors.primary.withAlpha(25),
-                              borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.radiusMedium,
+                              ),
                             ),
                             child: const Icon(
                               Icons.auto_stories_rounded,
@@ -513,7 +578,9 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
                       ),
                       decoration: const BoxDecoration(
                         color: AppColors.surface,
-                        border: Border(top: BorderSide(color: AppColors.border)),
+                        border: Border(
+                          top: BorderSide(color: AppColors.border),
+                        ),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.end,
@@ -547,11 +614,18 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
         children: [
           Row(
             children: [
-              const Icon(Icons.info_outline_rounded, size: 18, color: AppColors.primary),
+              const Icon(
+                Icons.info_outline_rounded,
+                size: 18,
+                color: AppColors.primary,
+              ),
               const SizedBox(width: AppSpacing.s8),
               Text(
                 context.l10n.lectureDetailsSection,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
               ),
             ],
           ),
@@ -588,11 +662,18 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
         children: [
           Row(
             children: [
-              const Icon(Icons.videocam_outlined, size: 18, color: AppColors.primary),
+              const Icon(
+                Icons.videocam_outlined,
+                size: 18,
+                color: AppColors.primary,
+              ),
               const SizedBox(width: AppSpacing.s8),
               Text(
                 context.l10n.videoSourceLabel,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
               ),
             ],
           ),
@@ -602,12 +683,18 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
               ButtonSegment(
                 value: VideoSourceType.youtube,
                 label: Text(context.l10n.videoSourceYoutube),
-                icon: const Icon(Icons.play_circle_fill_rounded, color: Colors.red),
+                icon: const Icon(
+                  Icons.play_circle_fill_rounded,
+                  color: Colors.red,
+                ),
               ),
               ButtonSegment(
                 value: VideoSourceType.bunny,
                 label: Text(context.l10n.videoSourceBunny),
-                icon: const Icon(Icons.cloud_upload_rounded, color: AppColors.primary),
+                icon: const Icon(
+                  Icons.cloud_upload_rounded,
+                  color: AppColors.primary,
+                ),
               ),
               ButtonSegment(
                 value: VideoSourceType.none,
@@ -651,7 +738,8 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(4),
                       child: CachedNetworkImage(
-                        imageUrl: 'https://img.youtube.com/vi/$_extractedYouTubeId/hqdefault.jpg',
+                        imageUrl:
+                            'https://img.youtube.com/vi/$_extractedYouTubeId/hqdefault.jpg',
                         width: 100,
                         height: 56,
                         fit: BoxFit.cover,
@@ -678,7 +766,10 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
                           ),
                           Text(
                             _extractedYouTubeId!,
-                            style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                            ),
                           ),
                         ],
                       ),
@@ -692,9 +783,11 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
               children: [
                 OutlinedButton.icon(
                   icon: const Icon(Icons.file_upload_outlined),
-                  label: Text(_pickedBunnyFile != null
-                      ? context.l10n.changeVideoFileAction
-                      : context.l10n.selectVideoFileAction),
+                  label: Text(
+                    _pickedBunnyFile != null
+                        ? context.l10n.changeVideoFileAction
+                        : context.l10n.selectVideoFileAction,
+                  ),
                   onPressed: _pickBunnyVideo,
                 ),
                 const SizedBox(width: AppSpacing.s12),
@@ -704,7 +797,10 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
                       '${_pickedBunnyFile!.name} (${(_pickedBunnyFile!.size / (1024 * 1024)).toStringAsFixed(1)} MB)',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
               ],
@@ -724,11 +820,18 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
         children: [
           Row(
             children: [
-              const Icon(Icons.picture_as_pdf_outlined, size: 18, color: Colors.redAccent),
+              const Icon(
+                Icons.picture_as_pdf_outlined,
+                size: 18,
+                color: Colors.redAccent,
+              ),
               const SizedBox(width: AppSpacing.s8),
               Text(
                 context.l10n.handoutAttachmentSection,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
               ),
             ],
           ),
@@ -752,12 +855,19 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.description_rounded, color: Colors.redAccent, size: 20),
+                  const Icon(
+                    Icons.description_rounded,
+                    color: Colors.redAccent,
+                    size: 20,
+                  ),
                   const SizedBox(width: AppSpacing.s8),
                   Expanded(
                     child: Text(
                       '${_pickedHandoutFile!.name} (${(_pickedHandoutFile!.size / 1024).toStringAsFixed(1)} KB)',
-                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                   IconButton(
@@ -788,12 +898,19 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
           // Header Switch
           Row(
             children: [
-              const Icon(Icons.quiz_outlined, size: 18, color: AppColors.primary),
+              const Icon(
+                Icons.quiz_outlined,
+                size: 18,
+                color: AppColors.primary,
+              ),
               const SizedBox(width: AppSpacing.s8),
               Expanded(
                 child: Text(
                   context.l10n.inlineQuizSection,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
                 ),
               ),
               Switch(
@@ -814,12 +931,19 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.lock_open_rounded, color: AppColors.success, size: 18),
+                  const Icon(
+                    Icons.lock_open_rounded,
+                    color: AppColors.success,
+                    size: 18,
+                  ),
                   const SizedBox(width: AppSpacing.s8),
                   Expanded(
                     child: Text(
                       context.l10n.enableInlineQuiz,
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],
@@ -866,7 +990,10 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
                   onPressed: () => _addQuestion(QuestionType.multipleChoice),
                 ),
                 OutlinedButton.icon(
-                  icon: const Icon(Icons.check_circle_outline_rounded, size: 16),
+                  icon: const Icon(
+                    Icons.check_circle_outline_rounded,
+                    size: 16,
+                  ),
                   label: Text(context.l10n.addTrueFalseQuestionAction),
                   onPressed: () => _addQuestion(QuestionType.trueFalse),
                 ),
@@ -911,8 +1038,13 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
               ),
               const SizedBox(width: AppSpacing.s8),
               Text(
-                isMcq ? context.l10n.questionTypeMcq : context.l10n.questionTypeTrueFalse,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                isMcq
+                    ? context.l10n.questionTypeMcq
+                    : context.l10n.questionTypeTrueFalse,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
               ),
               const Spacer(),
               SizedBox(
@@ -926,7 +1058,11 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
               const SizedBox(width: AppSpacing.s8),
               if (_questions.length > 1)
                 IconButton(
-                  icon: const Icon(Icons.delete_outline_rounded, color: AppColors.error, size: 20),
+                  icon: const Icon(
+                    Icons.delete_outline_rounded,
+                    color: AppColors.error,
+                    size: 20,
+                  ),
                   tooltip: context.l10n.removeQuestionTooltip,
                   onPressed: () => _removeQuestion(index),
                 ),

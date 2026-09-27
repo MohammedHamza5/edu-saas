@@ -25,12 +25,16 @@ class SupabaseService {
 
   static Future<void> initialize() async {
     AppLogger.i('SupabaseService', 'Initializing Supabase...');
-    AppLogger.d('SupabaseService', 'Config', data: {
-      'url': AppConfig.supabaseUrl,
-      'anonKeyPrefix': AppConfig.supabaseAnonKey.isNotEmpty
-          ? '${AppConfig.supabaseAnonKey.substring(0, 10)}...'
-          : 'MISSING',
-    });
+    AppLogger.d(
+      'SupabaseService',
+      'Config',
+      data: {
+        'url': AppConfig.supabaseUrl,
+        'anonKeyPrefix': AppConfig.supabaseAnonKey.isNotEmpty
+            ? '${AppConfig.supabaseAnonKey.substring(0, 10)}...'
+            : 'MISSING',
+      },
+    );
 
     // Restore cached role from hardware secure storage immediately
     try {
@@ -53,13 +57,19 @@ class SupabaseService {
       (data) {
         final event = data.event;
         final session = data.session;
-        AppLogger.i('SupabaseService', 'Auth state changed: ${event.name}', data: {
-          'userId': session?.user.id ?? 'null',
-          'email': session?.user.email ?? 'null',
-          'expiresAt': session?.expiresAt != null
-              ? DateTime.fromMillisecondsSinceEpoch(session!.expiresAt! * 1000).toIso8601String()
-              : 'null',
-        });
+        AppLogger.i(
+          'SupabaseService',
+          'Auth state changed: ${event.name}',
+          data: {
+            'userId': session?.user.id ?? 'null',
+            'email': session?.user.email ?? 'null',
+            'expiresAt': session?.expiresAt != null
+                ? DateTime.fromMillisecondsSinceEpoch(
+                    session!.expiresAt! * 1000,
+                  ).toIso8601String()
+                : 'null',
+          },
+        );
       },
       onError: (Object error, StackTrace stackTrace) {
         AppLogger.e(
@@ -72,7 +82,8 @@ class SupabaseService {
     );
   }
 
-  static User? get currentUser => isInitialized ? client.auth.currentUser : null;
+  static User? get currentUser =>
+      isInitialized ? client.auth.currentUser : null;
   static bool get isAuthenticated => currentUser != null;
   static String? get currentUserId => currentUser?.id;
   static String? _cachedRole;
@@ -84,6 +95,7 @@ class SupabaseService {
       SecureStorageHelper.delete(key: _roleStorageKey);
     }
   }
+
   static String? get cachedRole => _cachedRole;
   static String? get currentUserRole =>
       _cachedRole ?? (currentUser?.userMetadata?['role'] as String?);

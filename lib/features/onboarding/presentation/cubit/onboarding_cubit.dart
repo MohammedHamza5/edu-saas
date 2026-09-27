@@ -7,8 +7,8 @@ class OnboardingCubit extends Cubit<OnboardingState> {
   final OnboardingRepository _repository;
 
   OnboardingCubit({required OnboardingRepository repository})
-      : _repository = repository,
-        super(const OnboardingInitial());
+    : _repository = repository,
+      super(const OnboardingInitial());
 
   Future<bool> provisionTenant(ProvisionTenantParams params) async {
     emit(const OnboardingLoading());

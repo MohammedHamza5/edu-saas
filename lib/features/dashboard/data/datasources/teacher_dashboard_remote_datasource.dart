@@ -8,10 +8,12 @@ abstract class TeacherDashboardRemoteDataSource {
   Future<TeacherRadarAlerts> getTeacherRadarAlerts(String teacherId);
 }
 
-class TeacherDashboardRemoteDataSourceImpl implements TeacherDashboardRemoteDataSource {
+class TeacherDashboardRemoteDataSourceImpl
+    implements TeacherDashboardRemoteDataSource {
   final SupabaseClient? _client;
 
-  TeacherDashboardRemoteDataSourceImpl({SupabaseClient? client}) : _client = client;
+  TeacherDashboardRemoteDataSourceImpl({SupabaseClient? client})
+    : _client = client;
 
   SupabaseClient get _c => _client ?? SupabaseService.client;
 
@@ -28,7 +30,9 @@ class TeacherDashboardRemoteDataSourceImpl implements TeacherDashboardRemoteData
         data = Map<String, dynamic>.from(result);
       } else if (result is String) {
         final decoded = jsonDecode(result);
-        data = decoded is Map ? Map<String, dynamic>.from(decoded) : <String, dynamic>{};
+        data = decoded is Map
+            ? Map<String, dynamic>.from(decoded)
+            : <String, dynamic>{};
       } else {
         data = <String, dynamic>{};
       }
@@ -38,9 +42,15 @@ class TeacherDashboardRemoteDataSourceImpl implements TeacherDashboardRemoteData
       final overdueList = data['overdue_assignments'] as List<dynamic>? ?? [];
 
       return TeacherRadarAlerts(
-        lowScores: lowScoresList.map((e) => RadarAlertItem.fromJson(e as Map<String, dynamic>)).toList(),
-        unwatchedVideos: unwatchedList.map((e) => RadarAlertItem.fromJson(e as Map<String, dynamic>)).toList(),
-        overdueAssignments: overdueList.map((e) => RadarAlertItem.fromJson(e as Map<String, dynamic>)).toList(),
+        lowScores: lowScoresList
+            .map((e) => RadarAlertItem.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        unwatchedVideos: unwatchedList
+            .map((e) => RadarAlertItem.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        overdueAssignments: overdueList
+            .map((e) => RadarAlertItem.fromJson(e as Map<String, dynamic>))
+            .toList(),
       );
     } on PostgrestException catch (e) {
       throw ServerException(e.message);

@@ -14,7 +14,8 @@ import 'package:edu_saas/core/localization/generated/app_localizations.dart';
 class MockVideosRepository implements VideosRepository {
   List<VideoEntity> videosResponse = [];
   VideoEntity? singleVideoResponse;
-  String playbackUrlResponse = 'https://vz-04d07c5c-73c.b-cdn.net/test-guid/playlist.m3u8?token=mocktoken&expires=9999999999';
+  String playbackUrlResponse =
+      'https://vz-04d07c5c-73c.b-cdn.net/test-guid/playlist.m3u8?token=mocktoken&expires=9999999999';
   VideoProgressEntity? progressResponse;
   Failure? failureToThrow;
 
@@ -27,16 +28,19 @@ class MockVideosRepository implements VideosRepository {
   @override
   Future<Result<VideoEntity>> getVideoById(String videoId) async {
     if (failureToThrow != null) return Result.failure(failureToThrow!);
-    return Result.success(singleVideoResponse ?? VideoEntity(
-      id: videoId,
-      contentId: 'content-1',
-      title: 'درس الجبر والهندسة',
-      providerVideoId: 'test-guid',
-      duration: 1200,
-      status: VideoStatus.ready,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    ));
+    return Result.success(
+      singleVideoResponse ??
+          VideoEntity(
+            id: videoId,
+            contentId: 'content-1',
+            title: 'درس الجبر والهندسة',
+            providerVideoId: 'test-guid',
+            duration: 1200,
+            status: VideoStatus.ready,
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
+    );
   }
 
   @override
@@ -78,16 +82,20 @@ class MockVideosRepository implements VideosRepository {
     List<int>? newSegment,
   }) async {
     if (failureToThrow != null) return Result.failure(failureToThrow!);
-    final percentage = durationSeconds > 0 ? (progressSeconds / durationSeconds * 100) : 0.0;
-    return Result.success(VideoProgressEntity(
-      videoId: videoId,
-      studentId: studentId,
-      progressSeconds: progressSeconds,
-      durationSeconds: durationSeconds,
-      percentage: percentage,
-      completed: percentage >= 90.0,
-      lastWatchedAt: DateTime.now(),
-    ));
+    final percentage = durationSeconds > 0
+        ? (progressSeconds / durationSeconds * 100)
+        : 0.0;
+    return Result.success(
+      VideoProgressEntity(
+        videoId: videoId,
+        studentId: studentId,
+        progressSeconds: progressSeconds,
+        durationSeconds: durationSeconds,
+        percentage: percentage,
+        completed: percentage >= 90.0,
+        lastWatchedAt: DateTime.now(),
+      ),
+    );
   }
 
   @override
@@ -100,15 +108,17 @@ class MockVideosRepository implements VideosRepository {
   }) async {
     if (failureToThrow != null) return Result.failure(failureToThrow!);
     onProgress?.call(100, 100);
-    return Result.success(VideoEntity(
-      id: 'vid-new-1',
-      contentId: contentId,
-      title: title,
-      providerVideoId: 'guid-new',
-      status: VideoStatus.processing,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    ));
+    return Result.success(
+      VideoEntity(
+        id: 'vid-new-1',
+        contentId: contentId,
+        title: title,
+        providerVideoId: 'guid-new',
+        status: VideoStatus.processing,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      ),
+    );
   }
 
   @override
@@ -141,7 +151,8 @@ class MockVideosRepository implements VideosRepository {
       mimeType: 'application/pdf',
       createdAt: DateTime.now(),
     );
-    final base = singleVideoResponse ??
+    final base =
+        singleVideoResponse ??
         VideoEntity(
           id: videoId,
           contentId: contentId,
@@ -168,7 +179,8 @@ class MockVideosRepository implements VideosRepository {
       title: title ?? 'درس يوتيوب',
       provider: 'youtube',
       providerVideoId: 'dQw4w9WgXcQ',
-      playbackUrl: 'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?enablejsapi=1',
+      playbackUrl:
+          'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?enablejsapi=1',
       thumbnailUrl: 'https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg',
       status: VideoStatus.ready,
       createdAt: DateTime.now(),
@@ -232,8 +244,14 @@ void main() {
 
     test('VideoStatus parses accurately from strings', () {
       expect(VideoStatus.fromString('ready'), equals(VideoStatus.ready));
-      expect(VideoStatus.fromString('processing'), equals(VideoStatus.processing));
-      expect(VideoStatus.fromString('uploading'), equals(VideoStatus.uploading));
+      expect(
+        VideoStatus.fromString('processing'),
+        equals(VideoStatus.processing),
+      );
+      expect(
+        VideoStatus.fromString('uploading'),
+        equals(VideoStatus.uploading),
+      );
       expect(VideoStatus.fromString('failed'), equals(VideoStatus.failed));
       expect(VideoStatus.fromString('deleted'), equals(VideoStatus.deleted));
       expect(VideoStatus.fromString('unknown'), equals(VideoStatus.uploading));
@@ -243,21 +261,27 @@ void main() {
       expect(VideoStatus.failed.isFailed, isTrue);
     });
 
-    test('VideoProgressEntity factory creates zero state and copyWith works', () {
-      final initial = VideoProgressEntity.initial(videoId: 'v1', studentId: 's1');
-      expect(initial.progressSeconds, equals(0));
-      expect(initial.percentage, equals(0.0));
-      expect(initial.completed, isFalse);
+    test(
+      'VideoProgressEntity factory creates zero state and copyWith works',
+      () {
+        final initial = VideoProgressEntity.initial(
+          videoId: 'v1',
+          studentId: 's1',
+        );
+        expect(initial.progressSeconds, equals(0));
+        expect(initial.percentage, equals(0.0));
+        expect(initial.completed, isFalse);
 
-      final updated = initial.copyWith(
-        progressSeconds: 950,
-        durationSeconds: 1000,
-        percentage: 95.0,
-        completed: true,
-      );
-      expect(updated.progressSeconds, equals(950));
-      expect(updated.completed, isTrue);
-    });
+        final updated = initial.copyWith(
+          progressSeconds: 950,
+          durationSeconds: 1000,
+          percentage: 95.0,
+          completed: true,
+        );
+        expect(updated.progressSeconds, equals(950));
+        expect(updated.completed, isTrue);
+      },
+    );
   });
 
   group('VideosCubit Unit Tests', () {
@@ -309,46 +333,55 @@ void main() {
       expect(error.message, equals('خطأ في الاتصال بالخادم'));
     });
 
-    test('loadVideoPlayback loads video, signed URL, and student progress for resume', () async {
-      mockRepo.progressResponse = VideoProgressEntity(
-        videoId: 'vid-1',
-        studentId: 'std-1',
-        progressSeconds: 320,
-        durationSeconds: 1200,
-        percentage: 26.6,
-        completed: false,
-        lastWatchedAt: DateTime.now(),
-      );
+    test(
+      'loadVideoPlayback loads video, signed URL, and student progress for resume',
+      () async {
+        mockRepo.progressResponse = VideoProgressEntity(
+          videoId: 'vid-1',
+          studentId: 'std-1',
+          progressSeconds: 320,
+          durationSeconds: 1200,
+          percentage: 26.6,
+          completed: false,
+          lastWatchedAt: DateTime.now(),
+        );
 
-      await cubit.loadVideoPlayback(videoId: 'vid-1', studentId: 'std-1');
+        await cubit.loadVideoPlayback(videoId: 'vid-1', studentId: 'std-1');
 
-      expect(cubit.state, isA<VideosLoaded>());
-      final state = cubit.state as VideosLoaded;
-      expect(state.currentVideo?.id, equals('vid-1'));
-      expect(state.playbackUrl, contains('vz-04d07c5c-73c.b-cdn.net'));
-      expect(state.playbackUrl, contains('token='));
-      expect(state.progress?.progressSeconds, equals(320));
-    });
+        expect(cubit.state, isA<VideosLoaded>());
+        final state = cubit.state as VideosLoaded;
+        expect(state.currentVideo?.id, equals('vid-1'));
+        expect(state.playbackUrl, contains('vz-04d07c5c-73c.b-cdn.net'));
+        expect(state.playbackUrl, contains('token='));
+        expect(state.progress?.progressSeconds, equals(320));
+      },
+    );
 
-    test('loadVideoPlayback with un-uploaded video emits Loaded with null playbackUrl', () async {
-      mockRepo.singleVideoResponse = VideoEntity(
-        id: 'vid-pending',
-        contentId: 'c-pending',
-        title: 'درس قيد التجهيز',
-        providerVideoId: null,
-        duration: 0,
-        status: VideoStatus.uploading,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
+    test(
+      'loadVideoPlayback with un-uploaded video emits Loaded with null playbackUrl',
+      () async {
+        mockRepo.singleVideoResponse = VideoEntity(
+          id: 'vid-pending',
+          contentId: 'c-pending',
+          title: 'درس قيد التجهيز',
+          providerVideoId: null,
+          duration: 0,
+          status: VideoStatus.uploading,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
 
-      await cubit.loadVideoPlayback(videoId: 'vid-pending', studentId: 'std-1');
+        await cubit.loadVideoPlayback(
+          videoId: 'vid-pending',
+          studentId: 'std-1',
+        );
 
-      expect(cubit.state, isA<VideosLoaded>());
-      final state = cubit.state as VideosLoaded;
-      expect(state.currentVideo?.id, equals('vid-pending'));
-      expect(state.playbackUrl, isNull);
-    });
+        expect(cubit.state, isA<VideosLoaded>());
+        final state = cubit.state as VideosLoaded;
+        expect(state.currentVideo?.id, equals('vid-pending'));
+        expect(state.playbackUrl, isNull);
+      },
+    );
 
     test('uploadVideo emits uploading progress and success states', () async {
       await cubit.uploadVideo(
@@ -363,23 +396,28 @@ void main() {
       expect(success.video.title, equals('درس جديد'));
     });
 
-    test('linkYouTubeVideo links unlisted youtube lesson successfully', () async {
-      final success = await cubit.linkYouTubeVideo(
-        contentId: 'c-yt',
-        youtubeUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-        title: 'درس يوتيوب SAT',
-      );
+    test(
+      'linkYouTubeVideo links unlisted youtube lesson successfully',
+      () async {
+        final success = await cubit.linkYouTubeVideo(
+          contentId: 'c-yt',
+          youtubeUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+          title: 'درس يوتيوب SAT',
+        );
 
-      expect(success, isTrue);
-      expect(cubit.state, isA<VideoUploadSuccess>());
-      final state = cubit.state as VideoUploadSuccess;
-      expect(state.video.isYouTube, isTrue);
-      expect(state.video.providerVideoId, equals('dQw4w9WgXcQ'));
-    });
+        expect(success, isTrue);
+        expect(cubit.state, isA<VideoUploadSuccess>());
+        final state = cubit.state as VideoUploadSuccess;
+        expect(state.video.isYouTube, isTrue);
+        expect(state.video.providerVideoId, equals('dQw4w9WgXcQ'));
+      },
+    );
   });
 
   group('VideoCard Widget Tests', () {
-    testWidgets('renders video title, duration, and CDN status properly', (tester) async {
+    testWidgets('renders video title, duration, and CDN status properly', (
+      tester,
+    ) async {
       final video = VideoEntity(
         id: 'v1',
         contentId: 'c1',
@@ -399,10 +437,7 @@ void main() {
           supportedLocales: AppLocalizations.supportedLocales,
           locale: const Locale('ar'),
           home: Scaffold(
-            body: VideoCard(
-              video: video,
-              onTap: () => tapped = true,
-            ),
+            body: VideoCard(video: video, onTap: () => tapped = true),
           ),
         ),
       );
@@ -433,10 +468,7 @@ void main() {
           supportedLocales: AppLocalizations.supportedLocales,
           locale: const Locale('ar'),
           home: Scaffold(
-            body: VideoCard(
-              video: video,
-              onTap: () {},
-            ),
+            body: VideoCard(video: video, onTap: () {}),
           ),
         ),
       );
@@ -445,7 +477,9 @@ void main() {
       expect(find.text('يوتيوب'), findsOneWidget);
     });
 
-    testWidgets('shows completed badge when progress is completed', (tester) async {
+    testWidgets('shows completed badge when progress is completed', (
+      tester,
+    ) async {
       final video = VideoEntity(
         id: 'v1',
         contentId: 'c1',
@@ -472,11 +506,7 @@ void main() {
           supportedLocales: AppLocalizations.supportedLocales,
           locale: const Locale('ar'),
           home: Scaffold(
-            body: VideoCard(
-              video: video,
-              progress: progress,
-              onTap: () {},
-            ),
+            body: VideoCard(video: video, progress: progress, onTap: () {}),
           ),
         ),
       );

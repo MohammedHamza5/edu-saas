@@ -12,11 +12,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.lightTheme,
-          home: const Scaffold(
-            body: Center(
-              child: AppLogo(size: 80),
-            ),
-          ),
+          home: const Scaffold(body: Center(child: AppLogo(size: 80))),
         ),
       );
 
@@ -24,7 +20,9 @@ void main() {
       expect(find.byType(CustomPaint), findsWidgets);
     });
 
-    testWidgets('AppLogo renders platform name when showName is true', (tester) async {
+    testWidgets('AppLogo renders platform name when showName is true', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.lightTheme,
@@ -44,13 +42,13 @@ void main() {
       expect(find.text('EduSaaS Math'), findsOneWidget);
     });
 
-    testWidgets('MathBackground paints grid and symbols without error', (tester) async {
+    testWidgets('MathBackground paints grid and symbols without error', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.lightTheme,
-          home: const Scaffold(
-            body: MathBackground(),
-          ),
+          home: const Scaffold(body: MathBackground()),
         ),
       );
 
@@ -64,28 +62,33 @@ void main() {
       );
     });
 
-    testWidgets('MathLoadingIndicator renders and animates curve with tracer dot', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: AppTheme.lightTheme,
-          home: const Scaffold(
-            body: MathLoadingIndicator(
-              size: 100,
-              message: 'جاري التحميل الأكاديمي...',
+    testWidgets(
+      'MathLoadingIndicator renders and animates curve with tracer dot',
+      (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: AppTheme.lightTheme,
+            home: const Scaffold(
+              body: MathLoadingIndicator(
+                size: 100,
+                message: 'جاري التحميل الأكاديمي...',
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      expect(find.byType(MathLoadingIndicator), findsOneWidget);
-      expect(find.text('جاري التحميل الأكاديمي...'), findsOneWidget);
+        expect(find.byType(MathLoadingIndicator), findsOneWidget);
+        expect(find.text('جاري التحميل الأكاديمي...'), findsOneWidget);
 
-      // Advance animation timer
-      await tester.pump(const Duration(milliseconds: 600));
-      expect(find.byType(CustomPaint), findsWidgets);
-    });
+        // Advance animation timer
+        await tester.pump(const Duration(milliseconds: 600));
+        expect(find.byType(CustomPaint), findsWidgets);
+      },
+    );
 
-    testWidgets('AppLoadingView supports mathCurve style seamlessly', (tester) async {
+    testWidgets('AppLoadingView supports mathCurve style seamlessly', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.lightTheme,

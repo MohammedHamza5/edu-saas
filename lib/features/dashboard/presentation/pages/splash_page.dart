@@ -62,15 +62,13 @@ class _SplashPageState extends State<SplashPage>
       ),
     );
 
-    _titleSlide = Tween<Offset>(
-      begin: const Offset(0, 0.25),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _animController,
-        curve: const Interval(0.35, 0.75, curve: Curves.easeOutCubic),
-      ),
-    );
+    _titleSlide = Tween<Offset>(begin: const Offset(0, 0.25), end: Offset.zero)
+        .animate(
+          CurvedAnimation(
+            parent: _animController,
+            curve: const Interval(0.35, 0.75, curve: Curves.easeOutCubic),
+          ),
+        );
 
     _loadingFade = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
@@ -134,7 +132,7 @@ class _SplashPageState extends State<SplashPage>
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    
+
     // Dynamic Tenant Branding
     final branding = (() {
       try {
@@ -145,8 +143,12 @@ class _SplashPageState extends State<SplashPage>
     })();
 
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
-    final title = isArabic ? branding.brandName : (branding.brandNameEn ?? branding.brandName);
-    final subtitle = isArabic ? branding.tagline : (branding.taglineEn ?? branding.tagline);
+    final title = isArabic
+        ? branding.brandName
+        : (branding.brandNameEn ?? branding.brandName);
+    final subtitle = isArabic
+        ? branding.tagline
+        : (branding.taglineEn ?? branding.tagline);
 
     return Scaffold(
       backgroundColor: const Color(0xFF080C16),
@@ -187,27 +189,30 @@ class _SplashPageState extends State<SplashPage>
                           child: Container(
                             padding: const EdgeInsets.all(AppSpacing.s20),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF0F172A).withValues(alpha: 0.85),
+                              color: const Color(
+                                0xFF0F172A,
+                              ).withValues(alpha: 0.85),
                               borderRadius: BorderRadius.circular(
                                 AppSpacing.radiusLarge + 4,
                               ),
                               border: Border.all(
-                                color: const Color(0xFF38BDF8).withValues(alpha: 0.35),
+                                color: const Color(
+                                  0xFF38BDF8,
+                                ).withValues(alpha: 0.35),
                                 width: 1.2,
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFF38BDF8).withValues(alpha: 0.18),
+                                  color: const Color(
+                                    0xFF38BDF8,
+                                  ).withValues(alpha: 0.18),
                                   blurRadius: 36,
                                   offset: const Offset(0, 10),
                                   spreadRadius: -2,
                                 ),
                               ],
                             ),
-                            child: const AppLogo(
-                              size: 110,
-                              showName: false,
-                            ),
+                            child: const AppLogo(size: 110, showName: false),
                           ),
                         ),
                       ),
@@ -236,10 +241,16 @@ class _SplashPageState extends State<SplashPage>
                                   vertical: AppSpacing.s4,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF38BDF8).withValues(alpha: 0.12),
-                                  borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                                  color: const Color(
+                                    0xFF38BDF8,
+                                  ).withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(
+                                    AppSpacing.radiusSmall,
+                                  ),
                                   border: Border.all(
-                                    color: const Color(0xFF38BDF8).withValues(alpha: 0.30),
+                                    color: const Color(
+                                      0xFF38BDF8,
+                                    ).withValues(alpha: 0.30),
                                   ),
                                 ),
                                 child: Text(

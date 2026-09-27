@@ -18,14 +18,13 @@ void main() {
   }
 
   group('Design System Widgets Test', () {
-    testWidgets('AppButton triggers callback and handles loading state', (tester) async {
+    testWidgets('AppButton triggers callback and handles loading state', (
+      tester,
+    ) async {
       var clicked = false;
       await tester.pumpWidget(
         createTestWidget(
-          AppButton(
-            text: 'Submit',
-            onPressed: () => clicked = true,
-          ),
+          AppButton(text: 'Submit', onPressed: () => clicked = true),
         ),
       );
 
@@ -37,11 +36,7 @@ void main() {
       // Loading state
       await tester.pumpWidget(
         createTestWidget(
-          AppButton(
-            text: 'Submit',
-            isLoading: true,
-            onPressed: () {},
-          ),
+          AppButton(text: 'Submit', isLoading: true, onPressed: () {}),
         ),
       );
 
@@ -49,35 +44,32 @@ void main() {
       expect(find.text('Submit'), findsNothing);
     });
 
-    testWidgets('AppButton renders safely inside unconstrained Row with TextButton', (tester) async {
-      await tester.pumpWidget(
-        createTestWidget(
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              TextButton(onPressed: () {}, child: const Text('Cancel')),
-              const SizedBox(width: 12),
-              AppButton(
-                text: 'Save & Publish',
-                onPressed: () {},
-              ),
-            ],
+    testWidgets(
+      'AppButton renders safely inside unconstrained Row with TextButton',
+      (tester) async {
+        await tester.pumpWidget(
+          createTestWidget(
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(onPressed: () {}, child: const Text('Cancel')),
+                const SizedBox(width: 12),
+                AppButton(text: 'Save & Publish', onPressed: () {}),
+              ],
+            ),
           ),
-        ),
-      );
+        );
 
-      expect(find.text('Cancel'), findsOneWidget);
-      expect(find.text('Save & Publish'), findsOneWidget);
-      expect(tester.takeException(), isNull);
-    });
+        expect(find.text('Cancel'), findsOneWidget);
+        expect(find.text('Save & Publish'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      },
+    );
 
     testWidgets('AppTextField toggles password visibility', (tester) async {
       await tester.pumpWidget(
         createTestWidget(
-          const AppTextField(
-            isPassword: true,
-            labelText: 'Password',
-          ),
+          const AppTextField(isPassword: true, labelText: 'Password'),
         ),
       );
 
@@ -90,10 +82,7 @@ void main() {
     testWidgets('AppCard renders title and child content', (tester) async {
       await tester.pumpWidget(
         createTestWidget(
-          const AppCard(
-            title: 'Card Header',
-            child: Text('Card Content'),
-          ),
+          const AppCard(title: 'Card Header', child: Text('Card Content')),
         ),
       );
 
@@ -104,17 +93,16 @@ void main() {
     testWidgets('AppBadge renders correct label', (tester) async {
       await tester.pumpWidget(
         createTestWidget(
-          const AppBadge(
-            label: 'Active',
-            variant: AppBadgeVariant.active,
-          ),
+          const AppBadge(label: 'Active', variant: AppBadgeVariant.active),
         ),
       );
 
       expect(find.text('Active'), findsOneWidget);
     });
 
-    testWidgets('AppErrorView renders message and triggers retry', (tester) async {
+    testWidgets('AppErrorView renders message and triggers retry', (
+      tester,
+    ) async {
       var retried = false;
       await tester.pumpWidget(
         createTestWidget(
@@ -133,21 +121,17 @@ void main() {
 
     testWidgets('AppEmptyView renders message', (tester) async {
       await tester.pumpWidget(
-        createTestWidget(
-          const AppEmptyView(
-            message: 'No items found',
-          ),
-        ),
+        createTestWidget(const AppEmptyView(message: 'No items found')),
       );
 
       expect(find.text('No items found'), findsOneWidget);
     });
 
-    testWidgets('AppLoadingView renders spinner and skeleton styles cleanly', (tester) async {
+    testWidgets('AppLoadingView renders spinner and skeleton styles cleanly', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        createTestWidget(
-          const AppLoadingView(message: 'Please wait...'),
-        ),
+        createTestWidget(const AppLoadingView(message: 'Please wait...')),
       );
       expect(find.text('Please wait...'), findsOneWidget);
 
@@ -159,67 +143,72 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
     });
 
-    testWidgets('AppButton provides click cursor when enabled and basic when disabled', (tester) async {
-      // Enabled button -> SystemMouseCursors.click
-      await tester.pumpWidget(
-        createTestWidget(
-          AppButton(
-            text: 'Save',
-            onPressed: () {},
+    testWidgets(
+      'AppButton provides click cursor when enabled and basic when disabled',
+      (tester) async {
+        // Enabled button -> SystemMouseCursors.click
+        await tester.pumpWidget(
+          createTestWidget(AppButton(text: 'Save', onPressed: () {})),
+        );
+
+        final enabledMouseRegion = tester.widget<MouseRegion>(
+          find.descendant(
+            of: find.byType(AppButton),
+            matching: find.byType(MouseRegion),
           ),
-        ),
-      );
+        );
+        expect(enabledMouseRegion.cursor, SystemMouseCursors.click);
 
-      final enabledMouseRegion = tester.widget<MouseRegion>(
-        find.descendant(of: find.byType(AppButton), matching: find.byType(MouseRegion)),
-      );
-      expect(enabledMouseRegion.cursor, SystemMouseCursors.click);
+        // Disabled button (onPressed: null) -> SystemMouseCursors.basic
+        await tester.pumpWidget(
+          createTestWidget(const AppButton(text: 'Save', onPressed: null)),
+        );
 
-      // Disabled button (onPressed: null) -> SystemMouseCursors.basic
-      await tester.pumpWidget(
-        createTestWidget(
-          const AppButton(
-            text: 'Save',
-            onPressed: null,
+        final disabledMouseRegion = tester.widget<MouseRegion>(
+          find.descendant(
+            of: find.byType(AppButton),
+            matching: find.byType(MouseRegion),
           ),
-        ),
-      );
+        );
+        expect(disabledMouseRegion.cursor, SystemMouseCursors.basic);
+      },
+    );
 
-      final disabledMouseRegion = tester.widget<MouseRegion>(
-        find.descendant(of: find.byType(AppButton), matching: find.byType(MouseRegion)),
-      );
-      expect(disabledMouseRegion.cursor, SystemMouseCursors.basic);
-    });
-
-    testWidgets('AppCard provides click cursor when onTap is set, defers cursor when null', (tester) async {
-      // Clickable card -> SystemMouseCursors.click
-      await tester.pumpWidget(
-        createTestWidget(
-          AppCard(
-            onTap: () {},
-            child: const Text('Interactive Card'),
+    testWidgets(
+      'AppCard provides click cursor when onTap is set, defers cursor when null',
+      (tester) async {
+        // Clickable card -> SystemMouseCursors.click
+        await tester.pumpWidget(
+          createTestWidget(
+            AppCard(onTap: () {}, child: const Text('Interactive Card')),
           ),
-        ),
-      );
+        );
 
-      final clickableMouseRegion = tester.widget<MouseRegion>(
-        find.descendant(of: find.byType(AppCard), matching: find.byType(MouseRegion)).first,
-      );
-      expect(clickableMouseRegion.cursor, SystemMouseCursors.click);
+        final clickableMouseRegion = tester.widget<MouseRegion>(
+          find
+              .descendant(
+                of: find.byType(AppCard),
+                matching: find.byType(MouseRegion),
+              )
+              .first,
+        );
+        expect(clickableMouseRegion.cursor, SystemMouseCursors.click);
 
-      // Non-clickable card -> MouseCursor.defer (to allow child buttons/inputs to handle cursors)
-      await tester.pumpWidget(
-        createTestWidget(
-          const AppCard(
-            child: Text('Static Card'),
-          ),
-        ),
-      );
+        // Non-clickable card -> MouseCursor.defer (to allow child buttons/inputs to handle cursors)
+        await tester.pumpWidget(
+          createTestWidget(const AppCard(child: Text('Static Card'))),
+        );
 
-      final staticMouseRegion = tester.widget<MouseRegion>(
-        find.descendant(of: find.byType(AppCard), matching: find.byType(MouseRegion)).first,
-      );
-      expect(staticMouseRegion.cursor, MouseCursor.defer);
-    });
+        final staticMouseRegion = tester.widget<MouseRegion>(
+          find
+              .descendant(
+                of: find.byType(AppCard),
+                matching: find.byType(MouseRegion),
+              )
+              .first,
+        );
+        expect(staticMouseRegion.cursor, MouseCursor.defer);
+      },
+    );
   });
 }

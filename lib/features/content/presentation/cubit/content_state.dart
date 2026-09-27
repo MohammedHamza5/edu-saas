@@ -67,12 +67,12 @@ class ContentLoaded extends ContentState {
 
   @override
   List<Object?> get props => [
-        items,
-        activeFilter,
-        isReordering,
-        hasMore,
-        isLoadingMore,
-      ];
+    items,
+    activeFilter,
+    isReordering,
+    hasMore,
+    isLoadingMore,
+  ];
 }
 
 class ContentOperationSuccess extends ContentState {

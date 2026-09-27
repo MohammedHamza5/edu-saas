@@ -20,13 +20,15 @@ class ExamAttemptModel extends ExamAttemptEntity {
   factory ExamAttemptModel.fromJson(Map<String, dynamic> json) {
     String? studentName;
     if (json['users'] is Map<String, dynamic>) {
-      studentName = (json['users'] as Map<String, dynamic>)['full_name'] as String?;
+      studentName =
+          (json['users'] as Map<String, dynamic>)['full_name'] as String?;
     } else if (json['student_name'] != null) {
       studentName = json['student_name'] as String?;
     }
 
     final rawAnswers = json['answers'] ?? json['exam_answers'];
-    final answersList = (rawAnswers as List<dynamic>?)?.map((a) {
+    final answersList =
+        (rawAnswers as List<dynamic>?)?.map((a) {
           final aMap = a as Map<String, dynamic>;
           return ExamAnswerEntity(
             id: aMap['id'] as String? ?? '',
@@ -43,8 +45,11 @@ class ExamAttemptModel extends ExamAttemptEntity {
         <ExamAnswerEntity>[];
 
     final rawQuestions = json['questions'] as List<dynamic>?;
-    final questionsList = rawQuestions?.map((q) {
-          return ExamQuestionModel.fromJson(Map<String, dynamic>.from(q as Map));
+    final questionsList =
+        rawQuestions?.map((q) {
+          return ExamQuestionModel.fromJson(
+            Map<String, dynamic>.from(q as Map),
+          );
         }).toList() ??
         <ExamQuestionEntity>[];
 
@@ -58,7 +63,9 @@ class ExamAttemptModel extends ExamAttemptEntity {
       submittedAt: json['submitted_at'] != null
           ? DateTime.parse(json['submitted_at'] as String)
           : null,
-      status: AttemptStatus.fromString(json['status'] as String? ?? 'in_progress'),
+      status: AttemptStatus.fromString(
+        json['status'] as String? ?? 'in_progress',
+      ),
       score: (json['score'] as num?)?.toInt(),
       percentage: (json['percentage'] as num?)?.toDouble(),
       answers: answersList,

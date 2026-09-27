@@ -71,23 +71,23 @@ class Student360Entity extends Equatable {
 
   @override
   List<Object?> get props => [
-        studentId,
-        attendancePercentage,
-        assignmentsSubmitted,
-        assignmentsReviewed,
-        examAverage,
-        videoCompletionPercentage,
-        lastActivityAt,
-        groups,
-        todayActiveSeconds,
-        todayIdleSeconds,
-        totalActiveSeconds7d,
-        totalIdleSeconds7d,
-        firstSeenToday,
-        lastSeenToday,
-        recentActivities,
-        videoInsights,
-      ];
+    studentId,
+    attendancePercentage,
+    assignmentsSubmitted,
+    assignmentsReviewed,
+    examAverage,
+    videoCompletionPercentage,
+    lastActivityAt,
+    groups,
+    todayActiveSeconds,
+    todayIdleSeconds,
+    totalActiveSeconds7d,
+    totalIdleSeconds7d,
+    firstSeenToday,
+    lastSeenToday,
+    recentActivities,
+    videoInsights,
+  ];
 }
 
 class StudentGroupInfo extends Equatable {
@@ -129,14 +129,14 @@ class StudentActivityItem extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        eventType,
-        createdAt,
-        contentId,
-        contentTitle,
-        groupName,
-        metadata,
-      ];
+    id,
+    eventType,
+    createdAt,
+    contentId,
+    contentTitle,
+    groupName,
+    metadata,
+  ];
 }
 
 /// Detailed video watch telemetry and honesty indicator
@@ -175,14 +175,14 @@ class StudentVideoInsight extends Equatable {
 
   @override
   List<Object?> get props => [
-        videoId,
-        videoTitle,
-        durationSeconds,
-        progressSeconds,
-        actualWatchSeconds,
-        percentage,
-        completed,
-        isSkipped,
-        lastWatchedAt,
-      ];
+    videoId,
+    videoTitle,
+    durationSeconds,
+    progressSeconds,
+    actualWatchSeconds,
+    percentage,
+    completed,
+    isSkipped,
+    lastWatchedAt,
+  ];
 }

@@ -178,7 +178,9 @@ class _RegisterStudentPageState extends State<RegisterStudentPage> {
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFF10B981).withValues(alpha: 0.6),
+                                color: const Color(
+                                  0xFF10B981,
+                                ).withValues(alpha: 0.6),
                                 blurRadius: 6,
                               ),
                             ],
@@ -277,7 +279,10 @@ class _RegisterStudentPageState extends State<RegisterStudentPage> {
                   controller: _parentPhoneController,
                   labelText: context.l10n.parentWhatsappPhone,
                   keyboardType: TextInputType.phone,
-                  prefixIcon: const Icon(Icons.family_restroom_rounded, size: 20),
+                  prefixIcon: const Icon(
+                    Icons.family_restroom_rounded,
+                    size: 20,
+                  ),
                   validator: (val) {
                     if (val == null || val.trim().length < 10) {
                       return context.l10n.pleaseEnterParentPhone;
@@ -305,7 +310,9 @@ class _RegisterStudentPageState extends State<RegisterStudentPage> {
                       runSpacing: AppSpacing.s8,
                       children: _tracks.map((track) {
                         final isSelected = _selectedTrack == track;
-                        final displayLabel = track == 'custom' ? context.l10n.customTrack : track;
+                        final displayLabel = track == 'custom'
+                            ? context.l10n.customTrack
+                            : track;
                         return ChoiceChip(
                           label: Text(displayLabel),
                           selected: isSelected,
@@ -315,7 +322,9 @@ class _RegisterStudentPageState extends State<RegisterStudentPage> {
                             }
                           },
                           selectedColor: branding.primaryColor,
-                          backgroundColor: const Color(0xFF1E293B).withValues(alpha: 0.7),
+                          backgroundColor: const Color(
+                            0xFF1E293B,
+                          ).withValues(alpha: 0.7),
                           labelStyle: TextStyle(
                             color: isSelected
                                 ? Colors.white

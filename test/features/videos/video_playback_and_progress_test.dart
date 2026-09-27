@@ -11,7 +11,8 @@ void main() {
       final tokenKey = AppConfig.bunnyTokenKey;
       final libraryId = AppConfig.bunnyLibraryId;
 
-      final expires = (DateTime.now().toUtc().millisecondsSinceEpoch ~/ 1000) + 14400;
+      final expires =
+          (DateTime.now().toUtc().millisecondsSinceEpoch ~/ 1000) + 14400;
       final hashInput = '$tokenKey$providerVideoId$expires';
       final token = sha256.convert(utf8.encode(hashInput)).toString();
 
@@ -43,36 +44,45 @@ void main() {
           !isSkipped;
     }
 
-    test('should mark completed when student watches >= 80% without skipping', () {
-      final completed = computeCompleted(
-        progressSeconds: 850,
-        durationSeconds: durationSeconds,
-        actualWatchSeconds: 850,
-        isSkipped: false,
-      );
-      expect(completed, isTrue);
-    });
+    test(
+      'should mark completed when student watches >= 80% without skipping',
+      () {
+        final completed = computeCompleted(
+          progressSeconds: 850,
+          durationSeconds: durationSeconds,
+          actualWatchSeconds: 850,
+          isSkipped: false,
+        );
+        expect(completed, isTrue);
+      },
+    );
 
-    test('should reject completion when student fast-forwards (isSkipped = true)', () {
-      final completed = computeCompleted(
-        progressSeconds: 950,
-        durationSeconds: durationSeconds,
-        actualWatchSeconds: 950,
-        isSkipped: true,
-      );
-      expect(completed, isFalse);
-    });
+    test(
+      'should reject completion when student fast-forwards (isSkipped = true)',
+      () {
+        final completed = computeCompleted(
+          progressSeconds: 950,
+          durationSeconds: durationSeconds,
+          actualWatchSeconds: 950,
+          isSkipped: true,
+        );
+        expect(completed, isFalse);
+      },
+    );
 
-    test('should reject completion when actualWatchSeconds is below 80% despite slider position', () {
-      // Student dragged slider to 900 seconds after watching only 200 seconds
-      final completed = computeCompleted(
-        progressSeconds: 900,
-        durationSeconds: durationSeconds,
-        actualWatchSeconds: 200,
-        isSkipped: false,
-      );
-      expect(completed, isFalse);
-    });
+    test(
+      'should reject completion when actualWatchSeconds is below 80% despite slider position',
+      () {
+        // Student dragged slider to 900 seconds after watching only 200 seconds
+        final completed = computeCompleted(
+          progressSeconds: 900,
+          durationSeconds: durationSeconds,
+          actualWatchSeconds: 200,
+          isSkipped: false,
+        );
+        expect(completed, isFalse);
+      },
+    );
 
     test('should reject completion when progress percentage is below 80%', () {
       final completed = computeCompleted(

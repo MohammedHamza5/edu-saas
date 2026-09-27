@@ -56,7 +56,10 @@ abstract final class PrefetchService {
 
     if (futures.isNotEmpty) {
       await Future.wait(futures);
-      AppLogger.d('Prefetch', '✅ Teacher data prefetched (${futures.length} sources)');
+      AppLogger.d(
+        'Prefetch',
+        '✅ Teacher data prefetched (${futures.length} sources)',
+      );
     }
   }
 
@@ -78,7 +81,10 @@ abstract final class PrefetchService {
 
     if (futures.isNotEmpty) {
       await Future.wait(futures);
-      AppLogger.d('Prefetch', '✅ Student data prefetched (${futures.length} sources)');
+      AppLogger.d(
+        'Prefetch',
+        '✅ Student data prefetched (${futures.length} sources)',
+      );
     }
   }
 }

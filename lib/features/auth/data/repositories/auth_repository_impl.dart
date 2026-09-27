@@ -11,7 +11,7 @@ class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource _remoteDataSource;
 
   AuthRepositoryImpl({AuthRemoteDataSource? remoteDataSource})
-      : _remoteDataSource = remoteDataSource ?? AuthRemoteDataSourceImpl();
+    : _remoteDataSource = remoteDataSource ?? AuthRemoteDataSourceImpl();
 
   @override
   Future<Result<UserEntity>> signInWithEmail({
@@ -42,9 +42,13 @@ class AuthRepositoryImpl implements AuthRepository {
       return Success(user);
     } on AuthException catch (e) {
       if (e.message == 'TENANT_SUSPENDED') {
-        return const FailureResult(AuthFailure('TENANT_SUSPENDED', code: 'TENANT_SUSPENDED'));
+        return const FailureResult(
+          AuthFailure('TENANT_SUSPENDED', code: 'TENANT_SUSPENDED'),
+        );
       }
-      return FailureResult(AuthFailure(e.message, code: e.code ?? e.statusCode));
+      return FailureResult(
+        AuthFailure(e.message, code: e.code ?? e.statusCode),
+      );
     } catch (e) {
       return FailureResult(ServerFailure(e.toString()));
     }
@@ -70,7 +74,9 @@ class AuthRepositoryImpl implements AuthRepository {
       );
       return Success(user);
     } on AuthException catch (e) {
-      return FailureResult(AuthFailure(e.message, code: e.code ?? e.statusCode));
+      return FailureResult(
+        AuthFailure(e.message, code: e.code ?? e.statusCode),
+      );
     } catch (e) {
       return FailureResult(ServerFailure(e.toString()));
     }
@@ -103,7 +109,9 @@ class AuthRepositoryImpl implements AuthRepository {
       await _remoteDataSource.resetPassword(email);
       return const Success(null);
     } on AuthException catch (e) {
-      return FailureResult(AuthFailure(e.message, code: e.code ?? e.statusCode));
+      return FailureResult(
+        AuthFailure(e.message, code: e.code ?? e.statusCode),
+      );
     } catch (e) {
       return FailureResult(ServerFailure(e.toString()));
     }

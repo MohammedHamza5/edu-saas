@@ -70,7 +70,7 @@ class AddLessonFlow extends StatelessWidget {
           if (examId != null) 'associated_exam_id': examId,
           if (passingScoreOverride != null)
             'passing_score_override': passingScoreOverride,
-        }
+        },
       ],
     );
   }
@@ -89,22 +89,22 @@ class AddLessonFlow extends StatelessWidget {
       groupId: groupId,
       groupName: groupName,
       defaultPassingScore: defaultPassingScore,
-      onSave: ({
-        required contentId,
-        required groupId,
-        required lessonTitle,
-        required fileId,
-        required examId,
-        required passingScoreOverride,
-      }) =>
-          _saveLesson(
-        context,
-        video: video,
-        lessonTitle: lessonTitle,
-        fileId: fileId,
-        examId: examId,
-        passingScoreOverride: passingScoreOverride,
-      ),
+      onSave:
+          ({
+            required contentId,
+            required groupId,
+            required lessonTitle,
+            required fileId,
+            required examId,
+            required passingScoreOverride,
+          }) => _saveLesson(
+            context,
+            video: video,
+            lessonTitle: lessonTitle,
+            fileId: fileId,
+            examId: examId,
+            passingScoreOverride: passingScoreOverride,
+          ),
     );
 
     if (saved && context.mounted) {
@@ -139,22 +139,22 @@ class AddLessonFlow extends StatelessWidget {
       groupId: groupId,
       groupName: groupName,
       defaultPassingScore: defaultPassingScore,
-      onSave: ({
-        required contentId,
-        required groupId,
-        required lessonTitle,
-        required fileId,
-        required examId,
-        required passingScoreOverride,
-      }) =>
-          _saveLesson(
-        context,
-        video: newVideo!,
-        lessonTitle: lessonTitle,
-        fileId: fileId,
-        examId: examId,
-        passingScoreOverride: passingScoreOverride,
-      ),
+      onSave:
+          ({
+            required contentId,
+            required groupId,
+            required lessonTitle,
+            required fileId,
+            required examId,
+            required passingScoreOverride,
+          }) => _saveLesson(
+            context,
+            video: newVideo!,
+            lessonTitle: lessonTitle,
+            fileId: fileId,
+            examId: examId,
+            passingScoreOverride: passingScoreOverride,
+          ),
     );
 
     if (saved && context.mounted) {
@@ -174,10 +174,10 @@ class AddLessonFlow extends StatelessWidget {
 
     return Dialog(
       shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.radiusLarge)),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLarge),
+      ),
       elevation: 4,
-      insetPadding:
-          const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 440),
         child: Padding(
@@ -195,8 +195,9 @@ class AddLessonFlow extends StatelessWidget {
                       children: [
                         Text(
                           l10n.addLessonTitle,
-                          style: theme.textTheme.titleLarge
-                              ?.copyWith(fontWeight: FontWeight.bold),
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         const SizedBox(height: 2),
                         Text(
@@ -218,8 +219,9 @@ class AddLessonFlow extends StatelessWidget {
               const SizedBox(height: AppSpacing.s8),
               Text(
                 l10n.addLessonSubtitle,
-                style: theme.textTheme.bodyMedium
-                    ?.copyWith(color: AppColors.textSecondary),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
               ),
               const SizedBox(height: AppSpacing.s20),
 
@@ -245,9 +247,10 @@ class AddLessonFlow extends StatelessWidget {
 
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: Text(l10n.cancel,
-                    style:
-                        const TextStyle(color: AppColors.textSecondary)),
+                child: Text(
+                  l10n.cancel,
+                  style: const TextStyle(color: AppColors.textSecondary),
+                ),
               ),
             ],
           ),

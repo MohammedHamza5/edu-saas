@@ -37,7 +37,8 @@ class _FakeAuthRepository implements AuthRepository {
   Future<Result<void>> signOut() async => const Success(null);
 
   @override
-  Future<Result<void>> resetPasswordForEmail(String email) async => const Success(null);
+  Future<Result<void>> resetPasswordForEmail(String email) async =>
+      const Success(null);
 
   @override
   Future<Result<UserEntity?>> getCurrentUser() async => const Success(null);
@@ -56,7 +57,8 @@ class _FakeNotificationsRepository implements NotificationsRepository {
   Future<Result<int>> getUnreadCount() async => const Success(0);
 
   @override
-  Future<Result<void>> markAsRead(String recipientId) async => const Success(null);
+  Future<Result<void>> markAsRead(String recipientId) async =>
+      const Success(null);
 
   @override
   Future<Result<void>> markAllAsRead() async => const Success(null);
@@ -77,7 +79,9 @@ void main() {
 
   setUp(() {
     authCubit = AuthCubit(repository: _FakeAuthRepository());
-    notificationsCubit = NotificationsCubit(repository: _FakeNotificationsRepository());
+    notificationsCubit = NotificationsCubit(
+      repository: _FakeNotificationsRepository(),
+    );
   });
 
   tearDown(() {
@@ -102,19 +106,22 @@ void main() {
   }
 
   group('TeacherDashboardPage Multi-Device Responsive Tests', () {
-    testWidgets('Renders cleanly on Extra Small Mobile (320x640) with zero overflow', (tester) async {
-      tester.view.devicePixelRatio = 1.0;
-      tester.view.physicalSize = const Size(320, 640);
-      addTearDown(tester.view.resetPhysicalSize);
+    testWidgets(
+      'Renders cleanly on Extra Small Mobile (320x640) with zero overflow',
+      (tester) async {
+        tester.view.devicePixelRatio = 1.0;
+        tester.view.physicalSize = const Size(320, 640);
+        addTearDown(tester.view.resetPhysicalSize);
 
-      await tester.pumpWidget(buildDashboardTestApp());
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(buildDashboardTestApp());
+        await tester.pumpAndSettle();
 
-      expect(tester.takeException(), isNull);
-      expect(find.textContaining('لوحة القيادة الأكاديمية'), findsOneWidget);
-      expect(find.text('إجمالي الطلاب'), findsOneWidget);
-      expect(find.text('المجموعات النشطة'), findsOneWidget);
-    });
+        expect(tester.takeException(), isNull);
+        expect(find.textContaining('لوحة القيادة الأكاديمية'), findsOneWidget);
+        expect(find.text('إجمالي الطلاب'), findsOneWidget);
+        expect(find.text('المجموعات النشطة'), findsOneWidget);
+      },
+    );
 
     testWidgets('Renders cleanly on Standard Mobile (390x844)', (tester) async {
       tester.view.devicePixelRatio = 1.0;
@@ -130,7 +137,9 @@ void main() {
       expect(find.text('رصد الحضور والغياب اليومي'), findsOneWidget);
     });
 
-    testWidgets('Renders cleanly on Tablet Portrait (768x1024)', (tester) async {
+    testWidgets('Renders cleanly on Tablet Portrait (768x1024)', (
+      tester,
+    ) async {
       tester.view.devicePixelRatio = 1.0;
       tester.view.physicalSize = const Size(768, 1024);
       addTearDown(tester.view.resetPhysicalSize);
@@ -143,19 +152,22 @@ void main() {
       expect(find.text('إجمالي الطلاب'), findsOneWidget);
     });
 
-    testWidgets('Renders cleanly on Desktop/Laptop (1440x900) with bounded width', (tester) async {
-      tester.view.devicePixelRatio = 1.0;
-      tester.view.physicalSize = const Size(1440, 900);
-      addTearDown(tester.view.resetPhysicalSize);
+    testWidgets(
+      'Renders cleanly on Desktop/Laptop (1440x900) with bounded width',
+      (tester) async {
+        tester.view.devicePixelRatio = 1.0;
+        tester.view.physicalSize = const Size(1440, 900);
+        addTearDown(tester.view.resetPhysicalSize);
 
-      await tester.pumpWidget(buildDashboardTestApp());
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(buildDashboardTestApp());
+        await tester.pumpAndSettle();
 
-      expect(tester.takeException(), isNull);
-      expect(find.textContaining('لوحة القيادة الأكاديمية'), findsOneWidget);
-      expect(find.text('إجمالي الطلاب'), findsOneWidget);
-      expect(find.text('إرسال تنبيه أو إعلان عام'), findsOneWidget);
-    });
+        expect(tester.takeException(), isNull);
+        expect(find.textContaining('لوحة القيادة الأكاديمية'), findsOneWidget);
+        expect(find.text('إجمالي الطلاب'), findsOneWidget);
+        expect(find.text('إرسال تنبيه أو إعلان عام'), findsOneWidget);
+      },
+    );
 
     testWidgets('Renders cleanly on 1080p Desktop (1920x1080)', (tester) async {
       tester.view.devicePixelRatio = 1.0;

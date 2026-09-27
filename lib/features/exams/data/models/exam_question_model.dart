@@ -14,8 +14,11 @@ class ExamQuestionModel extends ExamQuestionEntity {
 
   factory ExamQuestionModel.fromJson(Map<String, dynamic> json) {
     final rawOptions = json['options'] ?? json['question_options'];
-    final optionsList = (rawOptions as List<dynamic>?)
-            ?.map((o) => QuestionOptionModel.fromJson(o as Map<String, dynamic>))
+    final optionsList =
+        (rawOptions as List<dynamic>?)
+            ?.map(
+              (o) => QuestionOptionModel.fromJson(o as Map<String, dynamic>),
+            )
             .toList() ??
         <QuestionOptionModel>[];
 
@@ -23,7 +26,9 @@ class ExamQuestionModel extends ExamQuestionEntity {
       id: json['id'] as String,
       examVersionId: json['exam_version_id'] as String? ?? '',
       questionText: json['question_text'] as String? ?? '',
-      questionType: QuestionType.fromString(json['question_type'] as String? ?? 'multiple_choice'),
+      questionType: QuestionType.fromString(
+        json['question_type'] as String? ?? 'multiple_choice',
+      ),
       points: (json['points'] as num?)?.toInt() ?? 1,
       sortOrder: (json['sort_order'] as num?)?.toInt() ?? 0,
       options: optionsList,

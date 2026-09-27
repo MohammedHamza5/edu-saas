@@ -19,7 +19,8 @@ extension ResponsiveContextX on BuildContext {
   bool get isLandscape => orientation == Orientation.landscape;
 
   /// Current [DeviceScreenType] (compact, medium, expanded, large).
-  DeviceScreenType get screenType => ResponsiveBreakpoints.getScreenType(screenWidth);
+  DeviceScreenType get screenType =>
+      ResponsiveBreakpoints.getScreenType(screenWidth);
 
   /// True for phones and narrow screens (< 600dp).
   bool get isMobile => screenType.isMobile;
@@ -65,7 +66,12 @@ extension ResponsiveContextX on BuildContext {
       tablet: 20.0,
       desktop: 24.0,
     );
-    return EdgeInsetsDirectional.fromSTEB(horizontal, vertical, horizontal, vertical);
+    return EdgeInsetsDirectional.fromSTEB(
+      horizontal,
+      vertical,
+      horizontal,
+      vertical,
+    );
   }
 
   /// Adaptive gap / spacing value.

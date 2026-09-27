@@ -17,18 +17,15 @@ Widget buildTestableWidget(Widget child, {Locale locale = const Locale('ar')}) {
 
 void main() {
   group('AppErrorView Tests', () {
-    testWidgets('renders full view with title, message, and hint', (tester) async {
+    testWidgets('renders full view with title, message, and hint', (
+      tester,
+    ) async {
       final error = ErrorMapper.resolve(
         const NetworkFailure('Network connection error', code: 'NET_OFFLINE'),
       );
 
       await tester.pumpWidget(
-        buildTestableWidget(
-          AppErrorView(
-            error: error,
-            onRetry: () {},
-          ),
-        ),
+        buildTestableWidget(AppErrorView(error: error, onRetry: () {})),
       );
       await tester.pumpAndSettle();
 
@@ -49,11 +46,7 @@ void main() {
 
       await tester.pumpWidget(
         buildTestableWidget(
-          AppErrorView(
-            error: error,
-            isCompact: true,
-            onRetry: () {},
-          ),
+          AppErrorView(error: error, isCompact: true, onRetry: () {}),
         ),
       );
       await tester.pumpAndSettle();
@@ -62,7 +55,9 @@ void main() {
       expect(find.byIcon(Icons.refresh_rounded), findsOneWidget);
     });
 
-    testWidgets('triggers secondary action button when provided', (tester) async {
+    testWidgets('triggers secondary action button when provided', (
+      tester,
+    ) async {
       var secondaryTriggered = false;
 
       await tester.pumpWidget(

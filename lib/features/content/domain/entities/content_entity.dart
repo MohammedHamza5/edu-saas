@@ -96,25 +96,29 @@ class ContentEntity extends Equatable {
 
   /// Video metadata — populated when type == ContentType.video and a
   /// video record exists in the `videos` table for this content item.
-  final String? videoId;          // UUID from videos.id
-  final String? videoStatus;      // 'uploading' | 'processing' | 'ready' | 'failed'
-  final String? videoProviderId;  // Bunny Stream GUID or YouTube Video ID
-  final String? videoProvider;    // 'youtube' | 'bunny'
+  final String? videoId; // UUID from videos.id
+  final String? videoStatus; // 'uploading' | 'processing' | 'ready' | 'failed'
+  final String? videoProviderId; // Bunny Stream GUID or YouTube Video ID
+  final String? videoProvider; // 'youtube' | 'bunny'
 
   /// Multi-group assignments (from content_groups junction)
   final List<String> assignedGroupIds;
   final List<String> assignedGroupNames;
 
   /// Integrated Lesson Unit & Prerequisite Progression
-  final String? associatedExamId;     // The quiz for this lesson unit
+  final String? associatedExamId; // The quiz for this lesson unit
   final String? associatedExamTitle;
-  final String? prerequisiteExamId;   // Prerequisite exam that must be passed
+  final String? prerequisiteExamId; // Prerequisite exam that must be passed
   final String? prerequisiteExamTitle;
   final int? prerequisitePassingScore;
-  final bool isLocked;                // True if student has not passed prerequisite exam
-  final bool isVideoCompleted;        // True if student completed video playback (>=90%)
+  final bool isLocked; // True if student has not passed prerequisite exam
+  final bool
+  isVideoCompleted; // True if student completed video playback (>=90%)
   final double videoProgressPercentage; // Student live progress (0.0 to 100.0)
-  final bool isExamPassed;            // True if student passed associated exam
+  final bool isExamPassed; // True if student passed associated exam
+
+  /// Group-level visibility (from content_groups.is_published)
+  final bool isPublishedInGroup;
 
   const ContentEntity({
     required this.id,
@@ -144,10 +148,12 @@ class ContentEntity extends Equatable {
     this.isVideoCompleted = false,
     this.videoProgressPercentage = 0.0,
     this.isExamPassed = false,
+    this.isPublishedInGroup = true,
   });
 
-  bool get isPublished => status == ContentStatus.published;
-  bool get isDraft => status == ContentStatus.draft;
+  bool get isPublished =>
+      status == ContentStatus.published && isPublishedInGroup;
+  bool get isDraft => status == ContentStatus.draft || !isPublishedInGroup;
   bool get isArchived => status == ContentStatus.archived;
   bool get hasAttachment => file != null;
 
@@ -205,6 +211,7 @@ class ContentEntity extends Equatable {
     bool? isVideoCompleted,
     double? videoProgressPercentage,
     bool? isExamPassed,
+    bool? isPublishedInGroup,
   }) {
     return ContentEntity(
       id: id ?? this.id,
@@ -220,20 +227,38 @@ class ContentEntity extends Equatable {
       updatedAt: updatedAt ?? this.updatedAt,
       file: file ?? this.file,
       videoId: videoId == _sentinel ? this.videoId : videoId as String?,
-      videoStatus: videoStatus == _sentinel ? this.videoStatus : videoStatus as String?,
-      videoProviderId: videoProviderId == _sentinel ? this.videoProviderId : videoProviderId as String?,
-      videoProvider: videoProvider == _sentinel ? this.videoProvider : videoProvider as String?,
+      videoStatus: videoStatus == _sentinel
+          ? this.videoStatus
+          : videoStatus as String?,
+      videoProviderId: videoProviderId == _sentinel
+          ? this.videoProviderId
+          : videoProviderId as String?,
+      videoProvider: videoProvider == _sentinel
+          ? this.videoProvider
+          : videoProvider as String?,
       assignedGroupIds: assignedGroupIds ?? this.assignedGroupIds,
       assignedGroupNames: assignedGroupNames ?? this.assignedGroupNames,
-      associatedExamId: associatedExamId == _sentinel ? this.associatedExamId : associatedExamId as String?,
-      associatedExamTitle: associatedExamTitle == _sentinel ? this.associatedExamTitle : associatedExamTitle as String?,
-      prerequisiteExamId: prerequisiteExamId == _sentinel ? this.prerequisiteExamId : prerequisiteExamId as String?,
-      prerequisiteExamTitle: prerequisiteExamTitle == _sentinel ? this.prerequisiteExamTitle : prerequisiteExamTitle as String?,
-      prerequisitePassingScore: prerequisitePassingScore == _sentinel ? this.prerequisitePassingScore : prerequisitePassingScore as int?,
+      associatedExamId: associatedExamId == _sentinel
+          ? this.associatedExamId
+          : associatedExamId as String?,
+      associatedExamTitle: associatedExamTitle == _sentinel
+          ? this.associatedExamTitle
+          : associatedExamTitle as String?,
+      prerequisiteExamId: prerequisiteExamId == _sentinel
+          ? this.prerequisiteExamId
+          : prerequisiteExamId as String?,
+      prerequisiteExamTitle: prerequisiteExamTitle == _sentinel
+          ? this.prerequisiteExamTitle
+          : prerequisiteExamTitle as String?,
+      prerequisitePassingScore: prerequisitePassingScore == _sentinel
+          ? this.prerequisitePassingScore
+          : prerequisitePassingScore as int?,
       isLocked: isLocked ?? this.isLocked,
       isVideoCompleted: isVideoCompleted ?? this.isVideoCompleted,
-      videoProgressPercentage: videoProgressPercentage ?? this.videoProgressPercentage,
+      videoProgressPercentage:
+          videoProgressPercentage ?? this.videoProgressPercentage,
       isExamPassed: isExamPassed ?? this.isExamPassed,
+      isPublishedInGroup: isPublishedInGroup ?? this.isPublishedInGroup,
     );
   }
 
@@ -241,32 +266,33 @@ class ContentEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        tenantId,
-        groupId,
-        title,
-        description,
-        type,
-        status,
-        sortOrder,
-        publishedAt,
-        createdAt,
-        updatedAt,
-        file,
-        videoId,
-        videoStatus,
-        videoProviderId,
-        videoProvider,
-        assignedGroupIds,
-        assignedGroupNames,
-        associatedExamId,
-        associatedExamTitle,
-        prerequisiteExamId,
-        prerequisiteExamTitle,
-        prerequisitePassingScore,
-        isLocked,
-        isVideoCompleted,
-        videoProgressPercentage,
-        isExamPassed,
-      ];
+    id,
+    tenantId,
+    groupId,
+    title,
+    description,
+    type,
+    status,
+    sortOrder,
+    publishedAt,
+    createdAt,
+    updatedAt,
+    file,
+    videoId,
+    videoStatus,
+    videoProviderId,
+    videoProvider,
+    assignedGroupIds,
+    assignedGroupNames,
+    associatedExamId,
+    associatedExamTitle,
+    prerequisiteExamId,
+    prerequisiteExamTitle,
+    prerequisitePassingScore,
+    isLocked,
+    isVideoCompleted,
+    videoProgressPercentage,
+    isExamPassed,
+    isPublishedInGroup,
+  ];
 }

@@ -17,18 +17,18 @@ import 'package:edu_saas/core/localization/generated/app_localizations.dart';
 
 class _FakeAuthCubit extends Cubit<AuthState> implements AuthCubit {
   _FakeAuthCubit()
-      : super(
-          const AuthAuthenticated(
-            UserEntity(
-              id: 'std-responsive-1',
-              tenantId: 'tenant-1',
-              email: 'student@al-nour.edu',
-              fullName: 'طالب النظام الأمريكي',
-              role: UserRole.student,
-              status: UserStatus.active,
-            ),
+    : super(
+        const AuthAuthenticated(
+          UserEntity(
+            id: 'std-responsive-1',
+            tenantId: 'tenant-1',
+            email: 'student@al-nour.edu',
+            fullName: 'طالب النظام الأمريكي',
+            role: UserRole.student,
+            status: UserStatus.active,
           ),
-        );
+        ),
+      );
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
@@ -38,10 +38,7 @@ class _FakeVideosRepository implements VideosRepository {
   final VideoEntity video;
   final VideoProgressEntity progress;
 
-  _FakeVideosRepository({
-    required this.video,
-    required this.progress,
-  });
+  _FakeVideosRepository({required this.video, required this.progress});
 
   @override
   Future<Result<List<VideoEntity>>> getVideosForGroup(String groupId) async {
@@ -158,7 +155,8 @@ void main() {
     id: 'vid-sat-math-1',
     contentId: 'content-math-1',
     title: 'شرح تفصيلي: حل معادلات الدرجة الثانية والدوال التربيعية (SAT Math)',
-    description: 'في هذا الدرس نتناول القانون العام، المميز، ورسم المنحنيات مع أمثلة عملية.',
+    description:
+        'في هذا الدرس نتناول القانون العام، المميز، ورسم المنحنيات مع أمثلة عملية.',
     providerVideoId: 'guid-12345',
     duration: 1800, // 30 mins
     status: VideoStatus.ready,
@@ -197,51 +195,55 @@ void main() {
 
   group('VideoPlayerPage Multi-Device Responsive Tests', () {
     for (final entry in deviceSizes.entries) {
-      testWidgets('Renders VideoPlayerPage cleanly on screen size (${entry.key}) with zero overflow',
-          (tester) async {
-        final repo = _FakeVideosRepository(
-          video: sampleVideo,
-          progress: sampleProgress,
-        );
-        final authCubit = _FakeAuthCubit();
+      testWidgets(
+        'Renders VideoPlayerPage cleanly on screen size (${entry.key}) with zero overflow',
+        (tester) async {
+          final repo = _FakeVideosRepository(
+            video: sampleVideo,
+            progress: sampleProgress,
+          );
+          final authCubit = _FakeAuthCubit();
 
-        tester.view.physicalSize = entry.value;
-        tester.view.devicePixelRatio = 1.0;
-        addTearDown(tester.view.resetPhysicalSize);
-        addTearDown(tester.view.resetDevicePixelRatio);
+          tester.view.physicalSize = entry.value;
+          tester.view.devicePixelRatio = 1.0;
+          addTearDown(tester.view.resetPhysicalSize);
+          addTearDown(tester.view.resetDevicePixelRatio);
 
-        await tester.pumpWidget(
-          createTestWidget(
-            repo: repo,
-            authCubit: authCubit,
-            child: const VideoPlayerPage(videoId: 'vid-sat-math-1'),
-          ),
-        );
+          await tester.pumpWidget(
+            createTestWidget(
+              repo: repo,
+              authCubit: authCubit,
+              child: const VideoPlayerPage(videoId: 'vid-sat-math-1'),
+            ),
+          );
 
-        await tester.pump();
-        await tester.pump();
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 100));
+          await tester.pump();
+          await tester.pump();
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 100));
 
-        // 1. Verify Page Title and CDN Badge rendered
-        expect(find.text('مشاهدة الدرس التعليمي'), findsOneWidget);
-        expect(find.text('بث سحابي محمي'), findsOneWidget);
+          // 1. Verify Page Title and CDN Badge rendered
+          expect(find.text('مشاهدة الدرس التعليمي'), findsOneWidget);
+          expect(find.text('بث سحابي محمي'), findsOneWidget);
 
-        // 2. Verify Academic Stats Card
-        expect(find.text('التقدم الأكاديمي للدرس'), findsWidgets);
-        expect(find.text('66%'), findsOneWidget);
-        expect(find.text('إعادة المحاضرة'), findsOneWidget);
-        expect(find.text('قيد المتابعة'), findsOneWidget);
+          // 2. Verify Academic Stats Card
+          expect(find.text('التقدم الأكاديمي للدرس'), findsWidgets);
+          expect(find.text('66%'), findsOneWidget);
+          expect(find.text('إعادة المحاضرة'), findsOneWidget);
+          expect(find.text('قيد المتابعة'), findsOneWidget);
 
-        // 3. Zero RenderFlex overflow assertions
-        expect(tester.takeException(), isNull);
-      });
+          // 3. Zero RenderFlex overflow assertions
+          expect(tester.takeException(), isNull);
+        },
+      );
     }
   });
 
   group('VideoCard Multi-Device Responsive Tests', () {
     for (final entry in deviceSizes.entries) {
-      testWidgets('Renders VideoCard without overflow on (${entry.key})', (tester) async {
+      testWidgets('Renders VideoCard without overflow on (${entry.key})', (
+        tester,
+      ) async {
         tester.view.physicalSize = entry.value;
         tester.view.devicePixelRatio = 1.0;
         addTearDown(tester.view.resetPhysicalSize);

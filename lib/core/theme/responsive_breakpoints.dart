@@ -11,7 +11,8 @@ enum DeviceScreenType {
 
   bool get isMobile => this == DeviceScreenType.compact;
   bool get isTablet => this == DeviceScreenType.medium;
-  bool get isDesktop => this == DeviceScreenType.expanded || this == DeviceScreenType.large;
+  bool get isDesktop =>
+      this == DeviceScreenType.expanded || this == DeviceScreenType.large;
   bool get isLargeDesktop => this == DeviceScreenType.large;
 }
 

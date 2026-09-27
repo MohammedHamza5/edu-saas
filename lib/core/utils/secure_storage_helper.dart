@@ -11,14 +11,15 @@ class SecureStorageHelper {
       encryptedSharedPreferences: true,
       resetOnError: true,
     ),
-    iOptions: IOSOptions(
-      accessibility: KeychainAccessibility.first_unlock,
-    ),
+    iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
   );
 
   static final Map<String, String> _inMemoryFallback = {};
 
-  static Future<void> write({required String key, required String value}) async {
+  static Future<void> write({
+    required String key,
+    required String value,
+  }) async {
     try {
       await _storage.write(key: key, value: value);
     } catch (_) {

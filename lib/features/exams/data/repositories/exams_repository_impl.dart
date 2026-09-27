@@ -10,8 +10,7 @@ class ExamsRepositoryImpl implements ExamsRepository {
   final ExamsRemoteDataSource _remoteDataSource;
 
   ExamsRepositoryImpl({ExamsRemoteDataSource? remoteDataSource})
-      : _remoteDataSource =
-            remoteDataSource ?? ExamsRemoteDataSourceImpl();
+    : _remoteDataSource = remoteDataSource ?? ExamsRemoteDataSourceImpl();
 
   @override
   Future<Result<List<ExamEntity>>> getGroupExams(

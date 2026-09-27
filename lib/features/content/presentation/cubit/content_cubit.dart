@@ -12,10 +12,9 @@ class ContentCubit extends Cubit<ContentState> {
   int _currentPage = 0;
   bool _isStudent = false;
 
-  ContentCubit({
-    required ContentRepository repository,
-  })  : _repository = repository,
-        super(const ContentInitial());
+  ContentCubit({required ContentRepository repository})
+    : _repository = repository,
+      super(const ContentInitial());
 
   String? get currentGroupId => _currentGroupId;
 
@@ -38,11 +37,13 @@ class ContentCubit extends Cubit<ContentState> {
       // ── Stale-While-Revalidate: Instant display from memory cache ──────────
       final cached = AppCache.content.getStale(cacheKey);
       if (cached is List<ContentEntity>) {
-        emit(ContentLoaded(
-          items: cached,
-          activeFilter: statusFilter,
-          hasMore: cached.length >= _pageSize,
-        ));
+        emit(
+          ContentLoaded(
+            items: cached,
+            activeFilter: statusFilter,
+            hasMore: cached.length >= _pageSize,
+          ),
+        );
         if (AppCache.content.has(cacheKey)) return; // Fresh cache, skip network
       } else {
         emit(const ContentLoading());
@@ -60,12 +61,14 @@ class ContentCubit extends Cubit<ContentState> {
     switch (result) {
       case Success(:final data):
         AppCache.content.put(cacheKey, data);
-        emit(ContentLoaded(
-          items: data,
-          activeFilter: statusFilter,
-          hasMore: data.length == _pageSize,
-          isLoadingMore: false,
-        ));
+        emit(
+          ContentLoaded(
+            items: data,
+            activeFilter: statusFilter,
+            hasMore: data.length == _pageSize,
+            isLoadingMore: false,
+          ),
+        );
       case FailureResult(:final failure):
         if (state is! ContentLoaded) {
           emit(ContentError(failure.message));
@@ -77,11 +80,16 @@ class ContentCubit extends Cubit<ContentState> {
   Future<void> loadMoreContent() async {
     final currentState = state;
     if (currentState is! ContentLoaded) return;
-    if (!currentState.hasMore || currentState.isLoadingMore || _currentGroupId == null) return;
+    if (!currentState.hasMore ||
+        currentState.isLoadingMore ||
+        _currentGroupId == null)
+      return;
 
     emit(currentState.copyWith(isLoadingMore: true));
     final nextPage = _currentPage + 1;
-    final filter = _isStudent ? ContentStatus.published : currentState.activeFilter;
+    final filter = _isStudent
+        ? ContentStatus.published
+        : currentState.activeFilter;
 
     final result = await _repository.getGroupContent(
       groupId: _currentGroupId!,
@@ -96,13 +104,16 @@ class ContentCubit extends Cubit<ContentState> {
       case Success(:final data):
         _currentPage = nextPage;
         final allItems = [...currentState.items, ...data];
-        final cacheKey = '${_currentGroupId}_${currentState.activeFilter?.name ?? 'all'}_$_isStudent';
+        final cacheKey =
+            '${_currentGroupId}_${currentState.activeFilter?.name ?? 'all'}_$_isStudent';
         AppCache.content.put(cacheKey, allItems);
-        emit(currentState.copyWith(
-          items: allItems,
-          hasMore: data.length == _pageSize,
-          isLoadingMore: false,
-        ));
+        emit(
+          currentState.copyWith(
+            items: allItems,
+            hasMore: data.length == _pageSize,
+            isLoadingMore: false,
+          ),
+        );
       case FailureResult():
         emit(currentState.copyWith(isLoadingMore: false));
     }
@@ -213,10 +224,7 @@ class ContentCubit extends Cubit<ContentState> {
     final result = await _repository.getCentralVideoBank();
     switch (result) {
       case Success(:final data):
-        emit(ContentLoaded(
-          items: data,
-          hasMore: false,
-        ));
+        emit(ContentLoaded(items: data, hasMore: false));
       case FailureResult(:final failure):
         emit(ContentError(failure.message));
     }
@@ -349,6 +357,82 @@ class ContentCubit extends Cubit<ContentState> {
         return data;
       case FailureResult():
         return null;
+    }
+  }
+
+  /// Toggles visibility of a single lesson in the group
+  Future<bool> toggleLessonVisibility({
+    required String contentId,
+    required bool isPublished,
+    String? groupId,
+  }) async {
+    final targetGroupId = groupId ?? _currentGroupId;
+    if (targetGroupId == null) return false;
+
+    // Optimistic UI update if in ContentLoaded state
+    final currentState = state;
+    if (currentState is ContentLoaded) {
+      final updatedList = currentState.items.map((item) {
+        if (item.id == contentId) {
+          return item.copyWith(isPublishedInGroup: isPublished);
+        }
+        return item;
+      }).toList();
+      emit(currentState.copyWith(items: updatedList));
+    }
+
+    final result = await _repository.toggleLessonVisibility(
+      contentId: contentId,
+      groupId: targetGroupId,
+      isPublished: isPublished,
+    );
+
+    switch (result) {
+      case Success():
+        AppCache.content.invalidatePrefix(targetGroupId);
+        return true;
+      case FailureResult(:final failure):
+        emit(ContentError(failure.message));
+        if (targetGroupId == _currentGroupId) {
+          await loadGroupContent(targetGroupId, forceRefresh: true);
+        }
+        return false;
+    }
+  }
+
+  /// Bulk toggles visibility of all lessons in the group
+  Future<bool> toggleAllLessonsVisibility({
+    required bool isPublished,
+    String? groupId,
+  }) async {
+    final targetGroupId = groupId ?? _currentGroupId;
+    if (targetGroupId == null) return false;
+
+    // Optimistic UI update if in ContentLoaded state
+    final currentState = state;
+    if (currentState is ContentLoaded) {
+      final updatedList = currentState.items.map((item) {
+        return item.copyWith(isPublishedInGroup: isPublished);
+      }).toList();
+      emit(currentState.copyWith(items: updatedList));
+    }
+
+    final result = await _repository.toggleAllLessonsVisibility(
+      groupId: targetGroupId,
+      isPublished: isPublished,
+    );
+
+    switch (result) {
+      case Success():
+        AppCache.content.invalidatePrefix(targetGroupId);
+        await loadGroupContent(targetGroupId, forceRefresh: true);
+        return true;
+      case FailureResult(:final failure):
+        emit(ContentError(failure.message));
+        if (targetGroupId == _currentGroupId) {
+          await loadGroupContent(targetGroupId, forceRefresh: true);
+        }
+        return false;
     }
   }
 }

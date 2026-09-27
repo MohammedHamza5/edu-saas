@@ -34,7 +34,10 @@ Future<void> main() async {
       // ── 1. Flutter engine binding (داخل الـ Zone) ──────────────────────────
       WidgetsFlutterBinding.ensureInitialized();
       AppLogger.separator('🚀 EduSaaS App Startup');
-      AppLogger.i('Main', 'Flutter binding initialized & Clean Path URLs enabled');
+      AppLogger.i(
+        'Main',
+        'Flutter binding initialized & Clean Path URLs enabled',
+      );
 
       // ── 2. Register global BlocObserver ─────────────────────────────────────
       Bloc.observer = const AppBlocObserver();
@@ -51,7 +54,10 @@ Future<void> main() async {
       ErrorWidget.builder = (FlutterErrorDetails details) {
         return AppUiErrorWidget(details: details);
       };
-      AppLogger.i('Main', 'Precision UI Error Tracker & ErrorWidget.builder active');
+      AppLogger.i(
+        'Main',
+        'Precision UI Error Tracker & ErrorWidget.builder active',
+      );
 
       // ── 4. Load .env ─────────────────────────────────────────────────────────
       try {
@@ -66,20 +72,38 @@ Future<void> main() async {
       try {
         await SupabaseService.initialize();
         AppLogger.s('Main', 'Supabase initialized successfully');
-        AppLogger.d('Main', 'Supabase client ready', data: {
-          'isAuthenticated': SupabaseService.isAuthenticated,
-          'currentUserId': SupabaseService.currentUserId ?? 'null (no session)',
-        });
+        AppLogger.d(
+          'Main',
+          'Supabase client ready',
+          data: {
+            'isAuthenticated': SupabaseService.isAuthenticated,
+            'currentUserId':
+                SupabaseService.currentUserId ?? 'null (no session)',
+          },
+        );
       } catch (e, st) {
-        AppLogger.e('Main', 'Supabase initialization FAILED', error: e, stackTrace: st);
+        AppLogger.e(
+          'Main',
+          'Supabase initialization FAILED',
+          error: e,
+          stackTrace: st,
+        );
       }
 
       // ── 6. Initialize Dependency Injection ───────────────────────────────────
       try {
         await InjectionContainer.init();
-        AppLogger.s('Main', 'DI container initialized — all repositories ready');
+        AppLogger.s(
+          'Main',
+          'DI container initialized — all repositories ready',
+        );
       } catch (e, st) {
-        AppLogger.e('Main', 'DI container initialization FAILED', error: e, stackTrace: st);
+        AppLogger.e(
+          'Main',
+          'DI container initialization FAILED',
+          error: e,
+          stackTrace: st,
+        );
       }
 
       AppLogger.separator('🎬 Running App');
@@ -166,10 +190,7 @@ class _AppRootView extends StatelessWidget {
               locale: activeLocale,
               builder: (context, child) =>
                   GlobalActivityListener(child: child ?? const SizedBox()),
-              supportedLocales: const [
-                Locale('en'),
-                Locale('ar'),
-              ],
+              supportedLocales: const [Locale('en'), Locale('ar')],
               localizationsDelegates: const [
                 AppLocalizations.delegate,
                 GlobalMaterialLocalizations.delegate,
@@ -183,4 +204,3 @@ class _AppRootView extends StatelessWidget {
     );
   }
 }
-

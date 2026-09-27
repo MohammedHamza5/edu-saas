@@ -14,23 +14,38 @@ import 'package:flutter_test/flutter_test.dart';
 
 class MockAuthRepository implements AuthRepository {
   @override
-  Future<Result<UserEntity>> signInWithEmail({required String email, required String password}) async {
+  Future<Result<UserEntity>> signInWithEmail({
+    required String email,
+    required String password,
+  }) async {
     return const FailureResult(AuthFailure('test'));
   }
+
   @override
-  Future<Result<UserEntity>> signUpStudent({required String email, required String password, required String fullName, required String phone, String? parentPhone, required String tenantId}) async {
+  Future<Result<UserEntity>> signUpStudent({
+    required String email,
+    required String password,
+    required String fullName,
+    required String phone,
+    String? parentPhone,
+    required String tenantId,
+  }) async {
     return const FailureResult(AuthFailure('test'));
   }
+
   @override
   Future<Result<UserEntity?>> getCurrentUser() async => const Success(null);
   @override
   Future<Result<void>> signOut() async => const Success(null);
   @override
-  Future<Result<void>> resetPasswordForEmail(String email) async => const Success(null);
+  Future<Result<void>> resetPasswordForEmail(String email) async =>
+      const Success(null);
 }
 
 void main() {
-  testWidgets('LoginPage renders on desktop (1440x900) without crashing', (tester) async {
+  testWidgets('LoginPage renders on desktop (1440x900) without crashing', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(1440, 900);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);

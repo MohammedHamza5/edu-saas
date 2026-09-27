@@ -42,17 +42,19 @@ class _FakeContentRepository implements ContentRepository {
   }) async {
     final list = items
         .where((i) => i.groupId == groupId)
-        .map((i) => LessonAssignmentEntity(
-              contentGroupId: 'cg-${i.id}',
-              contentId: i.id,
-              groupId: i.groupId ?? '',
-              title: i.title,
-              description: i.description,
-              type: i.type,
-              sortOrder: i.sortOrder,
-              access: LessonAccess.unlocked,
-              progress: LessonProgress.notStarted,
-            ))
+        .map(
+          (i) => LessonAssignmentEntity(
+            contentGroupId: 'cg-${i.id}',
+            contentId: i.id,
+            groupId: i.groupId ?? '',
+            title: i.title,
+            description: i.description,
+            type: i.type,
+            sortOrder: i.sortOrder,
+            access: LessonAccess.unlocked,
+            progress: LessonProgress.notStarted,
+          ),
+        )
         .toList();
     return Success(list);
   }
@@ -173,6 +175,23 @@ class _FakeContentRepository implements ContentRepository {
   }) async {
     return const Success(null);
   }
+
+  @override
+  Future<Result<void>> toggleLessonVisibility({
+    required String contentId,
+    required String groupId,
+    required bool isPublished,
+  }) async {
+    return const Success(null);
+  }
+
+  @override
+  Future<Result<void>> toggleAllLessonsVisibility({
+    required String groupId,
+    required bool isPublished,
+  }) async {
+    return const Success(null);
+  }
 }
 
 void main() {
@@ -190,7 +209,8 @@ void main() {
       tenantId: 't-1',
       groupId: 'grp-sat-1',
       title: 'مذكرة قوانين التفاضل والتكامل الشاملة (Calculus Sheet)',
-      description: 'تشمل جميع مشتقات الدوال المثلثية والقواعد الأساسية مع 50 مسألة محلولة بالتفصيل.',
+      description:
+          'تشمل جميع مشتقات الدوال المثلثية والقواعد الأساسية مع 50 مسألة محلولة بالتفصيل.',
       type: ContentType.video,
       status: ContentStatus.published,
       sortOrder: 0,
@@ -247,69 +267,75 @@ void main() {
 
   group('TeacherContentLibraryPage Multi-Device Responsive Tests', () {
     for (final entry in deviceSizes.entries) {
-      testWidgets('Renders cleanly on screen size (${entry.key}) with zero overflow',
-          (tester) async {
-        final repo = _FakeContentRepository(items: sampleItems);
+      testWidgets(
+        'Renders cleanly on screen size (${entry.key}) with zero overflow',
+        (tester) async {
+          final repo = _FakeContentRepository(items: sampleItems);
 
-        tester.view.physicalSize = entry.value;
-        tester.view.devicePixelRatio = 1.0;
-        addTearDown(tester.view.resetPhysicalSize);
-        addTearDown(tester.view.resetDevicePixelRatio);
+          tester.view.physicalSize = entry.value;
+          tester.view.devicePixelRatio = 1.0;
+          addTearDown(tester.view.resetPhysicalSize);
+          addTearDown(tester.view.resetDevicePixelRatio);
 
-        await tester.pumpWidget(
-          createTestWidget(
-            repo: repo,
-            child: const TeacherContentLibraryPage(
-              groupId: 'grp-sat-1',
-              groupName: 'SAT Math Advanced',
+          await tester.pumpWidget(
+            createTestWidget(
+              repo: repo,
+              child: const TeacherContentLibraryPage(
+                groupId: 'grp-sat-1',
+                groupName: 'SAT Math Advanced',
+              ),
             ),
-          ),
-        );
+          );
 
-        await tester.pumpAndSettle();
+          await tester.pumpAndSettle();
 
-        // Check Content items
-        expect(find.text(sampleItems[0].title), findsOneWidget);
-        expect(find.text('إضافة درس'), findsOneWidget);
+          // Check Content items
+          expect(find.text(sampleItems[0].title), findsOneWidget);
+          expect(find.text('إضافة درس'), findsOneWidget);
 
-        expect(tester.takeException(), isNull);
-      });
+          expect(tester.takeException(), isNull);
+        },
+      );
     }
   });
 
   group('StudentContentFeedPage Multi-Device Responsive Tests', () {
     for (final entry in deviceSizes.entries) {
-      testWidgets('Renders cleanly on screen size (${entry.key}) with zero overflow',
-          (tester) async {
-        final repo = _FakeContentRepository(items: sampleItems);
+      testWidgets(
+        'Renders cleanly on screen size (${entry.key}) with zero overflow',
+        (tester) async {
+          final repo = _FakeContentRepository(items: sampleItems);
 
-        tester.view.physicalSize = entry.value;
-        tester.view.devicePixelRatio = 1.0;
-        addTearDown(tester.view.resetPhysicalSize);
-        addTearDown(tester.view.resetDevicePixelRatio);
+          tester.view.physicalSize = entry.value;
+          tester.view.devicePixelRatio = 1.0;
+          addTearDown(tester.view.resetPhysicalSize);
+          addTearDown(tester.view.resetDevicePixelRatio);
 
-        await tester.pumpWidget(
-          createTestWidget(
-            repo: repo,
-            child: const StudentContentFeedPage(
-              groupId: 'grp-sat-1',
-              groupName: 'SAT Math Advanced',
+          await tester.pumpWidget(
+            createTestWidget(
+              repo: repo,
+              child: const StudentContentFeedPage(
+                groupId: 'grp-sat-1',
+                groupName: 'SAT Math Advanced',
+              ),
             ),
-          ),
-        );
+          );
 
-        await tester.pumpAndSettle();
+          await tester.pumpAndSettle();
 
-        expect(find.text(sampleItems[0].title), findsWidgets);
-        expect(find.textContaining('SAT Math Advanced'), findsWidgets);
+          expect(find.text(sampleItems[0].title), findsWidgets);
+          expect(find.textContaining('SAT Math Advanced'), findsWidgets);
 
-        expect(tester.takeException(), isNull);
-      });
+          expect(tester.takeException(), isNull);
+        },
+      );
     }
   });
 
   group('ContentItemCard Narrow Width Overflow Tests', () {
-    testWidgets('Renders on ultra-narrow width (288px) without overflow', (tester) async {
+    testWidgets('Renders on ultra-narrow width (288px) without overflow', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.lightTheme,
@@ -347,36 +373,38 @@ void main() {
 
   group('MaterialViewerSheet Multi-Device Responsive Tests', () {
     for (final entry in deviceSizes.entries) {
-      testWidgets('Renders cleanly on screen size (${entry.key}) with zero overflow',
-          (tester) async {
-        tester.view.physicalSize = entry.value;
-        tester.view.devicePixelRatio = 1.0;
-        addTearDown(tester.view.resetPhysicalSize);
-        addTearDown(tester.view.resetDevicePixelRatio);
+      testWidgets(
+        'Renders cleanly on screen size (${entry.key}) with zero overflow',
+        (tester) async {
+          tester.view.physicalSize = entry.value;
+          tester.view.devicePixelRatio = 1.0;
+          addTearDown(tester.view.resetPhysicalSize);
+          addTearDown(tester.view.resetDevicePixelRatio);
 
-        await tester.pumpWidget(
-          MaterialApp(
-            theme: AppTheme.lightTheme,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            locale: const Locale('ar'),
-            home: Scaffold(
-              body: MaterialViewerSheet(
-                content: sampleItems[0],
-                onGetSignedUrl: (path) async =>
-                    'https://storage.supabase.co/signed/$path',
+          await tester.pumpWidget(
+            MaterialApp(
+              theme: AppTheme.lightTheme,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              locale: const Locale('ar'),
+              home: Scaffold(
+                body: MaterialViewerSheet(
+                  content: sampleItems[0],
+                  onGetSignedUrl: (path) async =>
+                      'https://storage.supabase.co/signed/$path',
+                ),
               ),
             ),
-          ),
-        );
+          );
 
-        await tester.pumpAndSettle();
+          await tester.pumpAndSettle();
 
-        expect(find.text(sampleItems[0].title), findsOneWidget);
-        expect(find.text(sampleItems[0].file!.fileName), findsOneWidget);
-        expect(find.text('تنزيل / فتح الملف'), findsOneWidget);
-        expect(tester.takeException(), isNull);
-      });
+          expect(find.text(sampleItems[0].title), findsOneWidget);
+          expect(find.text(sampleItems[0].file!.fileName), findsOneWidget);
+          expect(find.text('تنزيل / فتح الملف'), findsOneWidget);
+          expect(tester.takeException(), isNull);
+        },
+      );
     }
   });
 }

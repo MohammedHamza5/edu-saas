@@ -73,11 +73,9 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
   final SupabaseClient? _client;
   final Dio _dio;
 
-  VideosRemoteDataSourceImpl({
-    SupabaseClient? client,
-    Dio? dio,
-  })  : _client = client,
-        _dio = dio ?? Dio();
+  VideosRemoteDataSourceImpl({SupabaseClient? client, Dio? dio})
+    : _client = client,
+      _dio = dio ?? Dio();
 
   SupabaseClient get _c => _client ?? SupabaseService.client;
 
@@ -120,7 +118,8 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
 
       if (data != null) {
         final model = VideoModel.fromJson(data);
-        if (model.providerVideoId != null && model.providerVideoId!.isNotEmpty) {
+        if (model.providerVideoId != null &&
+            model.providerVideoId!.isNotEmpty) {
           final playbackUrl = model.isYouTube
               ? YouTubeUrlParser.getEmbedUrl(model.providerVideoId!)
               : _generateSignedPlaybackUrl(model.providerVideoId!);
@@ -148,18 +147,17 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
           duration: 0,
           status: VideoStatus.uploading,
           createdAt: contentData['created_at'] != null
-              ? DateTime.tryParse(contentData['created_at'] as String) ?? DateTime.now()
+              ? DateTime.tryParse(contentData['created_at'] as String) ??
+                    DateTime.now()
               : DateTime.now(),
           updatedAt: contentData['updated_at'] != null
-              ? DateTime.tryParse(contentData['updated_at'] as String) ?? DateTime.now()
+              ? DateTime.tryParse(contentData['updated_at'] as String) ??
+                    DateTime.now()
               : DateTime.now(),
         );
       }
 
-      throw const ServerException(
-        'Video not found',
-        code: 'VIDEO_NOT_FOUND',
-      );
+      throw const ServerException('Video not found', code: 'VIDEO_NOT_FOUND');
     } on PostgrestException catch (e) {
       throw ServerException(e.message, code: e.code);
     } catch (e) {
@@ -171,20 +169,35 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
   @override
   Future<String> getPlaybackUrl(String videoId) async {
     try {
-      final res = await _c.rpc<dynamic>('get_video_playback_url', params: {'p_video_id': videoId});
+      final res = await _c.rpc<dynamic>(
+        'get_video_playback_url',
+        params: {'p_video_id': videoId},
+      );
       if (res is Map && res['playback_url'] != null) {
         return res['playback_url'] as String;
       }
     } catch (e) {
       final msg = e.toString();
       if (msg.contains('VIDEO_NOT_READY')) {
-        throw const ServerException('Video is currently processing', code: 'VIDEO_NOT_READY');
+        throw const ServerException(
+          'Video is currently processing',
+          code: 'VIDEO_NOT_READY',
+        );
       } else if (msg.contains('NOT_AUTHORIZED')) {
-        throw const ServerException('Not authorized to play this video', code: 'NOT_AUTHORIZED');
+        throw const ServerException(
+          'Not authorized to play this video',
+          code: 'NOT_AUTHORIZED',
+        );
       } else if (msg.contains('CONTENT_NOT_PUBLISHED')) {
-        throw const ServerException('Video content is not published', code: 'CONTENT_NOT_PUBLISHED');
+        throw const ServerException(
+          'Video content is not published',
+          code: 'CONTENT_NOT_PUBLISHED',
+        );
       } else if (msg.contains('VIDEO_NOT_FOUND')) {
-        throw const ServerException('Video record not found', code: 'VIDEO_NOT_FOUND');
+        throw const ServerException(
+          'Video record not found',
+          code: 'VIDEO_NOT_FOUND',
+        );
       }
     }
 
@@ -211,7 +224,8 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
     }
 
     // Expires in 4 hours (14400 seconds)
-    final expires = (DateTime.now().toUtc().millisecondsSinceEpoch ~/ 1000) + 14400;
+    final expires =
+        (DateTime.now().toUtc().millisecondsSinceEpoch ~/ 1000) + 14400;
 
     // SHA256(token_key + video_id + expires)
     final hashInput = '$tokenKey$providerVideoId$expires';
@@ -277,12 +291,17 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
         'p_video_id': actualVideoId,
         'p_duration_seconds': durationSeconds,
         'p_resume_position_seconds': progressSeconds,
-        'p_new_segments': newSegment != null ? <List<int>>[newSegment] : <List<int>>[],
+        'p_new_segments': newSegment != null
+            ? <List<int>>[newSegment]
+            : <List<int>>[],
         'p_actual_watch_seconds_added': actualWatchSeconds,
         'p_is_skipped': isSkipped,
       };
 
-      final data = await _c.rpc<dynamic>('update_video_progress_v2', params: rpcParams);
+      final data = await _c.rpc<dynamic>(
+        'update_video_progress_v2',
+        params: rpcParams,
+      );
 
       if (data is Map<String, dynamic> && data['status'] == 'ok') {
         // Since the RPC doesn't return the full model, we need to return a merged local state
@@ -292,13 +311,17 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
           id: '',
           videoId: actualVideoId,
           studentId: studentId,
-          progressSeconds: (data['progress_seconds'] as num?)?.toInt() ?? progressSeconds,
+          progressSeconds:
+              (data['progress_seconds'] as num?)?.toInt() ?? progressSeconds,
           durationSeconds: durationSeconds,
-          percentage: (data['watched_coverage_percentage'] as num?)?.toDouble() ?? 0.0,
+          percentage:
+              (data['watched_coverage_percentage'] as num?)?.toDouble() ?? 0.0,
           completed: data['completed'] as bool? ?? false,
-          actualWatchSeconds: (data['actual_watch_seconds'] as num?)?.toInt() ?? 0,
+          actualWatchSeconds:
+              (data['actual_watch_seconds'] as num?)?.toInt() ?? 0,
           isSkipped: isSkipped,
-          furthestPositionSeconds: (data['furthest_position_seconds'] as num?)?.toInt() ?? 0,
+          furthestPositionSeconds:
+              (data['furthest_position_seconds'] as num?)?.toInt() ?? 0,
           lastWatchedAt: DateTime.now(),
         );
       } else {
@@ -364,7 +387,9 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
       }
 
       // 2. Direct Binary Upload to Bunny Stream
-      final payloadBytes = videoBytes is Uint8List ? videoBytes : Uint8List.fromList(videoBytes);
+      final payloadBytes = videoBytes is Uint8List
+          ? videoBytes
+          : Uint8List.fromList(videoBytes);
       await _dio.put<void>(
         'https://video.bunnycdn.com/library/$libraryId/videos/$videoGuid',
         data: payloadBytes,
@@ -401,19 +426,25 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
             .select('*, content(*)')
             .single();
       } else {
-        videoData = await _c.from('videos').insert({
-          'content_id': contentId,
-          'provider': 'bunny',
-          'provider_video_id': videoGuid,
-          'status': 'processing',
-          'thumbnail_url': thumbnailUrl,
-        }).select('*, content(*)').single();
+        videoData = await _c
+            .from('videos')
+            .insert({
+              'content_id': contentId,
+              'provider': 'bunny',
+              'provider_video_id': videoGuid,
+              'status': 'processing',
+              'thumbnail_url': thumbnailUrl,
+            })
+            .select('*, content(*)')
+            .single();
       }
 
       return VideoModel.fromJson(videoData);
     } on DioException catch (e) {
       throw ServerException(
-        e.response?.data?.toString() ?? e.message ?? 'Network error uploading video',
+        e.response?.data?.toString() ??
+            e.message ??
+            'Network error uploading video',
         code: 'UPLOAD_FAILED',
       );
     } on PostgrestException catch (e) {
@@ -507,6 +538,22 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
     int expiresInSeconds = 900,
   }) async {
     try {
+      if (storagePath.startsWith('materials/')) {
+        try {
+          final r2Res = await _c.functions.invoke(
+            'r2-storage',
+            body: {'action': 'get-download-url', 'storage_path': storagePath},
+          );
+          if (r2Res.status == 200 && r2Res.data is Map<String, dynamic>) {
+            final data = r2Res.data as Map<String, dynamic>;
+            final downloadUrl = data['download_url'] as String?;
+            if (downloadUrl != null && downloadUrl.isNotEmpty) {
+              return downloadUrl;
+            }
+          }
+        } catch (_) {}
+      }
+
       final signedUrl = await _c.storage
           .from('group-content')
           .createSignedUrl(storagePath, expiresInSeconds);
@@ -525,8 +572,10 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
   }) async {
     try {
       final now = DateTime.now().toUtc().toIso8601String();
-      final sanitizedName =
-          fileName.toLowerCase().replaceAll(RegExp(r'[^a-z0-9_.-]'), '_');
+      final sanitizedName = fileName.toLowerCase().replaceAll(
+        RegExp(r'[^a-z0-9_.-]'),
+        '_',
+      );
       final storagePath =
           'content/$contentId/${DateTime.now().millisecondsSinceEpoch}_$sanitizedName';
       final mimeType = fileName.toLowerCase().endsWith('.pdf')
@@ -534,14 +583,17 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
           : 'application/octet-stream';
 
       // 1. Upload to Supabase Storage
-      await _c.storage.from('group-content').uploadBinary(
+      await _c.storage
+          .from('group-content')
+          .uploadBinary(
             storagePath,
             fileBytes is Uint8List ? fileBytes : Uint8List.fromList(fileBytes),
             fileOptions: FileOptions(contentType: mimeType, upsert: true),
           );
 
       // 2. Resolve Tenant ID
-      String? tenantId = _c.auth.currentUser?.userMetadata?['tenant_id'] as String?;
+      String? tenantId =
+          _c.auth.currentUser?.userMetadata?['tenant_id'] as String?;
       if (tenantId == null) {
         final currentUserId = _c.auth.currentUser?.id;
         if (currentUserId != null) {
@@ -564,7 +616,10 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
       }
 
       if (tenantId == null) {
-        throw const ServerException('Tenant ID could not be determined', code: 'TENANT_NOT_FOUND');
+        throw const ServerException(
+          'Tenant ID could not be determined',
+          code: 'TENANT_NOT_FOUND',
+        );
       }
 
       // 3. Check if file record exists
@@ -577,13 +632,16 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
 
       if (list.isNotEmpty) {
         final existingId = list.first['id'] as String;
-        await _c.from('files').update({
-          'storage_path': storagePath,
-          'file_name': fileName,
-          'mime_type': mimeType,
-          'file_size': fileBytes.length,
-          'created_at': now,
-        }).eq('id', existingId);
+        await _c
+            .from('files')
+            .update({
+              'storage_path': storagePath,
+              'file_name': fileName,
+              'mime_type': mimeType,
+              'file_size': fileBytes.length,
+              'created_at': now,
+            })
+            .eq('id', existingId);
       } else {
         await _c.from('files').insert({
           'tenant_id': tenantId,

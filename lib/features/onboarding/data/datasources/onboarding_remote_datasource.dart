@@ -24,13 +24,17 @@ class OnboardingRemoteDataSourceImpl implements OnboardingRemoteDataSource {
   Future<OnboardingResult> provisionTenant(ProvisionTenantParams params) async {
     try {
       // 1. Create the new Tenant record
-      final tenantData = await _safeClient.from('tenants').insert({
-        'name': params.tenantName,
-        'email': params.tenantEmail,
-        'phone': params.tenantPhone,
-        'logo_url': params.logoUrl,
-        'status': 'active',
-      }).select().single();
+      final tenantData = await _safeClient
+          .from('tenants')
+          .insert({
+            'name': params.tenantName,
+            'email': params.tenantEmail,
+            'phone': params.tenantPhone,
+            'logo_url': params.logoUrl,
+            'status': 'active',
+          })
+          .select()
+          .single();
 
       final tenant = TenantModel.fromJson(tenantData);
 
@@ -52,15 +56,19 @@ class OnboardingRemoteDataSourceImpl implements OnboardingRemoteDataSource {
       }
 
       // 3. Ensure Teacher Profile in public.users has active status and teacher role
-      final updatedUserData = await _safeClient.from('users').upsert({
-        'id': authUser.id,
-        'tenant_id': tenant.id,
-        'role': 'teacher',
-        'full_name': params.teacherFullName,
-        'email': params.teacherEmail,
-        'phone': params.teacherPhone,
-        'status': 'active',
-      }).select().single();
+      final updatedUserData = await _safeClient
+          .from('users')
+          .upsert({
+            'id': authUser.id,
+            'tenant_id': tenant.id,
+            'role': 'teacher',
+            'full_name': params.teacherFullName,
+            'email': params.teacherEmail,
+            'phone': params.teacherPhone,
+            'status': 'active',
+          })
+          .select()
+          .single();
 
       final teacher = UserEntity(
         id: updatedUserData['id'] as String,
@@ -86,7 +94,8 @@ class OnboardingRemoteDataSourceImpl implements OnboardingRemoteDataSource {
   @override
   Future<TenantModel?> getTenantById(String tenantId) async {
     try {
-      final data = await _safeClient.from('tenants')
+      final data = await _safeClient
+          .from('tenants')
           .select()
           .eq('id', tenantId)
           .maybeSingle();
@@ -103,7 +112,8 @@ class OnboardingRemoteDataSourceImpl implements OnboardingRemoteDataSource {
   @override
   Future<List<TenantModel>> listTenants() async {
     try {
-      final List<dynamic> data = await _safeClient.from('tenants')
+      final List<dynamic> data = await _safeClient
+          .from('tenants')
           .select()
           .order('created_at', ascending: false);
 

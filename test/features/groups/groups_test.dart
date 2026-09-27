@@ -32,7 +32,8 @@ class FakeStudentsRepository implements StudentsRepository {
   }
 
   @override
-  Future<Result<List<StudentEntity>>> getPendingStudents() async => const Success([]);
+  Future<Result<List<StudentEntity>>> getPendingStudents() async =>
+      const Success([]);
 
   @override
   Future<Result<StudentEntity>> changeStudentStatus({
@@ -126,7 +127,9 @@ class FakeGroupsRepository implements GroupsRepository {
   }
 
   @override
-  Future<Result<List<GroupMemberEntity>>> getGroupMembers(String groupId) async {
+  Future<Result<List<GroupMemberEntity>>> getGroupMembers(
+    String groupId,
+  ) async {
     return Success(membersByGroup[groupId] ?? []);
   }
 
@@ -148,7 +151,9 @@ class FakeGroupsRepository implements GroupsRepository {
 
     final idx = groups.indexWhere((g) => g.id == groupId);
     if (idx != -1) {
-      groups[idx] = groups[idx].copyWith(membersCount: groups[idx].membersCount + 1);
+      groups[idx] = groups[idx].copyWith(
+        membersCount: groups[idx].membersCount + 1,
+      );
     }
 
     return Success(newMember);
@@ -162,7 +167,9 @@ class FakeGroupsRepository implements GroupsRepository {
     membersByGroup[groupId]?.removeWhere((m) => m.studentId == studentId);
     final idx = groups.indexWhere((g) => g.id == groupId);
     if (idx != -1 && groups[idx].membersCount > 0) {
-      groups[idx] = groups[idx].copyWith(membersCount: groups[idx].membersCount - 1);
+      groups[idx] = groups[idx].copyWith(
+        membersCount: groups[idx].membersCount - 1,
+      );
     }
     return const Success(null);
   }
@@ -218,22 +225,25 @@ void main() {
       expect(groupsCubit.state, const GroupsInitial());
     });
 
-    test('loadGroups emits GroupsLoading then GroupsLoaded with all groups', () async {
-      final states = <GroupsState>[];
-      final subscription = groupsCubit.stream.listen(states.add);
+    test(
+      'loadGroups emits GroupsLoading then GroupsLoaded with all groups',
+      () async {
+        final states = <GroupsState>[];
+        final subscription = groupsCubit.stream.listen(states.add);
 
-      await groupsCubit.loadGroups();
-      await Future<void>.delayed(Duration.zero);
+        await groupsCubit.loadGroups();
+        await Future<void>.delayed(Duration.zero);
 
-      expect(states.length, 2);
-      expect(states[0], const GroupsLoading());
-      expect(states[1], isA<GroupsLoaded>());
-      final loaded = states[1] as GroupsLoaded;
-      expect(loaded.groups.length, 3);
-      expect(loaded.groups[0].name, 'SAT Math Advanced');
+        expect(states.length, 2);
+        expect(states[0], const GroupsLoading());
+        expect(states[1], isA<GroupsLoaded>());
+        final loaded = states[1] as GroupsLoaded;
+        expect(loaded.groups.length, 3);
+        expect(loaded.groups[0].name, 'SAT Math Advanced');
 
-      await subscription.cancel();
-    });
+        await subscription.cancel();
+      },
+    );
 
     test('filterByLevel filters groups correctly', () async {
       await groupsCubit.loadGroups();
@@ -257,23 +267,26 @@ void main() {
       expect(all.filteredGroups.length, 3);
     });
 
-    test('createGroup adds new group and sets previousContentAccess correctly', () async {
-      await groupsCubit.loadGroups();
+    test(
+      'createGroup adds new group and sets previousContentAccess correctly',
+      () async {
+        await groupsCubit.loadGroups();
 
-      final success = await groupsCubit.createGroup(
-        name: 'ACT Crash Course',
-        level: 'ACT',
-        description: 'Speed-run prep',
-        previousContentAccess: 'deny',
-      );
+        final success = await groupsCubit.createGroup(
+          name: 'ACT Crash Course',
+          level: 'ACT',
+          description: 'Speed-run prep',
+          previousContentAccess: 'deny',
+        );
 
-      expect(success, isTrue);
-      final state = groupsCubit.state as GroupsLoaded;
-      expect(state.groups.length, 4);
-      expect(state.groups.first.name, 'ACT Crash Course');
-      expect(state.groups.first.previousContentAccess, 'deny');
-      expect(state.groups.first.isPreviousContentAllowed, isFalse);
-    });
+        expect(success, isTrue);
+        final state = groupsCubit.state as GroupsLoaded;
+        expect(state.groups.length, 4);
+        expect(state.groups.first.name, 'ACT Crash Course');
+        expect(state.groups.first.previousContentAccess, 'deny');
+        expect(state.groups.first.isPreviousContentAllowed, isFalse);
+      },
+    );
 
     test('loadGroupDetail loads members for a given group', () async {
       fakeRepo.membersByGroup['grp-1'] = [
@@ -343,8 +356,9 @@ void main() {
       );
     }
 
-    testWidgets('renders groups list page title and floating action button',
-        (tester) async {
+    testWidgets('renders groups list page title and floating action button', (
+      tester,
+    ) async {
       await tester.pumpWidget(createWidgetUnderTest(groupsCubit));
       await tester.pumpAndSettle();
 
@@ -352,7 +366,9 @@ void main() {
       expect(find.text('مجموعة جديدة'), findsOneWidget);
     });
 
-    testWidgets('renders all group cards and level filter chips', (tester) async {
+    testWidgets('renders all group cards and level filter chips', (
+      tester,
+    ) async {
       await tester.pumpWidget(createWidgetUnderTest(groupsCubit));
       await tester.pumpAndSettle();
 
@@ -403,8 +419,9 @@ void main() {
       );
     }
 
-    testWidgets('opens dialog and allows toggling previous content access',
-        (tester) async {
+    testWidgets('opens dialog and allows toggling previous content access', (
+      tester,
+    ) async {
       await tester.pumpWidget(createDialogUnderTest(groupsCubit));
       await tester.pumpAndSettle();
 
@@ -492,29 +509,33 @@ void main() {
       );
     }
 
-    testWidgets('renders active students list and filters out existing group members',
-        (tester) async {
-      await tester.pumpWidget(createAddMemberDialogUnderTest(
-        cubit: groupsCubit,
-        existingMemberIds: {'std-1'}, // std-1 is already in the group
-      ));
-      await tester.pumpAndSettle();
+    testWidgets(
+      'renders active students list and filters out existing group members',
+      (tester) async {
+        await tester.pumpWidget(
+          createAddMemberDialogUnderTest(
+            cubit: groupsCubit,
+            existingMemberIds: {'std-1'}, // std-1 is already in the group
+          ),
+        );
+        await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Open Add Member'));
-      await tester.pumpAndSettle();
+        await tester.tap(find.text('Open Add Member'));
+        await tester.pumpAndSettle();
 
-      // std-1 should NOT appear because it is already a member
-      expect(find.text('Ahmed Ali'), findsNothing);
+        // std-1 should NOT appear because it is already a member
+        expect(find.text('Ahmed Ali'), findsNothing);
 
-      // std-2 and std-3 should appear
-      expect(find.text('Sara Mohamed'), findsOneWidget);
-      expect(find.text('Khaled Omar'), findsOneWidget);
-    });
+        // std-2 and std-3 should appear
+        expect(find.text('Sara Mohamed'), findsOneWidget);
+        expect(find.text('Khaled Omar'), findsOneWidget);
+      },
+    );
 
     testWidgets('allows searching students in real-time', (tester) async {
-      await tester.pumpWidget(createAddMemberDialogUnderTest(
-        cubit: groupsCubit,
-      ));
+      await tester.pumpWidget(
+        createAddMemberDialogUnderTest(cubit: groupsCubit),
+      );
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('Open Add Member'));
@@ -531,11 +552,12 @@ void main() {
       expect(find.text('Ahmed Ali'), findsNothing);
     });
 
-    testWidgets('selecting student and clicking add calls cubit.addMember',
-        (tester) async {
-      await tester.pumpWidget(createAddMemberDialogUnderTest(
-        cubit: groupsCubit,
-      ));
+    testWidgets('selecting student and clicking add calls cubit.addMember', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        createAddMemberDialogUnderTest(cubit: groupsCubit),
+      );
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('Open Add Member'));

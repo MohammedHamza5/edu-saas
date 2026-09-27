@@ -42,68 +42,80 @@ void main() {
   }
 
   group('AdaptiveScaffold Responsive Layout Tests', () {
-    testWidgets('Renders Mobile Web TopBar and Drawer on compact mobile (<600dp)', (tester) async {
-      tester.view.physicalSize = const Size(390, 844);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.resetPhysicalSize);
+    testWidgets(
+      'Renders Mobile Web TopBar and Drawer on compact mobile (<600dp)',
+      (tester) async {
+        tester.view.physicalSize = const Size(390, 844);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
 
-      await tester.pumpWidget(buildTestWidget(screenSize: const Size(390, 844)));
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(
+          buildTestWidget(screenSize: const Size(390, 844)),
+        );
+        await tester.pumpAndSettle();
 
-      // Ensure NO bottom NavigationBar on mobile web
-      expect(find.byType(NavigationBar), findsNothing);
-      expect(find.byType(NavigationRail), findsNothing);
-      expect(find.text('Body Content'), findsOneWidget);
+        // Ensure NO bottom NavigationBar on mobile web
+        expect(find.byType(NavigationBar), findsNothing);
+        expect(find.byType(NavigationRail), findsNothing);
+        expect(find.text('Body Content'), findsOneWidget);
 
-      // Verify Mobile Web Header with menu button and branding
-      expect(find.byIcon(Icons.menu_rounded), findsOneWidget);
-      expect(find.text('Edu SaaS Platform'), findsOneWidget);
+        // Verify Mobile Web Header with menu button and branding
+        expect(find.byIcon(Icons.menu_rounded), findsOneWidget);
+        expect(find.text('Edu SaaS Platform'), findsOneWidget);
 
-      // Tap menu button to open drawer
-      await tester.tap(find.byIcon(Icons.menu_rounded));
-      await tester.pumpAndSettle();
+        // Tap menu button to open drawer
+        await tester.tap(find.byIcon(Icons.menu_rounded));
+        await tester.pumpAndSettle();
 
-      // Drawer is open with all destinations and footer
-      expect(find.byType(Drawer), findsOneWidget);
-      expect(find.text('الرئيسية'), findsOneWidget);
-      expect(find.text('المجموعات'), findsOneWidget);
-      expect(find.text('الطلاب'), findsOneWidget);
-      expect(find.text('Logout'), findsOneWidget);
-    });
+        // Drawer is open with all destinations and footer
+        expect(find.byType(Drawer), findsOneWidget);
+        expect(find.text('الرئيسية'), findsOneWidget);
+        expect(find.text('المجموعات'), findsOneWidget);
+        expect(find.text('الطلاب'), findsOneWidget);
+        expect(find.text('Logout'), findsOneWidget);
+      },
+    );
 
-    testWidgets('Tapping destination in Mobile Drawer navigates and closes drawer', (tester) async {
-      tester.view.physicalSize = const Size(390, 844);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.resetPhysicalSize);
+    testWidgets(
+      'Tapping destination in Mobile Drawer navigates and closes drawer',
+      (tester) async {
+        tester.view.physicalSize = const Size(390, 844);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
 
-      int? selectedIndex;
-      await tester.pumpWidget(
-        buildTestWidget(
-          screenSize: const Size(390, 844),
-          onNavigationIndexChanged: (idx) => selectedIndex = idx,
-        ),
-      );
-      await tester.pumpAndSettle();
+        int? selectedIndex;
+        await tester.pumpWidget(
+          buildTestWidget(
+            screenSize: const Size(390, 844),
+            onNavigationIndexChanged: (idx) => selectedIndex = idx,
+          ),
+        );
+        await tester.pumpAndSettle();
 
-      // Open drawer
-      await tester.tap(find.byIcon(Icons.menu_rounded));
-      await tester.pumpAndSettle();
+        // Open drawer
+        await tester.tap(find.byIcon(Icons.menu_rounded));
+        await tester.pumpAndSettle();
 
-      // Tap 'المجموعات'
-      await tester.tap(find.text('المجموعات'));
-      await tester.pumpAndSettle();
+        // Tap 'المجموعات'
+        await tester.tap(find.text('المجموعات'));
+        await tester.pumpAndSettle();
 
-      // Drawer is closed and callback received index 1
-      expect(selectedIndex, 1);
-      expect(find.byType(Drawer), findsNothing);
-    });
+        // Drawer is closed and callback received index 1
+        expect(selectedIndex, 1);
+        expect(find.byType(Drawer), findsNothing);
+      },
+    );
 
-    testWidgets('Renders NavigationRail on medium tablet (600-839dp)', (tester) async {
+    testWidgets('Renders NavigationRail on medium tablet (600-839dp)', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(768, 1024);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
 
-      await tester.pumpWidget(buildTestWidget(screenSize: const Size(768, 1024)));
+      await tester.pumpWidget(
+        buildTestWidget(screenSize: const Size(768, 1024)),
+      );
       await tester.pumpAndSettle();
 
       expect(find.byType(NavigationRail), findsOneWidget);
@@ -111,12 +123,16 @@ void main() {
       expect(find.text('Body Content'), findsOneWidget);
     });
 
-    testWidgets('Renders Permanent Sidebar on desktop (>=840dp)', (tester) async {
+    testWidgets('Renders Permanent Sidebar on desktop (>=840dp)', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(1440, 900);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
 
-      await tester.pumpWidget(buildTestWidget(screenSize: const Size(1440, 900)));
+      await tester.pumpWidget(
+        buildTestWidget(screenSize: const Size(1440, 900)),
+      );
       await tester.pumpAndSettle();
 
       expect(find.byType(NavigationBar), findsNothing);
@@ -129,7 +145,9 @@ void main() {
       expect(find.text('Body Content'), findsOneWidget);
     });
 
-    testWidgets('Callback fires when clicking destination on desktop', (tester) async {
+    testWidgets('Callback fires when clicking destination on desktop', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(1200, 800);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -149,49 +167,57 @@ void main() {
       expect(selectedIndex, 1);
     });
 
-    testWidgets('Renders Categorized Sections with section headers on Desktop', (tester) async {
-      tester.view.physicalSize = const Size(1440, 900);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.resetPhysicalSize);
+    testWidgets(
+      'Renders Categorized Sections with section headers on Desktop',
+      (tester) async {
+        tester.view.physicalSize = const Size(1440, 900);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
 
-      int? selectedIndex;
-      await tester.pumpWidget(
-        MaterialApp(
-          home: MediaQuery(
-            data: const MediaQueryData(size: Size(1440, 900)),
-            child: AdaptiveScaffold(
-              currentIndex: 0,
-              onNavigationIndexChanged: (idx) => selectedIndex = idx,
-              sections: const [
-                AdaptiveSidebarSection(
-                  title: 'القسم الأول',
-                  destinations: [
-                    AdaptiveDestination(icon: Icons.home, label: 'العنصر الأول'),
-                  ],
-                ),
-                AdaptiveSidebarSection(
-                  title: 'القسم الثاني',
-                  destinations: [
-                    AdaptiveDestination(icon: Icons.school, label: 'العنصر الثاني'),
-                  ],
-                ),
-              ],
-              body: const Text('Categorized Body'),
+        int? selectedIndex;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: MediaQuery(
+              data: const MediaQueryData(size: Size(1440, 900)),
+              child: AdaptiveScaffold(
+                currentIndex: 0,
+                onNavigationIndexChanged: (idx) => selectedIndex = idx,
+                sections: const [
+                  AdaptiveSidebarSection(
+                    title: 'القسم الأول',
+                    destinations: [
+                      AdaptiveDestination(
+                        icon: Icons.home,
+                        label: 'العنصر الأول',
+                      ),
+                    ],
+                  ),
+                  AdaptiveSidebarSection(
+                    title: 'القسم الثاني',
+                    destinations: [
+                      AdaptiveDestination(
+                        icon: Icons.school,
+                        label: 'العنصر الثاني',
+                      ),
+                    ],
+                  ),
+                ],
+                body: const Text('Categorized Body'),
+              ),
             ),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.text('القسم الأول'), findsOneWidget);
-      expect(find.text('العنصر الأول'), findsOneWidget);
-      expect(find.text('القسم الثاني'), findsOneWidget);
-      expect(find.text('العنصر الثاني'), findsOneWidget);
+        expect(find.text('القسم الأول'), findsOneWidget);
+        expect(find.text('العنصر الأول'), findsOneWidget);
+        expect(find.text('القسم الثاني'), findsOneWidget);
+        expect(find.text('العنصر الثاني'), findsOneWidget);
 
-      await tester.tap(find.text('العنصر الثاني'));
-      await tester.pump();
-      expect(selectedIndex, 1);
-    });
+        await tester.tap(find.text('العنصر الثاني'));
+        await tester.pump();
+        expect(selectedIndex, 1);
+      },
+    );
   });
 }
-

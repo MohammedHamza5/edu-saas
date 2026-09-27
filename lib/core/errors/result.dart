@@ -12,20 +12,21 @@ sealed class Result<T> {
   bool get isFailure => this is FailureResult<T>;
 
   T get data => switch (this) {
-        Success(:final data) => data,
-        FailureResult(:final failure) =>
-          throw StateError('Cannot access data on failure: $failure'),
-      };
+    Success(:final data) => data,
+    FailureResult(:final failure) => throw StateError(
+      'Cannot access data on failure: $failure',
+    ),
+  };
 
   T? get dataOrNull => switch (this) {
-        Success(:final data) => data,
-        FailureResult() => null,
-      };
+    Success(:final data) => data,
+    FailureResult() => null,
+  };
 
   Failure? get failureOrNull => switch (this) {
-        Success() => null,
-        FailureResult(:final failure) => failure,
-      };
+    Success() => null,
+    FailureResult(:final failure) => failure,
+  };
 
   R when<R>({
     R Function(T data)? onSuccess,

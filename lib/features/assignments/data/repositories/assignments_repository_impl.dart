@@ -9,8 +9,7 @@ class AssignmentsRepositoryImpl implements AssignmentsRepository {
   final AssignmentsRemoteDataSource _remoteDataSource;
 
   AssignmentsRepositoryImpl({AssignmentsRemoteDataSource? remoteDataSource})
-      : _remoteDataSource =
-            remoteDataSource ?? AssignmentsRemoteDataSourceImpl();
+    : _remoteDataSource = remoteDataSource ?? AssignmentsRemoteDataSourceImpl();
 
   @override
   Future<Result<List<AssignmentEntity>>> getGroupAssignments(
@@ -55,9 +54,13 @@ class AssignmentsRepositoryImpl implements AssignmentsRepository {
   }
 
   @override
-  Future<Result<AssignmentEntity>> getAssignmentDetails(String assignmentId) async {
+  Future<Result<AssignmentEntity>> getAssignmentDetails(
+    String assignmentId,
+  ) async {
     try {
-      final assignment = await _remoteDataSource.getAssignmentDetails(assignmentId);
+      final assignment = await _remoteDataSource.getAssignmentDetails(
+        assignmentId,
+      );
       return Success(assignment);
     } on PostgrestException catch (e) {
       return FailureResult(ServerFailure(e.message, code: e.code));
@@ -69,7 +72,9 @@ class AssignmentsRepositoryImpl implements AssignmentsRepository {
   }
 
   @override
-  Future<Result<List<AssignmentSubmissionEntity>>> getSubmissions(String assignmentId) async {
+  Future<Result<List<AssignmentSubmissionEntity>>> getSubmissions(
+    String assignmentId,
+  ) async {
     try {
       final submissions = await _remoteDataSource.getSubmissions(assignmentId);
       return Success(submissions);
@@ -83,7 +88,9 @@ class AssignmentsRepositoryImpl implements AssignmentsRepository {
   }
 
   @override
-  Future<Result<AssignmentSubmissionEntity?>> getMySubmission(String assignmentId) async {
+  Future<Result<AssignmentSubmissionEntity?>> getMySubmission(
+    String assignmentId,
+  ) async {
     try {
       final submission = await _remoteDataSource.getMySubmission(assignmentId);
       return Success(submission);

@@ -70,7 +70,9 @@ class QuestionOptionTile extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
           border: Border.all(
             color: borderColor,
-            width: isSelected || isCorrectReview == true || isWrongReview ? 1.5 : 1,
+            width: isSelected || isCorrectReview == true || isWrongReview
+                ? 1.5
+                : 1,
           ),
         ),
         child: Row(
@@ -110,13 +112,21 @@ class QuestionOptionTile extends StatelessWidget {
 
             if (isCorrectReview == true) ...[
               const SizedBox(width: AppSpacing.s8),
-              const Icon(Icons.check_circle, color: AppColors.success, size: 20),
+              const Icon(
+                Icons.check_circle,
+                color: AppColors.success,
+                size: 20,
+              ),
             ] else if (isWrongReview) ...[
               const SizedBox(width: AppSpacing.s8),
               const Icon(Icons.cancel, color: AppColors.error, size: 20),
             ] else if (isSelected) ...[
               const SizedBox(width: AppSpacing.s8),
-              const Icon(Icons.radio_button_checked, color: AppColors.primary, size: 20),
+              const Icon(
+                Icons.radio_button_checked,
+                color: AppColors.primary,
+                size: 20,
+              ),
             ],
           ],
         ),

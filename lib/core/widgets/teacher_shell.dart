@@ -31,21 +31,28 @@ class TeacherShell extends StatelessWidget {
 
   int _computeIndex(String path) {
     if (path == '/teacher' || path == '/teacher/') return 0;
-    if (path.startsWith('/notifications') || path.startsWith('/teacher/notifications')) return 1;
+    if (path.startsWith('/notifications') ||
+        path.startsWith('/teacher/notifications')) {
+      return 1;
+    }
     if (path == '/teacher/students' ||
         path.startsWith('/teacher/students/profile') ||
         path.startsWith('/teacher/students/assign-groups')) {
       return 2;
     }
     if (path.startsWith('/teacher/students/pending')) return 3;
+    if (path.startsWith('/teacher/groups')) return 4;
     if (path.startsWith('/teacher/attendance')) return 5;
     if (path.contains('/content')) return 6;
     if (path.contains('/videos')) return 7;
-    if (path.contains('/assignments')) return 8;
+    if (path.contains('/question-bank')) return 8;
     if (path.contains('/exams')) return 9;
-    if (path.startsWith('/teacher/announcements')) return 10;
-    if (path.startsWith('/teacher/settings')) return 11;
-    if (path.startsWith('/teacher/groups')) return 4;
+    if (path.contains('/assignments')) return 10;
+    if (path.startsWith('/teacher/announcements') ||
+        path.startsWith('/teacher/send-announcement')) {
+      return 11;
+    }
+    if (path.startsWith('/teacher/settings')) return 12;
     return 0;
   }
 
@@ -59,10 +66,11 @@ class TeacherShell extends StatelessWidget {
       AppRoutes.teacherAttendance, // 5
       AppRoutes.teacherContent, // 6 (Course Builder / Manage Lessons)
       AppRoutes.teacherVideos, // 7 (Video Bank)
-      AppRoutes.teacherAssignments, // 8
-      AppRoutes.teacherExams, // 9
-      AppRoutes.sendAnnouncement, // 10
-      AppRoutes.teacherSettings, // 11
+      AppRoutes.questionBank, // 8 (Question Bank & Review Console)
+      AppRoutes.teacherExams, // 9 (Exams & Assessments)
+      AppRoutes.teacherAssignments, // 10 (Assignments)
+      AppRoutes.sendAnnouncement, // 11
+      AppRoutes.teacherSettings, // 12
     ];
 
     if (index >= 0 && index < routes.length) {
@@ -99,7 +107,7 @@ class TeacherShell extends StatelessWidget {
     } catch (_) {}
 
     final sections = [
-      // Section 1: Dashboard
+      // Section 1: Command Center
       AdaptiveSidebarSection(
         title: context.l10n.navDashboard,
         destinations: [
@@ -119,7 +127,7 @@ class TeacherShell extends StatelessWidget {
         ],
       ),
 
-      // Section 2: Students & Groups
+      // Section 2: Students & Classes
       AdaptiveSidebarSection(
         title: context.l10n.navSectionStudents,
         destinations: [
@@ -143,15 +151,15 @@ class TeacherShell extends StatelessWidget {
             tooltip: context.l10n.groupsListTitle,
           ),
           AdaptiveDestination(
-            icon: Icons.play_circle_outline_rounded,
-            selectedIcon: Icons.play_circle_rounded,
+            icon: Icons.fact_check_outlined,
+            selectedIcon: Icons.fact_check_rounded,
             label: context.l10n.attendanceTitle,
             tooltip: context.l10n.attendanceTitle,
           ),
         ],
       ),
 
-      // Section 3: Academic Engine (Course Builder, Video Bank, Assignments, Exams, Announcements)
+      // Section 3: Academic Studio (Course Builder, Video Bank, Question Bank, Exams)
       AdaptiveSidebarSection(
         title: context.l10n.navSectionAcademic,
         destinations: [
@@ -164,14 +172,14 @@ class TeacherShell extends StatelessWidget {
           AdaptiveDestination(
             icon: Icons.video_library_outlined,
             selectedIcon: Icons.video_library_rounded,
-            label: context.l10n.videoBankTitle,
-            tooltip: context.l10n.videoBankTitle,
+            label: context.l10n.videoLibraryTitle,
+            tooltip: context.l10n.videoLibraryTitle,
           ),
           AdaptiveDestination(
-            icon: Icons.assignment_outlined,
-            selectedIcon: Icons.assignment_rounded,
-            label: context.l10n.assignmentsListTitle,
-            tooltip: context.l10n.assignmentsListTitle,
+            icon: Icons.functions_rounded,
+            selectedIcon: Icons.functions_rounded,
+            label: context.l10n.centralQuestionBankTitle,
+            tooltip: context.l10n.centralQuestionBankTitle,
           ),
           AdaptiveDestination(
             icon: Icons.quiz_outlined,
@@ -179,19 +187,25 @@ class TeacherShell extends StatelessWidget {
             label: context.l10n.examsListTitle,
             tooltip: context.l10n.examsListTitle,
           ),
+        ],
+      ),
+
+      // Section 4: System & Grading
+      AdaptiveSidebarSection(
+        title: context.l10n.navSectionSystem,
+        destinations: [
+          AdaptiveDestination(
+            icon: Icons.assignment_outlined,
+            selectedIcon: Icons.assignment_rounded,
+            label: context.l10n.assignmentsListTitle,
+            tooltip: context.l10n.assignmentsListTitle,
+          ),
           AdaptiveDestination(
             icon: Icons.campaign_outlined,
             selectedIcon: Icons.campaign_rounded,
             label: context.l10n.sendAnnouncementNav,
             tooltip: context.l10n.sendAnnouncementTitle,
           ),
-        ],
-      ),
-
-      // Section 4: System & Settings
-      AdaptiveSidebarSection(
-        title: context.l10n.navSectionSystem,
-        destinations: [
           AdaptiveDestination(
             icon: Icons.tune_outlined,
             selectedIcon: Icons.tune_rounded,
@@ -230,7 +244,8 @@ class TeacherShell extends StatelessWidget {
         size: 42,
         showName: true,
         platformName: branding.localizedBrandName(context),
-        subtitle: '${branding.localizedTeacherName(context)} • ${branding.localizedAcademicTrack(context)}',
+        subtitle:
+            '${branding.localizedTeacherName(context)} • ${branding.localizedAcademicTrack(context)}',
         nameColor: Colors.white,
       ),
     );
@@ -238,7 +253,8 @@ class TeacherShell extends StatelessWidget {
 
   Widget _buildSidebarFooter(BuildContext context) {
     final theme = Theme.of(context);
-    final userEmail = SupabaseService.currentUser?.email ?? context.l10n.roleTeacher;
+    final userEmail =
+        SupabaseService.currentUser?.email ?? context.l10n.roleTeacher;
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.s8),

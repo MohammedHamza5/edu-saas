@@ -126,7 +126,11 @@ class _NotificationTileState extends State<NotificationTile> {
                               ),
                             ),
                             child: Center(
-                              child: Icon(type.icon, size: 22, color: type.color),
+                              child: Icon(
+                                type.icon,
+                                size: 22,
+                                color: type.color,
+                              ),
                             ),
                           ),
                           const SizedBox(width: AppSpacing.s12),

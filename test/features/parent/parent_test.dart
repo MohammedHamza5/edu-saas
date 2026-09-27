@@ -99,7 +99,9 @@ class FakeParentRepository implements ParentRepository {
   }
 
   @override
-  Future<Result<ChildAcademicSummary>> getChildAcademicSummary(String studentId) async {
+  Future<Result<ChildAcademicSummary>> getChildAcademicSummary(
+    String studentId,
+  ) async {
     if (shouldFail) {
       return const FailureResult(ServerFailure('Failed to fetch summary'));
     }
@@ -112,14 +114,14 @@ class FakeNotificationsRepository implements NotificationsRepository {
   Future<Result<List<NotificationEntity>>> getMyNotifications({
     int limit = 50,
     int offset = 0,
-  }) async =>
-      const Success([]);
+  }) async => const Success([]);
 
   @override
   Future<Result<int>> getUnreadCount() async => const Success(0);
 
   @override
-  Future<Result<void>> markAsRead(String recipientId) async => const Success(null);
+  Future<Result<void>> markAsRead(String recipientId) async =>
+      const Success(null);
 
   @override
   Future<Result<void>> markAllAsRead() async => const Success(null);
@@ -129,38 +131,36 @@ class FakeNotificationsRepository implements NotificationsRepository {
     required String title,
     required String body,
     String? groupId,
-  }) async =>
-      const Success(null);
+  }) async => const Success(null);
 }
 
 class FakeAuthRepository implements AuthRepository {
   @override
   Future<Result<UserEntity?>> getCurrentUser() async => const Success(
-        UserEntity(
-          id: 'parent-1',
-          tenantId: 'tenant-1',
-          email: 'parent@test.com',
-          fullName: 'أحمد محمود',
-          role: UserRole.parent,
-          status: UserStatus.active,
-        ),
-      );
+    UserEntity(
+      id: 'parent-1',
+      tenantId: 'tenant-1',
+      email: 'parent@test.com',
+      fullName: 'أحمد محمود',
+      role: UserRole.parent,
+      status: UserStatus.active,
+    ),
+  );
 
   @override
   Future<Result<UserEntity>> signInWithEmail({
     required String email,
     required String password,
-  }) async =>
-      const Success(
-        UserEntity(
-          id: 'parent-1',
-          tenantId: 'tenant-1',
-          email: 'parent@test.com',
-          fullName: 'أحمد محمود',
-          role: UserRole.parent,
-          status: UserStatus.active,
-        ),
-      );
+  }) async => const Success(
+    UserEntity(
+      id: 'parent-1',
+      tenantId: 'tenant-1',
+      email: 'parent@test.com',
+      fullName: 'أحمد محمود',
+      role: UserRole.parent,
+      status: UserStatus.active,
+    ),
+  );
 
   @override
   Future<Result<void>> signOut() async => const Success(null);
@@ -173,11 +173,11 @@ class FakeAuthRepository implements AuthRepository {
     required String phone,
     String? parentPhone,
     required String tenantId,
-  }) async =>
-      throw UnimplementedError();
+  }) async => throw UnimplementedError();
 
   @override
-  Future<Result<void>> resetPasswordForEmail(String email) async => const Success(null);
+  Future<Result<void>> resetPasswordForEmail(String email) async =>
+      const Success(null);
 }
 
 void main() {
@@ -269,46 +269,66 @@ void main() {
   });
 
   group('ParentCubit Unit Tests', () {
-    test('loadParentDashboard emits Loading, then Loaded with first child summary', () async {
-      final expected = [
-        isA<ParentLoading>(),
-        isA<ParentLoaded>()
-            .having((s) => s.children.length, 'childrenCount', 2)
-            .having((s) => s.selectedChild.id, 'selectedChildId', 'student-1')
-            .having((s) => s.isLoadingSummary, 'isLoadingSummary', true),
-        isA<ParentLoaded>()
-            .having((s) => s.selectedChild.id, 'selectedChildId', 'student-1')
-            .having((s) => s.summary?.attendancePercentage, 'attendancePercentage', 90.0)
-            .having((s) => s.isLoadingSummary, 'isLoadingSummary', false),
-      ];
+    test(
+      'loadParentDashboard emits Loading, then Loaded with first child summary',
+      () async {
+        final expected = [
+          isA<ParentLoading>(),
+          isA<ParentLoaded>()
+              .having((s) => s.children.length, 'childrenCount', 2)
+              .having((s) => s.selectedChild.id, 'selectedChildId', 'student-1')
+              .having((s) => s.isLoadingSummary, 'isLoadingSummary', true),
+          isA<ParentLoaded>()
+              .having((s) => s.selectedChild.id, 'selectedChildId', 'student-1')
+              .having(
+                (s) => s.summary?.attendancePercentage,
+                'attendancePercentage',
+                90.0,
+              )
+              .having((s) => s.isLoadingSummary, 'isLoadingSummary', false),
+        ];
 
-      final expectation = expectLater(parentCubit.stream, emitsInOrder(expected));
-      await parentCubit.loadParentDashboard();
-      await expectation;
-    });
+        final expectation = expectLater(
+          parentCubit.stream,
+          emitsInOrder(expected),
+        );
+        await parentCubit.loadParentDashboard();
+        await expectation;
+      },
+    );
 
-    test('loadParentDashboard emits ParentNoChildren when children list is empty', () async {
-      fakeRepo.returnEmpty = true;
+    test(
+      'loadParentDashboard emits ParentNoChildren when children list is empty',
+      () async {
+        fakeRepo.returnEmpty = true;
 
-      final expected = [
-        isA<ParentLoading>(),
-        isA<ParentNoChildren>(),
-      ];
+        final expected = [isA<ParentLoading>(), isA<ParentNoChildren>()];
 
-      final expectation = expectLater(parentCubit.stream, emitsInOrder(expected));
-      await parentCubit.loadParentDashboard();
-      await expectation;
-    });
+        final expectation = expectLater(
+          parentCubit.stream,
+          emitsInOrder(expected),
+        );
+        await parentCubit.loadParentDashboard();
+        await expectation;
+      },
+    );
 
     test('loadParentDashboard emits ParentError on failure', () async {
       fakeRepo.shouldFail = true;
 
       final expected = [
         isA<ParentLoading>(),
-        isA<ParentError>().having((s) => s.message, 'message', 'Database error'),
+        isA<ParentError>().having(
+          (s) => s.message,
+          'message',
+          'Database error',
+        ),
       ];
 
-      final expectation = expectLater(parentCubit.stream, emitsInOrder(expected));
+      final expectation = expectLater(
+        parentCubit.stream,
+        emitsInOrder(expected),
+      );
       await parentCubit.loadParentDashboard();
       await expectation;
     });
@@ -327,119 +347,126 @@ void main() {
   });
 
   group('Parent Widgets UI Tests', () {
-    testWidgets('ChildSelectorBar renders single child view when only 1 child exists',
-        (tester) async {
-      await tester.pumpWidget(
-        createTestWidget(
-          Scaffold(
-            body: ChildSelectorBar(
-              children: [fakeRepo.mockChildren.first],
-              selectedChild: fakeRepo.mockChildren.first,
-              onChildSelected: (_) {},
+    testWidgets(
+      'ChildSelectorBar renders single child view when only 1 child exists',
+      (tester) async {
+        await tester.pumpWidget(
+          createTestWidget(
+            Scaffold(
+              body: ChildSelectorBar(
+                children: [fakeRepo.mockChildren.first],
+                selectedChild: fakeRepo.mockChildren.first,
+                onChildSelected: (_) {},
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      expect(find.text('عمر أحمد'), findsOneWidget);
-      expect(find.text('صلة القرابة: Father'), findsOneWidget);
-      expect(find.text('الابن الحالي'), findsOneWidget);
-    });
+        expect(find.text('عمر أحمد'), findsOneWidget);
+        expect(find.text('صلة القرابة: Father'), findsOneWidget);
+        expect(find.text('الابن الحالي'), findsOneWidget);
+      },
+    );
 
-    testWidgets('ChildSelectorBar renders choice chips and allows switching when multiple children exist',
-        (tester) async {
-      ChildEntity? selected;
+    testWidgets(
+      'ChildSelectorBar renders choice chips and allows switching when multiple children exist',
+      (tester) async {
+        ChildEntity? selected;
 
-      await tester.pumpWidget(
-        createTestWidget(
-          Scaffold(
-            body: ChildSelectorBar(
-              children: fakeRepo.mockChildren,
-              selectedChild: fakeRepo.mockChildren.first,
-              onChildSelected: (child) => selected = child,
+        await tester.pumpWidget(
+          createTestWidget(
+            Scaffold(
+              body: ChildSelectorBar(
+                children: fakeRepo.mockChildren,
+                selectedChild: fakeRepo.mockChildren.first,
+                onChildSelected: (child) => selected = child,
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      expect(find.text('اختر الطالب للمتابعة'), findsOneWidget);
-      expect(find.text('عمر أحمد'), findsOneWidget);
-      expect(find.text('مريم أحمد'), findsOneWidget);
+        expect(find.text('اختر الطالب للمتابعة'), findsOneWidget);
+        expect(find.text('عمر أحمد'), findsOneWidget);
+        expect(find.text('مريم أحمد'), findsOneWidget);
 
-      await tester.tap(find.text('مريم أحمد'));
-      expect(selected?.fullName, 'مريم أحمد');
-    });
+        await tester.tap(find.text('مريم أحمد'));
+        expect(selected?.fullName, 'مريم أحمد');
+      },
+    );
 
-    testWidgets('ParentAcademicOverviewCard renders stats, groups, and attendance metrics',
-        (tester) async {
-      await tester.pumpWidget(
-        createTestWidget(
-          Scaffold(
-            body: SingleChildScrollView(
-              child: ParentAcademicOverviewCard(summary: fakeRepo.mockSummary),
+    testWidgets(
+      'ParentAcademicOverviewCard renders stats, groups, and attendance metrics',
+      (tester) async {
+        await tester.pumpWidget(
+          createTestWidget(
+            Scaffold(
+              body: SingleChildScrollView(
+                child: ParentAcademicOverviewCard(
+                  summary: fakeRepo.mockSummary,
+                ),
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      expect(find.text('نسبة الحضور'), findsOneWidget);
-      expect(find.text('90.0%'), findsOneWidget);
-      expect(find.text('حضر 9 من 10 حصة'), findsOneWidget);
-      expect(find.text('متوسط الامتحانات'), findsOneWidget);
-      expect(find.text('88.5%'), findsOneWidget);
-      expect(find.text('المجموعات المسجل بها'), findsOneWidget);
-      expect(find.text('SAT Math Basics (SAT)'), findsOneWidget);
-    });
+        expect(find.text('نسبة الحضور'), findsOneWidget);
+        expect(find.text('90.0%'), findsOneWidget);
+        expect(find.text('حضر 9 من 10 حصة'), findsOneWidget);
+        expect(find.text('متوسط الامتحانات'), findsOneWidget);
+        expect(find.text('88.5%'), findsOneWidget);
+        expect(find.text('المجموعات المسجل بها'), findsOneWidget);
+        expect(find.text('SAT Math Basics (SAT)'), findsOneWidget);
+      },
+    );
 
-    testWidgets('ParentDashboardPage renders ParentNoChildren empty state when no children linked',
-        (tester) async {
-      tester.view.physicalSize = const Size(1200, 1000);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.resetPhysicalSize);
+    testWidgets(
+      'ParentDashboardPage renders ParentNoChildren empty state when no children linked',
+      (tester) async {
+        tester.view.physicalSize = const Size(1200, 1000);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
 
-      fakeRepo.returnEmpty = true;
-      await parentCubit.loadParentDashboard();
+        fakeRepo.returnEmpty = true;
+        await parentCubit.loadParentDashboard();
 
-      await tester.pumpWidget(
-        createTestWidget(
-          const Scaffold(
-            body: ParentDashboardPage(),
+        await tester.pumpWidget(
+          createTestWidget(const Scaffold(body: ParentDashboardPage())),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('لوحة متابعة ولي الأمر'), findsOneWidget);
+        expect(
+          find.text(
+            'لا يوجد طلاب مرتبطون بحسابك حالياً.\nيرجى تزويد المعلم ببريدك الإلكتروني لربط حسابك بابنك أو ابنتك.',
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+          findsOneWidget,
+        );
+      },
+    );
 
-      expect(find.text('لوحة متابعة ولي الأمر'), findsOneWidget);
-      expect(
-        find.text(
-          'لا يوجد طلاب مرتبطون بحسابك حالياً.\nيرجى تزويد المعلم ببريدك الإلكتروني لربط حسابك بابنك أو ابنتك.',
-        ),
-        findsOneWidget,
-      );
-    });
+    testWidgets(
+      'ParentDashboardPage renders loaded state with overview and sections',
+      (tester) async {
+        tester.view.physicalSize = const Size(1200, 1000);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
 
-    testWidgets('ParentDashboardPage renders loaded state with overview and sections',
-        (tester) async {
-      tester.view.physicalSize = const Size(1200, 1000);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.resetPhysicalSize);
+        await parentCubit.loadParentDashboard();
 
-      await parentCubit.loadParentDashboard();
+        await tester.pumpWidget(
+          createTestWidget(const Scaffold(body: ParentDashboardPage())),
+        );
+        await tester.pumpAndSettle();
 
-      await tester.pumpWidget(
-        createTestWidget(
-          const Scaffold(
-            body: ParentDashboardPage(),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('لوحة متابعة ولي الأمر'), findsOneWidget);
-      expect(find.text('نسبة الحضور'), findsOneWidget);
-      expect(find.text('آخر جلسات الحضور (P-06)'), findsOneWidget);
-      expect(find.text('نتائج الاختبارات والامتحانات (P-05)'), findsOneWidget);
-      expect(find.text('امتحان الجبر الشامل'), findsOneWidget);
-    });
+        expect(find.text('لوحة متابعة ولي الأمر'), findsOneWidget);
+        expect(find.text('نسبة الحضور'), findsOneWidget);
+        expect(find.text('آخر جلسات الحضور (P-06)'), findsOneWidget);
+        expect(
+          find.text('نتائج الاختبارات والامتحانات (P-05)'),
+          findsOneWidget,
+        );
+        expect(find.text('امتحان الجبر الشامل'), findsOneWidget);
+      },
+    );
   });
 }

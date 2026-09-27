@@ -62,13 +62,13 @@ final class StudentsLoaded extends StudentsState {
 
   @override
   List<Object?> get props => [
-        students,
-        filterStatus,
-        searchQuery,
-        hasMore,
-        isLoadingMore,
-        pendingCount,
-      ];
+    students,
+    filterStatus,
+    searchQuery,
+    hasMore,
+    isLoadingMore,
+    pendingCount,
+  ];
 }
 
 // ── Error ─────────────────────────────────────────────────────────────────

@@ -227,7 +227,9 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
                             scrollDirection: Axis.horizontal,
                             children: [
                               FilterChip(
-                                label: Text(context.l10n.filterAllCount(records.length)),
+                                label: Text(
+                                  context.l10n.filterAllCount(records.length),
+                                ),
                                 selected: _historyFilter == null,
                                 selectedColor: AppColors.primaryLight
                                     .withValues(alpha: 0.25),
@@ -246,7 +248,11 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
                               ),
                               const SizedBox(width: AppSpacing.s8),
                               FilterChip(
-                                label: Text(context.l10n.filterPresentCount(stats.presentCount)),
+                                label: Text(
+                                  context.l10n.filterPresentCount(
+                                    stats.presentCount,
+                                  ),
+                                ),
                                 selected:
                                     _historyFilter == AttendanceStatus.present,
                                 selectedColor: AppColors.success.withValues(
@@ -273,7 +279,11 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
                               ),
                               const SizedBox(width: AppSpacing.s8),
                               FilterChip(
-                                label: Text(context.l10n.filterAbsentCount(stats.absentCount)),
+                                label: Text(
+                                  context.l10n.filterAbsentCount(
+                                    stats.absentCount,
+                                  ),
+                                ),
                                 selected:
                                     _historyFilter == AttendanceStatus.absent,
                                 selectedColor: AppColors.error.withValues(
@@ -300,7 +310,9 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
                               ),
                               const SizedBox(width: AppSpacing.s8),
                               FilterChip(
-                                label: Text(context.l10n.filterLateCount(stats.lateCount)),
+                                label: Text(
+                                  context.l10n.filterLateCount(stats.lateCount),
+                                ),
                                 selected:
                                     _historyFilter == AttendanceStatus.late,
                                 selectedColor: AppColors.warning.withValues(
@@ -326,7 +338,11 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
                               ),
                               const SizedBox(width: AppSpacing.s8),
                               FilterChip(
-                                label: Text(context.l10n.filterExcusedCount(stats.excusedCount)),
+                                label: Text(
+                                  context.l10n.filterExcusedCount(
+                                    stats.excusedCount,
+                                  ),
+                                ),
                                 selected:
                                     _historyFilter == AttendanceStatus.excused,
                                 selectedColor: AppColors.info.withValues(
@@ -382,8 +398,12 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
                           }),
                         if (state.isLoadingMore)
                           const Padding(
-                            padding: EdgeInsets.symmetric(vertical: AppSpacing.s16),
-                            child: Center(child: AppLoadingView.compact(size: 24)),
+                            padding: EdgeInsets.symmetric(
+                              vertical: AppSpacing.s16,
+                            ),
+                            child: Center(
+                              child: AppLoadingView.compact(size: 24),
+                            ),
                           ),
                       ],
                     ),
@@ -629,7 +649,6 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
       ),
     );
   }
-
 }
 
 class _AttendanceHistoryItemCard extends StatefulWidget {

@@ -12,7 +12,6 @@ import '../../../dashboard/presentation/cubit/teacher_dashboard_state.dart';
 import '../../../groups/presentation/cubit/groups_state.dart';
 import '../../../groups/presentation/widgets/create_group_dialog.dart';
 
-
 /// رادار المتابعة والإنذار المبكر للمعلم
 /// يجيب عن الأسئلة الأربعة المصيرية بنظرة واحدة:
 /// 1. مين مشافش المحاضرة؟
@@ -77,7 +76,9 @@ class TeacherActionRadar extends StatelessWidget {
                     padding: const EdgeInsets.all(AppSpacing.s10),
                     decoration: BoxDecoration(
                       color: color.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.radiusSmall,
+                      ),
                     ),
                     child: Icon(icon, color: color, size: 24),
                   ),
@@ -128,7 +129,8 @@ class TeacherActionRadar extends StatelessWidget {
                   child: ListView.separated(
                     shrinkWrap: true,
                     itemCount: items.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.s8),
+                    separatorBuilder: (_, __) =>
+                        const SizedBox(height: AppSpacing.s8),
                     itemBuilder: (context, i) {
                       final item = items[i];
                       return Container(
@@ -137,8 +139,12 @@ class TeacherActionRadar extends StatelessWidget {
                           vertical: AppSpacing.s12,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.surfaceVariant.withValues(alpha: 0.35),
-                          borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                          color: AppColors.surfaceVariant.withValues(
+                            alpha: 0.35,
+                          ),
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.radiusSmall,
+                          ),
                           border: Border.all(color: AppColors.border),
                         ),
                         child: Row(
@@ -147,7 +153,8 @@ class TeacherActionRadar extends StatelessWidget {
                               radius: 16,
                               backgroundColor: color.withValues(alpha: 0.15),
                               child: Text(
-                                (item['name'] != null && item['name']!.trim().isNotEmpty)
+                                (item['name'] != null &&
+                                        item['name']!.trim().isNotEmpty)
                                     ? item['name']!.trim()[0]
                                     : 'S',
                                 style: TextStyle(
@@ -198,9 +205,13 @@ class TeacherActionRadar extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: color,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.s12),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.s12,
+                    ),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.radiusSmall,
+                      ),
                     ),
                   ),
                   onPressed: () {
@@ -221,29 +232,29 @@ class TeacherActionRadar extends StatelessWidget {
   Widget build(BuildContext context) {
     // 1. Unwatched Videos
     final unwatchedStudents = alertsState is TeacherDashboardLoaded
-        ? (alertsState as TeacherDashboardLoaded).alerts.unwatchedVideos.map((s) => {
-            'name': s.name,
-            'group': s.group,
-            'detail': s.detail,
-          }).toList()
+        ? (alertsState as TeacherDashboardLoaded).alerts.unwatchedVideos
+              .map(
+                (s) => {'name': s.name, 'group': s.group, 'detail': s.detail},
+              )
+              .toList()
         : <Map<String, String>>[];
 
     // 2. Unsubmitted Drill Homework
     final unsubmittedHomework = alertsState is TeacherDashboardLoaded
-        ? (alertsState as TeacherDashboardLoaded).alerts.overdueAssignments.map((s) => {
-            'name': s.name,
-            'group': s.group,
-            'detail': s.detail,
-          }).toList()
+        ? (alertsState as TeacherDashboardLoaded).alerts.overdueAssignments
+              .map(
+                (s) => {'name': s.name, 'group': s.group, 'detail': s.detail},
+              )
+              .toList()
         : <Map<String, String>>[];
 
     // 3. Needs Academic Intervention (Low Scores)
     final lowScoreAlerts = alertsState is TeacherDashboardLoaded
-        ? (alertsState as TeacherDashboardLoaded).alerts.lowScores.map((s) => {
-            'name': s.name,
-            'group': s.group,
-            'detail': s.detail,
-          }).toList()
+        ? (alertsState as TeacherDashboardLoaded).alerts.lowScores
+              .map(
+                (s) => {'name': s.name, 'group': s.group, 'detail': s.detail},
+              )
+              .toList()
         : <Map<String, String>>[];
 
     return Column(
@@ -384,11 +395,7 @@ class TeacherActionRadar extends StatelessWidget {
         // Study Groups Section Header (Dynamic for real teachers, academic preview fallback for tests)
         Row(
           children: [
-            const Icon(
-              Icons.stars_rounded,
-              color: AppColors.primary,
-              size: 20,
-            ),
+            const Icon(Icons.stars_rounded, color: AppColors.primary, size: 20),
             const SizedBox(width: AppSpacing.s8),
             Expanded(
               child: Text(
@@ -408,15 +415,12 @@ class TeacherActionRadar extends StatelessWidget {
         Text(
           groupsState is GroupsLoaded
               ? (groupsState as GroupsLoaded).groups.isEmpty
-                  ? context.l10n.noGroupsAvailable
-                  : '${(groupsState as GroupsLoaded).groups.length} ${context.l10n.activeGroups}'
+                    ? context.l10n.noGroupsAvailable
+                    : '${(groupsState as GroupsLoaded).groups.length} ${context.l10n.activeGroups}'
               : groupsState != null
-                  ? context.l10n.navGroups
-                  : context.l10n.testPrepCohortsSubtitle,
-          style: const TextStyle(
-            fontSize: 12,
-            color: AppColors.textSecondary,
-          ),
+              ? context.l10n.navGroups
+              : context.l10n.testPrepCohortsSubtitle,
+          style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
         ),
         const SizedBox(height: AppSpacing.s16),
 
@@ -457,7 +461,10 @@ class TeacherActionRadar extends StatelessWidget {
               ),
               if (isCritical)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: color.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(4),
@@ -612,7 +619,9 @@ class TeacherActionRadar extends StatelessWidget {
                               gradient: LinearGradient(
                                 colors: [color, color.withValues(alpha: 0.8)],
                               ),
-                              borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.radiusSmall,
+                              ),
                             ),
                             child: const Center(
                               child: Text(
@@ -658,7 +667,8 @@ class TeacherActionRadar extends StatelessWidget {
                         crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
                           AppBadge(
-                            label: '${group.membersCount} ${context.l10n.navStudents}',
+                            label:
+                                '${group.membersCount} ${context.l10n.navStudents}',
                             variant: AppBadgeVariant.active,
                           ),
                           Text(
@@ -683,7 +693,9 @@ class TeacherActionRadar extends StatelessWidget {
                               gradient: LinearGradient(
                                 colors: [color, color.withValues(alpha: 0.8)],
                               ),
-                              borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.radiusMedium,
+                              ),
                             ),
                             child: const Center(
                               child: Text(
@@ -728,7 +740,8 @@ class TeacherActionRadar extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               AppBadge(
-                                label: '${group.membersCount} ${context.l10n.navStudents}',
+                                label:
+                                    '${group.membersCount} ${context.l10n.navStudents}',
                                 variant: AppBadgeVariant.active,
                               ),
                               const SizedBox(height: 4),
@@ -753,36 +766,88 @@ class TeacherActionRadar extends StatelessWidget {
                       runSpacing: AppSpacing.s8,
                       children: [
                         ActionChip(
-                          avatar: const Icon(Icons.folder_shared_rounded, size: 14, color: AppColors.primary),
-                          label: Text(context.l10n.chipHandoutsPdfs, style: const TextStyle(fontSize: 11, color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
-                          backgroundColor: AppColors.surfaceVariant.withValues(alpha: 0.5),
+                          avatar: const Icon(
+                            Icons.folder_shared_rounded,
+                            size: 14,
+                            color: AppColors.primary,
+                          ),
+                          label: Text(
+                            context.l10n.chipHandoutsPdfs,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: AppColors.textPrimary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          backgroundColor: AppColors.surfaceVariant.withValues(
+                            alpha: 0.5,
+                          ),
                           side: const BorderSide(color: AppColors.border),
                           onPressed: () => context.push(
                             '${AppRoutes.teacherGroupContent.replaceAll(':groupId', group.id)}?name=${Uri.encodeComponent(group.name)}',
                           ),
                         ),
                         ActionChip(
-                          avatar: const Icon(Icons.assignment_rounded, size: 14, color: AppColors.warning),
-                          label: Text(context.l10n.chipDrillHomework, style: const TextStyle(fontSize: 11, color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
-                          backgroundColor: AppColors.surfaceVariant.withValues(alpha: 0.5),
+                          avatar: const Icon(
+                            Icons.assignment_rounded,
+                            size: 14,
+                            color: AppColors.warning,
+                          ),
+                          label: Text(
+                            context.l10n.chipDrillHomework,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: AppColors.textPrimary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          backgroundColor: AppColors.surfaceVariant.withValues(
+                            alpha: 0.5,
+                          ),
                           side: const BorderSide(color: AppColors.border),
                           onPressed: () => context.push(
                             '${AppRoutes.teacherGroupAssignments.replaceAll(':groupId', group.id)}?name=${Uri.encodeComponent(group.name)}',
                           ),
                         ),
                         ActionChip(
-                          avatar: const Icon(Icons.quiz_rounded, size: 14, color: AppColors.primary),
-                          label: Text(context.l10n.chipExamsSimulations, style: const TextStyle(fontSize: 11, color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
-                          backgroundColor: AppColors.surfaceVariant.withValues(alpha: 0.5),
+                          avatar: const Icon(
+                            Icons.quiz_rounded,
+                            size: 14,
+                            color: AppColors.primary,
+                          ),
+                          label: Text(
+                            context.l10n.chipExamsSimulations,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: AppColors.textPrimary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          backgroundColor: AppColors.surfaceVariant.withValues(
+                            alpha: 0.5,
+                          ),
                           side: const BorderSide(color: AppColors.border),
                           onPressed: () => context.push(
                             '${AppRoutes.teacherGroupExams.replaceAll(':groupId', group.id)}?name=${Uri.encodeComponent(group.name)}',
                           ),
                         ),
                         ActionChip(
-                          avatar: const Icon(Icons.fact_check_rounded, size: 14, color: AppColors.success),
-                          label: Text(context.l10n.chipRecordAttendance, style: const TextStyle(fontSize: 11, color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
-                          backgroundColor: AppColors.surfaceVariant.withValues(alpha: 0.5),
+                          avatar: const Icon(
+                            Icons.fact_check_rounded,
+                            size: 14,
+                            color: AppColors.success,
+                          ),
+                          label: Text(
+                            context.l10n.chipRecordAttendance,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: AppColors.textPrimary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          backgroundColor: AppColors.surfaceVariant.withValues(
+                            alpha: 0.5,
+                          ),
                           side: const BorderSide(color: AppColors.border),
                           onPressed: () => context.push(
                             '${AppRoutes.teacherAttendance}?groupId=${group.id}',
@@ -876,7 +941,9 @@ class TeacherActionRadar extends StatelessWidget {
                             gradient: LinearGradient(
                               colors: [color, color.withValues(alpha: 0.8)],
                             ),
-                            borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.radiusSmall,
+                            ),
                           ),
                           child: const Center(
                             child: Text(
@@ -945,7 +1012,9 @@ class TeacherActionRadar extends StatelessWidget {
                             gradient: LinearGradient(
                               colors: [color, color.withValues(alpha: 0.8)],
                             ),
-                            borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.radiusMedium,
+                            ),
                           ),
                           child: const Center(
                             child: Text(
@@ -1015,32 +1084,85 @@ class TeacherActionRadar extends StatelessWidget {
                     runSpacing: AppSpacing.s8,
                     children: [
                       ActionChip(
-                        avatar: const Icon(Icons.folder_shared_rounded, size: 14, color: AppColors.primary),
-                        label: Text(context.l10n.chipHandoutsPdfs, style: const TextStyle(fontSize: 11, color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
-                        backgroundColor: AppColors.surfaceVariant.withValues(alpha: 0.5),
+                        avatar: const Icon(
+                          Icons.folder_shared_rounded,
+                          size: 14,
+                          color: AppColors.primary,
+                        ),
+                        label: Text(
+                          context.l10n.chipHandoutsPdfs,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        backgroundColor: AppColors.surfaceVariant.withValues(
+                          alpha: 0.5,
+                        ),
                         side: const BorderSide(color: AppColors.border),
                         onPressed: () => context.push(AppRoutes.groupsList),
                       ),
                       ActionChip(
-                        avatar: const Icon(Icons.assignment_rounded, size: 14, color: AppColors.warning),
-                        label: Text(context.l10n.chipDrillHomework, style: const TextStyle(fontSize: 11, color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
-                        backgroundColor: AppColors.surfaceVariant.withValues(alpha: 0.5),
+                        avatar: const Icon(
+                          Icons.assignment_rounded,
+                          size: 14,
+                          color: AppColors.warning,
+                        ),
+                        label: Text(
+                          context.l10n.chipDrillHomework,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        backgroundColor: AppColors.surfaceVariant.withValues(
+                          alpha: 0.5,
+                        ),
                         side: const BorderSide(color: AppColors.border),
                         onPressed: () => context.push(AppRoutes.groupsList),
                       ),
                       ActionChip(
-                        avatar: const Icon(Icons.quiz_rounded, size: 14, color: AppColors.primary),
-                        label: Text(context.l10n.chipExamsSimulations, style: const TextStyle(fontSize: 11, color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
-                        backgroundColor: AppColors.surfaceVariant.withValues(alpha: 0.5),
+                        avatar: const Icon(
+                          Icons.quiz_rounded,
+                          size: 14,
+                          color: AppColors.primary,
+                        ),
+                        label: Text(
+                          context.l10n.chipExamsSimulations,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        backgroundColor: AppColors.surfaceVariant.withValues(
+                          alpha: 0.5,
+                        ),
                         side: const BorderSide(color: AppColors.border),
                         onPressed: () => context.push(AppRoutes.groupsList),
                       ),
                       ActionChip(
-                        avatar: const Icon(Icons.fact_check_rounded, size: 14, color: AppColors.success),
-                        label: Text(context.l10n.chipRecordAttendance, style: const TextStyle(fontSize: 11, color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
-                        backgroundColor: AppColors.surfaceVariant.withValues(alpha: 0.5),
+                        avatar: const Icon(
+                          Icons.fact_check_rounded,
+                          size: 14,
+                          color: AppColors.success,
+                        ),
+                        label: Text(
+                          context.l10n.chipRecordAttendance,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        backgroundColor: AppColors.surfaceVariant.withValues(
+                          alpha: 0.5,
+                        ),
                         side: const BorderSide(color: AppColors.border),
-                        onPressed: () => context.push(AppRoutes.teacherAttendance),
+                        onPressed: () =>
+                            context.push(AppRoutes.teacherAttendance),
                       ),
                     ],
                   ),
@@ -1053,4 +1175,3 @@ class TeacherActionRadar extends StatelessWidget {
     );
   }
 }
-

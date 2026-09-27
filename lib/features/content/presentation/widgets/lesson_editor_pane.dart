@@ -63,6 +63,7 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
 
   bool _useCustomScore = false;
   bool _isSaving = false;
+  bool _isPublished = true;
 
   @override
   void initState() {
@@ -86,6 +87,7 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
     _currentFileId = widget.editingLesson?.file?.id;
     _currentFileName = widget.editingLesson?.file?.fileName;
     _selectedExamId = widget.editingLesson?.associatedExamId;
+    _isPublished = widget.editingLesson?.isPublishedInGroup ?? true;
 
     _pickedFile = null;
     _pickedFileBytes = null;
@@ -153,27 +155,37 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
     final client = SupabaseService.client;
     final tenantId = _selectedVideo!.tenantId;
     final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final safeName = _pickedFile!.name
-        .toLowerCase()
-        .replaceAll(RegExp(r'[^a-z0-9_.-]'), '_');
-    final storagePath = 'group_handouts/${widget.groupId}_${timestamp}_$safeName';
+    final safeName = _pickedFile!.name.toLowerCase().replaceAll(
+      RegExp(r'[^a-z0-9_.-]'),
+      '_',
+    );
+    final storagePath =
+        'group_handouts/${widget.groupId}_${timestamp}_$safeName';
 
-    await client.storage.from('group-content').uploadBinary(
+    await client.storage
+        .from('group-content')
+        .uploadBinary(
           storagePath,
           Uint8List.fromList(_pickedFileBytes!),
-          fileOptions:
-              const FileOptions(contentType: 'application/pdf', upsert: true),
+          fileOptions: const FileOptions(
+            contentType: 'application/pdf',
+            upsert: true,
+          ),
         );
 
-    final fileRes = await client.from('files').insert({
-      'tenant_id': tenantId,
-      'content_id': _selectedVideo!.id,
-      'storage_path': storagePath,
-      'file_name': _pickedFile!.name,
-      'mime_type': 'application/pdf',
-      'file_size': _pickedFile!.size,
-      'created_at': DateTime.now().toUtc().toIso8601String(),
-    }).select('id').single();
+    final fileRes = await client
+        .from('files')
+        .insert({
+          'tenant_id': tenantId,
+          'content_id': _selectedVideo!.id,
+          'storage_path': storagePath,
+          'file_name': _pickedFile!.name,
+          'mime_type': 'application/pdf',
+          'file_size': _pickedFile!.size,
+          'created_at': DateTime.now().toUtc().toIso8601String(),
+        })
+        .select('id')
+        .single();
 
     return fileRes['id'] as String?;
   }
@@ -193,10 +205,11 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
       final fileId = await _uploadPdfIfNeeded();
       final passingScore = _useCustomScore
           ? (int.tryParse(_customScoreController.text.trim()) ??
-              widget.defaultPassingScore)
+                widget.defaultPassingScore)
           : null;
 
-      final lessonTitle = _titleController.text.trim().isEmpty ||
+      final lessonTitle =
+          _titleController.text.trim().isEmpty ||
               _titleController.text.trim() == _selectedVideo!.title
           ? null
           : _titleController.text.trim();
@@ -209,6 +222,7 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
         groupConfigs: [
           {
             'group_id': widget.groupId,
+            'is_published': _isPublished,
             if (lessonTitle != null) 'custom_title': lessonTitle,
             if (fileId != null) 'file_id': fileId,
             if (fileId == null && _removePdf) 'file_id': null,
@@ -216,12 +230,11 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
             if (_selectedExamId == null) 'associated_exam_id': null,
             if (passingScore != null) 'passing_score_override': passingScore,
             if (passingScore == null) 'passing_score_override': null,
-          }
+          },
         ],
       );
-      
-      widget.onSaved();
 
+      widget.onSaved();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -246,7 +259,10 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
       }
     } catch (_) {}
 
-    final video = await VideoPickerSheet.show(context, excludedVideoIds: excludedIds);
+    final video = await VideoPickerSheet.show(
+      context,
+      excludedVideoIds: excludedIds,
+    );
     if (video != null && mounted) {
       setState(() {
         _selectedVideo = video;
@@ -278,7 +294,9 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
               children: [
                 Expanded(
                   child: Text(
-                    isEditing ? context.l10n.lessonEditorEditTitle : context.l10n.lessonEditorAddTitle,
+                    isEditing
+                        ? context.l10n.lessonEditorEditTitle
+                        : context.l10n.lessonEditorAddTitle,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -298,12 +316,19 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
                         ),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary.withValues(alpha: 0.12),
+                        backgroundColor: AppColors.primary.withValues(
+                          alpha: 0.12,
+                        ),
                         foregroundColor: AppColors.primary,
                         elevation: 0,
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
                         minimumSize: Size.zero,
-                        side: BorderSide(color: AppColors.primary.withValues(alpha: 0.4)),
+                        side: BorderSide(
+                          color: AppColors.primary.withValues(alpha: 0.4),
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(6),
                         ),
@@ -344,25 +369,32 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
                         color: AppColors.primary.withValues(alpha: 0.05),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                            color: AppColors.primary.withValues(alpha: 0.2)),
+                          color: AppColors.primary.withValues(alpha: 0.2),
+                        ),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.play_circle_fill_rounded,
-                              color: AppColors.primary),
+                          const Icon(
+                            Icons.play_circle_fill_rounded,
+                            color: AppColors.primary,
+                          ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               _selectedVideo!.title,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                           if (!isEditing)
                             IconButton(
-                              icon: const Icon(Icons.change_circle_outlined,
-                                  color: AppColors.primary),
+                              icon: const Icon(
+                                Icons.change_circle_outlined,
+                                color: AppColors.primary,
+                              ),
                               onPressed: _pickVideoFromBank,
                               tooltip: context.l10n.lessonEditorChangeVideo,
                             ),
@@ -415,7 +447,9 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
                   const SizedBox(height: AppSpacing.s8),
                   AppTextField(
                     controller: _titleController,
-                    hintText: _selectedVideo?.title ?? context.l10n.lessonEditorLessonTitleHint,
+                    hintText:
+                        _selectedVideo?.title ??
+                        context.l10n.lessonEditorLessonTitleHint,
                   ),
                   const SizedBox(height: AppSpacing.s24),
 
@@ -431,30 +465,38 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
                       (_pickedFile != null || _currentFileName != null)) ...[
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 8),
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.orange.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                            color: Colors.orange.withValues(alpha: 0.3)),
+                          color: Colors.orange.withValues(alpha: 0.3),
+                        ),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.picture_as_pdf_rounded,
-                              color: Colors.orange),
+                          const Icon(
+                            Icons.picture_as_pdf_rounded,
+                            color: Colors.orange,
+                          ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               _pickedFile?.name ?? _currentFileName!,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.close_rounded,
-                                color: Colors.orange),
+                            icon: const Icon(
+                              Icons.close_rounded,
+                              color: Colors.orange,
+                            ),
                             onPressed: () => setState(() {
                               _removePdf = true;
                               _pickedFile = null;
@@ -504,10 +546,12 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
                           value: null,
                           child: Text(context.l10n.lessonEditorNoQuiz),
                         ),
-                        ..._availableExams.map((e) => DropdownMenuItem(
-                              value: e['id'] as String,
-                              child: Text(e['title'] as String),
-                            )),
+                        ..._availableExams.map(
+                          (e) => DropdownMenuItem(
+                            value: e['id'] as String,
+                            child: Text(e['title'] as String),
+                          ),
+                        ),
                       ],
                       onChanged: (val) => setState(() => _selectedExamId = val),
                     ),
@@ -579,9 +623,75 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
                     )
                   else
                     Text(
-                      context.l10n.lessonEditorDefaultPassingScore(widget.defaultPassingScore),
+                      context.l10n.lessonEditorDefaultPassingScore(
+                        widget.defaultPassingScore,
+                      ),
                       style: const TextStyle(color: AppColors.textSecondary),
                     ),
+
+                  // 6. Lesson Visibility (Draft vs Published)
+                  const SizedBox(height: AppSpacing.s24),
+                  Container(
+                    padding: const EdgeInsets.all(AppSpacing.s16),
+                    decoration: BoxDecoration(
+                      color: _isPublished
+                          ? AppColors.success.withValues(alpha: 0.05)
+                          : AppColors.warning.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: _isPublished
+                            ? AppColors.success.withValues(alpha: 0.25)
+                            : AppColors.warning.withValues(alpha: 0.35),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              _isPublished
+                                  ? Icons.visibility_rounded
+                                  : Icons.visibility_off_rounded,
+                              size: 20,
+                              color: _isPublished
+                                  ? AppColors.success
+                                  : AppColors.warning,
+                            ),
+                            const SizedBox(width: AppSpacing.s8),
+                            Expanded(
+                              child: Text(
+                                context.l10n.lessonStatusLabel,
+                                style: theme.textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                            Switch(
+                              value: _isPublished,
+                              onChanged: (val) =>
+                                  setState(() => _isPublished = val),
+                              activeColor: AppColors.success,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: AppSpacing.s4),
+                        Text(
+                          _isPublished
+                              ? context.l10n.lessonStatusPublishedDesc
+                              : context.l10n.lessonStatusDraftDesc,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: _isPublished
+                                ? AppColors.textSecondary
+                                : AppColors.warning,
+                            fontWeight: _isPublished
+                                ? FontWeight.normal
+                                : FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),

@@ -178,7 +178,9 @@ class _StudentAttendanceRowCardState extends State<StudentAttendanceRowCard> {
                   ),
                   decoration: BoxDecoration(
                     color: statusColor.withValues(alpha: 0.05),
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                    borderRadius: BorderRadius.circular(
+                      AppSpacing.radiusMedium,
+                    ),
                     border: Border.all(
                       color: statusColor.withValues(alpha: 0.18),
                     ),
@@ -190,10 +192,13 @@ class _StudentAttendanceRowCardState extends State<StudentAttendanceRowCard> {
                         children: [
                           Icon(
                             switch (student.status) {
-                              AttendanceStatus.present => Icons.check_circle_rounded,
-                              AttendanceStatus.late => Icons.play_circle_filled_rounded,
+                              AttendanceStatus.present =>
+                                Icons.check_circle_rounded,
+                              AttendanceStatus.late =>
+                                Icons.play_circle_filled_rounded,
                               AttendanceStatus.absent => Icons.cancel_outlined,
-                              AttendanceStatus.excused => Icons.info_outline_rounded,
+                              AttendanceStatus.excused =>
+                                Icons.info_outline_rounded,
                             },
                             size: 16,
                             color: statusColor,
@@ -202,10 +207,14 @@ class _StudentAttendanceRowCardState extends State<StudentAttendanceRowCard> {
                           Expanded(
                             child: Text(
                               switch (student.status) {
-                                AttendanceStatus.present => context.l10n.attendanceRateFull,
-                                AttendanceStatus.late => context.l10n.attendanceRatePartial,
-                                AttendanceStatus.absent => context.l10n.attendanceRateNone,
-                                AttendanceStatus.excused => context.l10n.attendanceRateExcused,
+                                AttendanceStatus.present =>
+                                  context.l10n.attendanceRateFull,
+                                AttendanceStatus.late =>
+                                  context.l10n.attendanceRatePartial,
+                                AttendanceStatus.absent =>
+                                  context.l10n.attendanceRateNone,
+                                AttendanceStatus.excused =>
+                                  context.l10n.attendanceRateExcused,
                               },
                               style: TextStyle(
                                 fontSize: 12,
@@ -251,8 +260,12 @@ class _StudentAttendanceRowCardState extends State<StudentAttendanceRowCard> {
                             AttendanceStatus.absent => 0.0,
                             AttendanceStatus.excused => 1.0,
                           },
-                          backgroundColor: AppColors.border.withValues(alpha: 0.5),
-                          valueColor: AlwaysStoppedAnimation<Color>(statusColor),
+                          backgroundColor: AppColors.border.withValues(
+                            alpha: 0.5,
+                          ),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            statusColor,
+                          ),
                           minHeight: 6,
                         ),
                       ),

@@ -1,0 +1,46 @@
+{
+  "version": "1.0",
+  "name": "EdSentre Golden Pilot Regression Corpus (§13 M6, §14)",
+  "total_items": 74,
+  "last_updated": "2026-09-25T02:00:00Z",
+  "sources": [
+    {
+      "document_id": "doc-solid-shapes",
+      "filename": "Dr Antonous Ashraf  (solid shapes).pdf",
+      "pages": 9,
+      "questions_count": 30,
+      "characteristics": "ExamView export, 600 DPI sliced raster stems, lowercase a.-d. options, Form ID A",
+      "defects_catalogued": [
+        {"ordinal": 3, "defect_type": "CE-02", "rule": "B-023", "fix": "Restore missing pi token in stem and options"},
+        {"ordinal": 9, "defect_type": "CE-06", "rule": "B-011", "fix": "Quarantine due to border-clipped options ink"},
+        {"ordinal": 11, "defect_type": "CE-02", "rule": "B-023", "fix": "Restore missing pi token in stem and options"},
+        {"ordinal": 12, "defect_type": "CE-02", "rule": "B-023", "fix": "Restore missing pi token in stem and options"},
+        {"ordinal": 13, "defect_type": "CE-02", "rule": "B-023", "fix": "Restore missing pi token in stem and options"},
+        {"ordinal": 14, "defect_type": "WARN", "rule": "B-031", "fix": "Acknowledge third-party watermark in figure"},
+        {"ordinal": 20, "defect_type": "CE-01", "rule": "B-041", "fix": "Teacher confirms answer A over solver conflict"},
+        {"ordinal": 21, "defect_type": "CE-01", "rule": "B-041", "fix": "Teacher confirms answer A over solver conflict"},
+        {"ordinal": 23, "defect_type": "CE-02", "rule": "B-023", "fix": "Restore missing pi token in stem and options"},
+        {"ordinal": 28, "defect_type": "WARN", "rule": "B-051", "fix": "Acknowledge prose reader disagreement"}
+      ],
+      "near_duplicate_clusters": [
+        {"cluster_id": "cluster-cone", "ordinals": [2, 4]},
+        {"cluster_id": "cluster-cube", "ordinals": [6, 7]},
+        {"cluster_id": "cluster-hemisphere", "ordinals": [25, 26]}
+      ]
+    },
+    {
+      "document_id": "doc-trial-august",
+      "filename": "Dr Antounios Ashraf (trail August).pdf",
+      "pages": 16,
+      "questions_count": 44,
+      "characteristics": "LaTeX native CM fonts, rotated watermark, stem prefix watermark, uppercase A-D options, 6 grid-ins",
+      "defects_catalogued": [
+        {"section": "M1", "ordinal": 6, "defect_type": "CE-05", "rule": "B-001", "fix": "Cross-page boundary merge verified (page 3 to 4)"},
+        {"section": "M1", "ordinal": 13, "defect_type": "CE-05", "rule": "B-001", "fix": "Cross-page boundary merge verified (page 5 to 6)"},
+        {"section": "M2", "ordinal": 15, "defect_type": "CE-05", "rule": "B-001", "fix": "Cross-page boundary merge verified (page 13 to 14)"},
+        {"section": "M2", "ordinal": 21, "defect_type": "CE-05", "rule": "B-001", "fix": "Cross-page boundary merge verified (page 15 to 16)"}
+      ],
+      "grid_in_ordinals": [1, 9, 10, 12, 13, 18]
+    }
+  ]
+}

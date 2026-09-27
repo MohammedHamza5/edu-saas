@@ -30,7 +30,10 @@ class AuthRequiredException implements Exception {
   final String message;
   final String? code;
 
-  const AuthRequiredException([this.message = 'Authentication required', this.code]);
+  const AuthRequiredException([
+    this.message = 'Authentication required',
+    this.code,
+  ]);
 
   @override
   String toString() => 'AuthRequiredException: $message (code: $code)';
@@ -70,7 +73,10 @@ class ExamAlreadySubmittedException implements Exception {
   final String message;
   final String? code;
 
-  const ExamAlreadySubmittedException([this.message = 'Exam already submitted', this.code]);
+  const ExamAlreadySubmittedException([
+    this.message = 'Exam already submitted',
+    this.code,
+  ]);
 
   @override
   String toString() => 'ExamAlreadySubmittedException: $message (code: $code)';
@@ -80,7 +86,10 @@ class ConflictException implements Exception {
   final String message;
   final String? code;
 
-  const ConflictException([this.message = 'Conflict with existing resource or attempt', this.code]);
+  const ConflictException([
+    this.message = 'Conflict with existing resource or attempt',
+    this.code,
+  ]);
 
   @override
   String toString() => 'ConflictException: $message (code: $code)';
@@ -90,7 +99,10 @@ class VideoNotReadyException implements Exception {
   final String message;
   final String? code;
 
-  const VideoNotReadyException([this.message = 'Video is still processing', this.code]);
+  const VideoNotReadyException([
+    this.message = 'Video is still processing',
+    this.code,
+  ]);
 
   @override
   String toString() => 'VideoNotReadyException: $message (code: $code)';

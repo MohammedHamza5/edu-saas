@@ -68,7 +68,9 @@ class AppErrorView extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final effectiveError = ErrorMapper.resolve(
-      error ?? message ?? (l10n != null ? l10n.errorOccurred : 'An unexpected error occurred'),
+      error ??
+          message ??
+          (l10n != null ? l10n.errorOccurred : 'An unexpected error occurred'),
     );
 
     final displayTitle = title ?? effectiveError.title(context);
@@ -76,10 +78,23 @@ class AppErrorView extends StatelessWidget {
     final displayHint = effectiveError.hint(context);
 
     if (isCompact) {
-      return _buildCompactView(context, effectiveError, displayTitle, displayMessage, l10n);
+      return _buildCompactView(
+        context,
+        effectiveError,
+        displayTitle,
+        displayMessage,
+        l10n,
+      );
     }
 
-    return _buildFullView(context, effectiveError, displayTitle, displayMessage, displayHint, l10n);
+    return _buildFullView(
+      context,
+      effectiveError,
+      displayTitle,
+      displayMessage,
+      displayHint,
+      l10n,
+    );
   }
 
   Widget _buildFullView(
@@ -96,8 +111,10 @@ class AppErrorView extends StatelessWidget {
     // Harmonious tinting for the icon based on error severity
     final badgeColor = switch (resolvedError.type) {
       FailureType.network => AppColors.primary,
-      FailureType.permission || FailureType.sessionExpired => const Color(0xFFD97706), // Amber
-      FailureType.examExpired || FailureType.examSubmitted => const Color(0xFF2563EB), // Blue
+      FailureType.permission ||
+      FailureType.sessionExpired => const Color(0xFFD97706), // Amber
+      FailureType.examExpired ||
+      FailureType.examSubmitted => const Color(0xFF2563EB), // Blue
       FailureType.videoProcessing => const Color(0xFF0284C7), // Sky
       FailureType.validation => const Color(0xFFE11D48), // Rose
       _ => AppColors.error,
@@ -124,11 +141,7 @@ class AppErrorView extends StatelessWidget {
                   ),
                 ),
                 child: Center(
-                  child: Icon(
-                    resolvedError.icon,
-                    color: badgeColor,
-                    size: 34,
-                  ),
+                  child: Icon(resolvedError.icon, color: badgeColor, size: 34),
                 ),
               ),
               const SizedBox(height: AppSpacing.s20),
@@ -162,10 +175,16 @@ class AppErrorView extends StatelessWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.all(AppSpacing.s12),
                   decoration: BoxDecoration(
-                    color: isDark ? AppColors.surfaceVariant : const Color(0xFFF8FAFC),
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                    color: isDark
+                        ? AppColors.surfaceVariant
+                        : const Color(0xFFF8FAFC),
+                    borderRadius: BorderRadius.circular(
+                      AppSpacing.radiusMedium,
+                    ),
                     border: Border.all(
-                      color: isDark ? AppColors.border : const Color(0xFFE2E8F0),
+                      color: isDark
+                          ? AppColors.border
+                          : const Color(0xFFE2E8F0),
                     ),
                   ),
                   child: Row(
@@ -182,11 +201,15 @@ class AppErrorView extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              l10n != null ? l10n.actionTip : 'What you can do:',
+                              l10n != null
+                                  ? l10n.actionTip
+                                  : 'What you can do:',
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
-                                color: isDark ? Colors.white70 : AppColors.textPrimary,
+                                color: isDark
+                                    ? Colors.white70
+                                    : AppColors.textPrimary,
                               ),
                             ),
                             const SizedBox(height: 2),
@@ -222,9 +245,12 @@ class AppErrorView extends StatelessWidget {
                     ),
                   if (onSecondaryAction != null)
                     AppButton(
-                      text: secondaryActionLabel ??
+                      text:
+                          secondaryActionLabel ??
                           (resolvedError.isSessionExpired
-                              ? (l10n != null ? l10n.signInAgain : 'Sign In Again')
+                              ? (l10n != null
+                                    ? l10n.signInAgain
+                                    : 'Sign In Again')
                               : (l10n != null ? l10n.goBack : 'Go Back')),
                       onPressed: onSecondaryAction,
                       variant: AppButtonVariant.outlined,
@@ -266,11 +292,7 @@ class AppErrorView extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(
-            resolvedError.icon,
-            color: AppColors.error,
-            size: 24,
-          ),
+          Icon(resolvedError.icon, color: AppColors.error, size: 24),
           const SizedBox(width: AppSpacing.s12),
           Expanded(
             child: Column(
@@ -318,7 +340,9 @@ class AppErrorView extends StatelessWidget {
     return InkWell(
       borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
       onTap: () {
-        Clipboard.setData(ClipboardData(text: resolvedError.toDiagnosticSummary()));
+        Clipboard.setData(
+          ClipboardData(text: resolvedError.toDiagnosticSummary()),
+        );
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(

@@ -39,7 +39,8 @@ class _PlatformOnboardingView extends StatefulWidget {
   const _PlatformOnboardingView();
 
   @override
-  State<_PlatformOnboardingView> createState() => _PlatformOnboardingViewState();
+  State<_PlatformOnboardingView> createState() =>
+      _PlatformOnboardingViewState();
 }
 
 class _PlatformOnboardingViewState extends State<_PlatformOnboardingView> {
@@ -150,8 +151,11 @@ class _PlatformOnboardingViewState extends State<_PlatformOnboardingView> {
                 CircleAvatar(
                   radius: 36,
                   backgroundColor: AppColors.success.withValues(alpha: 0.12),
-                  child: const Icon(Icons.check_circle_rounded,
-                      color: AppColors.success, size: 44),
+                  child: const Icon(
+                    Icons.check_circle_rounded,
+                    color: AppColors.success,
+                    size: 44,
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.s16),
                 Text(
@@ -168,8 +172,9 @@ class _PlatformOnboardingViewState extends State<_PlatformOnboardingView> {
                   padding: const EdgeInsets.all(AppSpacing.s16),
                   decoration: BoxDecoration(
                     color: AppColors.surfaceVariant,
-                    borderRadius:
-                        BorderRadius.circular(AppSpacing.radiusMedium),
+                    borderRadius: BorderRadius.circular(
+                      AppSpacing.radiusMedium,
+                    ),
                   ),
                   child: Column(
                     children: [
@@ -177,11 +182,17 @@ class _PlatformOnboardingViewState extends State<_PlatformOnboardingView> {
                       const SizedBox(height: AppSpacing.s8),
                       _buildInfoRow(context.l10n.tenantIdLabel, tenant.id),
                       const SizedBox(height: AppSpacing.s8),
-                      _buildInfoRow(context.l10n.leadTeacherLabel, teacher.fullName),
+                      _buildInfoRow(
+                        context.l10n.leadTeacherLabel,
+                        teacher.fullName,
+                      ),
                       const SizedBox(height: AppSpacing.s8),
                       _buildInfoRow(context.l10n.emailLabel, teacher.email),
                       const SizedBox(height: AppSpacing.s8),
-                      _buildInfoRow(context.l10n.status, context.l10n.activeAndReadyStatus),
+                      _buildInfoRow(
+                        context.l10n.status,
+                        context.l10n.activeAndReadyStatus,
+                      ),
                     ],
                   ),
                 ),
@@ -192,8 +203,7 @@ class _PlatformOnboardingViewState extends State<_PlatformOnboardingView> {
                 ),
                 const SizedBox(height: AppSpacing.s12),
                 TextButton(
-                  onPressed: () =>
-                      context.read<OnboardingCubit>().reset(),
+                  onPressed: () => context.read<OnboardingCubit>().reset(),
                   child: Text(context.l10n.provisionAnotherCenter),
                 ),
               ],
@@ -243,20 +253,12 @@ class _PlatformOnboardingViewState extends State<_PlatformOnboardingView> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 if (state is OnboardingError) ...[
-                  AppErrorView(
-                    message: state.message,
-                    onRetry: _submit,
-                  ),
+                  AppErrorView(message: state.message, onRetry: _submit),
                   const SizedBox(height: AppSpacing.s16),
                 ],
 
                 // Platform Brand Header
-                const Center(
-                  child: AppLogo.hero(
-                    size: 72,
-                    withGlow: true,
-                  ),
-                ),
+                const Center(child: AppLogo.hero(size: 72, withGlow: true)),
                 const SizedBox(height: AppSpacing.s20),
 
                 // Section 1: Tenant Information
@@ -269,8 +271,11 @@ class _PlatformOnboardingViewState extends State<_PlatformOnboardingView> {
                           const CircleAvatar(
                             radius: 18,
                             backgroundColor: AppColors.primaryLight,
-                            child: Icon(Icons.business_rounded,
-                                color: AppColors.primary, size: 20),
+                            child: Icon(
+                              Icons.business_rounded,
+                              color: AppColors.primary,
+                              size: 20,
+                            ),
                           ),
                           const SizedBox(width: AppSpacing.s12),
                           Expanded(
@@ -333,8 +338,11 @@ class _PlatformOnboardingViewState extends State<_PlatformOnboardingView> {
                           const CircleAvatar(
                             radius: 18,
                             backgroundColor: AppColors.primaryLight,
-                            child: Icon(Icons.person_outline_rounded,
-                                color: AppColors.primary, size: 20),
+                            child: Icon(
+                              Icons.person_outline_rounded,
+                              color: AppColors.primary,
+                              size: 20,
+                            ),
                           ),
                           const SizedBox(width: AppSpacing.s12),
                           Expanded(
@@ -388,7 +396,9 @@ class _PlatformOnboardingViewState extends State<_PlatformOnboardingView> {
                         prefixIcon: const Icon(Icons.lock_outline_rounded),
                         validator: (val) {
                           if (val == null || val.length < 6) {
-                            return context.l10n.leadTeacherPasswordRequiredError;
+                            return context
+                                .l10n
+                                .leadTeacherPasswordRequiredError;
                           }
                           return null;
                         },

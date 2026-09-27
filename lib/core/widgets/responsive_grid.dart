@@ -43,7 +43,10 @@ class ResponsiveGrid extends StatelessWidget {
 
         // Compute width per item so all columns fit within available width
         final totalSpacing = (columns - 1) * spacing;
-        final itemWidth = ((availableWidth - totalSpacing) / columns).clamp(0.0, availableWidth);
+        final itemWidth = ((availableWidth - totalSpacing) / columns).clamp(
+          0.0,
+          availableWidth,
+        );
 
         return Wrap(
           spacing: spacing,
@@ -51,10 +54,7 @@ class ResponsiveGrid extends StatelessWidget {
           alignment: WrapAlignment.start,
           crossAxisAlignment: WrapCrossAlignment.start,
           children: children.map((child) {
-            return SizedBox(
-              width: itemWidth,
-              child: child,
-            );
+            return SizedBox(width: itemWidth, child: child);
           }).toList(),
         );
       },

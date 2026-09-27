@@ -49,8 +49,8 @@ class MathTokens extends ThemeExtension<MathTokens> {
 
   static const MathTokens light = MathTokens(
     cardBorderColor: AppColors.border,
-    gridLineColor: Color(0xFFF1F5F9),       // Slate 100
-    formulaSymbolOpacity: 0.06,              // Very subtle watermark
+    gridLineColor: Color(0xFFF1F5F9), // Slate 100
+    formulaSymbolOpacity: 0.06, // Very subtle watermark
     statisticHighlightColor: AppColors.primary,
     badgeActiveBackground: Color(0xFFDCFCE7),
     badgeActiveForeground: Color(0xFF15803D),
@@ -74,11 +74,7 @@ class MathTokens extends ThemeExtension<MathTokens> {
         offset: Offset(0, 6),
         spreadRadius: -2,
       ),
-      BoxShadow(
-        color: Color(0x0A000000),
-        blurRadius: 6,
-        offset: Offset(0, 2),
-      ),
+      BoxShadow(color: Color(0x0A000000), blurRadius: 6, offset: Offset(0, 2)),
     ],
     cardShadowPremium: [
       BoxShadow(
@@ -87,11 +83,7 @@ class MathTokens extends ThemeExtension<MathTokens> {
         offset: Offset(0, 12),
         spreadRadius: -4,
       ),
-      BoxShadow(
-        color: Color(0x0D000000),
-        blurRadius: 8,
-        offset: Offset(0, 4),
-      ),
+      BoxShadow(color: Color(0x0D000000), blurRadius: 8, offset: Offset(0, 4)),
     ],
     sidebarGradient: LinearGradient(
       begin: Alignment.topCenter,
@@ -109,7 +101,7 @@ class MathTokens extends ThemeExtension<MathTokens> {
       colors: [Color(0xFF3B82F6), Color(0xFF1D4ED8)],
     ),
     sidebarSelectedGlow: Color(0x331D4ED8), // Blue 24% opacity
-    mathSymbolColor: Color(0xFFBFD1FF),     // Soft indigo for math symbols
+    mathSymbolColor: Color(0xFFBFD1FF), // Soft indigo for math symbols
   );
 
   @override
@@ -137,18 +129,26 @@ class MathTokens extends ThemeExtension<MathTokens> {
       cardBorderColor: cardBorderColor ?? this.cardBorderColor,
       gridLineColor: gridLineColor ?? this.gridLineColor,
       formulaSymbolOpacity: formulaSymbolOpacity ?? this.formulaSymbolOpacity,
-      statisticHighlightColor: statisticHighlightColor ?? this.statisticHighlightColor,
-      badgeActiveBackground: badgeActiveBackground ?? this.badgeActiveBackground,
-      badgeActiveForeground: badgeActiveForeground ?? this.badgeActiveForeground,
-      badgePendingBackground: badgePendingBackground ?? this.badgePendingBackground,
-      badgePendingForeground: badgePendingForeground ?? this.badgePendingForeground,
-      badgeSuspendedBackground: badgeSuspendedBackground ?? this.badgeSuspendedBackground,
-      badgeSuspendedForeground: badgeSuspendedForeground ?? this.badgeSuspendedForeground,
+      statisticHighlightColor:
+          statisticHighlightColor ?? this.statisticHighlightColor,
+      badgeActiveBackground:
+          badgeActiveBackground ?? this.badgeActiveBackground,
+      badgeActiveForeground:
+          badgeActiveForeground ?? this.badgeActiveForeground,
+      badgePendingBackground:
+          badgePendingBackground ?? this.badgePendingBackground,
+      badgePendingForeground:
+          badgePendingForeground ?? this.badgePendingForeground,
+      badgeSuspendedBackground:
+          badgeSuspendedBackground ?? this.badgeSuspendedBackground,
+      badgeSuspendedForeground:
+          badgeSuspendedForeground ?? this.badgeSuspendedForeground,
       cardShadowSoft: cardShadowSoft ?? this.cardShadowSoft,
       cardShadowElevated: cardShadowElevated ?? this.cardShadowElevated,
       cardShadowPremium: cardShadowPremium ?? this.cardShadowPremium,
       sidebarGradient: sidebarGradient ?? this.sidebarGradient,
-      primaryButtonGradient: primaryButtonGradient ?? this.primaryButtonGradient,
+      primaryButtonGradient:
+          primaryButtonGradient ?? this.primaryButtonGradient,
       accentGradient: accentGradient ?? this.accentGradient,
       sidebarSelectedGlow: sidebarSelectedGlow ?? this.sidebarSelectedGlow,
       mathSymbolColor: mathSymbolColor ?? this.mathSymbolColor,
@@ -159,24 +159,71 @@ class MathTokens extends ThemeExtension<MathTokens> {
   MathTokens lerp(ThemeExtension<MathTokens>? other, double t) {
     if (other is! MathTokens) return this;
     return MathTokens(
-      cardBorderColor: Color.lerp(cardBorderColor, other.cardBorderColor, t) ?? cardBorderColor,
-      gridLineColor: Color.lerp(gridLineColor, other.gridLineColor, t) ?? gridLineColor,
-      formulaSymbolOpacity: formulaSymbolOpacity + (other.formulaSymbolOpacity - formulaSymbolOpacity) * t,
-      statisticHighlightColor: Color.lerp(statisticHighlightColor, other.statisticHighlightColor, t) ?? statisticHighlightColor,
-      badgeActiveBackground: Color.lerp(badgeActiveBackground, other.badgeActiveBackground, t) ?? badgeActiveBackground,
-      badgeActiveForeground: Color.lerp(badgeActiveForeground, other.badgeActiveForeground, t) ?? badgeActiveForeground,
-      badgePendingBackground: Color.lerp(badgePendingBackground, other.badgePendingBackground, t) ?? badgePendingBackground,
-      badgePendingForeground: Color.lerp(badgePendingForeground, other.badgePendingForeground, t) ?? badgePendingForeground,
-      badgeSuspendedBackground: Color.lerp(badgeSuspendedBackground, other.badgeSuspendedBackground, t) ?? badgeSuspendedBackground,
-      badgeSuspendedForeground: Color.lerp(badgeSuspendedForeground, other.badgeSuspendedForeground, t) ?? badgeSuspendedForeground,
+      cardBorderColor:
+          Color.lerp(cardBorderColor, other.cardBorderColor, t) ??
+          cardBorderColor,
+      gridLineColor:
+          Color.lerp(gridLineColor, other.gridLineColor, t) ?? gridLineColor,
+      formulaSymbolOpacity:
+          formulaSymbolOpacity +
+          (other.formulaSymbolOpacity - formulaSymbolOpacity) * t,
+      statisticHighlightColor:
+          Color.lerp(
+            statisticHighlightColor,
+            other.statisticHighlightColor,
+            t,
+          ) ??
+          statisticHighlightColor,
+      badgeActiveBackground:
+          Color.lerp(badgeActiveBackground, other.badgeActiveBackground, t) ??
+          badgeActiveBackground,
+      badgeActiveForeground:
+          Color.lerp(badgeActiveForeground, other.badgeActiveForeground, t) ??
+          badgeActiveForeground,
+      badgePendingBackground:
+          Color.lerp(badgePendingBackground, other.badgePendingBackground, t) ??
+          badgePendingBackground,
+      badgePendingForeground:
+          Color.lerp(badgePendingForeground, other.badgePendingForeground, t) ??
+          badgePendingForeground,
+      badgeSuspendedBackground:
+          Color.lerp(
+            badgeSuspendedBackground,
+            other.badgeSuspendedBackground,
+            t,
+          ) ??
+          badgeSuspendedBackground,
+      badgeSuspendedForeground:
+          Color.lerp(
+            badgeSuspendedForeground,
+            other.badgeSuspendedForeground,
+            t,
+          ) ??
+          badgeSuspendedForeground,
       cardShadowSoft: t < 0.5 ? cardShadowSoft : other.cardShadowSoft,
-      cardShadowElevated: t < 0.5 ? cardShadowElevated : other.cardShadowElevated,
+      cardShadowElevated: t < 0.5
+          ? cardShadowElevated
+          : other.cardShadowElevated,
       cardShadowPremium: t < 0.5 ? cardShadowPremium : other.cardShadowPremium,
-      sidebarGradient: LinearGradient.lerp(sidebarGradient, other.sidebarGradient, t) ?? sidebarGradient,
-      primaryButtonGradient: LinearGradient.lerp(primaryButtonGradient, other.primaryButtonGradient, t) ?? primaryButtonGradient,
-      accentGradient: LinearGradient.lerp(accentGradient, other.accentGradient, t) ?? accentGradient,
-      sidebarSelectedGlow: Color.lerp(sidebarSelectedGlow, other.sidebarSelectedGlow, t) ?? sidebarSelectedGlow,
-      mathSymbolColor: Color.lerp(mathSymbolColor, other.mathSymbolColor, t) ?? mathSymbolColor,
+      sidebarGradient:
+          LinearGradient.lerp(sidebarGradient, other.sidebarGradient, t) ??
+          sidebarGradient,
+      primaryButtonGradient:
+          LinearGradient.lerp(
+            primaryButtonGradient,
+            other.primaryButtonGradient,
+            t,
+          ) ??
+          primaryButtonGradient,
+      accentGradient:
+          LinearGradient.lerp(accentGradient, other.accentGradient, t) ??
+          accentGradient,
+      sidebarSelectedGlow:
+          Color.lerp(sidebarSelectedGlow, other.sidebarSelectedGlow, t) ??
+          sidebarSelectedGlow,
+      mathSymbolColor:
+          Color.lerp(mathSymbolColor, other.mathSymbolColor, t) ??
+          mathSymbolColor,
     );
   }
 }

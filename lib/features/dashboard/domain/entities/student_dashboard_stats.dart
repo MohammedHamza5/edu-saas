@@ -21,14 +21,14 @@ class ContinueLearningItem extends Equatable {
 
   @override
   List<Object?> get props => [
-        videoId,
-        contentId,
-        title,
-        groupName,
-        progressSeconds,
-        durationSeconds,
-        percentage,
-      ];
+    videoId,
+    contentId,
+    title,
+    groupName,
+    progressSeconds,
+    durationSeconds,
+    percentage,
+  ];
 }
 
 class UrgentTaskItem extends Equatable {
@@ -52,14 +52,14 @@ class UrgentTaskItem extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        title,
-        groupName,
-        taskType,
-        dueAt,
-        status,
-        maxScore,
-      ];
+    id,
+    title,
+    groupName,
+    taskType,
+    dueAt,
+    status,
+    maxScore,
+  ];
 }
 
 class StudentDashboardStats extends Equatable {
@@ -98,13 +98,13 @@ class StudentDashboardStats extends Equatable {
 
   @override
   List<Object?> get props => [
-        attendancePercentage,
-        examAverage,
-        assignmentsSubmitted,
-        videoCompletionPercentage,
-        activeGroupName,
-        activeGroupLevel,
-        continueLearningItem,
-        urgentTasks,
-      ];
+    attendancePercentage,
+    examAverage,
+    assignmentsSubmitted,
+    videoCompletionPercentage,
+    activeGroupName,
+    activeGroupLevel,
+    continueLearningItem,
+    urgentTasks,
+  ];
 }

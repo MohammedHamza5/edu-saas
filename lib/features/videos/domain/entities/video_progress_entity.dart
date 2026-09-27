@@ -11,10 +11,13 @@ class VideoProgressEntity extends Equatable {
   final int actualWatchSeconds;
   final bool isSkipped;
   final DateTime lastWatchedAt;
+
   /// أبعد نقطة وصل إليها الطالب (للعودة أو تتبع الاستئناف)
   final int furthestPositionSeconds;
+
   /// النسب المئوية للمشاهدة الفعلية المحسوبة بناء على فترات المشاهدة
   final double watchedCoveragePercentage;
+
   /// فترات المشاهدة [start, end]
   final List<List<int>> watchedSegments;
 
@@ -56,7 +59,8 @@ class VideoProgressEntity extends Equatable {
   }
 
   /// هل أكمل الطالب 90% من الفيديو فعلياً؟ (يعتمد الآن على completed التي يحسبها السيرفر أو watchedCoveragePercentage)
-  bool get hasWatched90Percent => completed || watchedCoveragePercentage >= 90.0;
+  bool get hasWatched90Percent =>
+      completed || watchedCoveragePercentage >= 90.0;
 
   VideoProgressEntity copyWith({
     String? id,
@@ -84,26 +88,28 @@ class VideoProgressEntity extends Equatable {
       actualWatchSeconds: actualWatchSeconds ?? this.actualWatchSeconds,
       isSkipped: isSkipped ?? this.isSkipped,
       lastWatchedAt: lastWatchedAt ?? this.lastWatchedAt,
-      furthestPositionSeconds: furthestPositionSeconds ?? this.furthestPositionSeconds,
-      watchedCoveragePercentage: watchedCoveragePercentage ?? this.watchedCoveragePercentage,
+      furthestPositionSeconds:
+          furthestPositionSeconds ?? this.furthestPositionSeconds,
+      watchedCoveragePercentage:
+          watchedCoveragePercentage ?? this.watchedCoveragePercentage,
       watchedSegments: watchedSegments ?? this.watchedSegments,
     );
   }
 
   @override
   List<Object?> get props => [
-        id,
-        videoId,
-        studentId,
-        progressSeconds,
-        durationSeconds,
-        percentage,
-        completed,
-        actualWatchSeconds,
-        isSkipped,
-        lastWatchedAt,
-        furthestPositionSeconds,
-        watchedCoveragePercentage,
-        watchedSegments,
-      ];
+    id,
+    videoId,
+    studentId,
+    progressSeconds,
+    durationSeconds,
+    percentage,
+    completed,
+    actualWatchSeconds,
+    isSkipped,
+    lastWatchedAt,
+    furthestPositionSeconds,
+    watchedCoveragePercentage,
+    watchedSegments,
+  ];
 }

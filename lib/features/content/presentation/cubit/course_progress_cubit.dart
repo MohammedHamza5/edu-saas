@@ -6,12 +6,15 @@ import 'course_progress_state.dart';
 class CourseProgressCubit extends Cubit<CourseProgressState> {
   final ContentRepository _repository;
 
-  CourseProgressCubit({
-    required ContentRepository repository,
-  })  : _repository = repository,
-        super(const CourseProgressInitial());
+  CourseProgressCubit({required ContentRepository repository})
+    : _repository = repository,
+      super(const CourseProgressInitial());
 
-  Future<void> loadCourseProgress(String groupId, {String? studentId, bool isTeacher = false}) async {
+  Future<void> loadCourseProgress(
+    String groupId, {
+    String? studentId,
+    bool isTeacher = false,
+  }) async {
     if (state is CourseProgressLoaded) {
       emit((state as CourseProgressLoaded).copyWith(isRefreshing: true));
     } else {
@@ -50,6 +53,42 @@ class CourseProgressCubit extends Cubit<CourseProgressState> {
     } else if (result is FailureResult) {
       // We could emit a specific error state or rely on UI to handle it.
       // For now, we just emit the error state.
+      emit(CourseProgressError(result.failure.message));
+    }
+  }
+
+  Future<void> toggleLessonVisibility({
+    required String contentId,
+    required String groupId,
+    required bool isPublished,
+    String? studentId,
+  }) async {
+    final result = await _repository.toggleLessonVisibility(
+      contentId: contentId,
+      groupId: groupId,
+      isPublished: isPublished,
+    );
+
+    if (result is Success) {
+      await loadCourseProgress(groupId, studentId: studentId, isTeacher: true);
+    } else if (result is FailureResult) {
+      emit(CourseProgressError(result.failure.message));
+    }
+  }
+
+  Future<void> toggleAllLessonsVisibility({
+    required String groupId,
+    required bool isPublished,
+    String? studentId,
+  }) async {
+    final result = await _repository.toggleAllLessonsVisibility(
+      groupId: groupId,
+      isPublished: isPublished,
+    );
+
+    if (result is Success) {
+      await loadCourseProgress(groupId, studentId: studentId, isTeacher: true);
+    } else if (result is FailureResult) {
       emit(CourseProgressError(result.failure.message));
     }
   }

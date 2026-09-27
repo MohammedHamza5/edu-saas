@@ -30,7 +30,8 @@ class ForensicWatermarkOverlay extends StatefulWidget {
   });
 
   @override
-  State<ForensicWatermarkOverlay> createState() => _ForensicWatermarkOverlayState();
+  State<ForensicWatermarkOverlay> createState() =>
+      _ForensicWatermarkOverlayState();
 }
 
 class _ForensicWatermarkOverlayState extends State<ForensicWatermarkOverlay> {
@@ -107,12 +108,14 @@ class _ForensicWatermarkOverlayState extends State<ForensicWatermarkOverlay> {
     final user = SupabaseService.currentUser;
     final metadata = user?.userMetadata;
 
-    final name = widget.studentName ??
+    final name =
+        widget.studentName ??
         (metadata?['full_name'] as String?) ??
         user?.email?.split('@').first ??
         '';
 
-    final phone = widget.studentPhone ??
+    final phone =
+        widget.studentPhone ??
         (metadata?['phone'] as String?) ??
         user?.phone ??
         '';
@@ -143,9 +146,7 @@ class _ForensicWatermarkOverlayState extends State<ForensicWatermarkOverlay> {
           child: IgnorePointer(
             ignoring: true,
             child: CustomPaint(
-              painter: _RepeatingWatermarkPainter(
-                text: watermarkText,
-              ),
+              painter: _RepeatingWatermarkPainter(text: watermarkText),
             ),
           ),
         ),
@@ -160,7 +161,10 @@ class _ForensicWatermarkOverlayState extends State<ForensicWatermarkOverlay> {
               alignment: _currentAlignment,
               child: Container(
                 margin: const EdgeInsets.all(16),
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.black.withAlpha(85),
                   borderRadius: BorderRadius.circular(20),

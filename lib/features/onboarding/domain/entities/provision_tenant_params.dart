@@ -25,25 +25,22 @@ class ProvisionTenantParams extends Equatable {
 
   @override
   List<Object?> get props => [
-        tenantName,
-        tenantEmail,
-        tenantPhone,
-        logoUrl,
-        teacherFullName,
-        teacherEmail,
-        teacherPassword,
-        teacherPhone,
-      ];
+    tenantName,
+    tenantEmail,
+    tenantPhone,
+    logoUrl,
+    teacherFullName,
+    teacherEmail,
+    teacherPassword,
+    teacherPhone,
+  ];
 }
 
 class OnboardingResult extends Equatable {
   final TenantEntity tenant;
   final UserEntity teacher;
 
-  const OnboardingResult({
-    required this.tenant,
-    required this.teacher,
-  });
+  const OnboardingResult({required this.tenant, required this.teacher});
 
   @override
   List<Object?> get props => [tenant, teacher];

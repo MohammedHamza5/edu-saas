@@ -77,7 +77,10 @@ class SatExamToolsSheet {
                       title: ctx.l10n.areaCircumferenceSection,
                       formulas: [
                         {'name': ctx.l10n.circleArea, 'math': 'A = π r²'},
-                        {'name': ctx.l10n.circleCircumference, 'math': 'C = 2 π r'},
+                        {
+                          'name': ctx.l10n.circleCircumference,
+                          'math': 'C = 2 π r',
+                        },
                         {'name': ctx.l10n.rectangleArea, 'math': 'A = l × w'},
                         {'name': ctx.l10n.triangleArea, 'math': 'A = ½ b × h'},
                       ],
@@ -86,20 +89,41 @@ class SatExamToolsSheet {
                     _buildFormulaGroup(
                       title: ctx.l10n.volumesSection,
                       formulas: [
-                        {'name': ctx.l10n.rectangularPrismVolume, 'math': 'V = l × w × h'},
+                        {
+                          'name': ctx.l10n.rectangularPrismVolume,
+                          'math': 'V = l × w × h',
+                        },
                         {'name': ctx.l10n.cylinderVolume, 'math': 'V = π r² h'},
-                        {'name': ctx.l10n.sphereVolume, 'math': 'V = (4/3) π r³'},
-                        {'name': ctx.l10n.coneVolume, 'math': 'V = (1/3) π r² h'},
-                        {'name': ctx.l10n.pyramidVolume, 'math': 'V = (1/3) l × w × h'},
+                        {
+                          'name': ctx.l10n.sphereVolume,
+                          'math': 'V = (4/3) π r³',
+                        },
+                        {
+                          'name': ctx.l10n.coneVolume,
+                          'math': 'V = (1/3) π r² h',
+                        },
+                        {
+                          'name': ctx.l10n.pyramidVolume,
+                          'math': 'V = (1/3) l × w × h',
+                        },
                       ],
                     ),
                     const SizedBox(height: AppSpacing.s16),
                     _buildFormulaGroup(
                       title: ctx.l10n.rightTrianglesSection,
                       formulas: [
-                        {'name': ctx.l10n.pythagoreanTheorem, 'math': 'a² + b² = c²'},
-                        {'name': ctx.l10n.triangle306090, 'math': ctx.l10n.triangle306090Sides},
-                        {'name': ctx.l10n.triangle454590, 'math': ctx.l10n.triangle454590Sides},
+                        {
+                          'name': ctx.l10n.pythagoreanTheorem,
+                          'math': 'a² + b² = c²',
+                        },
+                        {
+                          'name': ctx.l10n.triangle306090,
+                          'math': ctx.l10n.triangle306090Sides,
+                        },
+                        {
+                          'name': ctx.l10n.triangle454590,
+                          'math': ctx.l10n.triangle454590Sides,
+                        },
                       ],
                     ),
                     const SizedBox(height: AppSpacing.s16),
@@ -107,8 +131,14 @@ class SatExamToolsSheet {
                       title: ctx.l10n.degreesRadiansSection,
                       formulas: [
                         {'name': ctx.l10n.triangleAnglesSum, 'math': '180°'},
-                        {'name': ctx.l10n.fullCircleRadians, 'math': '2π radians = 360°'},
-                        {'name': ctx.l10n.degreesToRadians, 'math': 'Radians = Degrees × (π / 180°)'},
+                        {
+                          'name': ctx.l10n.fullCircleRadians,
+                          'math': '2π radians = 360°',
+                        },
+                        {
+                          'name': ctx.l10n.degreesToRadians,
+                          'math': 'Radians = Degrees × (π / 180°)',
+                        },
                       ],
                     ),
                   ],
@@ -163,7 +193,10 @@ class SatExamToolsSheet {
                   ),
                   const SizedBox(width: AppSpacing.s8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.surface,
                       borderRadius: BorderRadius.circular(4),
@@ -278,13 +311,19 @@ class _SatCalculatorDialogState extends State<_SatCalculatorDialog> {
     // Simple basic math evaluator
     if (expr.contains('+')) {
       final parts = expr.split('+');
-      return parts.map((p) => double.tryParse(p.trim()) ?? 0.0).reduce((a, b) => a + b);
+      return parts
+          .map((p) => double.tryParse(p.trim()) ?? 0.0)
+          .reduce((a, b) => a + b);
     } else if (expr.contains('-') && !expr.startsWith('-')) {
       final parts = expr.split('-');
-      return parts.map((p) => double.tryParse(p.trim()) ?? 0.0).reduce((a, b) => a - b);
+      return parts
+          .map((p) => double.tryParse(p.trim()) ?? 0.0)
+          .reduce((a, b) => a - b);
     } else if (expr.contains('*')) {
       final parts = expr.split('*');
-      return parts.map((p) => double.tryParse(p.trim()) ?? 1.0).reduce((a, b) => a * b);
+      return parts
+          .map((p) => double.tryParse(p.trim()) ?? 1.0)
+          .reduce((a, b) => a * b);
     } else if (expr.contains('/')) {
       final parts = expr.split('/');
       final first = double.tryParse(parts[0].trim()) ?? 0.0;
@@ -318,14 +357,21 @@ class _SatCalculatorDialogState extends State<_SatCalculatorDialog> {
             // Title Bar
             Row(
               children: [
-                const Icon(Icons.calculate_rounded, color: AppColors.primary, size: 20),
+                const Icon(
+                  Icons.calculate_rounded,
+                  color: AppColors.primary,
+                  size: 20,
+                ),
                 const SizedBox(width: AppSpacing.s8),
                 Expanded(
                   child: Text(
                     context.l10n.satCalculatorTitle,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
                   ),
                 ),
                 IconButton(
@@ -338,7 +384,10 @@ class _SatCalculatorDialogState extends State<_SatCalculatorDialog> {
 
             // Display Screen
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s12, vertical: AppSpacing.s16),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.s12,
+                vertical: AppSpacing.s16,
+              ),
               decoration: BoxDecoration(
                 color: AppColors.surfaceVariant.withValues(alpha: 0.6),
                 borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
@@ -350,7 +399,10 @@ class _SatCalculatorDialogState extends State<_SatCalculatorDialog> {
                   if (_expression.isNotEmpty)
                     Text(
                       _expression,
-                      style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   Text(
                     _display,
@@ -387,11 +439,13 @@ class _SatCalculatorDialogState extends State<_SatCalculatorDialog> {
                               color: isOp
                                   ? AppColors.primary
                                   : isSpecial
-                                      ? AppColors.surfaceVariant
-                                      : AppColors.surface,
+                                  ? AppColors.surfaceVariant
+                                  : AppColors.surface,
                               borderRadius: BorderRadius.circular(6),
                               border: Border.all(
-                                color: isOp ? AppColors.primary : AppColors.border,
+                                color: isOp
+                                    ? AppColors.primary
+                                    : AppColors.border,
                               ),
                             ),
                             child: Center(
@@ -400,7 +454,9 @@ class _SatCalculatorDialogState extends State<_SatCalculatorDialog> {
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
-                                  color: isOp ? Colors.white : AppColors.textPrimary,
+                                  color: isOp
+                                      ? Colors.white
+                                      : AppColors.textPrimary,
                                 ),
                               ),
                             ),

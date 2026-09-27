@@ -9,16 +9,14 @@ import '../../../../core/widgets/app_text_field.dart';
 import '../../domain/entities/exam_entity.dart';
 import '../cubit/exams_cubit.dart';
 import '../cubit/exams_state.dart';
+import '../widgets/question_bank_picker_sheet.dart';
+import '../../../question_bank/domain/entities/question_revision_entity.dart';
 
 class CreateExamPage extends StatefulWidget {
   final String groupId;
   final String? groupName;
 
-  const CreateExamPage({
-    super.key,
-    required this.groupId,
-    this.groupName,
-  });
+  const CreateExamPage({super.key, required this.groupId, this.groupName});
 
   @override
   State<CreateExamPage> createState() => _CreateExamPageState();
@@ -29,7 +27,7 @@ class _DraftOption {
   bool isCorrect;
 
   _DraftOption({String text = '', this.isCorrect = false})
-      : controller = TextEditingController(text: text);
+    : controller = TextEditingController(text: text);
 
   void dispose() {
     controller.dispose();
@@ -38,10 +36,13 @@ class _DraftOption {
 
 class _DraftQuestion {
   final TextEditingController textController = TextEditingController();
-  final TextEditingController pointsController = TextEditingController(text: '5');
+  final TextEditingController pointsController = TextEditingController(
+    text: '5',
+  );
   QuestionType type = QuestionType.multipleChoice;
   int points = 5;
-  bool trueFalseAnswer = true; // true = OptionTrue is correct, false = OptionFalse is correct
+  bool trueFalseAnswer =
+      true; // true = OptionTrue is correct, false = OptionFalse is correct
   late List<_DraftOption> options;
 
   _DraftQuestion() {
@@ -75,9 +76,7 @@ class _CreateExamPageState extends State<CreateExamPage> {
 
   final ScrollController _scrollController = ScrollController();
 
-  final List<_DraftQuestion> _questions = [
-    _DraftQuestion(),
-  ];
+  final List<_DraftQuestion> _questions = [_DraftQuestion()];
 
   int get _totalQuestionsPoints =>
       _questions.fold(0, (sum, q) => sum + q.points);
@@ -119,6 +118,78 @@ class _CreateExamPageState extends State<CreateExamPage> {
         _autoUpdateMaxScoreIfBalanced();
       });
     }
+  }
+
+  Future<void> _openQuestionBankPicker() async {
+    final importedRevisions = await QuestionBankPickerSheet.show(context);
+    if (importedRevisions != null && importedRevisions.isNotEmpty && mounted) {
+      _importQuestionsFromBank(importedRevisions);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            context.l10n.questionsImportedSuccess(importedRevisions.length),
+          ),
+          backgroundColor: AppColors.success,
+        ),
+      );
+    }
+  }
+
+  void _importQuestionsFromBank(List<QuestionRevisionEntity> revisions) {
+    if (revisions.isEmpty) return;
+    setState(() {
+      for (final rev in revisions) {
+        final draftQ = _DraftQuestion();
+        draftQ.textController.text = rev.stemText;
+
+        if (rev.options.isNotEmpty) {
+          draftQ.type = QuestionType.multipleChoice;
+          draftQ.options.clear();
+
+          final correctKey = rev.answerKey?.trim().toUpperCase();
+          for (final opt in rev.options) {
+            final key = opt['key']?.toString().toUpperCase() ?? '';
+            String optText = '';
+            final contentList = opt['content'];
+            if (contentList is List && contentList.isNotEmpty) {
+              final first = contentList.first;
+              if (first is Map) {
+                optText = first['latex']?.toString() ??
+                    first['value']?.toString() ??
+                    '';
+              }
+            }
+            if (optText.isEmpty) {
+              optText = opt['text']?.toString() ?? '';
+            }
+            final isCorrect = (correctKey != null && correctKey == key);
+            draftQ.options.add(_DraftOption(
+              text: optText,
+              isCorrect: isCorrect,
+            ));
+          }
+          if (draftQ.options.isNotEmpty &&
+              !draftQ.options.any((o) => o.isCorrect)) {
+            draftQ.options.first.isCorrect = true;
+          }
+        } else {
+          draftQ.type = QuestionType.multipleChoice;
+        }
+
+        _questions.add(draftQ);
+      }
+
+      // If the first question was just an empty default draft, remove it
+      if (_questions.length > revisions.length &&
+          _questions.first.textController.text.trim().isEmpty &&
+          _questions.first.options
+              .every((o) => o.controller.text.trim().isEmpty)) {
+        final emptyQ = _questions.removeAt(0);
+        emptyQ.dispose();
+      }
+
+      _autoUpdateMaxScoreIfBalanced();
+    });
   }
 
   void _autoUpdateMaxScoreIfBalanced() {
@@ -167,7 +238,9 @@ class _CreateExamPageState extends State<CreateExamPage> {
       }
 
       if (q.type == QuestionType.multipleChoice) {
-        final filledOptions = q.options.where((o) => o.controller.text.trim().isNotEmpty).toList();
+        final filledOptions = q.options
+            .where((o) => o.controller.text.trim().isNotEmpty)
+            .toList();
         if (filledOptions.length < 2) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -178,7 +251,9 @@ class _CreateExamPageState extends State<CreateExamPage> {
           return;
         }
 
-        final hasCorrect = q.options.any((o) => o.isCorrect && o.controller.text.trim().isNotEmpty);
+        final hasCorrect = q.options.any(
+          (o) => o.isCorrect && o.controller.text.trim().isNotEmpty,
+        );
         if (!hasCorrect) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -223,14 +298,15 @@ class _CreateExamPageState extends State<CreateExamPage> {
             .asMap()
             .entries
             .map((optEntry) {
-          return QuestionOptionEntity(
-            id: 'opt-${idx + 1}-${optEntry.key + 1}',
-            questionId: 'q-${idx + 1}',
-            optionText: optEntry.value.controller.text.trim(),
-            sortOrder: optEntry.key + 1,
-            isCorrect: optEntry.value.isCorrect,
-          );
-        }).toList();
+              return QuestionOptionEntity(
+                id: 'opt-${idx + 1}-${optEntry.key + 1}',
+                questionId: 'q-${idx + 1}',
+                optionText: optEntry.value.controller.text.trim(),
+                sortOrder: optEntry.key + 1,
+                isCorrect: optEntry.value.isCorrect,
+              );
+            })
+            .toList();
       }
 
       return ExamQuestionEntity(
@@ -245,16 +321,16 @@ class _CreateExamPageState extends State<CreateExamPage> {
     }).toList();
 
     final createdExam = await context.read<ExamsCubit>().createExam(
-          groupId: widget.groupId,
-          title: _titleController.text.trim(),
-          durationMinutes: int.tryParse(_durationController.text.trim()) ?? 60,
-          maxScore: int.tryParse(_maxScoreController.text.trim()) ?? 100,
-          passingScore: int.tryParse(_passingScoreController.text.trim()),
-          shuffleQuestions: _shuffle,
-          showResult: _showResult,
-          allowRetake: _allowRetake,
-          initialQuestions: initialQuestions,
-        );
+      groupId: widget.groupId,
+      title: _titleController.text.trim(),
+      durationMinutes: int.tryParse(_durationController.text.trim()) ?? 60,
+      maxScore: int.tryParse(_maxScoreController.text.trim()) ?? 100,
+      passingScore: int.tryParse(_passingScoreController.text.trim()),
+      shuffleQuestions: _shuffle,
+      showResult: _showResult,
+      allowRetake: _allowRetake,
+      initialQuestions: initialQuestions,
+    );
 
     if (!mounted) return;
 
@@ -307,7 +383,8 @@ class _CreateExamPageState extends State<CreateExamPage> {
       ),
       floatingActionButton: BlocBuilder<ExamsCubit, ExamsState>(
         builder: (context, state) {
-          final isCreating = (state is TeacherExamsLoaded && state.isCreating) ||
+          final isCreating =
+              (state is TeacherExamsLoaded && state.isCreating) ||
               state is ExamsLoading;
           if (isCreating) return const SizedBox.shrink();
 
@@ -326,11 +403,14 @@ class _CreateExamPageState extends State<CreateExamPage> {
       ),
       body: BlocBuilder<ExamsCubit, ExamsState>(
         builder: (context, state) {
-          final isCreating = (state is TeacherExamsLoaded && state.isCreating) ||
+          final isCreating =
+              (state is TeacherExamsLoaded && state.isCreating) ||
               state is ExamsLoading;
 
-          final maxScoreNum = int.tryParse(_maxScoreController.text.trim()) ?? 0;
-          final isPointsMismatched = maxScoreNum > 0 && maxScoreNum != _totalQuestionsPoints;
+          final maxScoreNum =
+              int.tryParse(_maxScoreController.text.trim()) ?? 0;
+          final isPointsMismatched =
+              maxScoreNum > 0 && maxScoreNum != _totalQuestionsPoints;
 
           return SingleChildScrollView(
             controller: _scrollController,
@@ -355,7 +435,9 @@ class _CreateExamPageState extends State<CreateExamPage> {
                               padding: const EdgeInsets.all(AppSpacing.s8),
                               decoration: BoxDecoration(
                                 color: AppColors.primary.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                                borderRadius: BorderRadius.circular(
+                                  AppSpacing.radiusSmall,
+                                ),
                               ),
                               child: const Icon(
                                 Icons.tune_rounded,
@@ -400,7 +482,9 @@ class _CreateExamPageState extends State<CreateExamPage> {
                                 prefixIcon: const Icon(Icons.timer_outlined),
                                 validator: (v) {
                                   final num = int.tryParse(v ?? '');
-                                  if (num == null || num <= 0) return context.l10n.positiveNumberRequired;
+                                  if (num == null || num <= 0) {
+                                    return context.l10n.positiveNumberRequired;
+                                  }
                                   return null;
                                 },
                               ),
@@ -434,44 +518,68 @@ class _CreateExamPageState extends State<CreateExamPage> {
                         SwitchListTile(
                           title: Text(
                             context.l10n.shuffleQuestionsTitle,
-                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                           subtitle: Text(
                             context.l10n.shuffleQuestionsSubtitle,
-                            style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textMuted,
+                            ),
                           ),
                           value: _shuffle,
                           activeColor: AppColors.primary,
                           contentPadding: EdgeInsets.zero,
-                          onChanged: isCreating ? null : (v) => setState(() => _shuffle = v),
+                          onChanged: isCreating
+                              ? null
+                              : (v) => setState(() => _shuffle = v),
                         ),
                         SwitchListTile(
                           title: Text(
                             context.l10n.showResultTitle,
-                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                           subtitle: Text(
                             context.l10n.showResultSubtitle,
-                            style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textMuted,
+                            ),
                           ),
                           value: _showResult,
                           activeColor: AppColors.primary,
                           contentPadding: EdgeInsets.zero,
-                          onChanged: isCreating ? null : (v) => setState(() => _showResult = v),
+                          onChanged: isCreating
+                              ? null
+                              : (v) => setState(() => _showResult = v),
                         ),
                         SwitchListTile(
                           title: Text(
                             context.l10n.allowRetakeTitle,
-                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                           subtitle: Text(
                             context.l10n.allowRetakeSubtitle,
-                            style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textMuted,
+                            ),
                           ),
                           value: _allowRetake,
                           activeColor: AppColors.primary,
                           contentPadding: EdgeInsets.zero,
-                          onChanged: isCreating ? null : (v) => setState(() => _allowRetake = v),
+                          onChanged: isCreating
+                              ? null
+                              : (v) => setState(() => _allowRetake = v),
                         ),
                       ],
                     ),
@@ -487,9 +595,13 @@ class _CreateExamPageState extends State<CreateExamPage> {
                     ),
                     decoration: BoxDecoration(
                       color: AppColors.surfaceVariant,
-                      borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.radiusMedium,
+                      ),
                       border: Border.all(
-                        color: isPointsMismatched ? AppColors.warning.withValues(alpha: 0.5) : AppColors.border,
+                        color: isPointsMismatched
+                            ? AppColors.warning.withValues(alpha: 0.5)
+                            : AppColors.border,
                       ),
                     ),
                     child: Row(
@@ -498,13 +610,20 @@ class _CreateExamPageState extends State<CreateExamPage> {
                         Row(
                           children: [
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
                               decoration: BoxDecoration(
                                 color: AppColors.primary.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                                borderRadius: BorderRadius.circular(
+                                  AppSpacing.radiusSmall,
+                                ),
                               ),
                               child: Text(
-                                context.l10n.totalQuestionsSummary(_questions.length),
+                                context.l10n.totalQuestionsSummary(
+                                  _questions.length,
+                                ),
                                 style: const TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.bold,
@@ -514,11 +633,16 @@ class _CreateExamPageState extends State<CreateExamPage> {
                             ),
                             const SizedBox(width: AppSpacing.s12),
                             Text(
-                              context.l10n.totalPointsSummary(_totalQuestionsPoints, maxScoreNum),
+                              context.l10n.totalPointsSummary(
+                                _totalQuestionsPoints,
+                                maxScoreNum,
+                              ),
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
-                                color: isPointsMismatched ? AppColors.warning : AppColors.textPrimary,
+                                color: isPointsMismatched
+                                    ? AppColors.warning
+                                    : AppColors.textPrimary,
                               ),
                             ),
                           ],
@@ -527,14 +651,27 @@ class _CreateExamPageState extends State<CreateExamPage> {
                           TextButton.icon(
                             onPressed: () {
                               setState(() {
-                                _maxScoreController.text = _totalQuestionsPoints.toString();
-                                _passingScoreController.text = (_totalQuestionsPoints * 0.6).round().toString();
+                                _maxScoreController.text = _totalQuestionsPoints
+                                    .toString();
+                                _passingScoreController.text =
+                                    (_totalQuestionsPoints * 0.6)
+                                        .round()
+                                        .toString();
                               });
                             },
-                            icon: const Icon(Icons.sync_alt_rounded, size: 16, color: AppColors.warning),
+                            icon: const Icon(
+                              Icons.sync_alt_rounded,
+                              size: 16,
+                              color: AppColors.warning,
+                            ),
                             label: Text(
-                              context.l10n.autoAdjustMaxScore(_totalQuestionsPoints),
-                              style: const TextStyle(fontSize: 12, color: AppColors.warning),
+                              context.l10n.autoAdjustMaxScore(
+                                _totalQuestionsPoints,
+                              ),
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppColors.warning,
+                              ),
                             ),
                           ),
                       ],
@@ -555,18 +692,50 @@ class _CreateExamPageState extends State<CreateExamPage> {
                           color: AppColors.textPrimary,
                         ),
                       ),
-                      ElevatedButton.icon(
-                        onPressed: isCreating ? null : _addQuestion,
-                        icon: const Icon(Icons.add_rounded, size: 18),
-                        label: Text(context.l10n.addQuestionAction),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16, vertical: 10),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                      Wrap(
+                        spacing: AppSpacing.s8,
+                        runSpacing: AppSpacing.s4,
+                        children: [
+                          OutlinedButton.icon(
+                            onPressed:
+                                isCreating ? null : _openQuestionBankPicker,
+                            icon: const Icon(Icons.functions_rounded, size: 18),
+                            label: Text(
+                              context.l10n.importFromQuestionBankAction,
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: const Color(0xFF0EA5E9),
+                              side: const BorderSide(color: Color(0xFF0EA5E9)),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppSpacing.s12,
+                                vertical: 10,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                  AppSpacing.radiusMedium,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
+                          ElevatedButton.icon(
+                            onPressed: isCreating ? null : _addQuestion,
+                            icon: const Icon(Icons.add_rounded, size: 18),
+                            label: Text(context.l10n.addQuestionAction),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppSpacing.s16,
+                                vertical: 10,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                  AppSpacing.radiusMedium,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -591,13 +760,22 @@ class _CreateExamPageState extends State<CreateExamPage> {
                                 Row(
                                   children: [
                                     Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 4,
+                                      ),
                                       decoration: BoxDecoration(
-                                        color: AppColors.primary.withValues(alpha: 0.12),
-                                        borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                                        color: AppColors.primary.withValues(
+                                          alpha: 0.12,
+                                        ),
+                                        borderRadius: BorderRadius.circular(
+                                          AppSpacing.radiusSmall,
+                                        ),
                                       ),
                                       child: Text(
-                                        context.l10n.questionNumberTitle(qIndex + 1),
+                                        context.l10n.questionNumberTitle(
+                                          qIndex + 1,
+                                        ),
                                         style: const TextStyle(
                                           fontSize: 14,
                                           fontWeight: FontWeight.bold,
@@ -607,11 +785,18 @@ class _CreateExamPageState extends State<CreateExamPage> {
                                     ),
                                     const SizedBox(width: AppSpacing.s8),
                                     Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
                                       decoration: BoxDecoration(
                                         color: AppColors.surfaceVariant,
-                                        borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                                        border: Border.all(color: AppColors.border),
+                                        borderRadius: BorderRadius.circular(
+                                          AppSpacing.radiusSmall,
+                                        ),
+                                        border: Border.all(
+                                          color: AppColors.border,
+                                        ),
                                       ),
                                       child: Text(
                                         '${q.points} ${context.l10n.pointsField}',
@@ -632,7 +817,9 @@ class _CreateExamPageState extends State<CreateExamPage> {
                                       size: 20,
                                     ),
                                     tooltip: context.l10n.removeOption,
-                                    onPressed: isCreating ? null : () => _removeQuestion(qIndex),
+                                    onPressed: isCreating
+                                        ? null
+                                        : () => _removeQuestion(qIndex),
                                   ),
                               ],
                             ),
@@ -649,7 +836,9 @@ class _CreateExamPageState extends State<CreateExamPage> {
                               maxLines: 2,
                               validator: (v) {
                                 if (v == null || v.trim().isEmpty) {
-                                  return context.l10n.fillQuestionTextError(qIndex + 1);
+                                  return context.l10n.fillQuestionTextError(
+                                    qIndex + 1,
+                                  );
                                 }
                                 return null;
                               },
@@ -673,11 +862,18 @@ class _CreateExamPageState extends State<CreateExamPage> {
                                     items: [
                                       DropdownMenuItem(
                                         value: QuestionType.multipleChoice,
-                                        child: Text(QuestionType.multipleChoice.localizedLabel(context)),
+                                        child: Text(
+                                          QuestionType.multipleChoice
+                                              .localizedLabel(context),
+                                        ),
                                       ),
                                       DropdownMenuItem(
                                         value: QuestionType.trueFalse,
-                                        child: Text(QuestionType.trueFalse.localizedLabel(context)),
+                                        child: Text(
+                                          QuestionType.trueFalse.localizedLabel(
+                                            context,
+                                          ),
+                                        ),
                                       ),
                                     ],
                                     onChanged: isCreating
@@ -699,7 +895,9 @@ class _CreateExamPageState extends State<CreateExamPage> {
                                     keyboardType: TextInputType.number,
                                     decoration: InputDecoration(
                                       labelText: context.l10n.pointsField,
-                                      prefixIcon: const Icon(Icons.stars_outlined),
+                                      prefixIcon: const Icon(
+                                        Icons.stars_outlined,
+                                      ),
                                     ),
                                     onChanged: (v) {
                                       setState(() {
@@ -726,13 +924,19 @@ class _CreateExamPageState extends State<CreateExamPage> {
                   // Bottom Add Question Card Button
                   InkWell(
                     onTap: isCreating ? null : _addQuestion,
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                    borderRadius: BorderRadius.circular(
+                      AppSpacing.radiusMedium,
+                    ),
                     child: Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: AppSpacing.s16),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: AppSpacing.s16,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.primary.withValues(alpha: 0.04),
-                        borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusMedium,
+                        ),
                         border: Border.all(
                           color: AppColors.primary.withValues(alpha: 0.35),
                           width: 1.5,
@@ -777,7 +981,9 @@ class _CreateExamPageState extends State<CreateExamPage> {
                     onPressed: isCreating ? null : _submitExam,
                     isLoading: isCreating,
                   ),
-                  const SizedBox(height: 80), // Clearance for FloatingActionButton
+                  const SizedBox(
+                    height: 80,
+                  ), // Clearance for FloatingActionButton
                 ],
               ),
             ),
@@ -794,7 +1000,11 @@ class _CreateExamPageState extends State<CreateExamPage> {
       children: [
         Row(
           children: [
-            const Icon(Icons.check_circle_outline, size: 16, color: AppColors.primary),
+            const Icon(
+              Icons.check_circle_outline,
+              size: 16,
+              color: AppColors.primary,
+            ),
             const SizedBox(width: 6),
             Text(
               context.l10n.selectCorrectAnswerPrompt,
@@ -862,8 +1072,8 @@ class _CreateExamPageState extends State<CreateExamPage> {
         decoration: BoxDecoration(
           color: isSelected
               ? (isTrue
-                  ? AppColors.success.withValues(alpha: 0.1)
-                  : AppColors.error.withValues(alpha: 0.1))
+                    ? AppColors.success.withValues(alpha: 0.1)
+                    : AppColors.error.withValues(alpha: 0.1))
               : AppColors.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
           border: Border.all(
@@ -901,7 +1111,9 @@ class _CreateExamPageState extends State<CreateExamPage> {
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
                 color: isSelected
-                    ? (isTrue ? AppColors.success : AppColors.error).withValues(alpha: 0.2)
+                    ? (isTrue ? AppColors.success : AppColors.error).withValues(
+                        alpha: 0.2,
+                      )
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
               ),
@@ -951,7 +1163,9 @@ class _CreateExamPageState extends State<CreateExamPage> {
         ...q.options.asMap().entries.map((optEntry) {
           final optIdx = optEntry.key;
           final opt = optEntry.value;
-          final letter = optIdx < letters.length ? letters[optIdx] : '${optIdx + 1}';
+          final letter = optIdx < letters.length
+              ? letters[optIdx]
+              : '${optIdx + 1}';
 
           return Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.s10),
@@ -961,10 +1175,14 @@ class _CreateExamPageState extends State<CreateExamPage> {
                 vertical: AppSpacing.s4,
               ),
               decoration: BoxDecoration(
-                color: opt.isCorrect ? AppColors.success.withValues(alpha: 0.05) : Colors.transparent,
+                color: opt.isCorrect
+                    ? AppColors.success.withValues(alpha: 0.05)
+                    : Colors.transparent,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
                 border: Border.all(
-                  color: opt.isCorrect ? AppColors.success.withValues(alpha: 0.6) : AppColors.border,
+                  color: opt.isCorrect
+                      ? AppColors.success.withValues(alpha: 0.6)
+                      : AppColors.border,
                   width: opt.isCorrect ? 1.5 : 1,
                 ),
               ),
@@ -992,7 +1210,9 @@ class _CreateExamPageState extends State<CreateExamPage> {
                       color: opt.isCorrect
                           ? AppColors.success
                           : AppColors.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.radiusSmall,
+                      ),
                     ),
                     child: Text(
                       letter,
@@ -1019,10 +1239,15 @@ class _CreateExamPageState extends State<CreateExamPage> {
                   if (opt.isCorrect)
                     Container(
                       margin: const EdgeInsets.only(left: 8, right: 8),
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.success.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusSmall,
+                        ),
                       ),
                       child: Text(
                         context.l10n.correctAnswerBadge,
@@ -1035,9 +1260,15 @@ class _CreateExamPageState extends State<CreateExamPage> {
                     ),
                   if (q.options.length > 2)
                     IconButton(
-                      icon: const Icon(Icons.close_rounded, size: 18, color: AppColors.textMuted),
+                      icon: const Icon(
+                        Icons.close_rounded,
+                        size: 18,
+                        color: AppColors.textMuted,
+                      ),
                       tooltip: context.l10n.removeOption,
-                      onPressed: isCreating ? null : () => _removeOptionFromQuestion(q, optIdx),
+                      onPressed: isCreating
+                          ? null
+                          : () => _removeOptionFromQuestion(q, optIdx),
                     ),
                 ],
               ),

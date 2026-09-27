@@ -98,9 +98,14 @@ class SatDomainMasteryCard extends StatelessWidget {
                           height: 40,
                           decoration: BoxDecoration(
                             gradient: const LinearGradient(
-                              colors: [AppColors.primary, AppColors.primaryLight],
+                              colors: [
+                                AppColors.primary,
+                                AppColors.primaryLight,
+                              ],
                             ),
-                            borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.radiusMedium,
+                            ),
                           ),
                           child: const Center(
                             child: Text(
@@ -178,7 +183,9 @@ class SatDomainMasteryCard extends StatelessWidget {
                       gradient: const LinearGradient(
                         colors: [AppColors.primary, AppColors.primaryLight],
                       ),
-                      borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.radiusMedium,
+                      ),
                     ),
                     child: const Center(
                       child: Text(
@@ -283,7 +290,9 @@ class SatDomainMasteryCard extends StatelessWidget {
                           padding: const EdgeInsets.all(AppSpacing.s6),
                           decoration: BoxDecoration(
                             color: color.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.radiusSmall,
+                            ),
                           ),
                           child: Icon(icon, color: color, size: 18),
                         ),
@@ -366,11 +375,17 @@ class SatDomainMasteryCard extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.bolt_rounded, color: AppColors.primary, size: 20),
+                          const Icon(
+                            Icons.bolt_rounded,
+                            color: AppColors.primary,
+                            size: 20,
+                          ),
                           const SizedBox(width: AppSpacing.s8),
                           Expanded(
                             child: Text(
-                              context.l10n.nextMissionWithTeacher(branding.teacherName),
+                              context.l10n.nextMissionWithTeacher(
+                                branding.teacherName,
+                              ),
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 13,
@@ -383,7 +398,10 @@ class SatDomainMasteryCard extends StatelessWidget {
                       const SizedBox(height: AppSpacing.s4),
                       Text(
                         context.l10n.drillHomeworkTitle,
-                        style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: AppColors.textSecondary,
+                        ),
                       ),
                       const SizedBox(height: AppSpacing.s12),
                       SizedBox(
@@ -392,13 +410,21 @@ class SatDomainMasteryCard extends StatelessWidget {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primary,
                             foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: AppSpacing.s8),
+                            padding: const EdgeInsets.symmetric(
+                              vertical: AppSpacing.s8,
+                            ),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.radiusSmall,
+                              ),
                             ),
                           ),
-                          onPressed: () => context.go(AppRoutes.studentAssignments),
-                          child: Text(context.l10n.uploadHomeworkSolutionNow, style: const TextStyle(fontSize: 12)),
+                          onPressed: () =>
+                              context.go(AppRoutes.studentAssignments),
+                          child: Text(
+                            context.l10n.uploadHomeworkSolutionNow,
+                            style: const TextStyle(fontSize: 12),
+                          ),
                         ),
                       ),
                     ],
@@ -407,14 +433,20 @@ class SatDomainMasteryCard extends StatelessWidget {
 
                 return Row(
                   children: [
-                    const Icon(Icons.bolt_rounded, color: AppColors.primary, size: 22),
+                    const Icon(
+                      Icons.bolt_rounded,
+                      color: AppColors.primary,
+                      size: 22,
+                    ),
                     const SizedBox(width: AppSpacing.s12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            context.l10n.nextMissionWithTeacher(branding.localizedTeacherName(context)),
+                            context.l10n.nextMissionWithTeacher(
+                              branding.localizedTeacherName(context),
+                            ),
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 13,
@@ -423,7 +455,10 @@ class SatDomainMasteryCard extends StatelessWidget {
                           ),
                           Text(
                             context.l10n.drillHomeworkTitle,
-                            style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: AppColors.textSecondary,
+                            ),
                           ),
                         ],
                       ),
@@ -437,11 +472,16 @@ class SatDomainMasteryCard extends StatelessWidget {
                           vertical: AppSpacing.s8,
                         ),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.radiusSmall,
+                          ),
                         ),
                       ),
                       onPressed: () => context.go(AppRoutes.studentAssignments),
-                      child: Text(context.l10n.uploadHomeworkSolutionNow, style: const TextStyle(fontSize: 12)),
+                      child: Text(
+                        context.l10n.uploadHomeworkSolutionNow,
+                        style: const TextStyle(fontSize: 12),
+                      ),
                     ),
                   ],
                 );

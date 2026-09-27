@@ -53,16 +53,20 @@ void main() {
       expect(error.icon, Icons.block_rounded);
     });
 
-    test('resolves PostgrestException 42501 (RLS violation) to permission error', () {
-      const exception = PostgrestException(
-        message: 'new row violates row-level security policy for table students',
-        code: '42501',
-      );
-      final error = ErrorMapper.resolve(exception);
+    test(
+      'resolves PostgrestException 42501 (RLS violation) to permission error',
+      () {
+        const exception = PostgrestException(
+          message:
+              'new row violates row-level security policy for table students',
+          code: '42501',
+        );
+        final error = ErrorMapper.resolve(exception);
 
-      expect(error.type, FailureType.permission);
-      expect(error.icon, Icons.shield_outlined);
-    });
+        expect(error.type, FailureType.permission);
+        expect(error.icon, Icons.shield_outlined);
+      },
+    );
 
     test('resolves PostgrestException exam_expired to ExamExpired error', () {
       const exception = PostgrestException(message: 'EXAM_EXPIRED error');
@@ -83,56 +87,75 @@ void main() {
     });
 
     test('resolves raw string error containing network error keywords', () {
-      final error = ErrorMapper.resolve('ClientException: Connection reset by peer');
+      final error = ErrorMapper.resolve(
+        'ClientException: Connection reset by peer',
+      );
 
       expect(error.type, FailureType.network);
       expect(error.canRetry, isTrue);
     });
 
-    test('resolves AuthException with invalid email address to emailInvalidError', () {
-      const exception = AuthException(
-        'Email address "test@gmail.com" is invalid',
-        code: 'email_address_invalid',
-        statusCode: '400',
-      );
-      final error = ErrorMapper.resolve(exception);
+    test(
+      'resolves AuthException with invalid email address to emailInvalidError',
+      () {
+        const exception = AuthException(
+          'Email address "test@gmail.com" is invalid',
+          code: 'email_address_invalid',
+          statusCode: '400',
+        );
+        final error = ErrorMapper.resolve(exception);
 
-      expect(error.type, FailureType.validation);
-      expect(error.canRetry, isFalse);
-      expect(error.icon, Icons.alternate_email_rounded);
-    });
+        expect(error.type, FailureType.validation);
+        expect(error.canRetry, isFalse);
+        expect(error.icon, Icons.alternate_email_rounded);
+      },
+    );
 
-    test('resolves AuthFailure with email_address_invalid to emailInvalidError', () {
-      const failure = AuthFailure(
-        'Email address "test@gmail.com" is invalid',
-        code: 'email_address_invalid',
-      );
-      final error = ErrorMapper.resolve(failure);
+    test(
+      'resolves AuthFailure with email_address_invalid to emailInvalidError',
+      () {
+        const failure = AuthFailure(
+          'Email address "test@gmail.com" is invalid',
+          code: 'email_address_invalid',
+        );
+        final error = ErrorMapper.resolve(failure);
 
-      expect(error.type, FailureType.validation);
-      expect(error.canRetry, isFalse);
-      expect(error.icon, Icons.alternate_email_rounded);
-    });
+        expect(error.type, FailureType.validation);
+        expect(error.canRetry, isFalse);
+        expect(error.icon, Icons.alternate_email_rounded);
+      },
+    );
 
     test('resolves raw string for invalid email to emailInvalidError', () {
-      final error = ErrorMapper.resolve('400: Email address "test@gmail.com" is invalid');
+      final error = ErrorMapper.resolve(
+        '400: Email address "test@gmail.com" is invalid',
+      );
 
       expect(error.type, FailureType.validation);
       expect(error.canRetry, isFalse);
       expect(error.icon, Icons.alternate_email_rounded);
     });
 
-    test('resolves duplicate email registration to emailAlreadyExistsError', () {
-      const failure = AuthFailure('User already registered', code: 'user_already_exists');
-      final error = ErrorMapper.resolve(failure);
+    test(
+      'resolves duplicate email registration to emailAlreadyExistsError',
+      () {
+        const failure = AuthFailure(
+          'User already registered',
+          code: 'user_already_exists',
+        );
+        final error = ErrorMapper.resolve(failure);
 
-      expect(error.type, FailureType.conflict);
-      expect(error.canRetry, isFalse);
-      expect(error.icon, Icons.person_off_rounded);
-    });
+        expect(error.type, FailureType.conflict);
+        expect(error.canRetry, isFalse);
+        expect(error.icon, Icons.person_off_rounded);
+      },
+    );
 
     test('resolves weak password to weakPasswordError', () {
-      const failure = AuthFailure('Password should be at least 6 characters', code: 'weak_password');
+      const failure = AuthFailure(
+        'Password should be at least 6 characters',
+        code: 'weak_password',
+      );
       final error = ErrorMapper.resolve(failure);
 
       expect(error.type, FailureType.validation);
@@ -141,7 +164,10 @@ void main() {
     });
 
     test('resolves rate limit to rateLimitError', () {
-      const failure = AuthFailure('Rate limit exceeded', code: 'over_email_send_rate_limit');
+      const failure = AuthFailure(
+        'Rate limit exceeded',
+        code: 'over_email_send_rate_limit',
+      );
       final error = ErrorMapper.resolve(failure);
 
       expect(error.type, FailureType.rateLimit);

@@ -50,9 +50,10 @@ class _AppButtonState extends State<AppButton>
       duration: const Duration(milliseconds: 100),
       reverseDuration: const Duration(milliseconds: 150),
     );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.97).animate(
-      CurvedAnimation(parent: _pressController, curve: Curves.easeIn),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.97,
+    ).animate(CurvedAnimation(parent: _pressController, curve: Curves.easeIn));
   }
 
   @override
@@ -81,8 +82,9 @@ class _AppButtonState extends State<AppButton>
     final mathTokens =
         Theme.of(context).extension<MathTokens>() ?? MathTokens.light;
 
-    final effectiveOnPressed =
-        (widget.onPressed != null && !widget.isLoading) ? _handlePress : null;
+    final effectiveOnPressed = (widget.onPressed != null && !widget.isLoading)
+        ? _handlePress
+        : null;
 
     final childWidget = widget.isLoading
         ? AppLoadingView.compact(
@@ -121,24 +123,21 @@ class _AppButtonState extends State<AppButton>
         onTap: effectiveOnPressed,
         child: AnimatedBuilder(
           animation: _scaleAnimation,
-          builder: (context, child) => Transform.scale(
-            scale: _scaleAnimation.value,
-            child: child,
-          ),
+          builder: (context, child) =>
+              Transform.scale(scale: _scaleAnimation.value, child: child),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             height: 48,
             width: effectiveWidth,
             alignment: Alignment.center,
-            padding: widget.padding ??
+            padding:
+                widget.padding ??
                 const EdgeInsets.symmetric(
                   horizontal: AppSpacing.s20,
                   vertical: 0,
                 ),
             decoration: BoxDecoration(
-              gradient: isDisabled
-                  ? null
-                  : mathTokens.primaryButtonGradient,
+              gradient: isDisabled ? null : mathTokens.primaryButtonGradient,
               color: isDisabled ? AppColors.border : null,
               borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
               boxShadow: isDisabled
@@ -173,63 +172,64 @@ class _AppButtonState extends State<AppButton>
       button = switch (widget.variant) {
         AppButtonVariant.primary => const SizedBox.shrink(), // handled above
         AppButtonVariant.secondary => ElevatedButton(
-            onPressed: effectiveOnPressed,
-            style: ElevatedButton.styleFrom(
-              enabledMouseCursor: SystemMouseCursors.click,
-              disabledMouseCursor: SystemMouseCursors.basic,
-              backgroundColor: AppColors.surfaceVariant,
-              foregroundColor: AppColors.textPrimary,
-              minimumSize: Size(effectiveWidth ?? 0, 48),
-              padding: widget.padding ??
-                  const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.s20,
-                    vertical: 0,
-                  ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                side: const BorderSide(color: AppColors.border),
-              ),
-              elevation: 0,
+          onPressed: effectiveOnPressed,
+          style: ElevatedButton.styleFrom(
+            enabledMouseCursor: SystemMouseCursors.click,
+            disabledMouseCursor: SystemMouseCursors.basic,
+            backgroundColor: AppColors.surfaceVariant,
+            foregroundColor: AppColors.textPrimary,
+            minimumSize: Size(effectiveWidth ?? 0, 48),
+            padding:
+                widget.padding ??
+                const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.s20,
+                  vertical: 0,
+                ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+              side: const BorderSide(color: AppColors.border),
             ),
-            child: childWidget,
+            elevation: 0,
           ),
+          child: childWidget,
+        ),
         AppButtonVariant.outlined => OutlinedButton(
-            onPressed: effectiveOnPressed,
-            style: OutlinedButton.styleFrom(
-              enabledMouseCursor: SystemMouseCursors.click,
-              disabledMouseCursor: SystemMouseCursors.basic,
-              minimumSize: Size(effectiveWidth ?? 0, 48),
-              padding: widget.padding ??
-                  const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.s20,
-                    vertical: 0,
-                  ),
-            ),
-            child: childWidget,
+          onPressed: effectiveOnPressed,
+          style: OutlinedButton.styleFrom(
+            enabledMouseCursor: SystemMouseCursors.click,
+            disabledMouseCursor: SystemMouseCursors.basic,
+            minimumSize: Size(effectiveWidth ?? 0, 48),
+            padding:
+                widget.padding ??
+                const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.s20,
+                  vertical: 0,
+                ),
           ),
+          child: childWidget,
+        ),
         AppButtonVariant.text => TextButton(
-            onPressed: effectiveOnPressed,
-            style: TextButton.styleFrom(
-              enabledMouseCursor: SystemMouseCursors.click,
-              disabledMouseCursor: SystemMouseCursors.basic,
-              foregroundColor: AppColors.primary,
-              padding: widget.padding ??
-                  const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.s16,
-                    vertical: 0,
-                  ),
-            ),
-            child: childWidget,
+          onPressed: effectiveOnPressed,
+          style: TextButton.styleFrom(
+            enabledMouseCursor: SystemMouseCursors.click,
+            disabledMouseCursor: SystemMouseCursors.basic,
+            foregroundColor: AppColors.primary,
+            padding:
+                widget.padding ??
+                const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.s16,
+                  vertical: 0,
+                ),
           ),
+          child: childWidget,
+        ),
       };
 
       // Wrap non-primary buttons with scale animation too
       button = AnimatedBuilder(
         animation: _scaleAnimation,
-        builder: (context, child) => Transform.scale(
-          scale: _scaleAnimation.value,
-          child: child,
-        ),
+        builder: (context, child) =>
+            Transform.scale(scale: _scaleAnimation.value, child: child),
         child: button,
       );
     }

@@ -7,11 +7,15 @@ void main() {
 
     test('extracts ID from standard watch URL', () {
       expect(
-        YouTubeUrlParser.extractVideoId('https://www.youtube.com/watch?v=$validId'),
+        YouTubeUrlParser.extractVideoId(
+          'https://www.youtube.com/watch?v=$validId',
+        ),
         equals(validId),
       );
       expect(
-        YouTubeUrlParser.extractVideoId('http://youtube.com/watch?v=$validId&feature=shared'),
+        YouTubeUrlParser.extractVideoId(
+          'http://youtube.com/watch?v=$validId&feature=shared',
+        ),
         equals(validId),
       );
     });
@@ -29,36 +33,42 @@ void main() {
 
     test('extracts ID from embed URL', () {
       expect(
-        YouTubeUrlParser.extractVideoId('https://www.youtube.com/embed/$validId'),
+        YouTubeUrlParser.extractVideoId(
+          'https://www.youtube.com/embed/$validId',
+        ),
         equals(validId),
       );
     });
 
     test('extracts ID from live stream URL', () {
       expect(
-        YouTubeUrlParser.extractVideoId('https://www.youtube.com/live/$validId?feature=share'),
+        YouTubeUrlParser.extractVideoId(
+          'https://www.youtube.com/live/$validId?feature=share',
+        ),
         equals(validId),
       );
     });
 
     test('extracts ID from mobile URL', () {
       expect(
-        YouTubeUrlParser.extractVideoId('https://m.youtube.com/watch?v=$validId'),
+        YouTubeUrlParser.extractVideoId(
+          'https://m.youtube.com/watch?v=$validId',
+        ),
         equals(validId),
       );
     });
 
     test('extracts ID from direct 11-char ID', () {
-      expect(
-        YouTubeUrlParser.extractVideoId(validId),
-        equals(validId),
-      );
+      expect(YouTubeUrlParser.extractVideoId(validId), equals(validId));
     });
 
     test('returns null for invalid URLs or empty strings', () {
       expect(YouTubeUrlParser.extractVideoId(''), isNull);
       expect(YouTubeUrlParser.extractVideoId(null), isNull);
-      expect(YouTubeUrlParser.extractVideoId('https://vimeo.com/12345678'), isNull);
+      expect(
+        YouTubeUrlParser.extractVideoId('https://vimeo.com/12345678'),
+        isNull,
+      );
       expect(YouTubeUrlParser.extractVideoId('not a url'), isNull);
       expect(YouTubeUrlParser.extractVideoId('https://google.com'), isNull);
     });

@@ -34,7 +34,9 @@ class _CourseSettingsDialogState extends State<CourseSettingsDialog> {
   void initState() {
     super.initState();
     _enforceSequential = widget.group.enforceSequentialLearning;
-    _passingScoreController = TextEditingController(text: widget.group.defaultPassingScore.toString());
+    _passingScoreController = TextEditingController(
+      text: widget.group.defaultPassingScore.toString(),
+    );
   }
 
   @override
@@ -45,8 +47,9 @@ class _CourseSettingsDialogState extends State<CourseSettingsDialog> {
 
   void _save() async {
     if (!_formKey.currentState!.validate()) return;
-    final passingScore = int.tryParse(_passingScoreController.text.trim()) ?? 60;
-    
+    final passingScore =
+        int.tryParse(_passingScoreController.text.trim()) ?? 60;
+
     final success = await context.read<GroupsCubit>().updateGroupSettings(
       groupId: widget.group.id,
       enforceSequentialLearning: _enforceSequential,
@@ -85,7 +88,11 @@ class _CourseSettingsDialogState extends State<CourseSettingsDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _buildSectionLabel(context, context.l10n.courseSettingsTitle, Icons.settings),
+            _buildSectionLabel(
+              context,
+              context.l10n.courseSettingsTitle,
+              Icons.settings,
+            ),
             const SizedBox(height: AppSpacing.s16),
             SwitchListTile(
               title: Text(context.l10n.sequentialLearning),
@@ -112,7 +119,8 @@ class _CourseSettingsDialogState extends State<CourseSettingsDialog> {
               validator: (v) {
                 if (v == null || v.trim().isEmpty) return 'Required';
                 final n = int.tryParse(v.trim());
-                if (n == null || n < 1 || n > 100) return 'Must be between 1 and 100';
+                if (n == null || n < 1 || n > 100)
+                  return 'Must be between 1 and 100';
                 return null;
               },
             ),
@@ -124,10 +132,7 @@ class _CourseSettingsDialogState extends State<CourseSettingsDialog> {
           onPressed: () => Navigator.of(context).pop(),
           child: Text(context.l10n.cancel),
         ),
-        ElevatedButton(
-          onPressed: _save,
-          child: Text(context.l10n.save),
-        ),
+        ElevatedButton(onPressed: _save, child: Text(context.l10n.save)),
       ],
     );
   }

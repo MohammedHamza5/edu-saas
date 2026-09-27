@@ -25,11 +25,13 @@ class NotificationsCubit extends Cubit<NotificationsState> {
     // ── Stale-While-Revalidate ────────────────────────────────────────────
     final cached = AppCache.notifications.getStale(_cacheKeyNotifs);
     if (cached is _NotifsCachePayload) {
-      emit(NotificationsLoaded(
-        notifications: cached.notifications,
-        unreadCount: cached.unreadCount,
-        hasMore: cached.notifications.length >= _pageSize,
-      ));
+      emit(
+        NotificationsLoaded(
+          notifications: cached.notifications,
+          unreadCount: cached.unreadCount,
+          hasMore: cached.notifications.length >= _pageSize,
+        ),
+      );
       if (!forceRefresh && AppCache.notifications.has(_cacheKeyNotifs)) return;
       // Continue to refresh silently
     } else {
@@ -50,21 +52,24 @@ class NotificationsCubit extends Cubit<NotificationsState> {
 
     if (notifsResult.isSuccess) {
       final notifs = notifsResult.dataOrNull ?? <NotificationEntity>[];
-      final count = countResult.dataOrNull ?? notifs.where((n) => !n.isRead).length;
+      final count =
+          countResult.dataOrNull ?? notifs.where((n) => !n.isRead).length;
 
       // Cache result
-      AppCache.notifications.put(_cacheKeyNotifs, _NotifsCachePayload(
-        notifications: notifs,
-        unreadCount: count,
-      ));
+      AppCache.notifications.put(
+        _cacheKeyNotifs,
+        _NotifsCachePayload(notifications: notifs, unreadCount: count),
+      );
 
       if (!isClosed) {
-        emit(NotificationsLoaded(
-          notifications: notifs,
-          unreadCount: count,
-          hasMore: notifs.length == _pageSize,
-          isLoadingMore: false,
-        ));
+        emit(
+          NotificationsLoaded(
+            notifications: notifs,
+            unreadCount: count,
+            hasMore: notifs.length == _pageSize,
+            isLoadingMore: false,
+          ),
+        );
       }
     } else {
       if (!isClosed) {
@@ -106,11 +111,13 @@ class NotificationsCubit extends Cubit<NotificationsState> {
         ),
       );
 
-      emit(currentState.copyWith(
-        notifications: allNotifs,
-        hasMore: newNotifs.length == _pageSize,
-        isLoadingMore: false,
-      ));
+      emit(
+        currentState.copyWith(
+          notifications: allNotifs,
+          hasMore: newNotifs.length == _pageSize,
+          isLoadingMore: false,
+        ),
+      );
     } else {
       emit(currentState.copyWith(isLoadingMore: false));
     }
@@ -130,12 +137,13 @@ class NotificationsCubit extends Cubit<NotificationsState> {
 
     if (notifsResult.isSuccess) {
       final notifs = notifsResult.dataOrNull ?? <NotificationEntity>[];
-      final count = countResult.dataOrNull ?? notifs.where((n) => !n.isRead).length;
+      final count =
+          countResult.dataOrNull ?? notifs.where((n) => !n.isRead).length;
 
-      AppCache.notifications.put(_cacheKeyNotifs, _NotifsCachePayload(
-        notifications: notifs,
-        unreadCount: count,
-      ));
+      AppCache.notifications.put(
+        _cacheKeyNotifs,
+        _NotifsCachePayload(notifications: notifs, unreadCount: count),
+      );
 
       if (!isClosed) {
         emit(NotificationsLoaded(notifications: notifs, unreadCount: count));
@@ -166,10 +174,10 @@ class NotificationsCubit extends Cubit<NotificationsState> {
     final newCount = (currentState.unreadCount - 1).clamp(0, 9999);
 
     // Update cache optimistically
-    AppCache.notifications.put(_cacheKeyNotifs, _NotifsCachePayload(
-      notifications: updatedNotifs,
-      unreadCount: newCount,
-    ));
+    AppCache.notifications.put(
+      _cacheKeyNotifs,
+      _NotifsCachePayload(notifications: updatedNotifs, unreadCount: newCount),
+    );
 
     emit(
       currentState.copyWith(
@@ -197,10 +205,10 @@ class NotificationsCubit extends Cubit<NotificationsState> {
     }).toList();
 
     // Update cache optimistically
-    AppCache.notifications.put(_cacheKeyNotifs, _NotifsCachePayload(
-      notifications: updatedNotifs,
-      unreadCount: 0,
-    ));
+    AppCache.notifications.put(
+      _cacheKeyNotifs,
+      _NotifsCachePayload(notifications: updatedNotifs, unreadCount: 0),
+    );
 
     emit(
       currentState.copyWith(

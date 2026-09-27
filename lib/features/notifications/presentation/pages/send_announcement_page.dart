@@ -107,7 +107,9 @@ class _SendAnnouncementPageState extends State<SendAnnouncementPage> {
           if (state is NotificationsLoaded && state.sendSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(state.message ?? context.l10n.announcementSentSuccess),
+                content: Text(
+                  state.message ?? context.l10n.announcementSentSuccess,
+                ),
                 backgroundColor: AppColors.success,
                 behavior: SnackBarBehavior.floating,
               ),
@@ -488,7 +490,9 @@ class _SendAnnouncementPageState extends State<SendAnnouncementPage> {
                                               _titleController.text
                                                       .trim()
                                                       .isEmpty
-                                                  ? context.l10n.previewTitlePlaceholder
+                                                  ? context
+                                                        .l10n
+                                                        .previewTitlePlaceholder
                                                   : _titleController.text
                                                         .trim(),
                                               style: TextStyle(
@@ -523,7 +527,9 @@ class _SendAnnouncementPageState extends State<SendAnnouncementPage> {
                                       const SizedBox(height: 4),
                                       Text(
                                         _bodyController.text.trim().isEmpty
-                                            ? context.l10n.previewBodyPlaceholder
+                                            ? context
+                                                  .l10n
+                                                  .previewBodyPlaceholder
                                             : _bodyController.text.trim(),
                                         style: TextStyle(
                                           fontSize: 12,

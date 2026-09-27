@@ -24,7 +24,8 @@ class YouTubeUrlParser {
     if (trimmed.isEmpty) return null;
 
     // Check if the input is directly an 11-character YouTube ID
-    if (trimmed.length == 11 && RegExp(r'^[a-zA-Z0-9_-]{11}$').hasMatch(trimmed)) {
+    if (trimmed.length == 11 &&
+        RegExp(r'^[a-zA-Z0-9_-]{11}$').hasMatch(trimmed)) {
       return trimmed;
     }
 
@@ -42,7 +43,9 @@ class YouTubeUrlParser {
 
   /// Returns the privacy-enhanced embed URL for the YouTube video.
   static String getEmbedUrl(String videoId, {int? startSeconds}) {
-    final startParam = (startSeconds != null && startSeconds > 0) ? '&start=$startSeconds' : '';
+    final startParam = (startSeconds != null && startSeconds > 0)
+        ? '&start=$startSeconds'
+        : '';
     return 'https://www.youtube-nocookie.com/embed/$videoId?enablejsapi=1&rel=0&modestbranding=1&iv_load_policy=3&controls=1&playsinline=1$startParam';
   }
 }

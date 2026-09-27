@@ -76,11 +76,11 @@ class AppLogo extends StatelessWidget {
     this.symbol,
     this.withGlow = false,
     this.useAsset = true,
-  })  : showName = false,
-        platformName = null,
-        subtitle = null,
-        nameColor = null,
-        isHorizontal = false;
+  }) : showName = false,
+       platformName = null,
+       subtitle = null,
+       nameColor = null,
+       isHorizontal = false;
 
   @override
   Widget build(BuildContext context) {
@@ -100,7 +100,9 @@ class AppLogo extends StatelessWidget {
     final effectiveSecondary = secondaryColor ?? branding.primaryLight;
     final effectiveSymbol = symbol ?? branding.signatureSymbol;
     final effectiveName = platformName ?? branding.localizedBrandName(context);
-    final effectiveNameColor = nameColor ?? (theme.brightness == Brightness.dark ? Colors.white : effectivePrimary);
+    final effectiveNameColor =
+        nameColor ??
+        (theme.brightness == Brightness.dark ? Colors.white : effectivePrimary);
 
     final emblem = _buildEmblem(
       effectivePrimary: effectivePrimary,
@@ -141,7 +143,10 @@ class AppLogo extends StatelessWidget {
                   Text(
                     subtitle!,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.7) ??
+                      color:
+                          theme.textTheme.bodySmall?.color?.withValues(
+                            alpha: 0.7,
+                          ) ??
                           effectivePrimary.withValues(alpha: 0.7),
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
@@ -227,11 +232,12 @@ class AppLogo extends StatelessWidget {
                 width: size,
                 height: size,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => _buildVectorFallback(
-                  effectivePrimary: effectivePrimary,
-                  effectiveSecondary: effectiveSecondary,
-                  effectiveSymbol: effectiveSymbol,
-                ),
+                errorBuilder: (context, error, stackTrace) =>
+                    _buildVectorFallback(
+                      effectivePrimary: effectivePrimary,
+                      effectiveSecondary: effectiveSecondary,
+                      effectiveSymbol: effectiveSymbol,
+                    ),
               )
             : _buildVectorFallback(
                 effectivePrimary: effectivePrimary,

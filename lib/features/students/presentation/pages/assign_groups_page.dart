@@ -201,7 +201,9 @@ class _AssignGroupsPageState extends State<AssignGroupsPage> {
                               ),
                             ),
                             child: Text(
-                              context.l10n.groupsCountBadge(state.currentGroups.length),
+                              context.l10n.groupsCountBadge(
+                                state.currentGroups.length,
+                              ),
                               style: const TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
@@ -286,7 +288,9 @@ class _AssignGroupsPageState extends State<AssignGroupsPage> {
                     else if (availableFiltered.isEmpty)
                       AppEmptyView(
                         icon: Icons.search_off_rounded,
-                        message: context.l10n.noGroupsMatchingQuery(_searchQuery),
+                        message: context.l10n.noGroupsMatchingQuery(
+                          _searchQuery,
+                        ),
                       )
                     else
                       ...availableFiltered.map(
@@ -313,9 +317,7 @@ class _AssignGroupsPageState extends State<AssignGroupsPage> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(context.l10n.assignGroupConfirmTitle),
-        content: Text(
-          context.l10n.assignGroupConfirmBody(g.groupName),
-        ),
+        content: Text(context.l10n.assignGroupConfirmBody(g.groupName)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -342,9 +344,7 @@ class _AssignGroupsPageState extends State<AssignGroupsPage> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(context.l10n.unassignGroupConfirmTitle),
-        content: Text(
-          context.l10n.unassignGroupConfirmBody(g.groupName),
-        ),
+        content: Text(context.l10n.unassignGroupConfirmBody(g.groupName)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -497,4 +497,3 @@ class _GroupTile extends StatelessWidget {
     );
   }
 }
-

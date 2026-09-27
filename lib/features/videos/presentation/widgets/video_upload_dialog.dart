@@ -70,7 +70,9 @@ class _VideoUploadDialogState extends State<VideoUploadDialog> {
   @override
   void initState() {
     super.initState();
-    _selectedTabIndex = AppConfig.isBunnyEnabled && !AppConfig.isYouTubeEnabled ? 1 : 0;
+    _selectedTabIndex = AppConfig.isBunnyEnabled && !AppConfig.isYouTubeEnabled
+        ? 1
+        : 0;
   }
 
   @override
@@ -102,12 +104,12 @@ class _VideoUploadDialogState extends State<VideoUploadDialog> {
     }
 
     final success = await context.read<VideosCubit>().linkYouTubeVideo(
-          contentId: widget.contentId,
-          youtubeUrl: url,
-          title: _titleController.text.trim().isNotEmpty
-              ? _titleController.text.trim()
-              : null,
-        );
+      contentId: widget.contentId,
+      youtubeUrl: url,
+      title: _titleController.text.trim().isNotEmpty
+          ? _titleController.text.trim()
+          : null,
+    );
 
     if (success && mounted) {
       Navigator.of(context).pop();
@@ -167,11 +169,11 @@ class _VideoUploadDialogState extends State<VideoUploadDialog> {
     }
 
     context.read<VideosCubit>().uploadVideo(
-          contentId: widget.contentId,
-          title: _titleController.text.trim(),
-          videoBytes: _fileBytes!,
-          fileName: _selectedFile!.name,
-        );
+      contentId: widget.contentId,
+      title: _titleController.text.trim(),
+      videoBytes: _fileBytes!,
+      fileName: _selectedFile!.name,
+    );
   }
 
   String _formatFileSize(int bytes) {
@@ -213,24 +215,24 @@ class _VideoUploadDialogState extends State<VideoUploadDialog> {
         return PopScope(
           canPop: !isUploading,
           child: Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-          ),
-          insetPadding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.s16,
-            vertical: AppSpacing.s24,
-          ),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 520),
-            child: SizedBox(
-              width: double.infinity,
-              child: SingleChildScrollView(
-              padding: const EdgeInsets.all(AppSpacing.s20),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+            ),
+            insetPadding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.s16,
+              vertical: AppSpacing.s24,
+            ),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 520),
+              child: SizedBox(
+                width: double.infinity,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(AppSpacing.s20),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         // Header
                         Row(
@@ -239,7 +241,9 @@ class _VideoUploadDialogState extends State<VideoUploadDialog> {
                               padding: const EdgeInsets.all(AppSpacing.s8),
                               decoration: BoxDecoration(
                                 color: AppColors.primary.withAlpha(25),
-                                borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                                borderRadius: BorderRadius.circular(
+                                  AppSpacing.radiusSmall,
+                                ),
                               ),
                               child: const Icon(
                                 Icons.video_call_rounded,
@@ -254,9 +258,8 @@ class _VideoUploadDialogState extends State<VideoUploadDialog> {
                                 children: [
                                   Text(
                                     context.l10n.uploadNewLessonVideo,
-                                    style: theme.textTheme.titleMedium?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                    style: theme.textTheme.titleMedium
+                                        ?.copyWith(fontWeight: FontWeight.bold),
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
@@ -285,7 +288,9 @@ class _VideoUploadDialogState extends State<VideoUploadDialog> {
                           Container(
                             decoration: BoxDecoration(
                               color: AppColors.surfaceVariant.withAlpha(80),
-                              borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.radiusSmall,
+                              ),
                             ),
                             padding: const EdgeInsets.all(4),
                             child: Row(
@@ -294,19 +299,29 @@ class _VideoUploadDialogState extends State<VideoUploadDialog> {
                                   child: InkWell(
                                     onTap: isUploading
                                         ? null
-                                        : () => setState(() => _selectedTabIndex = 0),
-                                    borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                                        : () => setState(
+                                            () => _selectedTabIndex = 0,
+                                          ),
+                                    borderRadius: BorderRadius.circular(
+                                      AppSpacing.radiusSmall,
+                                    ),
                                     child: Container(
-                                      padding: const EdgeInsets.symmetric(vertical: 8),
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 8,
+                                      ),
                                       decoration: BoxDecoration(
                                         color: _selectedTabIndex == 0
                                             ? AppColors.surface
                                             : Colors.transparent,
-                                        borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                                        borderRadius: BorderRadius.circular(
+                                          AppSpacing.radiusSmall,
+                                        ),
                                         boxShadow: _selectedTabIndex == 0
                                             ? [
                                                 BoxShadow(
-                                                  color: Colors.black.withAlpha(15),
+                                                  color: Colors.black.withAlpha(
+                                                    15,
+                                                  ),
                                                   blurRadius: 4,
                                                   offset: const Offset(0, 1),
                                                 ),
@@ -314,7 +329,8 @@ class _VideoUploadDialogState extends State<VideoUploadDialog> {
                                             : null,
                                       ),
                                       child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
                                         children: [
                                           Icon(
                                             Icons.play_circle_fill_rounded,
@@ -346,19 +362,29 @@ class _VideoUploadDialogState extends State<VideoUploadDialog> {
                                   child: InkWell(
                                     onTap: isUploading
                                         ? null
-                                        : () => setState(() => _selectedTabIndex = 1),
-                                    borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                                        : () => setState(
+                                            () => _selectedTabIndex = 1,
+                                          ),
+                                    borderRadius: BorderRadius.circular(
+                                      AppSpacing.radiusSmall,
+                                    ),
                                     child: Container(
-                                      padding: const EdgeInsets.symmetric(vertical: 8),
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 8,
+                                      ),
                                       decoration: BoxDecoration(
                                         color: _selectedTabIndex == 1
                                             ? AppColors.surface
                                             : Colors.transparent,
-                                        borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                                        borderRadius: BorderRadius.circular(
+                                          AppSpacing.radiusSmall,
+                                        ),
                                         boxShadow: _selectedTabIndex == 1
                                             ? [
                                                 BoxShadow(
-                                                  color: Colors.black.withAlpha(15),
+                                                  color: Colors.black.withAlpha(
+                                                    15,
+                                                  ),
                                                   blurRadius: 4,
                                                   offset: const Offset(0, 1),
                                                 ),
@@ -366,7 +392,8 @@ class _VideoUploadDialogState extends State<VideoUploadDialog> {
                                             : null,
                                       ),
                                       child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
                                         children: [
                                           Icon(
                                             Icons.cloud_upload_rounded,
@@ -417,7 +444,8 @@ class _VideoUploadDialogState extends State<VideoUploadDialog> {
                               if (val == null || val.trim().isEmpty) {
                                 return context.l10n.invalidYoutubeUrl;
                               }
-                              if (YouTubeUrlParser.extractVideoId(val.trim()) == null) {
+                              if (YouTubeUrlParser.extractVideoId(val.trim()) ==
+                                  null) {
                                 return context.l10n.invalidYoutubeUrl;
                               }
                               return null;
@@ -429,27 +457,37 @@ class _VideoUploadDialogState extends State<VideoUploadDialog> {
                           // Thumbnail Preview if valid URL entered
                           if (_extractedYouTubeId != null) ...[
                             ClipRRect(
-                              borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.radiusSmall,
+                              ),
                               child: Stack(
                                 alignment: Alignment.center,
                                 children: [
                                   CachedNetworkImage(
-                                    imageUrl: YouTubeUrlParser.getThumbnailUrl(_extractedYouTubeId!),
+                                    imageUrl: YouTubeUrlParser.getThumbnailUrl(
+                                      _extractedYouTubeId!,
+                                    ),
                                     height: 160,
                                     width: double.infinity,
                                     fit: BoxFit.cover,
                                     placeholder: (context, url) => Container(
                                       height: 160,
                                       color: AppColors.surfaceVariant,
-                                      child: const Center(child: AppLoadingView.compact(size: 20)),
-                                    ),
-                                    errorWidget: (context, url, error) => Container(
-                                      height: 160,
-                                      color: AppColors.surfaceVariant,
                                       child: const Center(
-                                        child: Icon(Icons.broken_image_rounded, color: AppColors.textSecondary),
+                                        child: AppLoadingView.compact(size: 20),
                                       ),
                                     ),
+                                    errorWidget: (context, url, error) =>
+                                        Container(
+                                          height: 160,
+                                          color: AppColors.surfaceVariant,
+                                          child: const Center(
+                                            child: Icon(
+                                              Icons.broken_image_rounded,
+                                              color: AppColors.textSecondary,
+                                            ),
+                                          ),
+                                        ),
                                   ),
                                   Container(
                                     height: 160,
@@ -462,14 +500,21 @@ class _VideoUploadDialogState extends State<VideoUploadDialog> {
                                       color: Color(0xFFFF0000),
                                       shape: BoxShape.circle,
                                     ),
-                                    child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 28),
+                                    child: const Icon(
+                                      Icons.play_arrow_rounded,
+                                      color: Colors.white,
+                                      size: 28,
+                                    ),
                                   ),
                                   Positioned(
                                     bottom: 8,
                                     left: 8,
                                     right: 8,
                                     child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
                                       decoration: BoxDecoration(
                                         color: Colors.black.withAlpha(180),
                                         borderRadius: BorderRadius.circular(4),
@@ -495,13 +540,21 @@ class _VideoUploadDialogState extends State<VideoUploadDialog> {
                             padding: const EdgeInsets.all(AppSpacing.s12),
                             decoration: BoxDecoration(
                               color: AppColors.primary.withAlpha(15),
-                              borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                              border: Border.all(color: AppColors.primary.withAlpha(60)),
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.radiusSmall,
+                              ),
+                              border: Border.all(
+                                color: AppColors.primary.withAlpha(60),
+                              ),
                             ),
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Icon(Icons.security_rounded, size: 18, color: AppColors.primary),
+                                const Icon(
+                                  Icons.security_rounded,
+                                  size: 18,
+                                  color: AppColors.primary,
+                                ),
                                 const SizedBox(width: AppSpacing.s8),
                                 Expanded(
                                   child: Text(
@@ -526,7 +579,9 @@ class _VideoUploadDialogState extends State<VideoUploadDialog> {
                             hintText: context.l10n.lessonTitleHint,
                             enabled: !isUploading,
                             validator: (val) =>
-                                val == null || val.trim().isEmpty ? context.l10n.lessonTitleRequired : null,
+                                val == null || val.trim().isEmpty
+                                ? context.l10n.lessonTitleRequired
+                                : null,
                           ),
 
                           const SizedBox(height: AppSpacing.s12),
@@ -559,14 +614,17 @@ class _VideoUploadDialogState extends State<VideoUploadDialog> {
                             ],
                           ),
                         ]
-
                         // TAB 1: BUNNY STREAM UPLOAD
                         else ...[
                           // File Picker Button / Info Card
                           if (_selectedFile == null)
                             InkWell(
-                              onTap: isUploading || _isSelecting ? null : _pickVideo,
-                              borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                              onTap: isUploading || _isSelecting
+                                  ? null
+                                  : _pickVideo,
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.radiusMedium,
+                              ),
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
                                   vertical: AppSpacing.s24,
@@ -577,7 +635,9 @@ class _VideoUploadDialogState extends State<VideoUploadDialog> {
                                     color: AppColors.primary.withAlpha(100),
                                     width: 1.5,
                                   ),
-                                  borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                                  borderRadius: BorderRadius.circular(
+                                    AppSpacing.radiusMedium,
+                                  ),
                                   color: AppColors.primary.withAlpha(8),
                                 ),
                                 child: Column(
@@ -589,7 +649,9 @@ class _VideoUploadDialogState extends State<VideoUploadDialog> {
                                     ),
                                     const SizedBox(height: AppSpacing.s8),
                                     Text(
-                                      _isSelecting ? context.l10n.openingDocuments : context.l10n.clickToPickVideo,
+                                      _isSelecting
+                                          ? context.l10n.openingDocuments
+                                          : context.l10n.clickToPickVideo,
                                       textAlign: TextAlign.center,
                                       style: const TextStyle(
                                         fontWeight: FontWeight.bold,
@@ -618,12 +680,17 @@ class _VideoUploadDialogState extends State<VideoUploadDialog> {
                                   const CircleAvatar(
                                     radius: 18,
                                     backgroundColor: AppColors.surfaceVariant,
-                                    child: Icon(Icons.movie_rounded, color: AppColors.primary, size: 20),
+                                    child: Icon(
+                                      Icons.movie_rounded,
+                                      color: AppColors.primary,
+                                      size: 20,
+                                    ),
                                   ),
                                   const SizedBox(width: AppSpacing.s12),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           _selectedFile!.name,
@@ -647,7 +714,10 @@ class _VideoUploadDialogState extends State<VideoUploadDialog> {
                                   ),
                                   if (!isUploading)
                                     IconButton(
-                                      icon: const Icon(Icons.refresh_rounded, color: AppColors.primary),
+                                      icon: const Icon(
+                                        Icons.refresh_rounded,
+                                        color: AppColors.primary,
+                                      ),
                                       tooltip: context.l10n.changeFile,
                                       onPressed: _pickVideo,
                                     ),
@@ -664,7 +734,9 @@ class _VideoUploadDialogState extends State<VideoUploadDialog> {
                             hintText: context.l10n.lessonTitleHint,
                             enabled: !isUploading,
                             validator: (val) =>
-                                val == null || val.trim().isEmpty ? context.l10n.lessonTitleRequired : null,
+                                val == null || val.trim().isEmpty
+                                ? context.l10n.lessonTitleRequired
+                                : null,
                           ),
 
                           const SizedBox(height: AppSpacing.s12),
@@ -685,15 +757,21 @@ class _VideoUploadDialogState extends State<VideoUploadDialog> {
                               padding: const EdgeInsets.all(AppSpacing.s12),
                               decoration: BoxDecoration(
                                 color: AppColors.warning.withAlpha(20),
-                                borderRadius:
-                                    BorderRadius.circular(AppSpacing.radiusSmall),
-                                border: Border.all(color: AppColors.warning.withAlpha(80)),
+                                borderRadius: BorderRadius.circular(
+                                  AppSpacing.radiusSmall,
+                                ),
+                                border: Border.all(
+                                  color: AppColors.warning.withAlpha(80),
+                                ),
                               ),
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Icon(Icons.warning_amber_rounded,
-                                      size: 20, color: AppColors.warning),
+                                  const Icon(
+                                    Icons.warning_amber_rounded,
+                                    size: 20,
+                                    color: AppColors.warning,
+                                  ),
                                   const SizedBox(width: AppSpacing.s10),
                                   Expanded(
                                     child: Text(
@@ -719,7 +797,10 @@ class _VideoUploadDialogState extends State<VideoUploadDialog> {
                                     const SizedBox(width: AppSpacing.s8),
                                     Text(
                                       context.l10n.uploadingVideoToCdn,
-                                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -735,12 +816,16 @@ class _VideoUploadDialogState extends State<VideoUploadDialog> {
                             ),
                             const SizedBox(height: AppSpacing.s8),
                             ClipRRect(
-                              borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.radiusFull,
+                              ),
                               child: LinearProgressIndicator(
                                 value: uploadProgress,
                                 minHeight: 8,
                                 backgroundColor: AppColors.surfaceVariant,
-                                valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+                                valueColor: const AlwaysStoppedAnimation<Color>(
+                                  AppColors.primary,
+                                ),
                               ),
                             ),
                             const SizedBox(height: AppSpacing.s20),
@@ -758,9 +843,13 @@ class _VideoUploadDialogState extends State<VideoUploadDialog> {
                               const SizedBox(width: AppSpacing.s8),
                               AppButton(
                                 text: isUploading
-                                    ? context.l10n.uploadingWithPercentage(uploadPercentage)
+                                    ? context.l10n.uploadingWithPercentage(
+                                        uploadPercentage,
+                                      )
                                     : context.l10n.startUpload,
-                                icon: isUploading ? null : Icons.file_upload_outlined,
+                                icon: isUploading
+                                    ? null
+                                    : Icons.file_upload_outlined,
                                 isLoading: isUploading,
                                 onPressed: isUploading ? null : _startUpload,
                               ),
@@ -768,14 +857,14 @@ class _VideoUploadDialogState extends State<VideoUploadDialog> {
                           ),
                         ],
                       ],
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
-  },
-);
   }
 }

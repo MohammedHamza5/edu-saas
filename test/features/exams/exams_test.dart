@@ -143,7 +143,9 @@ class FakeExamsRepository implements ExamsRepository {
     if (shouldFail) return FailureResult(ServerFailure(failureMessage));
 
     final existing = mockAttempts
-        .where((a) => a.examId == examId && a.status == AttemptStatus.inProgress)
+        .where(
+          (a) => a.examId == examId && a.status == AttemptStatus.inProgress,
+        )
         .firstOrNull;
 
     if (existing != null) {
@@ -248,10 +250,30 @@ class FakeExamsRepository implements ExamsRepository {
             points: 50,
             sortOrder: 0,
             options: [
-              QuestionOptionEntity(id: 'opt-1', questionId: 'q-1', optionText: '2', isCorrect: false),
-              QuestionOptionEntity(id: 'opt-2', questionId: 'q-1', optionText: '3', isCorrect: true),
-              QuestionOptionEntity(id: 'opt-3', questionId: 'q-1', optionText: '4', isCorrect: false),
-              QuestionOptionEntity(id: 'opt-4', questionId: 'q-1', optionText: '5', isCorrect: false),
+              QuestionOptionEntity(
+                id: 'opt-1',
+                questionId: 'q-1',
+                optionText: '2',
+                isCorrect: false,
+              ),
+              QuestionOptionEntity(
+                id: 'opt-2',
+                questionId: 'q-1',
+                optionText: '3',
+                isCorrect: true,
+              ),
+              QuestionOptionEntity(
+                id: 'opt-3',
+                questionId: 'q-1',
+                optionText: '4',
+                isCorrect: false,
+              ),
+              QuestionOptionEntity(
+                id: 'opt-4',
+                questionId: 'q-1',
+                optionText: '5',
+                isCorrect: false,
+              ),
             ],
           ),
           ExamQuestionEntity(
@@ -262,8 +284,18 @@ class FakeExamsRepository implements ExamsRepository {
             points: 50,
             sortOrder: 1,
             options: [
-              QuestionOptionEntity(id: 'opt-5', questionId: 'q-2', optionText: 'صح', isCorrect: true),
-              QuestionOptionEntity(id: 'opt-6', questionId: 'q-2', optionText: 'خطأ', isCorrect: false),
+              QuestionOptionEntity(
+                id: 'opt-5',
+                questionId: 'q-2',
+                optionText: 'صح',
+                isCorrect: true,
+              ),
+              QuestionOptionEntity(
+                id: 'opt-6',
+                questionId: 'q-2',
+                optionText: 'خطأ',
+                isCorrect: false,
+              ),
             ],
           ),
         ],
@@ -321,30 +353,36 @@ void main() {
       expect(attempt.score, 85);
     });
 
-    test('ExamAttemptEntity isPassed evaluates correctly against passing score', () {
-      final passingAttempt = ExamAttemptEntity(
-        id: 'attempt-1',
-        examId: 'exam-1',
-        examVersionId: 'version-1',
-        studentId: 'student-1',
-        startedAt: DateTime.now(),
-        score: 65,
-      );
+    test(
+      'ExamAttemptEntity isPassed evaluates correctly against passing score',
+      () {
+        final passingAttempt = ExamAttemptEntity(
+          id: 'attempt-1',
+          examId: 'exam-1',
+          examVersionId: 'version-1',
+          studentId: 'student-1',
+          startedAt: DateTime.now(),
+          score: 65,
+        );
 
-      expect(passingAttempt.isPassed(60), isTrue);
-      expect(passingAttempt.isPassed(70), isFalse);
-      expect(passingAttempt.isPassed(null), isTrue);
-    });
+        expect(passingAttempt.isPassed(60), isTrue);
+        expect(passingAttempt.isPassed(70), isFalse);
+        expect(passingAttempt.isPassed(null), isTrue);
+      },
+    );
 
-    test('ExamStatus and AttemptStatus enum helpers return valid Arabic strings and colors', () {
-      expect(ExamStatus.published.labelAr, 'منشور (مجمد)');
-      expect(ExamStatus.draft.labelAr, 'مسودة');
-      expect(ExamStatus.archived.labelAr, 'مؤرشف');
+    test(
+      'ExamStatus and AttemptStatus enum helpers return valid Arabic strings and colors',
+      () {
+        expect(ExamStatus.published.labelAr, 'منشور (مجمد)');
+        expect(ExamStatus.draft.labelAr, 'مسودة');
+        expect(ExamStatus.archived.labelAr, 'مؤرشف');
 
-      expect(AttemptStatus.inProgress.labelAr, 'قيد الأداء');
-      expect(AttemptStatus.submitted.labelAr, 'تم التسليم');
-      expect(AttemptStatus.expired.labelAr, 'انتهى الوقت');
-    });
+        expect(AttemptStatus.inProgress.labelAr, 'قيد الأداء');
+        expect(AttemptStatus.submitted.labelAr, 'تم التسليم');
+        expect(AttemptStatus.expired.labelAr, 'انتهى الوقت');
+      },
+    );
 
     test('ExamVersionEntity publishedAt indicates immutable snapshot', () {
       final publishedTime = DateTime.now();
@@ -362,15 +400,18 @@ void main() {
       expect(version.isPublished, isTrue);
     });
 
-    test('QuestionOptionEntity default hides isCorrect for security compliance', () {
-      const option = QuestionOptionEntity(
-        id: 'opt-x',
-        questionId: 'q-1',
-        optionText: 'خيار غير موثوق',
-      );
+    test(
+      'QuestionOptionEntity default hides isCorrect for security compliance',
+      () {
+        const option = QuestionOptionEntity(
+          id: 'opt-x',
+          questionId: 'q-1',
+          optionText: 'خيار غير موثوق',
+        );
 
-      expect(option.isCorrect, isNull);
-    });
+        expect(option.isCorrect, isNull);
+      },
+    );
   });
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -391,13 +432,16 @@ void main() {
       expect(fakeRepository.mockExams.length, 1);
     });
 
-    test('createNewExamVersion clones questions into a new draft version', () async {
-      final result = await fakeRepository.createNewExamVersion('exam-1');
-      expect(result.isSuccess, isTrue);
-      final version = (result as Success<ExamVersionEntity>).data;
-      expect(version.versionNumber, 2);
-      expect(version.status, ExamStatus.draft);
-    });
+    test(
+      'createNewExamVersion clones questions into a new draft version',
+      () async {
+        final result = await fakeRepository.createNewExamVersion('exam-1');
+        expect(result.isSuccess, isTrue);
+        final version = (result as Success<ExamVersionEntity>).data;
+        expect(version.versionNumber, 2);
+        expect(version.status, ExamStatus.draft);
+      },
+    );
 
     test('startExam creates an in_progress attempt', () async {
       final result = await fakeRepository.startExam('exam-1');
@@ -406,27 +450,33 @@ void main() {
       expect(attempt.status, AttemptStatus.inProgress);
     });
 
-    test('submitExam updates attempt status to submitted with atomic score', () async {
-      final startRes = await fakeRepository.startExam('exam-1');
-      final attemptId = (startRes as Success<ExamAttemptEntity>).data.id;
+    test(
+      'submitExam updates attempt status to submitted with atomic score',
+      () async {
+        final startRes = await fakeRepository.startExam('exam-1');
+        final attemptId = (startRes as Success<ExamAttemptEntity>).data.id;
 
-      final submitRes = await fakeRepository.submitExam(
-        attemptId: attemptId,
-        answers: {'q-1': 'opt-2'},
-      );
+        final submitRes = await fakeRepository.submitExam(
+          attemptId: attemptId,
+          answers: {'q-1': 'opt-2'},
+        );
 
-      expect(submitRes.isSuccess, isTrue);
-      final submitted = (submitRes as Success<ExamAttemptEntity>).data;
-      expect(submitted.status, AttemptStatus.submitted);
-      expect(submitted.score, 80);
-      expect(submitted.percentage, 80.0);
-    });
+        expect(submitRes.isSuccess, isTrue);
+        final submitted = (submitRes as Success<ExamAttemptEntity>).data;
+        expect(submitted.status, AttemptStatus.submitted);
+        expect(submitted.score, 80);
+        expect(submitted.percentage, 80.0);
+      },
+    );
 
     test('returns FailureResult on server failure', () async {
       fakeRepository.shouldFail = true;
       final result = await fakeRepository.getGroupExams('group-1');
       expect(result.isFailure, isTrue);
-      expect((result as FailureResult).failure.message, 'Server error occurred');
+      expect(
+        (result as FailureResult).failure.message,
+        'Server error occurred',
+      );
     });
   });
 
@@ -457,59 +507,71 @@ void main() {
       await sub.cancel();
     });
 
-    test('loadStudentExams emits ExamsEmpty when no exams are published', () async {
-      fakeRepository.mockExams = [];
+    test(
+      'loadStudentExams emits ExamsEmpty when no exams are published',
+      () async {
+        fakeRepository.mockExams = [];
 
-      final states = <ExamsState>[];
-      final sub = examsCubit.stream.listen(states.add);
+        final states = <ExamsState>[];
+        final sub = examsCubit.stream.listen(states.add);
 
-      await examsCubit.loadStudentExams();
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+        await examsCubit.loadStudentExams();
+        await Future<void>.delayed(const Duration(milliseconds: 50));
 
-      expect(states.last, isA<ExamsEmpty>());
+        expect(states.last, isA<ExamsEmpty>());
 
-      await sub.cancel();
-    });
+        await sub.cancel();
+      },
+    );
 
-    test('loadStudentExams emits StudentExamsLoaded with published exams', () async {
-      fakeRepository.mockExams = [FakeExamsRepository._sampleExam()];
+    test(
+      'loadStudentExams emits StudentExamsLoaded with published exams',
+      () async {
+        fakeRepository.mockExams = [FakeExamsRepository._sampleExam()];
 
-      final states = <ExamsState>[];
-      final sub = examsCubit.stream.listen(states.add);
+        final states = <ExamsState>[];
+        final sub = examsCubit.stream.listen(states.add);
 
-      await examsCubit.loadStudentExams();
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+        await examsCubit.loadStudentExams();
+        await Future<void>.delayed(const Duration(milliseconds: 50));
 
-      expect(states.last, isA<StudentExamsLoaded>());
-      final loaded = states.last as StudentExamsLoaded;
-      expect(loaded.exams.length, 1);
+        expect(states.last, isA<StudentExamsLoaded>());
+        final loaded = states.last as StudentExamsLoaded;
+        expect(loaded.exams.length, 1);
 
-      await sub.cancel();
-    });
+        await sub.cancel();
+      },
+    );
 
-    test('startExamTaking sets up ExamTakingState with questions and duration', () async {
-      final sample = FakeExamsRepository._sampleExam();
-      fakeRepository.mockExams = [sample];
+    test(
+      'startExamTaking sets up ExamTakingState with questions and duration',
+      () async {
+        final sample = FakeExamsRepository._sampleExam();
+        fakeRepository.mockExams = [sample];
 
-      final success = await examsCubit.startExamTaking(sample);
+        final success = await examsCubit.startExamTaking(sample);
 
-      expect(success, isTrue);
-      expect(examsCubit.state, isA<ExamTakingState>());
-      final takingState = examsCubit.state as ExamTakingState;
-      expect(takingState.questions.length, 2);
-      expect(takingState.remainingSeconds, greaterThan(0));
-    });
+        expect(success, isTrue);
+        expect(examsCubit.state, isA<ExamTakingState>());
+        final takingState = examsCubit.state as ExamTakingState;
+        expect(takingState.questions.length, 2);
+        expect(takingState.remainingSeconds, greaterThan(0));
+      },
+    );
 
-    test('selectAnswer records selected answer correctly in ExamTakingState', () async {
-      final sample = FakeExamsRepository._sampleExam();
-      fakeRepository.mockExams = [sample];
-      await examsCubit.startExamTaking(sample);
+    test(
+      'selectAnswer records selected answer correctly in ExamTakingState',
+      () async {
+        final sample = FakeExamsRepository._sampleExam();
+        fakeRepository.mockExams = [sample];
+        await examsCubit.startExamTaking(sample);
 
-      examsCubit.selectAnswer('q-1', 'opt-2');
+        examsCubit.selectAnswer('q-1', 'opt-2');
 
-      final takingState = examsCubit.state as ExamTakingState;
-      expect(takingState.answers['q-1'], 'opt-2');
-    });
+        final takingState = examsCubit.state as ExamTakingState;
+        expect(takingState.answers['q-1'], 'opt-2');
+      },
+    );
 
     test('goToQuestion navigates index correctly', () async {
       final sample = FakeExamsRepository._sampleExam();
@@ -556,16 +618,15 @@ void main() {
   // 4. Widget Tests
   // ═══════════════════════════════════════════════════════════════════════════
   group('Exam Widgets Tests', () {
-    testWidgets('ExamCard displays exam info and stats accurately', (tester) async {
+    testWidgets('ExamCard displays exam info and stats accurately', (
+      tester,
+    ) async {
       final exam = FakeExamsRepository._sampleExam();
 
       await tester.pumpWidget(
         createTestApp(
           child: Scaffold(
-            body: ExamCard(
-              exam: exam,
-              onTap: () {},
-            ),
+            body: ExamCard(exam: exam, onTap: () {}),
           ),
         ),
       );
@@ -577,42 +638,47 @@ void main() {
       expect(find.text('100 درجة'), findsOneWidget);
     });
 
-    testWidgets('QuestionOptionTile renders letter, text, and responds to tap', (tester) async {
-      const option = QuestionOptionEntity(
-        id: 'opt-1',
-        questionId: 'q-1',
-        optionText: 'خيار رقم واحد',
-      );
+    testWidgets(
+      'QuestionOptionTile renders letter, text, and responds to tap',
+      (tester) async {
+        const option = QuestionOptionEntity(
+          id: 'opt-1',
+          questionId: 'q-1',
+          optionText: 'خيار رقم واحد',
+        );
 
-      var tapped = false;
+        var tapped = false;
 
-      await tester.pumpWidget(
-        createTestApp(
-          child: Scaffold(
-            body: QuestionOptionTile(
-              option: option,
-              index: 0,
-              isSelected: false,
-              onTap: () {
-                tapped = true;
-              },
+        await tester.pumpWidget(
+          createTestApp(
+            child: Scaffold(
+              body: QuestionOptionTile(
+                option: option,
+                index: 0,
+                isSelected: false,
+                onTap: () {
+                  tapped = true;
+                },
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      await tester.pumpAndSettle();
+        await tester.pumpAndSettle();
 
-      expect(find.text('خيار رقم واحد'), findsOneWidget);
-      expect(find.text('أ'), findsOneWidget); // Arabic index indicator
+        expect(find.text('خيار رقم واحد'), findsOneWidget);
+        expect(find.text('أ'), findsOneWidget); // Arabic index indicator
 
-      await tester.tap(find.byType(QuestionOptionTile));
-      await tester.pumpAndSettle();
+        await tester.tap(find.byType(QuestionOptionTile));
+        await tester.pumpAndSettle();
 
-      expect(tapped, isTrue);
-    });
+        expect(tapped, isTrue);
+      },
+    );
 
-    testWidgets('ExamIntroPage renders exam instructions and start button', (tester) async {
+    testWidgets('ExamIntroPage renders exam instructions and start button', (
+      tester,
+    ) async {
       final exam = FakeExamsRepository._sampleExam();
 
       await tester.pumpWidget(
@@ -631,7 +697,9 @@ void main() {
       expect(find.text('تعليمات هامة قبل البدء:'), findsOneWidget);
     });
 
-    testWidgets('ExamResultPage renders student score and passed badge', (tester) async {
+    testWidgets('ExamResultPage renders student score and passed badge', (
+      tester,
+    ) async {
       final exam = FakeExamsRepository._sampleExam();
       final attempt = ExamAttemptEntity(
         id: 'att-1',
@@ -647,10 +715,7 @@ void main() {
 
       await tester.pumpWidget(
         createTestApp(
-          child: ExamResultPage(
-            exam: exam,
-            attempt: attempt,
-          ),
+          child: ExamResultPage(exam: exam, attempt: attempt),
         ),
       );
 
@@ -661,7 +726,9 @@ void main() {
       expect(find.text('80'), findsOneWidget);
     });
 
-    testWidgets('TeacherExamsPage renders empty state when no exams exist', (tester) async {
+    testWidgets('TeacherExamsPage renders empty state when no exams exist', (
+      tester,
+    ) async {
       fakeRepository.mockExams = [];
 
       await tester.pumpWidget(
@@ -681,7 +748,9 @@ void main() {
       expect(find.text('لا توجد امتحانات مضافة لهذه المجموعة'), findsOneWidget);
     });
 
-    testWidgets('StudentExamsPage renders exam cards when available', (tester) async {
+    testWidgets('StudentExamsPage renders exam cards when available', (
+      tester,
+    ) async {
       fakeRepository.mockExams = [FakeExamsRepository._sampleExam()];
 
       await tester.pumpWidget(
@@ -699,83 +768,91 @@ void main() {
       expect(find.text('امتحان الجبر والتفاضل'), findsOneWidget);
     });
 
-    testWidgets('TeacherExamsPage opens exam details sheet on card tap without error', (tester) async {
-      final exam = FakeExamsRepository._sampleExam();
-      fakeRepository.mockExams = [exam];
-      fakeRepository.mockAttempts = [
-        ExamAttemptEntity(
-          id: 'att-1',
-          examId: exam.id,
-          examVersionId: exam.activeVersion?.id ?? 'v1',
-          studentId: 'student-1',
-          studentName: 'محمود سامي',
-          score: 85,
-          percentage: 85.0,
-          status: AttemptStatus.submitted,
-          startedAt: DateTime.now().subtract(const Duration(minutes: 30)),
-          submittedAt: DateTime.now(),
-        ),
-      ];
+    testWidgets(
+      'TeacherExamsPage opens exam details sheet on card tap without error',
+      (tester) async {
+        final exam = FakeExamsRepository._sampleExam();
+        fakeRepository.mockExams = [exam];
+        fakeRepository.mockAttempts = [
+          ExamAttemptEntity(
+            id: 'att-1',
+            examId: exam.id,
+            examVersionId: exam.activeVersion?.id ?? 'v1',
+            studentId: 'student-1',
+            studentName: 'محمود سامي',
+            score: 85,
+            percentage: 85.0,
+            status: AttemptStatus.submitted,
+            startedAt: DateTime.now().subtract(const Duration(minutes: 30)),
+            submittedAt: DateTime.now(),
+          ),
+        ];
 
-      await tester.pumpWidget(
-        createTestApp(
-          child: BlocProvider<ExamsCubit>.value(
-            value: examsCubit,
-            child: const TeacherExamsPage(
-              groupId: 'group-1',
-              groupName: 'مجموعة 1',
+        await tester.pumpWidget(
+          createTestApp(
+            child: BlocProvider<ExamsCubit>.value(
+              value: examsCubit,
+              child: const TeacherExamsPage(
+                groupId: 'group-1',
+                groupName: 'مجموعة 1',
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      await tester.pumpAndSettle();
-      expect(find.text('امتحان الجبر والتفاضل'), findsOneWidget);
+        await tester.pumpAndSettle();
+        expect(find.text('امتحان الجبر والتفاضل'), findsOneWidget);
 
-      // Tap the exam card
-      await tester.tap(find.text('امتحان الجبر والتفاضل'));
-      await tester.pumpAndSettle();
+        // Tap the exam card
+        await tester.tap(find.text('امتحان الجبر والتفاضل'));
+        await tester.pumpAndSettle();
 
-      // Verify the details sheet opened with student attempt, NOT an error widget
-      expect(find.text('محمود سامي'), findsOneWidget);
-      expect(find.text('An error occurred displaying content'), findsNothing);
-    });
+        // Verify the details sheet opened with student attempt, NOT an error widget
+        expect(find.text('محمود سامي'), findsOneWidget);
+        expect(find.text('An error occurred displaying content'), findsNothing);
+      },
+    );
 
-    test('ExamsCubit loadStudentExams ignores invocation when exam is currently in progress (ExamTakingState)', () async {
-      final exam = FakeExamsRepository._sampleExam();
-      fakeRepository.mockExams = [exam];
+    test(
+      'ExamsCubit loadStudentExams ignores invocation when exam is currently in progress (ExamTakingState)',
+      () async {
+        final exam = FakeExamsRepository._sampleExam();
+        fakeRepository.mockExams = [exam];
 
-      final success = await examsCubit.startExamTaking(exam);
-      expect(success, isTrue);
-      expect(examsCubit.state, isA<ExamTakingState>());
+        final success = await examsCubit.startExamTaking(exam);
+        expect(success, isTrue);
+        expect(examsCubit.state, isA<ExamTakingState>());
 
-      // Calling loadStudentExams while taking exam should NOT overwrite ExamTakingState
-      await examsCubit.loadStudentExams(forceRefresh: true);
-      expect(examsCubit.state, isA<ExamTakingState>());
-    });
+        // Calling loadStudentExams while taking exam should NOT overwrite ExamTakingState
+        await examsCubit.loadStudentExams(forceRefresh: true);
+        expect(examsCubit.state, isA<ExamTakingState>());
+      },
+    );
 
-    test('ExamsCubit startExamTaking fails gracefully when questions are empty', () async {
-      final examWithoutQuestions = ExamEntity(
-        id: 'empty-exam',
-        contentId: 'content-empty',
-        tenantId: 'tenant-1',
-        groupId: 'group-1',
-        title: 'امتحان فارغ',
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-        activeVersion: ExamVersionEntity(
-          id: 'v-empty',
-          examId: 'empty-exam',
+    test(
+      'ExamsCubit startExamTaking fails gracefully when questions are empty',
+      () async {
+        final examWithoutQuestions = ExamEntity(
+          id: 'empty-exam',
+          contentId: 'content-empty',
+          tenantId: 'tenant-1',
+          groupId: 'group-1',
+          title: 'امتحان فارغ',
           createdAt: DateTime.now(),
-          questions: const [],
-        ),
-      );
-      fakeRepository.mockExams = [examWithoutQuestions];
+          updatedAt: DateTime.now(),
+          activeVersion: ExamVersionEntity(
+            id: 'v-empty',
+            examId: 'empty-exam',
+            createdAt: DateTime.now(),
+            questions: const [],
+          ),
+        );
+        fakeRepository.mockExams = [examWithoutQuestions];
 
-      final success = await examsCubit.startExamTaking(examWithoutQuestions);
-      expect(success, isFalse);
-      expect(examsCubit.state, isA<ExamsError>());
-    });
+        final success = await examsCubit.startExamTaking(examWithoutQuestions);
+        expect(success, isFalse);
+        expect(examsCubit.state, isA<ExamsError>());
+      },
+    );
   });
 }
-

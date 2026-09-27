@@ -57,12 +57,13 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
         }
       });
     }
-    final initialId = widget.groupId ?? TeacherGroupFilterBar.lastSelectedGroupId;
+    final initialId =
+        widget.groupId ?? TeacherGroupFilterBar.lastSelectedGroupId;
     GroupsState? groupsState;
     try {
       groupsState = context.read<GroupsCubit>().state;
     } catch (_) {}
-    
+
     if (initialId != null) {
       _selectedGroupId = initialId;
       _selectedGroupName = widget.groupName;
@@ -78,7 +79,9 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
     }
 
     if (_selectedGroupId != null) {
-      unawaited(context.read<ContentCubit>().loadGroupContent(_selectedGroupId!));
+      unawaited(
+        context.read<ContentCubit>().loadGroupContent(_selectedGroupId!),
+      );
     }
     try {
       context.read<GroupsCubit>().loadGroups();
@@ -97,10 +100,12 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
 
   Future<void> _loadContent({bool forceRefresh = false}) async {
     if (_selectedGroupId != null) {
-      unawaited(context.read<ContentCubit>().loadGroupContent(
-            _selectedGroupId!,
-            forceRefresh: forceRefresh,
-          ));
+      unawaited(
+        context.read<ContentCubit>().loadGroupContent(
+          _selectedGroupId!,
+          forceRefresh: forceRefresh,
+        ),
+      );
     }
   }
 
@@ -138,9 +143,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            style: TextButton.styleFrom(
-              foregroundColor: AppColors.error,
-            ),
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
             child: Text(ctx.l10n.deleteAction),
           ),
         ],
@@ -148,6 +151,83 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
     );
     if (confirm == true) {
       unawaited(cubit.deleteContent(item.id));
+    }
+  }
+
+  Future<void> _handleToggleVisibility(ContentEntity lesson) async {
+    if (_selectedGroupId == null) return;
+    final newVisibility = !lesson.isPublished;
+    final cubit = context.read<ContentCubit>();
+    final success = await cubit.toggleLessonVisibility(
+      contentId: lesson.id,
+      groupId: _selectedGroupId!,
+      isPublished: newVisibility,
+    );
+    if (success && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.lessonVisibilityUpdatedToast),
+          backgroundColor: AppColors.primary,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  Future<void> _handleBulkVisibility(bool isPublished) async {
+    if (_selectedGroupId == null) return;
+    final l10n = context.l10n;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(
+          isPublished
+              ? l10n.publishAllLessonsConfirmTitle
+              : l10n.hideAllLessonsConfirmTitle,
+        ),
+        content: Text(
+          isPublished
+              ? l10n.publishAllLessonsConfirmMessage
+              : l10n.hideAllLessonsConfirmMessage,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: isPublished
+                  ? AppColors.success
+                  : AppColors.warning,
+              foregroundColor: Colors.white,
+            ),
+            child: Text(
+              isPublished
+                  ? l10n.publishAllLessonsAction
+                  : l10n.hideAllLessonsAction,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      final cubit = context.read<ContentCubit>();
+      final success = await cubit.toggleAllLessonsVisibility(
+        groupId: _selectedGroupId!,
+        isPublished: isPublished,
+      );
+      if (success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.allLessonsVisibilityUpdatedToast),
+            backgroundColor: AppColors.success,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
     }
   }
 
@@ -170,7 +250,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
             } else {
               context.go(AppRoutes.teacherDashboard);
             }
-          }
+          },
         ),
         title: Row(
           children: [
@@ -200,7 +280,8 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
           ),
         ],
       ),
-      floatingActionButton: (_selectedGroupId == null || MediaQuery.of(context).size.width >= 960)
+      floatingActionButton:
+          (_selectedGroupId == null || MediaQuery.of(context).size.width >= 960)
           ? null
           : FloatingActionButton.extended(
               onPressed: _handleAddLesson,
@@ -218,7 +299,10 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
             children: [
               // 1. Group Selector Bar (Full width, top of page)
               Padding(
-                padding: const EdgeInsets.only(top: AppSpacing.s12, bottom: AppSpacing.s8),
+                padding: const EdgeInsets.only(
+                  top: AppSpacing.s12,
+                  bottom: AppSpacing.s8,
+                ),
                 child: TeacherGroupFilterBar(
                   selectedGroupId: _selectedGroupId,
                   onGroupChanged: _onGroupChanged,
@@ -237,12 +321,16 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                       groupsCubit = null;
                     }
 
-                    Widget bodyContent = BlocBuilder<ContentCubit, ContentState>(
+                    Widget
+                    bodyContent = BlocBuilder<ContentCubit, ContentState>(
                       builder: (context, state) {
                         if (state is ContentLoading) {
                           return const Padding(
                             padding: EdgeInsets.only(top: AppSpacing.s12),
-                            child: AppLoadingView.cardsGrid(count: 4, columns: 1),
+                            child: AppLoadingView.cardsGrid(
+                              count: 4,
+                              columns: 1,
+                            ),
                           );
                         }
 
@@ -259,9 +347,11 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                         }
 
                         if (state is ContentLoaded) {
-                          final lessons = state.items.where((i) => i.type == ContentType.video).toList();
-                          final isDesktop = MediaQuery.of(context).size.width >= 960;
-
+                          final lessons = state.items
+                              .where((i) => i.type == ContentType.video)
+                              .toList();
+                          final isDesktop =
+                              MediaQuery.of(context).size.width >= 960;
 
                           final Widget masterList = RefreshIndicator(
                             onRefresh: () => _loadContent(forceRefresh: true),
@@ -271,13 +361,20 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                 if (lessons.isEmpty)
                                   SliverToBoxAdapter(
                                     child: Padding(
-                                      padding: const EdgeInsets.symmetric(vertical: 48),
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 48,
+                                      ),
                                       child: Center(
                                         child: AppEmptyView(
-                                          message: context.l10n.courseBuilderEmptyTitle,
-                                          subtitle: context.l10n.courseBuilderEmptySubtitle,
+                                          message: context
+                                              .l10n
+                                              .courseBuilderEmptyTitle,
+                                          subtitle: context
+                                              .l10n
+                                              .courseBuilderEmptySubtitle,
                                           icon: Icons.view_timeline_outlined,
-                                          actionText: context.l10n.addLessonButton,
+                                          actionText:
+                                              context.l10n.addLessonButton,
                                           onAction: _handleAddLesson,
                                         ),
                                       ),
@@ -289,26 +386,30 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                     sliver: SliverReorderableList(
                                       itemCount: lessons.length,
                                       onReorder: (oldIdx, newIdx) {
-                                        context.read<ContentCubit>().reorderItems(
-                                          oldIdx,
-                                          newIdx,
-                                        );
+                                        context
+                                            .read<ContentCubit>()
+                                            .reorderItems(oldIdx, newIdx);
                                       },
-                                      proxyDecorator: (child, index, animation) {
-                                        return AnimatedBuilder(
-                                          animation: animation,
-                                          builder: (context, child) {
-                                            return Material(
-                                              elevation: 8,
-                                              color: Colors.transparent,
-                                              shadowColor: Colors.black.withValues(alpha: 0.3),
-                                              borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                                      proxyDecorator:
+                                          (child, index, animation) {
+                                            return AnimatedBuilder(
+                                              animation: animation,
+                                              builder: (context, child) {
+                                                return Material(
+                                                  elevation: 8,
+                                                  color: Colors.transparent,
+                                                  shadowColor: Colors.black
+                                                      .withValues(alpha: 0.3),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                        AppSpacing.radiusMedium,
+                                                      ),
+                                                  child: child,
+                                                );
+                                              },
                                               child: child,
                                             );
                                           },
-                                          child: child,
-                                        );
-                                      },
                                       itemBuilder: (context, index) {
                                         final lesson = lessons[index];
                                         return CourseLessonTile(
@@ -316,16 +417,26 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                           content: lesson,
                                           index: index,
                                           isSelected: false,
-                                          onTap: () => _openEditLessonPage(lesson),
+                                          onTap: () =>
+                                              _openEditLessonPage(lesson),
                                           lessonTitle: lesson.title,
                                           hasPdf: lesson.file != null,
                                           quizTitle: lesson.associatedExamTitle,
                                           canMoveUp: index > 0,
-                                          canMoveDown: index < lessons.length - 1,
-                                          onMoveUp: () => context.read<ContentCubit>().reorderItems(index, index - 1),
-                                          onMoveDown: () => context.read<ContentCubit>().reorderItems(index, index + 2),
-                                          onEdit: () => _openEditLessonPage(lesson),
-                                          onDelete: () => _confirmDelete(lesson),
+                                          canMoveDown:
+                                              index < lessons.length - 1,
+                                          onMoveUp: () => context
+                                              .read<ContentCubit>()
+                                              .reorderItems(index, index - 1),
+                                          onMoveDown: () => context
+                                              .read<ContentCubit>()
+                                              .reorderItems(index, index + 2),
+                                          onEdit: () =>
+                                              _openEditLessonPage(lesson),
+                                          onDelete: () =>
+                                              _confirmDelete(lesson),
+                                          onToggleVisibility: () =>
+                                              _handleToggleVisibility(lesson),
                                         );
                                       },
                                     ),
@@ -334,12 +445,89 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                             ),
                           );
 
+                          final publishedCount = lessons
+                              .where((l) => l.isPublished)
+                              .length;
+                          final draftCount = lessons
+                              .where((l) => l.isDraft)
+                              .length;
+
+                          final bulkVisibilityMenu = PopupMenuButton<String>(
+                            tooltip: context.l10n.lessonStatusLabel,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.surface,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: AppColors.border),
+                              ),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.tune_rounded,
+                                    size: 16,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                  SizedBox(width: 4),
+                                  Icon(
+                                    Icons.arrow_drop_down_rounded,
+                                    size: 18,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            itemBuilder: (ctx) => [
+                              PopupMenuItem(
+                                value: 'publish_all',
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.visibility_rounded,
+                                      color: AppColors.success,
+                                      size: 18,
+                                    ),
+                                    const SizedBox(width: AppSpacing.s8),
+                                    Text(ctx.l10n.publishAllLessonsAction),
+                                  ],
+                                ),
+                              ),
+                              PopupMenuItem(
+                                value: 'hide_all',
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.visibility_off_rounded,
+                                      color: AppColors.warning,
+                                      size: 18,
+                                    ),
+                                    const SizedBox(width: AppSpacing.s8),
+                                    Text(ctx.l10n.hideAllLessonsAction),
+                                  ],
+                                ),
+                              ),
+                            ],
+                            onSelected: (val) {
+                              if (val == 'publish_all') {
+                                _handleBulkVisibility(true);
+                              } else if (val == 'hide_all') {
+                                _handleBulkVisibility(false);
+                              }
+                            },
+                          );
+
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               // Course Overview Banner Card
                               Padding(
-                                padding: const EdgeInsets.only(bottom: AppSpacing.s12),
+                                padding: const EdgeInsets.only(
+                                  bottom: AppSpacing.s12,
+                                ),
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: AppSpacing.s16,
@@ -347,17 +535,23 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                   ),
                                   decoration: BoxDecoration(
                                     color: AppColors.surface,
-                                    borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                                    borderRadius: BorderRadius.circular(
+                                      AppSpacing.radiusMedium,
+                                    ),
                                     border: Border.all(color: AppColors.border),
                                   ),
                                   child: isDesktop
                                       ? Row(
                                           children: [
                                             Container(
-                                              padding: const EdgeInsets.all(AppSpacing.s8),
+                                              padding: const EdgeInsets.all(
+                                                AppSpacing.s8,
+                                              ),
                                               decoration: BoxDecoration(
-                                                color: AppColors.primary.withValues(alpha: 0.1),
-                                                borderRadius: BorderRadius.circular(8),
+                                                color: AppColors.primary
+                                                    .withValues(alpha: 0.1),
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
                                               ),
                                               child: const Icon(
                                                 Icons.menu_book_rounded,
@@ -365,20 +559,32 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                                 size: 20,
                                               ),
                                             ),
-                                            const SizedBox(width: AppSpacing.s12),
+                                            const SizedBox(
+                                              width: AppSpacing.s12,
+                                            ),
                                             Expanded(
                                               child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
                                                 mainAxisSize: MainAxisSize.min,
                                                 children: [
                                                   Text(
-                                                    _selectedGroupName ?? context.l10n.courseBuilderTitle,
+                                                    _selectedGroupName ??
+                                                        context
+                                                            .l10n
+                                                            .courseBuilderTitle,
                                                     maxLines: 1,
-                                                    overflow: TextOverflow.ellipsis,
-                                                    style: theme.textTheme.titleSmall?.copyWith(
-                                                      fontWeight: FontWeight.bold,
-                                                      color: AppColors.textPrimary,
-                                                    ),
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: theme
+                                                        .textTheme
+                                                        .titleSmall
+                                                        ?.copyWith(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color: AppColors
+                                                              .textPrimary,
+                                                        ),
                                                   ),
                                                   const SizedBox(height: 4),
                                                   Wrap(
@@ -386,43 +592,90 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                                     runSpacing: AppSpacing.s4,
                                                     children: [
                                                       _buildBannerStat(
-                                                        icon: Icons.video_collection_rounded,
-                                                        label: context.l10n.nLessonsCount(lessons.length),
-                                                        color: AppColors.primary,
+                                                        icon: Icons
+                                                            .video_collection_rounded,
+                                                        label: context.l10n
+                                                            .nLessonsCount(
+                                                              lessons.length,
+                                                            ),
+                                                        color:
+                                                            AppColors.primary,
                                                       ),
                                                       _buildBannerStat(
-                                                        icon: Icons.picture_as_pdf_rounded,
-                                                        label: '${lessons.where((l) => l.file != null).length} ${context.l10n.hasStudyMaterial}',
-                                                        color: const Color(0xFFEA580C),
+                                                        icon: Icons
+                                                            .check_circle_outline_rounded,
+                                                        label: context.l10n
+                                                            .publishedCountBadge(
+                                                              publishedCount,
+                                                            ),
+                                                        color:
+                                                            AppColors.success,
+                                                      ),
+                                                      if (draftCount > 0)
+                                                        _buildBannerStat(
+                                                          icon: Icons
+                                                              .visibility_off_outlined,
+                                                          label: context.l10n
+                                                              .draftCountBadge(
+                                                                draftCount,
+                                                              ),
+                                                          color:
+                                                              AppColors.warning,
+                                                        ),
+                                                      _buildBannerStat(
+                                                        icon: Icons
+                                                            .picture_as_pdf_rounded,
+                                                        label:
+                                                            '${lessons.where((l) => l.file != null).length} ${context.l10n.hasStudyMaterial}',
+                                                        color: const Color(
+                                                          0xFFEA580C,
+                                                        ),
                                                       ),
                                                       _buildBannerStat(
-                                                        icon: Icons.quiz_rounded,
-                                                        label: '${lessons.where((l) => l.associatedExamTitle != null).length} ${context.l10n.hasLessonQuiz}',
-                                                        color: AppColors.success,
+                                                        icon:
+                                                            Icons.quiz_rounded,
+                                                        label:
+                                                            '${lessons.where((l) => l.associatedExamTitle != null).length} ${context.l10n.hasLessonQuiz}',
+                                                        color:
+                                                            AppColors.success,
                                                       ),
                                                     ],
                                                   ),
                                                 ],
                                               ),
                                             ),
-                                            const SizedBox(width: AppSpacing.s12),
+                                            const SizedBox(
+                                              width: AppSpacing.s12,
+                                            ),
+                                            bulkVisibilityMenu,
+                                            const SizedBox(
+                                              width: AppSpacing.s8,
+                                            ),
                                             AppButton(
-                                              text: context.l10n.addLessonButton,
+                                              text:
+                                                  context.l10n.addLessonButton,
                                               icon: Icons.add_rounded,
                                               onPressed: _handleAddLesson,
                                             ),
                                           ],
                                         )
                                       : Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
                                             Row(
                                               children: [
                                                 Container(
-                                                  padding: const EdgeInsets.all(AppSpacing.s6),
+                                                  padding: const EdgeInsets.all(
+                                                    AppSpacing.s6,
+                                                  ),
                                                   decoration: BoxDecoration(
-                                                    color: AppColors.primary.withValues(alpha: 0.1),
-                                                    borderRadius: BorderRadius.circular(6),
+                                                    color: AppColors.primary
+                                                        .withValues(alpha: 0.1),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          6,
+                                                        ),
                                                   ),
                                                   child: const Icon(
                                                     Icons.menu_book_rounded,
@@ -430,18 +683,30 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                                     size: 18,
                                                   ),
                                                 ),
-                                                const SizedBox(width: AppSpacing.s8),
+                                                const SizedBox(
+                                                  width: AppSpacing.s8,
+                                                ),
                                                 Expanded(
                                                   child: Text(
-                                                    _selectedGroupName ?? context.l10n.courseBuilderTitle,
+                                                    _selectedGroupName ??
+                                                        context
+                                                            .l10n
+                                                            .courseBuilderTitle,
                                                     maxLines: 1,
-                                                    overflow: TextOverflow.ellipsis,
-                                                    style: theme.textTheme.titleSmall?.copyWith(
-                                                      fontWeight: FontWeight.bold,
-                                                      color: AppColors.textPrimary,
-                                                    ),
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: theme
+                                                        .textTheme
+                                                        .titleSmall
+                                                        ?.copyWith(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color: AppColors
+                                                              .textPrimary,
+                                                        ),
                                                   ),
                                                 ),
+                                                bulkVisibilityMenu,
                                               ],
                                             ),
                                             const SizedBox(height: 6),
@@ -450,18 +715,46 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                               runSpacing: AppSpacing.s4,
                                               children: [
                                                 _buildBannerStat(
-                                                  icon: Icons.video_collection_rounded,
-                                                  label: context.l10n.nLessonsCount(lessons.length),
+                                                  icon: Icons
+                                                      .video_collection_rounded,
+                                                  label: context.l10n
+                                                      .nLessonsCount(
+                                                        lessons.length,
+                                                      ),
                                                   color: AppColors.primary,
                                                 ),
                                                 _buildBannerStat(
-                                                  icon: Icons.picture_as_pdf_rounded,
-                                                  label: '${lessons.where((l) => l.file != null).length} ${context.l10n.hasStudyMaterial}',
-                                                  color: const Color(0xFFEA580C),
+                                                  icon: Icons
+                                                      .check_circle_outline_rounded,
+                                                  label: context.l10n
+                                                      .publishedCountBadge(
+                                                        publishedCount,
+                                                      ),
+                                                  color: AppColors.success,
+                                                ),
+                                                if (draftCount > 0)
+                                                  _buildBannerStat(
+                                                    icon: Icons
+                                                        .visibility_off_outlined,
+                                                    label: context.l10n
+                                                        .draftCountBadge(
+                                                          draftCount,
+                                                        ),
+                                                    color: AppColors.warning,
+                                                  ),
+                                                _buildBannerStat(
+                                                  icon: Icons
+                                                      .picture_as_pdf_rounded,
+                                                  label:
+                                                      '${lessons.where((l) => l.file != null).length} ${context.l10n.hasStudyMaterial}',
+                                                  color: const Color(
+                                                    0xFFEA580C,
+                                                  ),
                                                 ),
                                                 _buildBannerStat(
                                                   icon: Icons.quiz_rounded,
-                                                  label: '${lessons.where((l) => l.associatedExamTitle != null).length} ${context.l10n.hasLessonQuiz}',
+                                                  label:
+                                                      '${lessons.where((l) => l.associatedExamTitle != null).length} ${context.l10n.hasLessonQuiz}',
                                                   color: AppColors.success,
                                                 ),
                                               ],
@@ -472,9 +765,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                               ),
 
                               // Content Area: Clean, full-width course syllabus
-                              Expanded(
-                                child: masterList,
-                              ),
+                              Expanded(child: masterList),
                             ],
                           );
                         }
@@ -493,7 +784,8 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                               groupsState.groups.isNotEmpty) {
                             setState(() {
                               _selectedGroupId = groupsState.groups.first.id;
-                              _selectedGroupName = groupsState.groups.first.name;
+                              _selectedGroupName =
+                                  groupsState.groups.first.name;
                             });
                             _loadContent();
                           }

@@ -373,7 +373,9 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
                         onPressed: () => AddMemberDialog.show(
                           context,
                           widget.groupId,
-                          existingMemberIds: allMembers.map((m) => m.studentId).toSet(),
+                          existingMemberIds: allMembers
+                              .map((m) => m.studentId)
+                              .toSet(),
                         ),
                       ),
                       ElevatedButton.icon(
@@ -436,7 +438,9 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
                       onAction: () => AddMemberDialog.show(
                         context,
                         widget.groupId,
-                        existingMemberIds: allMembers.map((m) => m.studentId).toSet(),
+                        existingMemberIds: allMembers
+                            .map((m) => m.studentId)
+                            .toSet(),
                       ),
                     )
                   else if (members.isEmpty)

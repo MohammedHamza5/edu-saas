@@ -89,12 +89,7 @@ class _LoginPageState extends State<LoginPage> {
                 const SizedBox(height: AppSpacing.s8),
 
                 // ── 1. Brand Emblem ──────────────────────────────────────────
-                const Center(
-                  child: AppLogo.hero(
-                    size: 80,
-                    withGlow: true,
-                  ),
-                ),
+                const Center(child: AppLogo.hero(size: 80, withGlow: true)),
                 const SizedBox(height: AppSpacing.s16),
 
                 // ── 2. Academic Track Badge ──────────────────────────────────
@@ -125,7 +120,9 @@ class _LoginPageState extends State<LoginPage> {
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFF10B981).withValues(alpha: 0.6),
+                                color: const Color(
+                                  0xFF10B981,
+                                ).withValues(alpha: 0.6),
                                 blurRadius: 6,
                               ),
                             ],

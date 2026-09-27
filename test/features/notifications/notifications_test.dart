@@ -58,7 +58,9 @@ class FakeNotificationsRepository implements NotificationsRepository {
     int offset = 0,
   }) async {
     if (shouldFail) {
-      return const FailureResult(ServerFailure('Failed to fetch notifications'));
+      return const FailureResult(
+        ServerFailure('Failed to fetch notifications'),
+      );
     }
     if (unreadOnly == true) {
       return Success(mockNotifications.where((n) => !n.isRead).toList());
@@ -80,7 +82,9 @@ class FakeNotificationsRepository implements NotificationsRepository {
     if (shouldFail) {
       return const FailureResult(ServerFailure('Failed to mark as read'));
     }
-    final index = mockNotifications.indexWhere((n) => n.recipientId == recipientId);
+    final index = mockNotifications.indexWhere(
+      (n) => n.recipientId == recipientId,
+    );
     if (index != -1) {
       final old = mockNotifications[index];
       mockNotifications[index] = old.copyWith(readAt: DateTime.now());
@@ -157,8 +161,7 @@ class FakeGroupsRepository implements GroupsRepository {
     required String level,
     String? description,
     required String previousContentAccess,
-  }) async =>
-      Success(mockGroups.first);
+  }) async => Success(mockGroups.first);
 
   @override
   Future<Result<GroupEntity>> updateGroup({
@@ -170,32 +173,32 @@ class FakeGroupsRepository implements GroupsRepository {
     String? previousContentAccess,
     bool? enforceSequentialLearning,
     int? defaultPassingScore,
-  }) async =>
-      Success(mockGroups.first);
+  }) async => Success(mockGroups.first);
 
   @override
-  Future<Result<List<GroupMemberEntity>>> getGroupMembers(String groupId) async =>
-      const Success([]);
+  Future<Result<List<GroupMemberEntity>>> getGroupMembers(
+    String groupId,
+  ) async => const Success([]);
 
   @override
   Future<Result<GroupMemberEntity>> addMemberToGroup({
     required String groupId,
     required String studentId,
-  }) async =>
-      Success(GroupMemberEntity(
-        id: 'mem-1',
-        groupId: groupId,
-        studentId: studentId,
-        studentName: 'أحمد',
-        joinedAt: DateTime.now(),
-      ));
+  }) async => Success(
+    GroupMemberEntity(
+      id: 'mem-1',
+      groupId: groupId,
+      studentId: studentId,
+      studentName: 'أحمد',
+      joinedAt: DateTime.now(),
+    ),
+  );
 
   @override
   Future<Result<void>> removeMemberFromGroup({
     required String groupId,
     required String studentId,
-  }) async =>
-      const Success(null);
+  }) async => const Success(null);
 }
 
 class FakeAuthRepository implements AuthRepository {
@@ -241,20 +244,20 @@ class FakeAuthRepository implements AuthRepository {
     required String phone,
     String? parentPhone,
     required String tenantId,
-  }) async =>
-      const Success(
-        UserEntity(
-          id: 'student-1',
-          tenantId: 'tenant-1',
-          email: 'student@test.com',
-          fullName: 'طالب جديد',
-          role: UserRole.student,
-          status: UserStatus.pending,
-        ),
-      );
+  }) async => const Success(
+    UserEntity(
+      id: 'student-1',
+      tenantId: 'tenant-1',
+      email: 'student@test.com',
+      fullName: 'طالب جديد',
+      role: UserRole.student,
+      status: UserStatus.pending,
+    ),
+  );
 
   @override
-  Future<Result<void>> resetPasswordForEmail(String email) async => const Success(null);
+  Future<Result<void>> resetPasswordForEmail(String email) async =>
+      const Success(null);
 }
 
 void main() {
@@ -308,19 +311,40 @@ void main() {
       expect(NotificationType.newContent.dbValue, 'new_content');
       expect(NotificationType.assignmentCreated.dbValue, 'assignment_created');
       expect(NotificationType.assignmentDue.dbValue, 'assignment_due');
-      expect(NotificationType.assignmentReviewed.dbValue, 'assignment_reviewed');
+      expect(
+        NotificationType.assignmentReviewed.dbValue,
+        'assignment_reviewed',
+      );
       expect(NotificationType.examPublished.dbValue, 'exam_published');
       expect(NotificationType.examResult.dbValue, 'exam_result');
       expect(NotificationType.attendanceMarked.dbValue, 'attendance_marked');
-      expect(NotificationType.importantAnnouncement.dbValue, 'important_announcement');
+      expect(
+        NotificationType.importantAnnouncement.dbValue,
+        'important_announcement',
+      );
     });
 
-    test('NotificationType.fromString parses valid strings and defaults correctly', () {
-      expect(NotificationType.fromString('attendance_marked'), NotificationType.attendanceMarked);
-      expect(NotificationType.fromString('exam_published'), NotificationType.examPublished);
-      expect(NotificationType.fromString('assignment_due'), NotificationType.assignmentDue);
-      expect(NotificationType.fromString('unknown_type'), NotificationType.importantAnnouncement);
-    });
+    test(
+      'NotificationType.fromString parses valid strings and defaults correctly',
+      () {
+        expect(
+          NotificationType.fromString('attendance_marked'),
+          NotificationType.attendanceMarked,
+        );
+        expect(
+          NotificationType.fromString('exam_published'),
+          NotificationType.examPublished,
+        );
+        expect(
+          NotificationType.fromString('assignment_due'),
+          NotificationType.assignmentDue,
+        );
+        expect(
+          NotificationType.fromString('unknown_type'),
+          NotificationType.importantAnnouncement,
+        );
+      },
+    );
 
     test('NotificationType returns localized Arabic labels and icons', () {
       expect(NotificationType.attendanceMarked.labelAr, 'رصد حضور');
@@ -332,33 +356,36 @@ void main() {
   });
 
   group('NotificationModel JSON serialization tests', () {
-    test('NotificationModel.fromJson parses flat and joined notification maps', () {
-      final json = {
-        'id': 'rec-100',
-        'notification_id': 'notif-100',
-        'is_read': false,
-        'read_at': null,
-        'notifications': {
-          'id': 'notif-100',
-          'tenant_id': 'tenant-1',
-          'title': 'واجب جديد',
-          'body': 'تم نشر واجب الجبر والإحصاء',
-          'type': 'assignment_created',
-          'data': {'assignment_id': 'asg-1'},
-          'created_at': '2026-03-01T10:00:00.000Z',
-        }
-      };
+    test(
+      'NotificationModel.fromJson parses flat and joined notification maps',
+      () {
+        final json = {
+          'id': 'rec-100',
+          'notification_id': 'notif-100',
+          'is_read': false,
+          'read_at': null,
+          'notifications': {
+            'id': 'notif-100',
+            'tenant_id': 'tenant-1',
+            'title': 'واجب جديد',
+            'body': 'تم نشر واجب الجبر والإحصاء',
+            'type': 'assignment_created',
+            'data': {'assignment_id': 'asg-1'},
+            'created_at': '2026-03-01T10:00:00.000Z',
+          },
+        };
 
-      final model = NotificationModel.fromJson(json);
+        final model = NotificationModel.fromJson(json);
 
-      expect(model.id, 'notif-100');
-      expect(model.recipientId, 'rec-100');
-      expect(model.title, 'واجب جديد');
-      expect(model.body, 'تم نشر واجب الجبر والإحصاء');
-      expect(model.type, NotificationType.assignmentCreated);
-      expect(model.isRead, false);
-      expect(model.data['assignment_id'], 'asg-1');
-    });
+        expect(model.id, 'notif-100');
+        expect(model.recipientId, 'rec-100');
+        expect(model.title, 'واجب جديد');
+        expect(model.body, 'تم نشر واجب الجبر والإحصاء');
+        expect(model.type, NotificationType.assignmentCreated);
+        expect(model.isRead, false);
+        expect(model.data['assignment_id'], 'asg-1');
+      },
+    );
   });
 
   group('NotificationsCubit Unit Tests', () {
@@ -379,10 +406,7 @@ void main() {
     test('loadNotifications emits Loading then Error on failure', () async {
       fakeRepo.shouldFail = true;
 
-      final expected = [
-        isA<NotificationsLoading>(),
-        isA<NotificationsError>(),
-      ];
+      final expected = [isA<NotificationsLoading>(), isA<NotificationsError>()];
 
       final expectation = expectLater(cubit.stream, emitsInOrder(expected));
       unawaited(expectation);
@@ -390,15 +414,23 @@ void main() {
       await expectation;
     });
 
-    test('markAsRead performs optimistic update and reduces unread count', () async {
-      await cubit.loadNotifications();
-      expect((cubit.state as NotificationsLoaded).unreadCount, 1);
+    test(
+      'markAsRead performs optimistic update and reduces unread count',
+      () async {
+        await cubit.loadNotifications();
+        expect((cubit.state as NotificationsLoaded).unreadCount, 1);
 
-      await cubit.markAsRead('rec-1');
-      final updated = cubit.state as NotificationsLoaded;
-      expect(updated.unreadCount, 0);
-      expect(updated.notifications.firstWhere((n) => n.recipientId == 'rec-1').isRead, true);
-    });
+        await cubit.markAsRead('rec-1');
+        final updated = cubit.state as NotificationsLoaded;
+        expect(updated.unreadCount, 0);
+        expect(
+          updated.notifications
+              .firstWhere((n) => n.recipientId == 'rec-1')
+              .isRead,
+          true,
+        );
+      },
+    );
 
     test('markAllAsRead marks all notifications as read', () async {
       await cubit.loadNotifications();
@@ -418,22 +450,27 @@ void main() {
       expect((cubit.state as NotificationsLoaded).filterUnreadOnly, true);
     });
 
-    test('sendAnnouncement successfully dispatches and emits success state', () async {
-      await cubit.loadNotifications();
+    test(
+      'sendAnnouncement successfully dispatches and emits success state',
+      () async {
+        await cubit.loadNotifications();
 
-      await cubit.sendAnnouncement(
-        title: 'تنبيه عاجل',
-        body: 'الرجاء تسليم الواجب قبل الغد',
-        groupId: 'group-1',
-      );
+        await cubit.sendAnnouncement(
+          title: 'تنبيه عاجل',
+          body: 'الرجاء تسليم الواجب قبل الغد',
+          groupId: 'group-1',
+        );
 
-      final updated = cubit.state as NotificationsLoaded;
-      expect(updated.sendSuccess, true);
-    });
+        final updated = cubit.state as NotificationsLoaded;
+        expect(updated.sendSuccess, true);
+      },
+    );
   });
 
   group('Notifications UI Widgets Tests', () {
-    testWidgets('NotificationTile displays title, body, and type badge', (tester) async {
+    testWidgets('NotificationTile displays title, body, and type badge', (
+      tester,
+    ) async {
       final notif = NotificationEntity(
         id: '1',
         recipientId: 'r1',
@@ -466,66 +503,67 @@ void main() {
       expect(tapped, true);
     });
 
-    testWidgets('NotificationBadgeButton displays badge only when unreadCount > 0', (tester) async {
-      await tester.pumpWidget(
-        createTestWidget(
-          const Scaffold(
-            body: NotificationBadgeButton(),
-          ),
-        ),
-      );
+    testWidgets(
+      'NotificationBadgeButton displays badge only when unreadCount > 0',
+      (tester) async {
+        await tester.pumpWidget(
+          createTestWidget(const Scaffold(body: NotificationBadgeButton())),
+        );
 
-      // Initially no loaded state -> unread 0 -> no badge
-      expect(find.byIcon(Icons.notifications_outlined), findsOneWidget);
-      expect(find.text('1'), findsNothing);
+        // Initially no loaded state -> unread 0 -> no badge
+        expect(find.byIcon(Icons.notifications_outlined), findsOneWidget);
+        expect(find.text('1'), findsNothing);
 
-      // Load notifications with 1 unread
-      await cubit.loadNotifications();
-      await tester.pumpAndSettle();
+        // Load notifications with 1 unread
+        await cubit.loadNotifications();
+        await tester.pumpAndSettle();
 
-      // Badge with '1' should now appear
-      expect(find.text('1'), findsOneWidget);
-    });
+        // Badge with '1' should now appear
+        expect(find.text('1'), findsOneWidget);
+      },
+    );
 
-    testWidgets('NotificationsCenterPage displays notifications and allows marking all as read',
-        (tester) async {
-      tester.view.physicalSize = const Size(1200, 1000);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.resetPhysicalSize);
+    testWidgets(
+      'NotificationsCenterPage displays notifications and allows marking all as read',
+      (tester) async {
+        tester.view.physicalSize = const Size(1200, 1000);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
 
-      await cubit.loadNotifications();
+        await cubit.loadNotifications();
 
-      await tester.pumpWidget(
-        createTestWidget(const NotificationsCenterPage()),
-      );
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(
+          createTestWidget(const NotificationsCenterPage()),
+        );
+        await tester.pumpAndSettle();
 
-      // Verify title and notifications exist
-      expect(find.text('مركز الإشعارات'), findsOneWidget);
-      expect(find.text('إعلان هام'), findsOneWidget);
-      expect(find.text('رصد الحضور'), findsOneWidget);
+        // Verify title and notifications exist
+        expect(find.text('مركز الإشعارات'), findsOneWidget);
+        expect(find.text('إعلان هام'), findsOneWidget);
+        expect(find.text('رصد الحضور'), findsOneWidget);
 
-      // Verify mark all as read button exists and can be tapped
-      final markAllButton = find.text('قراءة الكل');
-      expect(markAllButton, findsOneWidget);
-      await tester.tap(markAllButton);
-      await tester.pumpAndSettle();
+        // Verify mark all as read button exists and can be tapped
+        final markAllButton = find.text('قراءة الكل');
+        expect(markAllButton, findsOneWidget);
+        await tester.tap(markAllButton);
+        await tester.pumpAndSettle();
 
-      // Verify unread count is 0
-      final state = cubit.state as NotificationsLoaded;
-      expect(state.unreadCount, 0);
-    });
+        // Verify unread count is 0
+        final state = cubit.state as NotificationsLoaded;
+        expect(state.unreadCount, 0);
+      },
+    );
 
-    testWidgets('SendAnnouncementPage renders form and validates inputs', (tester) async {
+    testWidgets('SendAnnouncementPage renders form and validates inputs', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(1200, 1000);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
 
       await groupsCubit.loadGroups();
 
-      await tester.pumpWidget(
-        createTestWidget(const SendAnnouncementPage()),
-      );
+      await tester.pumpWidget(createTestWidget(const SendAnnouncementPage()));
       await tester.pumpAndSettle();
 
       expect(find.text('إرسال إعلان وتنبيه'), findsOneWidget);

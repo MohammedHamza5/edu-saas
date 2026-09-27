@@ -101,4 +101,17 @@ abstract class ContentRepository {
     required String contentId,
     String? reason,
   });
+
+  /// Toggles visibility of a single lesson in a group
+  Future<Result<void>> toggleLessonVisibility({
+    required String contentId,
+    required String groupId,
+    required bool isPublished,
+  });
+
+  /// Bulk toggles visibility of all lessons in a group
+  Future<Result<void>> toggleAllLessonsVisibility({
+    required String groupId,
+    required bool isPublished,
+  });
 }

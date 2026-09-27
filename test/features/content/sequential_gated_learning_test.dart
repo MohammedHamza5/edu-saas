@@ -103,41 +103,41 @@ void main() {
       );
     }
 
-    testWidgets('Renders locked banner and required quiz info when isLocked is true',
-        (tester) async {
-      final lockedContent = ContentEntity(
-        id: 'lesson-locked',
-        tenantId: 'tenant-1',
-        groupId: 'group-1',
-        title: 'Trigonometry Lecture 3',
-        type: ContentType.video,
-        status: ContentStatus.published,
-        sortOrder: 3,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-        prerequisiteExamId: 'exam-trig-2',
-        prerequisiteExamTitle: 'Trigonometry Quiz 2',
-        prerequisitePassingScore: 75,
-        isLocked: true,
-      );
+    testWidgets(
+      'Renders locked banner and required quiz info when isLocked is true',
+      (tester) async {
+        final lockedContent = ContentEntity(
+          id: 'lesson-locked',
+          tenantId: 'tenant-1',
+          groupId: 'group-1',
+          title: 'Trigonometry Lecture 3',
+          type: ContentType.video,
+          status: ContentStatus.published,
+          sortOrder: 3,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+          prerequisiteExamId: 'exam-trig-2',
+          prerequisiteExamTitle: 'Trigonometry Quiz 2',
+          prerequisitePassingScore: 75,
+          isLocked: true,
+        );
 
-      await tester.pumpWidget(
-        buildTestApp(
-          ContentItemCard(
-            content: lockedContent,
-            isTeacher: false,
+        await tester.pumpWidget(
+          buildTestApp(
+            ContentItemCard(content: lockedContent, isTeacher: false),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.text('Trigonometry Lecture 3'), findsOneWidget);
-      expect(find.byIcon(Icons.lock_rounded), findsWidgets);
-      expect(find.textContaining('75%'), findsOneWidget);
-    });
+        expect(find.text('Trigonometry Lecture 3'), findsOneWidget);
+        expect(find.byIcon(Icons.lock_rounded), findsWidgets);
+        expect(find.textContaining('75%'), findsOneWidget);
+      },
+    );
 
-    testWidgets('Renders associated lesson quiz banner when present',
-        (tester) async {
+    testWidgets('Renders associated lesson quiz banner when present', (
+      tester,
+    ) async {
       final contentWithQuiz = ContentEntity(
         id: 'lesson-with-quiz',
         tenantId: 'tenant-1',
@@ -155,10 +155,7 @@ void main() {
 
       await tester.pumpWidget(
         buildTestApp(
-          ContentItemCard(
-            content: contentWithQuiz,
-            isTeacher: false,
-          ),
+          ContentItemCard(content: contentWithQuiz, isTeacher: false),
         ),
       );
       await tester.pumpAndSettle();

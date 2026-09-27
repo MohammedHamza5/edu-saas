@@ -31,6 +31,7 @@ class ContentModel extends ContentEntity {
     super.isVideoCompleted = false,
     super.videoProgressPercentage = 0.0,
     super.isExamPassed = false,
+    super.isPublishedInGroup = true,
   });
 
   factory ContentModel.fromJson(Map<String, dynamic> json) {
@@ -69,10 +70,17 @@ class ContentModel extends ContentEntity {
     // Parse multi-group junction associations
     final List<String> assignedGroupIds = [];
     final List<String> assignedGroupNames = [];
+    bool isPublishedInGroup = true;
     final contentGroupsRaw = json['content_groups'];
+    if (json['is_published'] != null) {
+      isPublishedInGroup = json['is_published'] == true;
+    }
     if (contentGroupsRaw is List) {
       for (final item in contentGroupsRaw) {
         if (item is Map<String, dynamic>) {
+          if (item['is_published'] != null && json['is_published'] == null) {
+            isPublishedInGroup = item['is_published'] == true;
+          }
           final gId = item['group_id'] as String?;
           if (gId != null && !assignedGroupIds.contains(gId)) {
             assignedGroupIds.add(gId);
@@ -139,6 +147,7 @@ class ContentModel extends ContentEntity {
       videoProgressPercentage:
           (json['video_progress_percentage'] as num?)?.toDouble() ?? 0.0,
       isExamPassed: json['is_exam_passed'] == true,
+      isPublishedInGroup: isPublishedInGroup,
     );
   }
 
@@ -171,6 +180,7 @@ class ContentModel extends ContentEntity {
       isVideoCompleted: entity.isVideoCompleted,
       videoProgressPercentage: entity.videoProgressPercentage,
       isExamPassed: entity.isExamPassed,
+      isPublishedInGroup: entity.isPublishedInGroup,
     );
   }
 
@@ -203,6 +213,7 @@ class ContentModel extends ContentEntity {
     bool? isVideoCompleted,
     double? videoProgressPercentage,
     bool? isExamPassed,
+    bool? isPublishedInGroup,
   }) {
     final entity = super.copyWith(
       id: id,
@@ -232,6 +243,7 @@ class ContentModel extends ContentEntity {
       isVideoCompleted: isVideoCompleted,
       videoProgressPercentage: videoProgressPercentage,
       isExamPassed: isExamPassed,
+      isPublishedInGroup: isPublishedInGroup,
     );
     return ContentModel.fromEntity(entity);
   }
@@ -252,7 +264,8 @@ class ContentModel extends ContentEntity {
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
       if (associatedExamId != null) 'associated_exam_id': associatedExamId,
-      if (prerequisiteExamId != null) 'prerequisite_exam_id': prerequisiteExamId,
+      if (prerequisiteExamId != null)
+        'prerequisite_exam_id': prerequisiteExamId,
     };
   }
 }

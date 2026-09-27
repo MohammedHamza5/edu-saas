@@ -20,10 +20,14 @@ abstract class AssignmentsRepository {
   Future<Result<AssignmentEntity>> getAssignmentDetails(String assignmentId);
 
   /// Fetches all student submissions for a specific assignment (for teachers).
-  Future<Result<List<AssignmentSubmissionEntity>>> getSubmissions(String assignmentId);
+  Future<Result<List<AssignmentSubmissionEntity>>> getSubmissions(
+    String assignmentId,
+  );
 
   /// Fetches the current logged-in student's submission for an assignment, if any.
-  Future<Result<AssignmentSubmissionEntity?>> getMySubmission(String assignmentId);
+  Future<Result<AssignmentSubmissionEntity?>> getMySubmission(
+    String assignmentId,
+  );
 
   /// Creates a new assignment for a group (creates content record + assignments record).
   Future<Result<AssignmentEntity>> createAssignment({

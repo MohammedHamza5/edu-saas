@@ -18,13 +18,26 @@ class AppBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = Theme.of(context).extension<MathTokens>() ?? MathTokens.light;
+    final tokens =
+        Theme.of(context).extension<MathTokens>() ?? MathTokens.light;
 
     final (backgroundColor, foregroundColor) = switch (variant) {
-      AppBadgeVariant.active => (tokens.badgeActiveBackground, tokens.badgeActiveForeground),
-      AppBadgeVariant.pending => (tokens.badgePendingBackground, tokens.badgePendingForeground),
-      AppBadgeVariant.suspended => (tokens.badgeSuspendedBackground, tokens.badgeSuspendedForeground),
-      AppBadgeVariant.neutral => (const Color(0xFFF1F5F9), const Color(0xFF475569)),
+      AppBadgeVariant.active => (
+        tokens.badgeActiveBackground,
+        tokens.badgeActiveForeground,
+      ),
+      AppBadgeVariant.pending => (
+        tokens.badgePendingBackground,
+        tokens.badgePendingForeground,
+      ),
+      AppBadgeVariant.suspended => (
+        tokens.badgeSuspendedBackground,
+        tokens.badgeSuspendedForeground,
+      ),
+      AppBadgeVariant.neutral => (
+        const Color(0xFFF1F5F9),
+        const Color(0xFF475569),
+      ),
     };
 
     return Container(

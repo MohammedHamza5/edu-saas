@@ -18,13 +18,19 @@ enum NotificationType {
 
   String localizedLabel(BuildContext context) => switch (this) {
     NotificationType.newContent => context.l10n.notificationTypeNewContent,
-    NotificationType.assignmentCreated => context.l10n.notificationTypeAssignmentCreated,
-    NotificationType.assignmentDue => context.l10n.notificationTypeAssignmentDue,
-    NotificationType.assignmentReviewed => context.l10n.notificationTypeAssignmentReviewed,
-    NotificationType.examPublished => context.l10n.notificationTypeExamPublished,
+    NotificationType.assignmentCreated =>
+      context.l10n.notificationTypeAssignmentCreated,
+    NotificationType.assignmentDue =>
+      context.l10n.notificationTypeAssignmentDue,
+    NotificationType.assignmentReviewed =>
+      context.l10n.notificationTypeAssignmentReviewed,
+    NotificationType.examPublished =>
+      context.l10n.notificationTypeExamPublished,
     NotificationType.examResult => context.l10n.notificationTypeExamResult,
-    NotificationType.attendanceMarked => context.l10n.notificationTypeAttendanceMarked,
-    NotificationType.importantAnnouncement => context.l10n.notificationTypeImportantAnnouncement,
+    NotificationType.attendanceMarked =>
+      context.l10n.notificationTypeAttendanceMarked,
+    NotificationType.importantAnnouncement =>
+      context.l10n.notificationTypeImportantAnnouncement,
   };
 
   String get labelAr => switch (this) {

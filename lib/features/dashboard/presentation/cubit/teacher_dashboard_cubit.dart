@@ -5,7 +5,8 @@ import 'teacher_dashboard_state.dart';
 class TeacherDashboardCubit extends Cubit<TeacherDashboardState> {
   final TeacherDashboardRepository repository;
 
-  TeacherDashboardCubit({required this.repository}) : super(TeacherDashboardInitial());
+  TeacherDashboardCubit({required this.repository})
+    : super(TeacherDashboardInitial());
 
   Future<void> loadRadarAlerts(
     String teacherId, {

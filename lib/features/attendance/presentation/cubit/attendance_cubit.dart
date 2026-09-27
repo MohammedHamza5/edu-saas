@@ -18,7 +18,8 @@ class AttendanceCubit extends Cubit<AttendanceState> {
     required DateTime date,
     bool forceRefresh = false,
   }) async {
-    final dateKey = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+    final dateKey =
+        "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
     final cacheKey = '${groupId}_$dateKey';
     if (forceRefresh) {
       AppCache.attendance.invalidate(cacheKey);
@@ -34,7 +35,8 @@ class AttendanceCubit extends Cubit<AttendanceState> {
           students: cached,
         ),
       );
-      if (!forceRefresh && AppCache.attendance.has(cacheKey)) return; // Fresh cache, skip network
+      if (!forceRefresh && AppCache.attendance.has(cacheKey))
+        return; // Fresh cache, skip network
     } else {
       emit(const AttendanceLoading());
     }
@@ -116,8 +118,12 @@ class AttendanceCubit extends Cubit<AttendanceState> {
     result.when(
       onSuccess: (_) {
         if (!isClosed) {
-          final dateKey = "${currentState.selectedDate.year}-${currentState.selectedDate.month.toString().padLeft(2, '0')}-${currentState.selectedDate.day.toString().padLeft(2, '0')}";
-          AppCache.attendance.put('${currentState.groupId}_$dateKey', currentState.students);
+          final dateKey =
+              "${currentState.selectedDate.year}-${currentState.selectedDate.month.toString().padLeft(2, '0')}-${currentState.selectedDate.day.toString().padLeft(2, '0')}";
+          AppCache.attendance.put(
+            '${currentState.groupId}_$dateKey',
+            currentState.students,
+          );
           emit(
             currentState.copyWith(
               isSaving: false,
@@ -176,7 +182,8 @@ class AttendanceCubit extends Cubit<AttendanceState> {
 
     if (historyResult.isSuccess) {
       final records = historyResult.dataOrNull ?? [];
-      final stats = statsResult.dataOrNull ?? AttendanceStats.fromRecords(records);
+      final stats =
+          statsResult.dataOrNull ?? AttendanceStats.fromRecords(records);
       emit(
         StudentAttendanceLoaded(
           records: records,

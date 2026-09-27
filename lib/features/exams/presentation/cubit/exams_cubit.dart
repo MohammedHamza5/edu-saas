@@ -15,8 +15,8 @@ class ExamsCubit extends Cubit<ExamsState> {
   int _studentPage = 0;
 
   ExamsCubit({required ExamsRepository repository})
-      : _repository = repository,
-        super(const ExamsInitial());
+    : _repository = repository,
+      super(const ExamsInitial());
 
   @override
   Future<void> close() {
@@ -27,7 +27,10 @@ class ExamsCubit extends Cubit<ExamsState> {
   // ── Teacher Flow ─────────────────────────────────────────────────────────
 
   /// Loads all exams for a specific group (Teacher flow) with instant SWR cache
-  Future<void> loadGroupExams(String groupId, {bool forceRefresh = false}) async {
+  Future<void> loadGroupExams(
+    String groupId, {
+    bool forceRefresh = false,
+  }) async {
     if (state is ExamTakingState) return;
 
     _teacherPage = 0;
@@ -39,12 +42,15 @@ class ExamsCubit extends Cubit<ExamsState> {
     // ── Stale-While-Revalidate: Instant display from memory cache ──────────
     final cached = AppCache.exams.getStale(cacheKey);
     if (cached is List<ExamEntity>) {
-      emit(TeacherExamsLoaded(
-        groupId: groupId,
-        exams: cached,
-        hasMore: cached.length >= _pageSize,
-      ));
-      if (!forceRefresh && AppCache.exams.has(cacheKey)) return; // Fresh cache, skip network
+      emit(
+        TeacherExamsLoaded(
+          groupId: groupId,
+          exams: cached,
+          hasMore: cached.length >= _pageSize,
+        ),
+      );
+      if (!forceRefresh && AppCache.exams.has(cacheKey))
+        return; // Fresh cache, skip network
     } else {
       emit(const ExamsLoading());
     }
@@ -58,12 +64,14 @@ class ExamsCubit extends Cubit<ExamsState> {
     result.when(
       onSuccess: (exams) {
         AppCache.exams.put(cacheKey, exams);
-        emit(TeacherExamsLoaded(
-          groupId: groupId,
-          exams: exams,
-          hasMore: exams.length == _pageSize,
-          isLoadingMore: false,
-        ));
+        emit(
+          TeacherExamsLoaded(
+            groupId: groupId,
+            exams: exams,
+            hasMore: exams.length == _pageSize,
+            isLoadingMore: false,
+          ),
+        );
       },
       onFailure: (failure) {
         if (state is! TeacherExamsLoaded) {
@@ -77,7 +85,10 @@ class ExamsCubit extends Cubit<ExamsState> {
   Future<void> loadMoreTeacherExams() async {
     final currentState = state;
     if (currentState is! TeacherExamsLoaded) return;
-    if (!currentState.hasMore || currentState.isLoadingMore || currentState.groupId == null) return;
+    if (!currentState.hasMore ||
+        currentState.isLoadingMore ||
+        currentState.groupId == null)
+      return;
 
     emit(currentState.copyWith(isLoadingMore: true));
     final nextPage = _teacherPage + 1;
@@ -95,11 +106,13 @@ class ExamsCubit extends Cubit<ExamsState> {
         _teacherPage = nextPage;
         final allExams = [...currentState.exams, ...newExams];
         AppCache.exams.put('teacher_exams_${currentState.groupId}', allExams);
-        emit(currentState.copyWith(
-          exams: allExams,
-          hasMore: newExams.length == _pageSize,
-          isLoadingMore: false,
-        ));
+        emit(
+          currentState.copyWith(
+            exams: allExams,
+            hasMore: newExams.length == _pageSize,
+            isLoadingMore: false,
+          ),
+        );
       },
       onFailure: (failure) {
         emit(currentState.copyWith(isLoadingMore: false));
@@ -112,27 +125,28 @@ class ExamsCubit extends Cubit<ExamsState> {
     final currentState = state;
     if (currentState is! TeacherExamsLoaded) return;
 
-    emit(currentState.copyWith(
-      selectedExam: exam,
-      isLoadingAttempts: true,
-    ));
+    emit(currentState.copyWith(selectedExam: exam, isLoadingAttempts: true));
 
     final result = await _repository.getExamAttempts(exam.id);
 
     result.when(
       onSuccess: (attempts) {
-        emit(currentState.copyWith(
-          selectedExam: exam,
-          attempts: attempts,
-          isLoadingAttempts: false,
-        ));
+        emit(
+          currentState.copyWith(
+            selectedExam: exam,
+            attempts: attempts,
+            isLoadingAttempts: false,
+          ),
+        );
       },
       onFailure: (failure) {
-        emit(currentState.copyWith(
-          selectedExam: exam,
-          isLoadingAttempts: false,
-          message: failure.message,
-        ));
+        emit(
+          currentState.copyWith(
+            selectedExam: exam,
+            isLoadingAttempts: false,
+            message: failure.message,
+          ),
+        );
       },
     );
   }
@@ -180,10 +194,9 @@ class ExamsCubit extends Cubit<ExamsState> {
       },
       onFailure: (failure) {
         if (currentState is TeacherExamsLoaded) {
-          emit(currentState.copyWith(
-            isCreating: false,
-            message: failure.message,
-          ));
+          emit(
+            currentState.copyWith(isCreating: false, message: failure.message),
+          );
         } else {
           emit(ExamsError(failure.message));
         }
@@ -242,7 +255,10 @@ class ExamsCubit extends Cubit<ExamsState> {
   Future<void> loadStudentExams({bool forceRefresh = false}) async {
     // Critical Guard: Never overwrite or interrupt an active exam taking session!
     if (state is ExamTakingState) {
-      AppLogger.w('ExamsCubit', 'Ignored loadStudentExams while exam is actively in progress');
+      AppLogger.w(
+        'ExamsCubit',
+        'Ignored loadStudentExams while exam is actively in progress',
+      );
       return;
     }
 
@@ -258,12 +274,15 @@ class ExamsCubit extends Cubit<ExamsState> {
       if (cached.isEmpty) {
         emit(const ExamsEmpty(message: 'لا توجد امتحانات متاحة حالياً'));
       } else {
-        emit(StudentExamsLoaded(
-          exams: cached,
-          hasMore: cached.length >= _pageSize,
-        ));
+        emit(
+          StudentExamsLoaded(
+            exams: cached,
+            hasMore: cached.length >= _pageSize,
+          ),
+        );
       }
-      if (!forceRefresh && AppCache.exams.has(cacheKey)) return; // Fresh cache, skip network
+      if (!forceRefresh && AppCache.exams.has(cacheKey))
+        return; // Fresh cache, skip network
     } else {
       emit(const ExamsLoading());
     }
@@ -282,11 +301,13 @@ class ExamsCubit extends Cubit<ExamsState> {
         if (exams.isEmpty) {
           emit(const ExamsEmpty(message: 'لا توجد امتحانات متاحة حالياً'));
         } else {
-          emit(StudentExamsLoaded(
-            exams: exams,
-            hasMore: exams.length == _pageSize,
-            isLoadingMore: false,
-          ));
+          emit(
+            StudentExamsLoaded(
+              exams: exams,
+              hasMore: exams.length == _pageSize,
+              isLoadingMore: false,
+            ),
+          );
         }
       },
       onFailure: (failure) {
@@ -318,11 +339,13 @@ class ExamsCubit extends Cubit<ExamsState> {
         _studentPage = nextPage;
         final allExams = [...currentState.exams, ...newExams];
         AppCache.exams.put('student_exams_all', allExams);
-        emit(currentState.copyWith(
-          exams: allExams,
-          hasMore: newExams.length == _pageSize,
-          isLoadingMore: false,
-        ));
+        emit(
+          currentState.copyWith(
+            exams: allExams,
+            hasMore: newExams.length == _pageSize,
+            isLoadingMore: false,
+          ),
+        );
       },
       onFailure: (failure) {
         emit(currentState.copyWith(isLoadingMore: false));
@@ -356,8 +379,9 @@ class ExamsCubit extends Cubit<ExamsState> {
         }
 
         // Calculate remaining seconds
-        final elapsedSeconds =
-            DateTime.now().difference(attempt.startedAt).inSeconds;
+        final elapsedSeconds = DateTime.now()
+            .difference(attempt.startedAt)
+            .inSeconds;
         final totalSeconds = fullExam.durationMinutes * 60;
         final remaining = totalSeconds - elapsedSeconds;
 
@@ -366,12 +390,14 @@ class ExamsCubit extends Cubit<ExamsState> {
           return false;
         }
 
-        emit(ExamTakingState(
-          exam: fullExam,
-          attempt: attempt,
-          questions: questions,
-          remainingSeconds: remaining,
-        ));
+        emit(
+          ExamTakingState(
+            exam: fullExam,
+            attempt: attempt,
+            questions: questions,
+            remainingSeconds: remaining,
+          ),
+        );
 
         _startTimer();
         return true;
@@ -394,15 +420,14 @@ class ExamsCubit extends Cubit<ExamsState> {
 
       if (currentState.remainingSeconds <= 1) {
         timer.cancel();
-        emit(currentState.copyWith(
-          remainingSeconds: 0,
-          isExpired: true,
-        ));
+        emit(currentState.copyWith(remainingSeconds: 0, isExpired: true));
         submitExam();
       } else {
-        emit(currentState.copyWith(
-          remainingSeconds: currentState.remainingSeconds - 1,
-        ));
+        emit(
+          currentState.copyWith(
+            remainingSeconds: currentState.remainingSeconds - 1,
+          ),
+        );
       }
     });
   }
@@ -442,18 +467,22 @@ class ExamsCubit extends Cubit<ExamsState> {
 
     return result.when(
       onSuccess: (submitResult) {
-        emit(currentState.copyWith(
-          isSubmitting: false,
-          submitSuccess: true,
-          submitResult: submitResult,
-        ));
+        emit(
+          currentState.copyWith(
+            isSubmitting: false,
+            submitSuccess: true,
+            submitResult: submitResult,
+          ),
+        );
         return true;
       },
       onFailure: (failure) {
-        emit(currentState.copyWith(
-          isSubmitting: false,
-          errorMessage: failure.message,
-        ));
+        emit(
+          currentState.copyWith(
+            isSubmitting: false,
+            errorMessage: failure.message,
+          ),
+        );
         return false;
       },
     );

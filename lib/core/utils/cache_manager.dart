@@ -34,11 +34,9 @@ class _CacheEntry<T> {
   final Duration ttl;
   DateTime lastAccessed;
 
-  _CacheEntry({
-    required this.data,
-    required this.ttl,
-  })  : storedAt = DateTime.now(),
-        lastAccessed = DateTime.now();
+  _CacheEntry({required this.data, required this.ttl})
+    : storedAt = DateTime.now(),
+      lastAccessed = DateTime.now();
 
   bool get isExpired => DateTime.now().difference(storedAt) > ttl;
 
@@ -80,11 +78,8 @@ class InMemoryCache<T> {
   final String _label;
   final Map<String, _CacheEntry<T>> _store = {};
 
-  InMemoryCache({
-    required this.ttl,
-    this.maxEntries = 50,
-    String? label,
-  }) : _label = label ?? T.toString();
+  InMemoryCache({required this.ttl, this.maxEntries = 50, String? label})
+    : _label = label ?? T.toString();
 
   /// Returns cached data if valid (not expired), otherwise null.
   T? get(String key) {
@@ -156,12 +151,17 @@ class InMemoryCache<T> {
 
   /// Invalidates all keys matching a prefix.
   void invalidatePrefix(String prefix) {
-    final keysToRemove = _store.keys.where((k) => k.startsWith(prefix)).toList();
+    final keysToRemove = _store.keys
+        .where((k) => k.startsWith(prefix))
+        .toList();
     for (final key in keysToRemove) {
       _store.remove(key);
     }
     if (keysToRemove.isNotEmpty) {
-      AppLogger.d('Cache:$_label', 'Invalidated ${keysToRemove.length} keys with prefix: $prefix');
+      AppLogger.d(
+        'Cache:$_label',
+        'Invalidated ${keysToRemove.length} keys with prefix: $prefix',
+      );
     }
   }
 
@@ -183,7 +183,9 @@ class InMemoryCache<T> {
   // ── Internal ────────────────────────────────────────────────────────────
 
   void _pruneExpired() {
-    _store.removeWhere((_, entry) => DateTime.now().difference(entry.storedAt) > entry.ttl * 2);
+    _store.removeWhere(
+      (_, entry) => DateTime.now().difference(entry.storedAt) > entry.ttl * 2,
+    );
   }
 }
 

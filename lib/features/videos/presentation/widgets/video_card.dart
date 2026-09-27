@@ -52,7 +52,8 @@ class VideoCard extends StatelessWidget {
                           child: Image.network(
                             video.thumbnailUrl!,
                             fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => _buildPlaceholder(context),
+                            errorBuilder: (_, __, ___) =>
+                                _buildPlaceholder(context),
                           ),
                         )
                       : _buildPlaceholder(context),
@@ -92,7 +93,10 @@ class VideoCard extends StatelessWidget {
                   bottom: AppSpacing.s8,
                   start: AppSpacing.s8,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.black87,
                       borderRadius: BorderRadius.circular(4),
@@ -132,14 +136,24 @@ class VideoCard extends StatelessWidget {
                               const SizedBox(height: AppSpacing.s6),
                               Text(
                                 context.l10n.videoProcessingMessage,
-                                style: const TextStyle(color: Colors.white, fontSize: 11),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 11,
+                                ),
                               ),
                             ] else if (video.status.isFailed) ...[
-                              const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 26),
+                              const Icon(
+                                Icons.error_outline_rounded,
+                                color: AppColors.error,
+                                size: 26,
+                              ),
                               const SizedBox(height: AppSpacing.s4),
                               Text(
                                 context.l10n.videoProcessingFailed,
-                                style: const TextStyle(color: Colors.white, fontSize: 11),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 11,
+                                ),
                               ),
                             ],
                           ],
@@ -155,10 +169,15 @@ class VideoCard extends StatelessWidget {
                   top: AppSpacing.s8,
                   end: AppSpacing.s8,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.success,
-                      borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.radiusFull,
+                      ),
                       boxShadow: const [
                         BoxShadow(
                           color: Colors.black26,
@@ -170,7 +189,11 @@ class VideoCard extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.check_rounded, color: Colors.white, size: 12),
+                        const Icon(
+                          Icons.check_rounded,
+                          color: Colors.white,
+                          size: 12,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           context.l10n.statusCompleted,
@@ -193,7 +216,9 @@ class VideoCard extends StatelessWidget {
               value: (percentage / 100).clamp(0.0, 1.0),
               minHeight: 3,
               backgroundColor: AppColors.surfaceVariant,
-              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                AppColors.primary,
+              ),
             ),
 
           // ── Video Details ─────────────────────────────────────────
@@ -210,7 +235,8 @@ class VideoCard extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                if (video.description != null && video.description!.isNotEmpty) ...[
+                if (video.description != null &&
+                    video.description!.isNotEmpty) ...[
                   const SizedBox(height: AppSpacing.s4),
                   Text(
                     video.description!,
@@ -224,7 +250,7 @@ class VideoCard extends StatelessWidget {
                 const SizedBox(height: AppSpacing.s8),
                 Row(
                   children: [
-                        Expanded(
+                    Expanded(
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -261,7 +287,9 @@ class VideoCard extends StatelessWidget {
                       Text(
                         context.l10n.watchedPercentage(percentage.toInt()),
                         style: theme.textTheme.labelSmall?.copyWith(
-                          color: isCompleted ? AppColors.success : AppColors.textSecondary,
+                          color: isCompleted
+                              ? AppColors.success
+                              : AppColors.textSecondary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),

@@ -57,6 +57,10 @@ import '../../features/dashboard/domain/repositories/student_dashboard_repositor
 import '../../features/dashboard/domain/repositories/teacher_dashboard_repository.dart';
 import '../../features/dashboard/presentation/cubit/student_dashboard_cubit.dart';
 import '../../features/dashboard/presentation/cubit/teacher_dashboard_cubit.dart';
+import '../../features/question_bank/data/datasources/question_bank_remote_datasource.dart';
+import '../../features/question_bank/data/repositories/question_bank_repository_impl.dart';
+import '../../features/question_bank/domain/repositories/question_bank_repository.dart';
+import '../../features/question_bank/presentation/cubit/question_bank_cubit.dart';
 
 /// Pure Dart Dependency Injection Container (Composition Root)
 /// Enforces Constructor Injection, Inversion of Control, and Zero-Package DI.
@@ -112,16 +116,23 @@ class InjectionContainer {
   static late final ExamsRepository examsRepository;
 
   // Feature: Student Dashboard
-  static late final StudentDashboardRemoteDataSource studentDashboardRemoteDataSource;
+  static late final StudentDashboardRemoteDataSource
+  studentDashboardRemoteDataSource;
   static late final StudentDashboardRepository studentDashboardRepository;
 
   // Feature: Teacher Dashboard
-  static late final TeacherDashboardRemoteDataSource teacherDashboardRemoteDataSource;
+  static late final TeacherDashboardRemoteDataSource
+  teacherDashboardRemoteDataSource;
   static late final TeacherDashboardRepository teacherDashboardRepository;
+
+  // Feature: Question Bank & Review Console (M1)
+  static late final QuestionBankRemoteDataSource questionBankRemoteDataSource;
+  static late final QuestionBankRepository questionBankRepository;
 
   // Factory methods for Cubits
   static AuthCubit createAuthCubit() => AuthCubit(repository: authRepository);
-  static GroupsCubit createGroupsCubit() => GroupsCubit(repository: groupsRepository);
+  static GroupsCubit createGroupsCubit() =>
+      GroupsCubit(repository: groupsRepository);
   static AttendanceCubit createAttendanceCubit() =>
       AttendanceCubit(repository: attendanceRepository);
   static StudentsCubit createStudentsCubit() =>
@@ -146,6 +157,8 @@ class InjectionContainer {
       StudentDashboardCubit(repository: studentDashboardRepository);
   static TeacherDashboardCubit createTeacherDashboardCubit() =>
       TeacherDashboardCubit(repository: teacherDashboardRepository);
+  static QuestionBankCubit createQuestionBankCubit() =>
+      QuestionBankCubit(repository: questionBankRepository);
   static TenantThemeCubit createTenantThemeCubit() => TenantThemeCubit();
   static LocaleCubit createLocaleCubit() => LocaleCubit();
 
@@ -164,63 +177,110 @@ class InjectionContainer {
 
     // 3. Groups Dependencies
     groupsRemoteDataSource = GroupsRemoteDataSourceImpl(client: customClient);
-    groupsRepository = GroupsRepositoryImpl(remoteDataSource: groupsRemoteDataSource);
+    groupsRepository = GroupsRepositoryImpl(
+      remoteDataSource: groupsRemoteDataSource,
+    );
     AppLogger.i('DI', '✅ Groups layer ready');
 
     // 4. Attendance Dependencies
-    attendanceRemoteDataSource = AttendanceRemoteDataSourceImpl(client: customClient);
-    attendanceRepository = AttendanceRepositoryImpl(remoteDataSource: attendanceRemoteDataSource);
+    attendanceRemoteDataSource = AttendanceRemoteDataSourceImpl(
+      client: customClient,
+    );
+    attendanceRepository = AttendanceRepositoryImpl(
+      remoteDataSource: attendanceRemoteDataSource,
+    );
     AppLogger.i('DI', '✅ Attendance layer ready');
 
     // 5. Students Dependencies
-    studentsRemoteDataSource = StudentsRemoteDataSourceImpl(client: customClient);
-    studentsRepository = StudentsRepositoryImpl(remoteDataSource: studentsRemoteDataSource);
+    studentsRemoteDataSource = StudentsRemoteDataSourceImpl(
+      client: customClient,
+    );
+    studentsRepository = StudentsRepositoryImpl(
+      remoteDataSource: studentsRemoteDataSource,
+    );
     AppLogger.i('DI', '✅ Students layer ready');
 
     // 6. Notifications Dependencies
-    notificationsRemoteDataSource = NotificationsRemoteDataSourceImpl(client: customClient);
-    notificationsRepository = NotificationsRepositoryImpl(remoteDataSource: notificationsRemoteDataSource);
+    notificationsRemoteDataSource = NotificationsRemoteDataSourceImpl(
+      client: customClient,
+    );
+    notificationsRepository = NotificationsRepositoryImpl(
+      remoteDataSource: notificationsRemoteDataSource,
+    );
     AppLogger.i('DI', '✅ Notifications layer ready');
 
     // 7. Onboarding Dependencies
-    onboardingRemoteDataSource = OnboardingRemoteDataSourceImpl(client: customClient);
-    onboardingRepository = OnboardingRepositoryImpl(remoteDataSource: onboardingRemoteDataSource);
+    onboardingRemoteDataSource = OnboardingRemoteDataSourceImpl(
+      client: customClient,
+    );
+    onboardingRepository = OnboardingRepositoryImpl(
+      remoteDataSource: onboardingRemoteDataSource,
+    );
     AppLogger.i('DI', '✅ Onboarding layer ready');
 
     // 8. Parent Dependencies
     parentRemoteDataSource = ParentRemoteDataSourceImpl(client: customClient);
-    parentRepository = ParentRepositoryImpl(remoteDataSource: parentRemoteDataSource);
+    parentRepository = ParentRepositoryImpl(
+      remoteDataSource: parentRemoteDataSource,
+    );
     AppLogger.i('DI', '✅ Parent layer ready');
 
     // 9. Videos Dependencies (Bunny Stream)
     videosRemoteDataSource = VideosRemoteDataSourceImpl(client: customClient);
-    videosRepository = VideosRepositoryImpl(remoteDataSource: videosRemoteDataSource);
+    videosRepository = VideosRepositoryImpl(
+      remoteDataSource: videosRemoteDataSource,
+    );
     AppLogger.i('DI', '✅ Videos layer ready');
 
     // 10. Content Dependencies
     contentRemoteDataSource = ContentRemoteDataSourceImpl(client: customClient);
-    contentRepository = ContentRepositoryImpl(remoteDataSource: contentRemoteDataSource);
+    contentRepository = ContentRepositoryImpl(
+      remoteDataSource: contentRemoteDataSource,
+    );
     AppLogger.i('DI', '✅ Content layer ready');
 
     // 11. Assignments Dependencies
-    assignmentsRemoteDataSource = AssignmentsRemoteDataSourceImpl(client: customClient);
-    assignmentsRepository = AssignmentsRepositoryImpl(remoteDataSource: assignmentsRemoteDataSource);
+    assignmentsRemoteDataSource = AssignmentsRemoteDataSourceImpl(
+      client: customClient,
+    );
+    assignmentsRepository = AssignmentsRepositoryImpl(
+      remoteDataSource: assignmentsRemoteDataSource,
+    );
     AppLogger.i('DI', '✅ Assignments layer ready');
 
     // 12. Exams Dependencies
     examsRemoteDataSource = ExamsRemoteDataSourceImpl(client: customClient);
-    examsRepository = ExamsRepositoryImpl(remoteDataSource: examsRemoteDataSource);
+    examsRepository = ExamsRepositoryImpl(
+      remoteDataSource: examsRemoteDataSource,
+    );
     AppLogger.i('DI', '✅ Exams layer ready');
 
     // 13. Student Dashboard Dependencies
-    studentDashboardRemoteDataSource = StudentDashboardRemoteDataSourceImpl(customClient ?? SupabaseService.client);
-    studentDashboardRepository = StudentDashboardRepositoryImpl(remoteDataSource: studentDashboardRemoteDataSource);
+    studentDashboardRemoteDataSource = StudentDashboardRemoteDataSourceImpl(
+      customClient ?? SupabaseService.client,
+    );
+    studentDashboardRepository = StudentDashboardRepositoryImpl(
+      remoteDataSource: studentDashboardRemoteDataSource,
+    );
     AppLogger.i('DI', '✅ Student Dashboard layer ready');
 
     // 14. Teacher Dashboard Dependencies
-    teacherDashboardRemoteDataSource = TeacherDashboardRemoteDataSourceImpl(client: customClient);
-    teacherDashboardRepository = TeacherDashboardRepositoryImpl(teacherDashboardRemoteDataSource);
+    teacherDashboardRemoteDataSource = TeacherDashboardRemoteDataSourceImpl(
+      client: customClient,
+    );
+    teacherDashboardRepository = TeacherDashboardRepositoryImpl(
+      teacherDashboardRemoteDataSource,
+    );
     AppLogger.i('DI', '✅ Teacher Dashboard layer ready');
+
+    // 15. Question Bank Dependencies
+    questionBankRemoteDataSource = QuestionBankRemoteDataSourceImpl(
+      supabaseClient: customClient ?? SupabaseService.client,
+    );
+    questionBankRepository = QuestionBankRepositoryImpl(
+      remoteDataSource: questionBankRemoteDataSource,
+    );
+    AppLogger.i('DI', '✅ Question Bank layer ready');
 
     AppLogger.s('DI', '🎉 All dependency layers initialized successfully');
   }

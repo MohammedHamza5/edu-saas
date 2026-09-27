@@ -1047,7 +1047,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get studentAttendanceTitle => 'سجل حضوري';
+  String get studentAttendanceTitle => 'سجل الحضور والالتزام';
 
   @override
   String get studentAttendanceHistory => 'سجل الجلسات المسجلة';
@@ -5437,4 +5437,632 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get addSelectedStudentAction => 'إضافة إلى المجموعة';
+
+  @override
+  String get questionBankTitle => 'بنك الأسئلة';
+
+  @override
+  String get manualQuestionEntry => 'إدخال سؤال يدوي';
+
+  @override
+  String get filterExtracted => 'مستخرج';
+
+  @override
+  String get filterReviewRequired => 'يتطلب مراجعة';
+
+  @override
+  String get filterApproved => 'معتمد';
+
+  @override
+  String get filterPublished => 'منشور';
+
+  @override
+  String get sourceLabel => 'معرّف السؤال';
+
+  @override
+  String get questionType => 'نوع السؤال';
+
+  @override
+  String get multipleChoice => 'اختيار من متعدد';
+
+  @override
+  String get gridIn => 'إجابة رقمية (Grid-In)';
+
+  @override
+  String get stemText => 'نص المسألة (Stem)';
+
+  @override
+  String get stemTextHint => 'أدخل نص المسألة الرياضية...';
+
+  @override
+  String get optionA => 'الخيار أ';
+
+  @override
+  String get optionB => 'الخيار ب';
+
+  @override
+  String get optionC => 'الخيار ج';
+
+  @override
+  String get optionD => 'الخيار د';
+
+  @override
+  String get correctAnswer => 'الإجابة الصحيحة';
+
+  @override
+  String get saveAndReview => 'حفظ في بنك الأسئلة';
+
+  @override
+  String get reviewConsoleTitle => 'منصة المراجعة والتدقيق';
+
+  @override
+  String get studentPreview => 'معاينة الطالب';
+
+  @override
+  String get validationBlockers => 'موانع النشر (Blockers)';
+
+  @override
+  String get approveRevision => 'اعتماد النسخة';
+
+  @override
+  String get revisionApprovedBadge => 'النسخة معتمدة';
+
+  @override
+  String get contentHashLabel => 'بصمة المحتوى (SHA-256)';
+
+  @override
+  String get statusExtracted => 'مستخرج';
+
+  @override
+  String get statusReviewRequired => 'يتطلب مراجعة';
+
+  @override
+  String get statusApproved => 'معتمد';
+
+  @override
+  String get statusQuarantined => 'معزول';
+
+  @override
+  String get standardMode => 'الوضع القياسي';
+
+  @override
+  String get editBlock => 'تعديل الكتلة';
+
+  @override
+  String get saveNewRevision => 'حفظ كنسخة جديدة';
+
+  @override
+  String get editReasonLabel => 'سبب التعديل';
+
+  @override
+  String get ocrErrorCorrection => 'تصحيح خطأ قراءة OCR';
+
+  @override
+  String get acknowledgeIssueAction => 'إقرار وتأكيد';
+
+  @override
+  String get acknowledgedBadge => 'تم الإقرار';
+
+  @override
+  String get confirmIssueDialogTitle => 'إقرار مانع النشر';
+
+  @override
+  String get mergeWithNextAction => 'دمج مع السؤال التالي';
+
+  @override
+  String get splitQuestionAction => 'تقسيم السؤال';
+
+  @override
+  String get duplicateClusterTitle => 'مكرر';
+
+  @override
+  String get restoreRevisionAction => 'استعادة هذه النسخة';
+
+  @override
+  String get secondReviewRequiredBadge => 'مطلوب مراجعة ثانية';
+
+  @override
+  String get priorityScoreLabel => 'درجة الأولوية';
+
+  @override
+  String get uploadExamFile => 'رفع ملف امتحان';
+
+  @override
+  String get primaryExamFile => 'ملف أسئلة الاختبار (PDF)';
+
+  @override
+  String get selectFileAction => 'اختيار ملف';
+
+  @override
+  String selectedFilesCount(int count) {
+    return 'تم اختيار $count ملفات';
+  }
+
+  @override
+  String get filterAllTypes => 'جميع الأنواع';
+
+  @override
+  String get typeMultipleChoice => 'اختيار من متعدد (MCQ)';
+
+  @override
+  String get typeGridIn => 'إجابة رقمية (Grid-In)';
+
+  @override
+  String get sortByPriority => 'ترتيب حسب الأولوية';
+
+  @override
+  String get statTotalQuestions => 'إجمالي الأسئلة';
+
+  @override
+  String get statPublished => 'منشورة';
+
+  @override
+  String get statApproved => 'معتمدة';
+
+  @override
+  String get statNeedsReview => 'تتطلب مراجعة';
+
+  @override
+  String get statQuarantined => 'محجورة';
+
+  @override
+  String get reviewAndAuditAction => 'مراجعة وتدقيق';
+
+  @override
+  String get satDomainTag => 'SAT/EST';
+
+  @override
+  String priorityScoreBadge(String score) {
+    return 'التقييم: $score';
+  }
+
+  @override
+  String get questionIdLabel => 'معرّف السؤال';
+
+  @override
+  String get questionSourceLabel => 'رمز السؤال في النموذج';
+
+  @override
+  String get questionTypeLabel => 'نوع السؤال';
+
+  @override
+  String get questionStatusLabel => 'حالة المراجعة';
+
+  @override
+  String get activeRevisionLabel => 'النسخة الحالية';
+
+  @override
+  String get answerStatusLabel => 'حالة الإجابة';
+
+  @override
+  String get answerKeyLabel => 'الإجابة الصحيحة';
+
+  @override
+  String get sourceRefsLabel => 'المقاطع المرجعية';
+
+  @override
+  String get teacherConfirmedStatus => 'مؤكدة من المدرس';
+
+  @override
+  String get solverVerifiedStatus => 'محققة رياضياً';
+
+  @override
+  String get sourceExtractedStatus => 'مستخرجة من النموذج';
+
+  @override
+  String get confirmMergeDialogTitle => 'دمج مع السؤال التالي';
+
+  @override
+  String get confirmSplitDialogTitle => 'تقسيم السؤال';
+
+  @override
+  String get splitAction => 'تقسيم';
+
+  @override
+  String get mergeAction => 'دمج';
+
+  @override
+  String get quarantineAction => 'حجر السؤال';
+
+  @override
+  String get editBlockDialogTitle => 'تعديل محتوى الكتلة';
+
+  @override
+  String get blockContentLabel => 'محتوى الكتلة / المعادلة';
+
+  @override
+  String get reviewFastBadge => 'مراجعة سريعة';
+
+  @override
+  String get reviewStandardBadge => 'مراجعة عادية';
+
+  @override
+  String get reviewBlockedBadge => 'يتطلب إجراء';
+
+  @override
+  String extractionSuccessDesc(int count, String filename) {
+    return 'تم استخراج $count سؤال من ملف: $filename. جميع معادلات KaTeX والخيارات جاهزة.';
+  }
+
+  @override
+  String extractionBannerTitle(int count) {
+    return 'تم استخراج $count سؤال بنجاح!';
+  }
+
+  @override
+  String extractionBannerSubtitle(String filename) {
+    return 'المصدر: $filename';
+  }
+
+  @override
+  String get dismissBanner => 'إخفاء';
+
+  @override
+  String get uploadExamDialogTitle => 'رفع ملف اختبار (PDF)';
+
+  @override
+  String get uploadExamDialogSubtitle =>
+      'استخراج ذكي للامتحان وإعادة بناء المعادلات الرياضية عبر KaTeX';
+
+  @override
+  String get multiFileAcceptedNotice =>
+      'يمكنك رفع ملف أسئلة الامتحان وملف الإجابات النموذجي بشكل منفصل';
+
+  @override
+  String get answerKeyFile => 'ملف الإجابات (اختياري)';
+
+  @override
+  String get rightsAttestationPrompt =>
+      'أقر بأن لدي الحقوق الأكاديمية لرفع واستخدام هذه المادة.';
+
+  @override
+  String get startReconstructionAction =>
+      'بدء الاستخراج وإعادة البناء الذكي 🚀';
+
+  @override
+  String get extractionSuccessTitle => 'تم الاستخراج وإعادة البناء بنجاح!';
+
+  @override
+  String get extractedQuestionsPreview => 'معاينة الأسئلة المستخرجة';
+
+  @override
+  String get assignAsExamAction => 'تعيين كاختبار لمجموعة دراسية الآن 🚀';
+
+  @override
+  String get assignAsExamDesc =>
+      'نشر هذه الأسئلة مباشرة كاختبار للطلاب في مجموعة محددة.';
+
+  @override
+  String get saveToQuestionBankOnly =>
+      'الاحتفاظ بها في بنك الأسئلة للمراجعة 🔍';
+
+  @override
+  String get saveToQuestionBankDesc =>
+      'حفظ الأسئلة في بنكك المركزي للمراجعة أو التعديل أو الاستخدام لاحقاً.';
+
+  @override
+  String get selectTargetGroup => 'اختر المجموعة الدراسية';
+
+  @override
+  String get selectTargetGroupHint => 'اختر المجموعة التي ستؤدي هذا الامتحان';
+
+  @override
+  String get examDurationMinutesLabel => 'المدة بالدقائق';
+
+  @override
+  String get publishExamToGroupAction => 'نشر الاختبار للمجموعة الآن 📢';
+
+  @override
+  String get examPublishedSuccess =>
+      'تم نشر الاختبار بنجاح! يمكن لطلاب المجموعة المحددة البدء في أدائه.';
+
+  @override
+  String get goToExamsPage => 'الانتقال إلى لوحة الاختبارات 📋';
+
+  @override
+  String get analyzingForensicStep =>
+      'جاري تحليل الطبقات الجنائية وتصنيف الصفحات...';
+
+  @override
+  String get extractingFormulasStep =>
+      'جاري استخراج صيغ KaTeX والكتل الرياضية...';
+
+  @override
+  String get savingQuestionsStep => 'جاري حفظ الأسئلة والنسخ في بنك الأسئلة...';
+
+  @override
+  String get emptyQuestionBankTitle => 'بنك الأسئلة فارغ حالياً';
+
+  @override
+  String get emptyQuestionBankSubtitle =>
+      'قم برفع ملف اختبار PDF للتحويل والاستخراج الذكي للمعادلات الرياضية، أو أضف سؤالاً يدوياً.';
+
+  @override
+  String get noMatchingQuestionsTitle => 'لا توجد أسئلة تطابق البحث';
+
+  @override
+  String get noMatchingQuestionsSubtitle =>
+      'جرّب تغيير كلمات البحث، نوع السؤال، أو فلتر الحالة الحالية.';
+
+  @override
+  String get questionBankSubtitle => 'إدارة ومراجعة ونشر الأسئلة الرياضية';
+
+  @override
+  String get searchQuestionBankHint =>
+      'البحث برمز السؤال، المعرّف، أو الكلمات المفتاحية...';
+
+  @override
+  String get extractionBannerHint =>
+      'القائمة أدناه مصفاة لعرض الأسئلة المستخرجة فقط — راجع واعتمد كل سؤال.';
+
+  @override
+  String get rightsAttestation =>
+      'أقر بأن لدي الحقوق الأكاديمية لاستخدام هذه المادة';
+
+  @override
+  String get fastDiffMode => 'نمط المقارنة السريعة';
+
+  @override
+  String get noBlockersMessage =>
+      'تم استيفاء جميع الشروط. جاهز للاعتماد والنشر.';
+
+  @override
+  String get possibleDuplicateNotice => 'تم اكتشاف سؤال مكرر محتمل في';
+
+  @override
+  String get questionDetailsAndSource => 'تفاصيل ومصدر السؤال';
+
+  @override
+  String get originalEvidence => 'الأصل الجنائي وسلسلة الإثبات';
+
+  @override
+  String get technicalAuditDetails => 'تفاصيل التدقيق الفني';
+
+  @override
+  String get revisionHistoryTitle => 'سجل المراجعات والتعديلات';
+
+  @override
+  String get markUnreadableAction => 'تحديد المصدر كغير قابل للقراءة';
+
+  @override
+  String get confirmIssuePrompt =>
+      'هل أنت متأكد من رغبتك في تأكيد وتجاوز هذا المانع؟';
+
+  @override
+  String get sourceImageCorrection => 'تصحيح الصورة الأصلية';
+
+  @override
+  String get sourceTypoFix => 'تصحيح خطأ مطبعي في المصدر';
+
+  @override
+  String get teacherAnswerConfirmation => 'تأكيد المدرس للإجابة';
+
+  @override
+  String get confirmMergeDialogBody =>
+      'هل تريد دمج هذا السؤال مع السؤال التالي؟ لا يمكن التراجع عن هذا الإجراء.';
+
+  @override
+  String get confirmSplitDialogBody =>
+      'هل تريد تقسيم هذا السؤال إلى سؤالين منفصلين؟ لا يمكن التراجع عن هذا الإجراء.';
+
+  @override
+  String get confirmUnreadableDialogTitle => 'تأكيد تعذر قراءة المصدر';
+
+  @override
+  String get confirmUnreadableDialogBody =>
+      'حجز هذا السؤال بسبب تشوه أو ضبابية أو انقطاع النص الأصلي؟ سيتم إخفاؤه عن الطلاب.';
+
+  @override
+  String publishedCountBadge(int count) {
+    return '$count منشورة';
+  }
+
+  @override
+  String draftCountBadge(int count) {
+    return '$count مسودة';
+  }
+
+  @override
+  String get publishedCountLabel => 'منشور';
+
+  @override
+  String get draftCountLabel => 'مسودة';
+
+  @override
+  String get lessonVisibilityPublished => 'منشورة (مرئية للطلاب)';
+
+  @override
+  String get lessonVisibilityDraft => 'مسودة (مخفية عن الطلاب)';
+
+  @override
+  String get hideLessonTooltip => 'إخفاء المحاضرة عن الطلاب';
+
+  @override
+  String get publishLessonTooltip => 'نشر المحاضرة للطلاب';
+
+  @override
+  String get lessonStatusLabel => 'حالة نشر المحاضرة';
+
+  @override
+  String get lessonStatusPublishedDesc =>
+      'المحاضرة منشورة ومرئية للطلاب المسجلين في هذه المجموعة.';
+
+  @override
+  String get lessonStatusDraftDesc =>
+      'المحاضرة خاصة وتظهر للمدرس فقط أثناء الإعداد.';
+
+  @override
+  String get lessonVisibilityUpdatedToast =>
+      'تم تحديث حالة ظهور المحاضرة بنجاح.';
+
+  @override
+  String get publishAllLessonsConfirmTitle => 'نشر جميع المحاضرات؟';
+
+  @override
+  String get hideAllLessonsConfirmTitle => 'إخفاء جميع المحاضرات؟';
+
+  @override
+  String get publishAllLessonsConfirmMessage =>
+      'هل أنت متأكد من رغبتك في نشر جميع محاضرات هذه الدورة؟ سيتمكن الطلاب من الوصول إليها.';
+
+  @override
+  String get hideAllLessonsConfirmMessage =>
+      'هل أنت متأكد من رغبتك في إخفاء جميع محاضرات هذه الدورة؟ ستتحول إلى مسودات.';
+
+  @override
+  String get publishAllLessonsAction => 'نشر جميع المحاضرات';
+
+  @override
+  String get hideAllLessonsAction => 'إخفاء جميع المحاضرات';
+
+  @override
+  String get allLessonsVisibilityUpdatedToast =>
+      'تم تحديث حالة ظهور جميع المحاضرات بنجاح.';
+
+  @override
+  String get imageNotAccessible => 'تعذر تحميل الصورة';
+
+  @override
+  String get zoomAsset => 'تكبير الصورة';
+
+  @override
+  String get deleteQuestionTitle => 'حذف السؤال';
+
+  @override
+  String deleteQuestionConfirm(String qLabel) {
+    return 'هل أنت متأكد من حذف السؤال \"$qLabel\"؟ لا يمكن التراجع عن هذا الإجراء.';
+  }
+
+  @override
+  String pageCountBadge(int count) {
+    return '$count صفحات';
+  }
+
+  @override
+  String get noQuestionsInDocumentTitle => 'لم يتم استخراج أسئلة';
+
+  @override
+  String get noQuestionsInDocumentSubtitle =>
+      'لم نتمكن من استخراج أي أسئلة من هذا المستند.';
+
+  @override
+  String get deleteDocumentTitle => 'حذف المستند';
+
+  @override
+  String deleteDocumentConfirm(String docName) {
+    return 'هل أنت متأكد من حذف المستند \"$docName\"؟ سيتم حذف جميع الأسئلة والمراجعات المرتبطة به نهائياً.';
+  }
+
+  @override
+  String get emptyDocumentsTitle => 'لا توجد مستندات';
+
+  @override
+  String get emptyDocumentsSubtitle =>
+      'قم برفع ملف PDF أو Word للبدء في استخراج الأسئلة تلقائياً.';
+
+  @override
+  String get statTotalDocuments => 'إجمالي المستندات';
+
+  @override
+  String get statDocumentsDone => 'مكتمل';
+
+  @override
+  String get statDocumentsPending => 'قيد الانتظار';
+
+  @override
+  String get statDocumentsFailed => 'فشل';
+
+  @override
+  String questionCountBadge(int count) {
+    return '$count أسئلة';
+  }
+
+  @override
+  String get viewQuestionsAction => 'عرض الأسئلة';
+
+  @override
+  String get statusDone => 'مكتمل';
+
+  @override
+  String get statusFailed => 'فشل';
+
+  @override
+  String get statusProcessing => 'قيد المعالجة';
+
+  @override
+  String get statusPending => 'قيد الانتظار';
+
+  @override
+  String get centralQuestionBankTitle => 'بنك الأسئلة المركزي';
+
+  @override
+  String get centralQuestionBankDesc =>
+      'تفريغ وتصنيف أسئلة الامتحانات بالذكاء الاصطناعي ومعادلات LaTeX';
+
+  @override
+  String get videoLibraryCardTitle => 'مكتبة الفيديو والوسائط';
+
+  @override
+  String get videoLibraryCardDesc =>
+      'إدارة ورفع الفيديوهات السحابية وبث HLS المشفر';
+
+  @override
+  String get selectCourseTitle => 'اختر المادة التعليمية';
+
+  @override
+  String get selectCoursePrompt =>
+      'أنت مسجل في أكثر من مجموعة، اختر المادة الدراسية للمتابعة:';
+
+  @override
+  String get importFromQuestionBankAction => 'استيراد من بنك الأسئلة';
+
+  @override
+  String get selectQuestionsToImport => 'اختر الأسئلة للاستيراد';
+
+  @override
+  String get selectDocumentToBrowse => 'اختر المستند لتصفح أسئلته';
+
+  @override
+  String importSelectedQuestionsAction(int count) {
+    return 'استيراد الأسئلة المحددة ($count)';
+  }
+
+  @override
+  String get noQuestionsSelectedPrompt => 'يرجى تحديد سؤال واحد على الأقل';
+
+  @override
+  String get createInstantExamAction => 'إنشاء امتحان فوري';
+
+  @override
+  String get createInstantExamTitle => 'إنشاء امتحان مباشر من هذا المستند';
+
+  @override
+  String get createInstantExamDesc =>
+      'سيتم إنشاء امتحان جديد في المجموعة المحددة ونشر كافة الأسئلة المعتمدة تلقائياً.';
+
+  @override
+  String get selectAllQuestions => 'تحديد كافة الأسئلة';
+
+  @override
+  String questionsImportedSuccess(int count) {
+    return 'تم استيراد $count أسئلة بنجاح إلى الامتحان';
+  }
+
+  @override
+  String get optionsLabel => 'خيارات الإجابة';
+
+  @override
+  String get tapToSelectAnswer => 'اضغط على خيار لتأكيد الإجابة';
+
+  @override
+  String get stemNotExtracted => 'لم يتم استخراج نص السؤال بعد';
+
+  @override
+  String get aiEnrichedBadge => 'مُحسّن بالذكاء الاصطناعي';
+
+  @override
+  String get editStemAction => 'تعديل نص السؤال';
+
+  @override
+  String get diagramLabel => 'رسم توضيحي / بياني';
 }

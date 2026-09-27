@@ -61,7 +61,9 @@ class StudentsRemoteDataSourceImpl implements StudentsRemoteDataSource {
     // Build query with filters BEFORE range() — PostgrestFilterBuilder needed
     var filterQuery = _c
         .from('users')
-        .select('id, tenant_id, full_name, email, phone, parent_phone, avatar_url, status, role, last_activity_at, created_at')
+        .select(
+          'id, tenant_id, full_name, email, phone, parent_phone, avatar_url, status, role, last_activity_at, created_at',
+        )
         .eq('role', 'student');
 
     if (status != null && status != 'all') {
@@ -88,7 +90,9 @@ class StudentsRemoteDataSourceImpl implements StudentsRemoteDataSource {
   Future<List<StudentModel>> getPendingStudents() async {
     final response = await _c
         .from('users')
-        .select('id, tenant_id, full_name, email, phone, parent_phone, avatar_url, status, role, last_activity_at, created_at')
+        .select(
+          'id, tenant_id, full_name, email, phone, parent_phone, avatar_url, status, role, last_activity_at, created_at',
+        )
         .eq('role', 'student')
         .eq('status', 'pending')
         .order('created_at', ascending: true); // oldest first for FIFO review
@@ -110,23 +114,18 @@ class StudentsRemoteDataSourceImpl implements StudentsRemoteDataSource {
       // 1. Primary: Atomic PostgreSQL RPC via PostgREST (bypasses browser CORS & gateway blocks)
       await _c.rpc<dynamic>(
         'approve_student',
-        params: {
-          'p_student_id': studentId,
-          'p_action': action,
-        },
+        params: {'p_student_id': studentId, 'p_action': action},
       );
     } catch (_) {
       // 2. Secondary fallback: Edge Function
       final result = await _c.functions.invoke(
         'approve-student',
-        body: {
-          'student_id': studentId,
-          'action': action,
-        },
+        body: {'student_id': studentId, 'action': action},
       );
 
       if (result.status != 200) {
-        final msg = (result.data as Map<String, dynamic>?)?['error']?.toString() ??
+        final msg =
+            (result.data as Map<String, dynamic>?)?['error']?.toString() ??
             'Status change failed (HTTP ${result.status})';
         throw PostgrestException(message: msg);
       }
@@ -142,7 +141,9 @@ class StudentsRemoteDataSourceImpl implements StudentsRemoteDataSource {
   Future<StudentModel> getStudent(String studentId) async {
     final response = await _c
         .from('users')
-        .select('id, tenant_id, full_name, email, phone, parent_phone, avatar_url, status, role, last_activity_at, created_at')
+        .select(
+          'id, tenant_id, full_name, email, phone, parent_phone, avatar_url, status, role, last_activity_at, created_at',
+        )
         .eq('id', studentId)
         .single();
 
@@ -187,7 +188,10 @@ class StudentsRemoteDataSourceImpl implements StudentsRemoteDataSource {
     try {
       return await _fetchStudent360Direct(studentId);
     } catch (e) {
-      AppLogger.e('StudentsRemoteDataSource', 'Failed to fetch student 360 direct: $e');
+      AppLogger.e(
+        'StudentsRemoteDataSource',
+        'Failed to fetch student 360 direct: $e',
+      );
       return Student360Model(studentId: studentId);
     }
   }
@@ -204,8 +208,10 @@ class StudentsRemoteDataSourceImpl implements StudentsRemoteDataSource {
         .select('last_activity_at')
         .eq('id', studentId)
         .maybeSingle();
-    final attFuture =
-        _c.from('attendance').select('status').eq('student_id', studentId);
+    final attFuture = _c
+        .from('attendance')
+        .select('status')
+        .eq('student_id', studentId);
     final subFuture = _c
         .from('assignment_submissions')
         .select('status')
@@ -237,12 +243,14 @@ class StudentsRemoteDataSourceImpl implements StudentsRemoteDataSource {
         : null;
 
     final totalAtt = attRows.length;
-    final presentAtt =
-        attRows.where((r) => (r is Map && r['status'] == 'present')).length;
+    final presentAtt = attRows
+        .where((r) => (r is Map && r['status'] == 'present'))
+        .length;
 
     final submitted = subRows.length;
-    final reviewed =
-        subRows.where((r) => (r is Map && r['status'] == 'reviewed')).length;
+    final reviewed = subRows
+        .where((r) => (r is Map && r['status'] == 'reviewed'))
+        .length;
 
     double examSum = 0;
     for (final r in examRows) {
@@ -320,8 +328,9 @@ class StudentsRemoteDataSourceImpl implements StudentsRemoteDataSource {
     final memberRows = results[0] as List<dynamic>;
     final allGroups = results[1] as List<dynamic>;
 
-    final memberGroupIds =
-        memberRows.map((r) => (r as Map)['group_id'] as String).toSet();
+    final memberGroupIds = memberRows
+        .map((r) => (r as Map)['group_id'] as String)
+        .toSet();
 
     // Filter out groups the student is already in and return as StudentGroupInfo
     return allGroups

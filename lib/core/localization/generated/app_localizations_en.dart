@@ -1049,7 +1049,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get studentAttendanceTitle => 'My Attendance Record';
+  String get studentAttendanceTitle => 'Attendance & Commitment';
 
   @override
   String get studentAttendanceHistory => 'Recorded Sessions History';
@@ -5475,4 +5475,635 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get addSelectedStudentAction => 'Add to Group';
+
+  @override
+  String get questionBankTitle => 'Question Bank';
+
+  @override
+  String get manualQuestionEntry => 'Manual Question Entry';
+
+  @override
+  String get filterExtracted => 'Extracted';
+
+  @override
+  String get filterReviewRequired => 'Review Required';
+
+  @override
+  String get filterApproved => 'Approved';
+
+  @override
+  String get filterPublished => 'Published';
+
+  @override
+  String get sourceLabel => 'Question Identifier';
+
+  @override
+  String get questionType => 'Question Type';
+
+  @override
+  String get multipleChoice => 'Multiple Choice';
+
+  @override
+  String get gridIn => 'Grid-In (Numeric)';
+
+  @override
+  String get stemText => 'Stem (Problem Text)';
+
+  @override
+  String get stemTextHint => 'Enter mathematical problem statement...';
+
+  @override
+  String get optionA => 'Option A';
+
+  @override
+  String get optionB => 'Option B';
+
+  @override
+  String get optionC => 'Option C';
+
+  @override
+  String get optionD => 'Option D';
+
+  @override
+  String get correctAnswer => 'Correct Answer';
+
+  @override
+  String get saveAndReview => 'Save to Question Bank';
+
+  @override
+  String get reviewConsoleTitle => 'Review Console';
+
+  @override
+  String get studentPreview => 'Student Preview';
+
+  @override
+  String get validationBlockers => 'Validation Blockers';
+
+  @override
+  String get approveRevision => 'Approve Revision';
+
+  @override
+  String get revisionApprovedBadge => 'Revision Approved';
+
+  @override
+  String get contentHashLabel => 'Content Hash (SHA-256)';
+
+  @override
+  String get statusExtracted => 'Extracted';
+
+  @override
+  String get statusReviewRequired => 'Review Required';
+
+  @override
+  String get statusApproved => 'Approved';
+
+  @override
+  String get statusQuarantined => 'Quarantined';
+
+  @override
+  String get standardMode => 'Standard Mode';
+
+  @override
+  String get editBlock => 'Edit Block';
+
+  @override
+  String get saveNewRevision => 'Save as New Revision';
+
+  @override
+  String get editReasonLabel => 'Edit Reason';
+
+  @override
+  String get ocrErrorCorrection => 'OCR Error Correction';
+
+  @override
+  String get acknowledgeIssueAction => 'Acknowledge / Confirm';
+
+  @override
+  String get acknowledgedBadge => 'Acknowledged';
+
+  @override
+  String get confirmIssueDialogTitle => 'Acknowledge Issue';
+
+  @override
+  String get mergeWithNextAction => 'Merge with Next';
+
+  @override
+  String get splitQuestionAction => 'Split Question';
+
+  @override
+  String get duplicateClusterTitle => 'Duplicate';
+
+  @override
+  String get restoreRevisionAction => 'Restore Revision';
+
+  @override
+  String get secondReviewRequiredBadge => '2nd Review Req';
+
+  @override
+  String get priorityScoreLabel => 'Priority Score';
+
+  @override
+  String get uploadExamFile => 'Upload Exam File';
+
+  @override
+  String get primaryExamFile => 'Exam Questions File (PDF)';
+
+  @override
+  String get selectFileAction => 'Select File';
+
+  @override
+  String selectedFilesCount(int count) {
+    return '$count files selected';
+  }
+
+  @override
+  String get filterAllTypes => 'All Types';
+
+  @override
+  String get typeMultipleChoice => 'Multiple Choice (MCQ)';
+
+  @override
+  String get typeGridIn => 'Student-Produced Response (Grid-In)';
+
+  @override
+  String get sortByPriority => 'Sort by Priority';
+
+  @override
+  String get statTotalQuestions => 'Total Questions';
+
+  @override
+  String get statPublished => 'Published';
+
+  @override
+  String get statApproved => 'Approved';
+
+  @override
+  String get statNeedsReview => 'Needs Review';
+
+  @override
+  String get statQuarantined => 'Quarantined';
+
+  @override
+  String get reviewAndAuditAction => 'Review & Audit';
+
+  @override
+  String get satDomainTag => 'SAT/EST';
+
+  @override
+  String priorityScoreBadge(String score) {
+    return 'Score: $score';
+  }
+
+  @override
+  String get questionIdLabel => 'Question ID';
+
+  @override
+  String get questionSourceLabel => 'Question Label';
+
+  @override
+  String get questionTypeLabel => 'Question Type';
+
+  @override
+  String get questionStatusLabel => 'Review Status';
+
+  @override
+  String get activeRevisionLabel => 'Current Version';
+
+  @override
+  String get answerStatusLabel => 'Answer Verification';
+
+  @override
+  String get answerKeyLabel => 'Correct Answer';
+
+  @override
+  String get sourceRefsLabel => 'Source References';
+
+  @override
+  String get teacherConfirmedStatus => 'Teacher Confirmed';
+
+  @override
+  String get solverVerifiedStatus => 'Mathematically Verified';
+
+  @override
+  String get sourceExtractedStatus => 'Extracted from Source';
+
+  @override
+  String get confirmMergeDialogTitle => 'Merge with Next Question';
+
+  @override
+  String get confirmSplitDialogTitle => 'Split Question';
+
+  @override
+  String get splitAction => 'Split';
+
+  @override
+  String get mergeAction => 'Merge';
+
+  @override
+  String get quarantineAction => 'Quarantine';
+
+  @override
+  String get editBlockDialogTitle => 'Edit Block Content';
+
+  @override
+  String get blockContentLabel => 'Block Content / Formula';
+
+  @override
+  String get reviewFastBadge => 'Fast Review';
+
+  @override
+  String get reviewStandardBadge => 'Standard Review';
+
+  @override
+  String get reviewBlockedBadge => 'Action Required';
+
+  @override
+  String extractionSuccessDesc(int count, String filename) {
+    return 'Extracted $count questions from file: $filename. All KaTeX formulas and choices are ready.';
+  }
+
+  @override
+  String extractionBannerTitle(int count) {
+    return '$count questions extracted successfully!';
+  }
+
+  @override
+  String extractionBannerSubtitle(String filename) {
+    return 'Source: $filename';
+  }
+
+  @override
+  String get dismissBanner => 'Dismiss';
+
+  @override
+  String get uploadExamDialogTitle => 'Upload Exam File (PDF)';
+
+  @override
+  String get uploadExamDialogSubtitle =>
+      'AI-powered exam extraction and KaTeX mathematical reconstruction';
+
+  @override
+  String get multiFileAcceptedNotice =>
+      'You can select exam questions PDF along with separate answer key PDF';
+
+  @override
+  String get answerKeyFile => 'Answer Key File (Optional)';
+
+  @override
+  String get rightsAttestationPrompt =>
+      'I attest that I have the academic rights to upload and use this material.';
+
+  @override
+  String get startReconstructionAction =>
+      'Start AI Extraction & Reconstruction 🚀';
+
+  @override
+  String get extractionSuccessTitle => 'Reconstruction Completed Successfully!';
+
+  @override
+  String get extractedQuestionsPreview => 'Extracted Questions Preview';
+
+  @override
+  String get assignAsExamAction => 'Assign as Exam to a Study Group Now 🚀';
+
+  @override
+  String get assignAsExamDesc =>
+      'Publish these questions directly as an exam for students in a specific group.';
+
+  @override
+  String get saveToQuestionBankOnly => 'Keep in Question Bank for Review 🔍';
+
+  @override
+  String get saveToQuestionBankDesc =>
+      'Save the questions in your central bank to review, edit, or use later.';
+
+  @override
+  String get selectTargetGroup => 'Select Study Group';
+
+  @override
+  String get selectTargetGroupHint =>
+      'Choose the group that will take this exam';
+
+  @override
+  String get examDurationMinutesLabel => 'Duration (Minutes)';
+
+  @override
+  String get publishExamToGroupAction => 'Publish Exam to Group Now 📢';
+
+  @override
+  String get examPublishedSuccess =>
+      'Exam published successfully! Students in the selected group can now take it.';
+
+  @override
+  String get goToExamsPage => 'Go to Exams Dashboard 📋';
+
+  @override
+  String get analyzingForensicStep =>
+      'Analyzing forensic layers & classifying pages...';
+
+  @override
+  String get extractingFormulasStep =>
+      'Extracting KaTeX formulas & math blocks...';
+
+  @override
+  String get savingQuestionsStep =>
+      'Saving questions and revisions to question bank...';
+
+  @override
+  String get emptyQuestionBankTitle => 'Question bank is currently empty';
+
+  @override
+  String get emptyQuestionBankSubtitle =>
+      'Upload a PDF exam file to intelligently extract questions and KaTeX mathematical formulas, or add a question manually.';
+
+  @override
+  String get noMatchingQuestionsTitle => 'No questions match your search';
+
+  @override
+  String get noMatchingQuestionsSubtitle =>
+      'Try adjusting search terms, question type, or status filter.';
+
+  @override
+  String get questionBankSubtitle =>
+      'Manage, review, and publish mathematical questions';
+
+  @override
+  String get searchQuestionBankHint =>
+      'Search by question code, identifier, or keywords...';
+
+  @override
+  String get extractionBannerHint =>
+      'The list below is filtered to show only the extracted questions — review and approve each one.';
+
+  @override
+  String get rightsAttestation =>
+      'I attest that I have the academic rights to use this material';
+
+  @override
+  String get fastDiffMode => 'Fast Diff Mode';
+
+  @override
+  String get noBlockersMessage =>
+      'All conditions satisfied. Ready for approval and publishing.';
+
+  @override
+  String get possibleDuplicateNotice =>
+      'Possible duplicate question detected in';
+
+  @override
+  String get questionDetailsAndSource => 'Question Details & Source';
+
+  @override
+  String get originalEvidence => 'Original Evidence & Traceability';
+
+  @override
+  String get technicalAuditDetails => 'Technical Audit Details';
+
+  @override
+  String get revisionHistoryTitle => 'Revision History';
+
+  @override
+  String get markUnreadableAction => 'Mark Source Unreadable';
+
+  @override
+  String get confirmIssuePrompt =>
+      'Are you sure you want to acknowledge this validation issue?';
+
+  @override
+  String get sourceImageCorrection => 'Source Image Correction';
+
+  @override
+  String get sourceTypoFix => 'Source Typo Fix';
+
+  @override
+  String get teacherAnswerConfirmation => 'Teacher Answer Confirmation';
+
+  @override
+  String get confirmMergeDialogBody =>
+      'Merge this question with the next question? This cannot be undone.';
+
+  @override
+  String get confirmSplitDialogBody =>
+      'Split this question into two separate questions? This cannot be undone.';
+
+  @override
+  String get confirmUnreadableDialogTitle => 'Confirm Source Unreadable';
+
+  @override
+  String get confirmUnreadableDialogBody =>
+      'Quarantine this question due to distorted, blurry, or cut-off source text? It will be hidden from students.';
+
+  @override
+  String publishedCountBadge(int count) {
+    return '$count Published';
+  }
+
+  @override
+  String draftCountBadge(int count) {
+    return '$count Drafts';
+  }
+
+  @override
+  String get publishedCountLabel => 'Published';
+
+  @override
+  String get draftCountLabel => 'Draft';
+
+  @override
+  String get lessonVisibilityPublished => 'Published (Visible to Students)';
+
+  @override
+  String get lessonVisibilityDraft => 'Draft (Hidden from Students)';
+
+  @override
+  String get hideLessonTooltip => 'Hide lesson from students';
+
+  @override
+  String get publishLessonTooltip => 'Publish lesson to students';
+
+  @override
+  String get lessonStatusLabel => 'Lesson Publishing Status';
+
+  @override
+  String get lessonStatusPublishedDesc =>
+      'The lesson is live and visible to enrolled students in this group.';
+
+  @override
+  String get lessonStatusDraftDesc =>
+      'The lesson is private and visible only to the teacher for drafting.';
+
+  @override
+  String get lessonVisibilityUpdatedToast =>
+      'Lesson visibility updated successfully.';
+
+  @override
+  String get publishAllLessonsConfirmTitle => 'Publish All Lessons?';
+
+  @override
+  String get hideAllLessonsConfirmTitle => 'Hide All Lessons?';
+
+  @override
+  String get publishAllLessonsConfirmMessage =>
+      'Are you sure you want to publish all lessons in this course? Students will be able to access them.';
+
+  @override
+  String get hideAllLessonsConfirmMessage =>
+      'Are you sure you want to hide all lessons in this course? They will become drafts.';
+
+  @override
+  String get publishAllLessonsAction => 'Publish All Lessons';
+
+  @override
+  String get hideAllLessonsAction => 'Hide All Lessons';
+
+  @override
+  String get allLessonsVisibilityUpdatedToast =>
+      'All lessons visibility updated successfully.';
+
+  @override
+  String get imageNotAccessible => 'Image not accessible';
+
+  @override
+  String get zoomAsset => 'Zoom Image';
+
+  @override
+  String get deleteQuestionTitle => 'Delete Question';
+
+  @override
+  String deleteQuestionConfirm(String qLabel) {
+    return 'Are you sure you want to delete question \\\"$qLabel\\\"? This action cannot be undone.';
+  }
+
+  @override
+  String pageCountBadge(int count) {
+    return '$count Pages';
+  }
+
+  @override
+  String get noQuestionsInDocumentTitle => 'No Questions Extracted';
+
+  @override
+  String get noQuestionsInDocumentSubtitle =>
+      'We couldn\'t extract any questions from this document.';
+
+  @override
+  String get deleteDocumentTitle => 'Delete Document';
+
+  @override
+  String deleteDocumentConfirm(String docName) {
+    return 'Are you sure you want to delete the document \\\"$docName\\\"? All associated questions and revisions will be permanently deleted.';
+  }
+
+  @override
+  String get emptyDocumentsTitle => 'No Documents Found';
+
+  @override
+  String get emptyDocumentsSubtitle =>
+      'Upload a PDF or Word document to start extracting questions automatically.';
+
+  @override
+  String get statTotalDocuments => 'Total Documents';
+
+  @override
+  String get statDocumentsDone => 'Done';
+
+  @override
+  String get statDocumentsPending => 'Pending';
+
+  @override
+  String get statDocumentsFailed => 'Failed';
+
+  @override
+  String questionCountBadge(int count) {
+    return '$count Questions';
+  }
+
+  @override
+  String get viewQuestionsAction => 'View Questions';
+
+  @override
+  String get statusDone => 'Completed';
+
+  @override
+  String get statusFailed => 'Failed';
+
+  @override
+  String get statusProcessing => 'Processing';
+
+  @override
+  String get statusPending => 'Pending';
+
+  @override
+  String get centralQuestionBankTitle => 'Central Question Bank';
+
+  @override
+  String get centralQuestionBankDesc =>
+      'AI exam question extraction, tagging, and LaTeX math verification';
+
+  @override
+  String get videoLibraryCardTitle => 'Video & Media Bank';
+
+  @override
+  String get videoLibraryCardDesc =>
+      'Manage cloud video assets and protected encrypted HLS streaming';
+
+  @override
+  String get selectCourseTitle => 'Select Course';
+
+  @override
+  String get selectCoursePrompt =>
+      'You are enrolled in multiple groups. Choose a course to continue:';
+
+  @override
+  String get importFromQuestionBankAction => 'Import from Question Bank';
+
+  @override
+  String get selectQuestionsToImport => 'Select Questions to Import';
+
+  @override
+  String get selectDocumentToBrowse => 'Select Document to Browse Questions';
+
+  @override
+  String importSelectedQuestionsAction(int count) {
+    return 'Import Selected Questions ($count)';
+  }
+
+  @override
+  String get noQuestionsSelectedPrompt => 'Please select at least one question';
+
+  @override
+  String get createInstantExamAction => 'Create Instant Exam';
+
+  @override
+  String get createInstantExamTitle => 'Create Instant Exam from Document';
+
+  @override
+  String get createInstantExamDesc =>
+      'A new exam will be created in the selected group with all approved questions deployed.';
+
+  @override
+  String get selectAllQuestions => 'Select All Questions';
+
+  @override
+  String questionsImportedSuccess(int count) {
+    return 'Successfully imported $count questions into the exam';
+  }
+
+  @override
+  String get optionsLabel => 'Options';
+
+  @override
+  String get tapToSelectAnswer => 'Click an option to confirm the answer';
+
+  @override
+  String get stemNotExtracted => 'Question text not extracted yet';
+
+  @override
+  String get aiEnrichedBadge => 'AI Enhanced';
+
+  @override
+  String get editStemAction => 'Edit Question Text';
+
+  @override
+  String get diagramLabel => 'Diagram / Illustration';
 }

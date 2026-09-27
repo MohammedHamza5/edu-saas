@@ -11,6 +11,7 @@ class FileAttachmentEntity extends Equatable {
   final int fileSize;
   final DateTime createdAt;
   final String? signedUrl;
+  final String storageProvider;
 
   const FileAttachmentEntity({
     required this.id,
@@ -22,6 +23,7 @@ class FileAttachmentEntity extends Equatable {
     required this.fileSize,
     required this.createdAt,
     this.signedUrl,
+    this.storageProvider = 'supabase',
   });
 
   FileAttachmentEntity copyWith({
@@ -34,6 +36,7 @@ class FileAttachmentEntity extends Equatable {
     int? fileSize,
     DateTime? createdAt,
     String? signedUrl,
+    String? storageProvider,
   }) {
     return FileAttachmentEntity(
       id: id ?? this.id,
@@ -45,6 +48,7 @@ class FileAttachmentEntity extends Equatable {
       fileSize: fileSize ?? this.fileSize,
       createdAt: createdAt ?? this.createdAt,
       signedUrl: signedUrl ?? this.signedUrl,
+      storageProvider: storageProvider ?? this.storageProvider,
     );
   }
 
@@ -59,14 +63,15 @@ class FileAttachmentEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        tenantId,
-        contentId,
-        storagePath,
-        fileName,
-        mimeType,
-        fileSize,
-        createdAt,
-        signedUrl,
-      ];
+    id,
+    tenantId,
+    contentId,
+    storagePath,
+    fileName,
+    mimeType,
+    fileSize,
+    createdAt,
+    signedUrl,
+    storageProvider,
+  ];
 }

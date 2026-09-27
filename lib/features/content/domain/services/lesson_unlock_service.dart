@@ -27,18 +27,22 @@ class LessonUnlockService {
       final lesson = lessons[i];
 
       if (lesson.isManuallyUnlocked) {
-        result.add(lesson.copyWith(
-          access: LessonAccess.unlocked,
-          unlockSource: UnlockSource.manualOverride,
-        ));
+        result.add(
+          lesson.copyWith(
+            access: LessonAccess.unlocked,
+            unlockSource: UnlockSource.manualOverride,
+          ),
+        );
         continue;
       }
 
       if (i == 0) {
-        result.add(lesson.copyWith(
-          access: LessonAccess.unlocked,
-          unlockSource: lesson.unlockSource ?? UnlockSource.firstLesson,
-        ));
+        result.add(
+          lesson.copyWith(
+            access: LessonAccess.unlocked,
+            unlockSource: lesson.unlockSource ?? UnlockSource.firstLesson,
+          ),
+        );
         continue;
       }
 
@@ -53,10 +57,12 @@ class LessonUnlockService {
           result.add(lesson.copyWith(access: LessonAccess.locked));
           continue;
         }
-        result.add(lesson.copyWith(
-          access: LessonAccess.unlocked,
-          unlockSource: UnlockSource.prerequisiteCompletion,
-        ));
+        result.add(
+          lesson.copyWith(
+            access: LessonAccess.unlocked,
+            unlockSource: UnlockSource.prerequisiteCompletion,
+          ),
+        );
         continue;
       }
 
@@ -68,10 +74,12 @@ class LessonUnlockService {
         continue;
       }
 
-      result.add(lesson.copyWith(
-        access: LessonAccess.unlocked,
-        unlockSource: UnlockSource.prerequisiteCompletion,
-      ));
+      result.add(
+        lesson.copyWith(
+          access: LessonAccess.unlocked,
+          unlockSource: UnlockSource.prerequisiteCompletion,
+        ),
+      );
     }
 
     return result;
@@ -88,7 +96,8 @@ class LessonUnlockService {
     }
 
     final videoOk = lesson.hasWatched90Percent || lesson.videoCompleted;
-    final examOk = lesson.examPassed ||
+    final examOk =
+        lesson.examPassed ||
         (lesson.lessonExamId != null &&
             passedExamIds.contains(lesson.lessonExamId));
     return videoOk && examOk;

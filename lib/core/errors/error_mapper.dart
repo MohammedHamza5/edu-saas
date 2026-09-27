@@ -40,7 +40,8 @@ class UserFriendlyError {
   /// Evaluates the localized description using the current context.
   String message(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    if (l10n == null) return rawError?.toString() ?? 'An unexpected error occurred.';
+    if (l10n == null)
+      return rawError?.toString() ?? 'An unexpected error occurred.';
     return messageBuilder(l10n);
   }
 
@@ -94,35 +95,73 @@ class ErrorMapper {
   static UserFriendlyError _mapFailure(Failure failure, {String? customCode}) {
     switch (failure.type) {
       case FailureType.network:
-        return _networkError(customCode ?? failure.code ?? 'NET_001', raw: failure);
+        return _networkError(
+          customCode ?? failure.code ?? 'NET_001',
+          raw: failure,
+        );
       case FailureType.auth:
         return _mapAuthFailure(failure, customCode: customCode);
       case FailureType.sessionExpired:
-        return _sessionExpiredError(customCode ?? failure.code ?? 'AUTH_401', raw: failure);
+        return _sessionExpiredError(
+          customCode ?? failure.code ?? 'AUTH_401',
+          raw: failure,
+        );
       case FailureType.permission:
-        return _permissionError(customCode ?? failure.code ?? 'SEC_403', raw: failure);
+        return _permissionError(
+          customCode ?? failure.code ?? 'SEC_403',
+          raw: failure,
+        );
       case FailureType.validation:
-        return _validationError(failure.message, customCode ?? failure.code ?? 'VAL_001', raw: failure);
+        return _validationError(
+          failure.message,
+          customCode ?? failure.code ?? 'VAL_001',
+          raw: failure,
+        );
       case FailureType.notFound:
-        return _notFoundError(customCode ?? failure.code ?? 'RES_404', raw: failure);
+        return _notFoundError(
+          customCode ?? failure.code ?? 'RES_404',
+          raw: failure,
+        );
       case FailureType.examExpired:
-        return _examExpiredError(customCode ?? failure.code ?? 'EXAM_001', raw: failure);
+        return _examExpiredError(
+          customCode ?? failure.code ?? 'EXAM_001',
+          raw: failure,
+        );
       case FailureType.examSubmitted:
-        return _examSubmittedError(customCode ?? failure.code ?? 'EXAM_002', raw: failure);
+        return _examSubmittedError(
+          customCode ?? failure.code ?? 'EXAM_002',
+          raw: failure,
+        );
       case FailureType.videoProcessing:
-        return _videoProcessingError(customCode ?? failure.code ?? 'VID_001', raw: failure);
+        return _videoProcessingError(
+          customCode ?? failure.code ?? 'VID_001',
+          raw: failure,
+        );
       case FailureType.rateLimit:
-        return _rateLimitError(customCode ?? failure.code ?? 'RATE_429', raw: failure);
+        return _rateLimitError(
+          customCode ?? failure.code ?? 'RATE_429',
+          raw: failure,
+        );
       case FailureType.conflict:
-        return _conflictError(failure.message, customCode ?? failure.code ?? 'CONF_001', raw: failure);
+        return _conflictError(
+          failure.message,
+          customCode ?? failure.code ?? 'CONF_001',
+          raw: failure,
+        );
       case FailureType.server:
       case FailureType.unknown:
         // Check message string for known patterns before defaulting to generic server
-        return _mapStringOrUnknown(failure.message, customCode: customCode ?? failure.code);
+        return _mapStringOrUnknown(
+          failure.message,
+          customCode: customCode ?? failure.code,
+        );
     }
   }
 
-  static UserFriendlyError _mapAuthFailure(Failure failure, {String? customCode}) {
+  static UserFriendlyError _mapAuthFailure(
+    Failure failure, {
+    String? customCode,
+  }) {
     final code = (customCode ?? failure.code ?? '').toLowerCase();
     final msg = failure.message.toLowerCase();
 
@@ -130,7 +169,10 @@ class ErrorMapper {
         msg.contains('email_address_invalid') ||
         (msg.contains('email') && msg.contains('invalid')) ||
         msg.contains('is invalid')) {
-      return _emailInvalidError(customCode ?? failure.code ?? 'AUTH_EMAIL_INVALID', raw: failure);
+      return _emailInvalidError(
+        customCode ?? failure.code ?? 'AUTH_EMAIL_INVALID',
+        raw: failure,
+      );
     }
     if (code == 'user_already_exists' ||
         code == 'email_exists' ||
@@ -138,27 +180,42 @@ class ErrorMapper {
         msg.contains('user_already_exists') ||
         msg.contains('already in use') ||
         msg.contains('already exists')) {
-      return _emailAlreadyExistsError(customCode ?? failure.code ?? 'AUTH_DUP', raw: failure);
+      return _emailAlreadyExistsError(
+        customCode ?? failure.code ?? 'AUTH_DUP',
+        raw: failure,
+      );
     }
     if (code == 'weak_password' ||
         msg.contains('weak_password') ||
         msg.contains('password should be at least') ||
         msg.contains('password is too short')) {
-      return _weakPasswordError(customCode ?? failure.code ?? 'AUTH_WEAK_PW', raw: failure);
+      return _weakPasswordError(
+        customCode ?? failure.code ?? 'AUTH_WEAK_PW',
+        raw: failure,
+      );
     }
     if (code == 'over_email_send_rate_limit' ||
         code == 'rate_limit' ||
         msg.contains('rate limit') ||
         msg.contains('over_email_send_rate_limit')) {
-      return _rateLimitError(customCode ?? failure.code ?? 'AUTH_RATE_LIMIT', raw: failure);
+      return _rateLimitError(
+        customCode ?? failure.code ?? 'AUTH_RATE_LIMIT',
+        raw: failure,
+      );
     }
     if (code == 'invalid_credentials' ||
         msg.contains('invalid login credentials') ||
         msg.contains('invalid_credentials')) {
-      return _invalidCredentialsError(customCode ?? failure.code ?? 'AUTH_CREDS', raw: failure);
+      return _invalidCredentialsError(
+        customCode ?? failure.code ?? 'AUTH_CREDS',
+        raw: failure,
+      );
     }
     if (msg.contains('tenant_suspended')) {
-      return _tenantSuspendedError(customCode ?? 'TENANT_SUSPENDED', raw: failure);
+      return _tenantSuspendedError(
+        customCode ?? 'TENANT_SUSPENDED',
+        raw: failure,
+      );
     }
     if (msg.contains('user_suspended') || msg.contains('suspended')) {
       return _userSuspendedError(customCode ?? 'USER_SUSPENDED', raw: failure);
@@ -170,20 +227,31 @@ class ErrorMapper {
       return _sessionExpiredError(customCode ?? 'AUTH_EXPIRED', raw: failure);
     }
 
-    return _authError(failure.message, customCode ?? failure.code ?? 'AUTH_001', raw: failure);
+    return _authError(
+      failure.message,
+      customCode ?? failure.code ?? 'AUTH_001',
+      raw: failure,
+    );
   }
 
-  static UserFriendlyError _mapException(Exception exception, {String? customCode}) {
+  static UserFriendlyError _mapException(
+    Exception exception, {
+    String? customCode,
+  }) {
     // ── Supabase Auth Exceptions ──
     if (exception is AuthException) {
       final msg = exception.message.toLowerCase();
-      final code = (exception.code ?? exception.statusCode ?? 'AUTH_001').toLowerCase();
+      final code = (exception.code ?? exception.statusCode ?? 'AUTH_001')
+          .toLowerCase();
 
       if (code == 'email_address_invalid' ||
           msg.contains('email_address_invalid') ||
           (msg.contains('email') && msg.contains('invalid')) ||
           msg.contains('is invalid')) {
-        return _emailInvalidError(customCode ?? exception.code ?? 'AUTH_EMAIL_INVALID', raw: exception);
+        return _emailInvalidError(
+          customCode ?? exception.code ?? 'AUTH_EMAIL_INVALID',
+          raw: exception,
+        );
       }
       if (code == 'user_already_exists' ||
           code == 'email_exists' ||
@@ -191,36 +259,65 @@ class ErrorMapper {
           msg.contains('user_already_exists') ||
           msg.contains('already in use') ||
           msg.contains('already exists')) {
-        return _emailAlreadyExistsError(customCode ?? exception.code ?? 'AUTH_DUP', raw: exception);
+        return _emailAlreadyExistsError(
+          customCode ?? exception.code ?? 'AUTH_DUP',
+          raw: exception,
+        );
       }
       if (code == 'weak_password' ||
           msg.contains('weak_password') ||
           msg.contains('password should be at least') ||
           msg.contains('password is too short')) {
-        return _weakPasswordError(customCode ?? exception.code ?? 'AUTH_WEAK_PW', raw: exception);
+        return _weakPasswordError(
+          customCode ?? exception.code ?? 'AUTH_WEAK_PW',
+          raw: exception,
+        );
       }
       if (code == 'over_email_send_rate_limit' ||
           msg.contains('rate limit') ||
           msg.contains('over_email_send_rate_limit')) {
-        return _rateLimitError(customCode ?? exception.code ?? 'AUTH_RATE_LIMIT', raw: exception);
+        return _rateLimitError(
+          customCode ?? exception.code ?? 'AUTH_RATE_LIMIT',
+          raw: exception,
+        );
       }
-      if (msg.contains('invalid login credentials') || msg.contains('invalid_credentials')) {
-        return _invalidCredentialsError(customCode ?? 'AUTH_CREDS', raw: exception);
+      if (msg.contains('invalid login credentials') ||
+          msg.contains('invalid_credentials')) {
+        return _invalidCredentialsError(
+          customCode ?? 'AUTH_CREDS',
+          raw: exception,
+        );
       }
       if (msg.contains('tenant_suspended')) {
-        return _tenantSuspendedError(customCode ?? 'TENANT_SUSPENDED', raw: exception);
+        return _tenantSuspendedError(
+          customCode ?? 'TENANT_SUSPENDED',
+          raw: exception,
+        );
       }
       if (msg.contains('user_suspended') || msg.contains('suspended')) {
-        return _userSuspendedError(customCode ?? 'USER_SUSPENDED', raw: exception);
+        return _userSuspendedError(
+          customCode ?? 'USER_SUSPENDED',
+          raw: exception,
+        );
       }
       if (msg.contains('user_rejected') || msg.contains('rejected')) {
-        return _userRejectedError(customCode ?? 'USER_REJECTED', raw: exception);
+        return _userRejectedError(
+          customCode ?? 'USER_REJECTED',
+          raw: exception,
+        );
       }
       if (msg.contains('expired') || msg.contains('jwt')) {
-        return _sessionExpiredError(customCode ?? 'AUTH_EXPIRED', raw: exception);
+        return _sessionExpiredError(
+          customCode ?? 'AUTH_EXPIRED',
+          raw: exception,
+        );
       }
 
-      return _authError(exception.message, customCode ?? exception.code ?? exception.statusCode ?? 'AUTH_001', raw: exception);
+      return _authError(
+        exception.message,
+        customCode ?? exception.code ?? exception.statusCode ?? 'AUTH_001',
+        raw: exception,
+      );
     }
 
     // ── Supabase Postgrest Exceptions ──
@@ -229,7 +326,9 @@ class ErrorMapper {
       final msg = exception.message.toLowerCase();
 
       // RLS or permission error
-      if (code == '42501' || msg.contains('row-level security') || msg.contains('permission denied')) {
+      if (code == '42501' ||
+          msg.contains('row-level security') ||
+          msg.contains('permission denied')) {
         return _permissionError(customCode ?? 'SEC_RLS_42501', raw: exception);
       }
       // Not found error
@@ -241,45 +340,86 @@ class ErrorMapper {
         return _examExpiredError(customCode ?? 'EXAM_EXP', raw: exception);
       }
       if (msg.contains('exam_already_submitted')) {
-        return _examSubmittedError(customCode ?? 'EXAM_SUBMITTED', raw: exception);
+        return _examSubmittedError(
+          customCode ?? 'EXAM_SUBMITTED',
+          raw: exception,
+        );
       }
       if (msg.contains('attempts_limit_reached')) {
-        return _attemptsLimitReachedError(customCode ?? 'EXAM_LIMIT', raw: exception);
+        return _attemptsLimitReachedError(
+          customCode ?? 'EXAM_LIMIT',
+          raw: exception,
+        );
       }
       if (msg.contains('video_not_ready')) {
-        return _videoProcessingError(customCode ?? 'VID_PROCESSING', raw: exception);
+        return _videoProcessingError(
+          customCode ?? 'VID_PROCESSING',
+          raw: exception,
+        );
       }
       if (msg.contains('content_not_published')) {
-        return _contentNotPublishedError(customCode ?? 'CONTENT_UNPUB', raw: exception);
+        return _contentNotPublishedError(
+          customCode ?? 'CONTENT_UNPUB',
+          raw: exception,
+        );
       }
 
-      return _serverError(customCode ?? (code.isNotEmpty ? 'PG_$code' : 'SRV_500'), raw: exception);
+      return _serverError(
+        customCode ?? (code.isNotEmpty ? 'PG_$code' : 'SRV_500'),
+        raw: exception,
+      );
     }
 
     // ── Domain Exceptions ──
     if (exception is PermissionException) {
-      return _permissionError(customCode ?? exception.code ?? 'SEC_403', raw: exception);
+      return _permissionError(
+        customCode ?? exception.code ?? 'SEC_403',
+        raw: exception,
+      );
     }
     if (exception is AuthRequiredException) {
-      return _sessionExpiredError(customCode ?? exception.code ?? 'AUTH_401', raw: exception);
+      return _sessionExpiredError(
+        customCode ?? exception.code ?? 'AUTH_401',
+        raw: exception,
+      );
     }
     if (exception is ExamExpiredException) {
-      return _examExpiredError(customCode ?? exception.code ?? 'EXAM_EXP', raw: exception);
+      return _examExpiredError(
+        customCode ?? exception.code ?? 'EXAM_EXP',
+        raw: exception,
+      );
     }
     if (exception is ExamAlreadySubmittedException) {
-      return _examSubmittedError(customCode ?? exception.code ?? 'EXAM_SUB', raw: exception);
+      return _examSubmittedError(
+        customCode ?? exception.code ?? 'EXAM_SUB',
+        raw: exception,
+      );
     }
     if (exception is VideoNotReadyException) {
-      return _videoProcessingError(customCode ?? exception.code ?? 'VID_PROC', raw: exception);
+      return _videoProcessingError(
+        customCode ?? exception.code ?? 'VID_PROC',
+        raw: exception,
+      );
     }
     if (exception is ValidationException) {
-      return _validationError(exception.message, customCode ?? exception.code ?? 'VAL_001', raw: exception);
+      return _validationError(
+        exception.message,
+        customCode ?? exception.code ?? 'VAL_001',
+        raw: exception,
+      );
     }
     if (exception is NotFoundException) {
-      return _notFoundError(customCode ?? exception.code ?? 'RES_404', raw: exception);
+      return _notFoundError(
+        customCode ?? exception.code ?? 'RES_404',
+        raw: exception,
+      );
     }
     if (exception is ConflictException) {
-      return _conflictError(exception.message, customCode ?? exception.code ?? 'CONF_001', raw: exception);
+      return _conflictError(
+        exception.message,
+        customCode ?? exception.code ?? 'CONF_001',
+        raw: exception,
+      );
     }
 
     // ── Transport & Network Exceptions ──
@@ -295,7 +435,10 @@ class ErrorMapper {
     return _mapStringOrUnknown(exception.toString(), customCode: customCode);
   }
 
-  static UserFriendlyError _mapStringOrUnknown(String text, {String? customCode}) {
+  static UserFriendlyError _mapStringOrUnknown(
+    String text, {
+    String? customCode,
+  }) {
     final lower = text.toLowerCase();
 
     // Network indicators
@@ -312,7 +455,9 @@ class ErrorMapper {
     }
 
     // Timeout
-    if (lower.contains('timeoutexception') || lower.contains('timed out') || lower.contains('deadline exceeded')) {
+    if (lower.contains('timeoutexception') ||
+        lower.contains('timed out') ||
+        lower.contains('deadline exceeded')) {
       return _timeoutError(customCode ?? 'NET_TIMEOUT', raw: text);
     }
 
@@ -340,19 +485,26 @@ class ErrorMapper {
     }
 
     // Auth indicators
-    if (lower.contains('invalid login credentials') || lower.contains('invalid_credentials')) {
+    if (lower.contains('invalid login credentials') ||
+        lower.contains('invalid_credentials')) {
       return _invalidCredentialsError(customCode ?? 'AUTH_CREDS', raw: text);
     }
     if (lower.contains('tenant_suspended')) {
       return _tenantSuspendedError(customCode ?? 'TENANT_SUSPENDED', raw: text);
     }
-    if (lower.contains('user_suspended') || lower.contains('account has been suspended') || lower.contains('suspended')) {
+    if (lower.contains('user_suspended') ||
+        lower.contains('account has been suspended') ||
+        lower.contains('suspended')) {
       return _userSuspendedError(customCode ?? 'USER_SUSPENDED', raw: text);
     }
-    if (lower.contains('user_rejected') || lower.contains('registration request for this account was rejected') || lower.contains('rejected')) {
+    if (lower.contains('user_rejected') ||
+        lower.contains('registration request for this account was rejected') ||
+        lower.contains('rejected')) {
       return _userRejectedError(customCode ?? 'USER_REJECTED', raw: text);
     }
-    if (lower.contains('jwt expired') || lower.contains('token expired') || lower.contains('session expired')) {
+    if (lower.contains('jwt expired') ||
+        lower.contains('token expired') ||
+        lower.contains('session expired')) {
       return _sessionExpiredError(customCode ?? 'AUTH_EXPIRED', raw: text);
     }
 
@@ -388,7 +540,8 @@ class ErrorMapper {
   // Builders for distinct error archetypes
   // ──────────────────────────────────────────────────────────────────────────
 
-  static UserFriendlyError _networkError(String code, {dynamic raw}) => UserFriendlyError(
+  static UserFriendlyError _networkError(String code, {dynamic raw}) =>
+      UserFriendlyError(
         type: FailureType.network,
         code: code,
         titleBuilder: (l10n) => l10n.errorNoInternetTitle,
@@ -399,7 +552,8 @@ class ErrorMapper {
         rawError: raw,
       );
 
-  static UserFriendlyError _timeoutError(String code, {dynamic raw}) => UserFriendlyError(
+  static UserFriendlyError _timeoutError(String code, {dynamic raw}) =>
+      UserFriendlyError(
         type: FailureType.network,
         code: code,
         titleBuilder: (l10n) => l10n.errorTimeoutTitle,
@@ -410,18 +564,22 @@ class ErrorMapper {
         rawError: raw,
       );
 
-  static UserFriendlyError _invalidCredentialsError(String code, {dynamic raw}) => UserFriendlyError(
-        type: FailureType.auth,
-        code: code,
-        titleBuilder: (l10n) => l10n.errorInvalidCredentialsTitle,
-        messageBuilder: (l10n) => l10n.errorInvalidCredentialsMessage,
-        hintBuilder: (l10n) => l10n.errorInvalidCredentialsHint,
-        icon: Icons.lock_outline_rounded,
-        canRetry: false,
-        rawError: raw,
-      );
+  static UserFriendlyError _invalidCredentialsError(
+    String code, {
+    dynamic raw,
+  }) => UserFriendlyError(
+    type: FailureType.auth,
+    code: code,
+    titleBuilder: (l10n) => l10n.errorInvalidCredentialsTitle,
+    messageBuilder: (l10n) => l10n.errorInvalidCredentialsMessage,
+    hintBuilder: (l10n) => l10n.errorInvalidCredentialsHint,
+    icon: Icons.lock_outline_rounded,
+    canRetry: false,
+    rawError: raw,
+  );
 
-  static UserFriendlyError _sessionExpiredError(String code, {dynamic raw}) => UserFriendlyError(
+  static UserFriendlyError _sessionExpiredError(String code, {dynamic raw}) =>
+      UserFriendlyError(
         type: FailureType.sessionExpired,
         code: code,
         titleBuilder: (l10n) => l10n.errorSessionExpiredTitle,
@@ -433,7 +591,8 @@ class ErrorMapper {
         rawError: raw,
       );
 
-  static UserFriendlyError _tenantSuspendedError(String code, {dynamic raw}) => UserFriendlyError(
+  static UserFriendlyError _tenantSuspendedError(String code, {dynamic raw}) =>
+      UserFriendlyError(
         type: FailureType.permission,
         code: code,
         titleBuilder: (l10n) => l10n.errorAccountSuspendedTitle,
@@ -444,7 +603,8 @@ class ErrorMapper {
         rawError: raw,
       );
 
-  static UserFriendlyError _userSuspendedError(String code, {dynamic raw}) => UserFriendlyError(
+  static UserFriendlyError _userSuspendedError(String code, {dynamic raw}) =>
+      UserFriendlyError(
         type: FailureType.permission,
         code: code,
         titleBuilder: (l10n) => l10n.errorAccountSuspendedTitle,
@@ -455,7 +615,8 @@ class ErrorMapper {
         rawError: raw,
       );
 
-  static UserFriendlyError _userRejectedError(String code, {dynamic raw}) => UserFriendlyError(
+  static UserFriendlyError _userRejectedError(String code, {dynamic raw}) =>
+      UserFriendlyError(
         type: FailureType.permission,
         code: code,
         titleBuilder: (l10n) => l10n.errorRegistrationRejectedTitle,
@@ -466,7 +627,8 @@ class ErrorMapper {
         rawError: raw,
       );
 
-  static UserFriendlyError _permissionError(String code, {dynamic raw}) => UserFriendlyError(
+  static UserFriendlyError _permissionError(String code, {dynamic raw}) =>
+      UserFriendlyError(
         type: FailureType.permission,
         code: code,
         titleBuilder: (l10n) => l10n.errorAccessDeniedTitle,
@@ -477,7 +639,8 @@ class ErrorMapper {
         rawError: raw,
       );
 
-  static UserFriendlyError _videoProcessingError(String code, {dynamic raw}) => UserFriendlyError(
+  static UserFriendlyError _videoProcessingError(String code, {dynamic raw}) =>
+      UserFriendlyError(
         type: FailureType.videoProcessing,
         code: code,
         titleBuilder: (l10n) => l10n.errorVideoProcessingTitle,
@@ -488,7 +651,8 @@ class ErrorMapper {
         rawError: raw,
       );
 
-  static UserFriendlyError _examExpiredError(String code, {dynamic raw}) => UserFriendlyError(
+  static UserFriendlyError _examExpiredError(String code, {dynamic raw}) =>
+      UserFriendlyError(
         type: FailureType.examExpired,
         code: code,
         titleBuilder: (l10n) => l10n.errorExamExpiredTitle,
@@ -499,7 +663,8 @@ class ErrorMapper {
         rawError: raw,
       );
 
-  static UserFriendlyError _examSubmittedError(String code, {dynamic raw}) => UserFriendlyError(
+  static UserFriendlyError _examSubmittedError(String code, {dynamic raw}) =>
+      UserFriendlyError(
         type: FailureType.examSubmitted,
         code: code,
         titleBuilder: (l10n) => l10n.errorExamAlreadySubmittedTitle,
@@ -510,29 +675,36 @@ class ErrorMapper {
         rawError: raw,
       );
 
-  static UserFriendlyError _attemptsLimitReachedError(String code, {dynamic raw}) => UserFriendlyError(
-        type: FailureType.examExpired,
-        code: code,
-        titleBuilder: (l10n) => l10n.errorAttemptsLimitReachedTitle,
-        messageBuilder: (l10n) => l10n.errorAttemptsLimitReachedMessage,
-        hintBuilder: (l10n) => l10n.errorAttemptsLimitReachedHint,
-        icon: Icons.highlight_off_rounded,
-        canRetry: false,
-        rawError: raw,
-      );
+  static UserFriendlyError _attemptsLimitReachedError(
+    String code, {
+    dynamic raw,
+  }) => UserFriendlyError(
+    type: FailureType.examExpired,
+    code: code,
+    titleBuilder: (l10n) => l10n.errorAttemptsLimitReachedTitle,
+    messageBuilder: (l10n) => l10n.errorAttemptsLimitReachedMessage,
+    hintBuilder: (l10n) => l10n.errorAttemptsLimitReachedHint,
+    icon: Icons.highlight_off_rounded,
+    canRetry: false,
+    rawError: raw,
+  );
 
-  static UserFriendlyError _contentNotPublishedError(String code, {dynamic raw}) => UserFriendlyError(
-        type: FailureType.notFound,
-        code: code,
-        titleBuilder: (l10n) => l10n.errorContentNotPublishedTitle,
-        messageBuilder: (l10n) => l10n.errorContentNotPublishedMessage,
-        hintBuilder: (l10n) => l10n.errorContentNotPublishedHint,
-        icon: Icons.visibility_off_rounded,
-        canRetry: false,
-        rawError: raw,
-      );
+  static UserFriendlyError _contentNotPublishedError(
+    String code, {
+    dynamic raw,
+  }) => UserFriendlyError(
+    type: FailureType.notFound,
+    code: code,
+    titleBuilder: (l10n) => l10n.errorContentNotPublishedTitle,
+    messageBuilder: (l10n) => l10n.errorContentNotPublishedMessage,
+    hintBuilder: (l10n) => l10n.errorContentNotPublishedHint,
+    icon: Icons.visibility_off_rounded,
+    canRetry: false,
+    rawError: raw,
+  );
 
-  static UserFriendlyError _notFoundError(String code, {dynamic raw}) => UserFriendlyError(
+  static UserFriendlyError _notFoundError(String code, {dynamic raw}) =>
+      UserFriendlyError(
         type: FailureType.notFound,
         code: code,
         titleBuilder: (l10n) => l10n.errorNotFoundTitle,
@@ -543,28 +715,38 @@ class ErrorMapper {
         rawError: raw,
       );
 
-  static UserFriendlyError _validationError(String message, String code, {dynamic raw}) => UserFriendlyError(
-        type: FailureType.validation,
-        code: code,
-        titleBuilder: (l10n) => l10n.errorValidationTitle,
-        messageBuilder: (l10n) => message.isNotEmpty ? message : l10n.errorValidationMessage,
-        hintBuilder: (l10n) => l10n.errorValidationHint,
-        icon: Icons.info_outline_rounded,
-        canRetry: false,
-        rawError: raw,
-      );
+  static UserFriendlyError _validationError(
+    String message,
+    String code, {
+    dynamic raw,
+  }) => UserFriendlyError(
+    type: FailureType.validation,
+    code: code,
+    titleBuilder: (l10n) => l10n.errorValidationTitle,
+    messageBuilder: (l10n) =>
+        message.isNotEmpty ? message : l10n.errorValidationMessage,
+    hintBuilder: (l10n) => l10n.errorValidationHint,
+    icon: Icons.info_outline_rounded,
+    canRetry: false,
+    rawError: raw,
+  );
 
-  static UserFriendlyError _conflictError(String message, String code, {dynamic raw}) => UserFriendlyError(
-        type: FailureType.conflict,
-        code: code,
-        titleBuilder: (l10n) => l10n.errorOccurred,
-        messageBuilder: (l10n) => message.isNotEmpty ? message : l10n.errorOccurred,
-        icon: Icons.sync_problem_rounded,
-        canRetry: true,
-        rawError: raw,
-      );
+  static UserFriendlyError _conflictError(
+    String message,
+    String code, {
+    dynamic raw,
+  }) => UserFriendlyError(
+    type: FailureType.conflict,
+    code: code,
+    titleBuilder: (l10n) => l10n.errorOccurred,
+    messageBuilder: (l10n) => message.isNotEmpty ? message : l10n.errorOccurred,
+    icon: Icons.sync_problem_rounded,
+    canRetry: true,
+    rawError: raw,
+  );
 
-  static UserFriendlyError _emailInvalidError(String code, {dynamic raw}) => UserFriendlyError(
+  static UserFriendlyError _emailInvalidError(String code, {dynamic raw}) =>
+      UserFriendlyError(
         type: FailureType.validation,
         code: code,
         titleBuilder: (l10n) => l10n.errorEmailInvalidTitle,
@@ -575,18 +757,22 @@ class ErrorMapper {
         rawError: raw,
       );
 
-  static UserFriendlyError _emailAlreadyExistsError(String code, {dynamic raw}) => UserFriendlyError(
-        type: FailureType.conflict,
-        code: code,
-        titleBuilder: (l10n) => l10n.errorEmailAlreadyExistsTitle,
-        messageBuilder: (l10n) => l10n.errorEmailAlreadyExistsMessage,
-        hintBuilder: (l10n) => l10n.errorEmailAlreadyExistsHint,
-        icon: Icons.person_off_rounded,
-        canRetry: false,
-        rawError: raw,
-      );
+  static UserFriendlyError _emailAlreadyExistsError(
+    String code, {
+    dynamic raw,
+  }) => UserFriendlyError(
+    type: FailureType.conflict,
+    code: code,
+    titleBuilder: (l10n) => l10n.errorEmailAlreadyExistsTitle,
+    messageBuilder: (l10n) => l10n.errorEmailAlreadyExistsMessage,
+    hintBuilder: (l10n) => l10n.errorEmailAlreadyExistsHint,
+    icon: Icons.person_off_rounded,
+    canRetry: false,
+    rawError: raw,
+  );
 
-  static UserFriendlyError _weakPasswordError(String code, {dynamic raw}) => UserFriendlyError(
+  static UserFriendlyError _weakPasswordError(String code, {dynamic raw}) =>
+      UserFriendlyError(
         type: FailureType.validation,
         code: code,
         titleBuilder: (l10n) => l10n.errorWeakPasswordTitle,
@@ -597,18 +783,24 @@ class ErrorMapper {
         rawError: raw,
       );
 
-  static UserFriendlyError _authError(String message, String code, {dynamic raw}) => UserFriendlyError(
-        type: FailureType.auth,
-        code: code,
-        titleBuilder: (l10n) => l10n.errorAuthFailedTitle,
-        messageBuilder: (l10n) => message.isNotEmpty ? message : l10n.errorAuthFailedMessage,
-        hintBuilder: (l10n) => l10n.errorAuthFailedHint,
-        icon: Icons.lock_outline_rounded,
-        canRetry: false,
-        rawError: raw,
-      );
+  static UserFriendlyError _authError(
+    String message,
+    String code, {
+    dynamic raw,
+  }) => UserFriendlyError(
+    type: FailureType.auth,
+    code: code,
+    titleBuilder: (l10n) => l10n.errorAuthFailedTitle,
+    messageBuilder: (l10n) =>
+        message.isNotEmpty ? message : l10n.errorAuthFailedMessage,
+    hintBuilder: (l10n) => l10n.errorAuthFailedHint,
+    icon: Icons.lock_outline_rounded,
+    canRetry: false,
+    rawError: raw,
+  );
 
-  static UserFriendlyError _rateLimitError(String code, {dynamic raw}) => UserFriendlyError(
+  static UserFriendlyError _rateLimitError(String code, {dynamic raw}) =>
+      UserFriendlyError(
         type: FailureType.rateLimit,
         code: code,
         titleBuilder: (l10n) => l10n.errorRateLimitTitle,
@@ -619,7 +811,8 @@ class ErrorMapper {
         rawError: raw,
       );
 
-  static UserFriendlyError _serverError(String code, {dynamic raw}) => UserFriendlyError(
+  static UserFriendlyError _serverError(String code, {dynamic raw}) =>
+      UserFriendlyError(
         type: FailureType.server,
         code: code,
         titleBuilder: (l10n) => l10n.errorServerTitle,

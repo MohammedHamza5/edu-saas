@@ -25,14 +25,11 @@ class MathLoadingIndicator extends StatefulWidget {
     this.showAxes = true,
   }) : isCompact = false;
 
-  const MathLoadingIndicator.compact({
-    super.key,
-    this.size = 20,
-    this.color,
-  })  : message = null,
-        textColor = null,
-        showAxes = false,
-        isCompact = true;
+  const MathLoadingIndicator.compact({super.key, this.size = 20, this.color})
+    : message = null,
+      textColor = null,
+      showAxes = false,
+      isCompact = true;
 
   @override
   State<MathLoadingIndicator> createState() => _MathLoadingIndicatorState();
@@ -50,8 +47,9 @@ class _MathLoadingIndicatorState extends State<MathLoadingIndicator>
       duration: Duration(milliseconds: widget.isCompact ? 1000 : 2200),
     );
 
-    final isTest =
-        WidgetsBinding.instance.runtimeType.toString().contains('Test');
+    final isTest = WidgetsBinding.instance.runtimeType.toString().contains(
+      'Test',
+    );
     if (!isTest) {
       _controller.repeat();
     } else {
@@ -241,18 +239,10 @@ class _MathFunctionCurvePainter extends CustomPainter {
         ..style = PaintingStyle.stroke;
 
       // Horizontal X-axis
-      canvas.drawLine(
-        Offset(4, midY),
-        Offset(width - 4, midY),
-        axisPaint,
-      );
+      canvas.drawLine(Offset(4, midY), Offset(width - 4, midY), axisPaint);
 
       // Vertical Y-axis
-      canvas.drawLine(
-        Offset(midX, 4),
-        Offset(midX, height - 4),
-        axisPaint,
-      );
+      canvas.drawLine(Offset(midX, 4), Offset(midX, height - 4), axisPaint);
 
       // Axis arrow heads
       final arrowPaint = Paint()
@@ -306,10 +296,7 @@ class _MathFunctionCurvePainter extends CustomPainter {
     // Gradient stroke for the traced function
     final curvePaint = Paint()
       ..shader = LinearGradient(
-        colors: [
-          primaryColor.withValues(alpha: 0.4),
-          accentColor,
-        ],
+        colors: [primaryColor.withValues(alpha: 0.4), accentColor],
       ).createShader(Rect.fromLTWH(padding, 0, graphWidth, height))
       ..strokeWidth = 2.2
       ..style = PaintingStyle.stroke

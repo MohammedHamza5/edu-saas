@@ -12,7 +12,10 @@ class SubmissionFileModel extends SubmissionFileEntity {
     required super.createdAt,
   });
 
-  factory SubmissionFileModel.fromJson(Map<String, dynamic> json, {String? signedUrl}) {
+  factory SubmissionFileModel.fromJson(
+    Map<String, dynamic> json, {
+    String? signedUrl,
+  }) {
     return SubmissionFileModel(
       id: json['id'] as String,
       submissionId: json['submission_id'] as String,

@@ -10,8 +10,7 @@ class StudentsRepositoryImpl implements StudentsRepository {
   final StudentsRemoteDataSource _remoteDataSource;
 
   StudentsRepositoryImpl({StudentsRemoteDataSource? remoteDataSource})
-      : _remoteDataSource =
-            remoteDataSource ?? StudentsRemoteDataSourceImpl();
+    : _remoteDataSource = remoteDataSource ?? StudentsRemoteDataSourceImpl();
 
   @override
   Future<Result<List<StudentEntity>>> getStudents({
@@ -114,8 +113,9 @@ class StudentsRepositoryImpl implements StudentsRepository {
     String studentId,
   ) async {
     try {
-      final groups =
-          await _remoteDataSource.getAvailableGroupsForStudent(studentId);
+      final groups = await _remoteDataSource.getAvailableGroupsForStudent(
+        studentId,
+      );
       return Success(groups);
     } on PostgrestException catch (e) {
       return FailureResult(ServerFailure(e.message, code: e.code));

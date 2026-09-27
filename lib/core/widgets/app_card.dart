@@ -56,12 +56,14 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
       vsync: this,
       duration: const Duration(milliseconds: 180),
     );
-    _shadowAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _hoverController, curve: Curves.easeOut),
-    );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.004).animate(
-      CurvedAnimation(parent: _hoverController, curve: Curves.easeOut),
-    );
+    _shadowAnimation = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(CurvedAnimation(parent: _hoverController, curve: Curves.easeOut));
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 1.004,
+    ).animate(CurvedAnimation(parent: _hoverController, curve: Curves.easeOut));
   }
 
   @override
@@ -135,30 +137,30 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
               ],
             ),
           )
-        : Padding(
-            padding: widget.padding,
-            child: widget.child,
-          );
+        : Padding(padding: widget.padding, child: widget.child);
 
     return AnimatedBuilder(
       animation: _hoverController,
       builder: (context, child) {
-        final canAnimate = widget.onTap != null || widget.variant != AppCardVariant.standard;
+        final canAnimate =
+            widget.onTap != null || widget.variant != AppCardVariant.standard;
 
         List<BoxShadow> shadows() {
           if (widget.variant == AppCardVariant.premium) {
             return BoxShadow.lerpList(
-              mathTokens.cardShadowElevated,
-              mathTokens.cardShadowPremium,
-              _shadowAnimation.value,
-            ) ?? mathTokens.cardShadowElevated;
+                  mathTokens.cardShadowElevated,
+                  mathTokens.cardShadowPremium,
+                  _shadowAnimation.value,
+                ) ??
+                mathTokens.cardShadowElevated;
           }
           if (widget.variant == AppCardVariant.elevated || canAnimate) {
             return BoxShadow.lerpList(
-              const [],
-              mathTokens.cardShadowElevated,
-              _shadowAnimation.value,
-            ) ?? const [];
+                  const [],
+                  mathTokens.cardShadowElevated,
+                  _shadowAnimation.value,
+                ) ??
+                const [];
           }
           return const [];
         }
@@ -166,8 +168,8 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
         final scale = canAnimate ? _scaleAnimation.value : 1.0;
         final borderColor = _isHovered
             ? (widget.variant == AppCardVariant.premium
-                ? AppColors.borderPremium
-                : const Color(0xFF38BDF8).withValues(alpha: 0.35))
+                  ? AppColors.borderPremium
+                  : const Color(0xFF38BDF8).withValues(alpha: 0.35))
             : (widget.borderColor ?? mathTokens.cardBorderColor);
 
         return Transform.scale(
@@ -195,7 +197,9 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
                     ? InkWell(
                         onTap: widget.onTap,
                         mouseCursor: SystemMouseCursors.click,
-                        borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusMedium,
+                        ),
                         child: content,
                       )
                     : content,

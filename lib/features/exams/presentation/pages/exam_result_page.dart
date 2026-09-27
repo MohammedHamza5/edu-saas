@@ -11,18 +11,16 @@ class ExamResultPage extends StatelessWidget {
   final ExamEntity exam;
   final ExamAttemptEntity attempt;
 
-  const ExamResultPage({
-    super.key,
-    required this.exam,
-    required this.attempt,
-  });
+  const ExamResultPage({super.key, required this.exam, required this.attempt});
 
   @override
   Widget build(BuildContext context) {
     final isPassed = attempt.isPassed(exam.passingScore);
     final dateFormat = DateFormat('yyyy/MM/dd - hh:mm a');
     final score = attempt.score ?? 0;
-    final percentage = attempt.percentage ?? (exam.maxScore > 0 ? (score / exam.maxScore) * 100 : 0.0);
+    final percentage =
+        attempt.percentage ??
+        (exam.maxScore > 0 ? (score / exam.maxScore) * 100 : 0.0);
 
     return Scaffold(
       appBar: AppBar(
@@ -49,7 +47,9 @@ class ExamResultPage extends StatelessWidget {
                     ),
                     child: Center(
                       child: Icon(
-                        isPassed ? Icons.emoji_events_outlined : Icons.sentiment_dissatisfied_outlined,
+                        isPassed
+                            ? Icons.emoji_events_outlined
+                            : Icons.sentiment_dissatisfied_outlined,
                         color: isPassed ? AppColors.success : AppColors.error,
                         size: 40,
                       ),
@@ -58,7 +58,9 @@ class ExamResultPage extends StatelessWidget {
                   const SizedBox(height: AppSpacing.s16),
 
                   Text(
-                    isPassed ? context.l10n.congratulationsPassed : context.l10n.sorryNotPassed,
+                    isPassed
+                        ? context.l10n.congratulationsPassed
+                        : context.l10n.sorryNotPassed,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 18,
@@ -116,8 +118,14 @@ class ExamResultPage extends StatelessWidget {
                   if (exam.passingScore != null) ...[
                     const SizedBox(height: AppSpacing.s6),
                     Text(
-                      context.l10n.requiredPassingScore(exam.passingScore!, exam.maxScore),
-                      style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                      context.l10n.requiredPassingScore(
+                        exam.passingScore!,
+                        exam.maxScore,
+                      ),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textMuted,
+                      ),
                     ),
                   ],
                   if (isPassed) ...[
@@ -165,16 +173,24 @@ class ExamResultPage extends StatelessWidget {
                 children: [
                   _buildDetailRow(
                     context.l10n.examSubmissionDateTitle,
-                    attempt.submittedAt != null ? dateFormat.format(attempt.submittedAt!) : context.l10n.justNow,
+                    attempt.submittedAt != null
+                        ? dateFormat.format(attempt.submittedAt!)
+                        : context.l10n.justNow,
                   ),
-                  const Divider(height: AppSpacing.s16, color: AppColors.border),
+                  const Divider(
+                    height: AppSpacing.s16,
+                    color: AppColors.border,
+                  ),
                   _buildDetailRow(
                     context.l10n.attemptStatusLabel,
                     attempt.status.localizedLabel(context),
                     valueColor: attempt.status.color,
                   ),
                   if (exam.allowRetake) ...[
-                    const Divider(height: AppSpacing.s16, color: AppColors.border),
+                    const Divider(
+                      height: AppSpacing.s16,
+                      color: AppColors.border,
+                    ),
                     _buildDetailRow(
                       context.l10n.retakePolicyLabel,
                       context.l10n.retakeAllowedBestScore,
@@ -199,7 +215,11 @@ class ExamResultPage extends StatelessWidget {
     );
   }
 
-  static Widget _buildDetailRow(String title, String value, {Color? valueColor}) {
+  static Widget _buildDetailRow(
+    String title,
+    String value, {
+    Color? valueColor,
+  }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [

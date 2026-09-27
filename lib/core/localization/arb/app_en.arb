@@ -4338,9 +4338,9 @@
   "@newVersionCreatedSuccess": {
     "description": "Toast when new version created"
   },
-  "noAttemptsYet": "No submissions yet",
+  "noAttemptsYet": "No completed attempts yet",
   "@noAttemptsYet": {
-    "description": "Empty attempts title"
+    "description": "Label when no students have completed the quiz yet"
   },
   "noAttemptsYetSubtitle": "Student attempts and scores will appear here once they finish their exams",
   "@noAttemptsYetSubtitle": {
@@ -6273,10 +6273,8 @@
   "addLessonButton": "Add Lesson",
   "courseBuilderEmptyTitle": "No Lessons Yet",
   "courseBuilderEmptySubtitle": "Start building your course by adding a lesson.",
-  "manageLessons": "Manage Lessons",
   "sequentialLearning": "Sequential Learning",
   "sequentialLearningDesc": "Students must complete each lesson's video and pass the lesson quiz before the next lesson unlocks.",
-  "defaultLessonPassingScore": "Default Lesson Quiz Passing Score",
   "lessonEditorErrorSelectVideo": "Please select a video first.",
   "@lessonEditorErrorSelectVideo": {
     "description": "Error when no video selected"
@@ -6388,10 +6386,6 @@
   "@noAssociatedQuiz": {
     "description": "Label when no quiz is attached to the lesson"
   },
-  "noAttemptsYet": "No completed attempts yet",
-  "@noAttemptsYet": {
-    "description": "Label when no students have completed the quiz yet"
-  },
   "analyticsAvailableAfterPublish": "Analytics will appear once students start watching the lecture.",
   "@analyticsAvailableAfterPublish": {
     "description": "Message when analytics are not yet available"
@@ -6423,5 +6417,688 @@
   "addSelectedStudentAction": "Add to Group",
   "@addSelectedStudentAction": {
     "description": "Button text to add selected student to group"
-  }
+  },
+  "questionBankTitle": "Question Bank",
+  "@questionBankTitle": {},
+  "manualQuestionEntry": "Manual Question Entry",
+  "@manualQuestionEntry": {},
+  "filterExtracted": "Extracted",
+  "@filterExtracted": {},
+  "filterReviewRequired": "Review Required",
+  "@filterReviewRequired": {},
+  "filterApproved": "Approved",
+  "@filterApproved": {},
+  "filterPublished": "Published",
+  "@filterPublished": {},
+  "sourceLabel": "Question Identifier",
+  "@sourceLabel": {},
+  "questionType": "Question Type",
+  "@questionType": {},
+  "multipleChoice": "Multiple Choice",
+  "@multipleChoice": {},
+  "gridIn": "Grid-In (Numeric)",
+  "@gridIn": {},
+  "stemText": "Stem (Problem Text)",
+  "@stemText": {},
+  "stemTextHint": "Enter mathematical problem statement...",
+  "@stemTextHint": {},
+  "optionA": "Option A",
+  "@optionA": {},
+  "optionB": "Option B",
+  "@optionB": {},
+  "optionC": "Option C",
+  "@optionC": {},
+  "optionD": "Option D",
+  "@optionD": {},
+  "correctAnswer": "Correct Answer",
+  "@correctAnswer": {},
+  "saveAndReview": "Save to Question Bank",
+  "@saveAndReview": {},
+  "reviewConsoleTitle": "Review Console",
+  "@reviewConsoleTitle": {},
+  "studentPreview": "Student Preview",
+  "@studentPreview": {},
+  "validationBlockers": "Validation Blockers",
+  "@validationBlockers": {},
+  "approveRevision": "Approve Revision",
+  "@approveRevision": {},
+  "revisionApprovedBadge": "Revision Approved",
+  "@revisionApprovedBadge": {},
+  "contentHashLabel": "Content Hash (SHA-256)",
+  "@contentHashLabel": {},
+  "statusExtracted": "Extracted",
+  "@statusExtracted": {},
+  "statusReviewRequired": "Review Required",
+  "@statusReviewRequired": {},
+  "statusApproved": "Approved",
+  "@statusApproved": {},
+  "statusQuarantined": "Quarantined",
+  "@statusQuarantined": {},
+  "standardMode": "Standard Mode",
+  "@standardMode": {},
+  "editBlock": "Edit Block",
+  "@editBlock": {},
+  "saveNewRevision": "Save as New Revision",
+  "@saveNewRevision": {},
+  "editReasonLabel": "Edit Reason",
+  "@editReasonLabel": {},
+  "ocrErrorCorrection": "OCR Error Correction",
+  "@ocrErrorCorrection": {},
+  "acknowledgeIssueAction": "Acknowledge / Confirm",
+  "@acknowledgeIssueAction": {},
+  "acknowledgedBadge": "Acknowledged",
+  "@acknowledgedBadge": {},
+  "confirmIssueDialogTitle": "Acknowledge Issue",
+  "@confirmIssueDialogTitle": {},
+  "mergeWithNextAction": "Merge with Next",
+  "@mergeWithNextAction": {},
+  "splitQuestionAction": "Split Question",
+  "@splitQuestionAction": {},
+  "duplicateClusterTitle": "Duplicate Cluster",
+  "@duplicateClusterTitle": {},
+  "restoreRevisionAction": "Restore Revision",
+  "@restoreRevisionAction": {},
+  "secondReviewRequiredBadge": "Second Review Required",
+  "@secondReviewRequiredBadge": {},
+  "priorityScoreLabel": "Priority Score",
+  "@priorityScoreLabel": {},
+  "uploadExamFile": "Upload Exam File (PDF)",
+  "@uploadExamFile": {
+    "description": "Button to upload exam PDF file in question bank"
+  },
+  "primaryExamFile": "Exam Questions File (PDF)",
+  "@primaryExamFile": {
+    "description": "Label for primary exam PDF file"
+  },
+  "selectFileAction": "Select File",
+  "@selectFileAction": {
+    "description": "Button to select file"
+  },
+  "selectedFilesCount": "{count} files selected",
+  "@selectedFilesCount": {
+    "description": "Count of selected files",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "filterAllTypes": "All Types",
+  "@filterAllTypes": {},
+  "typeMultipleChoice": "Multiple Choice (MCQ)",
+  "@typeMultipleChoice": {},
+  "typeGridIn": "Student-Produced Response (Grid-In)",
+  "@typeGridIn": {},
+  "sortByPriority": "Sort by Priority",
+  "@sortByPriority": {},
+  "statTotalQuestions": "Total Questions",
+  "@statTotalQuestions": {},
+  "statPublished": "Published",
+  "@statPublished": {},
+  "statApproved": "Approved",
+  "@statApproved": {},
+  "statNeedsReview": "Needs Review",
+  "@statNeedsReview": {},
+  "statQuarantined": "Quarantined",
+  "@statQuarantined": {},
+  "reviewAndAuditAction": "Review & Audit",
+  "@reviewAndAuditAction": {},
+  "satDomainTag": "SAT â€¢ EST â€¢ ACT",
+  "@satDomainTag": {},
+  "priorityScoreBadge": "Priority: {score}",
+  "@priorityScoreBadge": {
+    "placeholders": {
+      "score": {
+        "type": "String"
+      }
+    }
+  },
+  "questionIdLabel": "Question ID",
+  "@questionIdLabel": {},
+  "questionSourceLabel": "Question Label",
+  "@questionSourceLabel": {},
+  "questionTypeLabel": "Question Type",
+  "@questionTypeLabel": {},
+  "questionStatusLabel": "Review Status",
+  "@questionStatusLabel": {},
+  "activeRevisionLabel": "Current Version",
+  "@activeRevisionLabel": {},
+  "answerStatusLabel": "Answer Verification",
+  "@answerStatusLabel": {},
+  "answerKeyLabel": "Correct Answer",
+  "@answerKeyLabel": {},
+  "sourceRefsLabel": "Source References",
+  "@sourceRefsLabel": {},
+  "teacherConfirmedStatus": "Teacher Confirmed",
+  "@teacherConfirmedStatus": {},
+  "solverVerifiedStatus": "Mathematically Verified",
+  "@solverVerifiedStatus": {},
+  "sourceExtractedStatus": "Extracted from Source",
+  "@sourceExtractedStatus": {},
+  "confirmMergeDialogTitle": "Merge with Next Question",
+  "@confirmMergeDialogTitle": {},
+  "confirmSplitDialogTitle": "Split Question",
+  "@confirmSplitDialogTitle": {},
+  "splitAction": "Split",
+  "@splitAction": {},
+  "mergeAction": "Merge",
+  "@mergeAction": {},
+  "quarantineAction": "Quarantine",
+  "@quarantineAction": {},
+  "editBlockDialogTitle": "Edit Block Content",
+  "@editBlockDialogTitle": {},
+  "blockContentLabel": "Block Content / Formula",
+  "@blockContentLabel": {},
+  "reviewFastBadge": "Fast Review",
+  "@reviewFastBadge": {},
+  "reviewStandardBadge": "Standard Review",
+  "@reviewStandardBadge": {},
+  "reviewBlockedBadge": "Action Required",
+  "@reviewBlockedBadge": {},
+  "extractionSuccessDesc": "Extracted {count} questions from file: {filename}. All KaTeX formulas and choices are ready.",
+  "@extractionSuccessDesc": {
+    "description": "Extraction completion description with count and filename",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "filename": {
+        "type": "String"
+      }
+    }
+  },
+  "extractionBannerTitle": "{count} questions extracted successfully!",
+  "@extractionBannerTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "extractionBannerSubtitle": "Source: {filename}",
+  "@extractionBannerSubtitle": {
+    "placeholders": {
+      "filename": {
+        "type": "String"
+      }
+    }
+  },
+  "dismissBanner": "Dismiss",
+  "@dismissBanner": {},
+  "uploadExamDialogTitle": "Upload Exam File (PDF)",
+  "@uploadExamDialogTitle": {
+    "description": "Title of upload exam dialog"
+  },
+  "uploadExamDialogSubtitle": "AI-powered exam extraction and KaTeX mathematical reconstruction",
+  "@uploadExamDialogSubtitle": {
+    "description": "Subtitle of upload exam dialog"
+  },
+  "multiFileAcceptedNotice": "You can select exam questions PDF along with separate answer key PDF",
+  "@multiFileAcceptedNotice": {
+    "description": "Notice explaining separate answer key support"
+  },
+  "answerKeyFile": "Answer Key File (Optional)",
+  "@answerKeyFile": {
+    "description": "Label for answer key PDF file"
+  },
+  "rightsAttestationPrompt": "I attest that I have the academic rights to upload and use this material.",
+  "@rightsAttestationPrompt": {
+    "description": "Rights attestation prompt checkbox"
+  },
+  "startReconstructionAction": "Start AI Extraction & Reconstruction 🚀",
+  "@startReconstructionAction": {
+    "description": "Action button to trigger extraction"
+  },
+  "extractionSuccessTitle": "Reconstruction Completed Successfully!",
+  "@extractionSuccessTitle": {
+    "description": "Extraction completed success dialog title"
+  },
+  "extractedQuestionsPreview": "Extracted Questions Preview",
+  "@extractedQuestionsPreview": {
+    "description": "Header for extracted questions preview list"
+  },
+  "assignAsExamAction": "Assign as Exam to a Study Group Now 🚀",
+  "@assignAsExamAction": {
+    "description": "Option to assign extracted questions immediately as exam"
+  },
+  "assignAsExamDesc": "Publish these questions directly as an exam for students in a specific group.",
+  "@assignAsExamDesc": {
+    "description": "Description of assign as exam action"
+  },
+  "saveToQuestionBankOnly": "Keep in Question Bank for Review 🔍",
+  "@saveToQuestionBankOnly": {
+    "description": "Option to only keep in question bank"
+  },
+  "saveToQuestionBankDesc": "Save the questions in your central bank to review, edit, or use later.",
+  "@saveToQuestionBankDesc": {
+    "description": "Description for saving to question bank only"
+  },
+  "selectTargetGroup": "Select Study Group",
+  "@selectTargetGroup": {
+    "description": "Label to select group for exam assignment"
+  },
+  "selectTargetGroupHint": "Choose the group that will take this exam",
+  "@selectTargetGroupHint": {
+    "description": "Hint text for selecting target study group"
+  },
+  "examDurationMinutesLabel": "Duration (Minutes)",
+  "@examDurationMinutesLabel": {
+    "description": "Field label for exam duration in minutes"
+  },
+  "publishExamToGroupAction": "Publish Exam to Group Now 📢",
+  "@publishExamToGroupAction": {
+    "description": "Button to publish exam to group"
+  },
+  "examPublishedSuccess": "Exam published successfully! Students in the selected group can now take it.",
+  "@examPublishedSuccess": {
+    "description": "Success banner after publishing exam to group"
+  },
+  "goToExamsPage": "Go to Exams Dashboard 📋",
+  "@goToExamsPage": {
+    "description": "Button to navigate to exams dashboard"
+  },
+  "analyzingForensicStep": "Analyzing forensic layers & classifying pages...",
+  "@analyzingForensicStep": {
+    "description": "Extraction progress step 1"
+  },
+  "extractingFormulasStep": "Extracting KaTeX formulas & math blocks...",
+  "@extractingFormulasStep": {
+    "description": "Extraction progress step 2"
+  },
+  "savingQuestionsStep": "Saving questions and revisions to question bank...",
+  "@savingQuestionsStep": {
+    "description": "Extraction progress step 3"
+  },
+  "emptyQuestionBankTitle": "Question bank is currently empty",
+  "@emptyQuestionBankTitle": {
+    "description": "Title when question bank has no questions"
+  },
+  "emptyQuestionBankSubtitle": "Upload a PDF exam file to intelligently extract questions and KaTeX mathematical formulas, or add a question manually.",
+  "@emptyQuestionBankSubtitle": {
+    "description": "Subtitle when question bank is empty"
+  },
+  "noMatchingQuestionsTitle": "No questions match your search",
+  "@noMatchingQuestionsTitle": {
+    "description": "Title when no questions match search filter"
+  },
+  "noMatchingQuestionsSubtitle": "Try adjusting search terms, question type, or status filter.",
+  "@noMatchingQuestionsSubtitle": {
+    "description": "Subtitle when no questions match search filter"
+  },
+  "questionBankSubtitle": "Manage, review, and publish mathematical questions",
+  "@questionBankSubtitle": {
+    "description": "Question bank page subtitle"
+  },
+  "searchQuestionBankHint": "Search by question code, identifier, or keywords...",
+  "@searchQuestionBankHint": {
+    "description": "Search input placeholder in question bank"
+  },
+  "extractionBannerHint": "The list below is filtered to show only the extracted questions — review and approve each one.",
+  "@extractionBannerHint": {
+    "description": "Hint text in post-extraction banner"
+  },
+  "rightsAttestation": "I attest that I have the academic rights to use this material",
+  "@rightsAttestation": {
+    "description": "Academic rights attestation checkbox"
+  },
+  "fastDiffMode": "Fast Diff Mode",
+  "@fastDiffMode": {
+    "description": "Toggle for fast visual diff view"
+  },
+  "noBlockersMessage": "All conditions satisfied. Ready for approval and publishing.",
+  "@noBlockersMessage": {
+    "description": "Message when revision has zero validation blockers"
+  },
+  "possibleDuplicateNotice": "Possible duplicate question detected in",
+  "@possibleDuplicateNotice": {
+    "description": "Banner warning about possible duplicate"
+  },
+  "questionDetailsAndSource": "Question Details & Source",
+  "@questionDetailsAndSource": {
+    "description": "Section header for question metadata"
+  },
+  "originalEvidence": "Original Evidence & Traceability",
+  "@originalEvidence": {
+    "description": "Section header for forensic evidence"
+  },
+  "technicalAuditDetails": "Technical Audit Details",
+  "@technicalAuditDetails": {
+    "description": "Section header for technical hashes and versions"
+  },
+  "revisionHistoryTitle": "Revision History",
+  "@revisionHistoryTitle": {
+    "description": "Header for question revision log"
+  },
+  "markUnreadableAction": "Mark Source Unreadable",
+  "@markUnreadableAction": {
+    "description": "Button to mark question as unreadable"
+  },
+  "confirmIssuePrompt": "Are you sure you want to acknowledge this validation issue?",
+  "@confirmIssuePrompt": {
+    "description": "Dialog body when acknowledging an issue"
+  },
+  "sourceImageCorrection": "Source Image Correction",
+  "@sourceImageCorrection": {
+    "description": "Revision reason option"
+  },
+  "sourceTypoFix": "Source Typo Fix",
+  "@sourceTypoFix": {
+    "description": "Revision reason option"
+  },
+  "teacherAnswerConfirmation": "Teacher Answer Confirmation",
+  "@teacherAnswerConfirmation": {
+    "description": "Revision reason option"
+  },
+  "confirmMergeDialogBody": "Merge this question with the next question? This cannot be undone.",
+  "@confirmMergeDialogBody": {
+    "description": "Merge confirmation dialog text"
+  },
+  "confirmSplitDialogBody": "Split this question into two separate questions? This cannot be undone.",
+  "@confirmSplitDialogBody": {
+    "description": "Split confirmation dialog text"
+  },
+  "confirmUnreadableDialogTitle": "Confirm Source Unreadable",
+  "@confirmUnreadableDialogTitle": {
+    "description": "Quarantine confirmation dialog title"
+  },
+  "confirmUnreadableDialogBody": "Quarantine this question due to distorted, blurry, or cut-off source text? It will be hidden from students.",
+  "@confirmUnreadableDialogBody": {
+    "description": "Quarantine confirmation dialog body"
+  },
+  "publishedCountBadge": "{count} Published",
+  "@publishedCountBadge": {
+    "description": "Badge showing count of published lessons",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "draftCountBadge": "{count} Drafts",
+  "@draftCountBadge": {
+    "description": "Badge showing count of draft lessons",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "publishedCountLabel": "Published",
+  "@publishedCountLabel": {
+    "description": "Published status label"
+  },
+  "draftCountLabel": "Draft",
+  "@draftCountLabel": {
+    "description": "Draft status label"
+  },
+  "lessonVisibilityPublished": "Published (Visible to Students)",
+  "@lessonVisibilityPublished": {
+    "description": "Visibility status published"
+  },
+  "lessonVisibilityDraft": "Draft (Hidden from Students)",
+  "@lessonVisibilityDraft": {
+    "description": "Visibility status draft"
+  },
+  "hideLessonTooltip": "Hide lesson from students",
+  "@hideLessonTooltip": {
+    "description": "Tooltip to hide lesson"
+  },
+  "publishLessonTooltip": "Publish lesson to students",
+  "@publishLessonTooltip": {
+    "description": "Tooltip to publish lesson"
+  },
+  "lessonStatusLabel": "Lesson Publishing Status",
+  "@lessonStatusLabel": {
+    "description": "Label for lesson publishing status"
+  },
+  "lessonStatusPublishedDesc": "The lesson is live and visible to enrolled students in this group.",
+  "@lessonStatusPublishedDesc": {
+    "description": "Description when lesson is published"
+  },
+  "lessonStatusDraftDesc": "The lesson is private and visible only to the teacher for drafting.",
+  "@lessonStatusDraftDesc": {
+    "description": "Description when lesson is draft"
+  },
+  "lessonVisibilityUpdatedToast": "Lesson visibility updated successfully.",
+  "@lessonVisibilityUpdatedToast": {
+    "description": "Toast message when single lesson visibility is toggled"
+  },
+  "publishAllLessonsConfirmTitle": "Publish All Lessons?",
+  "@publishAllLessonsConfirmTitle": {
+    "description": "Dialog title to publish all lessons"
+  },
+  "hideAllLessonsConfirmTitle": "Hide All Lessons?",
+  "@hideAllLessonsConfirmTitle": {
+    "description": "Dialog title to hide all lessons"
+  },
+  "publishAllLessonsConfirmMessage": "Are you sure you want to publish all lessons in this course? Students will be able to access them.",
+  "@publishAllLessonsConfirmMessage": {
+    "description": "Dialog body when publishing all lessons"
+  },
+  "hideAllLessonsConfirmMessage": "Are you sure you want to hide all lessons in this course? They will become drafts.",
+  "@hideAllLessonsConfirmMessage": {
+    "description": "Dialog body when hiding all lessons"
+  },
+  "publishAllLessonsAction": "Publish All Lessons",
+  "@publishAllLessonsAction": {
+    "description": "Button text to publish all lessons"
+  },
+  "hideAllLessonsAction": "Hide All Lessons",
+  "@hideAllLessonsAction": {
+    "description": "Button text to hide all lessons"
+  },
+  "allLessonsVisibilityUpdatedToast": "All lessons visibility updated successfully.",
+  "@allLessonsVisibilityUpdatedToast": {
+    "description": "Toast when bulk visibility is toggled"
+  },
+  "imageNotAccessible": "Image not accessible",
+  "@imageNotAccessible": {},
+  "zoomAsset": "Zoom Image",
+  "@zoomAsset": {},
+  "deleteQuestionTitle": "Delete Question",
+  "@deleteQuestionTitle": {},
+  "deleteQuestionConfirm": "Are you sure you want to delete question {sourceLabel}?",
+  "@deleteQuestionConfirm": {
+    "placeholders": {
+      "sourceLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "pageCountBadge": "{count, plural, =1{1 Page} other{{count} Pages}}",
+  "@pageCountBadge": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noQuestionsInDocumentTitle": "No Extracted Questions",
+  "@noQuestionsInDocumentTitle": {},
+  "noQuestionsInDocumentSubtitle": "No questions have been extracted from this document yet.",
+  "@noQuestionsInDocumentSubtitle": {},
+  "deleteDocumentTitle": "Delete Document",
+  "@deleteDocumentTitle": {},
+  "deleteDocumentConfirm": "Are you sure you want to delete document \"{filename}\" and all its questions?",
+  "@deleteDocumentConfirm": {
+    "placeholders": {
+      "filename": {
+        "type": "String"
+      }
+    }
+  },
+  "emptyDocumentsTitle": "No Documents Uploaded",
+  "@emptyDocumentsTitle": {},
+  "emptyDocumentsSubtitle": "Upload PDF files to start extracting and reviewing question bank.",
+  "@emptyDocumentsSubtitle": {},
+  "statTotalDocuments": "Total Documents",
+  "@statTotalDocuments": {},
+  "statDocumentsDone": "Completed",
+  "@statDocumentsDone": {},
+  "statDocumentsPending": "Pending",
+  "@statDocumentsPending": {},
+  "statDocumentsFailed": "Failed",
+  "@statDocumentsFailed": {},
+  "questionCountBadge": "{count, plural, =1{1 Question} other{{count} Questions}}",
+  "@questionCountBadge": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "viewQuestionsAction": "View Questions",
+  "@viewQuestionsAction": {},
+  "statusDone": "Completed",
+  "@statusDone": {},
+  "statusFailed": "Failed",
+  "@statusFailed": {},
+  "statusProcessing": "Processing",
+  "@statusProcessing": {},
+  "statusPending": "Pending",
+  "@statusPending": {},
+  "deleteDocumentTitle": "Delete Document",
+  "@deleteDocumentTitle": {},
+  "deleteDocumentConfirm": "Are you sure you want to delete the document \\\"{docName}\\\"? All associated questions and revisions will be permanently deleted.",
+  "@deleteDocumentConfirm": {
+    "placeholders": {
+      "docName": {
+        "type": "String"
+      }
+    }
+  },
+  "emptyDocumentsTitle": "No Documents Found",
+  "@emptyDocumentsTitle": {},
+  "emptyDocumentsSubtitle": "Upload a PDF or Word document to start extracting questions automatically.",
+  "@emptyDocumentsSubtitle": {},
+  "uploadExamFile": "Upload Exam File",
+  "@uploadExamFile": {},
+  "statTotalDocuments": "Total Documents",
+  "@statTotalDocuments": {},
+  "statTotalQuestions": "Total Questions",
+  "@statTotalQuestions": {},
+  "statDocumentsDone": "Done",
+  "@statDocumentsDone": {},
+  "statDocumentsPending": "Pending",
+  "@statDocumentsPending": {},
+  "statDocumentsFailed": "Failed",
+  "@statDocumentsFailed": {},
+  "questionCountBadge": "{count} Questions",
+  "@questionCountBadge": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pageCountBadge": "{count} Pages",
+  "@pageCountBadge": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "retryAction": "Retry",
+  "@retryAction": {},
+  "viewQuestionsAction": "View Questions",
+  "@viewQuestionsAction": {},
+  "satDomainTag": "SAT/EST",
+  "@satDomainTag": {},
+  "refreshTooltip": "Refresh",
+  "@refreshTooltip": {},
+  "deleteQuestionTitle": "Delete Question",
+  "@deleteQuestionTitle": {},
+  "deleteQuestionConfirm": "Are you sure you want to delete question \\\"{qLabel}\\\"? This action cannot be undone.",
+  "@deleteQuestionConfirm": {
+    "placeholders": {
+      "qLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "noQuestionsInDocumentTitle": "No Questions Extracted",
+  "@noQuestionsInDocumentTitle": {},
+  "noQuestionsInDocumentSubtitle": "We couldn't extract any questions from this document.",
+  "@noQuestionsInDocumentSubtitle": {},
+  "filterAll": "All",
+  "@filterAll": {},
+  "statusQuarantined": "Quarantined",
+  "@statusQuarantined": {},
+  "priorityScoreBadge": "Score: {score}",
+  "@priorityScoreBadge": {
+    "placeholders": {
+      "score": {
+        "type": "String"
+      }
+    }
+  },
+  "secondReviewRequiredBadge": "2nd Review Req",
+  "@secondReviewRequiredBadge": {},
+  "duplicateClusterTitle": "Duplicate",
+  "@duplicateClusterTitle": {},
+  "reviewAndAuditAction": "Review & Audit",
+  "@reviewAndAuditAction": {},
+  "statusPublished": "Published",
+  "@statusPublished": {},
+  "statusExtracted": "Extracted",
+  "@statusExtracted": {},
+  "centralQuestionBankTitle": "Central Question Bank",
+  "@centralQuestionBankTitle": {},
+  "centralQuestionBankDesc": "AI exam question extraction, tagging, and LaTeX math verification",
+  "@centralQuestionBankDesc": {},
+  "videoLibraryCardTitle": "Video & Media Bank",
+  "@videoLibraryCardTitle": {},
+  "videoLibraryCardDesc": "Manage cloud video assets and protected encrypted HLS streaming",
+  "@videoLibraryCardDesc": {},
+  "studentAttendanceTitle": "Attendance & Commitment",
+  "@studentAttendanceTitle": {},
+  "selectCourseTitle": "Select Course",
+  "@selectCourseTitle": {},
+  "selectCoursePrompt": "You are enrolled in multiple groups. Choose a course to continue:",
+  "@selectCoursePrompt": {},
+  "importFromQuestionBankAction": "Import from Question Bank",
+  "@importFromQuestionBankAction": {},
+  "selectQuestionsToImport": "Select Questions to Import",
+  "@selectQuestionsToImport": {},
+  "selectDocumentToBrowse": "Select Document to Browse Questions",
+  "@selectDocumentToBrowse": {},
+  "importSelectedQuestionsAction": "Import Selected Questions ({count})",
+  "@importSelectedQuestionsAction": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noQuestionsSelectedPrompt": "Please select at least one question",
+  "@noQuestionsSelectedPrompt": {},
+  "createInstantExamAction": "Create Instant Exam",
+  "@createInstantExamAction": {},
+  "createInstantExamTitle": "Create Instant Exam from Document",
+  "@createInstantExamTitle": {},
+  "createInstantExamDesc": "A new exam will be created in the selected group with all approved questions deployed.",
+  "@createInstantExamDesc": {},
+  "selectAllQuestions": "Select All Questions",
+  "@selectAllQuestions": {},
+  "questionsImportedSuccess": "Successfully imported {count} questions into the exam",
+  "@questionsImportedSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "optionsLabel": "Options",
+  "@optionsLabel": {},
+  "tapToSelectAnswer": "Click an option to confirm the answer",
+  "@tapToSelectAnswer": {},
+  "stemNotExtracted": "Question text not extracted yet",
+  "@stemNotExtracted": {},
+  "aiEnrichedBadge": "AI Enhanced",
+  "@aiEnrichedBadge": {},
+  "editStemAction": "Edit Question Text",
+  "@editStemAction": {},
+  "diagramLabel": "Diagram / Illustration",
+  "@diagramLabel": {}
 }

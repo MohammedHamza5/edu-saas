@@ -58,7 +58,8 @@ class GroupEntity extends Equatable {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       membersCount: membersCount ?? this.membersCount,
-      enforceSequentialLearning: enforceSequentialLearning ?? this.enforceSequentialLearning,
+      enforceSequentialLearning:
+          enforceSequentialLearning ?? this.enforceSequentialLearning,
       defaultPassingScore: defaultPassingScore ?? this.defaultPassingScore,
     );
   }

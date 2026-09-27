@@ -1532,7 +1532,7 @@ abstract class AppLocalizations {
   /// **'Draft'**
   String get statusDraft;
 
-  /// Published status
+  /// No description provided for @statusPublished.
   ///
   /// In en, this message translates to:
   /// **'Published'**
@@ -2072,10 +2072,10 @@ abstract class AppLocalizations {
   /// **'{count} Absent'**
   String absentCountLabel(int count);
 
-  /// Student attendance title
+  /// No description provided for @studentAttendanceTitle.
   ///
   /// In en, this message translates to:
-  /// **'My Attendance Record'**
+  /// **'Attendance & Commitment'**
   String get studentAttendanceTitle;
 
   /// Student attendance history
@@ -3673,7 +3673,7 @@ abstract class AppLocalizations {
   /// **'Quick Attendance'**
   String get quickAttendanceTooltip;
 
-  /// Filter all chip
+  /// No description provided for @filterAll.
   ///
   /// In en, this message translates to:
   /// **'All'**
@@ -5161,7 +5161,7 @@ abstract class AppLocalizations {
   /// **'Unable to play video, please check your internet connection.'**
   String get videoPlaybackError;
 
-  /// Retry button label
+  /// No description provided for @retryAction.
   ///
   /// In en, this message translates to:
   /// **'Retry'**
@@ -5287,7 +5287,7 @@ abstract class AppLocalizations {
   /// **'Educational Content Library'**
   String get teacherContentLibraryTitle;
 
-  /// Refresh button tooltip
+  /// No description provided for @refreshTooltip.
   ///
   /// In en, this message translates to:
   /// **'Refresh'**
@@ -9774,6 +9774,1146 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add to Group'**
   String get addSelectedStudentAction;
+
+  /// No description provided for @questionBankTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Question Bank'**
+  String get questionBankTitle;
+
+  /// No description provided for @manualQuestionEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual Question Entry'**
+  String get manualQuestionEntry;
+
+  /// No description provided for @filterExtracted.
+  ///
+  /// In en, this message translates to:
+  /// **'Extracted'**
+  String get filterExtracted;
+
+  /// No description provided for @filterReviewRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Review Required'**
+  String get filterReviewRequired;
+
+  /// No description provided for @filterApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get filterApproved;
+
+  /// No description provided for @filterPublished.
+  ///
+  /// In en, this message translates to:
+  /// **'Published'**
+  String get filterPublished;
+
+  /// No description provided for @sourceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Question Identifier'**
+  String get sourceLabel;
+
+  /// No description provided for @questionType.
+  ///
+  /// In en, this message translates to:
+  /// **'Question Type'**
+  String get questionType;
+
+  /// No description provided for @multipleChoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Multiple Choice'**
+  String get multipleChoice;
+
+  /// No description provided for @gridIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Grid-In (Numeric)'**
+  String get gridIn;
+
+  /// No description provided for @stemText.
+  ///
+  /// In en, this message translates to:
+  /// **'Stem (Problem Text)'**
+  String get stemText;
+
+  /// No description provided for @stemTextHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter mathematical problem statement...'**
+  String get stemTextHint;
+
+  /// No description provided for @optionA.
+  ///
+  /// In en, this message translates to:
+  /// **'Option A'**
+  String get optionA;
+
+  /// No description provided for @optionB.
+  ///
+  /// In en, this message translates to:
+  /// **'Option B'**
+  String get optionB;
+
+  /// No description provided for @optionC.
+  ///
+  /// In en, this message translates to:
+  /// **'Option C'**
+  String get optionC;
+
+  /// No description provided for @optionD.
+  ///
+  /// In en, this message translates to:
+  /// **'Option D'**
+  String get optionD;
+
+  /// No description provided for @correctAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct Answer'**
+  String get correctAnswer;
+
+  /// No description provided for @saveAndReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to Question Bank'**
+  String get saveAndReview;
+
+  /// No description provided for @reviewConsoleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review Console'**
+  String get reviewConsoleTitle;
+
+  /// No description provided for @studentPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Student Preview'**
+  String get studentPreview;
+
+  /// No description provided for @validationBlockers.
+  ///
+  /// In en, this message translates to:
+  /// **'Validation Blockers'**
+  String get validationBlockers;
+
+  /// No description provided for @approveRevision.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve Revision'**
+  String get approveRevision;
+
+  /// No description provided for @revisionApprovedBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Revision Approved'**
+  String get revisionApprovedBadge;
+
+  /// No description provided for @contentHashLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Content Hash (SHA-256)'**
+  String get contentHashLabel;
+
+  /// No description provided for @statusExtracted.
+  ///
+  /// In en, this message translates to:
+  /// **'Extracted'**
+  String get statusExtracted;
+
+  /// No description provided for @statusReviewRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Review Required'**
+  String get statusReviewRequired;
+
+  /// No description provided for @statusApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get statusApproved;
+
+  /// No description provided for @statusQuarantined.
+  ///
+  /// In en, this message translates to:
+  /// **'Quarantined'**
+  String get statusQuarantined;
+
+  /// No description provided for @standardMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard Mode'**
+  String get standardMode;
+
+  /// No description provided for @editBlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Block'**
+  String get editBlock;
+
+  /// No description provided for @saveNewRevision.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as New Revision'**
+  String get saveNewRevision;
+
+  /// No description provided for @editReasonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Reason'**
+  String get editReasonLabel;
+
+  /// No description provided for @ocrErrorCorrection.
+  ///
+  /// In en, this message translates to:
+  /// **'OCR Error Correction'**
+  String get ocrErrorCorrection;
+
+  /// No description provided for @acknowledgeIssueAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Acknowledge / Confirm'**
+  String get acknowledgeIssueAction;
+
+  /// No description provided for @acknowledgedBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Acknowledged'**
+  String get acknowledgedBadge;
+
+  /// No description provided for @confirmIssueDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Acknowledge Issue'**
+  String get confirmIssueDialogTitle;
+
+  /// No description provided for @mergeWithNextAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge with Next'**
+  String get mergeWithNextAction;
+
+  /// No description provided for @splitQuestionAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Split Question'**
+  String get splitQuestionAction;
+
+  /// No description provided for @duplicateClusterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate'**
+  String get duplicateClusterTitle;
+
+  /// No description provided for @restoreRevisionAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore Revision'**
+  String get restoreRevisionAction;
+
+  /// No description provided for @secondReviewRequiredBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'2nd Review Req'**
+  String get secondReviewRequiredBadge;
+
+  /// No description provided for @priorityScoreLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Priority Score'**
+  String get priorityScoreLabel;
+
+  /// No description provided for @uploadExamFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Exam File'**
+  String get uploadExamFile;
+
+  /// Label for primary exam PDF file
+  ///
+  /// In en, this message translates to:
+  /// **'Exam Questions File (PDF)'**
+  String get primaryExamFile;
+
+  /// Button to select file
+  ///
+  /// In en, this message translates to:
+  /// **'Select File'**
+  String get selectFileAction;
+
+  /// Count of selected files
+  ///
+  /// In en, this message translates to:
+  /// **'{count} files selected'**
+  String selectedFilesCount(int count);
+
+  /// No description provided for @filterAllTypes.
+  ///
+  /// In en, this message translates to:
+  /// **'All Types'**
+  String get filterAllTypes;
+
+  /// No description provided for @typeMultipleChoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Multiple Choice (MCQ)'**
+  String get typeMultipleChoice;
+
+  /// No description provided for @typeGridIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Student-Produced Response (Grid-In)'**
+  String get typeGridIn;
+
+  /// No description provided for @sortByPriority.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort by Priority'**
+  String get sortByPriority;
+
+  /// No description provided for @statTotalQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Questions'**
+  String get statTotalQuestions;
+
+  /// No description provided for @statPublished.
+  ///
+  /// In en, this message translates to:
+  /// **'Published'**
+  String get statPublished;
+
+  /// No description provided for @statApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get statApproved;
+
+  /// No description provided for @statNeedsReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs Review'**
+  String get statNeedsReview;
+
+  /// No description provided for @statQuarantined.
+  ///
+  /// In en, this message translates to:
+  /// **'Quarantined'**
+  String get statQuarantined;
+
+  /// No description provided for @reviewAndAuditAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Review & Audit'**
+  String get reviewAndAuditAction;
+
+  /// No description provided for @satDomainTag.
+  ///
+  /// In en, this message translates to:
+  /// **'SAT/EST'**
+  String get satDomainTag;
+
+  /// No description provided for @priorityScoreBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Score: {score}'**
+  String priorityScoreBadge(String score);
+
+  /// No description provided for @questionIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Question ID'**
+  String get questionIdLabel;
+
+  /// No description provided for @questionSourceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Question Label'**
+  String get questionSourceLabel;
+
+  /// No description provided for @questionTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Question Type'**
+  String get questionTypeLabel;
+
+  /// No description provided for @questionStatusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Review Status'**
+  String get questionStatusLabel;
+
+  /// No description provided for @activeRevisionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Version'**
+  String get activeRevisionLabel;
+
+  /// No description provided for @answerStatusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer Verification'**
+  String get answerStatusLabel;
+
+  /// No description provided for @answerKeyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct Answer'**
+  String get answerKeyLabel;
+
+  /// No description provided for @sourceRefsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Source References'**
+  String get sourceRefsLabel;
+
+  /// No description provided for @teacherConfirmedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher Confirmed'**
+  String get teacherConfirmedStatus;
+
+  /// No description provided for @solverVerifiedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Mathematically Verified'**
+  String get solverVerifiedStatus;
+
+  /// No description provided for @sourceExtractedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Extracted from Source'**
+  String get sourceExtractedStatus;
+
+  /// No description provided for @confirmMergeDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge with Next Question'**
+  String get confirmMergeDialogTitle;
+
+  /// No description provided for @confirmSplitDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Split Question'**
+  String get confirmSplitDialogTitle;
+
+  /// No description provided for @splitAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Split'**
+  String get splitAction;
+
+  /// No description provided for @mergeAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge'**
+  String get mergeAction;
+
+  /// No description provided for @quarantineAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Quarantine'**
+  String get quarantineAction;
+
+  /// No description provided for @editBlockDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Block Content'**
+  String get editBlockDialogTitle;
+
+  /// No description provided for @blockContentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Block Content / Formula'**
+  String get blockContentLabel;
+
+  /// No description provided for @reviewFastBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Fast Review'**
+  String get reviewFastBadge;
+
+  /// No description provided for @reviewStandardBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard Review'**
+  String get reviewStandardBadge;
+
+  /// No description provided for @reviewBlockedBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Action Required'**
+  String get reviewBlockedBadge;
+
+  /// Extraction completion description with count and filename
+  ///
+  /// In en, this message translates to:
+  /// **'Extracted {count} questions from file: {filename}. All KaTeX formulas and choices are ready.'**
+  String extractionSuccessDesc(int count, String filename);
+
+  /// No description provided for @extractionBannerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} questions extracted successfully!'**
+  String extractionBannerTitle(int count);
+
+  /// No description provided for @extractionBannerSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Source: {filename}'**
+  String extractionBannerSubtitle(String filename);
+
+  /// No description provided for @dismissBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get dismissBanner;
+
+  /// Title of upload exam dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Exam File (PDF)'**
+  String get uploadExamDialogTitle;
+
+  /// Subtitle of upload exam dialog
+  ///
+  /// In en, this message translates to:
+  /// **'AI-powered exam extraction and KaTeX mathematical reconstruction'**
+  String get uploadExamDialogSubtitle;
+
+  /// Notice explaining separate answer key support
+  ///
+  /// In en, this message translates to:
+  /// **'You can select exam questions PDF along with separate answer key PDF'**
+  String get multiFileAcceptedNotice;
+
+  /// Label for answer key PDF file
+  ///
+  /// In en, this message translates to:
+  /// **'Answer Key File (Optional)'**
+  String get answerKeyFile;
+
+  /// Rights attestation prompt checkbox
+  ///
+  /// In en, this message translates to:
+  /// **'I attest that I have the academic rights to upload and use this material.'**
+  String get rightsAttestationPrompt;
+
+  /// Action button to trigger extraction
+  ///
+  /// In en, this message translates to:
+  /// **'Start AI Extraction & Reconstruction 🚀'**
+  String get startReconstructionAction;
+
+  /// Extraction completed success dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Reconstruction Completed Successfully!'**
+  String get extractionSuccessTitle;
+
+  /// Header for extracted questions preview list
+  ///
+  /// In en, this message translates to:
+  /// **'Extracted Questions Preview'**
+  String get extractedQuestionsPreview;
+
+  /// Option to assign extracted questions immediately as exam
+  ///
+  /// In en, this message translates to:
+  /// **'Assign as Exam to a Study Group Now 🚀'**
+  String get assignAsExamAction;
+
+  /// Description of assign as exam action
+  ///
+  /// In en, this message translates to:
+  /// **'Publish these questions directly as an exam for students in a specific group.'**
+  String get assignAsExamDesc;
+
+  /// Option to only keep in question bank
+  ///
+  /// In en, this message translates to:
+  /// **'Keep in Question Bank for Review 🔍'**
+  String get saveToQuestionBankOnly;
+
+  /// Description for saving to question bank only
+  ///
+  /// In en, this message translates to:
+  /// **'Save the questions in your central bank to review, edit, or use later.'**
+  String get saveToQuestionBankDesc;
+
+  /// Label to select group for exam assignment
+  ///
+  /// In en, this message translates to:
+  /// **'Select Study Group'**
+  String get selectTargetGroup;
+
+  /// Hint text for selecting target study group
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the group that will take this exam'**
+  String get selectTargetGroupHint;
+
+  /// Field label for exam duration in minutes
+  ///
+  /// In en, this message translates to:
+  /// **'Duration (Minutes)'**
+  String get examDurationMinutesLabel;
+
+  /// Button to publish exam to group
+  ///
+  /// In en, this message translates to:
+  /// **'Publish Exam to Group Now 📢'**
+  String get publishExamToGroupAction;
+
+  /// Success banner after publishing exam to group
+  ///
+  /// In en, this message translates to:
+  /// **'Exam published successfully! Students in the selected group can now take it.'**
+  String get examPublishedSuccess;
+
+  /// Button to navigate to exams dashboard
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Exams Dashboard 📋'**
+  String get goToExamsPage;
+
+  /// Extraction progress step 1
+  ///
+  /// In en, this message translates to:
+  /// **'Analyzing forensic layers & classifying pages...'**
+  String get analyzingForensicStep;
+
+  /// Extraction progress step 2
+  ///
+  /// In en, this message translates to:
+  /// **'Extracting KaTeX formulas & math blocks...'**
+  String get extractingFormulasStep;
+
+  /// Extraction progress step 3
+  ///
+  /// In en, this message translates to:
+  /// **'Saving questions and revisions to question bank...'**
+  String get savingQuestionsStep;
+
+  /// Title when question bank has no questions
+  ///
+  /// In en, this message translates to:
+  /// **'Question bank is currently empty'**
+  String get emptyQuestionBankTitle;
+
+  /// Subtitle when question bank is empty
+  ///
+  /// In en, this message translates to:
+  /// **'Upload a PDF exam file to intelligently extract questions and KaTeX mathematical formulas, or add a question manually.'**
+  String get emptyQuestionBankSubtitle;
+
+  /// Title when no questions match search filter
+  ///
+  /// In en, this message translates to:
+  /// **'No questions match your search'**
+  String get noMatchingQuestionsTitle;
+
+  /// Subtitle when no questions match search filter
+  ///
+  /// In en, this message translates to:
+  /// **'Try adjusting search terms, question type, or status filter.'**
+  String get noMatchingQuestionsSubtitle;
+
+  /// Question bank page subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Manage, review, and publish mathematical questions'**
+  String get questionBankSubtitle;
+
+  /// Search input placeholder in question bank
+  ///
+  /// In en, this message translates to:
+  /// **'Search by question code, identifier, or keywords...'**
+  String get searchQuestionBankHint;
+
+  /// Hint text in post-extraction banner
+  ///
+  /// In en, this message translates to:
+  /// **'The list below is filtered to show only the extracted questions — review and approve each one.'**
+  String get extractionBannerHint;
+
+  /// Academic rights attestation checkbox
+  ///
+  /// In en, this message translates to:
+  /// **'I attest that I have the academic rights to use this material'**
+  String get rightsAttestation;
+
+  /// Toggle for fast visual diff view
+  ///
+  /// In en, this message translates to:
+  /// **'Fast Diff Mode'**
+  String get fastDiffMode;
+
+  /// Message when revision has zero validation blockers
+  ///
+  /// In en, this message translates to:
+  /// **'All conditions satisfied. Ready for approval and publishing.'**
+  String get noBlockersMessage;
+
+  /// Banner warning about possible duplicate
+  ///
+  /// In en, this message translates to:
+  /// **'Possible duplicate question detected in'**
+  String get possibleDuplicateNotice;
+
+  /// Section header for question metadata
+  ///
+  /// In en, this message translates to:
+  /// **'Question Details & Source'**
+  String get questionDetailsAndSource;
+
+  /// Section header for forensic evidence
+  ///
+  /// In en, this message translates to:
+  /// **'Original Evidence & Traceability'**
+  String get originalEvidence;
+
+  /// Section header for technical hashes and versions
+  ///
+  /// In en, this message translates to:
+  /// **'Technical Audit Details'**
+  String get technicalAuditDetails;
+
+  /// Header for question revision log
+  ///
+  /// In en, this message translates to:
+  /// **'Revision History'**
+  String get revisionHistoryTitle;
+
+  /// Button to mark question as unreadable
+  ///
+  /// In en, this message translates to:
+  /// **'Mark Source Unreadable'**
+  String get markUnreadableAction;
+
+  /// Dialog body when acknowledging an issue
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to acknowledge this validation issue?'**
+  String get confirmIssuePrompt;
+
+  /// Revision reason option
+  ///
+  /// In en, this message translates to:
+  /// **'Source Image Correction'**
+  String get sourceImageCorrection;
+
+  /// Revision reason option
+  ///
+  /// In en, this message translates to:
+  /// **'Source Typo Fix'**
+  String get sourceTypoFix;
+
+  /// Revision reason option
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher Answer Confirmation'**
+  String get teacherAnswerConfirmation;
+
+  /// Merge confirmation dialog text
+  ///
+  /// In en, this message translates to:
+  /// **'Merge this question with the next question? This cannot be undone.'**
+  String get confirmMergeDialogBody;
+
+  /// Split confirmation dialog text
+  ///
+  /// In en, this message translates to:
+  /// **'Split this question into two separate questions? This cannot be undone.'**
+  String get confirmSplitDialogBody;
+
+  /// Quarantine confirmation dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Source Unreadable'**
+  String get confirmUnreadableDialogTitle;
+
+  /// Quarantine confirmation dialog body
+  ///
+  /// In en, this message translates to:
+  /// **'Quarantine this question due to distorted, blurry, or cut-off source text? It will be hidden from students.'**
+  String get confirmUnreadableDialogBody;
+
+  /// Badge showing count of published lessons
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Published'**
+  String publishedCountBadge(int count);
+
+  /// Badge showing count of draft lessons
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Drafts'**
+  String draftCountBadge(int count);
+
+  /// Published status label
+  ///
+  /// In en, this message translates to:
+  /// **'Published'**
+  String get publishedCountLabel;
+
+  /// Draft status label
+  ///
+  /// In en, this message translates to:
+  /// **'Draft'**
+  String get draftCountLabel;
+
+  /// Visibility status published
+  ///
+  /// In en, this message translates to:
+  /// **'Published (Visible to Students)'**
+  String get lessonVisibilityPublished;
+
+  /// Visibility status draft
+  ///
+  /// In en, this message translates to:
+  /// **'Draft (Hidden from Students)'**
+  String get lessonVisibilityDraft;
+
+  /// Tooltip to hide lesson
+  ///
+  /// In en, this message translates to:
+  /// **'Hide lesson from students'**
+  String get hideLessonTooltip;
+
+  /// Tooltip to publish lesson
+  ///
+  /// In en, this message translates to:
+  /// **'Publish lesson to students'**
+  String get publishLessonTooltip;
+
+  /// Label for lesson publishing status
+  ///
+  /// In en, this message translates to:
+  /// **'Lesson Publishing Status'**
+  String get lessonStatusLabel;
+
+  /// Description when lesson is published
+  ///
+  /// In en, this message translates to:
+  /// **'The lesson is live and visible to enrolled students in this group.'**
+  String get lessonStatusPublishedDesc;
+
+  /// Description when lesson is draft
+  ///
+  /// In en, this message translates to:
+  /// **'The lesson is private and visible only to the teacher for drafting.'**
+  String get lessonStatusDraftDesc;
+
+  /// Toast message when single lesson visibility is toggled
+  ///
+  /// In en, this message translates to:
+  /// **'Lesson visibility updated successfully.'**
+  String get lessonVisibilityUpdatedToast;
+
+  /// Dialog title to publish all lessons
+  ///
+  /// In en, this message translates to:
+  /// **'Publish All Lessons?'**
+  String get publishAllLessonsConfirmTitle;
+
+  /// Dialog title to hide all lessons
+  ///
+  /// In en, this message translates to:
+  /// **'Hide All Lessons?'**
+  String get hideAllLessonsConfirmTitle;
+
+  /// Dialog body when publishing all lessons
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to publish all lessons in this course? Students will be able to access them.'**
+  String get publishAllLessonsConfirmMessage;
+
+  /// Dialog body when hiding all lessons
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to hide all lessons in this course? They will become drafts.'**
+  String get hideAllLessonsConfirmMessage;
+
+  /// Button text to publish all lessons
+  ///
+  /// In en, this message translates to:
+  /// **'Publish All Lessons'**
+  String get publishAllLessonsAction;
+
+  /// Button text to hide all lessons
+  ///
+  /// In en, this message translates to:
+  /// **'Hide All Lessons'**
+  String get hideAllLessonsAction;
+
+  /// Toast when bulk visibility is toggled
+  ///
+  /// In en, this message translates to:
+  /// **'All lessons visibility updated successfully.'**
+  String get allLessonsVisibilityUpdatedToast;
+
+  /// No description provided for @imageNotAccessible.
+  ///
+  /// In en, this message translates to:
+  /// **'Image not accessible'**
+  String get imageNotAccessible;
+
+  /// No description provided for @zoomAsset.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom Image'**
+  String get zoomAsset;
+
+  /// No description provided for @deleteQuestionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Question'**
+  String get deleteQuestionTitle;
+
+  /// No description provided for @deleteQuestionConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete question \\\"{qLabel}\\\"? This action cannot be undone.'**
+  String deleteQuestionConfirm(String qLabel);
+
+  /// No description provided for @pageCountBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Pages'**
+  String pageCountBadge(int count);
+
+  /// No description provided for @noQuestionsInDocumentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No Questions Extracted'**
+  String get noQuestionsInDocumentTitle;
+
+  /// No description provided for @noQuestionsInDocumentSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t extract any questions from this document.'**
+  String get noQuestionsInDocumentSubtitle;
+
+  /// No description provided for @deleteDocumentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Document'**
+  String get deleteDocumentTitle;
+
+  /// No description provided for @deleteDocumentConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete the document \\\"{docName}\\\"? All associated questions and revisions will be permanently deleted.'**
+  String deleteDocumentConfirm(String docName);
+
+  /// No description provided for @emptyDocumentsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No Documents Found'**
+  String get emptyDocumentsTitle;
+
+  /// No description provided for @emptyDocumentsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload a PDF or Word document to start extracting questions automatically.'**
+  String get emptyDocumentsSubtitle;
+
+  /// No description provided for @statTotalDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Documents'**
+  String get statTotalDocuments;
+
+  /// No description provided for @statDocumentsDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get statDocumentsDone;
+
+  /// No description provided for @statDocumentsPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get statDocumentsPending;
+
+  /// No description provided for @statDocumentsFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get statDocumentsFailed;
+
+  /// No description provided for @questionCountBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Questions'**
+  String questionCountBadge(int count);
+
+  /// No description provided for @viewQuestionsAction.
+  ///
+  /// In en, this message translates to:
+  /// **'View Questions'**
+  String get viewQuestionsAction;
+
+  /// No description provided for @statusDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get statusDone;
+
+  /// No description provided for @statusFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get statusFailed;
+
+  /// No description provided for @statusProcessing.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing'**
+  String get statusProcessing;
+
+  /// No description provided for @statusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get statusPending;
+
+  /// No description provided for @centralQuestionBankTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Central Question Bank'**
+  String get centralQuestionBankTitle;
+
+  /// No description provided for @centralQuestionBankDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'AI exam question extraction, tagging, and LaTeX math verification'**
+  String get centralQuestionBankDesc;
+
+  /// No description provided for @videoLibraryCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Video & Media Bank'**
+  String get videoLibraryCardTitle;
+
+  /// No description provided for @videoLibraryCardDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage cloud video assets and protected encrypted HLS streaming'**
+  String get videoLibraryCardDesc;
+
+  /// No description provided for @selectCourseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Course'**
+  String get selectCourseTitle;
+
+  /// No description provided for @selectCoursePrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'You are enrolled in multiple groups. Choose a course to continue:'**
+  String get selectCoursePrompt;
+
+  /// No description provided for @importFromQuestionBankAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Import from Question Bank'**
+  String get importFromQuestionBankAction;
+
+  /// No description provided for @selectQuestionsToImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Questions to Import'**
+  String get selectQuestionsToImport;
+
+  /// No description provided for @selectDocumentToBrowse.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Document to Browse Questions'**
+  String get selectDocumentToBrowse;
+
+  /// No description provided for @importSelectedQuestionsAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Selected Questions ({count})'**
+  String importSelectedQuestionsAction(int count);
+
+  /// No description provided for @noQuestionsSelectedPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select at least one question'**
+  String get noQuestionsSelectedPrompt;
+
+  /// No description provided for @createInstantExamAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Instant Exam'**
+  String get createInstantExamAction;
+
+  /// No description provided for @createInstantExamTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Instant Exam from Document'**
+  String get createInstantExamTitle;
+
+  /// No description provided for @createInstantExamDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'A new exam will be created in the selected group with all approved questions deployed.'**
+  String get createInstantExamDesc;
+
+  /// No description provided for @selectAllQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Select All Questions'**
+  String get selectAllQuestions;
+
+  /// No description provided for @questionsImportedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Successfully imported {count} questions into the exam'**
+  String questionsImportedSuccess(int count);
+
+  /// No description provided for @optionsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Options'**
+  String get optionsLabel;
+
+  /// No description provided for @tapToSelectAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Click an option to confirm the answer'**
+  String get tapToSelectAnswer;
+
+  /// No description provided for @stemNotExtracted.
+  ///
+  /// In en, this message translates to:
+  /// **'Question text not extracted yet'**
+  String get stemNotExtracted;
+
+  /// No description provided for @aiEnrichedBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Enhanced'**
+  String get aiEnrichedBadge;
+
+  /// No description provided for @editStemAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Question Text'**
+  String get editStemAction;
+
+  /// No description provided for @diagramLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Diagram / Illustration'**
+  String get diagramLabel;
 }
 
 class _AppLocalizationsDelegate

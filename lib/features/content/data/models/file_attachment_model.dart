@@ -11,6 +11,7 @@ class FileAttachmentModel extends FileAttachmentEntity {
     required super.fileSize,
     required super.createdAt,
     super.signedUrl,
+    super.storageProvider,
   });
 
   factory FileAttachmentModel.fromJson(Map<String, dynamic> json) {
@@ -26,6 +27,7 @@ class FileAttachmentModel extends FileAttachmentEntity {
           ? DateTime.parse(json['created_at'] as String)
           : DateTime.now(),
       signedUrl: json['signed_url'] as String?,
+      storageProvider: json['storage_provider'] as String? ?? 'supabase',
     );
   }
 
@@ -39,6 +41,7 @@ class FileAttachmentModel extends FileAttachmentEntity {
       'mime_type': mimeType,
       'file_size': fileSize,
       'created_at': createdAt.toIso8601String(),
+      'storage_provider': storageProvider,
     };
   }
 
@@ -53,6 +56,7 @@ class FileAttachmentModel extends FileAttachmentEntity {
       fileSize: fileSize,
       createdAt: createdAt,
       signedUrl: url,
+      storageProvider: storageProvider,
     );
   }
 }

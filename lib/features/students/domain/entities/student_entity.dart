@@ -72,16 +72,16 @@ class StudentEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        tenantId,
-        fullName,
-        email,
-        phone,
-        parentPhone,
-        avatarUrl,
-        status,
-        role,
-        lastActivityAt,
-        createdAt,
-      ];
+    id,
+    tenantId,
+    fullName,
+    email,
+    phone,
+    parentPhone,
+    avatarUrl,
+    status,
+    role,
+    lastActivityAt,
+    createdAt,
+  ];
 }

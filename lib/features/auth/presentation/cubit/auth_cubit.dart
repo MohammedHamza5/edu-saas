@@ -13,8 +13,8 @@ class AuthCubit extends Cubit<AuthState> {
   static const _tag = 'AuthCubit';
 
   AuthCubit({required AuthRepository repository})
-      : _repository = repository,
-        super(const AuthInitial()) {
+    : _repository = repository,
+      super(const AuthInitial()) {
     AppLogger.i(_tag, 'AuthCubit instantiated');
   }
 
@@ -37,21 +37,26 @@ class AuthCubit extends Cubit<AuthState> {
           AppLogger.i(_tag, 'No active session — user unauthenticated');
           emit(const AuthUnauthenticated());
         } else {
-          AppLogger.i(_tag, 'Active session found', data: {
-            'userId': user.id,
-            'email': user.email,
-            'role': user.role.name,
-            'status': user.status.name,
-          });
+          AppLogger.i(
+            _tag,
+            'Active session found',
+            data: {
+              'userId': user.id,
+              'email': user.email,
+              'role': user.role.name,
+              'status': user.status.name,
+            },
+          );
           _routeUserByState(user);
         }
       },
       onFailure: (failure) {
         SupabaseService.currentRole = null;
-        AppLogger.w(_tag, 'checkAuthStatus failed — treating as unauthenticated', data: {
-          'code': failure.code,
-          'message': failure.message,
-        });
+        AppLogger.w(
+          _tag,
+          'checkAuthStatus failed — treating as unauthenticated',
+          data: {'code': failure.code, 'message': failure.message},
+        );
         emit(const AuthUnauthenticated());
       },
     );
@@ -67,17 +72,28 @@ class AuthCubit extends Cubit<AuthState> {
 
     result.when(
       onSuccess: (user) {
-        AppLogger.s(_tag, 'Login successful', data: {
-          'userId': user.id,
-          'role': user.role.name,
-          'status': user.status.name,
-        });
+        AppLogger.s(
+          _tag,
+          'Login successful',
+          data: {
+            'userId': user.id,
+            'role': user.role.name,
+            'status': user.status.name,
+          },
+        );
         _routeUserByState(user);
       },
       onFailure: (failure) {
-        AppLogger.e(_tag, 'Login FAILED', error: '${failure.code}: ${failure.message}');
+        AppLogger.e(
+          _tag,
+          'Login FAILED',
+          error: '${failure.code}: ${failure.message}',
+        );
         if (failure.code == 'TENANT_SUSPENDED') {
-          AppLogger.w(_tag, 'Tenant is suspended — emitting AuthTenantSuspended');
+          AppLogger.w(
+            _tag,
+            'Tenant is suspended — emitting AuthTenantSuspended',
+          );
           emit(const AuthTenantSuspended());
         } else {
           emit(AuthError(failure.message, failure: failure));
@@ -94,12 +110,16 @@ class AuthCubit extends Cubit<AuthState> {
     String? parentPhone,
     required String tenantId,
   }) async {
-    AppLogger.i(_tag, 'Student registration attempt', data: {
-      'email': email,
-      'fullName': fullName,
-      'tenantId': tenantId,
-      if (parentPhone != null) 'parentPhone': parentPhone,
-    });
+    AppLogger.i(
+      _tag,
+      'Student registration attempt',
+      data: {
+        'email': email,
+        'fullName': fullName,
+        'tenantId': tenantId,
+        if (parentPhone != null) 'parentPhone': parentPhone,
+      },
+    );
     emit(const AuthLoading());
     final result = await _repository.signUpStudent(
       email: email,
@@ -112,14 +132,19 @@ class AuthCubit extends Cubit<AuthState> {
 
     result.when(
       onSuccess: (user) {
-        AppLogger.s(_tag, 'Student registered — awaiting teacher approval', data: {
-          'userId': user.id,
-          'email': user.email,
-        });
+        AppLogger.s(
+          _tag,
+          'Student registered — awaiting teacher approval',
+          data: {'userId': user.id, 'email': user.email},
+        );
         emit(AuthPendingApproval(user));
       },
       onFailure: (failure) {
-        AppLogger.e(_tag, 'Student registration FAILED', error: '${failure.code}: ${failure.message}');
+        AppLogger.e(
+          _tag,
+          'Student registration FAILED',
+          error: '${failure.code}: ${failure.message}',
+        );
         emit(AuthError(failure.message, failure: failure));
       },
     );
@@ -149,7 +174,11 @@ class AuthCubit extends Cubit<AuthState> {
         emit(const AuthPasswordResetSent());
       },
       onFailure: (failure) {
-        AppLogger.e(_tag, 'Password reset FAILED', error: '${failure.code}: ${failure.message}');
+        AppLogger.e(
+          _tag,
+          'Password reset FAILED',
+          error: '${failure.code}: ${failure.message}',
+        );
         emit(AuthError(failure.message, failure: failure));
       },
     );
@@ -160,7 +189,10 @@ class AuthCubit extends Cubit<AuthState> {
     AppLogger.d(_tag, 'Routing user by status: ${user.status.name}');
     switch (user.status) {
       case UserStatus.pending:
-        AppLogger.i(_tag, 'User status: PENDING → waiting for teacher approval');
+        AppLogger.i(
+          _tag,
+          'User status: PENDING → waiting for teacher approval',
+        );
         emit(AuthPendingApproval(user));
       case UserStatus.active:
         AppLogger.s(_tag, 'User status: ACTIVE → authenticated successfully');

@@ -202,8 +202,9 @@ class _NotificationsCenterPageState extends State<NotificationsCenterPage> {
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
             tooltip: context.l10n.refresh,
-            onPressed: () =>
-                context.read<NotificationsCubit>().loadNotifications(forceRefresh: true),
+            onPressed: () => context
+                .read<NotificationsCubit>()
+                .loadNotifications(forceRefresh: true),
           ),
         ],
       ),
@@ -216,8 +217,9 @@ class _NotificationsCenterPageState extends State<NotificationsCenterPage> {
           if (state is NotificationsError) {
             return AppErrorView(
               message: state.message,
-              onRetry: () =>
-                  context.read<NotificationsCubit>().loadNotifications(forceRefresh: true),
+              onRetry: () => context
+                  .read<NotificationsCubit>()
+                  .loadNotifications(forceRefresh: true),
             );
           }
 
@@ -313,7 +315,9 @@ class _NotificationsCenterPageState extends State<NotificationsCenterPage> {
                             children: [
                               ChoiceChip(
                                 label: Text(
-                                  context.l10n.allNotificationsFilter(state.notifications.length),
+                                  context.l10n.allNotificationsFilter(
+                                    state.notifications.length,
+                                  ),
                                 ),
                                 selected: !state.filterUnreadOnly,
                                 selectedColor: AppColors.primary,
@@ -336,7 +340,9 @@ class _NotificationsCenterPageState extends State<NotificationsCenterPage> {
                               const SizedBox(width: AppSpacing.s8),
                               ChoiceChip(
                                 label: Text(
-                                  context.l10n.unreadNotificationsFilter(state.unreadCount),
+                                  context.l10n.unreadNotificationsFilter(
+                                    state.unreadCount,
+                                  ),
                                 ),
                                 selected: state.filterUnreadOnly,
                                 selectedColor: AppColors.primary,
@@ -393,7 +399,8 @@ class _NotificationsCenterPageState extends State<NotificationsCenterPage> {
                               child: ListView.builder(
                                 controller: _scrollController,
                                 padding: const EdgeInsets.all(AppSpacing.s16),
-                                itemCount: displayedItems.length +
+                                itemCount:
+                                    displayedItems.length +
                                     (state.isLoadingMore ? 1 : 0),
                                 itemBuilder: (context, index) {
                                   if (index == displayedItems.length) {

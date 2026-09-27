@@ -18,7 +18,10 @@ class VideoPickerSheet extends StatefulWidget {
   const VideoPickerSheet({super.key, this.excludedVideoIds});
 
   /// Shows the picker and returns the selected [ContentEntity], or null if cancelled.
-  static Future<ContentEntity?> show(BuildContext context, {Set<String>? excludedVideoIds}) {
+  static Future<ContentEntity?> show(
+    BuildContext context, {
+    Set<String>? excludedVideoIds,
+  }) {
     final pickerCubit = InjectionContainer.createContentCubit();
 
     return showModalBottomSheet<ContentEntity>(
@@ -122,7 +125,8 @@ class _VideoPickerSheetState extends State<VideoPickerSheet> {
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s24),
             child: TextField(
               controller: _searchController,
-              onChanged: (v) => setState(() => _searchQuery = v.trim().toLowerCase()),
+              onChanged: (v) =>
+                  setState(() => _searchQuery = v.trim().toLowerCase()),
               decoration: InputDecoration(
                 hintText: l10n.videoPickerSearchHint,
                 prefixIcon: const Icon(Icons.search_rounded),
@@ -137,7 +141,10 @@ class _VideoPickerSheetState extends State<VideoPickerSheet> {
                     : null,
                 filled: true,
                 fillColor: AppColors.surfaceVariant.withValues(alpha: 0.4),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide.none,
@@ -158,13 +165,17 @@ class _VideoPickerSheetState extends State<VideoPickerSheet> {
                 }
                 final all = state is ContentLoaded
                     ? state.items
-                        .where((i) =>
-                            (i.type == ContentType.video ||
-                            (i.videoProviderId != null &&
-                                i.videoProviderId!.isNotEmpty) ||
-                            (i.videoId != null && i.videoId!.isNotEmpty)) &&
-                            !(widget.excludedVideoIds?.contains(i.id) ?? false))
-                        .toList()
+                          .where(
+                            (i) =>
+                                (i.type == ContentType.video ||
+                                    (i.videoProviderId != null &&
+                                        i.videoProviderId!.isNotEmpty) ||
+                                    (i.videoId != null &&
+                                        i.videoId!.isNotEmpty)) &&
+                                !(widget.excludedVideoIds?.contains(i.id) ??
+                                    false),
+                          )
+                          .toList()
                     : <ContentEntity>[];
                 final filtered = _filter(all);
 
@@ -192,7 +203,8 @@ class _VideoPickerSheetState extends State<VideoPickerSheet> {
                     vertical: AppSpacing.s8,
                   ),
                   itemCount: filtered.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.s4),
+                  separatorBuilder: (_, __) =>
+                      const SizedBox(height: AppSpacing.s4),
                   itemBuilder: (context, index) {
                     final video = filtered[index];
                     final isSelected = _selected?.id == video.id;
@@ -235,12 +247,18 @@ class _VideoPickerSheetState extends State<VideoPickerSheet> {
                                         fit: BoxFit.cover,
                                         errorWidget: (_, __, ___) => Container(
                                           color: AppColors.surfaceVariant,
-                                          child: const Icon(Icons.videocam_rounded, size: 20),
+                                          child: const Icon(
+                                            Icons.videocam_rounded,
+                                            size: 20,
+                                          ),
                                         ),
                                       )
                                     : Container(
                                         color: AppColors.surfaceVariant,
-                                        child: const Icon(Icons.videocam_rounded, size: 20),
+                                        child: const Icon(
+                                          Icons.videocam_rounded,
+                                          size: 20,
+                                        ),
                                       ),
                               ),
                             ),
@@ -258,15 +276,15 @@ class _VideoPickerSheetState extends State<VideoPickerSheet> {
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                   const SizedBox(height: 2),
-                                   Text(
-                                     video.videoProvider == 'youtube'
-                                         ? context.l10n.videoSourceYoutube
-                                         : context.l10n.videoSourceBunny,
-                                     style: theme.textTheme.bodySmall?.copyWith(
-                                       color: AppColors.textSecondary,
-                                       fontSize: 11,
-                                     ),
-                                   ),
+                                  Text(
+                                    video.videoProvider == 'youtube'
+                                        ? context.l10n.videoSourceYoutube
+                                        : context.l10n.videoSourceBunny,
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: AppColors.textSecondary,
+                                      fontSize: 11,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),

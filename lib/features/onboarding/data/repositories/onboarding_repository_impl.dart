@@ -15,7 +15,8 @@ class OnboardingRepositoryImpl implements OnboardingRepository {
 
   @override
   Future<Result<OnboardingResult>> provisionTenant(
-      ProvisionTenantParams params) async {
+    ProvisionTenantParams params,
+  ) async {
     try {
       final result = await _remoteDataSource.provisionTenant(params);
       return Success(result);

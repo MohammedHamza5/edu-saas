@@ -99,7 +99,10 @@ class _AddVideoToBankDialogState extends State<AddVideoToBankDialog> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString()), backgroundColor: AppColors.error),
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: AppColors.error,
+          ),
         );
       }
     }
@@ -127,9 +130,10 @@ class _AddVideoToBankDialogState extends State<AddVideoToBankDialog> {
       String? storagePath;
       if (_selectedPdfFile != null && _pdfBytes != null) {
         final timestamp = DateTime.now().millisecondsSinceEpoch;
-        final sanitizedName = _selectedPdfFile!.name
-            .toLowerCase()
-            .replaceAll(RegExp(r'[^a-z0-9_.-]'), '_');
+        final sanitizedName = _selectedPdfFile!.name.toLowerCase().replaceAll(
+          RegExp(r'[^a-z0-9_.-]'),
+          '_',
+        );
         storagePath = 'bank_handouts/${timestamp}_$sanitizedName';
       }
 
@@ -151,7 +155,9 @@ class _AddVideoToBankDialogState extends State<AddVideoToBankDialog> {
 
       final createdContent = createResult.dataOrNull;
       if (createdContent == null) {
-        throw Exception(createResult.failureOrNull?.message ?? 'Failed to create content');
+        throw Exception(
+          createResult.failureOrNull?.message ?? 'Failed to create content',
+        );
       }
 
       // 2. Link YouTube Video
@@ -186,7 +192,10 @@ class _AddVideoToBankDialogState extends State<AddVideoToBankDialog> {
       if (mounted) {
         setState(() => _isSaving = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString()), backgroundColor: AppColors.error),
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: AppColors.error,
+          ),
         );
       }
     }
@@ -251,7 +260,9 @@ class _AddVideoToBankDialogState extends State<AddVideoToBankDialog> {
                     ),
                     IconButton(
                       icon: const Icon(Icons.close, size: 20),
-                      onPressed: _isSaving ? null : () => Navigator.of(context).pop(false),
+                      onPressed: _isSaving
+                          ? null
+                          : () => Navigator.of(context).pop(false),
                     ),
                   ],
                 ),
@@ -285,7 +296,10 @@ class _AddVideoToBankDialogState extends State<AddVideoToBankDialog> {
                         const SizedBox(height: AppSpacing.s4),
                         Text(
                           l10n.youtubeUnlistedNotice,
-                          style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: AppColors.textSecondary,
+                          ),
                         ),
 
                         // Thumbnail Preview if valid URL
@@ -299,17 +313,22 @@ class _AddVideoToBankDialogState extends State<AddVideoToBankDialog> {
                                 AspectRatio(
                                   aspectRatio: 16 / 9,
                                   child: CachedNetworkImage(
-                                    imageUrl: 'https://img.youtube.com/vi/$_extractedVideoId/hqdefault.jpg',
+                                    imageUrl:
+                                        'https://img.youtube.com/vi/$_extractedVideoId/hqdefault.jpg',
                                     fit: BoxFit.cover,
                                     placeholder: (_, __) => Container(
                                       color: AppColors.surfaceVariant,
                                       child: const Center(
-                                        child: CircularProgressIndicator.adaptive(),
+                                        child:
+                                            CircularProgressIndicator.adaptive(),
                                       ),
                                     ),
                                     errorWidget: (_, __, ___) => Container(
                                       color: AppColors.surfaceVariant,
-                                      child: const Icon(Icons.broken_image, size: 40),
+                                      child: const Icon(
+                                        Icons.broken_image,
+                                        size: 40,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -363,7 +382,9 @@ class _AddVideoToBankDialogState extends State<AddVideoToBankDialog> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: AppColors.surfaceVariant.withValues(alpha: 0.3),
+                            color: AppColors.surfaceVariant.withValues(
+                              alpha: 0.3,
+                            ),
                             border: Border.all(color: AppColors.border),
                             borderRadius: BorderRadius.circular(10),
                           ),
@@ -386,8 +407,13 @@ class _AddVideoToBankDialogState extends State<AddVideoToBankDialog> {
                                   ),
                                   const Spacer(),
                                   TextButton.icon(
-                                    onPressed: _isSaving ? null : _pickPdfHandout,
-                                    icon: const Icon(Icons.attach_file, size: 16),
+                                    onPressed: _isSaving
+                                        ? null
+                                        : _pickPdfHandout,
+                                    icon: const Icon(
+                                      Icons.attach_file,
+                                      size: 16,
+                                    ),
                                     label: Text(
                                       _selectedPdfFile == null
                                           ? l10n.chooseMaterialFile
@@ -404,10 +430,11 @@ class _AddVideoToBankDialogState extends State<AddVideoToBankDialog> {
                                     Expanded(
                                       child: Text(
                                         _selectedPdfFile!.name,
-                                        style: theme.textTheme.bodySmall?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColors.primary,
-                                        ),
+                                        style: theme.textTheme.bodySmall
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                              color: AppColors.primary,
+                                            ),
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
@@ -440,7 +467,9 @@ class _AddVideoToBankDialogState extends State<AddVideoToBankDialog> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
-                      onPressed: _isSaving ? null : () => Navigator.of(context).pop(false),
+                      onPressed: _isSaving
+                          ? null
+                          : () => Navigator.of(context).pop(false),
                       child: Text(
                         MaterialLocalizations.of(context).cancelButtonLabel,
                         style: const TextStyle(color: AppColors.textSecondary),

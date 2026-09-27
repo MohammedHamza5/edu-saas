@@ -63,4 +63,11 @@ class AppRoutes {
   // Feature: Videos routes
   static const String teacherVideos = '/teacher/videos';
   static const String videoPlayer = '/videos/player';
+
+  // Feature: Question Bank & Review Console (M1)
+  static const String questionBank = '/teacher/question-bank';
+  static const String manualQuestionEntry = '/teacher/question-bank/new';
+  static const String documentQuestions =
+      '/teacher/question-bank/documents/:docId';
+  static const String reviewConsole = '/teacher/question-bank/review/:id';
 }

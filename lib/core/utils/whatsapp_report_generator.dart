@@ -26,8 +26,10 @@ class WhatsAppReportGenerator {
   }) {
     final attendancePercent = (attendanceRate * 100).round();
     final videoPercent = (videoWatchRate * 100).round();
-    final actualGroup = groupName ?? 'مجموعة تدريب الـ Digital SAT (Target 800)';
-    final notes = teacherNotes ??
+    final actualGroup =
+        groupName ?? 'مجموعة تدريب الـ Digital SAT (Target 800)';
+    final notes =
+        teacherNotes ??
         'الطالب يظهر التزاماً ممتازاً وسرعة استيعاب عالية في مهارات الجبر وحل المعادلات، ونعمل حالياً على رفع سرعة الحل في مسائل الـ Coordinate Geometry.';
 
     final engagementLine = activeStudyMinutes != null && activeStudyMinutes > 0
@@ -52,7 +54,8 @@ $notes
 
 مع تمنياتنا بدوام التميز والتفوق لطلابنا الأعزاء،
 $teacherName
-'''.trim();
+'''
+        .trim();
   }
 
   /// عرض شاشة معاينة التقرير مع إمكانية النسخ أو الفتح المباشر
@@ -80,10 +83,7 @@ $teacherName
               Expanded(
                 child: Text(
                   'تقرير الواتساب لولي الأمر',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),
             ],
@@ -108,7 +108,9 @@ $teacherName
                     padding: const EdgeInsets.all(AppSpacing.s12),
                     decoration: BoxDecoration(
                       color: AppColors.surfaceVariant.withValues(alpha: 0.5),
-                      borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.radiusSmall,
+                      ),
                       border: Border.all(color: AppColors.border),
                     ),
                     child: SelectableText(

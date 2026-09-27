@@ -71,9 +71,9 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
     _activeGroupName = widget.groupName;
     _fetchStudentGroups();
     context.read<CourseProgressCubit>().loadCourseProgress(
-          _activeGroupId,
-          studentId: _currentUserId,
-        );
+      _activeGroupId,
+      studentId: _currentUserId,
+    );
     _scrollController.addListener(_onScroll);
   }
 
@@ -108,7 +108,11 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
     // Pagination is not needed for the course progress as it returns the whole sequence
   }
 
-  Future<void> _handleContentTap(LessonAssignmentEntity item, {int? index, int? totalCount}) async {
+  Future<void> _handleContentTap(
+    LessonAssignmentEntity item, {
+    int? index,
+    int? totalCount,
+  }) async {
     if (item.isLocked) {
       final prevIndex = index != null && index > 1
           ? index - 1
@@ -124,8 +128,8 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
 
     switch (item.type) {
       case ContentType.video:
-        final encodedTitle = item.lessonExamTitle != null 
-            ? Uri.encodeComponent(item.lessonExamTitle!) 
+        final encodedTitle = item.lessonExamTitle != null
+            ? Uri.encodeComponent(item.lessonExamTitle!)
             : '';
         final encodedGroupName = _activeGroupName != null
             ? Uri.encodeComponent(_activeGroupName!)
@@ -168,18 +172,22 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                   )
                 : null,
           ),
-          onGetSignedUrl: (storagePath) =>
-              context.read<ContentRepository>().getSignedFileUrl(storagePath: storagePath).then((value) => value.dataOrNull ?? ''),
+          onGetSignedUrl: (storagePath) => context
+              .read<ContentRepository>()
+              .getSignedFileUrl(storagePath: storagePath)
+              .then((value) => value.dataOrNull ?? ''),
         );
         break;
     }
 
     // Refresh course progress when returning from any content view (Phase E)
     if (mounted) {
-      unawaited(context.read<CourseProgressCubit>().loadCourseProgress(
-        _activeGroupId,
-        studentId: InjectionContainer.supabaseClient.auth.currentUser?.id,
-      ));
+      unawaited(
+        context.read<CourseProgressCubit>().loadCourseProgress(
+          _activeGroupId,
+          studentId: InjectionContainer.supabaseClient.auth.currentUser?.id,
+        ),
+      );
     }
   }
 
@@ -201,8 +209,11 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
         ),
         title: Row(
           children: [
-            const Icon(Icons.menu_book_rounded,
-                size: 20, color: AppColors.primary),
+            const Icon(
+              Icons.menu_book_rounded,
+              size: 20,
+              color: AppColors.primary,
+            ),
             const SizedBox(width: AppSpacing.s8),
             Expanded(
               child: Text(
@@ -220,9 +231,11 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
             tooltip: context.l10n.refreshContent,
-            onPressed: () => context.read<CourseProgressCubit>().loadCourseProgress(
+            onPressed: () =>
+                context.read<CourseProgressCubit>().loadCourseProgress(
                   _activeGroupId,
-                  studentId: InjectionContainer.supabaseClient.auth.currentUser?.id,
+                  studentId:
+                      InjectionContainer.supabaseClient.auth.currentUser?.id,
                 ),
           ),
         ],
@@ -252,9 +265,11 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                 : state.message;
             return AppErrorView(
               message: userFriendlyMessage,
-              onRetry: () => context.read<CourseProgressCubit>().loadCourseProgress(
+              onRetry: () =>
+                  context.read<CourseProgressCubit>().loadCourseProgress(
                     _activeGroupId,
-                    studentId: InjectionContainer.supabaseClient.auth.currentUser?.id,
+                    studentId:
+                        InjectionContainer.supabaseClient.auth.currentUser?.id,
                   ),
             );
           }
@@ -262,7 +277,9 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
           if (state is CourseProgressLoaded) {
             final allPublished = state.lessons;
 
-            final completedCount = allPublished.where((i) => i.isEffectivelyCompleted).length;
+            final completedCount = allPublished
+                .where((i) => i.isEffectivelyCompleted)
+                .length;
             final totalPublishedCount = allPublished.length;
             final overallProgressPct = totalPublishedCount > 0
                 ? ((completedCount / totalPublishedCount) * 100).toInt()
@@ -294,36 +311,38 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
             var items = _selectedTypeFilter == null
                 ? allPublished
                 : allPublished
-                    .where((i) => i.type == _selectedTypeFilter)
-                    .toList();
+                      .where((i) => i.type == _selectedTypeFilter)
+                      .toList();
 
             if (_searchQuery.isNotEmpty) {
               items = items
-                  .where((i) =>
-                      i.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-                      (i.description
-                              ?.toLowerCase()
-                              .contains(_searchQuery.toLowerCase()) ??
-                          false) ||
-                      (i.pdfFileName
-                              ?.toLowerCase()
-                              .contains(_searchQuery.toLowerCase()) ??
-                          false))
+                  .where(
+                    (i) =>
+                        i.title.toLowerCase().contains(
+                          _searchQuery.toLowerCase(),
+                        ) ||
+                        (i.description?.toLowerCase().contains(
+                              _searchQuery.toLowerCase(),
+                            ) ??
+                            false) ||
+                        (i.pdfFileName?.toLowerCase().contains(
+                              _searchQuery.toLowerCase(),
+                            ) ??
+                            false),
+                  )
                   .toList();
             }
 
             return Center(
               child: ResponsiveContainer(
                 maxWidth: ResponsiveBreakpoints.maxContentWidth,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.s16,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16),
                 child: RefreshIndicator(
                   onRefresh: () async =>
                       context.read<CourseProgressCubit>().loadCourseProgress(
-                            _activeGroupId,
-                            studentId: _currentUserId,
-                          ),
+                        _activeGroupId,
+                        studentId: _currentUserId,
+                      ),
                   child: CustomScrollView(
                     controller: _scrollController,
                     physics: const AlwaysScrollableScrollPhysics(),
@@ -364,7 +383,8 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                                             : AppColors.textPrimary,
                                       ),
                                       onSelected: (selected) {
-                                        if (selected && _activeGroupId != g.id) {
+                                        if (selected &&
+                                            _activeGroupId != g.id) {
                                           setState(() {
                                             _activeGroupId = g.id;
                                             _activeGroupName = g.name;
@@ -400,10 +420,10 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                             groupName: _activeGroupName ?? '',
                             onResume: nextLesson != null
                                 ? () => _handleContentTap(
-                                      nextLesson!,
-                                      index: nextLessonIndex,
-                                      totalCount: totalPublishedCount,
-                                    )
+                                    nextLesson!,
+                                    index: nextLessonIndex,
+                                    totalCount: totalPublishedCount,
+                                  )
                                 : null,
                           ),
                         ),
@@ -412,7 +432,10 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                       if (allPublished.isNotEmpty)
                         SliverToBoxAdapter(
                           child: Padding(
-                            padding: const EdgeInsets.only(top: AppSpacing.s4, bottom: AppSpacing.s8),
+                            padding: const EdgeInsets.only(
+                              top: AppSpacing.s4,
+                              bottom: AppSpacing.s8,
+                            ),
                             child: SingleChildScrollView(
                               scrollDirection: Axis.horizontal,
                               child: Row(
@@ -420,8 +443,12 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                                   Container(
                                     decoration: BoxDecoration(
                                       color: AppColors.surfaceVariant,
-                                      borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-                                      border: Border.all(color: AppColors.border),
+                                      borderRadius: BorderRadius.circular(
+                                        AppSpacing.radiusFull,
+                                      ),
+                                      border: Border.all(
+                                        color: AppColors.border,
+                                      ),
                                     ),
                                     padding: const EdgeInsets.all(3),
                                     child: Row(
@@ -429,15 +456,21 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                                       children: [
                                         _buildViewModeButton(
                                           icon: Icons.alt_route_rounded,
-                                          label: context.l10n.syllabusViewRoadmap,
+                                          label:
+                                              context.l10n.syllabusViewRoadmap,
                                           isActive: _isRoadmapMode,
-                                          onTap: () => setState(() => _isRoadmapMode = true),
+                                          onTap: () => setState(
+                                            () => _isRoadmapMode = true,
+                                          ),
                                         ),
                                         _buildViewModeButton(
-                                          icon: Icons.format_list_numbered_rounded,
+                                          icon: Icons
+                                              .format_list_numbered_rounded,
                                           label: context.l10n.syllabusViewList,
                                           isActive: !_isRoadmapMode,
-                                          onTap: () => setState(() => _isRoadmapMode = false),
+                                          onTap: () => setState(
+                                            () => _isRoadmapMode = false,
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -490,8 +523,9 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                             child: Row(
                               children: [
                                 _buildFilterChip(
-                                  label: context.l10n
-                                      .filterAllWithCount(allPublished.length),
+                                  label: context.l10n.filterAllWithCount(
+                                    allPublished.length,
+                                  ),
                                   isSelected: _selectedTypeFilter == null,
                                   onSelected: () => setState(
                                     () => _selectedTypeFilter = null,
@@ -556,7 +590,8 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                             child: Center(
                               child: AppEmptyView(
                                 message: context.l10n.courseBeingPreparedTitle,
-                                subtitle: context.l10n.courseBeingPreparedSubtitle,
+                                subtitle:
+                                    context.l10n.courseBeingPreparedSubtitle,
                                 icon: Icons.school_outlined,
                               ),
                             ),
@@ -577,8 +612,9 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                                   ),
                                   const SizedBox(height: AppSpacing.s12),
                                   Text(
-                                    context.l10n
-                                        .noMatchingContentFound(_searchQuery),
+                                    context.l10n.noMatchingContentFound(
+                                      _searchQuery,
+                                    ),
                                     style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       color: AppColors.textSecondary,
@@ -601,7 +637,8 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                                 lesson: item,
                                 index: index + 1,
                                 isLast: index == items.length - 1,
-                                isRoadmapMode: _isRoadmapMode &&
+                                isRoadmapMode:
+                                    _isRoadmapMode &&
                                     _selectedTypeFilter == null &&
                                     _searchQuery.isEmpty,
                                 onTap: () => _handleContentTap(
@@ -627,14 +664,23 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                                               tenantId: '',
                                               contentId: item.contentId,
                                               fileName: item.pdfFileName ?? '',
-                                              storagePath: item.pdfStoragePath ?? '',
+                                              storagePath:
+                                                  item.pdfStoragePath ?? '',
                                               mimeType: '',
                                               fileSize: 0,
                                               createdAt: DateTime.now(),
                                             ),
                                           ),
                                           onGetSignedUrl: (storagePath) =>
-                                              context.read<ContentRepository>().getSignedFileUrl(storagePath: storagePath).then((value) => value.dataOrNull ?? ''),
+                                              context
+                                                  .read<ContentRepository>()
+                                                  .getSignedFileUrl(
+                                                    storagePath: storagePath,
+                                                  )
+                                                  .then(
+                                                    (value) =>
+                                                        value.dataOrNull ?? '',
+                                                  ),
                                         );
                                       }
                                     : null,

@@ -32,8 +32,11 @@ class AssignmentSubmissionModel extends AssignmentSubmissionEntity {
       studentEmail = json['student_email'] as String?;
     }
 
-    final filesList = (json['submission_files'] as List<dynamic>?)
-            ?.map((f) => SubmissionFileModel.fromJson(f as Map<String, dynamic>))
+    final filesList =
+        (json['submission_files'] as List<dynamic>?)
+            ?.map(
+              (f) => SubmissionFileModel.fromJson(f as Map<String, dynamic>),
+            )
             .toList() ??
         <SubmissionFileModel>[];
 
@@ -45,10 +48,14 @@ class AssignmentSubmissionModel extends AssignmentSubmissionEntity {
       studentEmail: studentEmail,
       attemptNumber: (json['attempt_number'] as num?)?.toInt() ?? 1,
       submittedAt: DateTime.parse(json['submitted_at'] as String),
-      status: SubmissionStatus.fromString(json['status'] as String? ?? 'submitted'),
+      status: SubmissionStatus.fromString(
+        json['status'] as String? ?? 'submitted',
+      ),
       score: (json['score'] as num?)?.toInt(),
       teacherFeedback: json['teacher_feedback'] as String?,
-      reviewedAt: json['reviewed_at'] != null ? DateTime.parse(json['reviewed_at'] as String) : null,
+      reviewedAt: json['reviewed_at'] != null
+          ? DateTime.parse(json['reviewed_at'] as String)
+          : null,
       reviewedBy: json['reviewed_by'] as String?,
       files: filesList,
     );

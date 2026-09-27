@@ -81,18 +81,18 @@ final class TeacherAssignmentsLoaded extends AssignmentsState {
 
   @override
   List<Object?> get props => [
-        groupId,
-        assignments,
-        selectedAssignment,
-        submissions,
-        isLoadingSubmissions,
-        isGrading,
-        isCreating,
-        actionSuccess,
-        hasMore,
-        isLoadingMore,
-        message,
-      ];
+    groupId,
+    assignments,
+    selectedAssignment,
+    submissions,
+    isLoadingSubmissions,
+    isGrading,
+    isCreating,
+    actionSuccess,
+    hasMore,
+    isLoadingMore,
+    message,
+  ];
 }
 
 final class StudentAssignmentsLoaded extends AssignmentsState {
@@ -136,14 +136,14 @@ final class StudentAssignmentsLoaded extends AssignmentsState {
 
   @override
   List<Object?> get props => [
-        assignments,
-        selectedAssignment,
-        isSubmitting,
-        submitSuccess,
-        hasMore,
-        isLoadingMore,
-        message,
-      ];
+    assignments,
+    selectedAssignment,
+    isSubmitting,
+    submitSuccess,
+    hasMore,
+    isLoadingMore,
+    message,
+  ];
 }
 
 final class AssignmentsError extends AssignmentsState {

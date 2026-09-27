@@ -74,10 +74,14 @@ class SubmissionTile extends StatelessWidget {
                         ),
                         decoration: BoxDecoration(
                           color: AppColors.surfaceVariant,
-                          borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.radiusSmall,
+                          ),
                         ),
                         child: Text(
-                          context.l10n.attemptNumberLabel(submission.attemptNumber.toString()),
+                          context.l10n.attemptNumberLabel(
+                            submission.attemptNumber.toString(),
+                          ),
                           style: const TextStyle(
                             fontSize: 10,
                             color: AppColors.textSecondary,
@@ -106,7 +110,9 @@ class SubmissionTile extends StatelessWidget {
                       ),
                       const SizedBox(width: 2),
                       Text(
-                        context.l10n.attachedFilesCount(submission.files.length.toString()),
+                        context.l10n.attachedFilesCount(
+                          submission.files.length.toString(),
+                        ),
                         style: const TextStyle(
                           fontSize: 11,
                           color: AppColors.textSecondary,

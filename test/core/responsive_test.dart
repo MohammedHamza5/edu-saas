@@ -9,12 +9,24 @@ import 'package:edu_saas/core/widgets/responsive_grid.dart';
 void main() {
   group('ResponsiveBreakpoints Unit Tests', () {
     test('Correctly maps widths to DeviceScreenType', () {
-      expect(ResponsiveBreakpoints.getScreenType(320), DeviceScreenType.compact);
-      expect(ResponsiveBreakpoints.getScreenType(599), DeviceScreenType.compact);
+      expect(
+        ResponsiveBreakpoints.getScreenType(320),
+        DeviceScreenType.compact,
+      );
+      expect(
+        ResponsiveBreakpoints.getScreenType(599),
+        DeviceScreenType.compact,
+      );
       expect(ResponsiveBreakpoints.getScreenType(600), DeviceScreenType.medium);
       expect(ResponsiveBreakpoints.getScreenType(839), DeviceScreenType.medium);
-      expect(ResponsiveBreakpoints.getScreenType(840), DeviceScreenType.expanded);
-      expect(ResponsiveBreakpoints.getScreenType(1199), DeviceScreenType.expanded);
+      expect(
+        ResponsiveBreakpoints.getScreenType(840),
+        DeviceScreenType.expanded,
+      );
+      expect(
+        ResponsiveBreakpoints.getScreenType(1199),
+        DeviceScreenType.expanded,
+      );
       expect(ResponsiveBreakpoints.getScreenType(1200), DeviceScreenType.large);
       expect(ResponsiveBreakpoints.getScreenType(2560), DeviceScreenType.large);
     });
@@ -56,7 +68,9 @@ void main() {
   });
 
   group('Responsive Context Extensions & Widgets Tests', () {
-    testWidgets('ResponsiveContextX adapts values based on screen size', (tester) async {
+    testWidgets('ResponsiveContextX adapts values based on screen size', (
+      tester,
+    ) async {
       tester.view.devicePixelRatio = 1.0;
 
       // Mobile Size (380 x 800)
@@ -129,47 +143,54 @@ void main() {
       expect(find.text('Desktop View'), findsOneWidget);
     });
 
-    testWidgets('ResponsiveBuilder switches layouts based on width constraints', (tester) async {
-      tester.view.devicePixelRatio = 1.0;
+    testWidgets(
+      'ResponsiveBuilder switches layouts based on width constraints',
+      (tester) async {
+        tester.view.devicePixelRatio = 1.0;
 
-      // Render on narrow width
-      tester.view.physicalSize = const Size(400, 600);
-      addTearDown(tester.view.resetPhysicalSize);
+        // Render on narrow width
+        tester.view.physicalSize = const Size(400, 600);
+        addTearDown(tester.view.resetPhysicalSize);
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: ResponsiveBuilder(
-              mobile: (context, constraints) => const Text('Mobile Builder'),
-              tablet: (context, constraints) => const Text('Tablet Builder'),
-              desktop: (context, constraints) => const Text('Desktop Builder'),
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: ResponsiveBuilder(
+                mobile: (context, constraints) => const Text('Mobile Builder'),
+                tablet: (context, constraints) => const Text('Tablet Builder'),
+                desktop: (context, constraints) =>
+                    const Text('Desktop Builder'),
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      expect(find.text('Mobile Builder'), findsOneWidget);
-      expect(find.text('Tablet Builder'), findsNothing);
+        expect(find.text('Mobile Builder'), findsOneWidget);
+        expect(find.text('Tablet Builder'), findsNothing);
 
-      // Switch to Desktop width
-      tester.view.physicalSize = const Size(1280, 800);
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: ResponsiveBuilder(
-              mobile: (context, constraints) => const Text('Mobile Builder'),
-              tablet: (context, constraints) => const Text('Tablet Builder'),
-              desktop: (context, constraints) => const Text('Desktop Builder'),
+        // Switch to Desktop width
+        tester.view.physicalSize = const Size(1280, 800);
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: ResponsiveBuilder(
+                mobile: (context, constraints) => const Text('Mobile Builder'),
+                tablet: (context, constraints) => const Text('Tablet Builder'),
+                desktop: (context, constraints) =>
+                    const Text('Desktop Builder'),
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      expect(find.text('Desktop Builder'), findsOneWidget);
-      expect(find.text('Mobile Builder'), findsNothing);
-    });
+        expect(find.text('Desktop Builder'), findsOneWidget);
+        expect(find.text('Mobile Builder'), findsNothing);
+      },
+    );
 
-    testWidgets('ResponsiveContainer bounds width and centers content', (tester) async {
+    testWidgets('ResponsiveContainer bounds width and centers content', (
+      tester,
+    ) async {
       tester.view.devicePixelRatio = 1.0;
       tester.view.physicalSize = const Size(1600, 900);
       addTearDown(tester.view.resetPhysicalSize);
@@ -179,20 +200,21 @@ void main() {
           home: Scaffold(
             body: ResponsiveContainer(
               maxWidth: 800,
-              child: SizedBox(
-                key: Key('inner_child'),
-                height: 200,
-              ),
+              child: SizedBox(key: Key('inner_child'), height: 200),
             ),
           ),
         ),
       );
 
-      final renderBox = tester.renderObject<RenderBox>(find.byKey(const Key('inner_child')));
+      final renderBox = tester.renderObject<RenderBox>(
+        find.byKey(const Key('inner_child')),
+      );
       expect(renderBox.size.width, lessThanOrEqualTo(800));
     });
 
-    testWidgets('ResponsiveGrid displays all children in dynamic columns', (tester) async {
+    testWidgets('ResponsiveGrid displays all children in dynamic columns', (
+      tester,
+    ) async {
       tester.view.devicePixelRatio = 1.0;
       tester.view.physicalSize = const Size(800, 1000);
       addTearDown(tester.view.resetPhysicalSize);

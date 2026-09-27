@@ -9,9 +9,8 @@ import '../datasources/videos_remote_datasource.dart';
 class VideosRepositoryImpl implements VideosRepository {
   final VideosRemoteDataSource _remoteDataSource;
 
-  const VideosRepositoryImpl({
-    required VideosRemoteDataSource remoteDataSource,
-  }) : _remoteDataSource = remoteDataSource;
+  const VideosRepositoryImpl({required VideosRemoteDataSource remoteDataSource})
+    : _remoteDataSource = remoteDataSource;
 
   @override
   Future<Result<List<VideoEntity>>> getVideosForGroup(String groupId) async {
@@ -136,7 +135,9 @@ class VideosRepositoryImpl implements VideosRepository {
   @override
   Future<Result<String>> getSignedFileUrl(String storagePath) async {
     try {
-      final url = await _remoteDataSource.getSignedFileUrl(storagePath: storagePath);
+      final url = await _remoteDataSource.getSignedFileUrl(
+        storagePath: storagePath,
+      );
       return Result.success(url);
     } on ServerException catch (e) {
       return Result.failure(ServerFailure(e.message, code: e.code));

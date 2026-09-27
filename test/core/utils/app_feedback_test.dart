@@ -14,7 +14,9 @@ Widget buildTestScaffold(Widget child) {
 
 void main() {
   group('AppFeedback Tests', () {
-    testWidgets('showError displays floating snackbar with error info', (tester) async {
+    testWidgets('showError displays floating snackbar with error info', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         buildTestScaffold(
           Builder(
@@ -69,10 +71,7 @@ void main() {
           Builder(
             builder: (context) => ElevatedButton(
               onPressed: () {
-                AppFeedback.showWarning(
-                  context,
-                  'Warning notice details',
-                );
+                AppFeedback.showWarning(context, 'Warning notice details');
               },
               child: const Text('Trigger Warning'),
             ),

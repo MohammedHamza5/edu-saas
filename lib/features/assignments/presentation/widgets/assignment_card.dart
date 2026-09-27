@@ -40,7 +40,9 @@ class AssignmentCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: AppColors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                  border: Border.all(color: AppColors.primary.withValues(alpha: 0.25)),
+                  border: Border.all(
+                    color: AppColors.primary.withValues(alpha: 0.25),
+                  ),
                 ),
                 child: const Icon(
                   Icons.assignment_outlined,

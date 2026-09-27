@@ -18,7 +18,13 @@ Widget buildBunnyEmbedPlayer({
   required String embedUrl,
   required int initialProgressSeconds,
   void Function(int currentSeconds, int totalSeconds)? onProgress,
-  void Function(int currentSeconds, int totalSeconds, int actualWatchSeconds, bool isSkipped)? onMetricsProgress,
+  void Function(
+    int currentSeconds,
+    int totalSeconds,
+    int actualWatchSeconds,
+    bool isSkipped,
+  )?
+  onMetricsProgress,
   VoidCallback? onCompleted,
   void Function(void Function(int seconds) seekTo)? onSeekReady,
   ValueChanged<bool>? onFullscreenChanged,
@@ -38,7 +44,13 @@ class _BunnyEmbedPlayerWeb extends StatefulWidget {
   final String embedUrl;
   final int initialProgressSeconds;
   final void Function(int currentSeconds, int totalSeconds)? onProgress;
-  final void Function(int currentSeconds, int totalSeconds, int actualWatchSeconds, bool isSkipped)? onMetricsProgress;
+  final void Function(
+    int currentSeconds,
+    int totalSeconds,
+    int actualWatchSeconds,
+    bool isSkipped,
+  )?
+  onMetricsProgress;
   final VoidCallback? onCompleted;
   final void Function(void Function(int seconds) seekTo)? onSeekReady;
   final ValueChanged<bool>? onFullscreenChanged;
@@ -77,24 +89,21 @@ class _BunnyEmbedPlayerWebState extends State<_BunnyEmbedPlayerWeb> {
     _lastRecordedPosition = widget.initialProgressSeconds;
 
     // Register iframe platform view factory
-    ui_web.platformViewRegistry.registerViewFactory(
-      _viewType,
-      (int id) {
-        try {
-          String finalUrl = widget.embedUrl;
-          if (widget.initialProgressSeconds > 3 &&
-              !finalUrl.contains('&t=') &&
-              !finalUrl.contains('?t=')) {
-            final separator = finalUrl.contains('?') ? '&' : '?';
-            finalUrl = '$finalUrl${separator}t=${widget.initialProgressSeconds}';
-          }
-          return _createBunnyPlayer(finalUrl.toJS, _viewId.toJS);
-        } catch (e) {
-          debugPrint('[BunnyEmbed] Error initializing iframe: $e');
-          rethrow;
+    ui_web.platformViewRegistry.registerViewFactory(_viewType, (int id) {
+      try {
+        String finalUrl = widget.embedUrl;
+        if (widget.initialProgressSeconds > 3 &&
+            !finalUrl.contains('&t=') &&
+            !finalUrl.contains('?t=')) {
+          final separator = finalUrl.contains('?') ? '&' : '?';
+          finalUrl = '$finalUrl${separator}t=${widget.initialProgressSeconds}';
         }
-      },
-    );
+        return _createBunnyPlayer(finalUrl.toJS, _viewId.toJS);
+      } catch (e) {
+        debugPrint('[BunnyEmbed] Error initializing iframe: $e');
+        rethrow;
+      }
+    });
 
     // Register JS bridge message listener
     _setupMessageBridge();
@@ -127,7 +136,8 @@ class _BunnyEmbedPlayerWebState extends State<_BunnyEmbedPlayerWeb> {
             int totalSeconds = _lastDuration;
 
             if (val is Map) {
-              currentSeconds = (val['seconds'] as num?)?.toInt() ??
+              currentSeconds =
+                  (val['seconds'] as num?)?.toInt() ??
                   (val['currentTime'] as num?)?.toInt() ??
                   0;
               final durVal = (val['duration'] as num?)?.toInt() ?? 0;
@@ -142,7 +152,9 @@ class _BunnyEmbedPlayerWebState extends State<_BunnyEmbedPlayerWeb> {
             }
 
             if (totalSeconds > 0) _lastDuration = totalSeconds;
-            final effectiveDuration = totalSeconds > 0 ? totalSeconds : _lastDuration;
+            final effectiveDuration = totalSeconds > 0
+                ? totalSeconds
+                : _lastDuration;
 
             // Detect forward skip > 25 seconds
             if (currentSeconds - _lastRecordedPosition > 25) {

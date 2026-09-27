@@ -49,14 +49,20 @@ class UiErrorReport {
 
     buffer.writeln();
     buffer.writeln('$red$bold$topBorder$reset');
-    buffer.writeln('$red$bold║ 🚨 [UI ENGINE ERROR DETECTED] ── $category$reset');
+    buffer.writeln(
+      '$red$bold║ 🚨 [UI ENGINE ERROR DETECTED] ── $category$reset',
+    );
     buffer.writeln('$red$bold$midBorder$reset');
 
     // 1. Basic Coordinates
     buffer.writeln('$cyan║ 🧭 Active Screen / Route : $bold$activeRoute$reset');
-    buffer.writeln('$red$bold║ 💥 Culprit Widget        : $culpritWidget$reset');
+    buffer.writeln(
+      '$red$bold║ 💥 Culprit Widget        : $culpritWidget$reset',
+    );
     if (fileLocation != null) {
-      buffer.writeln('$green$bold║ 📁 File & Line Location   : $fileLocation$reset');
+      buffer.writeln(
+        '$green$bold║ 📁 File & Line Location   : $fileLocation$reset',
+      );
     }
     buffer.writeln('$yellow║ ⚠️ Problem               : $problemSummary$reset');
     buffer.writeln('$green║ 💡 Recommended Fix       : $quickSolution$reset');
@@ -64,7 +70,9 @@ class UiErrorReport {
     // 2. Widget Tree Ancestry
     if (widgetTreePath.isNotEmpty) {
       buffer.writeln('$gray$subBorder$reset');
-      buffer.writeln('$cyan$bold║ 🌳 EXACT WIDGET TREE LOCATION (Root ➔ Leaf):$reset');
+      buffer.writeln(
+        '$cyan$bold║ 🌳 EXACT WIDGET TREE LOCATION (Root ➔ Leaf):$reset',
+      );
       for (int i = 0; i < widgetTreePath.length; i++) {
         final isLast = i == widgetTreePath.length - 1;
         final indent = '   ${'  ' * i}';
@@ -77,7 +85,9 @@ class UiErrorReport {
     // 3. Relevant App Stack Frames (filtered from Flutter engine noise)
     if (appStackFrames.isNotEmpty) {
       buffer.writeln('$gray$subBorder$reset');
-      buffer.writeln('$yellow$bold║ 🎯 YOUR PROJECT CODE CALL SITES (App Frames):$reset');
+      buffer.writeln(
+        '$yellow$bold║ 🎯 YOUR PROJECT CODE CALL SITES (App Frames):$reset',
+      );
       for (int i = 0; i < appStackFrames.length && i < 4; i++) {
         buffer.writeln('$yellow║   [$i] ${appStackFrames[i]}$reset');
       }
@@ -128,13 +138,16 @@ class UiErrorTracker {
     final activeRoute = AppRouteObserver.currentRoute;
 
     // ── 1. Detect Overflow ───────────────────────────────────────────────────
-    final isOverflow = rawMessage.contains('overflowed by') ||
+    final isOverflow =
+        rawMessage.contains('overflowed by') ||
         rawMessage.contains('A RenderFlex overflowed');
     double? overflowPixels;
     String? overflowDirection;
 
     if (isOverflow) {
-      final match = RegExp(r'overflowed by ([\d\.]+) pixels on the (\w+)').firstMatch(rawMessage);
+      final match = RegExp(
+        r'overflowed by ([\d\.]+) pixels on the (\w+)',
+      ).firstMatch(rawMessage);
       if (match != null) {
         overflowPixels = double.tryParse(match.group(1) ?? '');
         overflowDirection = match.group(2);
@@ -145,11 +158,20 @@ class UiErrorTracker {
     final appFrames = _extractAppStackFrames(stackStr);
 
     // ── 3. Find Culprit Widget and File Location ─────────────────────────────
-    String culpritWidget = _extractCulpritWidget(details, appFrames, isOverflow, overflowDirection);
+    String culpritWidget = _extractCulpritWidget(
+      details,
+      appFrames,
+      isOverflow,
+      overflowDirection,
+    );
     String? fileLocation = appFrames.isNotEmpty ? appFrames.first : null;
 
     // ── 4. Extract Widget Tree Ancestry Path ─────────────────────────────────
-    final widgetTreePath = _buildWidgetTreePath(details, culpritWidget, activeRoute);
+    final widgetTreePath = _buildWidgetTreePath(
+      details,
+      culpritWidget,
+      activeRoute,
+    );
 
     // ── 5. Determine Category, Problem & Quick Solution ──────────────────────
     String category = 'Widget Error';
@@ -159,7 +181,9 @@ class UiErrorTracker {
     if (isOverflow) {
       category = 'RenderFlex Overflow (Layout)';
       final dir = overflowDirection ?? 'bottom';
-      final px = overflowPixels != null ? '${overflowPixels.toStringAsFixed(1)}px' : 'pixels';
+      final px = overflowPixels != null
+          ? '${overflowPixels.toStringAsFixed(1)}px'
+          : 'pixels';
       problemSummary = 'Content overflowed by $px on the $dir edge.';
 
       if (dir == 'bottom' || dir == 'top') {
@@ -169,24 +193,37 @@ class UiErrorTracker {
         quickSolution =
             'Horizontal overflow in Row: Wrap expanding child in Expanded, use Text(..., overflow: TextOverflow.ellipsis), or replace Row with Wrap.';
       }
-    } else if (rawMessage.contains('Null check operator used on a null value')) {
+    } else if (rawMessage.contains(
+      'Null check operator used on a null value',
+    )) {
       category = 'Null Check Failure (!) in UI';
-      problemSummary = 'A null object was forced with ! operator inside the widget tree.';
-      quickSolution = 'Search for "!" in $fileLocation and use safe null checking (?. or ?? fallback).';
-    } else if (rawMessage.contains('unbounded') || rawMessage.contains('Vertical viewport was given unbounded height')) {
+      problemSummary =
+          'A null object was forced with ! operator inside the widget tree.';
+      quickSolution =
+          'Search for "!" in $fileLocation and use safe null checking (?. or ?? fallback).';
+    } else if (rawMessage.contains('unbounded') ||
+        rawMessage.contains('Vertical viewport was given unbounded height')) {
       category = 'Unbounded Constraints (Infinite Size)';
-      problemSummary = 'A scrollable widget (e.g., ListView) has infinite height inside an unconstrained parent (e.g., Column).';
-      quickSolution = 'Add shrinkWrap: true and physics: const NeverScrollableScrollPhysics(), or wrap it with Expanded / SizedBox(height: ...).';
-    } else if (rawMessage.contains('setState() or markNeedsBuild() called during build')) {
+      problemSummary =
+          'A scrollable widget (e.g., ListView) has infinite height inside an unconstrained parent (e.g., Column).';
+      quickSolution =
+          'Add shrinkWrap: true and physics: const NeverScrollableScrollPhysics(), or wrap it with Expanded / SizedBox(height: ...).';
+    } else if (rawMessage.contains(
+      'setState() or markNeedsBuild() called during build',
+    )) {
       category = 'Lifecycle Violation (setState during build)';
-      problemSummary = 'A state change was triggered while the framework was already building widgets.';
-      quickSolution = 'Wrap the state update in WidgetsBinding.instance.addPostFrameCallback((_) => ...).';
+      problemSummary =
+          'A state change was triggered while the framework was already building widgets.';
+      quickSolution =
+          'Wrap the state update in WidgetsBinding.instance.addPostFrameCallback((_) => ...).';
     } else if (rawMessage.contains('No MediaQuery widget ancestor found') ||
         rawMessage.contains('No Directionality widget found') ||
         rawMessage.contains('No Theme widget found')) {
       category = 'Missing Inherited Widget Ancestor';
-      problemSummary = 'Widget requires an inherited ancestor that is missing above it in the tree.';
-      quickSolution = 'Ensure the widget is inside a MaterialApp or provide Directionality / MediaQuery directly.';
+      problemSummary =
+          'Widget requires an inherited ancestor that is missing above it in the tree.';
+      quickSolution =
+          'Ensure the widget is inside a MaterialApp or provide Directionality / MediaQuery directly.';
     }
 
     return UiErrorReport(
@@ -242,7 +279,9 @@ class UiErrorTracker {
       for (final node in nodes) {
         final desc = node.toDescription();
         final name = node.name ?? '';
-        if (name.contains('error-causing widget') || name.contains('widget') || desc.contains('relevant error-causing widget')) {
+        if (name.contains('error-causing widget') ||
+            name.contains('widget') ||
+            desc.contains('relevant error-causing widget')) {
           final match = RegExp(r'([A-Z][A-Za-z0-9_]+)').firstMatch(desc);
           if (match != null) return match.group(1)!;
         }
@@ -252,7 +291,9 @@ class UiErrorTracker {
     // 2. Try details.context (e.g. "building AcademicHeroBanner(dirty)")
     final contextDesc = details.context?.toDescription() ?? '';
     if (contextDesc.isNotEmpty) {
-      final match = RegExp(r'building\s+([A-Z][A-Za-z0-9_]+)').firstMatch(contextDesc);
+      final match = RegExp(
+        r'building\s+([A-Z][A-Za-z0-9_]+)',
+      ).firstMatch(contextDesc);
       if (match != null) return match.group(1)!;
     }
 
@@ -267,7 +308,9 @@ class UiErrorTracker {
         if (rawName.endsWith('State') && rawName.length > 5) {
           rawName = rawName.substring(0, rawName.length - 5);
         }
-        if (!rawName.endsWith('Cubit') && !rawName.endsWith('Repository') && !rawName.endsWith('Test')) {
+        if (!rawName.endsWith('Cubit') &&
+            !rawName.endsWith('Repository') &&
+            !rawName.endsWith('Test')) {
           foundWidget = rawName;
           break;
         }
@@ -277,10 +320,16 @@ class UiErrorTracker {
       final fileMatch = RegExp(r'/([a-z0-9_]+)\.dart').firstMatch(frame);
       if (fileMatch != null) {
         final fileName = fileMatch.group(1)!;
-        if (!fileName.endsWith('_test') && !fileName.endsWith('_cubit') && !fileName.endsWith('_repository')) {
+        if (!fileName.endsWith('_test') &&
+            !fileName.endsWith('_cubit') &&
+            !fileName.endsWith('_repository')) {
           final pascal = fileName
               .split('_')
-              .map((w) => w.isNotEmpty ? '${w[0].toUpperCase()}${w.substring(1)}' : '')
+              .map(
+                (w) => w.isNotEmpty
+                    ? '${w[0].toUpperCase()}${w.substring(1)}'
+                    : '',
+              )
               .join();
           if (pascal.isNotEmpty) {
             foundWidget = pascal;
@@ -292,7 +341,10 @@ class UiErrorTracker {
 
     // 4. Default for layout overflows
     if (isOverflow) {
-      final flexType = (overflowDirection == 'right' || overflowDirection == 'left') ? 'Row' : 'Column';
+      final flexType =
+          (overflowDirection == 'right' || overflowDirection == 'left')
+          ? 'Row'
+          : 'Column';
       if (foundWidget != null && foundWidget.isNotEmpty) {
         return '$flexType (in $foundWidget)';
       }
@@ -321,7 +373,11 @@ class UiErrorTracker {
         final desc = node.toDescription();
         // Flutter often includes creator chains formatted with arrows (←)
         if (desc.contains('←')) {
-          final parts = desc.split('←').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+          final parts = desc
+              .split('←')
+              .map((s) => s.trim())
+              .where((s) => s.isNotEmpty)
+              .toList();
           if (parts.isNotEmpty) {
             // Reverse so it goes Root ➔ Leaf
             for (final part in parts.reversed) {

@@ -58,73 +58,84 @@ void main() {
       expect(absentStudent.engagementQuality, EngagementQuality.noData);
     });
 
-    test('Detects suspicious video watching behavior (Seek cheating / Fast-forward)', () {
-      final now = DateTime.now();
+    test(
+      'Detects suspicious video watching behavior (Seek cheating / Fast-forward)',
+      () {
+        final now = DateTime.now();
 
-      // Normal honest watching: 600s duration, 550s actual watch, 90% watched
-      final honestVideo = StudentVideoInsight(
-        videoId: 'v1',
-        videoTitle: 'SAT Quadratics Deep Dive',
-        durationSeconds: 600,
-        progressSeconds: 540,
-        actualWatchSeconds: 540,
-        percentage: 90.0,
-        completed: true,
-        isSkipped: false,
-        lastWatchedAt: now,
-      );
-      expect(honestVideo.isSuspicious, isFalse);
-      expect(honestVideo.actualWatchMinutes, 9);
-      expect(honestVideo.durationMinutes, 10);
+        // Normal honest watching: 600s duration, 550s actual watch, 90% watched
+        final honestVideo = StudentVideoInsight(
+          videoId: 'v1',
+          videoTitle: 'SAT Quadratics Deep Dive',
+          durationSeconds: 600,
+          progressSeconds: 540,
+          actualWatchSeconds: 540,
+          percentage: 90.0,
+          completed: true,
+          isSkipped: false,
+          lastWatchedAt: now,
+        );
+        expect(honestVideo.isSuspicious, isFalse);
+        expect(honestVideo.actualWatchMinutes, 9);
+        expect(honestVideo.durationMinutes, 10);
 
-      // Suspicious: Flagged as isSkipped by forward scrub detector
-      final skippedVideo = StudentVideoInsight(
-        videoId: 'v2',
-        videoTitle: 'SAT Coordinate Geometry',
-        durationSeconds: 1200,
-        progressSeconds: 1200,
-        actualWatchSeconds: 60, // Watched only 1 minute then jumped to end!
-        percentage: 100.0,
-        completed: true,
-        isSkipped: true,
-        lastWatchedAt: now,
-      );
-      expect(skippedVideo.isSuspicious, isTrue);
+        // Suspicious: Flagged as isSkipped by forward scrub detector
+        final skippedVideo = StudentVideoInsight(
+          videoId: 'v2',
+          videoTitle: 'SAT Coordinate Geometry',
+          durationSeconds: 1200,
+          progressSeconds: 1200,
+          actualWatchSeconds: 60, // Watched only 1 minute then jumped to end!
+          percentage: 100.0,
+          completed: true,
+          isSkipped: true,
+          lastWatchedAt: now,
+        );
+        expect(skippedVideo.isSuspicious, isTrue);
 
-      // Suspicious: Reached 85% progress but actual watch time is < 50% of duration
-      final lowListenVideo = StudentVideoInsight(
-        videoId: 'v3',
-        videoTitle: 'ACT Trigonometry Shortcuts',
-        durationSeconds: 1000,
-        progressSeconds: 850,
-        actualWatchSeconds: 300, // Only 300s of 1000s duration (<50%)
-        percentage: 85.0,
-        completed: true,
-        isSkipped: false,
-        lastWatchedAt: now,
-      );
-      expect(lowListenVideo.isSuspicious, isTrue);
-    });
+        // Suspicious: Reached 85% progress but actual watch time is < 50% of duration
+        final lowListenVideo = StudentVideoInsight(
+          videoId: 'v3',
+          videoTitle: 'ACT Trigonometry Shortcuts',
+          durationSeconds: 1000,
+          progressSeconds: 850,
+          actualWatchSeconds: 300, // Only 300s of 1000s duration (<50%)
+          percentage: 85.0,
+          completed: true,
+          isSkipped: false,
+          lastWatchedAt: now,
+        );
+        expect(lowListenVideo.isSuspicious, isTrue);
+      },
+    );
   });
 
   group('WhatsAppReportGenerator Engagement Integration Tests', () {
-    test('Includes active study minutes and engagement quality in the generated report', () {
-      final report = WhatsAppReportGenerator.generateStudentWeeklyReport(
-        studentName: 'عمر خالد',
-        groupName: 'مجموعة تدريب SAT Advanced',
-        attendanceRate: 1.0,
-        videoWatchRate: 0.90,
-        activeStudyMinutes: 75,
-        engagementQualityText: 'حضور وتفاعل نشط وممتاز',
-        teacherNotes: 'مستوى متميز وحل سريع للمسائل.',
-      );
+    test(
+      'Includes active study minutes and engagement quality in the generated report',
+      () {
+        final report = WhatsAppReportGenerator.generateStudentWeeklyReport(
+          studentName: 'عمر خالد',
+          groupName: 'مجموعة تدريب SAT Advanced',
+          attendanceRate: 1.0,
+          videoWatchRate: 0.90,
+          activeStudyMinutes: 75,
+          engagementQualityText: 'حضور وتفاعل نشط وممتاز',
+          teacherNotes: 'مستوى متميز وحل سريع للمسائل.',
+        );
 
-      expect(report, contains('عمر خالد'));
-      expect(report, contains('مجموعة تدريب SAT Advanced'));
-      expect(report, contains('⏱️ وقت التفاعل والمذاكرة النشط: 75 دقيقة (حضور وتفاعل نشط وممتاز)'));
-      expect(report, contains('🎥 نسبة مشاهدة المحاضرات المسجلة: 90%'));
-      expect(report, contains('د. أنطونيوس أشرف'));
-    });
+        expect(report, contains('عمر خالد'));
+        expect(report, contains('مجموعة تدريب SAT Advanced'));
+        expect(
+          report,
+          contains(
+            '⏱️ وقت التفاعل والمذاكرة النشط: 75 دقيقة (حضور وتفاعل نشط وممتاز)',
+          ),
+        );
+        expect(report, contains('🎥 نسبة مشاهدة المحاضرات المسجلة: 90%'));
+        expect(report, contains('د. أنطونيوس أشرف'));
+      },
+    );
 
     test('Omits engagement line if active study minutes are zero or null', () {
       final report = WhatsAppReportGenerator.generateStudentWeeklyReport(

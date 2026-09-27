@@ -47,12 +47,12 @@ class _GroupCustomizationState {
 class AssignGroupsDialog extends StatefulWidget {
   final ContentEntity content;
 
-  const AssignGroupsDialog({
-    super.key,
-    required this.content,
-  });
+  const AssignGroupsDialog({super.key, required this.content});
 
-  static Future<bool?> show(BuildContext context, {required ContentEntity content}) {
+  static Future<bool?> show(
+    BuildContext context, {
+    required ContentEntity content,
+  }) {
     return showDialog<bool>(
       context: context,
       barrierDismissible: true,
@@ -126,7 +126,8 @@ class _AssignGroupsDialogState extends State<AssignGroupsDialog> {
           prerequisiteExamTitle: pObj?['title'] as String?,
           isSequentialLockEnabled: row['prerequisite_exam_id'] != null,
           sortOrder: (row['sort_order'] as num?)?.toInt() ?? 1,
-          passingScoreOverride: (row['passing_score_override'] as num?)?.toInt(),
+          passingScoreOverride: (row['passing_score_override'] as num?)
+              ?.toInt(),
         );
       }
 
@@ -141,7 +142,9 @@ class _AssignGroupsDialogState extends State<AssignGroupsDialog> {
       for (final ex in (examsRes as List<dynamic>)) {
         final gId = ex['group_id'] as String?;
         if (gId != null) {
-          _groupAvailableExams.putIfAbsent(gId, () => []).add(ex as Map<String, dynamic>);
+          _groupAvailableExams
+              .putIfAbsent(gId, () => [])
+              .add(ex as Map<String, dynamic>);
         }
       }
     } catch (_) {}
@@ -199,28 +202,39 @@ class _AssignGroupsDialogState extends State<AssignGroupsDialog> {
         String? finalFileId = customState.existingFileId;
 
         // Upload custom PDF if picked for this group
-        if (customState.customHandoutFile != null && customState.customHandoutBytes != null) {
+        if (customState.customHandoutFile != null &&
+            customState.customHandoutBytes != null) {
           final timestamp = DateTime.now().millisecondsSinceEpoch;
           final safeName = customState.customHandoutFile!.name
               .toLowerCase()
               .replaceAll(RegExp(r'[^a-z0-9_.-]'), '_');
-          final storagePath = 'group_handouts/${groupId}_${timestamp}_$safeName';
+          final storagePath =
+              'group_handouts/${groupId}_${timestamp}_$safeName';
 
-          await client.storage.from('group-content').uploadBinary(
+          await client.storage
+              .from('group-content')
+              .uploadBinary(
                 storagePath,
                 Uint8List.fromList(customState.customHandoutBytes!),
-                fileOptions: const FileOptions(contentType: 'application/pdf', upsert: true),
+                fileOptions: const FileOptions(
+                  contentType: 'application/pdf',
+                  upsert: true,
+                ),
               );
 
-          final fileRes = await client.from('files').insert({
-            'tenant_id': tenantId,
-            'content_id': widget.content.id,
-            'storage_path': storagePath,
-            'file_name': customState.customHandoutFile!.name,
-            'mime_type': 'application/pdf',
-            'file_size': customState.customHandoutFile!.size,
-            'created_at': DateTime.now().toUtc().toIso8601String(),
-          }).select('id').single();
+          final fileRes = await client
+              .from('files')
+              .insert({
+                'tenant_id': tenantId,
+                'content_id': widget.content.id,
+                'storage_path': storagePath,
+                'file_name': customState.customHandoutFile!.name,
+                'mime_type': 'application/pdf',
+                'file_size': customState.customHandoutFile!.size,
+                'created_at': DateTime.now().toUtc().toIso8601String(),
+              })
+              .select('id')
+              .single();
 
           finalFileId = fileRes['id'] as String;
         }
@@ -229,17 +243,19 @@ class _AssignGroupsDialogState extends State<AssignGroupsDialog> {
           'group_id': groupId,
           'file_id': finalFileId,
           'associated_exam_id': customState.selectedExamId,
-          'prerequisite_exam_id': customState.isSequentialLockEnabled ? customState.prerequisiteExamId : null,
+          'prerequisite_exam_id': customState.isSequentialLockEnabled
+              ? customState.prerequisiteExamId
+              : null,
           'sort_order': customState.sortOrder,
           'passing_score_override': customState.passingScoreOverride,
         });
       }
 
       final success = await contentCubit.assignContentToGroups(
-            contentId: widget.content.id,
-            groupIds: _selectedGroupIds.toList(),
-            groupConfigs: groupConfigs,
-          );
+        contentId: widget.content.id,
+        groupIds: _selectedGroupIds.toList(),
+        groupConfigs: groupConfigs,
+      );
 
       if (!mounted) return;
       setState(() => _isSaving = false);
@@ -247,10 +263,7 @@ class _AssignGroupsDialogState extends State<AssignGroupsDialog> {
       if (success) {
         final msg = context.l10n.groupAssignmentSuccess;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(msg),
-            backgroundColor: AppColors.success,
-          ),
+          SnackBar(content: Text(msg), backgroundColor: AppColors.success),
         );
         Navigator.of(context).pop(true);
       }
@@ -258,7 +271,10 @@ class _AssignGroupsDialogState extends State<AssignGroupsDialog> {
       if (mounted) {
         setState(() => _isSaving = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString()), backgroundColor: AppColors.error),
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: AppColors.error,
+          ),
         );
       }
     }
@@ -344,14 +360,18 @@ class _AssignGroupsDialogState extends State<AssignGroupsDialog> {
                     : BlocBuilder<GroupsCubit, GroupsState>(
                         builder: (context, state) {
                           if (state is GroupsLoading) {
-                            return const Center(child: AppLoadingView.compact(size: 32));
+                            return const Center(
+                              child: AppLoadingView.compact(size: 32),
+                            );
                           }
 
                           if (state is GroupsError) {
                             return Center(
                               child: Text(
                                 state.message,
-                                style: theme.textTheme.bodyMedium?.copyWith(color: AppColors.error),
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: AppColors.error,
+                                ),
                               ),
                             );
                           }
@@ -372,12 +392,18 @@ class _AssignGroupsDialogState extends State<AssignGroupsDialog> {
                             return ListView.separated(
                               shrinkWrap: true,
                               itemCount: groups.length,
-                              separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.s8),
+                              separatorBuilder: (_, __) =>
+                                  const SizedBox(height: AppSpacing.s8),
                               itemBuilder: (context, index) {
                                 final group = groups[index];
-                                final isSelected = _selectedGroupIds.contains(group.id);
-                                final customState = _getOrCreateGroupState(group.id);
-                                final availableExams = _groupAvailableExams[group.id] ?? [];
+                                final isSelected = _selectedGroupIds.contains(
+                                  group.id,
+                                );
+                                final customState = _getOrCreateGroupState(
+                                  group.id,
+                                );
+                                final availableExams =
+                                    _groupAvailableExams[group.id] ?? [];
 
                                 return _SmartGroupCard(
                                   group: group,
@@ -393,7 +419,8 @@ class _AssignGroupsDialogState extends State<AssignGroupsDialog> {
                                       }
                                     });
                                   },
-                                  onPickHandout: () => _pickHandoutForGroup(group.id),
+                                  onPickHandout: () =>
+                                      _pickHandoutForGroup(group.id),
                                   onExamChanged: (examId, examTitle) {
                                     setState(() {
                                       customState.selectedExamId = examId;
@@ -402,13 +429,15 @@ class _AssignGroupsDialogState extends State<AssignGroupsDialog> {
                                   },
                                   onLockToggled: (enabled) {
                                     setState(() {
-                                      customState.isSequentialLockEnabled = enabled;
+                                      customState.isSequentialLockEnabled =
+                                          enabled;
                                     });
                                   },
                                   onPrereqExamChanged: (examId, examTitle) {
                                     setState(() {
                                       customState.prerequisiteExamId = examId;
-                                      customState.prerequisiteExamTitle = examTitle;
+                                      customState.prerequisiteExamTitle =
+                                          examTitle;
                                     });
                                   },
                                   onSortOrderChanged: (val) {
@@ -436,7 +465,9 @@ class _AssignGroupsDialogState extends State<AssignGroupsDialog> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
-                    onPressed: _isSaving ? null : () => Navigator.of(context).pop(false),
+                    onPressed: _isSaving
+                        ? null
+                        : () => Navigator.of(context).pop(false),
                     child: Text(
                       MaterialLocalizations.of(context).cancelButtonLabel,
                       style: const TextStyle(color: AppColors.textSecondary),
@@ -508,7 +539,9 @@ class _SmartGroupCard extends StatelessWidget {
                     value: isSelected,
                     onChanged: onSelectionChanged,
                     activeColor: AppColors.primary,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
                   ),
                   const SizedBox(width: AppSpacing.s8),
                   Expanded(
@@ -519,7 +552,9 @@ class _SmartGroupCard extends StatelessWidget {
                           group.name,
                           style: theme.textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: isSelected ? AppColors.primary : AppColors.textPrimary,
+                            color: isSelected
+                                ? AppColors.primary
+                                : AppColors.textPrimary,
                           ),
                         ),
                         if (group.level.isNotEmpty)
@@ -534,14 +569,20 @@ class _SmartGroupCard extends StatelessWidget {
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.surfaceVariant.withValues(alpha: 0.5),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       l10n.enrolledStudentsCountLabel(group.membersCount),
-                      style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ),
                 ],
@@ -561,11 +602,18 @@ class _SmartGroupCard extends StatelessWidget {
                   // 1. Group-specific PDF Handout
                   Row(
                     children: [
-                      const Icon(Icons.picture_as_pdf_rounded, size: 16, color: Color(0xFFEA580C)),
+                      const Icon(
+                        Icons.picture_as_pdf_rounded,
+                        size: 16,
+                        color: Color(0xFFEA580C),
+                      ),
                       const SizedBox(width: 6),
                       Text(
                         l10n.groupHandoutPdfLabel,
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ],
                   ),
@@ -574,7 +622,10 @@ class _SmartGroupCard extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 8,
+                          ),
                           decoration: BoxDecoration(
                             color: AppColors.surface,
                             borderRadius: BorderRadius.circular(8),
@@ -584,11 +635,13 @@ class _SmartGroupCard extends StatelessWidget {
                             customState.customHandoutFile != null
                                 ? customState.customHandoutFile!.name
                                 : customState.existingFileName != null
-                                    ? customState.existingFileName!
-                                    : l10n.uploadPdfFileTitle,
+                                ? customState.existingFileName!
+                                : l10n.uploadPdfFileTitle,
                             style: TextStyle(
                               fontSize: 12,
-                              color: (customState.customHandoutFile != null || customState.existingFileName != null)
+                              color:
+                                  (customState.customHandoutFile != null ||
+                                      customState.existingFileName != null)
                                   ? AppColors.textPrimary
                                   : AppColors.textMuted,
                             ),
@@ -606,7 +659,10 @@ class _SmartGroupCard extends StatelessWidget {
                           style: const TextStyle(fontSize: 11),
                         ),
                         style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 8,
+                          ),
                         ),
                       ),
                     ],
@@ -616,21 +672,34 @@ class _SmartGroupCard extends StatelessWidget {
                   // 2. Group-specific Lesson Quiz
                   Row(
                     children: [
-                      const Icon(Icons.quiz_rounded, size: 16, color: Color(0xFF6366F1)),
+                      const Icon(
+                        Icons.quiz_rounded,
+                        size: 16,
+                        color: Color(0xFF6366F1),
+                      ),
                       const SizedBox(width: 6),
                       Text(
                         l10n.groupExamLabel,
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 6),
                   DropdownButtonFormField<String?>(
-                    value: availableExams.any((e) => e['id'] == customState.selectedExamId)
+                    value:
+                        availableExams.any(
+                          (e) => e['id'] == customState.selectedExamId,
+                        )
                         ? customState.selectedExamId
                         : null,
                     decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 8,
+                      ),
                       filled: true,
                       fillColor: AppColors.surface,
                       border: OutlineInputBorder(
@@ -638,11 +707,17 @@ class _SmartGroupCard extends StatelessWidget {
                         borderSide: const BorderSide(color: AppColors.border),
                       ),
                     ),
-                    hint: Text(l10n.noExamSelected, style: const TextStyle(fontSize: 12)),
+                    hint: Text(
+                      l10n.noExamSelected,
+                      style: const TextStyle(fontSize: 12),
+                    ),
                     items: [
                       DropdownMenuItem<String?>(
                         value: null,
-                        child: Text(l10n.noExamSelected, style: const TextStyle(fontSize: 12)),
+                        child: Text(
+                          l10n.noExamSelected,
+                          style: const TextStyle(fontSize: 12),
+                        ),
                       ),
                       ...availableExams.map((ex) {
                         return DropdownMenuItem<String?>(
@@ -657,9 +732,11 @@ class _SmartGroupCard extends StatelessWidget {
                       }),
                     ],
                     onChanged: (val) {
-                      final selectedTitle = availableExams
-                          .where((e) => e['id'] == val)
-                          .firstOrNull?['title'] as String?;
+                      final selectedTitle =
+                          availableExams
+                                  .where((e) => e['id'] == val)
+                                  .firstOrNull?['title']
+                              as String?;
                       onExamChanged(val, selectedTitle);
                     },
                   ),
@@ -677,7 +754,10 @@ class _SmartGroupCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           l10n.lockUntilPreviousQuizPassed,
-                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ],
@@ -686,25 +766,39 @@ class _SmartGroupCard extends StatelessWidget {
                   // 4. Passing Score Override
                   Row(
                     children: [
-                      const Icon(Icons.score_rounded, size: 16, color: Colors.amber),
+                      const Icon(
+                        Icons.score_rounded,
+                        size: 16,
+                        color: Colors.amber,
+                      ),
                       const SizedBox(width: 6),
                       Text(
                         l10n.passingScoreOverride,
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: TextFormField(
-                          initialValue: customState.passingScoreOverride?.toString() ?? '',
+                          initialValue:
+                              customState.passingScoreOverride?.toString() ??
+                              '',
                           keyboardType: TextInputType.number,
                           decoration: InputDecoration(
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 8,
+                            ),
                             filled: true,
                             fillColor: AppColors.surface,
                             hintText: l10n.passingScoreDefaultHint,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
-                              borderSide: const BorderSide(color: AppColors.border),
+                              borderSide: const BorderSide(
+                                color: AppColors.border,
+                              ),
                             ),
                           ),
                           onChanged: (val) {
