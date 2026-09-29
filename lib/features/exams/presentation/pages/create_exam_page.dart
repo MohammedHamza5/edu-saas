@@ -9,6 +9,7 @@ import '../../../../core/widgets/app_text_field.dart';
 import '../../domain/entities/exam_entity.dart';
 import '../cubit/exams_cubit.dart';
 import '../cubit/exams_state.dart';
+import '../widgets/exam_image_attachment_box.dart';
 import '../widgets/question_bank_picker_sheet.dart';
 import '../../../question_bank/domain/entities/question_revision_entity.dart';
 
@@ -25,9 +26,13 @@ class CreateExamPage extends StatefulWidget {
 class _DraftOption {
   final TextEditingController controller;
   bool isCorrect;
+  String? imageUrl;
+  Map<String, dynamic>? imageMeta;
 
-  _DraftOption({String text = '', this.isCorrect = false})
-    : controller = TextEditingController(text: text);
+  _DraftOption({
+    String text = '',
+    this.isCorrect = false,
+  }) : controller = TextEditingController(text: text);
 
   void dispose() {
     controller.dispose();
@@ -44,6 +49,9 @@ class _DraftQuestion {
   bool trueFalseAnswer =
       true; // true = OptionTrue is correct, false = OptionFalse is correct
   late List<_DraftOption> options;
+  String? imageUrl;
+  Map<String, dynamic>? imageMeta;
+  String? contextId;
 
   _DraftQuestion() {
     options = [
@@ -304,6 +312,8 @@ class _CreateExamPageState extends State<CreateExamPage> {
                 optionText: optEntry.value.controller.text.trim(),
                 sortOrder: optEntry.key + 1,
                 isCorrect: optEntry.value.isCorrect,
+                imageUrl: optEntry.value.imageUrl,
+                imageMeta: optEntry.value.imageMeta,
               );
             })
             .toList();
@@ -317,6 +327,9 @@ class _CreateExamPageState extends State<CreateExamPage> {
         points: q.points,
         sortOrder: idx + 1,
         options: optionsList,
+        imageUrl: q.imageUrl,
+        imageMeta: q.imageMeta,
+        contextId: q.contextId,
       );
     }).toList();
 
@@ -841,6 +854,19 @@ class _CreateExamPageState extends State<CreateExamPage> {
                                   );
                                 }
                                 return null;
+                              },
+                            ),
+                            const SizedBox(height: AppSpacing.s12),
+
+                            // Question Image / Screenshot Attachment Box
+                            ExamImageAttachmentBox(
+                              initialImageUrl: q.imageUrl,
+                              initialImageMeta: q.imageMeta,
+                              onChanged: (data) {
+                                setState(() {
+                                  q.imageUrl = data.imageUrl;
+                                  q.imageMeta = data.imageMeta;
+                                });
                               },
                             ),
                             const SizedBox(height: AppSpacing.s16),

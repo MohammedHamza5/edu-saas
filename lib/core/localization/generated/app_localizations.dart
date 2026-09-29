@@ -10914,6 +10914,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Diagram / Illustration'**
   String get diagramLabel;
+
+  /// No description provided for @cropRatioFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get cropRatioFree;
+
+  /// No description provided for @cropImageDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Crop & Rotate Image'**
+  String get cropImageDialogTitle;
+
+  /// No description provided for @rotate90Action.
+  ///
+  /// In en, this message translates to:
+  /// **'Rotate 90°'**
+  String get rotate90Action;
+
+  /// No description provided for @applyCropAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply & Save'**
+  String get applyCropAction;
+
+  /// No description provided for @uploadingImageToCloud.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading image to cloud storage...'**
+  String get uploadingImageToCloud;
+
+  /// No description provided for @failedToLoadImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load image'**
+  String get failedToLoadImage;
+
+  /// No description provided for @imageAlignmentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Alignment:'**
+  String get imageAlignmentLabel;
+
+  /// No description provided for @imageWidthLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Width:'**
+  String get imageWidthLabel;
+
+  /// No description provided for @removeImageAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove image'**
+  String get removeImageAction;
+
+  /// No description provided for @attachImageOrScreenshotTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach image or screenshot (Ctrl + V)'**
+  String get attachImageOrScreenshotTitle;
+
+  /// No description provided for @attachImageOrScreenshotSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag and drop, browse files, or press Ctrl+V after taking a screenshot'**
+  String get attachImageOrScreenshotSubtitle;
+
+  /// No description provided for @browseAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse'**
+  String get browseAction;
+
+  /// No description provided for @pasteScreenshotTip.
+  ///
+  /// In en, this message translates to:
+  /// **'To paste a screenshot, copy it to clipboard (Win+Shift+S) then choose a file or paste directly.'**
+  String get pasteScreenshotTip;
+
+  /// No description provided for @imageUploadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to upload image: {error}'**
+  String imageUploadFailed(String error);
 }
 
 class _AppLocalizationsDelegate

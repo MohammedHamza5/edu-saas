@@ -250,6 +250,15 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
             status,
             created_at,
             published_at,
+            exam_contexts(
+              id,
+              exam_version_id,
+              title,
+              context_text,
+              image_url,
+              image_meta,
+              sort_order
+            ),
             exam_questions(
               id,
               exam_version_id,
@@ -257,8 +266,13 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
               question_type,
               points,
               sort_order,
+              image_url,
+              image_meta,
+              context_id,
               question_options(
-                $optionsFields
+                $optionsFields,
+                image_url,
+                image_meta
               )
             )
           )
@@ -357,6 +371,9 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
             'question_type': q.questionType.value,
             'points': q.points,
             'sort_order': i + 1,
+            if (q.imageUrl != null) 'image_url': q.imageUrl,
+            if (q.imageMeta != null) 'image_meta': q.imageMeta,
+            if (q.contextId != null) 'context_id': q.contextId,
           })
           .select('id')
           .single();
@@ -372,6 +389,8 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
             'option_text': opt.optionText,
             'sort_order': j + 1,
             'is_correct': opt.isCorrect ?? false,
+            if (opt.imageUrl != null) 'image_url': opt.imageUrl,
+            if (opt.imageMeta != null) 'image_meta': opt.imageMeta,
           };
         }).toList();
         await _safeClient.from('question_options').insert(optionsPayload);

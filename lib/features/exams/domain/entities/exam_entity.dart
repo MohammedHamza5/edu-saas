@@ -166,6 +166,8 @@ class QuestionOptionEntity extends Equatable {
   final String optionText;
   final int sortOrder;
   final bool? isCorrect; // Hidden from student responses
+  final String? imageUrl;
+  final Map<String, dynamic>? imageMeta;
 
   const QuestionOptionEntity({
     required this.id,
@@ -173,6 +175,8 @@ class QuestionOptionEntity extends Equatable {
     required this.optionText,
     this.sortOrder = 0,
     this.isCorrect,
+    this.imageUrl,
+    this.imageMeta,
   });
 
   QuestionOptionEntity copyWith({
@@ -181,6 +185,8 @@ class QuestionOptionEntity extends Equatable {
     String? optionText,
     int? sortOrder,
     bool? isCorrect,
+    String? imageUrl,
+    Map<String, dynamic>? imageMeta,
   }) {
     return QuestionOptionEntity(
       id: id ?? this.id,
@@ -188,11 +194,52 @@ class QuestionOptionEntity extends Equatable {
       optionText: optionText ?? this.optionText,
       sortOrder: sortOrder ?? this.sortOrder,
       isCorrect: isCorrect ?? this.isCorrect,
+      imageUrl: imageUrl ?? this.imageUrl,
+      imageMeta: imageMeta ?? this.imageMeta,
     );
   }
 
   @override
-  List<Object?> get props => [id, questionId, optionText, sortOrder, isCorrect];
+  List<Object?> get props => [
+    id,
+    questionId,
+    optionText,
+    sortOrder,
+    isCorrect,
+    imageUrl,
+    imageMeta,
+  ];
+}
+
+class ExamContextEntity extends Equatable {
+  final String id;
+  final String examVersionId;
+  final String? title;
+  final String? contextText;
+  final String? imageUrl;
+  final Map<String, dynamic>? imageMeta;
+  final int sortOrder;
+
+  const ExamContextEntity({
+    required this.id,
+    required this.examVersionId,
+    this.title,
+    this.contextText,
+    this.imageUrl,
+    this.imageMeta,
+    this.sortOrder = 0,
+  });
+
+  @override
+  List<Object?> get props => [
+    id,
+    examVersionId,
+    title,
+    contextText,
+    imageUrl,
+    imageMeta,
+    sortOrder,
+  ];
 }
 
 class ExamQuestionEntity extends Equatable {
@@ -203,6 +250,9 @@ class ExamQuestionEntity extends Equatable {
   final int points;
   final int sortOrder;
   final List<QuestionOptionEntity> options;
+  final String? imageUrl;
+  final Map<String, dynamic>? imageMeta;
+  final String? contextId;
 
   const ExamQuestionEntity({
     required this.id,
@@ -212,6 +262,9 @@ class ExamQuestionEntity extends Equatable {
     this.points = 1,
     this.sortOrder = 0,
     this.options = const [],
+    this.imageUrl,
+    this.imageMeta,
+    this.contextId,
   });
 
   ExamQuestionEntity copyWith({
@@ -222,6 +275,9 @@ class ExamQuestionEntity extends Equatable {
     int? points,
     int? sortOrder,
     List<QuestionOptionEntity>? options,
+    String? imageUrl,
+    Map<String, dynamic>? imageMeta,
+    String? contextId,
   }) {
     return ExamQuestionEntity(
       id: id ?? this.id,
@@ -231,6 +287,9 @@ class ExamQuestionEntity extends Equatable {
       points: points ?? this.points,
       sortOrder: sortOrder ?? this.sortOrder,
       options: options ?? this.options,
+      imageUrl: imageUrl ?? this.imageUrl,
+      imageMeta: imageMeta ?? this.imageMeta,
+      contextId: contextId ?? this.contextId,
     );
   }
 
@@ -243,6 +302,9 @@ class ExamQuestionEntity extends Equatable {
     points,
     sortOrder,
     options,
+    imageUrl,
+    imageMeta,
+    contextId,
   ];
 }
 
@@ -254,6 +316,7 @@ class ExamVersionEntity extends Equatable {
   final DateTime createdAt;
   final DateTime? publishedAt;
   final List<ExamQuestionEntity> questions;
+  final List<ExamContextEntity> contexts;
 
   const ExamVersionEntity({
     required this.id,
@@ -263,6 +326,7 @@ class ExamVersionEntity extends Equatable {
     required this.createdAt,
     this.publishedAt,
     this.questions = const [],
+    this.contexts = const [],
   });
 
   bool get isPublished => status == ExamStatus.published;
@@ -278,6 +342,7 @@ class ExamVersionEntity extends Equatable {
     DateTime? createdAt,
     DateTime? publishedAt,
     List<ExamQuestionEntity>? questions,
+    List<ExamContextEntity>? contexts,
   }) {
     return ExamVersionEntity(
       id: id ?? this.id,
@@ -287,6 +352,7 @@ class ExamVersionEntity extends Equatable {
       createdAt: createdAt ?? this.createdAt,
       publishedAt: publishedAt ?? this.publishedAt,
       questions: questions ?? this.questions,
+      contexts: contexts ?? this.contexts,
     );
   }
 
@@ -299,6 +365,7 @@ class ExamVersionEntity extends Equatable {
     createdAt,
     publishedAt,
     questions,
+    contexts,
   ];
 }
 

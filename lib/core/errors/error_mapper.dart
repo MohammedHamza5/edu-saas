@@ -40,8 +40,9 @@ class UserFriendlyError {
   /// Evaluates the localized description using the current context.
   String message(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    if (l10n == null)
+    if (l10n == null) {
       return rawError?.toString() ?? 'An unexpected error occurred.';
+    }
     return messageBuilder(l10n);
   }
 

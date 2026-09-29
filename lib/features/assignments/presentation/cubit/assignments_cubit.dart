@@ -36,8 +36,9 @@ class AssignmentsCubit extends Cubit<AssignmentsState> {
           hasMore: cached.length >= _pageSize,
         ),
       );
-      if (!forceRefresh && AppCache.assignments.has(cacheKey))
+      if (!forceRefresh && AppCache.assignments.has(cacheKey)) {
         return; // Fresh cache, skip network
+      }
     } else {
       emit(const AssignmentsLoading());
     }
@@ -74,8 +75,9 @@ class AssignmentsCubit extends Cubit<AssignmentsState> {
     if (currentState is! TeacherAssignmentsLoaded) return;
     if (!currentState.hasMore ||
         currentState.isLoadingMore ||
-        currentState.groupId == null)
+        currentState.groupId == null) {
       return;
+    }
 
     emit(currentState.copyWith(isLoadingMore: true));
     final nextPage = _teacherPage + 1;
@@ -270,8 +272,9 @@ class AssignmentsCubit extends Cubit<AssignmentsState> {
           ),
         );
       }
-      if (!forceRefresh && AppCache.assignments.has(cacheKey))
+      if (!forceRefresh && AppCache.assignments.has(cacheKey)) {
         return; // Fresh cache, skip network
+      }
     } else {
       emit(const AssignmentsLoading());
     }

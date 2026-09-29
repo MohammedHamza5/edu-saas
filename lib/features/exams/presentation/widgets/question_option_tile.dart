@@ -98,15 +98,33 @@ class QuestionOptionTile extends StatelessWidget {
             ),
             const SizedBox(width: AppSpacing.s12),
 
-            // Option text
+            // Option text and optional image
             Expanded(
-              child: Text(
-                option.optionText,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                  color: AppColors.textPrimary,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (option.optionText.isNotEmpty)
+                    Text(
+                      option.optionText,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  if (option.imageUrl != null && option.imageUrl!.isNotEmpty) ...[
+                    if (option.optionText.isNotEmpty) const SizedBox(height: 6),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                      child: Image.network(
+                        option.imageUrl!,
+                        height: 90,
+                        fit: BoxFit.contain,
+                        errorBuilder: (ctx, _, __) => const SizedBox.shrink(),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
 

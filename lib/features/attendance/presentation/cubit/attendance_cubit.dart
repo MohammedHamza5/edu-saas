@@ -35,8 +35,9 @@ class AttendanceCubit extends Cubit<AttendanceState> {
           students: cached,
         ),
       );
-      if (!forceRefresh && AppCache.attendance.has(cacheKey))
+      if (!forceRefresh && AppCache.attendance.has(cacheKey)) {
         return; // Fresh cache, skip network
+      }
     } else {
       emit(const AttendanceLoading());
     }

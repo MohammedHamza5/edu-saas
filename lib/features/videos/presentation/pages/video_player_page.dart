@@ -377,8 +377,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   }
 
   Widget _buildSequentialNavigationBar(ThemeData theme) {
-    if (_courseLessons.isEmpty && widget.lessonIndex == null)
+    if (_courseLessons.isEmpty && widget.lessonIndex == null) {
       return const SizedBox.shrink();
+    }
 
     final currentIndex = _courseLessons.isNotEmpty
         ? _courseLessons.indexWhere((l) => l.contentId == widget.videoId)

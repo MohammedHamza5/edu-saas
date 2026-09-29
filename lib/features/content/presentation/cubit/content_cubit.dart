@@ -82,8 +82,9 @@ class ContentCubit extends Cubit<ContentState> {
     if (currentState is! ContentLoaded) return;
     if (!currentState.hasMore ||
         currentState.isLoadingMore ||
-        _currentGroupId == null)
+        _currentGroupId == null) {
       return;
+    }
 
     emit(currentState.copyWith(isLoadingMore: true));
     final nextPage = _currentPage + 1;

@@ -6106,4 +6106,51 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get diagramLabel => 'Diagram / Illustration';
+
+  @override
+  String get cropRatioFree => 'Free';
+
+  @override
+  String get cropImageDialogTitle => 'Crop & Rotate Image';
+
+  @override
+  String get rotate90Action => 'Rotate 90°';
+
+  @override
+  String get applyCropAction => 'Apply & Save';
+
+  @override
+  String get uploadingImageToCloud => 'Uploading image to cloud storage...';
+
+  @override
+  String get failedToLoadImage => 'Failed to load image';
+
+  @override
+  String get imageAlignmentLabel => 'Alignment:';
+
+  @override
+  String get imageWidthLabel => 'Width:';
+
+  @override
+  String get removeImageAction => 'Remove image';
+
+  @override
+  String get attachImageOrScreenshotTitle =>
+      'Attach image or screenshot (Ctrl + V)';
+
+  @override
+  String get attachImageOrScreenshotSubtitle =>
+      'Drag and drop, browse files, or press Ctrl+V after taking a screenshot';
+
+  @override
+  String get browseAction => 'Browse';
+
+  @override
+  String get pasteScreenshotTip =>
+      'To paste a screenshot, copy it to clipboard (Win+Shift+S) then choose a file or paste directly.';
+
+  @override
+  String imageUploadFailed(String error) {
+    return 'Failed to upload image: $error';
+  }
 }

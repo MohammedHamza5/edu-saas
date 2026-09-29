@@ -7,6 +7,7 @@ import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_loading_view.dart';
 import '../cubit/exams_cubit.dart';
 import '../cubit/exams_state.dart';
+import '../widgets/exam_image_viewer.dart';
 import '../widgets/question_option_tile.dart';
 import '../widgets/sat_exam_tools_sheet.dart';
 import 'exam_result_page.dart';
@@ -334,6 +335,16 @@ class ExamTakingPage extends StatelessWidget {
                                   height: 1.4,
                                 ),
                               ),
+                              if (question.imageUrl != null &&
+                                  question.imageUrl!.isNotEmpty)
+                                ExamImageViewer(
+                                  imageUrl: question.imageUrl!,
+                                  imageMeta: question.imageMeta,
+                                  caption: context.l10n.questionProgress(
+                                    qIndex + 1,
+                                    state.totalQuestions,
+                                  ),
+                                ),
                             ],
                           ),
                         ),

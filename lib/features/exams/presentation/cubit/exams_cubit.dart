@@ -49,8 +49,9 @@ class ExamsCubit extends Cubit<ExamsState> {
           hasMore: cached.length >= _pageSize,
         ),
       );
-      if (!forceRefresh && AppCache.exams.has(cacheKey))
+      if (!forceRefresh && AppCache.exams.has(cacheKey)) {
         return; // Fresh cache, skip network
+      }
     } else {
       emit(const ExamsLoading());
     }
@@ -87,8 +88,9 @@ class ExamsCubit extends Cubit<ExamsState> {
     if (currentState is! TeacherExamsLoaded) return;
     if (!currentState.hasMore ||
         currentState.isLoadingMore ||
-        currentState.groupId == null)
+        currentState.groupId == null) {
       return;
+    }
 
     emit(currentState.copyWith(isLoadingMore: true));
     final nextPage = _teacherPage + 1;
@@ -281,8 +283,9 @@ class ExamsCubit extends Cubit<ExamsState> {
           ),
         );
       }
-      if (!forceRefresh && AppCache.exams.has(cacheKey))
+      if (!forceRefresh && AppCache.exams.has(cacheKey)) {
         return; // Fresh cache, skip network
+      }
     } else {
       emit(const ExamsLoading());
     }

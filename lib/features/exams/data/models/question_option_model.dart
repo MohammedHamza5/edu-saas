@@ -7,6 +7,8 @@ class QuestionOptionModel extends QuestionOptionEntity {
     required super.optionText,
     super.sortOrder,
     super.isCorrect,
+    super.imageUrl,
+    super.imageMeta,
   });
 
   factory QuestionOptionModel.fromJson(Map<String, dynamic> json) {
@@ -16,6 +18,8 @@ class QuestionOptionModel extends QuestionOptionEntity {
       optionText: json['option_text'] as String? ?? '',
       sortOrder: (json['sort_order'] as num?)?.toInt() ?? 0,
       isCorrect: json['is_correct'] as bool?,
+      imageUrl: json['image_url'] as String?,
+      imageMeta: json['image_meta'] as Map<String, dynamic>?,
     );
   }
 
@@ -26,6 +30,8 @@ class QuestionOptionModel extends QuestionOptionEntity {
       'option_text': optionText,
       'sort_order': sortOrder,
       if (isCorrect != null) 'is_correct': isCorrect,
+      if (imageUrl != null) 'image_url': imageUrl,
+      if (imageMeta != null) 'image_meta': imageMeta,
     };
   }
 }

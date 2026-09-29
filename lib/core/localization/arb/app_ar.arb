@@ -2074,5 +2074,19 @@
   "stemNotExtracted": "لم يتم استخراج نص السؤال بعد",
   "aiEnrichedBadge": "مُحسّن بالذكاء الاصطناعي",
   "editStemAction": "تعديل نص السؤال",
-  "diagramLabel": "رسم توضيحي / بياني"
+  "diagramLabel": "رسم توضيحي / بياني",
+  "cropRatioFree": "حر",
+  "cropImageDialogTitle": "قص وتدوير الصورة",
+  "rotate90Action": "تدوير 90°",
+  "applyCropAction": "تأكيد وحفظ",
+  "uploadingImageToCloud": "جاري رفع الصورة إلى التخزين السحابي...",
+  "failedToLoadImage": "تعذر تحميل الصورة",
+  "imageAlignmentLabel": "المحاذاة:",
+  "imageWidthLabel": "الحجم:",
+  "removeImageAction": "حذف الصورة",
+  "attachImageOrScreenshotTitle": "إرفاق صورة أو لقطة شاشة (Ctrl + V)",
+  "attachImageOrScreenshotSubtitle": "اسحب الصورة هنا أو استعرض الملفات أو اضغط Ctrl+V بعد أخذ لقطة الشاشة",
+  "browseAction": "استعراض",
+  "pasteScreenshotTip": "للصق لقطة الشاشة، التقط الشاشة بـ Win+Shift+S ثم اختر الصورة أو الصقها مباشرة",
+  "imageUploadFailed": "فشل رفع الصورة: {error}"
 }

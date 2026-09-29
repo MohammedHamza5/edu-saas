@@ -31,8 +31,9 @@ class LocaleCubit extends Cubit<Locale> {
   }
 
   Future<void> setLocale(Locale newLocale) async {
-    if (newLocale.languageCode != 'en' && newLocale.languageCode != 'ar')
+    if (newLocale.languageCode != 'en' && newLocale.languageCode != 'ar') {
       return;
+    }
     if (state == newLocale) return;
 
     emit(newLocale);

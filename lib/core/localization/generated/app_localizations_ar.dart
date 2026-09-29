@@ -6065,4 +6065,51 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get diagramLabel => 'رسم توضيحي / بياني';
+
+  @override
+  String get cropRatioFree => 'حر';
+
+  @override
+  String get cropImageDialogTitle => 'قص وتدوير الصورة';
+
+  @override
+  String get rotate90Action => 'تدوير 90°';
+
+  @override
+  String get applyCropAction => 'تأكيد وحفظ';
+
+  @override
+  String get uploadingImageToCloud => 'جاري رفع الصورة إلى التخزين السحابي...';
+
+  @override
+  String get failedToLoadImage => 'تعذر تحميل الصورة';
+
+  @override
+  String get imageAlignmentLabel => 'المحاذاة:';
+
+  @override
+  String get imageWidthLabel => 'الحجم:';
+
+  @override
+  String get removeImageAction => 'حذف الصورة';
+
+  @override
+  String get attachImageOrScreenshotTitle =>
+      'إرفاق صورة أو لقطة شاشة (Ctrl + V)';
+
+  @override
+  String get attachImageOrScreenshotSubtitle =>
+      'اسحب الصورة هنا أو استعرض الملفات أو اضغط Ctrl+V بعد أخذ لقطة الشاشة';
+
+  @override
+  String get browseAction => 'استعراض';
+
+  @override
+  String get pasteScreenshotTip =>
+      'للصق لقطة الشاشة، التقط الشاشة بـ Win+Shift+S ثم اختر الصورة أو الصقها مباشرة';
+
+  @override
+  String imageUploadFailed(String error) {
+    return 'فشل رفع الصورة: $error';
+  }
 }

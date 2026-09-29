@@ -1,4 +1,5 @@
 import '../../domain/entities/exam_entity.dart';
+import 'exam_context_model.dart';
 import 'exam_question_model.dart';
 
 class ExamVersionModel extends ExamVersionEntity {
@@ -10,6 +11,7 @@ class ExamVersionModel extends ExamVersionEntity {
     required super.createdAt,
     super.publishedAt,
     super.questions,
+    super.contexts,
   });
 
   factory ExamVersionModel.fromJson(Map<String, dynamic> json) {
@@ -19,6 +21,13 @@ class ExamVersionModel extends ExamVersionEntity {
             ?.map((q) => ExamQuestionModel.fromJson(q as Map<String, dynamic>))
             .toList() ??
         <ExamQuestionModel>[];
+
+    final rawContexts = json['contexts'] ?? json['exam_contexts'];
+    final contextsList =
+        (rawContexts as List<dynamic>?)
+            ?.map((c) => ExamContextModel.fromJson(c as Map<String, dynamic>))
+            .toList() ??
+        <ExamContextModel>[];
 
     return ExamVersionModel(
       id: json['id'] as String,
@@ -30,6 +39,7 @@ class ExamVersionModel extends ExamVersionEntity {
           ? DateTime.parse(json['published_at'] as String)
           : null,
       questions: questionsList,
+      contexts: contextsList,
     );
   }
 

@@ -7100,5 +7100,39 @@
   "editStemAction": "Edit Question Text",
   "@editStemAction": {},
   "diagramLabel": "Diagram / Illustration",
-  "@diagramLabel": {}
+  "@diagramLabel": {},
+  "cropRatioFree": "Free",
+  "@cropRatioFree": {},
+  "cropImageDialogTitle": "Crop & Rotate Image",
+  "@cropImageDialogTitle": {},
+  "rotate90Action": "Rotate 90°",
+  "@rotate90Action": {},
+  "applyCropAction": "Apply & Save",
+  "@applyCropAction": {},
+  "uploadingImageToCloud": "Uploading image to cloud storage...",
+  "@uploadingImageToCloud": {},
+  "failedToLoadImage": "Failed to load image",
+  "@failedToLoadImage": {},
+  "imageAlignmentLabel": "Alignment:",
+  "@imageAlignmentLabel": {},
+  "imageWidthLabel": "Width:",
+  "@imageWidthLabel": {},
+  "removeImageAction": "Remove image",
+  "@removeImageAction": {},
+  "attachImageOrScreenshotTitle": "Attach image or screenshot (Ctrl + V)",
+  "@attachImageOrScreenshotTitle": {},
+  "attachImageOrScreenshotSubtitle": "Drag and drop, browse files, or press Ctrl+V after taking a screenshot",
+  "@attachImageOrScreenshotSubtitle": {},
+  "browseAction": "Browse",
+  "@browseAction": {},
+  "pasteScreenshotTip": "To paste a screenshot, copy it to clipboard (Win+Shift+S) then choose a file or paste directly.",
+  "@pasteScreenshotTip": {},
+  "imageUploadFailed": "Failed to upload image: {error}",
+  "@imageUploadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 }

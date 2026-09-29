@@ -10,6 +10,9 @@ class ExamQuestionModel extends ExamQuestionEntity {
     super.points,
     super.sortOrder,
     super.options,
+    super.imageUrl,
+    super.imageMeta,
+    super.contextId,
   });
 
   factory ExamQuestionModel.fromJson(Map<String, dynamic> json) {
@@ -32,6 +35,9 @@ class ExamQuestionModel extends ExamQuestionEntity {
       points: (json['points'] as num?)?.toInt() ?? 1,
       sortOrder: (json['sort_order'] as num?)?.toInt() ?? 0,
       options: optionsList,
+      imageUrl: json['image_url'] as String?,
+      imageMeta: json['image_meta'] as Map<String, dynamic>?,
+      contextId: json['context_id'] as String?,
     );
   }
 
@@ -43,6 +49,9 @@ class ExamQuestionModel extends ExamQuestionEntity {
       'question_type': questionType.value,
       'points': points,
       'sort_order': sortOrder,
+      if (imageUrl != null) 'image_url': imageUrl,
+      if (imageMeta != null) 'image_meta': imageMeta,
+      if (contextId != null) 'context_id': contextId,
     };
   }
 }

@@ -31,8 +31,9 @@ class ResponsiveBuilder extends StatelessWidget {
 
         switch (screenType) {
           case DeviceScreenType.large:
-            if (largeDesktop != null)
+            if (largeDesktop != null) {
               return largeDesktop!(context, constraints);
+            }
             if (desktop != null) return desktop!(context, constraints);
             if (tablet != null) return tablet!(context, constraints);
             return mobile(context, constraints);
