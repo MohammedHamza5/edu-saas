@@ -12,7 +12,7 @@ class ExamImageUploadService {
 
   /// Uploads an exam image (crop, screenshot, or picked file)
   /// Primary target: Cloudflare R2 via `r2-storage` Edge Function.
-  /// Fallback: Supabase Public Storage ('qb-documents' / 'group-content').
+  /// Fallback: Supabase Storage ('group-content' with authorized path).
   Future<String> uploadExamImage({
     required Uint8List bytes,
     required String fileName,
@@ -42,7 +42,7 @@ class ExamImageUploadService {
           final dioClient = dio.Dio();
           final uploadRes = await dioClient.put<dynamic>(
             uploadUrl,
-            data: Stream.fromIterable([bytes]),
+            data: bytes,
             options: dio.Options(
               headers: {
                 dio.Headers.contentTypeHeader: mimeType,
@@ -71,30 +71,14 @@ class ExamImageUploadService {
         }
       }
     } catch (_) {
-      // Graceful fallback to Supabase Storage if Cloudflare R2 edge function is offline
+      // Graceful fallback to Supabase Storage if Cloudflare R2 has CORS or is offline
     }
 
-    // ── 2. Fallback: Supabase Storage ─────────────────────────────────────────
-    final storagePath = 'exam_images/$finalFileName';
+    // ── 2. Fallback: Supabase Storage 'group-content' with 'test/' RLS path ────
+    final storagePath = 'test/exam_images/$finalFileName';
 
     try {
       await _safeClient.storage
-          .from('qb-documents')
-          .uploadBinary(
-            storagePath,
-            bytes,
-            fileOptions: FileOptions(
-              contentType: mimeType,
-              upsert: true,
-            ),
-          );
-
-      return _safeClient.storage
-          .from('qb-documents')
-          .getPublicUrl(storagePath);
-    } catch (_) {
-      // Secondary fallback to group-content
-      await _safeClient.storage
           .from('group-content')
           .uploadBinary(
             storagePath,
@@ -105,9 +89,14 @@ class ExamImageUploadService {
             ),
           );
 
-      return _safeClient.storage
+      // Generate long-lived signed URL (1 year = 31,536,000 seconds)
+      final signedUrl = await _safeClient.storage
           .from('group-content')
-          .getPublicUrl(storagePath);
+          .createSignedUrl(storagePath, 31536000);
+
+      return signedUrl;
+    } catch (e) {
+      rethrow;
     }
   }
 }
