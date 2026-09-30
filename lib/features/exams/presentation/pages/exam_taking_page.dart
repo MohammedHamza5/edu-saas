@@ -325,16 +325,18 @@ class ExamTakingPage extends StatelessWidget {
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: AppSpacing.s12),
-                              Text(
-                                question.questionText,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.textPrimary,
-                                  height: 1.4,
+                              if (question.questionText.trim().isNotEmpty) ...[
+                                Text(
+                                  question.questionText,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.textPrimary,
+                                    height: 1.4,
+                                  ),
                                 ),
-                              ),
+                                const SizedBox(height: AppSpacing.s12),
+                              ],
                               if (question.imageUrl != null &&
                                   question.imageUrl!.isNotEmpty)
                                 ExamImageViewer(

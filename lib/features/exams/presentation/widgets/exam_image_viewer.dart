@@ -19,7 +19,7 @@ class ExamImageViewer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final alignmentStr = imageMeta?['alignment'] as String? ?? 'center';
-    final widthPercent = (imageMeta?['width_percent'] as num?)?.toInt() ?? 75;
+    final widthPercent = (imageMeta?['width_percent'] as num?)?.toInt() ?? 50;
     final enableZoom = imageMeta?['enable_zoom'] as bool? ?? true;
 
     Alignment align = Alignment.center;

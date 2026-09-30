@@ -7134,5 +7134,11 @@
         "type": "String"
       }
     }
-  }
+  },
+  "questionTextFieldOptional": "Question Prompt (Optional if image attached)",
+  "@questionTextFieldOptional": {},
+  "questionTextOptionalHint": "Optional: Add problem details or leave blank if image contains full question...",
+  "@questionTextOptionalHint": {},
+  "resetCropAction": "Select Full Image",
+  "@resetCropAction": {}
 }

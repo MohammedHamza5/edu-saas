@@ -2088,5 +2088,8 @@
   "attachImageOrScreenshotSubtitle": "اسحب الصورة هنا أو استعرض الملفات أو اضغط Ctrl+V بعد أخذ لقطة الشاشة",
   "browseAction": "استعراض",
   "pasteScreenshotTip": "للصق لقطة الشاشة، التقط الشاشة بـ Win+Shift+S ثم اختر الصورة أو الصقها مباشرة",
-  "imageUploadFailed": "فشل رفع الصورة: {error}"
+  "imageUploadFailed": "فشل رفع الصورة: {error}",
+  "questionTextFieldOptional": "نص السؤال (اختياري مع وجود صورة)",
+  "questionTextOptionalHint": "اختياري: أضف توضيحاً إضافياً أو اتركه فارغاً إذا كانت الصورة تحتوي نص السؤال...",
+  "resetCropAction": "تحديد الصورة بالكامل"
 }

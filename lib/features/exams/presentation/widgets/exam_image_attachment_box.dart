@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/utils/app_logger.dart';
 import '../../data/services/exam_image_upload_service.dart';
 import 'app_image_cropper_dialog.dart';
 
@@ -39,7 +40,7 @@ class _ExamImageAttachmentBoxState extends State<ExamImageAttachmentBox> {
     _imageMeta = Map<String, dynamic>.from(
       widget.initialImageMeta ?? {
         'alignment': 'center',
-        'width_percent': 75,
+        'width_percent': 50,
         'enable_zoom': true,
       },
     );
@@ -53,20 +54,34 @@ class _ExamImageAttachmentBoxState extends State<ExamImageAttachmentBox> {
   }
 
   Future<void> _processRawBytes(Uint8List rawBytes, String filename) async {
+    AppLogger.i('ExamImageBox', '📷 [_processRawBytes] Received raw bytes: ${rawBytes.length} bytes for file: $filename');
+    
     // 1. Open in-app cropper dialog
+    AppLogger.d('ExamImageBox', '🖼️ Opening AppImageCropperDialog...');
     final croppedBytes = await AppImageCropperDialog.show(context, rawBytes);
-    if (croppedBytes == null || !mounted) return;
+    
+    if (croppedBytes == null) {
+      AppLogger.w('ExamImageBox', '⚠️ AppImageCropperDialog was cancelled or returned null');
+      return;
+    }
+    if (!mounted) {
+      AppLogger.w('ExamImageBox', '⚠️ Widget not mounted after cropper dialog');
+      return;
+    }
 
+    AppLogger.s('ExamImageBox', '✂️ Cropper returned ${croppedBytes.length} bytes. Setting _isUploading = true');
     _lastLocalBytes = croppedBytes;
     setState(() => _isUploading = true);
 
     try {
+      AppLogger.i('ExamImageBox', '☁️ Calling _uploadService.uploadExamImage...');
       final uploadedUrl = await _uploadService.uploadExamImage(
         bytes: croppedBytes,
         fileName: filename,
         mimeType: 'image/png',
       );
 
+      AppLogger.s('ExamImageBox', '🎉 Image uploaded successfully! URL: $uploadedUrl');
       if (mounted) {
         setState(() {
           _imageUrl = uploadedUrl;
@@ -74,7 +89,8 @@ class _ExamImageAttachmentBoxState extends State<ExamImageAttachmentBox> {
         });
         _notifyChange();
       }
-    } catch (e) {
+    } catch (e, st) {
+      AppLogger.e('ExamImageBox', '❌ Error uploading image: $e', error: e, stackTrace: st);
       if (mounted) {
         setState(() => _isUploading = false);
         ScaffoldMessenger.of(context).showSnackBar(
@@ -88,6 +104,7 @@ class _ExamImageAttachmentBoxState extends State<ExamImageAttachmentBox> {
   }
 
   Future<void> _pickFile() async {
+    AppLogger.i('ExamImageBox', '📂 [_pickFile] Triggered. Opening FilePicker...');
     try {
       final result = await FilePicker.platform.pickFiles(
         type: FileType.image,
@@ -95,14 +112,28 @@ class _ExamImageAttachmentBoxState extends State<ExamImageAttachmentBox> {
         withData: true,
       );
 
-      if (result != null && result.files.isNotEmpty) {
-        final file = result.files.first;
-        final bytes = file.bytes;
-        if (bytes != null) {
-          await _processRawBytes(bytes, file.name);
-        }
+      if (result == null) {
+        AppLogger.w('ExamImageBox', '📂 FilePicker returned null (user canceled)');
+        return;
       }
-    } catch (_) {}
+
+      if (result.files.isEmpty) {
+        AppLogger.w('ExamImageBox', '📂 FilePicker returned empty files list');
+        return;
+      }
+
+      final file = result.files.first;
+      AppLogger.d('ExamImageBox', '📂 Selected file: ${file.name}, size: ${file.size} bytes');
+      final bytes = file.bytes;
+      if (bytes != null) {
+        AppLogger.d('ExamImageBox', '📂 File bytes loaded into memory (${bytes.length} bytes). Processing...');
+        await _processRawBytes(bytes, file.name);
+      } else {
+        AppLogger.e('ExamImageBox', '❌ File bytes is null! FilePicker did not load bytes for ${file.name}');
+      }
+    } catch (e, st) {
+      AppLogger.e('ExamImageBox', '❌ FilePicker exception: $e', error: e, stackTrace: st);
+    }
   }
 
   Future<void> _handlePaste() async {
@@ -194,7 +225,8 @@ class _ExamImageAttachmentBoxState extends State<ExamImageAttachmentBox> {
                   alignment: align,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                    child: SizedBox(
+                    child: Container(
+                      constraints: const BoxConstraints(maxHeight: 260),
                       width: displayW,
                       child: _lastLocalBytes != null
                           ? Image.memory(
@@ -205,7 +237,7 @@ class _ExamImageAttachmentBoxState extends State<ExamImageAttachmentBox> {
                               imageUrl: _imageUrl!,
                               fit: BoxFit.contain,
                               placeholder: (ctx, _) => Container(
-                                height: 160,
+                                height: 140,
                                 color: AppColors.surfaceVariant,
                                 child: const Center(
                                   child: CircularProgressIndicator(strokeWidth: 2),
@@ -264,7 +296,8 @@ class _ExamImageAttachmentBoxState extends State<ExamImageAttachmentBox> {
                     color: AppColors.textSecondary,
                   ),
                 ),
-                _buildWidthChip(40, '40%', widthPercent),
+                _buildWidthChip(30, '30%', widthPercent),
+                _buildWidthChip(50, '50%', widthPercent),
                 _buildWidthChip(75, '75%', widthPercent),
                 _buildWidthChip(100, '100%', widthPercent),
 

@@ -6112,4 +6112,14 @@ class AppLocalizationsAr extends AppLocalizations {
   String imageUploadFailed(String error) {
     return 'فشل رفع الصورة: $error';
   }
+
+  @override
+  String get questionTextFieldOptional => 'نص السؤال (اختياري مع وجود صورة)';
+
+  @override
+  String get questionTextOptionalHint =>
+      'اختياري: أضف توضيحاً إضافياً أو اتركه فارغاً إذا كانت الصورة تحتوي نص السؤال...';
+
+  @override
+  String get resetCropAction => 'تحديد الصورة بالكامل';
 }

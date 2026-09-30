@@ -74,21 +74,20 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
 
     if (_selectedGroupId != null) {
       _loadExams().then((_) {
-        if (widget.initialExamId != null && mounted) {
-          final state = context.read<ExamsCubit>().state;
-          if (state is TeacherExamsLoaded) {
-            try {
-              final exam = state.exams.firstWhere(
-                (e) => e.id == widget.initialExamId,
-              );
-              _openExamDetails(exam);
-            } catch (_) {}
-          }
+        if (!mounted || widget.initialExamId == null) return;
+        final state = context.read<ExamsCubit>().state;
+        if (state is TeacherExamsLoaded) {
+          try {
+            final exam = state.exams.firstWhere(
+              (e) => e.id == widget.initialExamId,
+            );
+            if (mounted) _openExamDetails(exam);
+          } catch (_) {}
         }
       });
     }
     try {
-      context.read<GroupsCubit>().loadGroups();
+      if (mounted) context.read<GroupsCubit>().loadGroups();
     } catch (_) {}
   }
 
@@ -101,6 +100,7 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
   }
 
   void _onScroll() {
+    if (!mounted) return;
     if (_scrollController.hasClients &&
         _scrollController.position.pixels >=
             _scrollController.position.maxScrollExtent - 200) {
@@ -109,7 +109,7 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
   }
 
   void _onGroupChanged(GroupEntity group) {
-    if (_selectedGroupId == group.id) return;
+    if (!mounted || _selectedGroupId == group.id) return;
     TeacherGroupFilterBar.lastSelectedGroupId = group.id;
     setState(() {
       _selectedGroupId = group.id;
@@ -119,16 +119,16 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
   }
 
   void _openExamDetails(ExamEntity exam) {
+    if (!mounted) return;
     _showExamDetailsSheet(exam);
   }
 
   Future<void> _loadExams({bool forceRefresh = false}) async {
-    if (_selectedGroupId != null) {
-      await context.read<ExamsCubit>().loadGroupExams(
-        _selectedGroupId!,
-        forceRefresh: forceRefresh,
-      );
-    }
+    if (!mounted || _selectedGroupId == null) return;
+    await context.read<ExamsCubit>().loadGroupExams(
+      _selectedGroupId!,
+      forceRefresh: forceRefresh,
+    );
   }
 
   void _showExamDetailsSheet(ExamEntity exam) {
@@ -475,16 +475,21 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
         child: ResponsiveContainer(
           maxWidth: ResponsiveBreakpoints.maxContentWidth,
           padding: const EdgeInsets.all(AppSpacing.s16),
-          child: Builder(
-            builder: (context) {
-              GroupsCubit? groupsCubit;
-              try {
-                groupsCubit = context.read<GroupsCubit>();
-              } catch (_) {
-                groupsCubit = null;
-              }
+          child: _buildBodyContent(context),
+        ),
+      ),
+    );
+  }
 
-              Widget bodyContent = BlocBuilder<ExamsCubit, ExamsState>(
+  Widget _buildBodyContent(BuildContext context) {
+    GroupsCubit? groupsCubit;
+    try {
+      groupsCubit = context.read<GroupsCubit>();
+    } catch (_) {
+      groupsCubit = null;
+    }
+
+    Widget bodyContent = BlocBuilder<ExamsCubit, ExamsState>(
                 builder: (context, state) {
                   final groupFilterBar = TeacherGroupFilterBar(
                     selectedGroupId: _selectedGroupId,
@@ -852,44 +857,39 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
                 },
               );
 
-              if (groupsCubit != null) {
-                bodyContent = BlocListener<GroupsCubit, GroupsState>(
-                  bloc: groupsCubit,
-                  listener: (context, groupsState) {
-                    if (groupsState is GroupsLoaded &&
-                        groupsState.groups.isNotEmpty) {
-                      if (_selectedGroupId == null ||
-                          !groupsState.groups.any(
-                            (g) => g.id == _selectedGroupId,
-                          )) {
-                        final targetGroup =
-                            (widget.groupId != null &&
-                                groupsState.groups.any(
-                                  (g) => g.id == widget.groupId,
-                                ))
-                            ? groupsState.groups.firstWhere(
-                                (g) => g.id == widget.groupId,
-                              )
-                            : groupsState.groups.first;
-                        TeacherGroupFilterBar.lastSelectedGroupId =
-                            targetGroup.id;
-                        setState(() {
-                          _selectedGroupId = targetGroup.id;
-                          _selectedGroupName = targetGroup.name;
-                        });
-                        _loadExams();
-                      }
-                    }
-                  },
-                  child: bodyContent,
-                );
-              }
+    if (groupsCubit != null) {
+      bodyContent = BlocListener<GroupsCubit, GroupsState>(
+        bloc: groupsCubit,
+        listenWhen: (prev, curr) => mounted,
+        listener: (context, groupsState) {
+          if (!mounted) return;
+          if (groupsState is GroupsLoaded && groupsState.groups.isNotEmpty) {
+            if (_selectedGroupId == null ||
+                !groupsState.groups.any(
+                  (g) => g.id == _selectedGroupId,
+                )) {
+              final targetGroup = (widget.groupId != null &&
+                      groupsState.groups.any(
+                        (g) => g.id == widget.groupId,
+                      ))
+                  ? groupsState.groups.firstWhere(
+                      (g) => g.id == widget.groupId,
+                    )
+                  : groupsState.groups.first;
+              TeacherGroupFilterBar.lastSelectedGroupId = targetGroup.id;
+              if (!mounted) return;
+              setState(() {
+                _selectedGroupId = targetGroup.id;
+                _selectedGroupName = targetGroup.name;
+              });
+              _loadExams();
+            }
+          }
+        },
+        child: bodyContent,
+      );
+    }
 
-              return bodyContent;
-            },
-          ),
-        ),
-      ),
-    );
+    return bodyContent;
   }
 }

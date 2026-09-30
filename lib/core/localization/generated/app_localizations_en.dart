@@ -6153,4 +6153,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String imageUploadFailed(String error) {
     return 'Failed to upload image: $error';
   }
+
+  @override
+  String get questionTextFieldOptional =>
+      'Question Prompt (Optional if image attached)';
+
+  @override
+  String get questionTextOptionalHint =>
+      'Optional: Add problem details or leave blank if image contains full question...';
+
+  @override
+  String get resetCropAction => 'Select Full Image';
 }

@@ -10998,6 +10998,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to upload image: {error}'**
   String imageUploadFailed(String error);
+
+  /// No description provided for @questionTextFieldOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Question Prompt (Optional if image attached)'**
+  String get questionTextFieldOptional;
+
+  /// No description provided for @questionTextOptionalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional: Add problem details or leave blank if image contains full question...'**
+  String get questionTextOptionalHint;
+
+  /// No description provided for @resetCropAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Full Image'**
+  String get resetCropAction;
 }
 
 class _AppLocalizationsDelegate

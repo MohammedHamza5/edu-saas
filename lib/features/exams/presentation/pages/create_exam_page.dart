@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/utils/app_logger.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_text_field.dart';
@@ -232,10 +233,11 @@ class _CreateExamPageState extends State<CreateExamPage> {
   Future<void> _submitExam() async {
     if (!_formKey.currentState!.validate()) return;
 
-    // Validate that each question has text and at least one correct option
+    // Validate that each question has text (or an attached image) and at least one correct option
     for (int i = 0; i < _questions.length; i++) {
       final q = _questions[i];
-      if (q.textController.text.trim().isEmpty) {
+      final hasImage = q.imageUrl != null && q.imageUrl!.trim().isNotEmpty;
+      if (q.textController.text.trim().isEmpty && !hasImage) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(context.l10n.fillQuestionTextError(i + 1)),
@@ -319,10 +321,14 @@ class _CreateExamPageState extends State<CreateExamPage> {
             .toList();
       }
 
+      final hasImage = q.imageUrl != null && q.imageUrl!.trim().isNotEmpty;
+      final qText = q.textController.text.trim();
+      final finalQuestionText = qText.isEmpty && hasImage ? ' ' : qText;
+
       return ExamQuestionEntity(
         id: 'q-${idx + 1}',
         examVersionId: '',
-        questionText: q.textController.text.trim(),
+        questionText: finalQuestionText,
         questionType: q.type,
         points: q.points,
         sortOrder: idx + 1,
@@ -842,13 +848,21 @@ class _CreateExamPageState extends State<CreateExamPage> {
                             TextFormField(
                               controller: q.textController,
                               decoration: InputDecoration(
-                                labelText: context.l10n.questionTextField,
-                                hintText: context.l10n.questionTextHint,
+                                labelText: (q.imageUrl != null &&
+                                        q.imageUrl!.trim().isNotEmpty)
+                                    ? context.l10n.questionTextFieldOptional
+                                    : context.l10n.questionTextField,
+                                hintText: (q.imageUrl != null &&
+                                        q.imageUrl!.trim().isNotEmpty)
+                                    ? context.l10n.questionTextOptionalHint
+                                    : context.l10n.questionTextHint,
                                 alignLabelWithHint: true,
                               ),
                               maxLines: 2,
                               validator: (v) {
-                                if (v == null || v.trim().isEmpty) {
+                                final hasImg = q.imageUrl != null &&
+                                    q.imageUrl!.trim().isNotEmpty;
+                                if (!hasImg && (v == null || v.trim().isEmpty)) {
                                   return context.l10n.fillQuestionTextError(
                                     qIndex + 1,
                                   );
@@ -863,6 +877,7 @@ class _CreateExamPageState extends State<CreateExamPage> {
                               initialImageUrl: q.imageUrl,
                               initialImageMeta: q.imageMeta,
                               onChanged: (data) {
+                                AppLogger.i('CreateExamPage', '📸 Question ${qIndex + 1} image updated: url=${data.imageUrl}, meta=${data.imageMeta}');
                                 setState(() {
                                   q.imageUrl = data.imageUrl;
                                   q.imageMeta = data.imageMeta;
