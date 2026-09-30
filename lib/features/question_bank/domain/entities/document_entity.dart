@@ -50,6 +50,10 @@ class DocumentEntity extends Equatable {
 
   /// Clean display name without extension.
   String get displayName {
+    if (originalFilename.contains('manual_entry_intake') ||
+        originalFilename.contains('manual_intake')) {
+      return 'بنك أسئلة المعلم والامتحانات';
+    }
     final name = originalFilename
         .replaceAll(RegExp(r'\.[a-zA-Z0-9]+$'), '')
         .replaceAll('_', ' ');

@@ -238,6 +238,8 @@ class MockQuestionBankRepository implements QuestionBankRepository {
     required List<Map<String, dynamic>> options,
     required String correctAnswer,
     required Map<String, dynamic> rightsAttestation,
+    String? imageUrl,
+    Map<String, dynamic>? imageMeta,
   }) async {
     const newId = 'q-new-1';
     final question = QuestionEntity(

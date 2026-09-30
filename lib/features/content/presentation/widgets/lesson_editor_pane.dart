@@ -130,6 +130,40 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
     }
   }
 
+  Future<void> _openCreateQuiz() async {
+    final lessonTitle = _titleController.text.trim().isNotEmpty
+        ? _titleController.text.trim()
+        : (_selectedVideo?.title ?? '');
+    final initialQuizTitle =
+        lessonTitle.isNotEmpty ? 'كويز: $lessonTitle' : null;
+
+    final created = await Navigator.push<ExamEntity?>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => BlocProvider<ExamsCubit>(
+          create: (_) => ExamsCubit(
+            repository: InjectionContainer.examsRepository,
+          ),
+          child: CreateExamPage(
+            groupId: widget.groupId,
+            groupName: widget.groupName,
+            initialTitle: initialQuizTitle,
+          ),
+        ),
+      ),
+    );
+    if (created != null && mounted) {
+      setState(() {
+        _availableExams.add({
+          'id': created.id,
+          'title': created.title,
+        });
+        _selectedExamId = created.id;
+        _useCustomScore = true;
+      });
+    }
+  }
+
   Future<void> _pickPdf() async {
     try {
       final result = await FilePicker.platform.pickFiles(
@@ -515,77 +549,167 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
                   ],
                   const SizedBox(height: AppSpacing.s24),
 
-                  // 4. Attach Quiz
+                  // 4. Attach Gatekeeper Quiz
                   Text(
-                    context.l10n.lessonEditorLessonQuiz,
+                    context.l10n.gatekeeperQuizTitle,
                     style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.s8),
+                  const SizedBox(height: AppSpacing.s4),
+                  Text(
+                    context.l10n.gatekeeperQuizSubtitle,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.s12),
                   if (_isLoadingExams)
                     const Center(child: CircularProgressIndicator())
-                  else if (_availableExams.isEmpty)
-                    Text(
-                      context.l10n.lessonEditorNoQuizzes,
-                      style: const TextStyle(color: AppColors.textMuted),
-                    )
-                  else
-                    DropdownButtonFormField<String?>(
-                      value: _selectedExamId,
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: AppColors.background,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
-                      items: [
-                        DropdownMenuItem(
-                          value: null,
-                          child: Text(context.l10n.lessonEditorNoQuiz),
-                        ),
-                        ..._availableExams.map(
-                          (e) => DropdownMenuItem(
-                            value: e['id'] as String,
-                            child: Text(e['title'] as String),
+                  else if (_selectedExamId != null) ...[
+                    // Quiz selected card
+                    Builder(
+                      builder: (ctx) {
+                        final selectedMap = _availableExams.firstWhere(
+                          (e) => e['id'] == _selectedExamId,
+                          orElse: () => {
+                            'title': context.l10n.lessonEditorLessonQuiz,
+                          },
+                        );
+                        return Container(
+                          padding: const EdgeInsets.all(AppSpacing.s16),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.05),
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.radiusMedium,
+                            ),
+                            border: Border.all(
+                              color: AppColors.primary.withValues(alpha: 0.35),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(
+                                    AppSpacing.radiusSmall,
+                                  ),
+                                ),
+                                child: const Icon(
+                                  Icons.quiz_rounded,
+                                  color: AppColors.primary,
+                                  size: 24,
+                                ),
+                              ),
+                              const SizedBox(width: AppSpacing.s12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      selectedMap['title'] as String? ?? '',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                        color: AppColors.textPrimary,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      context.l10n.lessonEditorLessonQuiz,
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        color: AppColors.textMuted,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.link_off_rounded,
+                                  color: AppColors.error,
+                                  size: 20,
+                                ),
+                                tooltip: context.l10n.unlinkQuizAction,
+                                onPressed: () =>
+                                    setState(() => _selectedExamId = null),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ] else ...[
+                    // No quiz selected yet: options to create or pick
+                    Row(
+                      children: [
+                        Expanded(
+                          child: AppButton(
+                            text: context.l10n.createInstantQuizAction,
+                            icon: Icons.add_task_rounded,
+                            onPressed: _openCreateQuiz,
+                            variant: AppButtonVariant.primary,
                           ),
                         ),
                       ],
-                      onChanged: (val) => setState(() => _selectedExamId = val),
                     ),
-                  const SizedBox(height: AppSpacing.s12),
-                  AppButton(
-                    text: context.l10n.lessonEditorCreateQuiz,
-                    icon: Icons.add_circle_outline_rounded,
-                    onPressed: () async {
-                      final created = await Navigator.push<ExamEntity?>(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => BlocProvider<ExamsCubit>(
-                            create: (_) => ExamsCubit(
-                              repository: InjectionContainer.examsRepository,
-                            ),
-                            child: CreateExamPage(
-                              groupId: widget.groupId,
-                              groupName: widget.groupName,
+                    if (_availableExams.isNotEmpty) ...[
+                      const SizedBox(height: AppSpacing.s12),
+                      Row(
+                        children: [
+                          const Expanded(child: Divider()),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: Text(
+                              context.l10n.selectExistingQuizAction,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: AppColors.textMuted,
+                              ),
                             ),
                           ),
+                          const Expanded(child: Divider()),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.s8),
+                      DropdownButtonFormField<String?>(
+                        value: _selectedExamId,
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: AppColors.background,
+                          hintText: context.l10n.selectExistingQuizAction,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide.none,
+                          ),
                         ),
-                      );
-                      if (created != null && mounted) {
-                        setState(() {
-                          _availableExams.add({
-                            'id': created.id,
-                            'title': created.title,
+                        items: [
+                          DropdownMenuItem(
+                            value: null,
+                            child: Text(context.l10n.lessonEditorNoQuiz),
+                          ),
+                          ..._availableExams.map(
+                            (e) => DropdownMenuItem(
+                              value: e['id'] as String,
+                              child: Text(e['title'] as String),
+                            ),
+                          ),
+                        ],
+                        onChanged: (val) {
+                          setState(() {
+                            _selectedExamId = val;
+                            if (val != null) {
+                              _useCustomScore = true;
+                            }
                           });
-                          _selectedExamId = created.id;
-                        });
-                      }
-                    },
-                    variant: AppButtonVariant.outlined,
-                  ),
+                        },
+                      ),
+                    ],
+                  ],
                   const SizedBox(height: AppSpacing.s24),
 
                   // 5. Passing Score

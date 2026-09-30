@@ -101,6 +101,8 @@ abstract class QuestionBankRepository {
     required List<Map<String, dynamic>> options,
     required String correctAnswer,
     required Map<String, dynamic> rightsAttestation,
+    String? imageUrl,
+    Map<String, dynamic>? imageMeta,
   });
 
   /// Approves an immutable revision, recording content_hash binding.

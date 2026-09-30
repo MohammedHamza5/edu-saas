@@ -6164,4 +6164,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get resetCropAction => 'Select Full Image';
+
+  @override
+  String get saveToQuestionBankToggle =>
+      'Save questions to Central Question Bank';
+
+  @override
+  String get saveToQuestionBankTooltip =>
+      'Questions created here will be automatically saved to your Question Bank for future reuse.';
+
+  @override
+  String get gatekeeperQuizTitle => 'Lecture Gatekeeper Quiz';
+
+  @override
+  String get gatekeeperQuizSubtitle =>
+      'Students must pass this quiz to unlock the next lecture in sequential order.';
+
+  @override
+  String get createInstantQuizAction => 'Create Quiz for this Lesson';
+
+  @override
+  String get selectExistingQuizAction => 'Select from Existing Quizzes';
+
+  @override
+  String get unlinkQuizAction => 'Unlink Quiz';
 }

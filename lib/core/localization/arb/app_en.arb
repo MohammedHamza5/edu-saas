@@ -7140,5 +7140,19 @@
   "questionTextOptionalHint": "Optional: Add problem details or leave blank if image contains full question...",
   "@questionTextOptionalHint": {},
   "resetCropAction": "Select Full Image",
-  "@resetCropAction": {}
+  "@resetCropAction": {},
+  "saveToQuestionBankToggle": "Save questions to Central Question Bank",
+  "@saveToQuestionBankToggle": {},
+  "saveToQuestionBankTooltip": "Questions created here will be automatically saved to your Question Bank for future reuse.",
+  "@saveToQuestionBankTooltip": {},
+  "gatekeeperQuizTitle": "Lecture Gatekeeper Quiz",
+  "@gatekeeperQuizTitle": {},
+  "gatekeeperQuizSubtitle": "Students must pass this quiz to unlock the next lecture in sequential order.",
+  "@gatekeeperQuizSubtitle": {},
+  "createInstantQuizAction": "Create Quiz for this Lesson",
+  "@createInstantQuizAction": {},
+  "selectExistingQuizAction": "Select from Existing Quizzes",
+  "@selectExistingQuizAction": {},
+  "unlinkQuizAction": "Unlink Quiz",
+  "@unlinkQuizAction": {}
 }

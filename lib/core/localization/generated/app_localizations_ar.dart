@@ -6122,4 +6122,27 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get resetCropAction => 'تحديد الصورة بالكامل';
+
+  @override
+  String get saveToQuestionBankToggle => 'حفظ الأسئلة في بنك الأسئلة المركزي';
+
+  @override
+  String get saveToQuestionBankTooltip =>
+      'الأسئلة المنشأة هنا ستُحفظ تلقائياً في بنك الأسئلة لإعادة استخدامها في أي وقت.';
+
+  @override
+  String get gatekeeperQuizTitle => 'اختبار المحاضرة الإلزامي';
+
+  @override
+  String get gatekeeperQuizSubtitle =>
+      'يجب على الطالب اجتياز هذا الاختبار لفتح المحاضرة التالية في الترتيب.';
+
+  @override
+  String get createInstantQuizAction => 'إنشاء كويز لهذه المحاضرة فوراً';
+
+  @override
+  String get selectExistingQuizAction => 'اختيار من الاختبارات السابقة';
+
+  @override
+  String get unlinkQuizAction => 'إلغاء ربط الاختبار';
 }

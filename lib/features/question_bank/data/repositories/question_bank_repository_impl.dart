@@ -171,6 +171,8 @@ class QuestionBankRepositoryImpl implements QuestionBankRepository {
     required List<Map<String, dynamic>> options,
     required String correctAnswer,
     required Map<String, dynamic> rightsAttestation,
+    String? imageUrl,
+    Map<String, dynamic>? imageMeta,
   }) {
     return remoteDataSource.createManualQuestion(
       sourceLabel: sourceLabel,
@@ -179,6 +181,8 @@ class QuestionBankRepositoryImpl implements QuestionBankRepository {
       options: options,
       correctAnswer: correctAnswer,
       rightsAttestation: rightsAttestation,
+      imageUrl: imageUrl,
+      imageMeta: imageMeta,
     );
   }
 

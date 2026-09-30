@@ -12,13 +12,20 @@ import '../cubit/exams_cubit.dart';
 import '../cubit/exams_state.dart';
 import '../widgets/exam_image_attachment_box.dart';
 import '../widgets/question_bank_picker_sheet.dart';
+import '../../../../core/di/injection_container.dart';
 import '../../../question_bank/domain/entities/question_revision_entity.dart';
 
 class CreateExamPage extends StatefulWidget {
   final String groupId;
   final String? groupName;
+  final String? initialTitle;
 
-  const CreateExamPage({super.key, required this.groupId, this.groupName});
+  const CreateExamPage({
+    super.key,
+    required this.groupId,
+    this.groupName,
+    this.initialTitle,
+  });
 
   @override
   State<CreateExamPage> createState() => _CreateExamPageState();
@@ -82,6 +89,7 @@ class _CreateExamPageState extends State<CreateExamPage> {
   bool _shuffle = true;
   bool _showResult = true;
   bool _allowRetake = false;
+  bool _saveToQuestionBank = true;
 
   final ScrollController _scrollController = ScrollController();
 
@@ -89,6 +97,14 @@ class _CreateExamPageState extends State<CreateExamPage> {
 
   int get _totalQuestionsPoints =>
       _questions.fold(0, (sum, q) => sum + q.points);
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialTitle != null && widget.initialTitle!.trim().isNotEmpty) {
+      _titleController.text = widget.initialTitle!.trim();
+    }
+  }
 
   @override
   void dispose() {
@@ -354,6 +370,9 @@ class _CreateExamPageState extends State<CreateExamPage> {
     if (!mounted) return;
 
     if (createdExam != null) {
+      if (_saveToQuestionBank) {
+        _syncQuestionsToBank();
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(context.l10n.examBuiltAndPublishedSuccess),
@@ -375,6 +394,55 @@ class _CreateExamPageState extends State<CreateExamPage> {
           backgroundColor: AppColors.error,
         ),
       );
+    }
+  }
+
+  void _syncQuestionsToBank() {
+    final examTitle = _titleController.text.trim().isEmpty ? 'Exam' : _titleController.text.trim();
+    final qbRepo = InjectionContainer.questionBankRepository;
+
+    for (int i = 0; i < _questions.length; i++) {
+      final q = _questions[i];
+      final optionsList = <Map<String, dynamic>>[];
+      String correctAnswer = 'A';
+
+      if (q.type == QuestionType.multipleChoice) {
+        for (int optIdx = 0; optIdx < q.options.length; optIdx++) {
+          final key = String.fromCharCode(65 + optIdx);
+          optionsList.add({
+            'key': key,
+            'text': q.options[optIdx].controller.text.trim(),
+          });
+          if (q.options[optIdx].isCorrect) {
+            correctAnswer = key;
+          }
+        }
+      } else {
+        optionsList.add({'key': 'A', 'text': 'True'});
+        optionsList.add({'key': 'B', 'text': 'False'});
+        correctAnswer = q.trueFalseAnswer ? 'A' : 'B';
+      }
+
+      final stemText = q.textController.text.trim();
+      final sourceLabel = '$examTitle-Q${i + 1}';
+
+      qbRepo.createManualQuestion(
+        sourceLabel: sourceLabel,
+        questionType: q.type == QuestionType.trueFalse ? 'true_false' : 'multiple_choice',
+        stemText: stemText,
+        options: optionsList,
+        correctAnswer: correctAnswer,
+        rightsAttestation: {
+          'claimed_source': 'exam_builder',
+          'license': 'teacher_owned',
+          'attested_at': DateTime.now().toIso8601String(),
+        },
+        imageUrl: q.imageUrl,
+        imageMeta: q.imageMeta,
+      ).catchError((Object err) {
+        AppLogger.w('CreateExamPage', 'Could not sync question ${i + 1} to question bank: $err');
+        return '';
+      });
     }
   }
 
@@ -599,6 +667,29 @@ class _CreateExamPageState extends State<CreateExamPage> {
                           onChanged: isCreating
                               ? null
                               : (v) => setState(() => _allowRetake = v),
+                        ),
+                        const Divider(height: 20),
+                        SwitchListTile(
+                          title: Text(
+                            context.l10n.saveToQuestionBankToggle,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          subtitle: Text(
+                            context.l10n.saveToQuestionBankTooltip,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textMuted,
+                            ),
+                          ),
+                          value: _saveToQuestionBank,
+                          activeColor: AppColors.primary,
+                          contentPadding: EdgeInsets.zero,
+                          onChanged: isCreating
+                              ? null
+                              : (v) => setState(() => _saveToQuestionBank = v),
                         ),
                       ],
                     ),

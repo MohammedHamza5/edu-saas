@@ -11016,6 +11016,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Select Full Image'**
   String get resetCropAction;
+
+  /// No description provided for @saveToQuestionBankToggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save questions to Central Question Bank'**
+  String get saveToQuestionBankToggle;
+
+  /// No description provided for @saveToQuestionBankTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Questions created here will be automatically saved to your Question Bank for future reuse.'**
+  String get saveToQuestionBankTooltip;
+
+  /// No description provided for @gatekeeperQuizTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Lecture Gatekeeper Quiz'**
+  String get gatekeeperQuizTitle;
+
+  /// No description provided for @gatekeeperQuizSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Students must pass this quiz to unlock the next lecture in sequential order.'**
+  String get gatekeeperQuizSubtitle;
+
+  /// No description provided for @createInstantQuizAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Quiz for this Lesson'**
+  String get createInstantQuizAction;
+
+  /// No description provided for @selectExistingQuizAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Select from Existing Quizzes'**
+  String get selectExistingQuizAction;
+
+  /// No description provided for @unlinkQuizAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlink Quiz'**
+  String get unlinkQuizAction;
 }
 
 class _AppLocalizationsDelegate

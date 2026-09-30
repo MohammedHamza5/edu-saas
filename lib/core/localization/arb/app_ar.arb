@@ -2091,5 +2091,12 @@
   "imageUploadFailed": "فشل رفع الصورة: {error}",
   "questionTextFieldOptional": "نص السؤال (اختياري مع وجود صورة)",
   "questionTextOptionalHint": "اختياري: أضف توضيحاً إضافياً أو اتركه فارغاً إذا كانت الصورة تحتوي نص السؤال...",
-  "resetCropAction": "تحديد الصورة بالكامل"
+  "resetCropAction": "تحديد الصورة بالكامل",
+  "saveToQuestionBankToggle": "حفظ الأسئلة في بنك الأسئلة المركزي",
+  "saveToQuestionBankTooltip": "الأسئلة المنشأة هنا ستُحفظ تلقائياً في بنك الأسئلة لإعادة استخدامها في أي وقت.",
+  "gatekeeperQuizTitle": "اختبار المحاضرة الإلزامي",
+  "gatekeeperQuizSubtitle": "يجب على الطالب اجتياز هذا الاختبار لفتح المحاضرة التالية في الترتيب.",
+  "createInstantQuizAction": "إنشاء كويز لهذه المحاضرة فوراً",
+  "selectExistingQuizAction": "اختيار من الاختبارات السابقة",
+  "unlinkQuizAction": "إلغاء ربط الاختبار"
 }

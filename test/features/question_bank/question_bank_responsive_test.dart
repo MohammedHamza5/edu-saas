@@ -132,6 +132,8 @@ class _MockQuestionBankRepository implements QuestionBankRepository {
     required List<Map<String, dynamic>> options,
     required String correctAnswer,
     required Map<String, dynamic> rightsAttestation,
+    String? imageUrl,
+    Map<String, dynamic>? imageMeta,
   }) async => 'new-q-id';
 
   @override

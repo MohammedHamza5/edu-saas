@@ -415,6 +415,8 @@ class QuestionBankCubit extends Cubit<QuestionBankState> {
     required List<Map<String, dynamic>> options,
     required String correctAnswer,
     required Map<String, dynamic> rightsAttestation,
+    String? imageUrl,
+    Map<String, dynamic>? imageMeta,
   }) async {
     emit(const QuestionBankLoading());
     try {
@@ -425,6 +427,8 @@ class QuestionBankCubit extends Cubit<QuestionBankState> {
         options: options,
         correctAnswer: correctAnswer,
         rightsAttestation: rightsAttestation,
+        imageUrl: imageUrl,
+        imageMeta: imageMeta,
       );
       emit(
         QuestionBankActionSuccess(

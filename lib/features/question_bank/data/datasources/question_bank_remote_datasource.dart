@@ -66,6 +66,8 @@ abstract class QuestionBankRemoteDataSource {
     required List<Map<String, dynamic>> options,
     required String correctAnswer,
     required Map<String, dynamic> rightsAttestation,
+    String? imageUrl,
+    Map<String, dynamic>? imageMeta,
   });
   Future<void> approveRevision({
     required String revisionId,
@@ -556,6 +558,8 @@ class QuestionBankRemoteDataSourceImpl implements QuestionBankRemoteDataSource {
     required List<Map<String, dynamic>> options,
     required String correctAnswer,
     required Map<String, dynamic> rightsAttestation,
+    String? imageUrl,
+    Map<String, dynamic>? imageMeta,
   }) async {
     final user = supabaseClient.auth.currentUser;
     if (user == null) {
@@ -591,7 +595,7 @@ class QuestionBankRemoteDataSourceImpl implements QuestionBankRemoteDataSource {
           'tenant_id': tenantId,
           'document_id': documentId,
           'source_label': sourceLabel,
-          'question_type': questionType,
+          'question_type': questionType == 'true_false' ? 'true_false' : 'multiple_choice',
           'status': 'review_required',
         })
         .select('id')
@@ -608,15 +612,35 @@ class QuestionBankRemoteDataSourceImpl implements QuestionBankRemoteDataSource {
       };
     }).toList();
 
+    final stemBlocks = <Map<String, dynamic>>[];
+    if (stemText.trim().isNotEmpty) {
+      stemBlocks.add({
+        'id': 'b1',
+        'type': 'text',
+        'value': stemText.trim(),
+        'source_refs': ['manual_input'],
+      });
+    }
+    if (imageUrl != null && imageUrl.trim().isNotEmpty) {
+      stemBlocks.add({
+        'id': 'b_img',
+        'type': 'image',
+        'value': imageUrl.trim(),
+        if (imageMeta != null) 'meta': imageMeta,
+        'source_refs': ['manual_input'],
+      });
+    }
+    if (stemBlocks.isEmpty) {
+      stemBlocks.add({
+        'id': 'b1',
+        'type': 'text',
+        'value': ' ',
+        'source_refs': ['manual_input'],
+      });
+    }
+
     final content = {
-      'stem': [
-        {
-          'id': 'b1',
-          'type': 'text',
-          'value': stemText,
-          'source_refs': ['manual_input'],
-        },
-      ],
+      'stem': stemBlocks,
       'question_type': questionType,
       'options': formattedOptions,
       'language': 'en',
@@ -733,11 +757,13 @@ class QuestionBankRemoteDataSourceImpl implements QuestionBankRemoteDataSource {
     }
     final jwt = session.accessToken;
 
-    // ── 1. استخرج Supabase project URL لبناء Edge Function URL ────────────────
+    // ── 1. بناء URL الـ Edge Function ─────────────────────────────────────────
     final supabaseUrl = AppConfig.supabaseUrl;
     final edgeFunctionUrl = '$supabaseUrl/functions/v1/qb-ingest';
 
     // ── 2. أرسل الملف كـ multipart/form-data للـ Edge Function ───────────────
+    //    الـ Edge Function v2 تستخرج الأسئلة مباشرة بـ Gemini وترد بها فوراً
+    //    (لا polling، لا job queue — كل شيء synchronous داخل الـ Edge Function)
     final request = http.MultipartRequest('POST', Uri.parse(edgeFunctionUrl))
       ..headers['Authorization'] = 'Bearer $jwt'
       ..files.add(
@@ -758,53 +784,45 @@ class QuestionBankRemoteDataSourceImpl implements QuestionBankRemoteDataSource {
       request.fields['answer_key_filename'] = answerKeyFilename;
     }
 
+    // timeout: 5 دقائق كافية للاستخراج المباشر بـ Gemini
     final streamedResponse = await request.send().timeout(
       const Duration(minutes: 5),
     );
     final responseBody = await streamedResponse.stream.bytesToString();
 
     if (streamedResponse.statusCode != 200) {
-      final err = json.decode(responseBody) as Map<String, dynamic>;
+      final Map<String, dynamic> err;
+      try {
+        err = json.decode(responseBody) as Map<String, dynamic>;
+      } catch (_) {
+        throw Exception('INGEST_ERROR: $responseBody');
+      }
       throw Exception(
         '${err['code'] ?? 'INGEST_ERROR'}: ${err['message'] ?? responseBody}',
       );
     }
 
+    // ── 3. Edge Function ترد مباشرة بالنتيجة النهائية ────────────────────────
     final ingestResult = json.decode(responseBody) as Map<String, dynamic>;
-    final jobId = ingestResult['job_id'] as String;
     final documentId = ingestResult['document_id'] as String;
+    final status = ingestResult['status'] as String? ?? 'done';
 
-    // ── 3. إذا كانت معالجة مسبقة، جلب الأسئلة مباشرة ────────────────────────
-    if (ingestResult['status'] == 'already_processed') {
+    // حالة: الملف معالج مسبقاً أو تم الاستخراج للتو
+    if (status == 'done' || status == 'already_processed') {
+      // الأسئلة تأتي في الـ Response مباشرة
+      final questionsRaw = ingestResult['questions'] as List<dynamic>?;
+      if (questionsRaw != null && questionsRaw.isNotEmpty) {
+        // أسئلة جاءت في الـ response مباشرة
+        return questionsRaw
+            .map((q) => _mapQuestion(q as Map<String, dynamic>))
+            .toList();
+      }
+      // fallback: جلب من قاعدة البيانات
       return _fetchQuestionsByDocument(documentId);
     }
 
-    // ── 4. Poll حتى ينتهي الـ job (timeout: 10 دقائق) ────────────────────────
-    const maxWait = Duration(minutes: 10);
-    const pollInterval = Duration(seconds: 3);
-    final deadline = DateTime.now().add(maxWait);
-
-    while (DateTime.now().isBefore(deadline)) {
-      await Future<void>.delayed(pollInterval);
-
-      final jobStatus = await getJobStatus(jobId);
-      final status = jobStatus['status'] as String? ?? 'pending';
-
-      if (status == 'done') {
-        // ── 5. جلب الأسئلة الحقيقية التي أدرجها الـ worker ─────────────────
-        return _fetchQuestionsByDocument(documentId);
-      }
-
-      if (status == 'failed') {
-        final error = jobStatus['error'] as String? ?? 'Unknown pipeline error';
-        throw Exception('PIPELINE_FAILED: $error');
-      }
-
-      // pending | running → استمر في الانتظار
-    }
-
     throw Exception(
-      'PIPELINE_TIMEOUT: Job $jobId did not complete within 10 minutes',
+      'INGEST_ERROR: Unexpected status "$status" from Edge Function',
     );
   }
 
