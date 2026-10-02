@@ -99,7 +99,11 @@ class ContentModel extends ContentEntity {
     // Parse associated and prerequisite exam metadata
     String? associatedExamTitle;
     if (json['associated_exam'] is Map<String, dynamic>) {
-      associatedExamTitle = json['associated_exam']['title'] as String?;
+      final aMap = json['associated_exam'] as Map<String, dynamic>;
+      associatedExamTitle = aMap['title'] as String?;
+      if (associatedExamTitle == null && aMap['content'] is Map<String, dynamic>) {
+        associatedExamTitle = (aMap['content'] as Map<String, dynamic>)['title'] as String?;
+      }
     }
 
     String? prerequisiteExamTitle;
@@ -107,6 +111,9 @@ class ContentModel extends ContentEntity {
     if (json['prerequisite_exam'] is Map<String, dynamic>) {
       final pExam = json['prerequisite_exam'] as Map<String, dynamic>;
       prerequisiteExamTitle = pExam['title'] as String?;
+      if (prerequisiteExamTitle == null && pExam['content'] is Map<String, dynamic>) {
+        prerequisiteExamTitle = (pExam['content'] as Map<String, dynamic>)['title'] as String?;
+      }
       prerequisitePassingScore = (pExam['passing_score'] as num?)?.toInt();
     }
 

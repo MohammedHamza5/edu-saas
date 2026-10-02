@@ -147,8 +147,8 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
         .select(
           'content_id, file_id, associated_exam_id, prerequisite_exam_id, sort_order, custom_title, is_published, '
           'file:files!content_groups_file_id_fkey(*), '
-          'associated_exam:exams!content_groups_associated_exam_id_fkey(id, content(title)), '
-          'prerequisite_exam:exams!content_groups_prerequisite_exam_id_fkey(id, passing_score, content(title))',
+          'associated_exam:exams!content_groups_associated_exam_id_fkey(id, title, content:content!exams_content_id_fkey(title)), '
+          'prerequisite_exam:exams!content_groups_prerequisite_exam_id_fkey(id, title, passing_score, content:content!exams_content_id_fkey(title))',
         )
         .eq('group_id', groupId);
 
@@ -209,9 +209,13 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
         if (cfg['associated_exam_id'] != null) {
           assocExamId = cfg['associated_exam_id'] as String?;
           final assocObj = cfg['associated_exam'] as Map<String, dynamic>?;
-          if (assocObj != null && assocObj['content'] != null) {
-            final contentObj = assocObj['content'] as Map<String, dynamic>;
-            assocExamTitle = contentObj['title'] as String? ?? assocExamTitle;
+          if (assocObj != null) {
+            if (assocObj['content'] != null) {
+              final contentObj = assocObj['content'] as Map<String, dynamic>;
+              assocExamTitle = contentObj['title'] as String? ?? assocExamTitle;
+            } else if (assocObj['title'] != null) {
+              assocExamTitle = assocObj['title'] as String? ?? assocExamTitle;
+            }
           }
         }
 
@@ -221,13 +225,17 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
         if (cfg['prerequisite_exam_id'] != null) {
           prereqExamId = cfg['prerequisite_exam_id'] as String?;
           final prereqObj = cfg['prerequisite_exam'] as Map<String, dynamic>?;
-          if (prereqObj != null && prereqObj['content'] != null) {
-            final contentObj = prereqObj['content'] as Map<String, dynamic>;
-            prereqExamTitle = contentObj['title'] as String? ?? prereqExamTitle;
+          if (prereqObj != null) {
+            if (prereqObj['content'] != null) {
+              final contentObj = prereqObj['content'] as Map<String, dynamic>;
+              prereqExamTitle = contentObj['title'] as String? ?? prereqExamTitle;
+            } else if (prereqObj['title'] != null) {
+              prereqExamTitle = prereqObj['title'] as String? ?? prereqExamTitle;
+            }
+            prereqPassingScore =
+                (prereqObj['passing_score'] as num?)?.toInt() ??
+                prereqPassingScore;
           }
-          prereqPassingScore =
-              (prereqObj?['passing_score'] as num?)?.toInt() ??
-              prereqPassingScore;
         }
 
         int sortOrder = m.sortOrder;

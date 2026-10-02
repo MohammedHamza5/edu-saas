@@ -165,12 +165,20 @@ class _LessonSetupSheetState extends State<LessonSetupSheet> {
       final client = SupabaseService.client;
       final res = await client
           .from('exams')
-          .select('id, title')
-          .eq('group_id', widget.groupId)
-          .order('title');
+          .select('id, title, content:content!exams_content_id_fkey(group_id, title)')
+          .order('created_at', ascending: false);
       if (mounted) {
         setState(() {
-          _availableExams = List<Map<String, dynamic>>.from(res as List);
+          _availableExams = (res as List).map((e) {
+            final contentMap = e['content'] as Map<String, dynamic>?;
+            final title = e['title'] as String? ??
+                contentMap?['title'] as String? ??
+                'بدون عنوان';
+            return {
+              'id': e['id'],
+              'title': title,
+            };
+          }).toList();
           _isLoadingExams = false;
         });
       }

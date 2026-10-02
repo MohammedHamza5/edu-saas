@@ -75,6 +75,7 @@ class _AssignGroupsDialogState extends State<AssignGroupsDialog> {
   late final Set<String> _selectedGroupIds;
   final Map<String, _GroupCustomizationState> _groupCustomizations = {};
   final Map<String, List<Map<String, dynamic>>> _groupAvailableExams = {};
+  final List<Map<String, dynamic>> _allExams = [];
   bool _isSaving = false;
   bool _isLoadingExams = true;
 
@@ -134,16 +135,27 @@ class _AssignGroupsDialogState extends State<AssignGroupsDialog> {
       final tenantId = widget.content.tenantId;
       final examsRes = await client
           .from('exams')
-          .select('id, group_id, title')
+          .select('id, title, content:content!exams_content_id_fkey(group_id, title)')
           .eq('tenant_id', tenantId)
-          .order('title');
+          .order('created_at', ascending: false);
 
+      _allExams.clear();
       for (final ex in (examsRes as List<dynamic>)) {
-        final gId = ex['group_id'] as String?;
+        final contentMap = ex['content'] as Map<String, dynamic>?;
+        final gId = contentMap?['group_id'] as String?;
+        final title = ex['title'] as String? ??
+            contentMap?['title'] as String? ??
+            'بدون عنوان';
+        final item = {
+          'id': ex['id'],
+          'title': title,
+          if (gId != null) 'group_id': gId,
+        };
+        _allExams.add(item);
         if (gId != null) {
           _groupAvailableExams
               .putIfAbsent(gId, () => [])
-              .add(ex as Map<String, dynamic>);
+              .add(item);
         }
       }
     } catch (_) {}
@@ -381,7 +393,9 @@ class _AssignGroupsDialogState extends State<AssignGroupsDialog> {
                                   group.id,
                                 );
                                 final availableExams =
-                                    _groupAvailableExams[group.id] ?? [];
+                                    _allExams.isNotEmpty
+                                        ? _allExams
+                                        : (_groupAvailableExams[group.id] ?? []);
 
                                 return _SmartGroupCard(
                                   group: group,
