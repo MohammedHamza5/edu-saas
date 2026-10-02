@@ -52,7 +52,15 @@ class MathContentView extends StatelessWidget {
       );
     }
 
-    if (text.isNotEmpty) {
+    final cleanText = text.trim();
+    if (_isImageUrl(cleanText)) {
+      widgets.add(
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.s8),
+          child: _buildAssetWidget(context, cleanText),
+        ),
+      );
+    } else if (text.isNotEmpty) {
       widgets.add(
         _buildParsedText(context, effectiveTextStyle, effectiveMathStyle),
       );
@@ -162,6 +170,20 @@ class MathContentView extends StatelessWidget {
         trimmed.startsWith(r'\begin{') ||
         trimmed.startsWith(r'\[') ||
         trimmed.startsWith(r'\(');
+  }
+
+  bool _isImageUrl(String str) {
+    final lower = str.trim().toLowerCase();
+    if (!lower.startsWith('http://') && !lower.startsWith('https://')) {
+      return false;
+    }
+    return lower.contains('.png') ||
+        lower.contains('.jpg') ||
+        lower.contains('.jpeg') ||
+        lower.contains('.webp') ||
+        lower.contains('.gif') ||
+        lower.contains('/storage/v1/object/') ||
+        lower.contains('/exam_images/');
   }
 
   Widget _buildAssetWidget(BuildContext context, String url) {

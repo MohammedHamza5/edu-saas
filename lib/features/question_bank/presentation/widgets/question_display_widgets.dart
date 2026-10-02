@@ -45,13 +45,14 @@ class QuestionStemView extends StatelessWidget {
         '';
 
     switch (type) {
+      case 'image':
       case 'asset':
         final rawAsset = block['crop_asset'] ??
             block['path'] ??
             block['url'] ??
             value;
         final url = resolveUrl(rawAsset?.toString());
-        final description = value.isNotEmpty && !value.contains('/') ? value : null;
+        final description = value.isNotEmpty && !value.contains('/') && !value.startsWith('http') ? value : null;
         return _AssetBlock(
           url: url,
           description: description,
@@ -66,11 +67,43 @@ class QuestionStemView extends StatelessWidget {
       case 'text':
       default:
         if (value.isEmpty) return const SizedBox.shrink();
+
+        final trimmed = value.trim();
+        // Check if value is a standalone image URL
+        if (isImageUrl(trimmed)) {
+          return _AssetBlock(url: resolveUrl(trimmed));
+        }
+
+        // Check for markdown image format ![alt](url)
+        final mdImgMatch = RegExp(r'^!\[(.*?)\]\((https?://[^\)]+)\)$').firstMatch(trimmed);
+        if (mdImgMatch != null) {
+          final alt = mdImgMatch.group(1);
+          final imgUrl = mdImgMatch.group(2);
+          return _AssetBlock(
+            url: resolveUrl(imgUrl),
+            description: alt != null && alt.isNotEmpty ? alt : null,
+          );
+        }
+
         return Padding(
           padding: const EdgeInsets.only(bottom: AppSpacing.s4),
           child: _RichTextBlock(text: value, fontSize: fontSize),
         );
     }
+  }
+
+  static bool isImageUrl(String str) {
+    final lower = str.trim().toLowerCase();
+    if (!lower.startsWith('http://') && !lower.startsWith('https://')) {
+      return false;
+    }
+    return lower.contains('.png') ||
+        lower.contains('.jpg') ||
+        lower.contains('.jpeg') ||
+        lower.contains('.webp') ||
+        lower.contains('.gif') ||
+        lower.contains('/storage/v1/object/') ||
+        lower.contains('/exam_images/');
   }
 }
 
@@ -96,6 +129,11 @@ class _RichTextBlock extends StatelessWidget {
     // فحص: هل النص يحتوي على LaTeX مضمّن؟
     final regex = RegExp(r'(\$\$[\s\S]+?\$\$|\$[^\$\n]+?\$)');
     final matches = regex.allMatches(text);
+
+    final trimmed = text.trim();
+    if (QuestionStemView.isImageUrl(trimmed)) {
+      return _AssetBlock(url: trimmed);
+    }
 
     if (matches.isEmpty) {
       // نص عادي بالكامل

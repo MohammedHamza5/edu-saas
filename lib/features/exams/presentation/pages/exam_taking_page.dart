@@ -11,6 +11,7 @@ import '../widgets/exam_image_viewer.dart';
 import '../widgets/question_option_tile.dart';
 import '../widgets/sat_exam_tools_sheet.dart';
 import 'exam_result_page.dart';
+import 'package:edu_saas/features/question_bank/presentation/widgets/question_display_widgets.dart';
 
 class ExamTakingPage extends StatelessWidget {
   const ExamTakingPage({super.key});
@@ -325,28 +326,52 @@ class ExamTakingPage extends StatelessWidget {
                                   ),
                                 ],
                               ),
-                              if (question.questionText.trim().isNotEmpty) ...[
-                                Text(
-                                  question.questionText,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.textPrimary,
-                                    height: 1.4,
-                                  ),
-                                ),
-                                const SizedBox(height: AppSpacing.s12),
-                              ],
-                              if (question.imageUrl != null &&
-                                  question.imageUrl!.isNotEmpty)
-                                ExamImageViewer(
-                                  imageUrl: question.imageUrl!,
-                                  imageMeta: question.imageMeta,
-                                  caption: context.l10n.questionProgress(
-                                    qIndex + 1,
-                                    state.totalQuestions,
-                                  ),
-                                ),
+                              Builder(
+                                builder: (context) {
+                                  final hasExplicitImage = question.imageUrl != null &&
+                                      question.imageUrl!.trim().isNotEmpty;
+                                  final isTextAnImageUrl = QuestionStemView.isImageUrl(
+                                    question.questionText.trim(),
+                                  );
+                                  final effectiveImageUrl = hasExplicitImage
+                                      ? question.imageUrl!
+                                      : (isTextAnImageUrl
+                                          ? question.questionText.trim()
+                                          : null);
+                                  final shouldShowText =
+                                      question.questionText.trim().isNotEmpty &&
+                                          !isTextAnImageUrl;
+
+                                  return Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      if (shouldShowText) ...[
+                                        Text(
+                                          question.questionText,
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                            color: AppColors.textPrimary,
+                                            height: 1.4,
+                                          ),
+                                        ),
+                                        const SizedBox(height: AppSpacing.s12),
+                                      ],
+                                      if (effectiveImageUrl != null &&
+                                          effectiveImageUrl.isNotEmpty)
+                                        ExamImageViewer(
+                                          imageUrl: effectiveImageUrl,
+                                          imageMeta: question.imageMeta,
+                                          caption: context.l10n.questionProgress(
+                                            qIndex + 1,
+                                            state.totalQuestions,
+                                          ),
+                                        ),
+                                    ],
+                                  );
+                                },
+                              ),
                             ],
                           ),
                         ),

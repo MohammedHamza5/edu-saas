@@ -241,8 +241,7 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
         }
 
         int sortOrder = m.sortOrder;
-        if (cfg['sort_order'] != null &&
-            (cfg['sort_order'] as num).toInt() > 0) {
+        if (cfg['sort_order'] != null) {
           sortOrder = (cfg['sort_order'] as num).toInt();
         }
 
@@ -780,11 +779,14 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     // ⚡ Performance: RPC واحد بدلاً من N رحلات HTTP
     // ترتيب 10 عناصر = 10 × ~400ms = 4s  →  RPC واحد = ~80ms
     // يُحدّث كلاً من جدول content وجدول content_groups لضمان تزامن الطالب والمعلم 100%
+    final resolvedGroupId =
+        groupId != null ? GroupSlugResolver.toId(groupId) : null;
     await _safeClient.rpc<void>(
       'reorder_content_items',
       params: {
         'p_ids': contentIdsInOrder,
-        if (groupId != null) 'p_group_id': groupId,
+        if (resolvedGroupId != null && GroupSlugResolver.isUuid(resolvedGroupId))
+          'p_group_id': resolvedGroupId,
       },
     );
   }

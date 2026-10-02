@@ -327,14 +327,99 @@ class ContentCubit extends Cubit<ContentState> {
     }
   }
 
+  /// Reorders visible lessons and updates both memory state and server order
+  Future<void> reorderLessonItems({
+    required int oldIndex,
+    required int newIndex,
+    required List<ContentEntity> visibleLessons,
+  }) async {
+    if (state is! ContentLoaded) return;
+    final current = state as ContentLoaded;
+
+    final lessons = List<ContentEntity>.from(visibleLessons);
+    if (oldIndex < newIndex) {
+      newIndex -= 1;
+    }
+    if (oldIndex < 0 ||
+        oldIndex >= lessons.length ||
+        newIndex < 0 ||
+        newIndex >= lessons.length) {
+      return;
+    }
+
+    final item = lessons.removeAt(oldIndex);
+    lessons.insert(newIndex, item);
+
+    // Build the new ordering map from the reordered visible lessons
+    final orderedIds = lessons.map((e) => e.id).toList();
+    final idToOrder = <String, int>{};
+    for (int i = 0; i < orderedIds.length; i++) {
+      idToOrder[orderedIds[i]] = i;
+    }
+
+    // Apply the new order to current.items and sort accordingly
+    final updatedList = current.items.map((it) {
+      if (idToOrder.containsKey(it.id)) {
+        return it.copyWith(sortOrder: idToOrder[it.id]!);
+      }
+      return it;
+    }).toList();
+
+    updatedList.sort((a, b) {
+      final s = a.sortOrder.compareTo(b.sortOrder);
+      if (s != 0) return s;
+      return b.createdAt.compareTo(a.createdAt);
+    });
+
+    // Optimistically update UI order immediately
+    emit(current.copyWith(items: updatedList, isReordering: true));
+
+    final result = await _repository.reorderContentItems(
+      contentIdsInOrder: orderedIds,
+      groupId: _currentGroupId,
+    );
+
+    switch (result) {
+      case Success():
+        if (_currentGroupId != null) {
+          AppCache.content.invalidatePrefix(_currentGroupId!);
+        }
+        emit(current.copyWith(items: updatedList, isReordering: false));
+      case FailureResult(:final failure):
+        emit(ContentError(failure.message));
+        if (_currentGroupId != null) {
+          AppCache.content.invalidatePrefix(_currentGroupId!);
+          await loadGroupContent(_currentGroupId!, forceRefresh: true);
+        }
+    }
+  }
+
   /// Reorders items after a drag-and-drop in ReorderableListView
   Future<void> reorderItems(int oldIndex, int newIndex) async {
     if (state is! ContentLoaded) return;
     final current = state as ContentLoaded;
+    final videos =
+        current.items.where((i) => i.type == ContentType.video).toList();
+    if (videos.isNotEmpty &&
+        oldIndex < videos.length &&
+        newIndex <= videos.length) {
+      await reorderLessonItems(
+        oldIndex: oldIndex,
+        newIndex: newIndex,
+        visibleLessons: videos,
+      );
+      return;
+    }
 
     final list = List<ContentEntity>.from(current.items);
     if (oldIndex < newIndex) {
       newIndex -= 1;
+    }
+    if (oldIndex < 0 ||
+        oldIndex >= list.length ||
+        newIndex < 0 ||
+        newIndex >= list.length) {
+      return;
     }
     final item = list.removeAt(oldIndex);
     list.insert(newIndex, item);

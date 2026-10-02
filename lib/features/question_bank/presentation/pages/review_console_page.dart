@@ -522,14 +522,25 @@ class _ReviewConsolePageState extends State<ReviewConsolePage> {
                 if (rawCrop == null || rawCrop.isEmpty) {
                   for (final block in rev.stemBlocks) {
                     final type = block['type']?.toString();
-                    if (type == 'asset') {
-                      final val = block['crop_asset'] ?? block['path'] ?? block['url'];
+                    if (type == 'asset' || type == 'image') {
+                      final val = block['crop_asset'] ??
+                          block['path'] ??
+                          block['url'] ??
+                          block['value'];
                       if (val != null && val.toString().isNotEmpty) {
                         rawCrop = val.toString();
                         break;
                       }
+                    } else if (QuestionStemView.isImageUrl(block['value']?.toString() ?? '')) {
+                      rawCrop = block['value'].toString();
+                      break;
                     }
                   }
+                }
+
+                if ((rawCrop == null || rawCrop.isEmpty) &&
+                    QuestionStemView.isImageUrl(rev.stemText.trim())) {
+                  rawCrop = rev.stemText.trim();
                 }
 
                 final cropUrl = _resolveStorageUrl(rawCrop);
@@ -960,6 +971,7 @@ class _ReviewConsolePageState extends State<ReviewConsolePage> {
     }
 
     // ── الحالة: نص stemText بسيط (الطريقة القديمة) ──
+    final isImage = QuestionStemView.isImageUrl(rev.stemText.trim());
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.s16),
@@ -968,7 +980,15 @@ class _ReviewConsolePageState extends State<ReviewConsolePage> {
         borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
         border: Border.all(color: theme.colorScheme.outlineVariant),
       ),
-      child: MathContentView(text: rev.stemText),
+      child: isImage
+          ? QuestionStemView(
+              blocks: [
+                {'type': 'image', 'value': rev.stemText.trim()}
+              ],
+              resolveUrl: _resolveStorageUrl,
+              fontSize: 15,
+            )
+          : MathContentView(text: rev.stemText),
     );
   }
 
@@ -1434,4 +1454,5 @@ class _ReviewConsolePageState extends State<ReviewConsolePage> {
       ),
     );
   }
+
 }

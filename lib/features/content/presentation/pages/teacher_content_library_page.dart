@@ -403,7 +403,11 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                       onReorder: (oldIdx, newIdx) {
                                         context
                                             .read<ContentCubit>()
-                                            .reorderItems(oldIdx, newIdx);
+                                            .reorderLessonItems(
+                                              oldIndex: oldIdx,
+                                              newIndex: newIdx,
+                                              visibleLessons: lessons,
+                                            );
                                       },
                                       proxyDecorator:
                                           (child, index, animation) {
@@ -442,10 +446,18 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                               index < lessons.length - 1,
                                           onMoveUp: () => context
                                               .read<ContentCubit>()
-                                              .reorderItems(index, index - 1),
+                                              .reorderLessonItems(
+                                                oldIndex: index,
+                                                newIndex: index - 1,
+                                                visibleLessons: lessons,
+                                              ),
                                           onMoveDown: () => context
                                               .read<ContentCubit>()
-                                              .reorderItems(index, index + 2),
+                                              .reorderLessonItems(
+                                                oldIndex: index,
+                                                newIndex: index + 2,
+                                                visibleLessons: lessons,
+                                              ),
                                           onEdit: () =>
                                               _openEditLessonPage(lesson),
                                           onDelete: () =>
