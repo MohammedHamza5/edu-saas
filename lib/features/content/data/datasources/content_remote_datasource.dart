@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart' as dio;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/network/supabase_service.dart';
+import '../../../../core/utils/group_slug_resolver.dart';
 import '../models/content_model.dart';
 import '../models/file_attachment_model.dart';
 
@@ -141,6 +142,7 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     int page = 0,
     int pageSize = 20,
   }) async {
+    final resolvedGroupId = GroupSlugResolver.toId(groupId);
     // Fetch any content linked to this group via the junction table content_groups with group overrides
     final junctionRes = await _safeClient
         .from('content_groups')
@@ -150,7 +152,7 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
           'associated_exam:exams!content_groups_associated_exam_id_fkey(id, title, content:content!exams_content_id_fkey(title)), '
           'prerequisite_exam:exams!content_groups_prerequisite_exam_id_fkey(id, title, passing_score, content:content!exams_content_id_fkey(title))',
         )
-        .eq('group_id', groupId);
+        .eq('group_id', resolvedGroupId);
 
     final Map<String, Map<String, dynamic>> junctionConfigMap = {};
     final junctionIds = <String>[];
@@ -172,10 +174,10 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
         );
 
     if (junctionIds.isEmpty) {
-      query = query.eq('group_id', groupId);
+      query = query.eq('group_id', resolvedGroupId);
     } else {
       final joinedIds = junctionIds.join(',');
-      query = query.or('group_id.eq.$groupId,id.in.($joinedIds)');
+      query = query.or('group_id.eq.$resolvedGroupId,id.in.($joinedIds)');
     }
 
     if (statusFilter != null && statusFilter.isNotEmpty) {
@@ -882,15 +884,29 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     required String groupId,
     String? studentId,
   }) async {
-    final response = await _safeClient.rpc<List<dynamic>>(
+    final resolvedGroupId = GroupSlugResolver.toId(groupId);
+    final response = await _safeClient.rpc<dynamic>(
       'get_group_course_progress',
       params: {
-        'p_group_id': groupId,
+        'p_group_id': resolvedGroupId,
         if (studentId != null) 'p_student_id': studentId,
       },
     );
 
-    return response.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+    if (response is Map) {
+      final lessons = response['lessons'];
+      if (lessons is List) {
+        return lessons
+            .map((e) => Map<String, dynamic>.from(e as Map))
+            .toList();
+      }
+      return [];
+    } else if (response is List) {
+      return response
+          .map((e) => Map<String, dynamic>.from(e as Map))
+          .toList();
+    }
+    return [];
   }
 
   @override
@@ -900,11 +916,12 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     required String contentId,
     String? reason,
   }) async {
+    final resolvedGroupId = GroupSlugResolver.toId(groupId);
     await _safeClient.rpc<void>(
       'manual_unlock_lesson',
       params: {
         'p_student_id': studentId,
-        'p_group_id': groupId,
+        'p_group_id': resolvedGroupId,
         'p_content_id': contentId,
         if (reason != null && reason.isNotEmpty) 'p_reason': reason,
       },
@@ -917,11 +934,12 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     required String groupId,
     required bool isPublished,
   }) async {
+    final resolvedGroupId = GroupSlugResolver.toId(groupId);
     await _safeClient.rpc<void>(
       'toggle_lesson_group_visibility',
       params: {
         'p_content_id': contentId,
-        'p_group_id': groupId,
+        'p_group_id': resolvedGroupId,
         'p_is_published': isPublished,
       },
     );
@@ -932,9 +950,10 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     required String groupId,
     required bool isPublished,
   }) async {
+    final resolvedGroupId = GroupSlugResolver.toId(groupId);
     await _safeClient.rpc<void>(
       'toggle_group_all_content_visibility',
-      params: {'p_group_id': groupId, 'p_is_published': isPublished},
+      params: {'p_group_id': resolvedGroupId, 'p_is_published': isPublished},
     );
   }
 }

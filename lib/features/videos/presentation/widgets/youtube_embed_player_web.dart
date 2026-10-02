@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:js_interop';
 import 'dart:ui_web' as ui_web;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/services/student_activity_tracker.dart';
 
@@ -126,7 +127,9 @@ class _YouTubeEmbedPlayerWebState extends State<_YouTubeEmbedPlayerWeb> {
       try {
         return _createYouTubePlayer(videoId.toJS, _viewId.toJS, origin.toJS);
       } catch (e) {
-        debugPrint('[YouTubeEmbed] Error initializing player: $e');
+        if (kDebugMode) {
+          debugPrint('[YouTubeEmbed] Error initializing player: $e');
+        }
         rethrow;
       }
     });
@@ -252,7 +255,9 @@ class _YouTubeEmbedPlayerWebState extends State<_YouTubeEmbedPlayerWeb> {
             }
           }
         } catch (e) {
-          debugPrint('[YouTubeEmbed] Message handling warning: $e');
+          if (kDebugMode) {
+            debugPrint('[YouTubeEmbed] Message handling warning: $e');
+          }
         }
       }
 

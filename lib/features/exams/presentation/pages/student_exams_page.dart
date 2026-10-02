@@ -20,8 +20,6 @@ import 'exam_intro_page.dart';
 
 enum StudentExamFilter { all, available, inProgress, completed }
 
-enum AssessmentTypeFilter { all, lessonQuizzes, generalExams }
-
 class StudentExamsPage extends StatefulWidget {
   final String? initialExamId;
 
@@ -34,7 +32,6 @@ class StudentExamsPage extends StatefulWidget {
 class _StudentExamsPageState extends State<StudentExamsPage> {
   final ScrollController _scrollController = ScrollController();
   StudentExamFilter _activeFilter = StudentExamFilter.all;
-  AssessmentTypeFilter _typeFilter = AssessmentTypeFilter.all;
   Set<String> _lessonExamIds = {};
 
   @override
@@ -90,16 +87,31 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
 
   Future<void> _loadExams({bool forceRefresh = false}) async {
     try {
-      final res = await InjectionContainer.supabaseClient
+      final ids = <String>{};
+
+      // 1. From content_groups (associated & prerequisite)
+      final cgRes = await InjectionContainer.supabaseClient
           .from('content_groups')
-          .select('associated_exam_id')
-          .not('associated_exam_id', 'is', null);
+          .select('associated_exam_id, prerequisite_exam_id');
+      for (final row in (cgRes as List<dynamic>)) {
+        final aId = row['associated_exam_id'] as String?;
+        final pId = row['prerequisite_exam_id'] as String?;
+        if (aId != null && aId.isNotEmpty) ids.add(aId);
+        if (pId != null && pId.isNotEmpty) ids.add(pId);
+      }
+
+      // 2. From content (associated & prerequisite)
+      final cRes = await InjectionContainer.supabaseClient
+          .from('content')
+          .select('associated_exam_id, prerequisite_exam_id');
+      for (final row in (cRes as List<dynamic>)) {
+        final aId = row['associated_exam_id'] as String?;
+        final pId = row['prerequisite_exam_id'] as String?;
+        if (aId != null && aId.isNotEmpty) ids.add(aId);
+        if (pId != null && pId.isNotEmpty) ids.add(pId);
+      }
+
       if (mounted) {
-        final ids = <String>{};
-        for (final row in (res as List<dynamic>)) {
-          final id = row['associated_exam_id'] as String?;
-          if (id != null && id.isNotEmpty) ids.add(id);
-        }
         setState(() {
           _lessonExamIds = ids;
         });
@@ -115,28 +127,26 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
   bool _isLessonQuiz(ExamEntity exam) {
     if (_lessonExamIds.contains(exam.id)) return true;
     final lower = exam.title.toLowerCase();
-    return lower.contains('quiz') ||
+    return lower.contains('كويز') ||
+        lower.contains('quiz') ||
         lower.contains('درس') ||
         lower.contains('lesson');
   }
 
   List<ExamEntity> _filterExams(List<ExamEntity> list) {
-    var result = list;
-    if (_typeFilter == AssessmentTypeFilter.lessonQuizzes) {
-      result = result.where(_isLessonQuiz).toList();
-    } else if (_typeFilter == AssessmentTypeFilter.generalExams) {
-      result = result.where((e) => !_isLessonQuiz(e)).toList();
-    }
+    // Exclude any exam attached to a lesson.
+    // Lesson quizzes must strictly be completed inside the lesson itself.
+    final generalOnly = list.where((e) => !_isLessonQuiz(e)).toList();
 
     switch (_activeFilter) {
       case StudentExamFilter.all:
-        return result;
+        return generalOnly;
       case StudentExamFilter.available:
-        return result.where((e) => !e.hasAttempted || e.canTakeExam).toList();
+        return generalOnly.where((e) => !e.hasAttempted || e.canTakeExam).toList();
       case StudentExamFilter.inProgress:
-        return result.where((e) => e.hasActiveAttempt).toList();
+        return generalOnly.where((e) => e.hasActiveAttempt).toList();
       case StudentExamFilter.completed:
-        return result
+        return generalOnly
             .where((e) => e.hasAttempted && !e.hasActiveAttempt)
             .toList();
     }
@@ -194,52 +204,13 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
 
           if (state is StudentExamsLoaded) {
             final filtered = _filterExams(state.exams);
-            final lessonQuizzes = filtered.where(_isLessonQuiz).toList();
-            final generalExams = filtered
-                .where((e) => !_isLessonQuiz(e))
-                .toList();
 
             return Center(
               child: ResponsiveContainer(
                 maxWidth: ResponsiveBreakpoints.maxContentWidth,
                 child: Column(
                   children: [
-                    // 1. Assessment Category Chips (All / Lesson Quizzes / General Exams)
-                    Padding(
-                      padding: const EdgeInsets.only(
-                        left: AppSpacing.s16,
-                        right: AppSpacing.s16,
-                        top: AppSpacing.s8,
-                      ),
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: [
-                            _buildCategoryChip(
-                              context.l10n.filterAll,
-                              AssessmentTypeFilter.all,
-                              state.exams.length,
-                            ),
-                            const SizedBox(width: AppSpacing.s8),
-                            _buildCategoryChip(
-                              context.l10n.lessonQuizzesSectionTitle,
-                              AssessmentTypeFilter.lessonQuizzes,
-                              state.exams.where(_isLessonQuiz).length,
-                            ),
-                            const SizedBox(width: AppSpacing.s8),
-                            _buildCategoryChip(
-                              context.l10n.generalExamsSectionTitle,
-                              AssessmentTypeFilter.generalExams,
-                              state.exams
-                                  .where((e) => !_isLessonQuiz(e))
-                                  .length,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    // 2. Status Filter Chips
+                    // Status Filter Chips
                     Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: AppSpacing.s16,
@@ -287,7 +258,7 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
                     ),
                     const Divider(height: 1, color: AppColors.border),
 
-                    // 3. Exams List grouped or filtered
+                    // Exams List
                     Expanded(
                       child: filtered.isEmpty
                           ? Center(
@@ -307,69 +278,19 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
                                   crossAxisAlignment:
                                       CrossAxisAlignment.stretch,
                                   children: [
-                                    if (_typeFilter ==
-                                        AssessmentTypeFilter.all) ...[
-                                      if (lessonQuizzes.isNotEmpty) ...[
-                                        _buildSectionHeader(
-                                          context,
-                                          title: context
-                                              .l10n
-                                              .lessonQuizzesSectionTitle,
-                                          subtitle: context
-                                              .l10n
-                                              .lessonQuizzesSectionDesc,
-                                          icon: Icons.quiz_rounded,
-                                          color: AppColors.primary,
-                                        ),
-                                        const SizedBox(height: AppSpacing.s8),
-                                        _buildExamsGrid(lessonQuizzes),
-                                        const SizedBox(height: AppSpacing.s24),
-                                      ],
-                                      if (generalExams.isNotEmpty) ...[
-                                        _buildSectionHeader(
-                                          context,
-                                          title: context
-                                              .l10n
-                                              .generalExamsSectionTitle,
-                                          subtitle: context
-                                              .l10n
-                                              .generalExamsSectionDesc,
-                                          icon: Icons.assignment_rounded,
-                                          color: const Color(0xFF0D9488),
-                                        ),
-                                        const SizedBox(height: AppSpacing.s8),
-                                        _buildExamsGrid(generalExams),
-                                      ],
-                                    ] else if (_typeFilter ==
-                                        AssessmentTypeFilter.lessonQuizzes) ...[
-                                      _buildSectionHeader(
-                                        context,
-                                        title: context
-                                            .l10n
-                                            .lessonQuizzesSectionTitle,
-                                        subtitle: context
-                                            .l10n
-                                            .lessonQuizzesSectionDesc,
-                                        icon: Icons.quiz_rounded,
-                                        color: AppColors.primary,
-                                      ),
-                                      const SizedBox(height: AppSpacing.s8),
-                                      _buildExamsGrid(filtered),
-                                    ] else ...[
-                                      _buildSectionHeader(
-                                        context,
-                                        title: context
-                                            .l10n
-                                            .generalExamsSectionTitle,
-                                        subtitle: context
-                                            .l10n
-                                            .generalExamsSectionDesc,
-                                        icon: Icons.assignment_rounded,
-                                        color: const Color(0xFF0D9488),
-                                      ),
-                                      const SizedBox(height: AppSpacing.s8),
-                                      _buildExamsGrid(filtered),
-                                    ],
+                                    _buildSectionHeader(
+                                      context,
+                                      title: context
+                                          .l10n
+                                          .generalExamsSectionTitle,
+                                      subtitle: context
+                                          .l10n
+                                          .generalExamsSectionDesc,
+                                      icon: Icons.assignment_rounded,
+                                      color: const Color(0xFF0D9488),
+                                    ),
+                                    const SizedBox(height: AppSpacing.s8),
+                                    _buildExamsGrid(filtered),
                                     if (state.isLoadingMore)
                                       const Padding(
                                         padding: EdgeInsets.symmetric(
@@ -462,29 +383,7 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
     );
   }
 
-  Widget _buildCategoryChip(
-    String label,
-    AssessmentTypeFilter filter,
-    int count,
-  ) {
-    final isSelected = _typeFilter == filter;
-    return ChoiceChip(
-      label: Text('$label ($count)'),
-      selected: isSelected,
-      selectedColor: AppColors.primary,
-      backgroundColor: AppColors.surfaceVariant,
-      labelStyle: TextStyle(
-        fontSize: 12,
-        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-        color: isSelected ? Colors.white : AppColors.textPrimary,
-      ),
-      onSelected: (_) {
-        setState(() {
-          _typeFilter = filter;
-        });
-      },
-    );
-  }
+
 
   Widget _buildFilterChip(String label, StudentExamFilter filter, int count) {
     final isSelected = _activeFilter == filter;

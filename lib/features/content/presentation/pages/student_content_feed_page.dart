@@ -9,6 +9,7 @@ import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/utils/group_slug_resolver.dart';
 import '../../../../core/theme/responsive_breakpoints.dart';
 import '../../../../core/widgets/app_empty_view.dart';
 import '../../../../core/widgets/app_error_view.dart';
@@ -67,32 +68,69 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
   @override
   void initState() {
     super.initState();
-    _activeGroupId = widget.groupId;
+    _activeGroupId = GroupSlugResolver.toId(widget.groupId);
     _activeGroupName = widget.groupName;
-    _fetchStudentGroups();
-    context.read<CourseProgressCubit>().loadCourseProgress(
-      _activeGroupId,
-      studentId: _currentUserId,
-    );
+    _initializeFeed();
     _scrollController.addListener(_onScroll);
+  }
+
+  void _initializeFeed() {
+    // If _activeGroupId is already a valid UUID, load immediately (0ms fast path)
+    if (GroupSlugResolver.isUuid(_activeGroupId)) {
+      unawaited(
+        context.read<CourseProgressCubit>().loadCourseProgress(
+          _activeGroupId,
+          studentId: _currentUserId,
+        ),
+      );
+    }
+    unawaited(_fetchStudentGroups());
   }
 
   Future<void> _fetchStudentGroups() async {
     try {
       final result = await InjectionContainer.groupsRepository.getGroups();
       if (mounted && result.isSuccess && result.dataOrNull != null) {
+        final groups = result.dataOrNull!;
+        for (final g in groups) {
+          GroupSlugResolver.registerGroup(g.id, g.name);
+        }
+        final hadValidUuidBefore = GroupSlugResolver.isUuid(_activeGroupId);
         setState(() {
-          _studentGroups = result.dataOrNull!;
-          if (_activeGroupName == null && _studentGroups.isNotEmpty) {
-            final match = _studentGroups.where((g) => g.id == _activeGroupId);
-            if (match.isNotEmpty) {
-              _activeGroupName = match.first.name;
-            }
+          _studentGroups = groups;
+          // Match by id or by slug or by name
+          final match = _studentGroups.where((g) {
+            return g.id == _activeGroupId ||
+                g.id == widget.groupId ||
+                GroupSlugResolver.toSlug(g.id, g.name).toLowerCase() == widget.groupId.toLowerCase() ||
+                g.name.toLowerCase() == widget.groupId.toLowerCase();
+          });
+          if (match.isNotEmpty) {
+            _activeGroupId = match.first.id;
+            _activeGroupName = match.first.name;
           }
         });
+
+        // If it wasn't loaded because widget.groupId was an unresolved slug, load now
+        if (mounted && !hadValidUuidBefore && GroupSlugResolver.isUuid(_activeGroupId)) {
+          unawaited(
+            context.read<CourseProgressCubit>().loadCourseProgress(
+              _activeGroupId,
+              studentId: _currentUserId,
+            ),
+          );
+        }
       }
     } catch (_) {
       // Safe fallback when groupsRepository is uninitialized in tests or offline
+      if (mounted) {
+        unawaited(
+          context.read<CourseProgressCubit>().loadCourseProgress(
+            _activeGroupId,
+            studentId: _currentUserId,
+          ),
+        );
+      }
     }
   }
 
@@ -265,12 +303,14 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                 : state.message;
             return AppErrorView(
               message: userFriendlyMessage,
-              onRetry: () =>
-                  context.read<CourseProgressCubit>().loadCourseProgress(
-                    _activeGroupId,
-                    studentId:
-                        InjectionContainer.supabaseClient.auth.currentUser?.id,
-                  ),
+              onRetry: () {
+                _activeGroupId = GroupSlugResolver.toId(_activeGroupId);
+                context.read<CourseProgressCubit>().loadCourseProgress(
+                  _activeGroupId,
+                  studentId:
+                      InjectionContainer.supabaseClient.auth.currentUser?.id,
+                );
+              },
             );
           }
 

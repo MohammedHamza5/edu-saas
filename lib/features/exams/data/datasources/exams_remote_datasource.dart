@@ -131,6 +131,33 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
 
     if (groupIds.isEmpty) return [];
 
+    // Collect any exam IDs that are attached to lessons as quizzes or prerequisites
+    // Lesson quizzes must strictly be taken within their respective lessons, not here.
+    final lessonExamIds = <String>{};
+    try {
+      final cgRes = await _safeClient
+          .from('content_groups')
+          .select('associated_exam_id, prerequisite_exam_id')
+          .inFilter('group_id', groupIds);
+      for (final row in (cgRes as List<dynamic>)) {
+        final aId = row['associated_exam_id'] as String?;
+        final pId = row['prerequisite_exam_id'] as String?;
+        if (aId != null && aId.isNotEmpty) lessonExamIds.add(aId);
+        if (pId != null && pId.isNotEmpty) lessonExamIds.add(pId);
+      }
+
+      final cRes = await _safeClient
+          .from('content')
+          .select('associated_exam_id, prerequisite_exam_id')
+          .inFilter('group_id', groupIds);
+      for (final row in (cRes as List<dynamic>)) {
+        final aId = row['associated_exam_id'] as String?;
+        final pId = row['prerequisite_exam_id'] as String?;
+        if (aId != null && aId.isNotEmpty) lessonExamIds.add(aId);
+        if (pId != null && pId.isNotEmpty) lessonExamIds.add(pId);
+      }
+    } catch (_) {}
+
     // 2. Fetch published exams
     final response = await _safeClient
         .from('exams')
@@ -170,7 +197,14 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
         .order('created_at', ascending: false)
         .range(page * pageSize, (page + 1) * pageSize - 1);
 
-    final list = response as List<dynamic>;
+    final rawList = response as List<dynamic>;
+    if (rawList.isEmpty) return [];
+
+    final list = rawList.where((item) {
+      final id = (item as Map<String, dynamic>)['id'] as String?;
+      return id != null && !lessonExamIds.contains(id);
+    }).toList();
+
     if (list.isEmpty) return [];
 
     final examIds = list

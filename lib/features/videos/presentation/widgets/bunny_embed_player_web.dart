@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:js_interop';
 import 'dart:ui_web' as ui_web;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/services/student_activity_tracker.dart';
 
@@ -100,7 +101,9 @@ class _BunnyEmbedPlayerWebState extends State<_BunnyEmbedPlayerWeb> {
         }
         return _createBunnyPlayer(finalUrl.toJS, _viewId.toJS);
       } catch (e) {
-        debugPrint('[BunnyEmbed] Error initializing iframe: $e');
+        if (kDebugMode) {
+          debugPrint('[BunnyEmbed] Error initializing iframe: $e');
+        }
         rethrow;
       }
     });
@@ -187,7 +190,9 @@ class _BunnyEmbedPlayerWebState extends State<_BunnyEmbedPlayerWeb> {
             }
           }
         } catch (e) {
-          debugPrint('[BunnyEmbed] Message handling warning: $e');
+          if (kDebugMode) {
+            debugPrint('[BunnyEmbed] Message handling warning: $e');
+          }
         }
       }
 

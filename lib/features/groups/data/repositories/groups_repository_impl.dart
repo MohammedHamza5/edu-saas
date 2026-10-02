@@ -2,6 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/errors/result.dart';
 import '../../../../core/utils/cache_manager.dart';
+import '../../../../core/utils/group_slug_resolver.dart';
 import '../../domain/entities/group_entity.dart';
 import '../../domain/entities/group_member_entity.dart';
 import '../../domain/repositories/groups_repository.dart';
@@ -18,6 +19,9 @@ class GroupsRepositoryImpl implements GroupsRepository {
   Future<Result<List<GroupEntity>>> getGroups() async {
     final cached = AppCache.groups.getStale(_cacheKeyGroups);
     if (cached is List<GroupEntity> && cached.isNotEmpty && AppCache.groups.has(_cacheKeyGroups)) {
+      for (final g in cached) {
+        GroupSlugResolver.registerGroup(g.id, g.name);
+      }
       return Success(cached);
     }
 
@@ -25,6 +29,9 @@ class GroupsRepositoryImpl implements GroupsRepository {
       final groups = await _remoteDataSource.getGroups();
       final entities = List<GroupEntity>.from(groups);
       AppCache.groups.put(_cacheKeyGroups, entities);
+      for (final g in entities) {
+        GroupSlugResolver.registerGroup(g.id, g.name);
+      }
       return Success(entities);
     } on PostgrestException catch (e) {
       if (cached is List<GroupEntity> && cached.isNotEmpty) {

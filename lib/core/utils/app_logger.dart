@@ -27,7 +27,7 @@ class AppLogger {
   static const _magenta = '\x1B[35m';
   static const _blue = '\x1B[34m';
 
-  static bool _enabled = true;
+  static bool _enabled = kDebugMode;
 
   /// Enable or disable all logging (e.g., disable in release for performance)
   static void setEnabled(bool enabled) => _enabled = enabled;
@@ -36,7 +36,7 @@ class AppLogger {
 
   /// 🔍 DEBUG — Low-level implementation detail (only in debug mode)
   static void d(String tag, String message, {Object? data}) {
-    if (!kDebugMode) return;
+    if (!kDebugMode || !_enabled) return;
     _log(
       level: 'DEBUG',
       tag: tag,
@@ -49,6 +49,7 @@ class AppLogger {
 
   /// ℹ️ INFO — Important lifecycle or business event
   static void i(String tag, String message, {Object? data}) {
+    if (!kDebugMode || !_enabled) return;
     _log(
       level: 'INFO ',
       tag: tag,
@@ -61,6 +62,7 @@ class AppLogger {
 
   /// ⚠️ WARNING — Something unexpected but non-fatal
   static void w(String tag, String message, {Object? data}) {
+    if (!kDebugMode || !_enabled) return;
     _log(
       level: 'WARN ',
       tag: tag,
@@ -78,21 +80,19 @@ class AppLogger {
     Object? error,
     StackTrace? stackTrace,
   }) {
-    if (!_enabled) return;
+    if (!kDebugMode || !_enabled) return;
     final now = _timestamp();
     final header = '$_red[$now][ERROR][$tag] ❌ $message$_reset';
 
-    if (kDebugMode) {
+    // ignore: avoid_print
+    print(header);
+    if (error != null) {
       // ignore: avoid_print
-      print(header);
-      if (error != null) {
-        // ignore: avoid_print
-        print('$_red  ↳ Exception: $error$_reset');
-      }
-      if (stackTrace != null) {
-        // ignore: avoid_print
-        print('$_red  ↳ StackTrace:\n$stackTrace$_reset');
-      }
+      print('$_red  ↳ Exception: $error$_reset');
+    }
+    if (stackTrace != null) {
+      // ignore: avoid_print
+      print('$_red  ↳ StackTrace:\n$stackTrace$_reset');
     }
 
     developer.log(
@@ -107,6 +107,7 @@ class AppLogger {
 
   /// ✅ SUCCESS — Successful completion of an important operation
   static void s(String tag, String message, {Object? data}) {
+    if (!kDebugMode || !_enabled) return;
     _log(
       level: 'OK   ',
       tag: tag,
@@ -119,6 +120,7 @@ class AppLogger {
 
   /// 🌐 NETWORK — HTTP/Supabase request/response tracking
   static void n(String tag, String message, {Object? data}) {
+    if (!kDebugMode || !_enabled) return;
     _log(
       level: 'NET  ',
       tag: tag,
@@ -131,6 +133,7 @@ class AppLogger {
 
   /// 🧩 BLOC — Cubit/Bloc state transition
   static void b(String tag, String message, {Object? data}) {
+    if (!kDebugMode || !_enabled) return;
     _log(
       level: 'BLOC ',
       tag: tag,
@@ -143,6 +146,7 @@ class AppLogger {
 
   /// 🛣️ ROUTER — Navigation event
   static void r(String tag, String message, {Object? data}) {
+    if (!kDebugMode || !_enabled) return;
     _log(
       level: 'ROUTE',
       tag: tag,
@@ -157,7 +161,7 @@ class AppLogger {
 
   /// Print a visual section separator in the console
   static void separator(String label) {
-    if (!_enabled || !kDebugMode) return;
+    if (!kDebugMode || !_enabled) return;
     final line = '─' * 60;
     // ignore: avoid_print
     print('$_gray$line$_reset');
@@ -177,17 +181,15 @@ class AppLogger {
     required String emoji,
     Object? data,
   }) {
-    if (!_enabled) return;
+    if (!kDebugMode || !_enabled) return;
     final now = _timestamp();
     final line = '$color[$now][$level][$tag] $emoji $message$_reset';
 
-    if (kDebugMode) {
+    // ignore: avoid_print
+    print(line);
+    if (data != null) {
       // ignore: avoid_print
-      print(line);
-      if (data != null) {
-        // ignore: avoid_print
-        print('$_gray  ↳ data: $data$_reset');
-      }
+      print('$_gray  ↳ data: $data$_reset');
     }
 
     developer.log(message, name: tag, time: DateTime.now());

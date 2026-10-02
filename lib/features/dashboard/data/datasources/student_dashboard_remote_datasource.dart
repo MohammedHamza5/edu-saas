@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/utils/app_logger.dart';
+import '../../../../core/utils/group_slug_resolver.dart';
 import '../../../groups/data/models/group_model.dart';
 import '../../../groups/domain/entities/group_entity.dart';
 import '../../domain/entities/student_dashboard_stats.dart';
@@ -157,7 +158,9 @@ class StudentDashboardRemoteDataSourceImpl
     if (gList != null) {
       for (final g in gList) {
         if (g is Map<String, dynamic>) {
-          groups.add(GroupModel.fromJson(g));
+          final group = GroupModel.fromJson(g);
+          groups.add(group);
+          GroupSlugResolver.registerGroup(group.id, group.name);
         }
       }
     }

@@ -39,15 +39,19 @@ Future<void> main() async {
         'Flutter binding initialized & Clean Path URLs enabled',
       );
 
-      // ── 2. Register global BlocObserver ─────────────────────────────────────
-      Bloc.observer = const AppBlocObserver();
-      AppLogger.i('Main', 'BlocObserver registered');
+      // ── 2. Register global BlocObserver (Debug Only) ────────────────────────
+      if (kDebugMode) {
+        Bloc.observer = const AppBlocObserver();
+        AppLogger.i('Main', 'BlocObserver registered');
+      }
 
       // ── 3. Precision UI Error Tracking & Custom In-App Error Builder ──────────
       FlutterError.onError = (FlutterErrorDetails details) {
-        // Dissects error, logs exact widget, line, and widget tree path in console
-        UiErrorTracker.track(details);
-        FlutterError.presentError(details);
+        if (kDebugMode) {
+          // Dissects error, logs exact widget, line, and widget tree path in console
+          UiErrorTracker.track(details);
+          FlutterError.presentError(details);
+        }
       };
 
       // Custom in-app error card replacing the blank red/grey crash screen
@@ -111,12 +115,14 @@ Future<void> main() async {
     },
     // ── 7. Zoned error handler — يمسك كل async error لم يُمسك ───────────────
     (Object error, StackTrace stackTrace) {
-      AppLogger.e(
-        'ZoneError',
-        '🔥 Unhandled async error caught by Zone',
-        error: error,
-        stackTrace: stackTrace,
-      );
+      if (kDebugMode) {
+        AppLogger.e(
+          'ZoneError',
+          '🔥 Unhandled async error caught by Zone',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }
     },
   );
 }
