@@ -15,6 +15,7 @@ import '../../../../core/extensions/responsive_context_extension.dart';
 import '../../../../core/theme/responsive_breakpoints.dart';
 import '../../../../core/widgets/responsive_container.dart';
 import '../../../../core/widgets/responsive_grid.dart';
+import '../../../../core/utils/app_feedback.dart';
 import '../../../../core/utils/whatsapp_report_generator.dart';
 import '../../domain/entities/student_entity.dart';
 import '../../domain/entities/student_360_entity.dart';
@@ -48,6 +49,41 @@ class _Student360PageState extends State<Student360Page> {
     return const AppLoadingView.profile();
   }
 
+  Future<void> _confirmDeleteStudent(
+    BuildContext context,
+    StudentEntity student,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(context.l10n.deleteStudentConfirmTitle),
+        content: Text(context.l10n.deleteStudentConfirmBody(student.fullName)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(context.l10n.cancel),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: AppColors.error),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(context.l10n.deleteStudentAction),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && context.mounted) {
+      final ok = await context.read<StudentsCubit>().deleteStudent(student.id);
+      if (ok && context.mounted) {
+        AppFeedback.showSuccess(context, context.l10n.studentDeletedSuccess);
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          context.go(AppRoutes.studentsList);
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -76,6 +112,21 @@ class _Student360PageState extends State<Student360Page> {
             tooltip: context.l10n.refresh,
             onPressed: () =>
                 context.read<StudentsCubit>().loadStudent360(widget.studentId),
+          ),
+          BlocBuilder<StudentsCubit, StudentsState>(
+            builder: (context, state) {
+              if (state is Student360Loaded) {
+                return IconButton(
+                  icon: const Icon(
+                    Icons.delete_outline_rounded,
+                    color: AppColors.error,
+                  ),
+                  tooltip: context.l10n.deleteStudentAction,
+                  onPressed: () => _confirmDeleteStudent(context, state.student),
+                );
+              }
+              return const SizedBox.shrink();
+            },
           ),
         ],
       ),

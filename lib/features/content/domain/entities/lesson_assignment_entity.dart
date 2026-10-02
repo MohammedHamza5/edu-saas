@@ -281,7 +281,7 @@ class LessonAssignmentEntity extends Equatable {
   }
 
   static LessonAccess _parseAccess(String? val) {
-    if (val == 'unlocked') return LessonAccess.unlocked;
+    if (val == 'unlocked' || val == 'available') return LessonAccess.unlocked;
     return LessonAccess.locked;
   }
 

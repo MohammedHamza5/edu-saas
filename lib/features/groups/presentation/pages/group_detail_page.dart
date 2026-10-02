@@ -12,6 +12,7 @@ import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_empty_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
 import '../../../../core/widgets/responsive_container.dart';
+import '../../../../core/utils/app_feedback.dart';
 import '../../domain/entities/group_entity.dart';
 import '../../domain/entities/group_member_entity.dart';
 import '../cubit/groups_cubit.dart';
@@ -74,6 +75,42 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
         ],
       ),
     );
+  }
+
+  Future<void> _confirmDeleteGroup(BuildContext context, GroupEntity group) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(context.l10n.deleteGroupConfirmTitle),
+        content: Text(context.l10n.deleteGroupConfirmBody(group.name)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(context.l10n.cancel),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.error,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(context.l10n.deleteGroupAction),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      final ok = await context.read<GroupsCubit>().deleteGroup(group.id);
+      if (ok && context.mounted) {
+        AppFeedback.showSuccess(context, context.l10n.groupDeletedSuccess);
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          context.go(AppRoutes.groupsList);
+        }
+      }
+    }
   }
 
   String _getMathSymbol(String level) {
@@ -145,6 +182,14 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
                 icon: const Icon(Icons.settings_rounded),
                 tooltip: context.l10n.courseSettingsTitle,
                 onPressed: () => CourseSettingsDialog.show(context, group!),
+              ),
+              IconButton(
+                icon: const Icon(
+                  Icons.delete_outline_rounded,
+                  color: AppColors.error,
+                ),
+                tooltip: context.l10n.deleteGroupAction,
+                onPressed: () => _confirmDeleteGroup(context, group!),
               ),
             ],
           ),

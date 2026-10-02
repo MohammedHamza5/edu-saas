@@ -6172,4 +6172,36 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get openLecturesAction => 'عرض المحاضرات';
+
+  @override
+  String get deleteStudentAction => 'حذف الطالب';
+
+  @override
+  String get deleteStudentConfirmTitle => 'حذف الطالب نهائياً';
+
+  @override
+  String deleteStudentConfirmBody(String studentName) {
+    return 'هل أنت متأكد من حذف الطالب \"$studentName\" نهائياً؟ سيتم مسح كافة سجلات أدائه وواجباته واختباراته وحضوره فوراً لتوفير مساحة التخزين.';
+  }
+
+  @override
+  String get studentDeletedSuccess => 'تم حذف الطالب وكافة سجلاته بنجاح.';
+
+  @override
+  String get deleteGroupAction => 'حذف المجموعة';
+
+  @override
+  String get deleteGroupConfirmTitle => 'حذف المجموعة';
+
+  @override
+  String deleteGroupConfirmBody(String groupName) {
+    return 'هل أنت متأكد من حذف المجموعة \"$groupName\"؟ ستبقى المحاضرات والمواد التعليمية محفوظة بأمان في مكتبتك المركزية، ولكن سيتم فك ارتباط الطلاب بها وحذف سجلات حضور المجموعة.';
+  }
+
+  @override
+  String get groupDeletedSuccess => 'تم حذف المجموعة بنجاح.';
+
+  @override
+  String get deleteLessonSmartNote =>
+      'سيتم مسح ملفات الـ PDF المرفقة وسجلات التقدم لتوفير مساحة التخزين، بينما ستبقى الاختبارات المرتبطة محفوظة في بنك اختباراتك.';
 }

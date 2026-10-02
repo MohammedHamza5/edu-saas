@@ -315,4 +315,40 @@ class GroupsCubit extends Cubit<GroupsState> {
       },
     );
   }
+
+  /// Permanently deletes a group and detaches its content to the central library.
+  Future<bool> deleteGroup(String groupId) async {
+    final result = await _repository.deleteGroup(groupId);
+    if (isClosed) return false;
+
+    return result.when(
+      onSuccess: (_) {
+        AppCache.groups.clear();
+        AppCache.content.clear();
+        if (state is GroupsLoaded) {
+          final current = state as GroupsLoaded;
+          final updatedGroups =
+              current.groups.where((g) => g.id != groupId).toList();
+          AppCache.groups.put(_cacheKeyGroups, updatedGroups);
+          if (!isClosed) {
+            emit(
+              current.copyWith(
+                groups: updatedGroups,
+                selectedGroup: current.selectedGroup?.id == groupId
+                    ? null
+                    : current.selectedGroup,
+              ),
+            );
+          }
+        } else {
+          loadGroups();
+        }
+        return true;
+      },
+      onFailure: (failure) {
+        if (!isClosed) emit(GroupsError(failure.message));
+        return false;
+      },
+    );
+  }
 }

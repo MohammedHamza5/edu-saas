@@ -34,4 +34,7 @@ abstract interface class GroupsRepository {
     required String groupId,
     required String studentId,
   });
+
+  /// Delete a group and detach content
+  Future<Result<void>> deleteGroup(String groupId);
 }

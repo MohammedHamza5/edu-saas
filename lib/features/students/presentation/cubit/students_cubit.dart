@@ -270,6 +270,33 @@ class StudentsCubit extends Cubit<StudentsState> {
     );
   }
 
+  /// Permanently deletes student account and all related records to preserve storage quota.
+  Future<bool> deleteStudent(String studentId) async {
+    final result = await _repository.deleteStudent(studentId);
+    if (isClosed) return false;
+
+    return result.when(
+      onSuccess: (_) {
+        if (!isClosed) {
+          AppCache.students.clear();
+          AppCache.groups.clear();
+          loadStudents(
+            status: _currentStatus,
+            searchQuery: _currentSearch,
+            refresh: true,
+          );
+        }
+        return true;
+      },
+      onFailure: (failure) {
+        if (!isClosed) {
+          emit(StudentsError(failure.message));
+        }
+        return false;
+      },
+    );
+  }
+
   // ── Pending Students (T-04) ───────────────────────────────────────────────
 
   Future<void> loadPendingStudents({bool refresh = false}) async {

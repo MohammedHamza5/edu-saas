@@ -135,7 +135,22 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(ctx.l10n.deleteConfirmTitle),
-        content: Text(ctx.l10n.deleteItemConfirmMessage(item.title)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(ctx.l10n.deleteItemConfirmMessage(item.title)),
+            const SizedBox(height: AppSpacing.s12),
+            Text(
+              ctx.l10n.deleteLessonSmartNote,
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(ctx).colorScheme.primary,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),

@@ -791,7 +791,42 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
 
   @override
   Future<void> deleteContent(String contentId) async {
-    await _safeClient.from('content').delete().eq('id', contentId);
+    // 1. Call atomic database cleanup RPC (preserves exams, cleans DB child records)
+    final res = await _safeClient.rpc<dynamic>(
+      'delete_lesson_with_cleanup',
+      params: {'p_content_id': contentId},
+    );
+
+    // 2. The RPC returns a list of storage paths of deleted files (e.g. materials/... or files in group-content)
+    if (res != null && res is List) {
+      final paths = res.map((e) => e.toString()).toList();
+      final r2Paths = paths.where((p) => p.startsWith('materials/')).toList();
+      final supabasePaths = paths.where((p) => !p.startsWith('materials/')).toList();
+
+      // Clean up R2 physical files
+      if (r2Paths.isNotEmpty) {
+        try {
+          await _safeClient.functions.invoke(
+            'r2-storage',
+            body: {
+              'action': 'delete-files',
+              'storage_paths': r2Paths,
+            },
+          );
+        } catch (_) {
+          // Non-blocking cleanup
+        }
+      }
+
+      // Clean up Supabase Storage files if any
+      if (supabasePaths.isNotEmpty) {
+        try {
+          await _safeClient.storage.from('group-content').remove(supabasePaths);
+        } catch (_) {
+          // Non-blocking cleanup
+        }
+      }
+    }
   }
 
   @override

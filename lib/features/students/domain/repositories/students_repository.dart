@@ -43,4 +43,7 @@ abstract interface class StudentsRepository {
   Future<Result<List<StudentGroupInfo>>> getAvailableGroupsForStudent(
     String studentId,
   );
+
+  /// Permanently delete student and purge all associated storage/records.
+  Future<Result<void>> deleteStudent(String studentId);
 }

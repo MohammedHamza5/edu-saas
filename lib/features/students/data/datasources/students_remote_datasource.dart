@@ -36,6 +36,9 @@ abstract interface class StudentsRemoteDataSource {
   Future<List<StudentGroupInfoModel>> getAvailableGroupsForStudent(
     String studentId,
   );
+
+  /// Permanently deletes a student and all cascading records via delete_student RPC.
+  Future<void> deleteStudent(String studentId);
 }
 
 // ---------------------------------------------------------------------------
@@ -344,5 +347,10 @@ class StudentsRemoteDataSourceImpl implements StudentsRemoteDataSource {
           ),
         )
         .toList();
+  }
+
+  @override
+  Future<void> deleteStudent(String studentId) async {
+    await _c.rpc<void>('delete_student', params: {'p_student_id': studentId});
   }
 }

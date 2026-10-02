@@ -199,6 +199,12 @@ class FakeGroupsRepository implements GroupsRepository {
     required String groupId,
     required String studentId,
   }) async => const Success(null);
+
+  @override
+  Future<Result<void>> deleteGroup(String id) async {
+    mockGroups.removeWhere((g) => g.id == id);
+    return const Success(null);
+  }
 }
 
 class FakeAuthRepository implements AuthRepository {

@@ -174,6 +174,9 @@ class FakeGroupsRepository implements GroupsRepository {
     required String groupId,
     required String studentId,
   }) async => throw UnimplementedError();
+
+  @override
+  Future<Result<void>> deleteGroup(String groupId) async => const Success(null);
 }
 
 class FakeAuthRepository implements AuthRepository {

@@ -123,4 +123,16 @@ class StudentsRepositoryImpl implements StudentsRepository {
       return FailureResult(ServerFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Result<void>> deleteStudent(String studentId) async {
+    try {
+      await _remoteDataSource.deleteStudent(studentId);
+      return const Success(null);
+    } on PostgrestException catch (e) {
+      return FailureResult(ServerFailure(e.message, code: e.code));
+    } catch (e) {
+      return FailureResult(ServerFailure(e.toString()));
+    }
+  }
 }

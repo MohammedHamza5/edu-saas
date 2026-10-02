@@ -11106,6 +11106,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'View Lectures'**
   String get openLecturesAction;
+
+  /// No description provided for @deleteStudentAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Student'**
+  String get deleteStudentAction;
+
+  /// No description provided for @deleteStudentConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Student Permanently'**
+  String get deleteStudentConfirmTitle;
+
+  /// No description provided for @deleteStudentConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to permanently delete \"{studentName}\"? All associated homework submissions, exam attempts, attendance, and account records will be wiped immediately to free storage space.'**
+  String deleteStudentConfirmBody(String studentName);
+
+  /// No description provided for @studentDeletedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Student and all related records deleted successfully.'**
+  String get studentDeletedSuccess;
+
+  /// No description provided for @deleteGroupAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Group'**
+  String get deleteGroupAction;
+
+  /// No description provided for @deleteGroupConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Group'**
+  String get deleteGroupConfirmTitle;
+
+  /// No description provided for @deleteGroupConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete \"{groupName}\"? All lectures and course materials will remain safe in your central library, but student enrollments and group-specific attendance will be removed.'**
+  String deleteGroupConfirmBody(String groupName);
+
+  /// No description provided for @groupDeletedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Group deleted successfully.'**
+  String get groupDeletedSuccess;
+
+  /// No description provided for @deleteLessonSmartNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Handout files and student progress records will be removed to free storage, while attached exams remain preserved in your exam bank.'**
+  String get deleteLessonSmartNote;
 }
 
 class _AppLocalizationsDelegate

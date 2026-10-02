@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
-import { S3Client, PutObjectCommand, GetObjectCommand } from "npm:@aws-sdk/client-s3@3.540.0";
+import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from "npm:@aws-sdk/client-s3@3.540.0";
 import { getSignedUrl } from "npm:@aws-sdk/s3-request-presigner@3.540.0";
 
 const corsHeaders = {
@@ -157,6 +157,61 @@ Deno.serve(async (req: Request) => {
         JSON.stringify({
           download_url: downloadUrl,
           expires_in: 900,
+        }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    // ── ACTION: delete-files ──────────────────────────────────────────────────
+    if (action === "delete-files") {
+      // 1. Fetch user role and tenant
+      const { data: userData, error: userError } = await supabaseAdmin
+        .from("users")
+        .select("role, tenant_id, status")
+        .eq("id", callerUser.id)
+        .single();
+
+      if (userError || !userData || userData.role !== "teacher" || userData.status !== "active") {
+        return new Response(JSON.stringify({ error: "NOT_AUTHORIZED", details: "Only active teachers can delete materials" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const rawPaths: unknown = body.storage_paths || (body.storage_path ? [body.storage_path] : []);
+      const storagePaths = Array.isArray(rawPaths) ? rawPaths.filter((p): p is string => typeof p === "string") : [];
+
+      if (storagePaths.length === 0) {
+        return new Response(JSON.stringify({ success: true, deleted: 0 }), {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Security check: ensure the paths belong to the teacher's tenant to prevent unauthorized deletions
+      const tenantPrefix = `materials/${userData.tenant_id}/`;
+      const validPaths = storagePaths.filter((path) => path.startsWith(tenantPrefix));
+
+      const deleteResults = await Promise.allSettled(
+        validPaths.map(async (key) => {
+          const command = new DeleteObjectCommand({
+            Bucket: bucketName,
+            Key: key,
+          });
+          return s3Client.send(command);
+        })
+      );
+
+      const deletedCount = deleteResults.filter((r) => r.status === "fulfilled").length;
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          deleted: deletedCount,
+          total: validPaths.length,
         }),
         {
           status: 200,

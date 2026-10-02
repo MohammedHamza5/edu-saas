@@ -67,6 +67,12 @@ class _FakeStudentsRepository implements StudentsRepository {
   ) async {
     return const Success([]);
   }
+
+  @override
+  Future<Result<void>> deleteStudent(String studentId) async {
+    students.removeWhere((s) => s.id == studentId);
+    return const Success(null);
+  }
 }
 
 void main() {

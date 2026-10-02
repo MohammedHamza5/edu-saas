@@ -372,6 +372,7 @@ class _StudentsListPageState extends State<StudentsListPage> {
                                   confirmColor: AppColors.success,
                                 )
                               : null,
+                          onDelete: () => _confirmDeleteStudent(context, student),
                         );
                       },
                     );
@@ -392,6 +393,36 @@ class _StudentsListPageState extends State<StudentsListPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _confirmDeleteStudent(
+    BuildContext context,
+    StudentEntity student,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(context.l10n.deleteStudentConfirmTitle),
+        content: Text(context.l10n.deleteStudentConfirmBody(student.fullName)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(context.l10n.cancel),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: AppColors.error),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(context.l10n.deleteStudentAction),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && context.mounted) {
+      final ok = await context.read<StudentsCubit>().deleteStudent(student.id);
+      if (ok && context.mounted) {
+        AppFeedback.showSuccess(context, context.l10n.studentDeletedSuccess);
+      }
+    }
   }
 
   Future<void> _confirmAction(
@@ -440,6 +471,7 @@ class _StudentCard extends StatelessWidget {
   final VoidCallback? onReject;
   final VoidCallback? onSuspend;
   final VoidCallback? onActivate;
+  final VoidCallback? onDelete;
 
   const _StudentCard({
     required this.student,
@@ -449,6 +481,7 @@ class _StudentCard extends StatelessWidget {
     this.onReject,
     this.onSuspend,
     this.onActivate,
+    this.onDelete,
   });
 
   @override
@@ -589,7 +622,8 @@ class _StudentCard extends StatelessWidget {
               onReject != null ||
               onSuspend != null ||
               onActivate != null ||
-              onAssignGroups != null) ...[
+              onAssignGroups != null ||
+              onDelete != null) ...[
             const SizedBox(height: AppSpacing.s12),
             const Divider(height: 1),
             const SizedBox(height: AppSpacing.s8),
@@ -637,6 +671,13 @@ class _StudentCard extends StatelessWidget {
                         icon: Icons.play_circle_outline_rounded,
                         color: AppColors.success,
                         onPressed: onActivate!,
+                      ),
+                    if (onDelete != null)
+                      _ActionBtn(
+                        label: context.l10n.deleteStudentAction,
+                        icon: Icons.delete_outline_rounded,
+                        color: AppColors.error,
+                        onPressed: onDelete!,
                       ),
                   ],
                 ),

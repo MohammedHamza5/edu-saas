@@ -7174,5 +7174,35 @@
   "myLecturesSectionSubtitle": "Lectures and course materials for each group",
   "@myLecturesSectionSubtitle": {},
   "openLecturesAction": "View Lectures",
-  "@openLecturesAction": {}
+  "@openLecturesAction": {},
+  "deleteStudentAction": "Delete Student",
+  "@deleteStudentAction": {},
+  "deleteStudentConfirmTitle": "Delete Student Permanently",
+  "@deleteStudentConfirmTitle": {},
+  "deleteStudentConfirmBody": "Are you sure you want to permanently delete \"{studentName}\"? All associated homework submissions, exam attempts, attendance, and account records will be wiped immediately to free storage space.",
+  "@deleteStudentConfirmBody": {
+    "placeholders": {
+      "studentName": {
+        "type": "String"
+      }
+    }
+  },
+  "studentDeletedSuccess": "Student and all related records deleted successfully.",
+  "@studentDeletedSuccess": {},
+  "deleteGroupAction": "Delete Group",
+  "@deleteGroupAction": {},
+  "deleteGroupConfirmTitle": "Delete Group",
+  "@deleteGroupConfirmTitle": {},
+  "deleteGroupConfirmBody": "Are you sure you want to delete \"{groupName}\"? All lectures and course materials will remain safe in your central library, but student enrollments and group-specific attendance will be removed.",
+  "@deleteGroupConfirmBody": {
+    "placeholders": {
+      "groupName": {
+        "type": "String"
+      }
+    }
+  },
+  "groupDeletedSuccess": "Group deleted successfully.",
+  "@groupDeletedSuccess": {},
+  "deleteLessonSmartNote": "Handout files and student progress records will be removed to free storage, while attached exams remain preserved in your exam bank.",
+  "@deleteLessonSmartNote": {}
 }

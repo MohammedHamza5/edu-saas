@@ -101,7 +101,22 @@ class _TeacherVideoBankPageState extends State<TeacherVideoBankPage> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(l10n.deleteConfirmTitle),
-        content: Text(l10n.deleteItemConfirmMessage(item.title)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.deleteItemConfirmMessage(item.title)),
+            const SizedBox(height: AppSpacing.s12),
+            Text(
+              l10n.deleteLessonSmartNote,
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(ctx).colorScheme.primary,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),

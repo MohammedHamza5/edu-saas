@@ -35,6 +35,9 @@ abstract interface class GroupsRemoteDataSource {
     required String groupId,
     required String studentId,
   });
+
+  /// Deletes group, detaches content to central library, cleans members & attendance via delete_group RPC.
+  Future<void> deleteGroup(String groupId);
 }
 
 class GroupsRemoteDataSourceImpl implements GroupsRemoteDataSource {
@@ -175,5 +178,10 @@ class GroupsRemoteDataSourceImpl implements GroupsRemoteDataSource {
         .delete()
         .eq('group_id', groupId)
         .eq('student_id', studentId);
+  }
+
+  @override
+  Future<void> deleteGroup(String groupId) async {
+    await _safeClient.rpc<void>('delete_group', params: {'p_group_id': groupId});
   }
 }

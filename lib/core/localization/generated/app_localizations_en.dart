@@ -6215,4 +6215,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get openLecturesAction => 'View Lectures';
+
+  @override
+  String get deleteStudentAction => 'Delete Student';
+
+  @override
+  String get deleteStudentConfirmTitle => 'Delete Student Permanently';
+
+  @override
+  String deleteStudentConfirmBody(String studentName) {
+    return 'Are you sure you want to permanently delete \"$studentName\"? All associated homework submissions, exam attempts, attendance, and account records will be wiped immediately to free storage space.';
+  }
+
+  @override
+  String get studentDeletedSuccess =>
+      'Student and all related records deleted successfully.';
+
+  @override
+  String get deleteGroupAction => 'Delete Group';
+
+  @override
+  String get deleteGroupConfirmTitle => 'Delete Group';
+
+  @override
+  String deleteGroupConfirmBody(String groupName) {
+    return 'Are you sure you want to delete \"$groupName\"? All lectures and course materials will remain safe in your central library, but student enrollments and group-specific attendance will be removed.';
+  }
+
+  @override
+  String get groupDeletedSuccess => 'Group deleted successfully.';
+
+  @override
+  String get deleteLessonSmartNote =>
+      'Handout files and student progress records will be removed to free storage, while attached exams remain preserved in your exam bank.';
 }

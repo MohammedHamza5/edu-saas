@@ -147,4 +147,16 @@ class GroupsRepositoryImpl implements GroupsRepository {
       return FailureResult(ServerFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Result<void>> deleteGroup(String groupId) async {
+    try {
+      await _remoteDataSource.deleteGroup(groupId);
+      return const Success(null);
+    } on PostgrestException catch (e) {
+      return FailureResult(ServerFailure(e.message, code: e.code));
+    } catch (e) {
+      return FailureResult(ServerFailure(e.toString()));
+    }
+  }
 }

@@ -2106,5 +2106,14 @@
   "studentLecturesCardSubtitle": "مشاهدة المحاضرات المسجلة ومتابعة التقدم الأكاديمي",
   "myLecturesSectionTitle": "المحاضرات والمجموعات الدراسية",
   "myLecturesSectionSubtitle": "فهرس المحاضرات والمواد المسجلة لكل مجموعة",
-  "openLecturesAction": "عرض المحاضرات"
+  "openLecturesAction": "عرض المحاضرات",
+  "deleteStudentAction": "حذف الطالب",
+  "deleteStudentConfirmTitle": "حذف الطالب نهائياً",
+  "deleteStudentConfirmBody": "هل أنت متأكد من حذف الطالب \"{studentName}\" نهائياً؟ سيتم مسح كافة سجلات أدائه وواجباته واختباراته وحضوره فوراً لتوفير مساحة التخزين.",
+  "studentDeletedSuccess": "تم حذف الطالب وكافة سجلاته بنجاح.",
+  "deleteGroupAction": "حذف المجموعة",
+  "deleteGroupConfirmTitle": "حذف المجموعة",
+  "deleteGroupConfirmBody": "هل أنت متأكد من حذف المجموعة \"{groupName}\"؟ ستبقى المحاضرات والمواد التعليمية محفوظة بأمان في مكتبتك المركزية، ولكن سيتم فك ارتباط الطلاب بها وحذف سجلات حضور المجموعة.",
+  "groupDeletedSuccess": "تم حذف المجموعة بنجاح.",
+  "deleteLessonSmartNote": "سيتم مسح ملفات الـ PDF المرفقة وسجلات التقدم لتوفير مساحة التخزين، بينما ستبقى الاختبارات المرتبطة محفوظة في بنك اختباراتك."
 }

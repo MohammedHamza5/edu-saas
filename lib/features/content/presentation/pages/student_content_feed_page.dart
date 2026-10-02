@@ -315,7 +315,12 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
           }
 
           if (state is CourseProgressLoaded) {
-            final allPublished = state.lessons;
+            // The lectures roadmap represents video lectures only; attached quizzes appear inside the video player
+            final videoLectures = state.lessons
+                .where((i) => i.type == ContentType.video)
+                .toList();
+            final allPublished =
+                videoLectures.isNotEmpty ? videoLectures : state.lessons;
 
             final completedCount = allPublished
                 .where((i) => i.isEffectivelyCompleted)
@@ -552,75 +557,83 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                         ),
                       ),
 
-                      // 3. Type Filter Chips Row
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: AppSpacing.s8,
-                          ),
-                          child: SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                              children: [
-                                _buildFilterChip(
-                                  label: context.l10n.filterAllWithCount(
-                                    allPublished.length,
+                      // 3. Type Filter Chips Row (Only displayed if multiple media types exist)
+                      if (allPublished.any((i) => i.type == ContentType.pdf) ||
+                          allPublished.any((i) => i.type == ContentType.image))
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: AppSpacing.s8,
+                            ),
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: [
+                                  _buildFilterChip(
+                                    label: context.l10n.filterAllWithCount(
+                                      allPublished.length,
+                                    ),
+                                    isSelected: _selectedTypeFilter == null,
+                                    onSelected: () => setState(
+                                      () => _selectedTypeFilter = null,
+                                    ),
                                   ),
-                                  isSelected: _selectedTypeFilter == null,
-                                  onSelected: () => setState(
-                                    () => _selectedTypeFilter = null,
-                                  ),
-                                ),
-                                const SizedBox(width: AppSpacing.s8),
-                                _buildFilterChip(
-                                  label: context.l10n.filterPdfsWithCount(
-                                    allPublished
-                                        .where((i) => i.type == ContentType.pdf)
-                                        .length,
-                                  ),
-                                  isSelected:
-                                      _selectedTypeFilter == ContentType.pdf,
-                                  onSelected: () => setState(
-                                    () => _selectedTypeFilter = ContentType.pdf,
-                                  ),
-                                ),
-                                const SizedBox(width: AppSpacing.s8),
-                                _buildFilterChip(
-                                  label: context.l10n.filterImagesWithCount(
-                                    allPublished
-                                        .where(
-                                          (i) => i.type == ContentType.image,
-                                        )
-                                        .length,
-                                  ),
-                                  isSelected:
-                                      _selectedTypeFilter == ContentType.image,
-                                  onSelected: () => setState(
-                                    () =>
-                                        _selectedTypeFilter = ContentType.image,
-                                  ),
-                                ),
-                                const SizedBox(width: AppSpacing.s8),
-                                _buildFilterChip(
-                                  label: context.l10n.filterVideosWithCount(
-                                    allPublished
-                                        .where(
-                                          (i) => i.type == ContentType.video,
-                                        )
-                                        .length,
-                                  ),
-                                  isSelected:
-                                      _selectedTypeFilter == ContentType.video,
-                                  onSelected: () => setState(
-                                    () =>
-                                        _selectedTypeFilter = ContentType.video,
-                                  ),
-                                ),
-                              ],
+                                  if (allPublished.any((i) => i.type == ContentType.pdf)) ...[
+                                    const SizedBox(width: AppSpacing.s8),
+                                    _buildFilterChip(
+                                      label: context.l10n.filterPdfsWithCount(
+                                        allPublished
+                                            .where((i) => i.type == ContentType.pdf)
+                                            .length,
+                                      ),
+                                      isSelected:
+                                          _selectedTypeFilter == ContentType.pdf,
+                                      onSelected: () => setState(
+                                        () => _selectedTypeFilter = ContentType.pdf,
+                                      ),
+                                    ),
+                                  ],
+                                  if (allPublished.any((i) => i.type == ContentType.image)) ...[
+                                    const SizedBox(width: AppSpacing.s8),
+                                    _buildFilterChip(
+                                      label: context.l10n.filterImagesWithCount(
+                                        allPublished
+                                            .where(
+                                              (i) => i.type == ContentType.image,
+                                            )
+                                            .length,
+                                      ),
+                                      isSelected:
+                                          _selectedTypeFilter == ContentType.image,
+                                      onSelected: () => setState(
+                                        () =>
+                                            _selectedTypeFilter = ContentType.image,
+                                      ),
+                                    ),
+                                  ],
+                                  if (allPublished.any((i) => i.type == ContentType.video)) ...[
+                                    const SizedBox(width: AppSpacing.s8),
+                                    _buildFilterChip(
+                                      label: context.l10n.filterVideosWithCount(
+                                        allPublished
+                                            .where(
+                                              (i) => i.type == ContentType.video,
+                                            )
+                                            .length,
+                                      ),
+                                      isSelected:
+                                          _selectedTypeFilter == ContentType.video,
+                                      onSelected: () => setState(
+                                        () =>
+                                            _selectedTypeFilter = ContentType.video,
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
 
                       // 4. Content Feed List or Empty State
                       if (allPublished.isEmpty)

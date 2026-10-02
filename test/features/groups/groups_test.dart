@@ -60,6 +60,10 @@ class FakeStudentsRepository implements StudentsRepository {
   Future<Result<List<StudentGroupInfo>>> getAvailableGroupsForStudent(
     String studentId,
   ) async => const Success([]);
+
+  @override
+  Future<Result<void>> deleteStudent(String studentId) async =>
+      const Success(null);
 }
 
 class FakeGroupsRepository implements GroupsRepository {
@@ -171,6 +175,12 @@ class FakeGroupsRepository implements GroupsRepository {
         membersCount: groups[idx].membersCount - 1,
       );
     }
+    return const Success(null);
+  }
+
+  @override
+  Future<Result<void>> deleteGroup(String id) async {
+    groups.removeWhere((g) => g.id == id);
     return const Success(null);
   }
 }
