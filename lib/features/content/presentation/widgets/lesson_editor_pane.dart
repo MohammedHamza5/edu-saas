@@ -2,7 +2,6 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/network/supabase_service.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -116,12 +115,20 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
       final client = SupabaseService.client;
       final res = await client
           .from('exams')
-          .select('id, title')
-          .eq('group_id', widget.groupId)
-          .order('title');
+          .select('id, content!inner(title)')
+          // Fetch all exams for this tenant, so the teacher can reuse them across groups.
+          // RLS automatically restricts this to the teacher's tenant.
+          .order('created_at', ascending: false);
+
       if (mounted) {
         setState(() {
-          _availableExams = List<Map<String, dynamic>>.from(res as List);
+          _availableExams = (res as List).map((e) {
+            final contentMap = e['content'] as Map<String, dynamic>;
+            return {
+              'id': e['id'],
+              'title': contentMap['title'] ?? 'بدون عنوان',
+            };
+          }).toList();
           _isLoadingExams = false;
         });
       }
@@ -186,42 +193,22 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
     if (_removePdf) return null;
     if (_pickedFile == null || _pickedFileBytes == null) return _currentFileId;
 
-    final client = SupabaseService.client;
-    final tenantId = _selectedVideo!.tenantId;
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     final safeName = _pickedFile!.name.toLowerCase().replaceAll(
       RegExp(r'[^a-z0-9_.-]'),
       '_',
     );
-    final storagePath =
-        'group_handouts/${widget.groupId}_${timestamp}_$safeName';
+    final storagePath = 'groups/${widget.groupId}/${timestamp}_$safeName';
 
-    await client.storage
-        .from('group-content')
-        .uploadBinary(
-          storagePath,
-          Uint8List.fromList(_pickedFileBytes!),
-          fileOptions: const FileOptions(
-            contentType: 'application/pdf',
-            upsert: true,
-          ),
-        );
-
-    final fileRes = await client
-        .from('files')
-        .insert({
-          'tenant_id': tenantId,
-          'content_id': _selectedVideo!.id,
-          'storage_path': storagePath,
-          'file_name': _pickedFile!.name,
-          'mime_type': 'application/pdf',
-          'file_size': _pickedFile!.size,
-          'created_at': DateTime.now().toUtc().toIso8601String(),
-        })
-        .select('id')
-        .single();
-
-    return fileRes['id'] as String?;
+    final cubit = context.read<ContentCubit>();
+    return await cubit.uploadAndCreateFileRecord(
+      tenantId: _selectedVideo!.tenantId,
+      contentId: _selectedVideo!.id,
+      fileName: _pickedFile!.name,
+      mimeType: 'application/pdf',
+      fileBytes: _pickedFileBytes!,
+      storagePath: storagePath,
+    );
   }
 
   Future<void> _handleSave() async {

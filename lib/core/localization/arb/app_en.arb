@@ -4677,6 +4677,14 @@
   "@allowRetakeTitle": {
     "description": "Allow retake switch title"
   },
+  "examPublishImmediatelyTitle": "Publish to Students Now?",
+  "@examPublishImmediatelyTitle": {
+    "description": "Switch title for publishing exam immediately"
+  },
+  "examPublishImmediatelyDesc": "If disabled, the exam will be saved as a draft (hidden from students) and can be used as a General Exam or published later.",
+  "@examPublishImmediatelyDesc": {
+    "description": "Switch description for publishing exam immediately"
+  },
   "allowRetakeSubtitle": "The platform retains the highest score achieved in student record",
   "@allowRetakeSubtitle": {
     "description": "Allow retake switch subtitle"
@@ -7154,5 +7162,17 @@
   "selectExistingQuizAction": "Select from Existing Quizzes",
   "@selectExistingQuizAction": {},
   "unlinkQuizAction": "Unlink Quiz",
-  "@unlinkQuizAction": {}
+  "@unlinkQuizAction": {},
+  "studentNavLectures": "Lectures",
+  "@studentNavLectures": {},
+  "studentNavLecturesSubtitle": "Video lectures & course materials",
+  "@studentNavLecturesSubtitle": {},
+  "studentLecturesCardSubtitle": "Watch recorded lectures and track academic progress",
+  "@studentLecturesCardSubtitle": {},
+  "myLecturesSectionTitle": "My Lectures & Study Groups",
+  "@myLecturesSectionTitle": {},
+  "myLecturesSectionSubtitle": "Lectures and course materials for each group",
+  "@myLecturesSectionSubtitle": {},
+  "openLecturesAction": "View Lectures",
+  "@openLecturesAction": {}
 }

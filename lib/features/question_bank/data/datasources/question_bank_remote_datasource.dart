@@ -809,16 +809,13 @@ class QuestionBankRemoteDataSourceImpl implements QuestionBankRemoteDataSource {
 
     // حالة: الملف معالج مسبقاً أو تم الاستخراج للتو
     if (status == 'done' || status == 'already_processed') {
-      // الأسئلة تأتي في الـ Response مباشرة
-      final questionsRaw = ingestResult['questions'] as List<dynamic>?;
-      if (questionsRaw != null && questionsRaw.isNotEmpty) {
-        // أسئلة جاءت في الـ response مباشرة
-        return questionsRaw
-            .map((q) => _mapQuestion(q as Map<String, dynamic>))
-            .toList();
-      }
-      // fallback: جلب من قاعدة البيانات
+      // الأسئلة قد تأتي في الـ Response ولكنها قد تكون غير مكتملة (مثلاً ينقصها tenant_id)
+      // الأفضل والأكثر أماناً هو جلبها دائماً من قاعدة البيانات لضمان اكتمال كل الحقول.
       return _fetchQuestionsByDocument(documentId);
+    }
+
+    if (status == 'processing') {
+      throw Exception('BACKGROUND_PROCESSING');
     }
 
     throw Exception(

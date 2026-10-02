@@ -6307,6 +6307,18 @@ abstract class AppLocalizations {
   /// **'Allow Exam Retakes'**
   String get allowRetakeTitle;
 
+  /// Switch title for publishing exam immediately
+  ///
+  /// In en, this message translates to:
+  /// **'Publish to Students Now?'**
+  String get examPublishImmediatelyTitle;
+
+  /// Switch description for publishing exam immediately
+  ///
+  /// In en, this message translates to:
+  /// **'If disabled, the exam will be saved as a draft (hidden from students) and can be used as a General Exam or published later.'**
+  String get examPublishImmediatelyDesc;
+
   /// Allow retake switch subtitle
   ///
   /// In en, this message translates to:
@@ -11058,6 +11070,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unlink Quiz'**
   String get unlinkQuizAction;
+
+  /// No description provided for @studentNavLectures.
+  ///
+  /// In en, this message translates to:
+  /// **'Lectures'**
+  String get studentNavLectures;
+
+  /// No description provided for @studentNavLecturesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Video lectures & course materials'**
+  String get studentNavLecturesSubtitle;
+
+  /// No description provided for @studentLecturesCardSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch recorded lectures and track academic progress'**
+  String get studentLecturesCardSubtitle;
+
+  /// No description provided for @myLecturesSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My Lectures & Study Groups'**
+  String get myLecturesSectionTitle;
+
+  /// No description provided for @myLecturesSectionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Lectures and course materials for each group'**
+  String get myLecturesSectionSubtitle;
+
+  /// No description provided for @openLecturesAction.
+  ///
+  /// In en, this message translates to:
+  /// **'View Lectures'**
+  String get openLecturesAction;
 }
 
 class _AppLocalizationsDelegate

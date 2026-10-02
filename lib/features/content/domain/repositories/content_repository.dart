@@ -114,4 +114,15 @@ abstract class ContentRepository {
     required String groupId,
     required bool isPublished,
   });
+
+  /// Uploads a file (R2 or fallback) and creates a record in the files table.
+  /// Returns the newly created file_id.
+  Future<Result<String>> uploadAndCreateFileRecord({
+    required String tenantId,
+    required String contentId,
+    required String fileName,
+    required String mimeType,
+    required List<int> fileBytes,
+    required String storagePath,
+  });
 }

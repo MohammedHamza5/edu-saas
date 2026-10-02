@@ -3482,6 +3482,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get allowRetakeTitle => 'Allow Exam Retakes';
 
   @override
+  String get examPublishImmediatelyTitle => 'Publish to Students Now?';
+
+  @override
+  String get examPublishImmediatelyDesc =>
+      'If disabled, the exam will be saved as a draft (hidden from students) and can be used as a General Exam or published later.';
+
+  @override
   String get allowRetakeSubtitle =>
       'The platform retains the highest score achieved in student record';
 
@@ -6188,4 +6195,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get unlinkQuizAction => 'Unlink Quiz';
+
+  @override
+  String get studentNavLectures => 'Lectures';
+
+  @override
+  String get studentNavLecturesSubtitle => 'Video lectures & course materials';
+
+  @override
+  String get studentLecturesCardSubtitle =>
+      'Watch recorded lectures and track academic progress';
+
+  @override
+  String get myLecturesSectionTitle => 'My Lectures & Study Groups';
+
+  @override
+  String get myLecturesSectionSubtitle =>
+      'Lectures and course materials for each group';
+
+  @override
+  String get openLecturesAction => 'View Lectures';
 }

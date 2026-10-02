@@ -319,4 +319,28 @@ class ContentRepositoryImpl implements ContentRepository {
       );
     }
   }
+
+  @override
+  Future<Result<String>> uploadAndCreateFileRecord({
+    required String tenantId,
+    required String contentId,
+    required String fileName,
+    required String mimeType,
+    required List<int> fileBytes,
+    required String storagePath,
+  }) async {
+    try {
+      final fileId = await _remoteDataSource.uploadAndCreateFileRecord(
+        tenantId: tenantId,
+        contentId: contentId,
+        fileName: fileName,
+        mimeType: mimeType,
+        fileBytes: fileBytes,
+        storagePath: storagePath,
+      );
+      return Success(fileId);
+    } catch (e) {
+      return FailureResult(ServerFailure('فشل في رفع الملف', details: e.toString()));
+    }
+  }
 }

@@ -70,7 +70,7 @@ class ExamsRepositoryImpl implements ExamsRepository {
 
   @override
   Future<Result<ExamEntity>> createExam({
-    required String groupId,
+    String? groupId,
     required String title,
     int durationMinutes = 60,
     int maxScore = 100,
@@ -80,6 +80,7 @@ class ExamsRepositoryImpl implements ExamsRepository {
     bool allowRetake = false,
     DateTime? startAt,
     DateTime? endAt,
+    bool isPublished = false,
     required List<ExamQuestionEntity> initialQuestions,
   }) async {
     try {
@@ -106,6 +107,7 @@ class ExamsRepositoryImpl implements ExamsRepository {
         allowRetake: allowRetake,
         startAt: startAt,
         endAt: endAt,
+        isPublished: isPublished,
         initialQuestions: questionsModels,
       );
       return Success(created);

@@ -256,6 +256,33 @@ class ContentCubit extends Cubit<ContentState> {
     }
   }
 
+  /// Uploads a file (R2 or fallback) and creates a record in the files table.
+  /// Returns the newly created file_id.
+  Future<String?> uploadAndCreateFileRecord({
+    required String tenantId,
+    required String contentId,
+    required String fileName,
+    required String mimeType,
+    required List<int> fileBytes,
+    required String storagePath,
+  }) async {
+    final result = await _repository.uploadAndCreateFileRecord(
+      tenantId: tenantId,
+      contentId: contentId,
+      fileName: fileName,
+      mimeType: mimeType,
+      fileBytes: fileBytes,
+      storagePath: storagePath,
+    );
+    switch (result) {
+      case Success(:final data):
+        return data;
+      case FailureResult(:final failure):
+        emit(ContentError(failure.message));
+        return null;
+    }
+  }
+
   /// Links a quiz/exam to a lesson
   Future<bool> linkLessonExam({
     required String contentId,

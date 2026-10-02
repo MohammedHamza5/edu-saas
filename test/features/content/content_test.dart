@@ -308,6 +308,21 @@ class _FakeContentRepository implements ContentRepository {
     }).toList();
     return const Success(null);
   }
+
+  @override
+  Future<Result<String>> uploadAndCreateFileRecord({
+    required String tenantId,
+    required String contentId,
+    required String fileName,
+    required String mimeType,
+    required List<int> fileBytes,
+    required String storagePath,
+  }) async {
+    if (shouldFail) {
+      return const FailureResult(ServerFailure('Upload failed'));
+    }
+    return const Success('new-file-123');
+  }
 }
 
 void main() {

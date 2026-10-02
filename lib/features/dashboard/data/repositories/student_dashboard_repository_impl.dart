@@ -1,6 +1,7 @@
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/errors/result.dart';
+import '../../../../core/utils/cache_manager.dart';
 import '../../domain/entities/student_dashboard_stats.dart';
 import '../../domain/repositories/student_dashboard_repository.dart';
 import '../datasources/student_dashboard_remote_datasource.dart';
@@ -36,6 +37,9 @@ class StudentDashboardRepositoryImpl implements StudentDashboardRepository {
       _cachedStats = stats;
       _cachedStudentId = studentId;
       _cachedAt = now;
+      if (stats.enrolledGroups.isNotEmpty) {
+        AppCache.groups.put('groups_all', stats.enrolledGroups);
+      }
       return Result.success(stats);
     } on ServerException catch (e) {
       // Graceful degradation: return cached data if available

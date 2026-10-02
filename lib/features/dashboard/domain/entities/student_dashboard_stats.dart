@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../../groups/domain/entities/group_entity.dart';
 
 class ContinueLearningItem extends Equatable {
   final String videoId;
@@ -71,6 +72,7 @@ class StudentDashboardStats extends Equatable {
   final String activeGroupLevel;
   final ContinueLearningItem? continueLearningItem;
   final List<UrgentTaskItem> urgentTasks;
+  final List<GroupEntity> enrolledGroups;
 
   const StudentDashboardStats({
     required this.attendancePercentage,
@@ -81,6 +83,7 @@ class StudentDashboardStats extends Equatable {
     required this.activeGroupLevel,
     this.continueLearningItem,
     this.urgentTasks = const [],
+    this.enrolledGroups = const [],
   });
 
   factory StudentDashboardStats.empty() {
@@ -93,6 +96,7 @@ class StudentDashboardStats extends Equatable {
       activeGroupLevel: 'N/A',
       continueLearningItem: null,
       urgentTasks: [],
+      enrolledGroups: [],
     );
   }
 
@@ -106,5 +110,6 @@ class StudentDashboardStats extends Equatable {
     activeGroupLevel,
     continueLearningItem,
     urgentTasks,
+    enrolledGroups,
   ];
 }

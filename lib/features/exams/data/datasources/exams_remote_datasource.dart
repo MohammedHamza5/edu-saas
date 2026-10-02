@@ -15,7 +15,7 @@ abstract interface class ExamsRemoteDataSource {
   Future<List<ExamModel>> getStudentExams({int page = 0, int pageSize = 15});
   Future<ExamModel> getExamDetails(String examId);
   Future<ExamModel> createExam({
-    required String groupId,
+    String? groupId,
     required String title,
     int durationMinutes = 60,
     int maxScore = 100,
@@ -25,6 +25,7 @@ abstract interface class ExamsRemoteDataSource {
     bool allowRetake = false,
     DateTime? startAt,
     DateTime? endAt,
+    bool isPublished = false,
     required List<ExamQuestionModel> initialQuestions,
   });
   Future<ExamVersionModel> publishExamVersion(String versionId);
@@ -285,7 +286,7 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
 
   @override
   Future<ExamModel> createExam({
-    required String groupId,
+    String? groupId,
     required String title,
     int durationMinutes = 60,
     int maxScore = 100,
@@ -295,6 +296,7 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
     bool allowRetake = false,
     DateTime? startAt,
     DateTime? endAt,
+    bool isPublished = false,
     required List<ExamQuestionModel> initialQuestions,
   }) async {
     final currentUserId = _safeClient.auth.currentUser?.id;
@@ -315,11 +317,11 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
         .from('content')
         .insert({
           'tenant_id': tenantId,
-          'group_id': groupId,
+          if (groupId != null) 'group_id': groupId,
           'title': title,
           'type': 'exam',
-          'status': 'published',
-          'published_at': DateTime.now().toUtc().toIso8601String(),
+          'status': isPublished ? 'published' : 'draft',
+          if (isPublished) 'published_at': DateTime.now().toUtc().toIso8601String(),
         })
         .select('id')
         .single();
@@ -352,8 +354,8 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
         .insert({
           'exam_id': examId,
           'version_number': 1,
-          'status': 'published',
-          'published_at': DateTime.now().toUtc().toIso8601String(),
+          'status': isPublished ? 'published' : 'draft',
+          if (isPublished) 'published_at': DateTime.now().toUtc().toIso8601String(),
         })
         .select('id')
         .single();

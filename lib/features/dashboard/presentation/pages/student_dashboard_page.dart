@@ -11,6 +11,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/responsive_breakpoints.dart';
 import '../../../../core/theme/tenant_theme_cubit.dart';
+import '../../../../core/utils/cache_manager.dart';
 import '../../../../core/utils/group_slug_resolver.dart';
 import '../../../../core/widgets/academic_hero_banner.dart';
 import '../../../../core/widgets/app_card.dart';
@@ -20,6 +21,8 @@ import '../../../../core/widgets/responsive_grid.dart';
 import '../../../auth/presentation/cubit/auth_cubit.dart';
 import '../../../auth/presentation/cubit/auth_state.dart';
 import '../../../groups/domain/entities/group_entity.dart';
+import '../../../groups/presentation/cubit/groups_cubit.dart';
+import '../../../groups/presentation/cubit/groups_state.dart';
 import '../../../notifications/presentation/cubit/notifications_cubit.dart';
 import '../../../notifications/presentation/widgets/notification_badge_button.dart';
 import '../cubit/student_dashboard_cubit.dart';
@@ -42,15 +45,25 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
   @override
   void initState() {
     super.initState();
+    // 1. Resolve initial groups from cache immediately (0ms render)
+    final cached = AppCache.groups.getStale('groups_all');
+    if (cached is List<GroupEntity> && cached.isNotEmpty) {
+      _enrolledCourses = cached;
+      _isLoadingCourses = false;
+    }
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         try {
           context.read<NotificationsCubit>().loadNotifications();
           final authState = context.read<AuthCubit>().state;
           if (authState is AuthAuthenticated) {
-            context.read<StudentDashboardCubit>().loadDashboardStats(
-              authState.user.id,
-            );
+            final dashState = context.read<StudentDashboardCubit>().state;
+            if (dashState is! StudentDashboardLoaded) {
+              context.read<StudentDashboardCubit>().loadDashboardStats(
+                authState.user.id,
+              );
+            }
           }
           _loadEnrolledCourses();
         } catch (_) {}
@@ -58,7 +71,31 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
     });
   }
 
-  Future<void> _loadEnrolledCourses() async {
+  Future<void> _loadEnrolledCourses({bool forceRefresh = false}) async {
+    // If already populated and not forcing refresh, avoid duplicate work
+    if (!forceRefresh && _enrolledCourses.isNotEmpty) {
+      if (mounted && _isLoadingCourses) {
+        setState(() => _isLoadingCourses = false);
+      }
+      return;
+    }
+
+    // Check GroupsCubit state safely (may not be present in isolated widget tests)
+    try {
+      final groupsState = context.read<GroupsCubit>().state;
+      if (groupsState is GroupsLoaded && groupsState.groups.isNotEmpty) {
+        if (mounted) {
+          setState(() {
+            _enrolledCourses = groupsState.groups;
+            _isLoadingCourses = false;
+          });
+        }
+        return;
+      }
+    } catch (_) {
+      // GroupsCubit may not be provided in isolated test trees
+    }
+
     try {
       final res = await InjectionContainer.groupsRepository.getGroups();
       if (mounted) {
@@ -102,12 +139,30 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
     );
   }
 
-  Future<void> _handleOpenContent(BuildContext context) async {
+  Future<void> _handleOpenContent(
+    BuildContext context, [
+    List<GroupEntity>? fallbackGroups,
+  ]) async {
+    final groups = _enrolledCourses.isNotEmpty
+        ? _enrolledCourses
+        : (fallbackGroups ?? []);
+
+    if (groups.isNotEmpty) {
+      final g = groups.first;
+      final slug = GroupSlugResolver.toSlug(g.id, g.name);
+      context.go(
+        AppRoutes.studentGroupContent.replaceAll(':groupId', slug),
+        extra: g.name,
+      );
+      return;
+    }
+
+    // Direct fetch if empty
     final result = await InjectionContainer.groupsRepository.getGroups();
     if (!context.mounted) return;
 
-    final groups = result.dataOrNull ?? [];
-    if (!result.isSuccess || groups.isEmpty) {
+    final fetched = result.dataOrNull ?? [];
+    if (!result.isSuccess || fetched.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(context.l10n.studentNoGroupsAssigned),
@@ -117,8 +172,7 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
       return;
     }
 
-    // Direct 1-tap navigation to the student's assigned group content
-    final g = groups.first;
+    final g = fetched.first;
     final slug = GroupSlugResolver.toSlug(g.id, g.name);
     context.go(
       AppRoutes.studentGroupContent.replaceAll(':groupId', slug),
@@ -234,8 +288,12 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
                       AcademicPerformanceCard(stats: stats),
                       const SizedBox(height: AppSpacing.s20),
 
-                      // 5. My Courses (Section 4 LMS Design)
-                      _buildMyCoursesSection(context, theme),
+                      // 5. My Lectures & Groups
+                      _buildMyCoursesSection(
+                        context,
+                        theme,
+                        stats.enrolledGroups,
+                      ),
                       const SizedBox(height: AppSpacing.s20),
 
                       // 6. Section Title: Quick Study Hub
@@ -274,7 +332,10 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
                           // Card A: Study Materials & Lectures
                           AppCard(
                             variant: AppCardVariant.elevated,
-                            onTap: () => _handleOpenContent(context),
+                            onTap: () => _handleOpenContent(
+                              context,
+                              stats.enrolledGroups,
+                            ),
                             child: Row(
                               children: [
                                 Container(
@@ -294,9 +355,9 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
                                     ),
                                   ),
                                   child: const Icon(
-                                    Icons.menu_book_rounded,
+                                    Icons.play_circle_filled_rounded,
                                     color: AppColors.primary,
-                                    size: 24,
+                                    size: 26,
                                   ),
                                 ),
                                 const SizedBox(width: AppSpacing.s16),
@@ -306,7 +367,7 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        context.l10n.myStudyMaterials,
+                                        context.l10n.studentNavLectures,
                                         style: const TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 15,
@@ -315,7 +376,7 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        context.l10n.myStudyMaterialsDesc,
+                                        context.l10n.studentLecturesCardSubtitle,
                                         style: const TextStyle(
                                           fontSize: 12,
                                           color: AppColors.textSecondary,
@@ -596,7 +657,16 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
     );
   }
 
-  Widget _buildMyCoursesSection(BuildContext context, ThemeData theme) {
+  Widget _buildMyCoursesSection(
+    BuildContext context,
+    ThemeData theme, [
+    List<GroupEntity>? fallbackGroups,
+  ]) {
+    final courses = _enrolledCourses.isNotEmpty
+        ? _enrolledCourses
+        : (fallbackGroups ?? []);
+    final isLoading = _isLoadingCourses && courses.isEmpty;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -606,7 +676,7 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                context.l10n.myCoursesTitle,
+                context.l10n.myLecturesSectionTitle,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
@@ -614,7 +684,7 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
               ),
               const SizedBox(height: 2),
               Text(
-                context.l10n.myCoursesSubtitle,
+                context.l10n.myLecturesSectionSubtitle,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: AppColors.textSecondary,
                 ),
@@ -623,9 +693,9 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
           ),
         ),
         const SizedBox(height: AppSpacing.s12),
-        if (_isLoadingCourses)
+        if (isLoading)
           const AppLoadingView.cardsGrid(count: 2, columns: 2)
-        else if (_enrolledCourses.isEmpty)
+        else if (courses.isEmpty)
           AppCard(
             variant: AppCardVariant.standard,
             padding: const EdgeInsets.all(AppSpacing.s24),
@@ -634,7 +704,7 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const Icon(
-                    Icons.school_outlined,
+                    Icons.play_circle_outline_rounded,
                     size: 40,
                     color: AppColors.textMuted,
                   ),
@@ -665,7 +735,7 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
             desktopColumns: 2,
             spacing: AppSpacing.s16,
             runSpacing: AppSpacing.s16,
-            children: _enrolledCourses.map((course) {
+            children: courses.map((course) {
               final slug = GroupSlugResolver.toSlug(course.id, course.name);
               return AppCard(
                 variant: AppCardVariant.elevated,
@@ -684,7 +754,7 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
                             ),
                           ),
                           child: const Icon(
-                            Icons.school_rounded,
+                            Icons.play_lesson_rounded,
                             color: AppColors.primary,
                             size: 24,
                           ),
@@ -721,8 +791,8 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
                     SizedBox(
                       width: double.infinity,
                       child: OutlinedButton.icon(
-                        icon: const Icon(Icons.arrow_forward_rounded, size: 16),
-                        label: Text(context.l10n.openCourseAction),
+                        icon: const Icon(Icons.play_arrow_rounded, size: 18),
+                        label: Text(context.l10n.openLecturesAction),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppColors.primary,
                           side: const BorderSide(color: AppColors.primary),

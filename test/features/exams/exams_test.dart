@@ -59,7 +59,7 @@ class FakeExamsRepository implements ExamsRepository {
 
   @override
   Future<Result<ExamEntity>> createExam({
-    required String groupId,
+    String? groupId,
     required String title,
     int durationMinutes = 60,
     int maxScore = 100,
@@ -69,6 +69,7 @@ class FakeExamsRepository implements ExamsRepository {
     bool allowRetake = false,
     DateTime? startAt,
     DateTime? endAt,
+    bool isPublished = false,
     required List<ExamQuestionEntity> initialQuestions,
   }) async {
     if (shouldFail) return FailureResult(ServerFailure(failureMessage));
@@ -87,7 +88,7 @@ class FakeExamsRepository implements ExamsRepository {
       id: newVersion.examId,
       contentId: 'content-${now.millisecondsSinceEpoch}',
       tenantId: 'tenant-1',
-      groupId: groupId,
+      groupId: groupId ?? 'mock-group',
       title: title,
       durationMinutes: durationMinutes,
       maxScore: maxScore,

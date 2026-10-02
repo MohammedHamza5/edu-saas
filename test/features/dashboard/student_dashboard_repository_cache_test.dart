@@ -1,9 +1,11 @@
 import 'package:edu_saas/core/errors/exceptions.dart';
+import 'package:edu_saas/core/utils/cache_manager.dart';
 import 'package:edu_saas/features/dashboard/data/datasources/student_dashboard_remote_datasource.dart';
 import 'package:edu_saas/features/dashboard/data/repositories/student_dashboard_repository_impl.dart';
 import 'package:edu_saas/features/dashboard/domain/entities/student_dashboard_stats.dart';
 import 'package:edu_saas/features/dashboard/presentation/cubit/student_dashboard_cubit.dart';
 import 'package:edu_saas/features/dashboard/presentation/cubit/student_dashboard_state.dart';
+import 'package:edu_saas/features/groups/domain/entities/group_entity.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class _MockStudentDashboardRemoteDataSource
@@ -117,6 +119,35 @@ void main() {
       );
       expect(result.isSuccess, isTrue);
       expect(result.dataOrNull?.activeGroupName, equals('SAT Prep Group'));
+    });
+
+    test('Warms up AppCache.groups when stats contain enrolledGroups', () async {
+      mockDataSource.mockStats = const StudentDashboardStats(
+        attendancePercentage: 100,
+        examAverage: 90,
+        assignmentsSubmitted: 2,
+        videoCompletionPercentage: 50,
+        activeGroupName: 'SAT Prep Group',
+        activeGroupLevel: 'SAT',
+        enrolledGroups: [
+          GroupEntity(
+            id: 'g-1',
+            tenantId: 't-1',
+            name: 'SAT Elite Batch',
+            level: 'SAT',
+            membersCount: 5,
+          ),
+        ],
+      );
+
+      final result = await repository.getStudentDashboardStats('student-123', forceRefresh: true);
+      expect(result.isSuccess, isTrue);
+      expect(result.dataOrNull?.enrolledGroups.length, equals(1));
+
+      final cached = AppCache.groups.getStale('groups_all');
+      expect(cached, isNotNull);
+      expect(cached, isA<List<GroupEntity>>());
+      expect((cached as List<GroupEntity>).first.name, equals('SAT Elite Batch'));
     });
   });
 

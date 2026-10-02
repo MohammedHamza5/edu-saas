@@ -172,9 +172,25 @@ class _UploadExamDialogState extends State<UploadExamDialog> {
       });
     } catch (e) {
       if (!mounted) return;
+      
+      final msg = e.toString();
+      if (msg.contains('BACKGROUND_PROCESSING')) {
+         if (Navigator.of(context).canPop()) {
+           Navigator.of(context).pop();
+         }
+         ScaffoldMessenger.of(context).showSnackBar(
+           const SnackBar(
+             content: Text('جاري معالجة الامتحان في الخلفية.. سيظهر في قائمة بنك الأسئلة فور الانتهاء.'),
+             backgroundColor: AppColors.success,
+             duration: Duration(seconds: 4),
+           ),
+         );
+         return;
+      }
+
       setState(() {
         _isProcessing = false;
-        _errorMessage = e.toString().replaceFirst('Exception: ', '');
+        _errorMessage = msg.replaceFirst('Exception: ', '');
       });
     }
   }

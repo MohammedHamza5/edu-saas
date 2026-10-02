@@ -43,6 +43,7 @@ import '../../features/question_bank/presentation/pages/review_console_page.dart
 import '../network/supabase_service.dart';
 import '../utils/group_slug_resolver.dart';
 import '../widgets/student_shell.dart';
+import '../../features/dashboard/presentation/cubit/student_dashboard_cubit.dart';
 import '../widgets/teacher_shell.dart';
 import 'app_route_observer.dart';
 import 'app_routes.dart';
@@ -538,21 +539,20 @@ class AppRouter {
       // ── Student Shell (Persistent Navigation Bar & Categorized Sidebar) ────────
       ShellRoute(
         builder: (BuildContext context, GoRouterState state, Widget child) {
-          return StudentShell(
-            currentLocation: state.matchedLocation,
-            child: child,
+          return BlocProvider<StudentDashboardCubit>(
+            create: (_) => InjectionContainer.createStudentDashboardCubit(),
+            child: StudentShell(
+              currentLocation: state.matchedLocation,
+              child: child,
+            ),
           );
         },
         routes: [
           GoRoute(
             path: studentDashboard,
             pageBuilder: (BuildContext context, GoRouterState state) =>
-                NoTransitionPage(
-                  child: BlocProvider(
-                    create: (_) =>
-                        InjectionContainer.createStudentDashboardCubit(),
-                    child: const StudentDashboardPage(),
-                  ),
+                const NoTransitionPage(
+                  child: StudentDashboardPage(),
                 ),
           ),
           GoRoute(

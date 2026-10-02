@@ -114,6 +114,17 @@ abstract interface class ContentRemoteDataSource {
     required String groupId,
     required bool isPublished,
   });
+
+  /// Uploads a file (R2 or fallback) and creates a record in the files table.
+  /// Returns the newly created file_id.
+  Future<String> uploadAndCreateFileRecord({
+    required String tenantId,
+    required String contentId,
+    required String fileName,
+    required String mimeType,
+    required List<int> fileBytes,
+    required String storagePath,
+  });
 }
 
 class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
@@ -136,8 +147,8 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
         .select(
           'content_id, file_id, associated_exam_id, prerequisite_exam_id, sort_order, custom_title, is_published, '
           'file:files!content_groups_file_id_fkey(*), '
-          'associated_exam:exams!content_groups_associated_exam_id_fkey(id, title), '
-          'prerequisite_exam:exams!content_groups_prerequisite_exam_id_fkey(id, title, passing_score)',
+          'associated_exam:exams!content_groups_associated_exam_id_fkey(id, content(title)), '
+          'prerequisite_exam:exams!content_groups_prerequisite_exam_id_fkey(id, passing_score, content(title))',
         )
         .eq('group_id', groupId);
 
@@ -198,7 +209,10 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
         if (cfg['associated_exam_id'] != null) {
           assocExamId = cfg['associated_exam_id'] as String?;
           final assocObj = cfg['associated_exam'] as Map<String, dynamic>?;
-          assocExamTitle = assocObj?['title'] as String? ?? assocExamTitle;
+          if (assocObj != null && assocObj['content'] != null) {
+            final contentObj = assocObj['content'] as Map<String, dynamic>;
+            assocExamTitle = contentObj['title'] as String? ?? assocExamTitle;
+          }
         }
 
         String? prereqExamId = m.prerequisiteExamId;
@@ -207,7 +221,10 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
         if (cfg['prerequisite_exam_id'] != null) {
           prereqExamId = cfg['prerequisite_exam_id'] as String?;
           final prereqObj = cfg['prerequisite_exam'] as Map<String, dynamic>?;
-          prereqExamTitle = prereqObj?['title'] as String? ?? prereqExamTitle;
+          if (prereqObj != null && prereqObj['content'] != null) {
+            final contentObj = prereqObj['content'] as Map<String, dynamic>;
+            prereqExamTitle = contentObj['title'] as String? ?? prereqExamTitle;
+          }
           prereqPassingScore =
               (prereqObj?['passing_score'] as num?)?.toInt() ??
               prereqPassingScore;
@@ -418,6 +435,42 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
       associatedExamId: associatedExamId,
       prerequisiteExamId: prerequisiteExamId,
     );
+  }
+
+  @override
+  Future<String> uploadAndCreateFileRecord({
+    required String tenantId,
+    required String contentId,
+    required String fileName,
+    required String mimeType,
+    required List<int> fileBytes,
+    required String storagePath,
+  }) async {
+    final uploadResult = await _uploadMaterialFile(
+      fileName: fileName,
+      mimeType: mimeType,
+      fileBytes: fileBytes,
+      defaultStoragePath: storagePath,
+    );
+
+    final filePayload = {
+      'tenant_id': tenantId,
+      'content_id': contentId,
+      'storage_path': uploadResult.path,
+      'file_name': fileName,
+      'mime_type': mimeType,
+      'file_size': fileBytes.length,
+      'storage_provider': uploadResult.provider,
+      'created_at': DateTime.now().toUtc().toIso8601String(),
+    };
+
+    final fileRes = await _safeClient
+        .from('files')
+        .insert(filePayload)
+        .select('id')
+        .single();
+
+    return fileRes['id'] as String;
   }
 
   Future<({String path, String provider})> _uploadMaterialFile({

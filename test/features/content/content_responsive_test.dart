@@ -192,6 +192,18 @@ class _FakeContentRepository implements ContentRepository {
   }) async {
     return const Success(null);
   }
+
+  @override
+  Future<Result<String>> uploadAndCreateFileRecord({
+    required String tenantId,
+    required String contentId,
+    required String fileName,
+    required String mimeType,
+    required List<int> fileBytes,
+    required String storagePath,
+  }) async {
+    return const Success('mock-file-123');
+  }
 }
 
 void main() {

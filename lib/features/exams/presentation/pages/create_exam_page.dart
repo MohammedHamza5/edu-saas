@@ -16,13 +16,13 @@ import '../../../../core/di/injection_container.dart';
 import '../../../question_bank/domain/entities/question_revision_entity.dart';
 
 class CreateExamPage extends StatefulWidget {
-  final String groupId;
+  final String? groupId;
   final String? groupName;
   final String? initialTitle;
 
   const CreateExamPage({
     super.key,
-    required this.groupId,
+    this.groupId,
     this.groupName,
     this.initialTitle,
   });
@@ -89,6 +89,7 @@ class _CreateExamPageState extends State<CreateExamPage> {
   bool _shuffle = true;
   bool _showResult = true;
   bool _allowRetake = false;
+  bool _isPublished = false;
   bool _saveToQuestionBank = true;
 
   final ScrollController _scrollController = ScrollController();
@@ -364,6 +365,7 @@ class _CreateExamPageState extends State<CreateExamPage> {
       shuffleQuestions: _shuffle,
       showResult: _showResult,
       allowRetake: _allowRetake,
+      isPublished: _isPublished,
       initialQuestions: initialQuestions,
     );
 
@@ -667,6 +669,29 @@ class _CreateExamPageState extends State<CreateExamPage> {
                           onChanged: isCreating
                               ? null
                               : (v) => setState(() => _allowRetake = v),
+                        ),
+                        const Divider(height: 20),
+                        SwitchListTile(
+                          title: Text(
+                            context.l10n.examPublishImmediatelyTitle,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          subtitle: Text(
+                            context.l10n.examPublishImmediatelyDesc,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textMuted,
+                            ),
+                          ),
+                          value: _isPublished,
+                          activeColor: AppColors.primary,
+                          contentPadding: EdgeInsets.zero,
+                          onChanged: isCreating
+                              ? null
+                              : (v) => setState(() => _isPublished = v),
                         ),
                         const Divider(height: 20),
                         SwitchListTile(

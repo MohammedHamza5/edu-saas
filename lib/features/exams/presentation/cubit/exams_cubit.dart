@@ -155,7 +155,7 @@ class ExamsCubit extends Cubit<ExamsState> {
 
   /// Creates a new exam with initial questions and version (Teacher flow)
   Future<ExamEntity?> createExam({
-    required String groupId,
+    String? groupId,
     required String title,
     int durationMinutes = 60,
     int maxScore = 100,
@@ -165,6 +165,7 @@ class ExamsCubit extends Cubit<ExamsState> {
     bool allowRetake = false,
     DateTime? startAt,
     DateTime? endAt,
+    bool isPublished = false,
     required List<ExamQuestionEntity> initialQuestions,
   }) async {
     final currentState = state;
@@ -185,13 +186,16 @@ class ExamsCubit extends Cubit<ExamsState> {
       allowRetake: allowRetake,
       startAt: startAt,
       endAt: endAt,
+      isPublished: isPublished,
       initialQuestions: initialQuestions,
     );
 
     return result.when(
       onSuccess: (created) {
         AppCache.exams.invalidate('teacher_exams_$groupId');
-        loadGroupExams(groupId, forceRefresh: true);
+        if (groupId != null) {
+          loadGroupExams(groupId, forceRefresh: true);
+        }
         return created;
       },
       onFailure: (failure) {

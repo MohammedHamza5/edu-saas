@@ -6,11 +6,15 @@ import '../config/tenant_registry.dart';
 import '../di/injection_container.dart';
 import '../network/supabase_service.dart';
 import '../router/app_routes.dart';
+import '../utils/cache_manager.dart';
 import '../utils/group_slug_resolver.dart';
 import '../extensions/localized_context_extension.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 import '../theme/tenant_theme_cubit.dart';
+import '../../features/groups/domain/entities/group_entity.dart';
+import '../../features/groups/presentation/cubit/groups_cubit.dart';
+import '../../features/groups/presentation/cubit/groups_state.dart';
 import '../../features/notifications/presentation/cubit/notifications_cubit.dart';
 import '../../features/notifications/presentation/cubit/notifications_state.dart';
 import '../../features/auth/presentation/cubit/auth_cubit.dart';
@@ -20,7 +24,7 @@ import 'language_switcher_button.dart';
 
 /// Permanent application shell for Student role screens.
 /// Features a categorized, mathematical sidebar that stays pinned across all student pages.
-class StudentShell extends StatelessWidget {
+class StudentShell extends StatefulWidget {
   final Widget child;
   final String currentLocation;
 
@@ -29,6 +33,27 @@ class StudentShell extends StatelessWidget {
     required this.child,
     required this.currentLocation,
   });
+
+  @override
+  State<StudentShell> createState() => _StudentShellState();
+}
+
+class _StudentShellState extends State<StudentShell> {
+  @override
+  void initState() {
+    super.initState();
+    // Warm up groups cache in background on shell launch for instant navigation
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        try {
+          final groupsCubit = context.read<GroupsCubit>();
+          if (groupsCubit.state is! GroupsLoaded) {
+            groupsCubit.loadGroups();
+          }
+        } catch (_) {}
+      }
+    });
+  }
 
   int _computeIndex(String path) {
     if (path == '/student' || path == '/student/') return 0;
@@ -67,12 +92,40 @@ class StudentShell extends StatelessWidget {
   }
 
   Future<void> _handleStudentContentNavigation(BuildContext context) async {
-    // Fetch student's groups
-    final result = await InjectionContainer.groupsRepository.getGroups();
+    // 1. Try resolving groups instantly from GroupsCubit state or AppCache (0ms response)
+    List<GroupEntity> groups = [];
+    try {
+      final groupsState = context.read<GroupsCubit>().state;
+      if (groupsState is GroupsLoaded && groupsState.groups.isNotEmpty) {
+        groups = groupsState.groups;
+      }
+    } catch (_) {}
+
+    if (groups.isEmpty) {
+      final cached = AppCache.groups.getStale('groups_all');
+      if (cached is List<GroupEntity> && cached.isNotEmpty) {
+        groups = cached;
+      }
+    }
+
+    // 2. Fallback: if cache is empty, load silently and wait
+    if (groups.isEmpty) {
+      try {
+        await context.read<GroupsCubit>().loadGroups();
+        if (!context.mounted) return;
+        final freshState = context.read<GroupsCubit>().state;
+        if (freshState is GroupsLoaded) {
+          groups = freshState.groups;
+        }
+      } catch (_) {
+        final result = await InjectionContainer.groupsRepository.getGroups();
+        groups = result.dataOrNull ?? [];
+      }
+    }
+
     if (!context.mounted) return;
 
-    final groups = result.dataOrNull ?? [];
-    if (!result.isSuccess || groups.isEmpty) {
+    if (groups.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(context.l10n.studentNoGroupsAssigned),
@@ -82,6 +135,7 @@ class StudentShell extends StatelessWidget {
       return;
     }
 
+    // 3. Single-group fast path (direct 0ms jump)
     if (groups.length == 1) {
       final g = groups.first;
       final slug = GroupSlugResolver.toSlug(g.id, g.name);
@@ -92,12 +146,13 @@ class StudentShell extends StatelessWidget {
       return;
     }
 
+    // 4. Multi-group selector sheet
     _showCourseSelectorSheet(context, groups);
   }
 
   void _showCourseSelectorSheet(
     BuildContext context,
-    List<dynamic> groups,
+    List<GroupEntity> groups,
   ) {
     showModalBottomSheet<void>(
       context: context,
@@ -114,28 +169,55 @@ class StudentShell extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                context.l10n.selectCourseTitle,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.s4),
-              Text(
-                context.l10n.selectCoursePrompt,
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: AppColors.textSecondary,
-                ),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(AppSpacing.s8),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryLight.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.radiusSmall,
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.play_circle_filled_rounded,
+                      color: AppColors.primary,
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.s12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          context.l10n.myLecturesSectionTitle,
+                          style: const TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          context.l10n.myLecturesSectionSubtitle,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: AppSpacing.s16),
               ...groups.map((g) {
-                final slug = GroupSlugResolver.toSlug(g.id as String, g.name as String);
+                final slug = GroupSlugResolver.toSlug(g.id, g.name);
                 return Container(
                   margin: const EdgeInsets.only(bottom: AppSpacing.s8),
                   decoration: BoxDecoration(
+                    color: AppColors.surface,
                     border: Border.all(
                       color: AppColors.primary.withValues(alpha: 0.15),
                     ),
@@ -147,18 +229,20 @@ class StudentShell extends StatelessWidget {
                     leading: const CircleAvatar(
                       backgroundColor: AppColors.primaryLight,
                       child: Icon(
-                        Icons.school_rounded,
+                        Icons.play_lesson_rounded,
                         color: AppColors.primary,
+                        size: 20,
                       ),
                     ),
                     title: Text(
-                      g.name as String,
+                      g.name,
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    subtitle: Text(g.level as String),
+                    subtitle: Text(g.level),
                     trailing: const Icon(
                       Icons.arrow_forward_ios_rounded,
                       size: 16,
+                      color: AppColors.textSecondary,
                     ),
                     onTap: () {
                       Navigator.pop(ctx);
@@ -184,10 +268,10 @@ class StudentShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final role = SupabaseService.currentUserRole;
     if (role != null && role != 'student') {
-      return child;
+      return widget.child;
     }
 
-    final currentIndex = _computeIndex(currentLocation);
+    final currentIndex = _computeIndex(widget.currentLocation);
 
     // Watch live unread notification count
     int unreadNotifications = 0;
@@ -221,16 +305,16 @@ class StudentShell extends StatelessWidget {
         ],
       ),
 
-      // Section 2: Learning Courses
+      // Section 2: Lectures & Content
       AdaptiveSidebarSection(
-        title: context.l10n.myCoursesTitle,
+        title: context.l10n.studentNavLectures,
         destinations: [
           AdaptiveDestination(
-            icon: Icons.school_outlined,
-            selectedIcon: Icons.school_rounded,
-            label: context.l10n.myCoursesTitle,
-            subtitle: context.l10n.myCoursesSubtitle,
-            tooltip: context.l10n.myCoursesTitle,
+            icon: Icons.play_circle_outline_rounded,
+            selectedIcon: Icons.play_circle_rounded,
+            label: context.l10n.studentNavLectures,
+            subtitle: context.l10n.studentNavLecturesSubtitle,
+            tooltip: context.l10n.studentNavLectures,
           ),
         ],
       ),
@@ -270,7 +354,7 @@ class StudentShell extends StatelessWidget {
       onNavigationIndexChanged: (idx) => _onNavigationChanged(context, idx),
       sidebarHeader: _buildSidebarHeader(context),
       sidebarFooter: _buildSidebarFooter(context),
-      body: child,
+      body: widget.child,
     );
   }
 

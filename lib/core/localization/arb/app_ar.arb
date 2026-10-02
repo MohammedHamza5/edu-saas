@@ -767,6 +767,8 @@
   "showResultTitle": "إظهار النتيجة للطالب فور التسليم",
   "showResultSubtitle": "عرض الدرجة المحسوبة خادمياً والنسبة المئوية",
   "allowRetakeTitle": "السماح بإعادة المحاولة (Retake)",
+  "examPublishImmediatelyTitle": "نشر للطلاب الآن؟",
+  "examPublishImmediatelyDesc": "إذا تم تعطيله، سيتم حفظ الاختبار كمسودة (مخفي عن الطلاب) ويمكن استخدامه كاختبار عام أو نشره لاحقاً.",
   "allowRetakeSubtitle": "تعتمد المنصة أعلى درجة محققة في سجل الطالب",
   "questionsSectionTitle": "الأسئلة ({count})",
   "addQuestionAction": "إضافة سؤال للكويز",
@@ -2098,5 +2100,11 @@
   "gatekeeperQuizSubtitle": "يجب على الطالب اجتياز هذا الاختبار لفتح المحاضرة التالية في الترتيب.",
   "createInstantQuizAction": "إنشاء كويز لهذه المحاضرة فوراً",
   "selectExistingQuizAction": "اختيار من الاختبارات السابقة",
-  "unlinkQuizAction": "إلغاء ربط الاختبار"
+  "unlinkQuizAction": "إلغاء ربط الاختبار",
+  "studentNavLectures": "المحاضرات",
+  "studentNavLecturesSubtitle": "الفيديوهات والمحاضرات التعليمية",
+  "studentLecturesCardSubtitle": "مشاهدة المحاضرات المسجلة ومتابعة التقدم الأكاديمي",
+  "myLecturesSectionTitle": "المحاضرات والمجموعات الدراسية",
+  "myLecturesSectionSubtitle": "فهرس المحاضرات والمواد المسجلة لكل مجموعة",
+  "openLecturesAction": "عرض المحاضرات"
 }

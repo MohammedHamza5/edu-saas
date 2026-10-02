@@ -137,6 +137,12 @@ class _AppImageCropperDialogState extends State<AppImageCropperDialog> {
       return;
     }
     setState(() => _isProcessing = true);
+    // Allow UI to render the loading spinner before blocking the main thread (Crucial for Web)
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+
+    final totalStopwatch = Stopwatch()..start();
+    AppLogger.i('CropperDialog', 'PERF_TRACE: ✂️ [_applyCropAndReturn] Applying crop started...');
+
     AppLogger.i('CropperDialog', '✂️ [_applyCropAndReturn] Applying crop...');
 
     try {
@@ -154,10 +160,26 @@ class _AppImageCropperDialogState extends State<AppImageCropperDialog> {
       final cropY = _cropRectNormalized.top * srcH;
       final cropW = (_cropRectNormalized.width * srcW).clamp(1.0, srcW);
       final cropH = (_cropRectNormalized.height * srcH).clamp(1.0, srcH);
-      AppLogger.d('CropperDialog', '✂️ Target crop dimensions: ${cropW.round()}x${cropH.round()} at ($cropX, $cropY)');
+      
+      // Downscale for Web performance. Large PNG encoding blocks the JS main thread completely.
+      const double maxOutputDimension = 800.0;
+      double scale = 1.0;
+      if (cropW > maxOutputDimension || cropH > maxOutputDimension) {
+        scale = cropW > cropH 
+            ? maxOutputDimension / cropW 
+            : maxOutputDimension / cropH;
+      }
+
+      final outW = (cropW * scale).round();
+      final outH = (cropH * scale).round();
+
+      AppLogger.d('CropperDialog', '✂️ Target crop dimensions: $outW x $outH (Scale: $scale)');
 
       canvas.save();
-      // Translate to center for rotation
+      // 1. Scale down the entire canvas drawing to match the output size
+      canvas.scale(scale);
+      
+      // 2. Translate crop to origin
       canvas.translate(-cropX, -cropY);
 
       if (_rotationDegrees != 0) {
@@ -170,18 +192,36 @@ class _AppImageCropperDialogState extends State<AppImageCropperDialog> {
       canvas.restore();
 
       final picture = recorder.endRecording();
-      AppLogger.d('CropperDialog', '⏳ picture.toImage (${cropW.round()}x${cropH.round()})...');
-      final croppedUiImage = await picture.toImage(cropW.round(), cropH.round());
-      AppLogger.d('CropperDialog', '⏳ Converting croppedUiImage to PNG ByteData...');
+      
+      final toImageStopwatch = Stopwatch()..start();
+      AppLogger.d('CropperDialog', 'PERF_TRACE: ⏳ picture.toImage ($outW x $outH) started...');
+      final croppedUiImage = await picture.toImage(outW, outH);
+      toImageStopwatch.stop();
+      AppLogger.d('CropperDialog', 'PERF_TRACE: ✅ picture.toImage took ${toImageStopwatch.elapsedMilliseconds}ms');
+      
+      final toByteDataStopwatch = Stopwatch()..start();
+      AppLogger.d('CropperDialog', 'PERF_TRACE: ⏳ Converting croppedUiImage to PNG ByteData started (this blocks JS!)...');
+      // This step blocks the UI thread on Web. Downscaling above minimizes the freeze time.
       final byteData = await croppedUiImage.toByteData(format: ui.ImageByteFormat.png);
+      toByteDataStopwatch.stop();
+      AppLogger.d('CropperDialog', 'PERF_TRACE: ✅ toByteData(png) took ${toByteDataStopwatch.elapsedMilliseconds}ms');
+
+      // Dispose CanvasKit native objects to prevent memory leaks (critical on Web!)
+      croppedUiImage.dispose();
+      picture.dispose();
 
       if (!mounted) {
         AppLogger.w('CropperDialog', '⚠️ Widget unmounted before dialog pop');
         return;
       }
       if (byteData != null) {
-        final resultBytes = byteData.buffer.asUint8List();
-        AppLogger.s('CropperDialog', '🎉 Crop success! Output PNG size: ${resultBytes.length} bytes');
+        // Deep copy the bytes so they don't depend on CanvasKit's WASM memory buffer, 
+        // which can be garbage collected and cause TypeErrors in async HTTP requests.
+        final originalBytes = byteData.buffer.asUint8List();
+        final resultBytes = Uint8List.fromList(originalBytes);
+        
+        totalStopwatch.stop();
+        AppLogger.s('CropperDialog', 'PERF_TRACE: 🎉 Crop success! Output PNG size: ${resultBytes.length} bytes. Total _applyCropAndReturn took ${totalStopwatch.elapsedMilliseconds}ms');
         Navigator.of(context).pop(resultBytes);
       } else {
         AppLogger.w('CropperDialog', '⚠️ byteData was null, falling back to original imageBytes');
@@ -532,11 +572,12 @@ class _AppImageCropperDialogState extends State<AppImageCropperDialog> {
           children: [
             // The Image with rotation
             Positioned.fill(
-              child: Transform.rotate(
-                angle: (_rotationDegrees * math.pi) / 180,
-                child: RawImage(
-                  image: img,
-                  fit: BoxFit.contain,
+              child: RotatedBox(
+                quarterTurns: _rotationDegrees ~/ 90,
+                child: Image.memory(
+                  widget.imageBytes,
+                  fit: BoxFit.fill,
+                  filterQuality: FilterQuality.high,
                 ),
               ),
             ),
@@ -767,3 +808,4 @@ class _RuleOfThirdsPainter extends CustomPainter {
   @override
   bool shouldRepaint(_RuleOfThirdsPainter old) => false;
 }
+

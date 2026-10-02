@@ -20,7 +20,7 @@ abstract class ExamsRepository {
 
   /// Creates a new exam with its content record, exam settings, initial draft version, and questions.
   Future<Result<ExamEntity>> createExam({
-    required String groupId,
+    String? groupId,
     required String title,
     int durationMinutes = 60,
     int maxScore = 100,
@@ -30,6 +30,7 @@ abstract class ExamsRepository {
     bool allowRetake = false,
     DateTime? startAt,
     DateTime? endAt,
+    bool isPublished = false,
     required List<ExamQuestionEntity> initialQuestions,
   });
 

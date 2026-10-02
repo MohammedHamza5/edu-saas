@@ -3460,6 +3460,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get allowRetakeTitle => 'السماح بإعادة المحاولة (Retake)';
 
   @override
+  String get examPublishImmediatelyTitle => 'نشر للطلاب الآن؟';
+
+  @override
+  String get examPublishImmediatelyDesc =>
+      'إذا تم تعطيله، سيتم حفظ الاختبار كمسودة (مخفي عن الطلاب) ويمكن استخدامه كاختبار عام أو نشره لاحقاً.';
+
+  @override
   String get allowRetakeSubtitle =>
       'تعتمد المنصة أعلى درجة محققة في سجل الطالب';
 
@@ -6145,4 +6152,24 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get unlinkQuizAction => 'إلغاء ربط الاختبار';
+
+  @override
+  String get studentNavLectures => 'المحاضرات';
+
+  @override
+  String get studentNavLecturesSubtitle => 'الفيديوهات والمحاضرات التعليمية';
+
+  @override
+  String get studentLecturesCardSubtitle =>
+      'مشاهدة المحاضرات المسجلة ومتابعة التقدم الأكاديمي';
+
+  @override
+  String get myLecturesSectionTitle => 'المحاضرات والمجموعات الدراسية';
+
+  @override
+  String get myLecturesSectionSubtitle =>
+      'فهرس المحاضرات والمواد المسجلة لكل مجموعة';
+
+  @override
+  String get openLecturesAction => 'عرض المحاضرات';
 }

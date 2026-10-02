@@ -99,6 +99,8 @@ class _StudentLessonTileState extends State<StudentLessonTile> {
               ? AppColors.surfaceVariant.withAlpha(40)
               : _isHovered
               ? AppColors.surfaceVariant.withAlpha(80)
+              : content.associatedExamTitle != null
+              ? AppColors.success.withAlpha(8)
               : AppColors.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
           border: Border.all(
@@ -108,6 +110,8 @@ class _StudentLessonTileState extends State<StudentLessonTile> {
                 ? AppColors.primary.withAlpha(120)
                 : isCompleted
                 ? AppColors.success.withAlpha(50)
+                : content.associatedExamTitle != null
+                ? AppColors.success.withAlpha(80)
                 : AppColors.border,
             width: _isHovered ? 1.5 : 1.0,
           ),

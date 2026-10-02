@@ -115,7 +115,9 @@ class _CourseLessonTileState extends State<CourseLessonTile> {
               : null,
         ),
         child: Material(
-          color: Colors.transparent,
+          color: widget.quizTitle != null 
+              ? AppColors.success.withValues(alpha: 0.03) 
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
           child: InkWell(
             onTap: widget.onTap ?? widget.onEdit,
@@ -208,19 +210,25 @@ class _CourseLessonTileState extends State<CourseLessonTile> {
                     width: 30,
                     height: 30,
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
+                      color: widget.quizTitle != null
+                          ? AppColors.success.withValues(alpha: 0.1)
+                          : AppColors.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(6),
                       border: Border.all(
-                        color: AppColors.primary.withValues(alpha: 0.3),
+                        color: widget.quizTitle != null
+                            ? AppColors.success.withValues(alpha: 0.3)
+                            : AppColors.primary.withValues(alpha: 0.3),
                       ),
                     ),
                     child: Center(
                       child: Text(
                         '${widget.index + 1}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w900,
-                          color: AppColors.primary,
+                          color: widget.quizTitle != null
+                              ? AppColors.success
+                              : AppColors.primary,
                         ),
                       ),
                     ),

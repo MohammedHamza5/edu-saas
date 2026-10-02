@@ -439,9 +439,7 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
           ),
         ],
       ),
-      floatingActionButton: _selectedGroupId == null
-          ? null
-          : FloatingActionButton.extended(
+      floatingActionButton: FloatingActionButton.extended(
               onPressed: () {
                 Navigator.of(context)
                     .push<void>(
@@ -449,7 +447,7 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
                         builder: (_) => BlocProvider.value(
                           value: context.read<ExamsCubit>(),
                           child: CreateExamPage(
-                            groupId: _selectedGroupId!,
+                            groupId: _selectedGroupId,
                             groupName: _selectedGroupName,
                           ),
                         ),
@@ -569,12 +567,8 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
                               child: AppEmptyView(
                                 message: context.l10n.noExamsForGroup,
                                 subtitle: context.l10n.noExamsForGroupSubtitle,
-                                actionText: _selectedGroupId != null
-                                    ? context.l10n.buildFirstExam
-                                    : null,
-                                onAction: _selectedGroupId == null
-                                    ? null
-                                    : () {
+                                actionText: context.l10n.buildFirstExam,
+                                onAction: () {
                                         Navigator.of(context)
                                             .push<void>(
                                               MaterialPageRoute<void>(
@@ -583,10 +577,8 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
                                                       value: context
                                                           .read<ExamsCubit>(),
                                                       child: CreateExamPage(
-                                                        groupId:
-                                                            _selectedGroupId!,
-                                                        groupName:
-                                                            _selectedGroupName,
+                                                        groupId: _selectedGroupId,
+                                                        groupName: _selectedGroupName,
                                                       ),
                                                     ),
                                               ),

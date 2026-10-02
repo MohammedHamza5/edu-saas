@@ -12,7 +12,8 @@ import 'app_image_cropper_dialog.dart';
 class ExamImageAttachmentBox extends StatefulWidget {
   final String? initialImageUrl;
   final Map<String, dynamic>? initialImageMeta;
-  final ValueChanged<({String? imageUrl, Map<String, dynamic>? imageMeta})> onChanged;
+  final ValueChanged<({String? imageUrl, Map<String, dynamic>? imageMeta})>
+  onChanged;
 
   const ExamImageAttachmentBox({
     super.key,
@@ -31,18 +32,15 @@ class _ExamImageAttachmentBoxState extends State<ExamImageAttachmentBox> {
   String? _imageUrl;
   late Map<String, dynamic> _imageMeta;
   bool _isUploading = false;
-  Uint8List? _lastLocalBytes;
+
 
   @override
   void initState() {
     super.initState();
     _imageUrl = widget.initialImageUrl;
     _imageMeta = Map<String, dynamic>.from(
-      widget.initialImageMeta ?? {
-        'alignment': 'center',
-        'width_percent': 50,
-        'enable_zoom': true,
-      },
+      widget.initialImageMeta ??
+          {'alignment': 'center', 'width_percent': 50, 'enable_zoom': true},
     );
   }
 
@@ -54,14 +52,20 @@ class _ExamImageAttachmentBoxState extends State<ExamImageAttachmentBox> {
   }
 
   Future<void> _processRawBytes(Uint8List rawBytes, String filename) async {
-    AppLogger.i('ExamImageBox', '📷 [_processRawBytes] Received raw bytes: ${rawBytes.length} bytes for file: $filename');
-    
+    AppLogger.i(
+      'ExamImageBox',
+      '📷 [_processRawBytes] Received raw bytes: ${rawBytes.length} bytes for file: $filename',
+    );
+
     // 1. Open in-app cropper dialog
     AppLogger.d('ExamImageBox', '🖼️ Opening AppImageCropperDialog...');
     final croppedBytes = await AppImageCropperDialog.show(context, rawBytes);
-    
+
     if (croppedBytes == null) {
-      AppLogger.w('ExamImageBox', '⚠️ AppImageCropperDialog was cancelled or returned null');
+      AppLogger.w(
+        'ExamImageBox',
+        '⚠️ AppImageCropperDialog was cancelled or returned null',
+      );
       return;
     }
     if (!mounted) {
@@ -69,28 +73,52 @@ class _ExamImageAttachmentBoxState extends State<ExamImageAttachmentBox> {
       return;
     }
 
-    AppLogger.s('ExamImageBox', '✂️ Cropper returned ${croppedBytes.length} bytes. Setting _isUploading = true');
-    _lastLocalBytes = croppedBytes;
+    AppLogger.s(
+      'ExamImageBox',
+      '✂️ Cropper returned ${croppedBytes.length} bytes. Setting _isUploading = true',
+    );
+
     setState(() => _isUploading = true);
 
+    // Yield to the event loop so Flutter can render the _isUploading UI (loading indicator)
+    // before the heavy Supabase upload logic blocks the thread.
+    await Future<void>.delayed(const Duration(milliseconds: 150));
+
     try {
-      AppLogger.i('ExamImageBox', '☁️ Calling _uploadService.uploadExamImage...');
+      final uploadStopwatch = Stopwatch()..start();
+      AppLogger.i(
+        'ExamImageBox',
+        'PERF_TRACE: ☁️ Calling _uploadService.uploadExamImage started...',
+      );
+      // Deep-copy bytes so release web builds pass a real Uint8List to Supabase
+      // (CanvasKit / FilePicker views can fail JS interop as upload payloads).
+      final uploadBytes = Uint8List.fromList(croppedBytes);
       final uploadedUrl = await _uploadService.uploadExamImage(
-        bytes: croppedBytes,
+        bytes: uploadBytes,
         fileName: filename,
         mimeType: 'image/png',
       );
+      uploadStopwatch.stop();
 
-      AppLogger.s('ExamImageBox', '🎉 Image uploaded successfully! URL: $uploadedUrl');
+      AppLogger.s(
+        'ExamImageBox',
+        'PERF_TRACE: 🎉 Image uploaded successfully! URL: $uploadedUrl. Took ${uploadStopwatch.elapsedMilliseconds}ms',
+      );
       if (mounted) {
         setState(() {
           _imageUrl = uploadedUrl;
           _isUploading = false;
+
         });
         _notifyChange();
       }
     } catch (e, st) {
-      AppLogger.e('ExamImageBox', '❌ Error uploading image: $e', error: e, stackTrace: st);
+      AppLogger.e(
+        'ExamImageBox',
+        '❌ Error uploading image: $e',
+        error: e,
+        stackTrace: st,
+      );
       if (mounted) {
         setState(() => _isUploading = false);
         ScaffoldMessenger.of(context).showSnackBar(
@@ -104,7 +132,10 @@ class _ExamImageAttachmentBoxState extends State<ExamImageAttachmentBox> {
   }
 
   Future<void> _pickFile() async {
-    AppLogger.i('ExamImageBox', '📂 [_pickFile] Triggered. Opening FilePicker...');
+    AppLogger.i(
+      'ExamImageBox',
+      '📂 [_pickFile] Triggered. Opening FilePicker...',
+    );
     try {
       final result = await FilePicker.platform.pickFiles(
         type: FileType.image,
@@ -113,7 +144,10 @@ class _ExamImageAttachmentBoxState extends State<ExamImageAttachmentBox> {
       );
 
       if (result == null) {
-        AppLogger.w('ExamImageBox', '📂 FilePicker returned null (user canceled)');
+        AppLogger.w(
+          'ExamImageBox',
+          '📂 FilePicker returned null (user canceled)',
+        );
         return;
       }
 
@@ -123,16 +157,30 @@ class _ExamImageAttachmentBoxState extends State<ExamImageAttachmentBox> {
       }
 
       final file = result.files.first;
-      AppLogger.d('ExamImageBox', '📂 Selected file: ${file.name}, size: ${file.size} bytes');
+      AppLogger.d(
+        'ExamImageBox',
+        '📂 Selected file: ${file.name}, size: ${file.size} bytes',
+      );
       final bytes = file.bytes;
       if (bytes != null) {
-        AppLogger.d('ExamImageBox', '📂 File bytes loaded into memory (${bytes.length} bytes). Processing...');
+        AppLogger.d(
+          'ExamImageBox',
+          '📂 File bytes loaded into memory (${bytes.length} bytes). Processing...',
+        );
         await _processRawBytes(bytes, file.name);
       } else {
-        AppLogger.e('ExamImageBox', '❌ File bytes is null! FilePicker did not load bytes for ${file.name}');
+        AppLogger.e(
+          'ExamImageBox',
+          '❌ File bytes is null! FilePicker did not load bytes for ${file.name}',
+        );
       }
     } catch (e, st) {
-      AppLogger.e('ExamImageBox', '❌ FilePicker exception: $e', error: e, stackTrace: st);
+      AppLogger.e(
+        'ExamImageBox',
+        '❌ FilePicker exception: $e',
+        error: e,
+        stackTrace: st,
+      );
     }
   }
 
@@ -151,7 +199,7 @@ class _ExamImageAttachmentBoxState extends State<ExamImageAttachmentBox> {
   void _removeImage() {
     setState(() {
       _imageUrl = null;
-      _lastLocalBytes = null;
+
     });
     _notifyChange();
   }
@@ -228,35 +276,30 @@ class _ExamImageAttachmentBoxState extends State<ExamImageAttachmentBox> {
                     child: Container(
                       constraints: const BoxConstraints(maxHeight: 260),
                       width: displayW,
-                      child: _lastLocalBytes != null
-                          ? Image.memory(
-                              _lastLocalBytes!,
-                              fit: BoxFit.contain,
-                            )
-                          : CachedNetworkImage(
-                              imageUrl: _imageUrl!,
-                              fit: BoxFit.contain,
-                              placeholder: (ctx, _) => Container(
-                                height: 140,
-                                color: AppColors.surfaceVariant,
-                                child: const Center(
-                                  child: CircularProgressIndicator(strokeWidth: 2),
-                                ),
-                              ),
-                              errorWidget: (ctx, _, __) => Container(
-                                height: 100,
-                                color: AppColors.error.withValues(alpha: 0.1),
-                                child: Center(
-                                  child: Text(
-                                    context.l10n.failedToLoadImage,
-                                    style: const TextStyle(
-                                      color: AppColors.error,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ),
+                      child: CachedNetworkImage(
+                        imageUrl: _imageUrl!,
+                        fit: BoxFit.contain,
+                        placeholder: (ctx, _) => Container(
+                          height: 140,
+                          color: AppColors.surfaceVariant,
+                          child: const Center(
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        ),
+                        errorWidget: (ctx, _, __) => Container(
+                          height: 100,
+                          color: AppColors.error.withValues(alpha: 0.1),
+                          child: Center(
+                            child: Text(
+                              context.l10n.failedToLoadImage,
+                              style: const TextStyle(
+                                color: AppColors.error,
+                                fontSize: 12,
                               ),
                             ),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 );
@@ -267,45 +310,60 @@ class _ExamImageAttachmentBoxState extends State<ExamImageAttachmentBox> {
             const SizedBox(height: AppSpacing.s8),
 
             // Controls Bar: Alignment + Width Selector + Delete
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              crossAxisAlignment: WrapCrossAlignment.center,
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Alignment Chips
-                Text(
-                  context.l10n.imageAlignmentLabel,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textSecondary,
+                Expanded(
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text(
+                        context.l10n.imageAlignmentLabel,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      _buildAlignButton(
+                        'right',
+                        Icons.format_align_right_rounded,
+                        alignment,
+                      ),
+                      _buildAlignButton(
+                        'center',
+                        Icons.format_align_center_rounded,
+                        alignment,
+                      ),
+                      _buildAlignButton(
+                        'left',
+                        Icons.format_align_left_rounded,
+                        alignment,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        context.l10n.imageWidthLabel,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      _buildWidthChip(30, '30%', widthPercent),
+                      _buildWidthChip(50, '50%', widthPercent),
+                      _buildWidthChip(75, '75%', widthPercent),
+                      _buildWidthChip(100, '100%', widthPercent),
+                    ],
                   ),
                 ),
-                _buildAlignButton('right', Icons.format_align_right_rounded, alignment),
-                _buildAlignButton('center', Icons.format_align_center_rounded, alignment),
-                _buildAlignButton('left', Icons.format_align_left_rounded, alignment),
-
-                const SizedBox(width: 8),
-
-                // Width Selector
-                Text(
-                  context.l10n.imageWidthLabel,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                _buildWidthChip(30, '30%', widthPercent),
-                _buildWidthChip(50, '50%', widthPercent),
-                _buildWidthChip(75, '75%', widthPercent),
-                _buildWidthChip(100, '100%', widthPercent),
-
-                const Spacer(),
-
-                // Remove Button
                 IconButton(
-                  icon: const Icon(Icons.delete_outline_rounded, color: AppColors.error, size: 20),
+                  icon: const Icon(
+                    Icons.delete_outline_rounded,
+                    color: AppColors.error,
+                    size: 20,
+                  ),
                   tooltip: context.l10n.removeImageAction,
                   onPressed: _removeImage,
                 ),
@@ -317,21 +375,38 @@ class _ExamImageAttachmentBoxState extends State<ExamImageAttachmentBox> {
     }
 
     // Empty Attachment Box (Drop Zone / Paste Box)
-    return InkWell(
-      onTap: _pickFile,
-      borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-        decoration: BoxDecoration(
-          color: AppColors.surfaceVariant.withValues(alpha: 0.25),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isCompact = constraints.maxWidth < 480;
+        return InkWell(
+          onTap: _pickFile,
           borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-          border: Border.all(
-            color: AppColors.border,
-            style: BorderStyle.solid,
-            width: 1.2,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceVariant.withValues(alpha: 0.25),
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+              border: Border.all(
+                color: AppColors.border,
+                style: BorderStyle.solid,
+                width: 1.2,
+              ),
+            ),
+            child: isCompact
+                ? _buildCompactLayout(context)
+                : _buildFullLayout(context),
           ),
-        ),
-        child: Row(
+        );
+      },
+    );
+  }
+
+  Widget _buildCompactLayout(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
           children: [
             Container(
               padding: const EdgeInsets.all(10),
@@ -369,15 +444,12 @@ class _ExamImageAttachmentBoxState extends State<ExamImageAttachmentBox> {
                 ],
               ),
             ),
-            OutlinedButton.icon(
-              onPressed: _handlePaste,
-              icon: const Icon(Icons.content_paste_rounded, size: 16),
-              label: const Text('Ctrl+V'),
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-              ),
-            ),
-            const SizedBox(width: 8),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.s16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
             ElevatedButton.icon(
               onPressed: _pickFile,
               icon: const Icon(Icons.upload_file_rounded, size: 16),
@@ -385,16 +457,85 @@ class _ExamImageAttachmentBoxState extends State<ExamImageAttachmentBox> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
               ),
             ),
           ],
         ),
-      ),
+      ],
     );
   }
 
-  Widget _buildAlignButton(String alignKey, IconData icon, String currentAlign) {
+  Widget _buildFullLayout(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: AppColors.primary.withValues(alpha: 0.1),
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(
+            Icons.add_photo_alternate_outlined,
+            color: AppColors.primary,
+            size: 22,
+          ),
+        ),
+        const SizedBox(width: AppSpacing.s12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                context.l10n.attachImageOrScreenshotTitle,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                context.l10n.attachImageOrScreenshotSubtitle,
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: AppColors.textMuted,
+                ),
+              ),
+            ],
+          ),
+        ),
+        OutlinedButton.icon(
+          onPressed: _handlePaste,
+          icon: const Icon(Icons.content_paste_rounded, size: 16),
+          label: const Text('Ctrl+V'),
+          style: OutlinedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          ),
+        ),
+        const SizedBox(width: 8),
+        ElevatedButton.icon(
+          onPressed: _pickFile,
+          icon: const Icon(Icons.upload_file_rounded, size: 16),
+          label: Text(context.l10n.browseAction),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.primary,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAlignButton(
+    String alignKey,
+    IconData icon,
+    String currentAlign,
+  ) {
     final isSelected = alignKey == currentAlign;
     return InkWell(
       onTap: () => _setAlignment(alignKey),
@@ -402,7 +543,9 @@ class _ExamImageAttachmentBoxState extends State<ExamImageAttachmentBox> {
       child: Container(
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withValues(alpha: 0.15) : Colors.transparent,
+          color: isSelected
+              ? AppColors.primary.withValues(alpha: 0.15)
+              : Colors.transparent,
           border: Border.all(
             color: isSelected ? AppColors.primary : AppColors.border,
           ),

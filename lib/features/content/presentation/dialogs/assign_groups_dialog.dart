@@ -2,7 +2,6 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/network/supabase_service.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -191,8 +190,6 @@ class _AssignGroupsDialogState extends State<AssignGroupsDialog> {
   Future<void> _handleSave() async {
     final contentCubit = context.read<ContentCubit>();
     setState(() => _isSaving = true);
-    final client = SupabaseService.client;
-    final tenantId = widget.content.tenantId;
 
     try {
       final List<Map<String, dynamic>> groupConfigs = [];
@@ -208,35 +205,16 @@ class _AssignGroupsDialogState extends State<AssignGroupsDialog> {
           final safeName = customState.customHandoutFile!.name
               .toLowerCase()
               .replaceAll(RegExp(r'[^a-z0-9_.-]'), '_');
-          final storagePath =
-              'group_handouts/${groupId}_${timestamp}_$safeName';
+          final storagePath = 'groups/$groupId/${timestamp}_$safeName';
 
-          await client.storage
-              .from('group-content')
-              .uploadBinary(
-                storagePath,
-                Uint8List.fromList(customState.customHandoutBytes!),
-                fileOptions: const FileOptions(
-                  contentType: 'application/pdf',
-                  upsert: true,
-                ),
-              );
-
-          final fileRes = await client
-              .from('files')
-              .insert({
-                'tenant_id': tenantId,
-                'content_id': widget.content.id,
-                'storage_path': storagePath,
-                'file_name': customState.customHandoutFile!.name,
-                'mime_type': 'application/pdf',
-                'file_size': customState.customHandoutFile!.size,
-                'created_at': DateTime.now().toUtc().toIso8601String(),
-              })
-              .select('id')
-              .single();
-
-          finalFileId = fileRes['id'] as String;
+          finalFileId = await contentCubit.uploadAndCreateFileRecord(
+            tenantId: widget.content.tenantId,
+            contentId: widget.content.id,
+            fileName: customState.customHandoutFile!.name,
+            mimeType: 'application/pdf',
+            fileBytes: customState.customHandoutBytes!,
+            storagePath: storagePath,
+          );
         }
 
         groupConfigs.add({

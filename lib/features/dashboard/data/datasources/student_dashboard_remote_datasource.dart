@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/utils/app_logger.dart';
+import '../../../groups/data/models/group_model.dart';
+import '../../../groups/domain/entities/group_entity.dart';
 import '../../domain/entities/student_dashboard_stats.dart';
 
 abstract class StudentDashboardRemoteDataSource {
@@ -18,13 +20,39 @@ class StudentDashboardRemoteDataSourceImpl
   Future<StudentDashboardStats> getStudentDashboardStats(
     String studentId,
   ) async {
+    // ── FAST PATH: Single round-trip RPC (get_student_dashboard) ─────────────
     try {
-      // Execute all core queries concurrently via Future.wait
-      // 1. Core student metrics & video telemetry (RPC get_student_360 with fallback)
-      // 2. Urgent assignments
-      // 3. Student assignment submissions
-      // 4. Urgent exams
-      // 5. Student exam attempts
+      final res = await _supabase.rpc<dynamic>(
+        'get_student_dashboard',
+        params: {'p_student_id': studentId},
+      );
+
+      if (res != null) {
+        final Map<String, dynamic> data;
+        if (res is Map) {
+          data = Map<String, dynamic>.from(res);
+        } else if (res is String) {
+          final decoded = jsonDecode(res);
+          data = decoded is Map
+              ? Map<String, dynamic>.from(decoded)
+              : <String, dynamic>{};
+        } else {
+          data = <String, dynamic>{};
+        }
+
+        if (data.isNotEmpty) {
+          return _parseDashboardRpcData(data);
+        }
+      }
+    } catch (e) {
+      AppLogger.w(
+        'StudentDashboardRemoteDataSource',
+        '⚡ RPC get_student_dashboard fallback triggered for $studentId: $e',
+      );
+    }
+
+    // ── FALLBACK PATH: Concurrent queries with graceful degradation ──────────
+    try {
       final coreStatsFuture = _fetchCoreStatsWithFallback(studentId);
       final assignmentsFuture = _fetchUrgentAssignments();
       final submissionsFuture = _fetchStudentSubmissions(studentId);
@@ -69,6 +97,82 @@ class StudentDashboardRemoteDataSourceImpl
     } catch (e) {
       throw ServerException('Failed to load dashboard stats: $e');
     }
+  }
+
+  StudentDashboardStats _parseDashboardRpcData(Map<String, dynamic> data) {
+    final activeGroupName =
+        (data['active_group_name'] as String?) ?? 'No Active Group';
+    final activeGroupLevel =
+        (data['active_group_level'] as String?) ?? 'N/A';
+    final attendancePercentage =
+        (data['attendance_percentage'] as num?)?.toDouble() ?? 0.0;
+    final examAverage =
+        (data['exam_avg_percentage'] as num?)?.toDouble() ?? 0.0;
+    final assignmentsSubmitted =
+        (data['assignments_submitted'] as num?)?.toInt() ?? 0;
+    final videoPercentage =
+        (data['video_completion_percentage'] as num?)?.toDouble() ?? 0.0;
+
+    // Continue learning item
+    ContinueLearningItem? continueItem;
+    final ci = data['continue_learning_item'];
+    if (ci is Map<String, dynamic>) {
+      continueItem = ContinueLearningItem(
+        videoId: (ci['video_id'] as String?) ?? '',
+        contentId: (ci['content_id'] as String?) ?? '',
+        title: (ci['title'] as String?) ?? 'Video Lesson',
+        groupName: (ci['group_name'] as String?) ?? activeGroupName,
+        progressSeconds: (ci['progress_seconds'] as num?)?.toInt() ?? 0,
+        durationSeconds: (ci['duration_seconds'] as num?)?.toInt() ?? 0,
+        percentage: (ci['percentage'] as num?)?.toDouble() ?? 0.0,
+      );
+    }
+
+    // Urgent tasks
+    final List<UrgentTaskItem> urgentTasks = [];
+    final utList = data['urgent_tasks'] as List<dynamic>?;
+    if (utList != null) {
+      for (final t in utList) {
+        if (t is Map<String, dynamic>) {
+          urgentTasks.add(
+            UrgentTaskItem(
+              id: (t['id'] as String?) ?? '',
+              title: (t['title'] as String?) ?? '',
+              groupName: (t['group_name'] as String?) ?? activeGroupName,
+              taskType: (t['task_type'] as String?) ?? 'assignment',
+              dueAt: t['due_at'] != null
+                  ? DateTime.tryParse(t['due_at'] as String)
+                  : null,
+              status: (t['status'] as String?) ?? 'pending',
+              maxScore: (t['max_score'] as num?)?.toInt(),
+            ),
+          );
+        }
+      }
+    }
+
+    // Enrolled groups
+    final List<GroupEntity> groups = [];
+    final gList = data['groups'] as List<dynamic>?;
+    if (gList != null) {
+      for (final g in gList) {
+        if (g is Map<String, dynamic>) {
+          groups.add(GroupModel.fromJson(g));
+        }
+      }
+    }
+
+    return StudentDashboardStats(
+      attendancePercentage: attendancePercentage,
+      examAverage: examAverage,
+      assignmentsSubmitted: assignmentsSubmitted,
+      videoCompletionPercentage: videoPercentage,
+      activeGroupName: activeGroupName,
+      activeGroupLevel: activeGroupLevel,
+      continueLearningItem: continueItem,
+      urgentTasks: urgentTasks,
+      enrolledGroups: groups,
+    );
   }
 
   Future<_CoreDashboardData> _fetchCoreStatsWithFallback(
