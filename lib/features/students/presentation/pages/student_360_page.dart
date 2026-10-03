@@ -352,6 +352,16 @@ class _Student360PageState extends State<Student360Page> {
                                       ),
                                     ),
                                     onPressed: () {
+                                      final isSatGroup = stats.groups.any((g) =>
+                                          g.groupName.toUpperCase().contains('SAT') ||
+                                          g.groupLevel.toUpperCase().contains('SAT'));
+                                      final targetScore = isSatGroup ? 800 : 100;
+                                      final examScore = stats.examAverage > 0
+                                          ? (isSatGroup
+                                              ? (stats.examAverage * 8).round()
+                                              : stats.examAverage.round())
+                                          : 0;
+
                                       final report =
                                           WhatsAppReportGenerator.generateStudentWeeklyReport(
                                             studentName: student.fullName,
@@ -369,13 +379,9 @@ class _Student360PageState extends State<Student360Page> {
                                             completedAssignments:
                                                 stats.assignmentsSubmitted,
                                             totalAssignments:
-                                                stats.assignmentsSubmitted > 0
-                                                ? stats.assignmentsSubmitted
-                                                : 4,
-                                            mockExamScore: stats.examAverage > 0
-                                                ? (stats.examAverage * 8)
-                                                      .round()
-                                                : 740,
+                                                stats.assignmentsSubmitted,
+                                            mockExamScore: examScore,
+                                            targetScore: targetScore,
                                             activeStudyMinutes:
                                                 stats.todayActiveMinutes,
                                             engagementQualityText:
@@ -387,11 +393,8 @@ class _Student360PageState extends State<Student360Page> {
                                         context,
                                         studentName: student.fullName,
                                         reportText: report,
-                                        phone:
-                                            (student.parentPhone != null &&
-                                                student.parentPhone!.isNotEmpty)
-                                            ? student.parentPhone
-                                            : student.phone,
+                                        phone: student.parentPhone,
+                                        alternatePhone: student.phone,
                                       );
                                     },
                                   ),
@@ -456,6 +459,16 @@ class _Student360PageState extends State<Student360Page> {
                                   ),
                                 ),
                                 onPressed: () {
+                                  final isSatGroup = stats.groups.any((g) =>
+                                      g.groupName.toUpperCase().contains('SAT') ||
+                                      g.groupLevel.toUpperCase().contains('SAT'));
+                                  final targetScore = isSatGroup ? 800 : 100;
+                                  final examScore = stats.examAverage > 0
+                                      ? (isSatGroup
+                                          ? (stats.examAverage * 8).round()
+                                          : stats.examAverage.round())
+                                      : 0;
+
                                   final report =
                                       WhatsAppReportGenerator.generateStudentWeeklyReport(
                                         studentName: student.fullName,
@@ -472,12 +485,9 @@ class _Student360PageState extends State<Student360Page> {
                                         completedAssignments:
                                             stats.assignmentsSubmitted,
                                         totalAssignments:
-                                            stats.assignmentsSubmitted > 0
-                                            ? stats.assignmentsSubmitted
-                                            : 4,
-                                        mockExamScore: stats.examAverage > 0
-                                            ? (stats.examAverage * 8).round()
-                                            : 740,
+                                            stats.assignmentsSubmitted,
+                                        mockExamScore: examScore,
+                                        targetScore: targetScore,
                                         activeStudyMinutes:
                                             stats.todayActiveMinutes,
                                         engagementQualityText:
@@ -489,11 +499,8 @@ class _Student360PageState extends State<Student360Page> {
                                     context,
                                     studentName: student.fullName,
                                     reportText: report,
-                                    phone:
-                                        (student.parentPhone != null &&
-                                            student.parentPhone!.isNotEmpty)
-                                        ? student.parentPhone
-                                        : student.phone,
+                                    phone: student.parentPhone,
+                                    alternatePhone: student.phone,
                                   );
                                 },
                               ),

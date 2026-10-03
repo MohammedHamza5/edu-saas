@@ -11,6 +11,7 @@ import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_loading_view.dart';
 import '../../../../core/widgets/forensic_watermark_overlay.dart';
 import '../../domain/entities/content_entity.dart';
+import 'secure_pdf_viewer.dart';
 
 /// An academic, highly polished modal sheet or dialog to view and download
 /// educational materials, notes, and attachments with secure signed URLs.
@@ -31,6 +32,7 @@ class MaterialViewerSheet extends StatefulWidget {
     required Future<String?> Function(String storagePath) onGetSignedUrl,
   }) async {
     final width = MediaQuery.of(context).size.width;
+    final isPdf = content.type == ContentType.pdf;
     if (width >= 600) {
       await showDialog<void>(
         context: context,
@@ -39,7 +41,10 @@ class MaterialViewerSheet extends StatefulWidget {
             borderRadius: BorderRadius.circular(AppSpacing.radiusLarge),
           ),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 520),
+            constraints: BoxConstraints(
+              maxWidth: isPdf ? 980 : 520,
+              maxHeight: isPdf ? MediaQuery.of(ctx).size.height * 0.90 : 640,
+            ),
             child: MaterialViewerSheet(
               content: content,
               onGetSignedUrl: onGetSignedUrl,
@@ -52,9 +57,14 @@ class MaterialViewerSheet extends StatefulWidget {
         context: context,
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
-        builder: (ctx) => MaterialViewerSheet(
-          content: content,
-          onGetSignedUrl: onGetSignedUrl,
+        builder: (ctx) => ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(ctx).size.height * 0.92,
+          ),
+          child: MaterialViewerSheet(
+            content: content,
+            onGetSignedUrl: onGetSignedUrl,
+          ),
         ),
       );
     }
@@ -402,50 +412,70 @@ class _MaterialViewerSheetState extends State<MaterialViewerSheet> {
                   ),
                 ),
               ],
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  final isVeryNarrow = constraints.maxWidth < 340;
-                  if (isVeryNarrow) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+              if (isPdf) ...[
+                Container(
+                  height: MediaQuery.of(context).size.width >= 600 ? 520 : 380,
+                  margin: const EdgeInsets.only(bottom: AppSpacing.s12),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(
+                      AppSpacing.radiusMedium,
+                    ),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(
+                      AppSpacing.radiusMedium,
+                    ),
+                    child: buildSecurePdfViewer(pdfUrl: _signedUrl!),
+                  ),
+                ),
+              ],
+              if (isTeacher) ...[
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isVeryNarrow = constraints.maxWidth < 340;
+                    if (isVeryNarrow) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          AppButton(
+                            text: context.l10n.downloadOrOpenFile,
+                            icon: Icons.open_in_new_rounded,
+                            onPressed: _copyUrl,
+                          ),
+                          const SizedBox(height: AppSpacing.s8),
+                          AppButton(
+                            text: context.l10n.copySecureUrlAction,
+                            icon: Icons.copy_rounded,
+                            variant: AppButtonVariant.secondary,
+                            onPressed: _copyUrl,
+                          ),
+                        ],
+                      );
+                    }
+                    return Row(
                       children: [
-                        AppButton(
-                          text: context.l10n.downloadOrOpenFile,
-                          icon: Icons.open_in_new_rounded,
-                          onPressed: _copyUrl,
+                        Expanded(
+                          child: AppButton(
+                            text: context.l10n.copySecureUrlAction,
+                            icon: Icons.copy_rounded,
+                            variant: AppButtonVariant.secondary,
+                            onPressed: _copyUrl,
+                          ),
                         ),
-                        const SizedBox(height: AppSpacing.s8),
-                        AppButton(
-                          text: context.l10n.copySecureUrlAction,
-                          icon: Icons.copy_rounded,
-                          variant: AppButtonVariant.secondary,
-                          onPressed: _copyUrl,
+                        const SizedBox(width: AppSpacing.s12),
+                        Expanded(
+                          child: AppButton(
+                            text: context.l10n.downloadOrOpenFile,
+                            icon: Icons.open_in_new_rounded,
+                            onPressed: _copyUrl,
+                          ),
                         ),
                       ],
                     );
-                  }
-                  return Row(
-                    children: [
-                      Expanded(
-                        child: AppButton(
-                          text: context.l10n.copySecureUrlAction,
-                          icon: Icons.copy_rounded,
-                          variant: AppButtonVariant.secondary,
-                          onPressed: _copyUrl,
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.s12),
-                      Expanded(
-                        child: AppButton(
-                          text: context.l10n.downloadOrOpenFile,
-                          icon: Icons.open_in_new_rounded,
-                          onPressed: _copyUrl,
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              ),
+                  },
+                ),
+              ],
             ],
 
             const SizedBox(height: AppSpacing.s12),

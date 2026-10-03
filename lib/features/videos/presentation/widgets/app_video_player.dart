@@ -375,15 +375,17 @@ class _AppVideoPlayerState extends State<AppVideoPlayer> {
   @override
   Widget build(BuildContext context) {
     if (_isYouTubeEmbed) {
-      return buildYouTubeEmbedPlayer(
-        embedUrl: widget.streamUrl,
-        initialProgressSeconds: widget.initialProgressSeconds,
-        onProgress: widget.onProgress,
-        onMetricsProgress: widget.onMetricsProgress,
-        onCompleted: widget.onCompleted,
-        onSeekReady: widget.onSeekReady,
-        onPlaybackControlsReady: widget.onPlaybackControlsReady,
-        onFullscreenChanged: widget.onFullscreenChanged,
+      return ForensicWatermarkOverlay(
+        child: buildYouTubeEmbedPlayer(
+          embedUrl: widget.streamUrl,
+          initialProgressSeconds: widget.initialProgressSeconds,
+          onProgress: widget.onProgress,
+          onMetricsProgress: widget.onMetricsProgress,
+          onCompleted: widget.onCompleted,
+          onSeekReady: widget.onSeekReady,
+          onPlaybackControlsReady: widget.onPlaybackControlsReady,
+          onFullscreenChanged: widget.onFullscreenChanged,
+        ),
       );
     }
 

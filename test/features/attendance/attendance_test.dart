@@ -67,14 +67,20 @@ class FakeAttendanceRepository implements AttendanceRepository {
   bool shouldFail = false;
 
   @override
-  Future<Result<List<StudentAttendanceItem>>> getGroupStudentsWithAttendance({
+  Future<Result<GroupAttendanceData>> getGroupStudentsWithAttendance({
     required String groupId,
     required DateTime date,
+    String? lectureContentId,
   }) async {
     if (shouldFail) {
       return const FailureResult(ServerFailure('Database error'));
     }
-    return Success(mockStudents);
+    return Success(
+      GroupAttendanceData(
+        students: mockStudents,
+        lectures: const [],
+      ),
+    );
   }
 
   @override

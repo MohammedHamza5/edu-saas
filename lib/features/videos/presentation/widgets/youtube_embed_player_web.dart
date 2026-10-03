@@ -11,6 +11,7 @@ external JSObject _createYouTubePlayer(
   JSString videoId,
   JSString viewId,
   JSString origin,
+  JSNumber startSeconds,
 );
 
 @JS('youtubePostMessage')
@@ -125,7 +126,12 @@ class _YouTubeEmbedPlayerWebState extends State<_YouTubeEmbedPlayerWeb> {
     // Register iframe platform view factory
     ui_web.platformViewRegistry.registerViewFactory(_viewType, (int id) {
       try {
-        return _createYouTubePlayer(videoId.toJS, _viewId.toJS, origin.toJS);
+        return _createYouTubePlayer(
+          videoId.toJS,
+          _viewId.toJS,
+          origin.toJS,
+          widget.initialProgressSeconds.toJS,
+        );
       } catch (e) {
         if (kDebugMode) {
           debugPrint('[YouTubeEmbed] Error initializing player: $e');
@@ -249,10 +255,7 @@ class _YouTubeEmbedPlayerWebState extends State<_YouTubeEmbedPlayerWeb> {
               widget.onCompleted?.call();
             }
           } else if (event == 'ready') {
-            if (widget.initialProgressSeconds > 3 && !_hasSeekedInitial) {
-              _hasSeekedInitial = true;
-              seekTo(widget.initialProgressSeconds);
-            }
+            // Player is initialized; video is cued at startSeconds natively via embed URL.
           }
         } catch (e) {
           if (kDebugMode) {

@@ -1907,6 +1907,75 @@ class AppLocalizationsEn extends AppLocalizations {
   String get createReport => 'Generate Report';
 
   @override
+  String get whatsappReportDialogTitle => 'Parent WhatsApp Report';
+
+  @override
+  String get whatsappReportDialogSubtitle =>
+      'Review and send the progress report directly to the parent';
+
+  @override
+  String get whatsappReportTypeLabel => 'Report Type';
+
+  @override
+  String get whatsappReportTypeComprehensive => 'Comprehensive Progress Report';
+
+  @override
+  String get whatsappReportTypeAbsence => 'Absence Notice';
+
+  @override
+  String get whatsappReportTypeExam => 'Latest Exam Result';
+
+  @override
+  String get whatsappTeacherNotesLabel => 'Teacher\'s Recommendation / Notes';
+
+  @override
+  String get whatsappTeacherNotesHint =>
+      'Write a note or choose a quick preset...';
+
+  @override
+  String get whatsappPresetExcellent =>
+      '🌟 The student shows outstanding commitment and solid academic progress.';
+
+  @override
+  String get whatsappPresetNeedsHomework =>
+      '⚠️ Please follow up with the student on completing assignments on schedule.';
+
+  @override
+  String get whatsappPresetAbsentNotice =>
+      '📢 The student was absent from today\'s session. Please ensure they catch up with the recorded lecture.';
+
+  @override
+  String get whatsappSendButton => 'Send via WhatsApp';
+
+  @override
+  String get whatsappCopyButton => 'Copy Report';
+
+  @override
+  String whatsappCopiedSuccess(String studentName) {
+    return 'Report for $studentName copied successfully! Ready for WhatsApp 📋';
+  }
+
+  @override
+  String get whatsappParentPhoneMissing =>
+      'Parent WhatsApp number is not registered for this student';
+
+  @override
+  String get whatsappOpenError =>
+      'Could not launch WhatsApp. The text has been copied to your clipboard instead.';
+
+  @override
+  String get whatsappQuickActionTooltip => 'Send WhatsApp Report to Parent';
+
+  @override
+  String get whatsappTargetPhoneLabel => 'Recipient Number';
+
+  @override
+  String get whatsappTargetParent => 'Parent';
+
+  @override
+  String get whatsappTargetStudent => 'Student';
+
+  @override
   String get statsOverviewTitle => 'Performance Statistics';
 
   @override
@@ -2193,7 +2262,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get eventLogin => 'Platform login';
 
   @override
-  String get eventContentOpened => 'Opened material or lesson';
+  String get eventContentOpened => 'Opened material or lecture';
 
   @override
   String get eventVideoStarted => 'Started lecture video';
@@ -2251,6 +2320,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notificationTypeImportantAnnouncement => 'Important Announcement';
+
+  @override
+  String get notificationGoToLecture => 'Go to Lectures';
+
+  @override
+  String get notificationGoToExam => 'Go to Exams';
+
+  @override
+  String get notificationGoToAssignment => 'Go to Assignments';
+
+  @override
+  String get notificationGoToAttendance => 'Go to Attendance';
 
   @override
   String get markAllAsRead => 'Mark All as Read';
@@ -2332,7 +2413,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get templateExamAlertBody =>
-      'Please review all lessons and practice exercises in preparation for the upcoming exam. Best of luck!';
+      'Please review all lectures and practice exercises in preparation for the upcoming exam. Best of luck!';
 
   @override
   String get templateExcellencePraiseLabel => '🎉 Praise & Honor';
@@ -2648,7 +2729,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get actionTip => 'What you can do:';
 
   @override
-  String get watchLessonTitle => 'Watch Educational Lesson';
+  String get watchLessonTitle => 'Watch Educational Lecture';
 
   @override
   String get secureCdnBadge => 'Protected Stream';
@@ -2669,7 +2750,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fullscreenAction => 'Fullscreen';
 
   @override
-  String get lessonAcademicProgress => 'Lesson Academic Progress';
+  String get lessonAcademicProgress => 'Lecture Academic Progress';
 
   @override
   String get statusCompleted => 'Completed';
@@ -2703,16 +2784,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get milestoneAdvanced => 'Advanced Problems';
 
   @override
-  String get milestoneCompletion => 'Full Lesson Completion';
+  String get milestoneCompletion => 'Full Lecture Completion';
 
   @override
-  String get defaultLessonTitle => 'Educational Lesson';
+  String get defaultLessonTitle => 'Educational Lecture';
 
   @override
   String get protectedStreamCdnNotice => 'Secure, encrypted educational stream';
 
   @override
-  String get lessonNotesAndTopics => 'Lesson Notes & Topics:';
+  String get lessonNotesAndTopics => 'Lecture Notes & Topics:';
 
   @override
   String get videoProcessingMessage => 'Processing video...';
@@ -2721,7 +2802,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get videoProcessingFailed => 'Video processing failed';
 
   @override
-  String get videoLessonUntitled => 'Untitled Video Lesson';
+  String get videoLessonUntitled => 'Untitled Video Lecture';
 
   @override
   String watchedPercentage(int percent) {
@@ -2729,7 +2810,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get videoLessonPlaceholder => 'Video Lesson';
+  String get videoLessonPlaceholder => 'Video Lecture';
 
   @override
   String videoPickFailed(String error) {
@@ -2744,18 +2825,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'Video uploaded successfully and is processing in the cloud!';
 
   @override
-  String get videoPendingUploadTitle => 'Lesson Under Preparation';
+  String get videoPendingUploadTitle => 'Lecture Under Preparation';
 
   @override
   String get studentVideoPendingUploadDesc =>
-      'The teacher is currently preparing and uploading the video for this lesson. Please check back later.';
+      'The teacher is currently preparing and uploading the video for this lecture. Please check back later.';
 
   @override
   String get teacherVideoNotUploadedTitle => 'No Video Uploaded Yet';
 
   @override
   String get teacherVideoNotUploadedDesc =>
-      'Lesson created, but the video file has not been uploaded to the streaming server yet. You can upload it now so students can watch.';
+      'Lecture created, but the video file has not been uploaded to the streaming server yet. You can upload it now so students can watch.';
 
   @override
   String get teacherVideoNotUploadedBadge => 'Pending Video Upload';
@@ -2765,10 +2846,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get videoNotFoundMessage =>
-      'The requested educational lesson could not be found.';
+      'The requested educational lecture could not be found.';
 
   @override
-  String get uploadNewLessonVideo => 'Upload New Lesson Video';
+  String get uploadNewLessonVideo => 'Upload New Lecture Video';
 
   @override
   String get fastEncryptedCdnHosting =>
@@ -2788,16 +2869,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get changeFile => 'Change file';
 
   @override
-  String get lessonTitleLabel => 'Lesson Title';
+  String get lessonTitleLabel => 'Lecture Title';
 
   @override
   String get lessonTitleHint => 'e.g. Trigonometric Functions - Part 1';
 
   @override
-  String get lessonTitleRequired => 'Please enter lesson title';
+  String get lessonTitleRequired => 'Please enter lecture title';
 
   @override
-  String get lessonNotesLabel => 'Lesson Topics & Notes (Optional)';
+  String get lessonNotesLabel => 'Lecture Topics & Notes (Optional)';
 
   @override
   String get lessonNotesHint => 'Important takeaways, formulas, homework...';
@@ -2875,7 +2956,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noContentPublishedYet =>
-      'No educational materials published in this group yet.\nNotes and lessons will appear here once published by the teacher.';
+      'No educational materials published in this group yet.\nNotes and lectures will appear here once published by the teacher.';
 
   @override
   String noMatchingContentFound(String query) {
@@ -4129,10 +4210,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sequentialLearningSectionTitle => 'Sequential Learning & Exams';
 
   @override
-  String get associatedExamBadge => 'Associated Exam (Lesson Quiz)';
+  String get associatedExamBadge => 'Associated Exam (Lecture Quiz)';
 
   @override
-  String get associatedExamLabel => 'Associated Exam (Lesson Quiz)';
+  String get associatedExamLabel => 'Associated Exam (Lecture Quiz)';
 
   @override
   String associatedExamTitleLabel(String title) {
@@ -4140,10 +4221,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get associatedExamHint => 'Select an exam for this lesson';
+  String get associatedExamHint => 'Select an exam for this lecture';
 
   @override
-  String get prerequisiteExamLabel => 'Prerequisite Exam (Lock Lesson)';
+  String get prerequisiteExamLabel => 'Prerequisite Exam (Lock Lecture)';
 
   @override
   String get prerequisiteExamHint => 'Select an exam that must be passed first';
@@ -4211,13 +4292,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get restartLesson => 'Restart Lesson';
+  String get restartLesson => 'Restart Lecture';
 
   @override
   String get clickToSeek => 'Click to Seek';
 
   @override
-  String get lessonCompletedSuccess => 'Lesson Completed!';
+  String get lessonCompletedSuccess => 'Lecture Completed!';
 
   @override
   String get progressSavedAutomatically => 'Progress saved automatically';
@@ -4286,7 +4367,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get assignToGroupsAction => 'Assign to Groups';
 
   @override
-  String get lessonPrerequisiteLocked => 'Lesson Locked by Prerequisite';
+  String get lessonPrerequisiteLocked => 'Lecture Locked by Prerequisite';
 
   @override
   String mustPassExamToUnlock(String title, int score) {
@@ -4523,7 +4604,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get studentNavNotificationsSubtitle => 'Recent updates';
 
   @override
-  String get studentNavContentSubtitle => 'Videos & lessons';
+  String get studentNavContentSubtitle => 'Videos & lectures';
 
   @override
   String get studentNavAssignmentsSubtitle => 'Homework tasks';
@@ -4851,7 +4932,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lessonHandoutChip => 'Handout PDF';
 
   @override
-  String get lessonQuizChip => 'Lesson Quiz';
+  String get lessonQuizChip => 'Lecture Quiz';
 
   @override
   String get lockedByPrereqTooltip =>
@@ -4861,7 +4942,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get groupHandoutPdfLabel => 'Handout PDF for this group';
 
   @override
-  String get groupExamLabel => 'Lesson Quiz for this group';
+  String get groupExamLabel => 'Lecture Quiz for this group';
 
   @override
   String get noExamSelected => 'No quiz (Optional)';
@@ -4905,7 +4986,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get manualUnlockTitle => 'Manual Unlock';
 
   @override
-  String get manualUnlockWarningText1 => 'You are about to unlock the lesson ';
+  String get manualUnlockWarningText1 => 'You are about to unlock the lecture ';
 
   @override
   String get manualUnlockWarningText2 => ' for the student ';
@@ -4932,7 +5013,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get enforceSequentialLearningDesc =>
-      'Students must pass quizzes to unlock next lessons';
+      'Students must pass quizzes to unlock next lectures';
 
   @override
   String get defaultPassingScore => 'Default Passing Score (%)';
@@ -4945,7 +5026,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get lessonQuizSequentialRequirement =>
-      'This Lesson Quiz will be required for students to unlock the next lesson (if Sequential Learning is enabled).';
+      'This Lecture Quiz will be required for students to unlock the next lecture (if Sequential Learning is enabled).';
 
   @override
   String get videoLibraryTitle => 'Video Library';
@@ -4994,18 +5075,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'Choose which course to add this video to:';
 
   @override
-  String nCoursesNLessons(int lessons, int students) {
-    return '$lessons Lessons · $students Students';
+  String nCoursesNLessons(int lessons, int students, Object lectures) {
+    return '$lectures Lectures · $students Students';
   }
 
   @override
-  String get addLesson => 'Add Lesson';
+  String get addLesson => 'Add Lecture';
 
   @override
-  String get addLessonTitle => 'Add Lesson';
+  String get addLessonTitle => 'Add Lecture';
 
   @override
-  String get addLessonSubtitle => 'How would you like to add this lesson?';
+  String get addLessonSubtitle => 'How would you like to add this lecture?';
 
   @override
   String get useExistingVideo => 'Use Existing Video';
@@ -5021,7 +5102,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Create a new video for this course';
 
   @override
-  String get lessonSetupTitle => 'Lesson Setup';
+  String get lessonSetupTitle => 'Lecture Setup';
 
   @override
   String get studyMaterial => 'Study Material';
@@ -5036,13 +5117,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get removePdf => 'Remove';
 
   @override
-  String get lessonQuizLabel => 'Lesson Quiz';
+  String get lessonQuizLabel => 'Lecture Quiz';
 
   @override
-  String get lessonQuizHint => 'Select Lesson Quiz';
+  String get lessonQuizHint => 'Select Lecture Quiz';
 
   @override
-  String get createLessonQuiz => '+ Create Lesson Quiz';
+  String get createLessonQuiz => '+ Create Lecture Quiz';
 
   @override
   String useCourseDefault(int score) {
@@ -5054,14 +5135,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String lessonAddedToCourse(String course) {
-    return 'Lesson added to $course.';
+    return 'Lecture added to $course.';
   }
 
   @override
-  String get lessonUpdatedSuccess => 'Lesson updated successfully.';
+  String get lessonUpdatedSuccess => 'Lecture updated successfully.';
 
   @override
-  String get manageLessons => 'Manage Lessons';
+  String get manageLessons => 'Manage Lectures';
 
   @override
   String get courseBuilderTitle => 'Course Builder';
@@ -5071,23 +5152,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sequentialLearningDescription =>
-      'Students must complete each lesson\'s video and pass the lesson quiz before the next lesson becomes available.';
+      'Students must complete each lecture\'s video and pass the lecture quiz before the next lecture becomes available.';
 
   @override
-  String get defaultLessonPassingScore => 'Default Lesson Quiz Passing Score';
+  String get defaultLessonPassingScore => 'Default Lecture Quiz Passing Score';
 
   @override
   String get learningProgression => 'Learning Progression';
 
   @override
-  String get noLessonsYet => 'No lessons yet';
+  String get noLessonsYet => 'No lectures yet';
 
   @override
   String get noLessonsYetSubtitle =>
-      'Start building your course by adding a video lesson.';
+      'Start building your course by adding a video lecture.';
 
   @override
-  String get addFirstLesson => 'Add First Lesson';
+  String get addFirstLesson => 'Add First Lecture';
 
   @override
   String get videoPickerTitle => 'Select Video';
@@ -5097,23 +5178,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String lessonNumber(int n) {
-    return 'Lesson $n';
+    return 'Lecture $n';
   }
 
   @override
   String get hasStudyMaterial => 'Study Material';
 
   @override
-  String get hasLessonQuiz => 'Lesson Quiz';
+  String get hasLessonQuiz => 'Lecture Quiz';
 
   @override
   String get lessonEditorCreateQuiz => 'Create New Quiz';
 
   @override
-  String get editLesson => 'Edit Lesson';
+  String get editLesson => 'Edit Lecture';
 
   @override
-  String get deleteLesson => 'Delete Lesson';
+  String get deleteLesson => 'Delete Lecture';
 
   @override
   String get moveUp => 'Move up';
@@ -5138,10 +5219,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get selectLessonToEdit =>
-      'Select a lesson to edit details or add a new one';
+      'Select a lecture to edit details or add a new one';
 
   @override
-  String get lessonAnalytics => 'Lesson Analytics';
+  String get lessonAnalytics => 'Lecture Analytics';
 
   @override
   String get backToCourse => 'Back to Course';
@@ -5150,10 +5231,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get activeEditing => 'Currently Editing';
 
   @override
-  String get lessonDetails => 'Lesson Details';
+  String get lessonDetails => 'Lecture Details';
 
   @override
-  String get lessonVideo => 'Lesson Video';
+  String get lessonVideo => 'Lecture Video';
 
   @override
   String get lessonHandouts => 'Handouts & Materials';
@@ -5166,8 +5247,8 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count Lessons',
-      one: '1 Lesson',
+      other: '$count Lectures',
+      one: '1 Lecture',
     );
     return '$_temp0';
   }
@@ -5189,11 +5270,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get couldNotAddLesson =>
-      'We couldn\'t add this lesson. Please try again.';
+      'We couldn\'t add this lecture. Please try again.';
 
   @override
   String get couldNotUpdateLesson =>
-      'We couldn\'t update this lesson. Please try again.';
+      'We couldn\'t update this lecture. Please try again.';
 
   @override
   String get noCoursesAvailable => 'No courses available.';
@@ -5249,81 +5330,81 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get courseBeingPreparedSubtitle =>
-      'Your lessons will appear here soon.';
+      'Your lectures will appear here soon.';
 
   @override
   String get startCourseAction => 'Start Course';
 
   @override
-  String get continueLessonAction => 'Continue Lesson';
+  String get continueLessonAction => 'Continue Lecture';
 
   @override
-  String get takeLessonQuizAction => 'Start Lesson Quiz';
+  String get takeLessonQuizAction => 'Start Lecture Quiz';
 
   @override
-  String get retryLessonQuizAction => 'Retry Lesson Quiz';
+  String get retryLessonQuizAction => 'Retry Lecture Quiz';
 
   @override
   String get reviewCourseAction => 'Review Course';
 
   @override
-  String get reviewLessonAction => 'Review Lesson';
+  String get reviewLessonAction => 'Review Lecture';
 
   @override
-  String get continueToNextLessonAction => 'Continue to Next Lesson';
+  String get continueToNextLessonAction => 'Continue to Next Lecture';
 
   @override
   String completeLessonToUnlock(int n) {
-    return 'Complete Lesson $n to unlock this lesson.';
+    return 'Complete Lecture $n to unlock this lecture.';
   }
 
   @override
   String get availableStatus => 'Available';
 
   @override
-  String get lessonQuizReadyTitle => 'Your lesson quiz is ready.';
+  String get lessonQuizReadyTitle => 'Your lecture quiz is ready.';
 
   @override
   String get lessonQuizReadyDesc =>
-      'Test your understanding of this lesson to unlock the next one.';
+      'Test your understanding of this lecture to unlock the next one.';
 
   @override
   String get quizNotPassedTitle => 'Quiz not passed';
 
   @override
-  String get quizNotPassedDesc => 'You can review the lesson and try again.';
+  String get quizNotPassedDesc => 'You can review the lecture and try again.';
 
   @override
-  String get lessonCompletedCongrats => 'Lesson completed!';
+  String get lessonCompletedCongrats => 'Lecture completed!';
 
   @override
-  String get passedQuizNotice => 'You passed the lesson quiz.';
+  String get passedQuizNotice => 'You passed the lecture quiz.';
 
   @override
   String nextLessonLabel(String title) {
-    return 'Next lesson: $title';
+    return 'Next lecture: $title';
   }
 
   @override
-  String get previousLessonAction => 'Previous Lesson';
+  String get previousLessonAction => 'Previous Lecture';
 
   @override
-  String get nextLessonAction => 'Next Lesson';
+  String get nextLessonAction => 'Next Lecture';
 
   @override
   String lessonXofY(int current, int total) {
-    return 'Lesson $current of $total';
+    return 'Lecture $current of $total';
   }
 
   @override
-  String get lessonMaterialTitle => 'Lesson Material';
+  String get lessonMaterialTitle => 'Lecture Material';
 
   @override
   String get openPdfAction => 'Open PDF';
 
   @override
   String get completeVideoToUnlockQuiz =>
-      'Complete the video to unlock the lesson quiz.';
+      'Complete the video to unlock the lecture quiz.';
 
   @override
   String get videoCompletedTitle => 'Video completed';
@@ -5332,11 +5413,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get courseAssessmentsTitle => 'Course Assessments';
 
   @override
-  String get lessonQuizzesSectionTitle => 'Lesson Quizzes';
+  String get lessonQuizzesSectionTitle => 'Lecture Quizzes';
 
   @override
   String get lessonQuizzesSectionDesc =>
-      'Completed as part of your lesson progression.';
+      'Completed as part of your lecture progression.';
 
   @override
   String get generalExamsSectionTitle => 'General Exams';
@@ -5346,7 +5427,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String lessonsCompletedRatio(int completed, int total) {
-    return '$completed of $total lessons completed';
+    return '$completed of $total lectures completed';
   }
 
   @override
@@ -5355,27 +5436,27 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get viewLessonsAction => 'View Lessons';
+  String get viewLessonsAction => 'View Lectures';
 
   @override
-  String get courseLessonsTitle => 'Course Lessons';
+  String get courseLessonsTitle => 'Course Lectures';
 
   @override
-  String get addLessonButton => 'Add Lesson';
+  String get addLessonButton => 'Add Lecture';
 
   @override
-  String get courseBuilderEmptyTitle => 'No Lessons Yet';
+  String get courseBuilderEmptyTitle => 'No Lectures Yet';
 
   @override
   String get courseBuilderEmptySubtitle =>
-      'Start building your course by adding a lesson.';
+      'Start building your course by adding a lecture.';
 
   @override
   String get sequentialLearning => 'Sequential Learning';
 
   @override
   String get sequentialLearningDesc =>
-      'Students must complete each lesson\'s video and pass the lesson quiz before the next lesson unlocks.';
+      'Students must complete each lecture\'s video and pass the lecture quiz before the next lecture unlocks.';
 
   @override
   String get lessonEditorErrorSelectVideo => 'Please select a video first.';
@@ -5384,10 +5465,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lessonEditorErrorSaving => 'An error occurred while saving.';
 
   @override
-  String get lessonEditorEditTitle => 'Edit Lesson';
+  String get lessonEditorEditTitle => 'Edit Lecture';
 
   @override
-  String get lessonEditorAddTitle => 'Add New Lesson';
+  String get lessonEditorAddTitle => 'Add New Lecture';
 
   @override
   String get lessonEditorSourceVideo => 'Source Video';
@@ -5402,10 +5483,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lessonEditorUploadNew => 'Upload New';
 
   @override
-  String get lessonEditorLessonTitle => 'Lesson Title (Optional Override)';
+  String get lessonEditorLessonTitle => 'Lecture Title (Optional Override)';
 
   @override
-  String get lessonEditorLessonTitleHint => 'Enter lesson title';
+  String get lessonEditorLessonTitleHint => 'Enter lecture title';
 
   @override
   String get lessonEditorStudyMaterial => 'Study Material (PDF)';
@@ -5414,7 +5495,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lessonEditorUploadPdf => 'Upload PDF';
 
   @override
-  String get lessonEditorLessonQuiz => 'Lesson Quiz';
+  String get lessonEditorLessonQuiz => 'Lecture Quiz';
 
   @override
   String get lessonEditorNoQuizzes => 'No quizzes available in this group.';
@@ -5437,13 +5518,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get totalViews => 'Total Views';
 
   @override
-  String get completedLesson => 'Completed Lesson';
+  String get completedLesson => 'Completed Lecture';
 
   @override
   String get averageQuizScore => 'Average Quiz Score';
 
   @override
-  String get studentLessonProgressStats => 'Student Lesson Progress';
+  String get studentLessonProgressStats => 'Student Lecture Progress';
 
   @override
   String overallCompletionRate(int rate) {
@@ -5461,7 +5542,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Analytics will appear once students start watching the lecture.';
 
   @override
-  String get editLessonTitle => 'Edit Lesson';
+  String get editLessonTitle => 'Edit Lecture';
 
   @override
   String get searchStudentsPlaceholder =>
@@ -5923,49 +6004,49 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lessonVisibilityDraft => 'Draft (Hidden from Students)';
 
   @override
-  String get hideLessonTooltip => 'Hide lesson from students';
+  String get hideLessonTooltip => 'Hide lecture from students';
 
   @override
-  String get publishLessonTooltip => 'Publish lesson to students';
+  String get publishLessonTooltip => 'Publish lecture to students';
 
   @override
-  String get lessonStatusLabel => 'Lesson Publishing Status';
+  String get lessonStatusLabel => 'Lecture Publishing Status';
 
   @override
   String get lessonStatusPublishedDesc =>
-      'The lesson is live and visible to enrolled students in this group.';
+      'The lecture is live and visible to enrolled students in this group.';
 
   @override
   String get lessonStatusDraftDesc =>
-      'The lesson is private and visible only to the teacher for drafting.';
+      'The lecture is private and visible only to the teacher for drafting.';
 
   @override
   String get lessonVisibilityUpdatedToast =>
-      'Lesson visibility updated successfully.';
+      'Lecture visibility updated successfully.';
 
   @override
-  String get publishAllLessonsConfirmTitle => 'Publish All Lessons?';
+  String get publishAllLessonsConfirmTitle => 'Publish All Lectures?';
 
   @override
-  String get hideAllLessonsConfirmTitle => 'Hide All Lessons?';
+  String get hideAllLessonsConfirmTitle => 'Hide All Lectures?';
 
   @override
   String get publishAllLessonsConfirmMessage =>
-      'Are you sure you want to publish all lessons in this course? Students will be able to access them.';
+      'Are you sure you want to publish all lectures in this course? Students will be able to access them.';
 
   @override
   String get hideAllLessonsConfirmMessage =>
-      'Are you sure you want to hide all lessons in this course? They will become drafts.';
+      'Are you sure you want to hide all lectures in this course? They will become drafts.';
 
   @override
-  String get publishAllLessonsAction => 'Publish All Lessons';
+  String get publishAllLessonsAction => 'Publish All Lectures';
 
   @override
-  String get hideAllLessonsAction => 'Hide All Lessons';
+  String get hideAllLessonsAction => 'Hide All Lectures';
 
   @override
   String get allLessonsVisibilityUpdatedToast =>
-      'All lessons visibility updated successfully.';
+      'All lectures visibility updated successfully.';
 
   @override
   String get imageNotAccessible => 'Image not accessible';
@@ -6188,7 +6269,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Students must pass this quiz to unlock the next lecture in sequential order.';
 
   @override
-  String get createInstantQuizAction => 'Create Quiz for this Lesson';
+  String get createInstantQuizAction => 'Create Quiz for this Lecture';
 
   @override
   String get selectExistingQuizAction => 'Select from Existing Quizzes';
@@ -6248,4 +6329,40 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get deleteLessonSmartNote =>
       'Handout files and student progress records will be removed to free storage, while attached exams remain preserved in your exam bank.';
+
+  @override
+  String get allLecturesOverview => 'All Group Lectures (Overview)';
+
+  @override
+  String get lectureSelectionLabel => 'Select Lecture:';
+
+  @override
+  String get syncAttendanceAction => 'Sync Attendance from Videos';
+
+  @override
+  String get saveAttendanceSheet => 'Save Attendance Sheet';
+
+  @override
+  String get fastSkippingDetected => 'Fast Skipping Detected';
+
+  @override
+  String get sendLectureWhatsAppNotice => 'Send WhatsApp Watch Notice';
+
+  @override
+  String completedLecturesRatio(int completed, int total) {
+    return 'Completed $completed of $total lectures';
+  }
+
+  @override
+  String lastWatchedTime(String time) {
+    return 'Last watched: $time';
+  }
+
+  @override
+  String get noLecturesInGroup =>
+      'No video lectures published in this group yet';
+
+  @override
+  String get syncAttendanceSuccessMessage =>
+      'Attendance statuses synced with video watch coverage';
 }

@@ -104,6 +104,7 @@ class _SplashPageState extends State<SplashPage>
     _fallbackTimer?.cancel();
 
     if (state is AuthAuthenticated) {
+      context.read<TenantThemeCubit>().loadForTenant(state.user.tenantId);
       final target = switch (state.user.role) {
         UserRole.teacher => AppRoutes.teacherDashboard,
         UserRole.student => AppRoutes.studentDashboard,

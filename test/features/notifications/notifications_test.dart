@@ -128,6 +128,35 @@ class FakeNotificationsRepository implements NotificationsRepository {
     );
     return const Success(null);
   }
+
+  @override
+  Future<Result<void>> dispatchNotification({
+    required String title,
+    required String body,
+    required NotificationType type,
+    String? groupId,
+    String? userId,
+    Map<String, dynamic>? data,
+  }) async {
+    if (shouldFail) {
+      return const FailureResult(ServerFailure('Failed to dispatch notification'));
+    }
+    mockNotifications.insert(
+      0,
+      NotificationEntity(
+        id: 'notif-${mockNotifications.length + 1}',
+        recipientId: 'rec-${mockNotifications.length + 1}',
+        tenantId: 'tenant-1',
+        title: title,
+        body: body,
+        type: type,
+        readAt: null,
+        createdAt: DateTime.now(),
+        data: data ?? (groupId != null ? {'group_id': groupId} : const {}),
+      ),
+    );
+    return const Success(null);
+  }
 }
 
 class FakeGroupsRepository implements GroupsRepository {

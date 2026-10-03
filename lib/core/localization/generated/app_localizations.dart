@@ -3571,6 +3571,126 @@ abstract class AppLocalizations {
   /// **'Generate Report'**
   String get createReport;
 
+  /// Dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Parent WhatsApp Report'**
+  String get whatsappReportDialogTitle;
+
+  /// Dialog subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Review and send the progress report directly to the parent'**
+  String get whatsappReportDialogSubtitle;
+
+  /// Label
+  ///
+  /// In en, this message translates to:
+  /// **'Report Type'**
+  String get whatsappReportTypeLabel;
+
+  /// Report type option
+  ///
+  /// In en, this message translates to:
+  /// **'Comprehensive Progress Report'**
+  String get whatsappReportTypeComprehensive;
+
+  /// Report type option
+  ///
+  /// In en, this message translates to:
+  /// **'Absence Notice'**
+  String get whatsappReportTypeAbsence;
+
+  /// Report type option
+  ///
+  /// In en, this message translates to:
+  /// **'Latest Exam Result'**
+  String get whatsappReportTypeExam;
+
+  /// Label
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher\'s Recommendation / Notes'**
+  String get whatsappTeacherNotesLabel;
+
+  /// Hint
+  ///
+  /// In en, this message translates to:
+  /// **'Write a note or choose a quick preset...'**
+  String get whatsappTeacherNotesHint;
+
+  /// Quick preset note
+  ///
+  /// In en, this message translates to:
+  /// **'🌟 The student shows outstanding commitment and solid academic progress.'**
+  String get whatsappPresetExcellent;
+
+  /// Quick preset note
+  ///
+  /// In en, this message translates to:
+  /// **'⚠️ Please follow up with the student on completing assignments on schedule.'**
+  String get whatsappPresetNeedsHomework;
+
+  /// Quick preset note
+  ///
+  /// In en, this message translates to:
+  /// **'📢 The student was absent from today\'s session. Please ensure they catch up with the recorded lecture.'**
+  String get whatsappPresetAbsentNotice;
+
+  /// Button
+  ///
+  /// In en, this message translates to:
+  /// **'Send via WhatsApp'**
+  String get whatsappSendButton;
+
+  /// Button
+  ///
+  /// In en, this message translates to:
+  /// **'Copy Report'**
+  String get whatsappCopyButton;
+
+  /// Success message
+  ///
+  /// In en, this message translates to:
+  /// **'Report for {studentName} copied successfully! Ready for WhatsApp 📋'**
+  String whatsappCopiedSuccess(String studentName);
+
+  /// Warning message
+  ///
+  /// In en, this message translates to:
+  /// **'Parent WhatsApp number is not registered for this student'**
+  String get whatsappParentPhoneMissing;
+
+  /// Error fallback message
+  ///
+  /// In en, this message translates to:
+  /// **'Could not launch WhatsApp. The text has been copied to your clipboard instead.'**
+  String get whatsappOpenError;
+
+  /// Tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Send WhatsApp Report to Parent'**
+  String get whatsappQuickActionTooltip;
+
+  /// Label
+  ///
+  /// In en, this message translates to:
+  /// **'Recipient Number'**
+  String get whatsappTargetPhoneLabel;
+
+  /// Target option
+  ///
+  /// In en, this message translates to:
+  /// **'Parent'**
+  String get whatsappTargetParent;
+
+  /// Target option
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get whatsappTargetStudent;
+
   /// Section header
   ///
   /// In en, this message translates to:
@@ -4096,7 +4216,7 @@ abstract class AppLocalizations {
   /// Activity event type
   ///
   /// In en, this message translates to:
-  /// **'Opened material or lesson'**
+  /// **'Opened material or lecture'**
   String get eventContentOpened;
 
   /// Activity event type
@@ -4200,6 +4320,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Important Announcement'**
   String get notificationTypeImportantAnnouncement;
+
+  /// Button to open lectures from notification
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Lectures'**
+  String get notificationGoToLecture;
+
+  /// Button to open exams from notification
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Exams'**
+  String get notificationGoToExam;
+
+  /// Button to open assignments from notification
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Assignments'**
+  String get notificationGoToAssignment;
+
+  /// Button to open attendance from notification
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Attendance'**
+  String get notificationGoToAttendance;
 
   /// Button to mark all as read
   ///
@@ -4336,7 +4480,7 @@ abstract class AppLocalizations {
   /// Template body
   ///
   /// In en, this message translates to:
-  /// **'Please review all lessons and practice exercises in preparation for the upcoming exam. Best of luck!'**
+  /// **'Please review all lectures and practice exercises in preparation for the upcoming exam. Best of luck!'**
   String get templateExamAlertBody;
 
   /// Template chip label
@@ -4858,7 +5002,7 @@ abstract class AppLocalizations {
   /// Title in app bar for video lesson
   ///
   /// In en, this message translates to:
-  /// **'Watch Educational Lesson'**
+  /// **'Watch Educational Lecture'**
   String get watchLessonTitle;
 
   /// Badge showing secure video stream
@@ -4900,7 +5044,7 @@ abstract class AppLocalizations {
   /// Title for lesson academic stats
   ///
   /// In en, this message translates to:
-  /// **'Lesson Academic Progress'**
+  /// **'Lecture Academic Progress'**
   String get lessonAcademicProgress;
 
   /// Completed status
@@ -4960,13 +5104,13 @@ abstract class AppLocalizations {
   /// 100% milestone
   ///
   /// In en, this message translates to:
-  /// **'Full Lesson Completion'**
+  /// **'Full Lecture Completion'**
   String get milestoneCompletion;
 
   /// Default title when video title is null
   ///
   /// In en, this message translates to:
-  /// **'Educational Lesson'**
+  /// **'Educational Lecture'**
   String get defaultLessonTitle;
 
   /// Encrypted streaming notice
@@ -4978,7 +5122,7 @@ abstract class AppLocalizations {
   /// Header for lesson notes
   ///
   /// In en, this message translates to:
-  /// **'Lesson Notes & Topics:'**
+  /// **'Lecture Notes & Topics:'**
   String get lessonNotesAndTopics;
 
   /// Message while video is processing
@@ -4996,7 +5140,7 @@ abstract class AppLocalizations {
   /// Placeholder for untitled video
   ///
   /// In en, this message translates to:
-  /// **'Untitled Video Lesson'**
+  /// **'Untitled Video Lecture'**
   String get videoLessonUntitled;
 
   /// Percentage watched text
@@ -5008,7 +5152,7 @@ abstract class AppLocalizations {
   /// Placeholder badge on thumbnail
   ///
   /// In en, this message translates to:
-  /// **'Video Lesson'**
+  /// **'Video Lecture'**
   String get videoLessonPlaceholder;
 
   /// Error picking video
@@ -5032,13 +5176,13 @@ abstract class AppLocalizations {
   /// Title when video is pending upload
   ///
   /// In en, this message translates to:
-  /// **'Lesson Under Preparation'**
+  /// **'Lecture Under Preparation'**
   String get videoPendingUploadTitle;
 
   /// Description for students when video is pending upload
   ///
   /// In en, this message translates to:
-  /// **'The teacher is currently preparing and uploading the video for this lesson. Please check back later.'**
+  /// **'The teacher is currently preparing and uploading the video for this lecture. Please check back later.'**
   String get studentVideoPendingUploadDesc;
 
   /// Title for teacher when video is not uploaded
@@ -5050,7 +5194,7 @@ abstract class AppLocalizations {
   /// Description for teacher when video is not uploaded
   ///
   /// In en, this message translates to:
-  /// **'Lesson created, but the video file has not been uploaded to the streaming server yet. You can upload it now so students can watch.'**
+  /// **'Lecture created, but the video file has not been uploaded to the streaming server yet. You can upload it now so students can watch.'**
   String get teacherVideoNotUploadedDesc;
 
   /// Badge for pending video upload
@@ -5068,13 +5212,13 @@ abstract class AppLocalizations {
   /// Error message when lesson video is not found
   ///
   /// In en, this message translates to:
-  /// **'The requested educational lesson could not be found.'**
+  /// **'The requested educational lecture could not be found.'**
   String get videoNotFoundMessage;
 
   /// Title of video upload dialog
   ///
   /// In en, this message translates to:
-  /// **'Upload New Lesson Video'**
+  /// **'Upload New Lecture Video'**
   String get uploadNewLessonVideo;
 
   /// Subtitle in video upload dialog
@@ -5110,7 +5254,7 @@ abstract class AppLocalizations {
   /// Form label for video title
   ///
   /// In en, this message translates to:
-  /// **'Lesson Title'**
+  /// **'Lecture Title'**
   String get lessonTitleLabel;
 
   /// Form hint for video title
@@ -5122,13 +5266,13 @@ abstract class AppLocalizations {
   /// Validation error for video title
   ///
   /// In en, this message translates to:
-  /// **'Please enter lesson title'**
+  /// **'Please enter lecture title'**
   String get lessonTitleRequired;
 
   /// Form label for video description
   ///
   /// In en, this message translates to:
-  /// **'Lesson Topics & Notes (Optional)'**
+  /// **'Lecture Topics & Notes (Optional)'**
   String get lessonNotesLabel;
 
   /// Form hint for video description
@@ -5248,7 +5392,7 @@ abstract class AppLocalizations {
   /// Empty state when no materials published
   ///
   /// In en, this message translates to:
-  /// **'No educational materials published in this group yet.\nNotes and lessons will appear here once published by the teacher.'**
+  /// **'No educational materials published in this group yet.\nNotes and lectures will appear here once published by the teacher.'**
   String get noContentPublishedYet;
 
   /// Search empty state
@@ -6913,25 +7057,25 @@ abstract class AppLocalizations {
   /// **'S'**
   String get studentInitialDefault;
 
-  /// Present status label
+  /// No description provided for @attendanceStatusPresent.
   ///
   /// In en, this message translates to:
   /// **'Present'**
   String get attendanceStatusPresent;
 
-  /// Absent status label
+  /// No description provided for @attendanceStatusAbsent.
   ///
   /// In en, this message translates to:
   /// **'Absent'**
   String get attendanceStatusAbsent;
 
-  /// Late status label
+  /// No description provided for @attendanceStatusLate.
   ///
   /// In en, this message translates to:
   /// **'Late'**
   String get attendanceStatusLate;
 
-  /// Excused status label
+  /// No description provided for @attendanceStatusExcused.
   ///
   /// In en, this message translates to:
   /// **'Excused'**
@@ -7408,13 +7552,13 @@ abstract class AppLocalizations {
   /// No description provided for @associatedExamBadge.
   ///
   /// In en, this message translates to:
-  /// **'Associated Exam (Lesson Quiz)'**
+  /// **'Associated Exam (Lecture Quiz)'**
   String get associatedExamBadge;
 
   /// No description provided for @associatedExamLabel.
   ///
   /// In en, this message translates to:
-  /// **'Associated Exam (Lesson Quiz)'**
+  /// **'Associated Exam (Lecture Quiz)'**
   String get associatedExamLabel;
 
   /// No description provided for @associatedExamTitleLabel.
@@ -7426,13 +7570,13 @@ abstract class AppLocalizations {
   /// No description provided for @associatedExamHint.
   ///
   /// In en, this message translates to:
-  /// **'Select an exam for this lesson'**
+  /// **'Select an exam for this lecture'**
   String get associatedExamHint;
 
   /// No description provided for @prerequisiteExamLabel.
   ///
   /// In en, this message translates to:
-  /// **'Prerequisite Exam (Lock Lesson)'**
+  /// **'Prerequisite Exam (Lock Lecture)'**
   String get prerequisiteExamLabel;
 
   /// No description provided for @prerequisiteExamHint.
@@ -7540,7 +7684,7 @@ abstract class AppLocalizations {
   /// No description provided for @restartLesson.
   ///
   /// In en, this message translates to:
-  /// **'Restart Lesson'**
+  /// **'Restart Lecture'**
   String get restartLesson;
 
   /// No description provided for @clickToSeek.
@@ -7552,7 +7696,7 @@ abstract class AppLocalizations {
   /// No description provided for @lessonCompletedSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Lesson Completed!'**
+  /// **'Lecture Completed!'**
   String get lessonCompletedSuccess;
 
   /// No description provided for @progressSavedAutomatically.
@@ -7690,7 +7834,7 @@ abstract class AppLocalizations {
   /// No description provided for @lessonPrerequisiteLocked.
   ///
   /// In en, this message translates to:
-  /// **'Lesson Locked by Prerequisite'**
+  /// **'Lecture Locked by Prerequisite'**
   String get lessonPrerequisiteLocked;
 
   /// No description provided for @mustPassExamToUnlock.
@@ -8098,7 +8242,7 @@ abstract class AppLocalizations {
   /// No description provided for @studentNavContentSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Videos & lessons'**
+  /// **'Videos & lectures'**
   String get studentNavContentSubtitle;
 
   /// No description provided for @studentNavAssignmentsSubtitle.
@@ -8686,7 +8830,7 @@ abstract class AppLocalizations {
   /// No description provided for @lessonQuizChip.
   ///
   /// In en, this message translates to:
-  /// **'Lesson Quiz'**
+  /// **'Lecture Quiz'**
   String get lessonQuizChip;
 
   /// No description provided for @lockedByPrereqTooltip.
@@ -8704,7 +8848,7 @@ abstract class AppLocalizations {
   /// No description provided for @groupExamLabel.
   ///
   /// In en, this message translates to:
-  /// **'Lesson Quiz for this group'**
+  /// **'Lecture Quiz for this group'**
   String get groupExamLabel;
 
   /// No description provided for @noExamSelected.
@@ -8782,7 +8926,7 @@ abstract class AppLocalizations {
   /// No description provided for @manualUnlockWarningText1.
   ///
   /// In en, this message translates to:
-  /// **'You are about to unlock the lesson '**
+  /// **'You are about to unlock the lecture '**
   String get manualUnlockWarningText1;
 
   /// No description provided for @manualUnlockWarningText2.
@@ -8830,7 +8974,7 @@ abstract class AppLocalizations {
   /// No description provided for @enforceSequentialLearningDesc.
   ///
   /// In en, this message translates to:
-  /// **'Students must pass quizzes to unlock next lessons'**
+  /// **'Students must pass quizzes to unlock next lectures'**
   String get enforceSequentialLearningDesc;
 
   /// No description provided for @defaultPassingScore.
@@ -8854,7 +8998,7 @@ abstract class AppLocalizations {
   /// No description provided for @lessonQuizSequentialRequirement.
   ///
   /// In en, this message translates to:
-  /// **'This Lesson Quiz will be required for students to unlock the next lesson (if Sequential Learning is enabled).'**
+  /// **'This Lecture Quiz will be required for students to unlock the next lecture (if Sequential Learning is enabled).'**
   String get lessonQuizSequentialRequirement;
 
   /// No description provided for @videoLibraryTitle.
@@ -8932,25 +9076,25 @@ abstract class AppLocalizations {
   /// No description provided for @nCoursesNLessons.
   ///
   /// In en, this message translates to:
-  /// **'{lessons} Lessons · {students} Students'**
-  String nCoursesNLessons(int lessons, int students);
+  /// **'{lectures} Lectures · {students} Students'**
+  String nCoursesNLessons(int lessons, int students, Object lectures);
 
   /// No description provided for @addLesson.
   ///
   /// In en, this message translates to:
-  /// **'Add Lesson'**
+  /// **'Add Lecture'**
   String get addLesson;
 
   /// No description provided for @addLessonTitle.
   ///
   /// In en, this message translates to:
-  /// **'Add Lesson'**
+  /// **'Add Lecture'**
   String get addLessonTitle;
 
   /// No description provided for @addLessonSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'How would you like to add this lesson?'**
+  /// **'How would you like to add this lecture?'**
   String get addLessonSubtitle;
 
   /// No description provided for @useExistingVideo.
@@ -8980,7 +9124,7 @@ abstract class AppLocalizations {
   /// No description provided for @lessonSetupTitle.
   ///
   /// In en, this message translates to:
-  /// **'Lesson Setup'**
+  /// **'Lecture Setup'**
   String get lessonSetupTitle;
 
   /// No description provided for @studyMaterial.
@@ -9010,19 +9154,19 @@ abstract class AppLocalizations {
   /// No description provided for @lessonQuizLabel.
   ///
   /// In en, this message translates to:
-  /// **'Lesson Quiz'**
+  /// **'Lecture Quiz'**
   String get lessonQuizLabel;
 
   /// No description provided for @lessonQuizHint.
   ///
   /// In en, this message translates to:
-  /// **'Select Lesson Quiz'**
+  /// **'Select Lecture Quiz'**
   String get lessonQuizHint;
 
   /// No description provided for @createLessonQuiz.
   ///
   /// In en, this message translates to:
-  /// **'+ Create Lesson Quiz'**
+  /// **'+ Create Lecture Quiz'**
   String get createLessonQuiz;
 
   /// No description provided for @useCourseDefault.
@@ -9040,19 +9184,19 @@ abstract class AppLocalizations {
   /// No description provided for @lessonAddedToCourse.
   ///
   /// In en, this message translates to:
-  /// **'Lesson added to {course}.'**
+  /// **'Lecture added to {course}.'**
   String lessonAddedToCourse(String course);
 
   /// No description provided for @lessonUpdatedSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Lesson updated successfully.'**
+  /// **'Lecture updated successfully.'**
   String get lessonUpdatedSuccess;
 
   /// No description provided for @manageLessons.
   ///
   /// In en, this message translates to:
-  /// **'Manage Lessons'**
+  /// **'Manage Lectures'**
   String get manageLessons;
 
   /// No description provided for @courseBuilderTitle.
@@ -9070,13 +9214,13 @@ abstract class AppLocalizations {
   /// No description provided for @sequentialLearningDescription.
   ///
   /// In en, this message translates to:
-  /// **'Students must complete each lesson\'s video and pass the lesson quiz before the next lesson becomes available.'**
+  /// **'Students must complete each lecture\'s video and pass the lecture quiz before the next lecture becomes available.'**
   String get sequentialLearningDescription;
 
   /// No description provided for @defaultLessonPassingScore.
   ///
   /// In en, this message translates to:
-  /// **'Default Lesson Quiz Passing Score'**
+  /// **'Default Lecture Quiz Passing Score'**
   String get defaultLessonPassingScore;
 
   /// No description provided for @learningProgression.
@@ -9088,19 +9232,19 @@ abstract class AppLocalizations {
   /// No description provided for @noLessonsYet.
   ///
   /// In en, this message translates to:
-  /// **'No lessons yet'**
+  /// **'No lectures yet'**
   String get noLessonsYet;
 
   /// No description provided for @noLessonsYetSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Start building your course by adding a video lesson.'**
+  /// **'Start building your course by adding a video lecture.'**
   String get noLessonsYetSubtitle;
 
   /// No description provided for @addFirstLesson.
   ///
   /// In en, this message translates to:
-  /// **'Add First Lesson'**
+  /// **'Add First Lecture'**
   String get addFirstLesson;
 
   /// No description provided for @videoPickerTitle.
@@ -9118,7 +9262,7 @@ abstract class AppLocalizations {
   /// No description provided for @lessonNumber.
   ///
   /// In en, this message translates to:
-  /// **'Lesson {n}'**
+  /// **'Lecture {n}'**
   String lessonNumber(int n);
 
   /// No description provided for @hasStudyMaterial.
@@ -9130,7 +9274,7 @@ abstract class AppLocalizations {
   /// No description provided for @hasLessonQuiz.
   ///
   /// In en, this message translates to:
-  /// **'Lesson Quiz'**
+  /// **'Lecture Quiz'**
   String get hasLessonQuiz;
 
   /// No description provided for @lessonEditorCreateQuiz.
@@ -9142,13 +9286,13 @@ abstract class AppLocalizations {
   /// No description provided for @editLesson.
   ///
   /// In en, this message translates to:
-  /// **'Edit Lesson'**
+  /// **'Edit Lecture'**
   String get editLesson;
 
   /// No description provided for @deleteLesson.
   ///
   /// In en, this message translates to:
-  /// **'Delete Lesson'**
+  /// **'Delete Lecture'**
   String get deleteLesson;
 
   /// No description provided for @moveUp.
@@ -9196,13 +9340,13 @@ abstract class AppLocalizations {
   /// No description provided for @selectLessonToEdit.
   ///
   /// In en, this message translates to:
-  /// **'Select a lesson to edit details or add a new one'**
+  /// **'Select a lecture to edit details or add a new one'**
   String get selectLessonToEdit;
 
   /// No description provided for @lessonAnalytics.
   ///
   /// In en, this message translates to:
-  /// **'Lesson Analytics'**
+  /// **'Lecture Analytics'**
   String get lessonAnalytics;
 
   /// No description provided for @backToCourse.
@@ -9220,13 +9364,13 @@ abstract class AppLocalizations {
   /// No description provided for @lessonDetails.
   ///
   /// In en, this message translates to:
-  /// **'Lesson Details'**
+  /// **'Lecture Details'**
   String get lessonDetails;
 
   /// No description provided for @lessonVideo.
   ///
   /// In en, this message translates to:
-  /// **'Lesson Video'**
+  /// **'Lecture Video'**
   String get lessonVideo;
 
   /// No description provided for @lessonHandouts.
@@ -9244,7 +9388,7 @@ abstract class AppLocalizations {
   /// No description provided for @nLessonsCount.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, one{1 Lesson} other{{count} Lessons}}'**
+  /// **'{count, plural, one{1 Lecture} other{{count} Lectures}}'**
   String nLessonsCount(int count);
 
   /// No description provided for @nStudentsCount.
@@ -9262,13 +9406,13 @@ abstract class AppLocalizations {
   /// No description provided for @couldNotAddLesson.
   ///
   /// In en, this message translates to:
-  /// **'We couldn\'t add this lesson. Please try again.'**
+  /// **'We couldn\'t add this lecture. Please try again.'**
   String get couldNotAddLesson;
 
   /// No description provided for @couldNotUpdateLesson.
   ///
   /// In en, this message translates to:
-  /// **'We couldn\'t update this lesson. Please try again.'**
+  /// **'We couldn\'t update this lecture. Please try again.'**
   String get couldNotUpdateLesson;
 
   /// No description provided for @noCoursesAvailable.
@@ -9364,7 +9508,7 @@ abstract class AppLocalizations {
   /// No description provided for @courseBeingPreparedSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Your lessons will appear here soon.'**
+  /// **'Your lectures will appear here soon.'**
   String get courseBeingPreparedSubtitle;
 
   /// No description provided for @startCourseAction.
@@ -9376,19 +9520,19 @@ abstract class AppLocalizations {
   /// No description provided for @continueLessonAction.
   ///
   /// In en, this message translates to:
-  /// **'Continue Lesson'**
+  /// **'Continue Lecture'**
   String get continueLessonAction;
 
   /// No description provided for @takeLessonQuizAction.
   ///
   /// In en, this message translates to:
-  /// **'Start Lesson Quiz'**
+  /// **'Start Lecture Quiz'**
   String get takeLessonQuizAction;
 
   /// No description provided for @retryLessonQuizAction.
   ///
   /// In en, this message translates to:
-  /// **'Retry Lesson Quiz'**
+  /// **'Retry Lecture Quiz'**
   String get retryLessonQuizAction;
 
   /// No description provided for @reviewCourseAction.
@@ -9400,19 +9544,19 @@ abstract class AppLocalizations {
   /// No description provided for @reviewLessonAction.
   ///
   /// In en, this message translates to:
-  /// **'Review Lesson'**
+  /// **'Review Lecture'**
   String get reviewLessonAction;
 
   /// No description provided for @continueToNextLessonAction.
   ///
   /// In en, this message translates to:
-  /// **'Continue to Next Lesson'**
+  /// **'Continue to Next Lecture'**
   String get continueToNextLessonAction;
 
   /// No description provided for @completeLessonToUnlock.
   ///
   /// In en, this message translates to:
-  /// **'Complete Lesson {n} to unlock this lesson.'**
+  /// **'Complete Lecture {n} to unlock this lecture.'**
   String completeLessonToUnlock(int n);
 
   /// No description provided for @availableStatus.
@@ -9424,13 +9568,13 @@ abstract class AppLocalizations {
   /// No description provided for @lessonQuizReadyTitle.
   ///
   /// In en, this message translates to:
-  /// **'Your lesson quiz is ready.'**
+  /// **'Your lecture quiz is ready.'**
   String get lessonQuizReadyTitle;
 
   /// No description provided for @lessonQuizReadyDesc.
   ///
   /// In en, this message translates to:
-  /// **'Test your understanding of this lesson to unlock the next one.'**
+  /// **'Test your understanding of this lecture to unlock the next one.'**
   String get lessonQuizReadyDesc;
 
   /// No description provided for @quizNotPassedTitle.
@@ -9442,49 +9586,49 @@ abstract class AppLocalizations {
   /// No description provided for @quizNotPassedDesc.
   ///
   /// In en, this message translates to:
-  /// **'You can review the lesson and try again.'**
+  /// **'You can review the lecture and try again.'**
   String get quizNotPassedDesc;
 
   /// No description provided for @lessonCompletedCongrats.
   ///
   /// In en, this message translates to:
-  /// **'Lesson completed!'**
+  /// **'Lecture completed!'**
   String get lessonCompletedCongrats;
 
   /// No description provided for @passedQuizNotice.
   ///
   /// In en, this message translates to:
-  /// **'You passed the lesson quiz.'**
+  /// **'You passed the lecture quiz.'**
   String get passedQuizNotice;
 
   /// No description provided for @nextLessonLabel.
   ///
   /// In en, this message translates to:
-  /// **'Next lesson: {title}'**
+  /// **'Next lecture: {title}'**
   String nextLessonLabel(String title);
 
   /// No description provided for @previousLessonAction.
   ///
   /// In en, this message translates to:
-  /// **'Previous Lesson'**
+  /// **'Previous Lecture'**
   String get previousLessonAction;
 
   /// No description provided for @nextLessonAction.
   ///
   /// In en, this message translates to:
-  /// **'Next Lesson'**
+  /// **'Next Lecture'**
   String get nextLessonAction;
 
   /// No description provided for @lessonXofY.
   ///
   /// In en, this message translates to:
-  /// **'Lesson {current} of {total}'**
+  /// **'Lecture {current} of {total}'**
   String lessonXofY(int current, int total);
 
   /// No description provided for @lessonMaterialTitle.
   ///
   /// In en, this message translates to:
-  /// **'Lesson Material'**
+  /// **'Lecture Material'**
   String get lessonMaterialTitle;
 
   /// No description provided for @openPdfAction.
@@ -9496,7 +9640,7 @@ abstract class AppLocalizations {
   /// No description provided for @completeVideoToUnlockQuiz.
   ///
   /// In en, this message translates to:
-  /// **'Complete the video to unlock the lesson quiz.'**
+  /// **'Complete the video to unlock the lecture quiz.'**
   String get completeVideoToUnlockQuiz;
 
   /// No description provided for @videoCompletedTitle.
@@ -9514,13 +9658,13 @@ abstract class AppLocalizations {
   /// No description provided for @lessonQuizzesSectionTitle.
   ///
   /// In en, this message translates to:
-  /// **'Lesson Quizzes'**
+  /// **'Lecture Quizzes'**
   String get lessonQuizzesSectionTitle;
 
   /// No description provided for @lessonQuizzesSectionDesc.
   ///
   /// In en, this message translates to:
-  /// **'Completed as part of your lesson progression.'**
+  /// **'Completed as part of your lecture progression.'**
   String get lessonQuizzesSectionDesc;
 
   /// No description provided for @generalExamsSectionTitle.
@@ -9538,7 +9682,7 @@ abstract class AppLocalizations {
   /// No description provided for @lessonsCompletedRatio.
   ///
   /// In en, this message translates to:
-  /// **'{completed} of {total} lessons completed'**
+  /// **'{completed} of {total} lectures completed'**
   String lessonsCompletedRatio(int completed, int total);
 
   /// No description provided for @percentComplete.
@@ -9550,31 +9694,31 @@ abstract class AppLocalizations {
   /// No description provided for @viewLessonsAction.
   ///
   /// In en, this message translates to:
-  /// **'View Lessons'**
+  /// **'View Lectures'**
   String get viewLessonsAction;
 
   /// No description provided for @courseLessonsTitle.
   ///
   /// In en, this message translates to:
-  /// **'Course Lessons'**
+  /// **'Course Lectures'**
   String get courseLessonsTitle;
 
   /// No description provided for @addLessonButton.
   ///
   /// In en, this message translates to:
-  /// **'Add Lesson'**
+  /// **'Add Lecture'**
   String get addLessonButton;
 
   /// No description provided for @courseBuilderEmptyTitle.
   ///
   /// In en, this message translates to:
-  /// **'No Lessons Yet'**
+  /// **'No Lectures Yet'**
   String get courseBuilderEmptyTitle;
 
   /// No description provided for @courseBuilderEmptySubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Start building your course by adding a lesson.'**
+  /// **'Start building your course by adding a lecture.'**
   String get courseBuilderEmptySubtitle;
 
   /// No description provided for @sequentialLearning.
@@ -9586,7 +9730,7 @@ abstract class AppLocalizations {
   /// No description provided for @sequentialLearningDesc.
   ///
   /// In en, this message translates to:
-  /// **'Students must complete each lesson\'s video and pass the lesson quiz before the next lesson unlocks.'**
+  /// **'Students must complete each lecture\'s video and pass the lecture quiz before the next lecture unlocks.'**
   String get sequentialLearningDesc;
 
   /// Error when no video selected
@@ -9604,13 +9748,13 @@ abstract class AppLocalizations {
   /// Edit lesson dialog title
   ///
   /// In en, this message translates to:
-  /// **'Edit Lesson'**
+  /// **'Edit Lecture'**
   String get lessonEditorEditTitle;
 
   /// Add new lesson dialog title
   ///
   /// In en, this message translates to:
-  /// **'Add New Lesson'**
+  /// **'Add New Lecture'**
   String get lessonEditorAddTitle;
 
   /// Source video section title
@@ -9640,13 +9784,13 @@ abstract class AppLocalizations {
   /// Lesson title field label
   ///
   /// In en, this message translates to:
-  /// **'Lesson Title (Optional Override)'**
+  /// **'Lecture Title (Optional Override)'**
   String get lessonEditorLessonTitle;
 
   /// Hint for lesson title field
   ///
   /// In en, this message translates to:
-  /// **'Enter lesson title'**
+  /// **'Enter lecture title'**
   String get lessonEditorLessonTitleHint;
 
   /// Study material section title
@@ -9664,7 +9808,7 @@ abstract class AppLocalizations {
   /// Lesson quiz section title
   ///
   /// In en, this message translates to:
-  /// **'Lesson Quiz'**
+  /// **'Lecture Quiz'**
   String get lessonEditorLessonQuiz;
 
   /// Message when no quizzes are available
@@ -9706,7 +9850,7 @@ abstract class AppLocalizations {
   /// Number of students who completed the lesson
   ///
   /// In en, this message translates to:
-  /// **'Completed Lesson'**
+  /// **'Completed Lecture'**
   String get completedLesson;
 
   /// Average quiz score for the lesson
@@ -9718,7 +9862,7 @@ abstract class AppLocalizations {
   /// Title for student lesson progress card
   ///
   /// In en, this message translates to:
-  /// **'Student Lesson Progress'**
+  /// **'Student Lecture Progress'**
   String get studentLessonProgressStats;
 
   /// Overall lesson completion rate
@@ -9748,7 +9892,7 @@ abstract class AppLocalizations {
   /// Title for editing a lesson
   ///
   /// In en, this message translates to:
-  /// **'Edit Lesson'**
+  /// **'Edit Lecture'**
   String get editLessonTitle;
 
   /// Placeholder for searching students in add member dialog
@@ -10594,79 +10738,79 @@ abstract class AppLocalizations {
   /// Tooltip to hide lesson
   ///
   /// In en, this message translates to:
-  /// **'Hide lesson from students'**
+  /// **'Hide lecture from students'**
   String get hideLessonTooltip;
 
   /// Tooltip to publish lesson
   ///
   /// In en, this message translates to:
-  /// **'Publish lesson to students'**
+  /// **'Publish lecture to students'**
   String get publishLessonTooltip;
 
   /// Label for lesson publishing status
   ///
   /// In en, this message translates to:
-  /// **'Lesson Publishing Status'**
+  /// **'Lecture Publishing Status'**
   String get lessonStatusLabel;
 
   /// Description when lesson is published
   ///
   /// In en, this message translates to:
-  /// **'The lesson is live and visible to enrolled students in this group.'**
+  /// **'The lecture is live and visible to enrolled students in this group.'**
   String get lessonStatusPublishedDesc;
 
   /// Description when lesson is draft
   ///
   /// In en, this message translates to:
-  /// **'The lesson is private and visible only to the teacher for drafting.'**
+  /// **'The lecture is private and visible only to the teacher for drafting.'**
   String get lessonStatusDraftDesc;
 
   /// Toast message when single lesson visibility is toggled
   ///
   /// In en, this message translates to:
-  /// **'Lesson visibility updated successfully.'**
+  /// **'Lecture visibility updated successfully.'**
   String get lessonVisibilityUpdatedToast;
 
   /// Dialog title to publish all lessons
   ///
   /// In en, this message translates to:
-  /// **'Publish All Lessons?'**
+  /// **'Publish All Lectures?'**
   String get publishAllLessonsConfirmTitle;
 
   /// Dialog title to hide all lessons
   ///
   /// In en, this message translates to:
-  /// **'Hide All Lessons?'**
+  /// **'Hide All Lectures?'**
   String get hideAllLessonsConfirmTitle;
 
   /// Dialog body when publishing all lessons
   ///
   /// In en, this message translates to:
-  /// **'Are you sure you want to publish all lessons in this course? Students will be able to access them.'**
+  /// **'Are you sure you want to publish all lectures in this course? Students will be able to access them.'**
   String get publishAllLessonsConfirmMessage;
 
   /// Dialog body when hiding all lessons
   ///
   /// In en, this message translates to:
-  /// **'Are you sure you want to hide all lessons in this course? They will become drafts.'**
+  /// **'Are you sure you want to hide all lectures in this course? They will become drafts.'**
   String get hideAllLessonsConfirmMessage;
 
   /// Button text to publish all lessons
   ///
   /// In en, this message translates to:
-  /// **'Publish All Lessons'**
+  /// **'Publish All Lectures'**
   String get publishAllLessonsAction;
 
   /// Button text to hide all lessons
   ///
   /// In en, this message translates to:
-  /// **'Hide All Lessons'**
+  /// **'Hide All Lectures'**
   String get hideAllLessonsAction;
 
   /// Toast when bulk visibility is toggled
   ///
   /// In en, this message translates to:
-  /// **'All lessons visibility updated successfully.'**
+  /// **'All lectures visibility updated successfully.'**
   String get allLessonsVisibilityUpdatedToast;
 
   /// No description provided for @imageNotAccessible.
@@ -11056,7 +11200,7 @@ abstract class AppLocalizations {
   /// No description provided for @createInstantQuizAction.
   ///
   /// In en, this message translates to:
-  /// **'Create Quiz for this Lesson'**
+  /// **'Create Quiz for this Lecture'**
   String get createInstantQuizAction;
 
   /// No description provided for @selectExistingQuizAction.
@@ -11160,6 +11304,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Handout files and student progress records will be removed to free storage, while attached exams remain preserved in your exam bank.'**
   String get deleteLessonSmartNote;
+
+  /// No description provided for @allLecturesOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'All Group Lectures (Overview)'**
+  String get allLecturesOverview;
+
+  /// No description provided for @lectureSelectionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Lecture:'**
+  String get lectureSelectionLabel;
+
+  /// No description provided for @syncAttendanceAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync Attendance from Videos'**
+  String get syncAttendanceAction;
+
+  /// No description provided for @saveAttendanceSheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Attendance Sheet'**
+  String get saveAttendanceSheet;
+
+  /// No description provided for @fastSkippingDetected.
+  ///
+  /// In en, this message translates to:
+  /// **'Fast Skipping Detected'**
+  String get fastSkippingDetected;
+
+  /// No description provided for @sendLectureWhatsAppNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Send WhatsApp Watch Notice'**
+  String get sendLectureWhatsAppNotice;
+
+  /// No description provided for @completedLecturesRatio.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed {completed} of {total} lectures'**
+  String completedLecturesRatio(int completed, int total);
+
+  /// No description provided for @lastWatchedTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Last watched: {time}'**
+  String lastWatchedTime(String time);
+
+  /// No description provided for @noLecturesInGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'No video lectures published in this group yet'**
+  String get noLecturesInGroup;
+
+  /// No description provided for @syncAttendanceSuccessMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance statuses synced with video watch coverage'**
+  String get syncAttendanceSuccessMessage;
 }
 
 class _AppLocalizationsDelegate

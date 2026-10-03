@@ -20,6 +20,8 @@ final class TeacherAttendanceLoaded extends AttendanceState {
   final String groupId;
   final DateTime selectedDate;
   final List<StudentAttendanceItem> students;
+  final List<LectureItem> availableLectures;
+  final String? selectedLectureContentId;
   final bool isSaving;
   final bool saveSuccess;
   final String? message;
@@ -28,18 +30,33 @@ final class TeacherAttendanceLoaded extends AttendanceState {
     required this.groupId,
     required this.selectedDate,
     required this.students,
+    this.availableLectures = const [],
+    this.selectedLectureContentId,
     this.isSaving = false,
     this.saveSuccess = false,
     this.message,
   });
+
+  LectureItem? get activeLecture {
+    if (availableLectures.isEmpty) return null;
+    if (selectedLectureContentId != null) {
+      return availableLectures.cast<LectureItem?>().firstWhere(
+        (l) => l?.contentId == selectedLectureContentId,
+        orElse: () => availableLectures.first,
+      );
+    }
+    return availableLectures.first;
+  }
 
   AttendanceStats get currentStats {
     int present = 0;
     int absent = 0;
     int late = 0;
     int excused = 0;
+    double totalWatch = 0.0;
 
     for (final s in students) {
+      totalWatch += s.watchProgressPercent;
       switch (s.status) {
         case AttendanceStatus.present:
           present++;
@@ -52,12 +69,15 @@ final class TeacherAttendanceLoaded extends AttendanceState {
       }
     }
 
+    final avgWatch = students.isNotEmpty ? (totalWatch / students.length) : 0.0;
+
     return AttendanceStats(
       totalSessions: students.length,
       presentCount: present,
       absentCount: absent,
       lateCount: late,
       excusedCount: excused,
+      averageWatchPercentage: avgWatch,
     );
   }
 
@@ -65,14 +85,21 @@ final class TeacherAttendanceLoaded extends AttendanceState {
     String? groupId,
     DateTime? selectedDate,
     List<StudentAttendanceItem>? students,
+    List<LectureItem>? availableLectures,
+    String? selectedLectureContentId,
     bool? isSaving,
     bool? saveSuccess,
     String? message,
+    bool clearSelectedLecture = false,
   }) {
     return TeacherAttendanceLoaded(
       groupId: groupId ?? this.groupId,
       selectedDate: selectedDate ?? this.selectedDate,
       students: students ?? this.students,
+      availableLectures: availableLectures ?? this.availableLectures,
+      selectedLectureContentId: clearSelectedLecture
+          ? null
+          : (selectedLectureContentId ?? this.selectedLectureContentId),
       isSaving: isSaving ?? this.isSaving,
       saveSuccess: saveSuccess ?? this.saveSuccess,
       message: message,
@@ -84,6 +111,8 @@ final class TeacherAttendanceLoaded extends AttendanceState {
     groupId,
     selectedDate,
     students,
+    availableLectures,
+    selectedLectureContentId,
     isSaving,
     saveSuccess,
     message,

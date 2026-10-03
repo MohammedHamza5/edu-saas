@@ -2,6 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../network/dio_client.dart';
 import '../network/supabase_service.dart';
 import '../localization/locale_cubit.dart';
+import '../config/tenant_resolver.dart';
 import '../theme/tenant_theme_cubit.dart';
 import '../utils/app_logger.dart';
 import '../../features/attendance/data/datasources/attendance_remote_datasource.dart';
@@ -159,7 +160,8 @@ class InjectionContainer {
       TeacherDashboardCubit(repository: teacherDashboardRepository);
   static QuestionBankCubit createQuestionBankCubit() =>
       QuestionBankCubit(repository: questionBankRepository);
-  static TenantThemeCubit createTenantThemeCubit() => TenantThemeCubit();
+  static TenantThemeCubit createTenantThemeCubit() =>
+      TenantThemeCubit(initialBranding: TenantResolver.resolveBranding());
   static LocaleCubit createLocaleCubit() => LocaleCubit();
 
   /// Initializes all dependencies in topological dependency order

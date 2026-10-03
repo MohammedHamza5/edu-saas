@@ -2,10 +2,11 @@ import '../../../../core/errors/result.dart';
 import '../entities/attendance_entity.dart';
 
 abstract interface class AttendanceRepository {
-  /// Fetches all active students in a group combined with any existing attendance record for the date
-  Future<Result<List<StudentAttendanceItem>>> getGroupStudentsWithAttendance({
+  /// Fetches all active students in a group combined with real video lecture watch progress and any existing attendance record
+  Future<Result<GroupAttendanceData>> getGroupStudentsWithAttendance({
     required String groupId,
     required DateTime date,
+    String? lectureContentId,
   });
 
   /// Saves or updates attendance for the entire group on the specified date atomically (upsert)

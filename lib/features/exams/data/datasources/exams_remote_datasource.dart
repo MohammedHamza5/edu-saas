@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/network/supabase_service.dart';
 import '../../domain/entities/exam_entity.dart';
+import '../../../notifications/domain/services/notification_dispatcher.dart';
 import '../models/exam_attempt_model.dart';
 import '../models/exam_model.dart';
 import '../models/exam_question_model.dart';
@@ -437,6 +439,18 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
     fullMap['title'] = title;
     fullMap['group_id'] = groupId;
 
+    if (isPublished && groupId != null && groupId.isNotEmpty) {
+      unawaited(
+        NotificationDispatcher.notifyNewExam(
+          title: title,
+          groupId: groupId,
+          examId: examId,
+          maxScore: maxScore,
+          durationMinutes: durationMinutes,
+        ),
+      );
+    }
+
     return ExamModel.fromJson(fullMap);
   }
 
@@ -576,18 +590,38 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
       );
 
       final map = Map<String, dynamic>.from(rpcRes as Map);
+      final studentId = _safeClient.auth.currentUser?.id ?? '';
+      final score = (map['score'] as num?)?.toInt() ?? 0;
+      final maxScore = (map['max_score'] as num?)?.toInt() ?? 100;
+      final percentage = (map['percentage'] as num?)?.toDouble();
+      final pct = percentage?.round() ?? (maxScore > 0 ? ((score / maxScore) * 100).round() : 0);
+
+      if (studentId.isNotEmpty) {
+        unawaited(
+          NotificationDispatcher.notifyExamResult(
+            examTitle: 'الاختبار',
+            studentId: studentId,
+            score: score,
+            maxScore: maxScore,
+            percentage: pct,
+            attemptId: attemptId,
+            examId: map['exam_id'] as String? ?? '',
+          ),
+        );
+      }
+
       return ExamAttemptModel(
         id: map['attempt_id'] as String,
-        examId: '',
+        examId: map['exam_id'] as String? ?? '',
         examVersionId: '',
-        studentId: _safeClient.auth.currentUser?.id ?? '',
+        studentId: studentId,
         startedAt: DateTime.now(),
         submittedAt: DateTime.now(),
         status: AttemptStatus.fromString(
           map['status'] as String? ?? 'submitted',
         ),
         score: (map['score'] as num?)?.toInt(),
-        percentage: (map['percentage'] as num?)?.toDouble(),
+        percentage: percentage,
       );
     } catch (_) {
       // Fallback for offline test environments: calculate server-side
@@ -650,6 +684,21 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
           .eq('id', attemptId)
           .select()
           .single();
+
+      final studentId = attemptRes['student_id'] as String;
+      if (studentId.isNotEmpty) {
+        unawaited(
+          NotificationDispatcher.notifyExamResult(
+            examTitle: 'الاختبار',
+            studentId: studentId,
+            score: totalScore,
+            maxScore: maxScore,
+            percentage: percentage.round(),
+            attemptId: attemptId,
+            examId: attemptRes['exam_id'] as String? ?? '',
+          ),
+        );
+      }
 
       return ExamAttemptModel.fromJson(Map<String, dynamic>.from(updated));
     }

@@ -87,6 +87,13 @@
           e.stopPropagation();
           return false;
         }
+
+        // Ctrl+P / Cmd+P (Print / Save as PDF)
+        if (isCtrlOrCmd && (key === 'P' || keyCode === 80)) {
+          e.preventDefault();
+          e.stopPropagation();
+          return false;
+        }
       }, { capture: true, passive: false });
     })();
   </script>
@@ -855,10 +862,13 @@
         } catch (_) {}
       });
 
-      window.createYouTubePlayer = function(videoId, viewId, origin) {
-        var originParam = encodeURIComponent(origin || window.location.origin);
+      window.createYouTubePlayer = function(videoId, viewId, origin, startSeconds) {
+        var originParam = origin || window.location.origin;
+        var startParam = (startSeconds && Number(startSeconds) > 3)
+          ? ('&start=' + Math.floor(Number(startSeconds)))
+          : '';
         var embedUrl = 'https://www.youtube-nocookie.com/embed/' + encodeURIComponent(videoId) +
-          '?enablejsapi=1&origin=' + originParam +
+          '?enablejsapi=1&origin=' + originParam + startParam +
           '&rel=0&modestbranding=1&iv_load_policy=3&controls=1&playsinline=1&fs=1';
 
         // Create the iframe directly - no blocking overlays, full pointer responsiveness
@@ -881,57 +891,64 @@
         window._ytFrames[viewId] = iframe;
 
         ensureYouTubeApi(function() {
-          try {
-            // Attach YT.Player directly to the iframe element (bypasses Shadow DOM document.getElementById failure)
-            var player = new YT.Player(iframe, {
-              events: {
-                onReady: function(evt) {
-                  window._ytPlayers[viewId] = player;
-                  notifyYouTubeFlutter({ event: 'ready' });
-
-                  // 1s heartbeat poll for currentTime + duration
-                  if (window._ytPollTimers[viewId]) {
-                    clearInterval(window._ytPollTimers[viewId]);
-                  }
-                  window._ytPollTimers[viewId] = setInterval(function() {
-                    try {
-                      if (!player || typeof player.getCurrentTime !== 'function') {
-                        clearInterval(window._ytPollTimers[viewId]);
-                        delete window._ytPollTimers[viewId];
-                        return;
-                      }
-                      var t = player.getCurrentTime();
-                      var d = player.getDuration();
-                      if (typeof t === 'number' && t >= 0) {
-                        notifyYouTubeFlutter({
-                          event: 'timeupdate',
-                          value: {
-                            seconds: Math.floor(t),
-                            duration: (typeof d === 'number' && d > 0) ? Math.floor(d) : null
-                          }
-                        });
-                      }
-                    } catch (e) {}
-                  }, 1000);
-                },
-                onStateChange: function(evt) {
-                  var state = evt.data;
-                  if (state === YT.PlayerState.PLAYING) {
-                    notifyYouTubeFlutter({ event: 'play' });
-                  } else if (state === YT.PlayerState.PAUSED) {
-                    notifyYouTubeFlutter({ event: 'pause' });
-                  } else if (state === YT.PlayerState.ENDED) {
-                    notifyYouTubeFlutter({ event: 'ended' });
-                  }
-                },
-                onError: function(evt) {
-                  console.warn('[YouTubeBridge] Player error:', evt.data);
-                }
+          function attachYT() {
+            try {
+              if (!iframe.parentElement && !iframe.contentWindow) {
+                setTimeout(attachYT, 100);
+                return;
               }
-            });
-          } catch (err) {
-            console.warn('[YouTubeBridge] Direct YT.Player attach warning:', err);
+              // Attach YT.Player directly to the iframe element
+              var player = new YT.Player(iframe, {
+                events: {
+                  onReady: function(evt) {
+                    window._ytPlayers[viewId] = player;
+                    notifyYouTubeFlutter({ event: 'ready' });
+
+                    // 1s heartbeat poll for currentTime + duration
+                    if (window._ytPollTimers[viewId]) {
+                      clearInterval(window._ytPollTimers[viewId]);
+                    }
+                    window._ytPollTimers[viewId] = setInterval(function() {
+                      try {
+                        if (!player || typeof player.getCurrentTime !== 'function') {
+                          clearInterval(window._ytPollTimers[viewId]);
+                          delete window._ytPollTimers[viewId];
+                          return;
+                        }
+                        var t = player.getCurrentTime();
+                        var d = player.getDuration();
+                        if (typeof t === 'number' && t >= 0) {
+                          notifyYouTubeFlutter({
+                            event: 'timeupdate',
+                            value: {
+                              seconds: Math.floor(t),
+                              duration: (typeof d === 'number' && d > 0) ? Math.floor(d) : null
+                            }
+                          });
+                        }
+                      } catch (e) {}
+                    }, 1000);
+                  },
+                  onStateChange: function(evt) {
+                    var state = evt.data;
+                    if (state === YT.PlayerState.PLAYING) {
+                      notifyYouTubeFlutter({ event: 'play' });
+                    } else if (state === YT.PlayerState.PAUSED) {
+                      notifyYouTubeFlutter({ event: 'pause' });
+                    } else if (state === YT.PlayerState.ENDED) {
+                      notifyYouTubeFlutter({ event: 'ended' });
+                    }
+                  },
+                  onError: function(evt) {
+                    console.warn('[YouTubeBridge] Player error:', evt.data);
+                  }
+                }
+              });
+            } catch (err) {
+              console.warn('[YouTubeBridge] Direct YT.Player attach warning:', err);
+            }
           }
+          attachYT();
         });
 
         return iframe;
@@ -974,6 +991,20 @@
         } catch (e) {
           console.warn('[YouTubeBridge] Direct postMessage error:', e);
         }
+      };
+
+      // Secure In-App PDF Viewer (Hides browser download/print toolbar)
+      window.createPdfViewer = function(src, viewId) {
+        var iframe = document.createElement('iframe');
+        iframe.id = 'pdf_frame_' + viewId;
+        var separator = src.indexOf('#') === -1 ? '#' : '&';
+        iframe.src = src + (src.indexOf('toolbar=') === -1 ? (separator + 'toolbar=0&navpanes=0') : '');
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = '0';
+        iframe.style.borderRadius = '8px';
+        iframe.style.backgroundColor = '#FFFFFF';
+        return iframe;
       };
     })();
   </script>

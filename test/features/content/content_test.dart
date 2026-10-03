@@ -18,7 +18,7 @@ import 'package:edu_saas/features/content/presentation/pages/student_content_fee
 import 'package:edu_saas/features/content/presentation/pages/teacher_content_library_page.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:edu_saas/core/localization/generated/app_localizations.dart';
-
+import 'package:edu_saas/core/network/supabase_service.dart';
 import 'package:edu_saas/features/content/presentation/widgets/material_viewer_sheet.dart';
 import 'package:edu_saas/features/content/presentation/widgets/course_lesson_tile.dart';
 
@@ -589,7 +589,7 @@ void main() {
 
         expect(find.textContaining('مجموعة SAT المتقدمة'), findsWidgets);
         expect(find.text('فيديو شرح المتجهات'), findsOneWidget);
-        expect(find.text('إضافة درس'), findsOneWidget);
+        expect(find.text('إضافة محاضرة'), findsOneWidget);
       },
     );
 
@@ -606,7 +606,7 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        expect(find.text('لا توجد دروس بعد'), findsOneWidget);
+        expect(find.text('لا توجد محاضرات بعد'), findsOneWidget);
       },
     );
 
@@ -637,6 +637,9 @@ void main() {
     testWidgets(
       'MaterialViewerSheet renders file details and download button',
       (tester) async {
+        SupabaseService.currentRole = 'teacher';
+        addTearDown(() => SupabaseService.currentRole = null);
+
         final sampleItem = ContentEntity(
           id: 'c-test-sheet',
           tenantId: 't-1',

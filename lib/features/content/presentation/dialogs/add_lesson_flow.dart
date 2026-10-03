@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../domain/entities/content_entity.dart';
 import '../cubit/content_cubit.dart';
+import '../cubit/content_state.dart';
 import 'add_video_to_bank_dialog.dart';
 import 'lesson_setup_sheet.dart';
 import '../widgets/video_picker_sheet.dart';
@@ -60,12 +61,25 @@ class AddLessonFlow extends StatelessWidget {
     required int? passingScoreOverride,
   }) {
     final cubit = context.read<ContentCubit>();
+    int? nextOrder;
+    if (cubit.state is ContentLoaded) {
+      final items = (cubit.state as ContentLoaded).items;
+      if (items.isNotEmpty) {
+        final maxOrder = items
+            .map((e) => e.sortOrder)
+            .fold<int>(0, (prev, elem) => elem > prev ? elem : prev);
+        nextOrder = maxOrder + 1;
+      } else {
+        nextOrder = 0;
+      }
+    }
     return cubit.assignContentToGroups(
       contentId: video.id,
       groupIds: [groupId],
       groupConfigs: [
         {
           'group_id': groupId,
+          if (nextOrder != null) 'sort_order': nextOrder,
           if (fileId != null) 'file_id': fileId,
           if (examId != null) 'associated_exam_id': examId,
           if (passingScoreOverride != null)

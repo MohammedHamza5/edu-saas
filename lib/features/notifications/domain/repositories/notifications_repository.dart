@@ -23,4 +23,14 @@ abstract interface class NotificationsRepository {
     required String body,
     String? groupId,
   });
+
+  /// Dispatches an event-driven notification to a group, user, or tenant
+  Future<Result<void>> dispatchNotification({
+    required String title,
+    required String body,
+    required NotificationType type,
+    String? groupId,
+    String? userId,
+    Map<String, dynamic>? data,
+  });
 }

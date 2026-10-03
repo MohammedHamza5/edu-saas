@@ -13,6 +13,7 @@ import 'package:edu_saas/features/content/presentation/pages/student_content_fee
 import 'package:edu_saas/features/content/presentation/pages/teacher_content_library_page.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:edu_saas/core/localization/generated/app_localizations.dart';
+import 'package:edu_saas/core/network/supabase_service.dart';
 import 'package:edu_saas/features/content/presentation/widgets/content_item_card.dart';
 import 'package:edu_saas/features/content/presentation/widgets/material_viewer_sheet.dart';
 
@@ -303,7 +304,7 @@ void main() {
 
           // Check Content items
           expect(find.text(sampleItems[0].title), findsOneWidget);
-          expect(find.text('إضافة درس'), findsOneWidget);
+          expect(find.text('إضافة محاضرة'), findsOneWidget);
 
           expect(tester.takeException(), isNull);
         },
@@ -384,6 +385,14 @@ void main() {
   });
 
   group('MaterialViewerSheet Multi-Device Responsive Tests', () {
+    setUp(() {
+      SupabaseService.currentRole = 'teacher';
+    });
+
+    tearDown(() {
+      SupabaseService.currentRole = null;
+    });
+
     for (final entry in deviceSizes.entries) {
       testWidgets(
         'Renders cleanly on screen size (${entry.key}) with zero overflow',

@@ -12,14 +12,16 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
     : _remoteDataSource = remoteDataSource ?? AttendanceRemoteDataSourceImpl();
 
   @override
-  Future<Result<List<StudentAttendanceItem>>> getGroupStudentsWithAttendance({
+  Future<Result<GroupAttendanceData>> getGroupStudentsWithAttendance({
     required String groupId,
     required DateTime date,
+    String? lectureContentId,
   }) async {
     try {
       final items = await _remoteDataSource.getGroupStudentsWithAttendance(
         groupId: groupId,
         date: date,
+        lectureContentId: lectureContentId,
       );
       return Success(items);
     } on PostgrestException catch (e) {

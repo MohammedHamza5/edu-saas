@@ -137,11 +137,11 @@ void main() {
 
         // Lessons 2 and 3 show locked text referencing prerequisite
         expect(
-          find.textContaining('Complete Lesson 1 to unlock'),
+          find.textContaining('Complete Lecture 1 to unlock'),
           findsOneWidget,
         );
         expect(
-          find.textContaining('Complete Lesson 2 to unlock'),
+          find.textContaining('Complete Lecture 2 to unlock'),
           findsOneWidget,
         );
       },
@@ -257,9 +257,9 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        expect(find.text('Your lesson quiz is ready.'), findsOneWidget);
+        expect(find.text('Your lecture quiz is ready.'), findsOneWidget);
         expect(
-          find.textContaining('Complete Lesson 1 to unlock'),
+          find.textContaining('Complete Lecture 1 to unlock'),
           findsOneWidget,
         );
       },

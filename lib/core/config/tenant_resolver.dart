@@ -9,40 +9,60 @@ import '../theme/tenant_branding.dart';
 class TenantResolver {
   TenantResolver._();
 
-  /// Default Premier Tenant ID (Dr. Antounios Ashraf Platform)
+  /// Default Premier Tenant ID (Dr. Antounios Ashraf Production Platform)
   static const String defaultTenantId = 'ea5caf8b-112f-4044-b9ad-798d5ab025c3';
+
+  /// Testing & Staging Tenant ID (Dr. Antounios Ashraf Test Platform)
+  static const String testTenantId = '11111111-1111-1111-1111-111111111111';
 
   /// Resolves the canonical Tenant ID for student registration or public requests.
   static String resolveTenantId({Uri? currentUri}) {
     final uri = currentUri ?? Uri.base;
 
-    // 1. Check query parameters explicitly
+    // 1. Check query parameters explicitly (?tenant=... or ?tenant_id=...)
     final queryTenant =
         uri.queryParameters['tenant'] ?? uri.queryParameters['tenant_id'];
     if (queryTenant != null && queryTenant.trim().isNotEmpty) {
-      final clean = queryTenant.trim();
+      final clean = queryTenant.trim().toLowerCase();
+      if (clean == 'test' ||
+          clean == 'staging' ||
+          clean == 'sandbox' ||
+          clean == 'demo' ||
+          clean == testTenantId) {
+        return testTenantId;
+      }
       if (clean == 'antounios' ||
           clean == 'dr-antounios' ||
-          clean == 'drantounios') {
+          clean == 'drantounios' ||
+          clean == 'prod' ||
+          clean == 'production' ||
+          clean == defaultTenantId) {
         return defaultTenantId;
       }
-      return clean;
+      return queryTenant.trim();
     }
 
     // 2. Check host and subdomain
     final host = uri.host.toLowerCase();
 
-    // Isolated Testing / Sandbox Environment
+    // Isolated Testing / Sandbox Environment (e.g. antounios-test.web.app)
     if (host.contains('antounios-test') || host.contains('staging')) {
-      return '11111111-1111-1111-1111-111111111111';
+      return testTenantId;
     }
 
-    // Official Production Environment (Dr. Antounios Ashraf)
+    // Official Production Environment (e.g. antounios.edsentre.com)
     if (host.contains('antounios') || host.contains('edsentre')) {
       return defaultTenantId;
     }
 
-    // 3. Fallback
+    // Local development convenience flags
+    if (host == 'localhost' || host == '127.0.0.1') {
+      if (uri.queryParameters['env'] == 'test' || uri.queryParameters['test'] == 'true') {
+        return testTenantId;
+      }
+    }
+
+    // 3. Fallback safely to Production Tenant
     return defaultTenantId;
   }
 

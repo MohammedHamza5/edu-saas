@@ -87,4 +87,32 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
       return FailureResult(ServerFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Result<void>> dispatchNotification({
+    required String title,
+    required String body,
+    required NotificationType type,
+    String? groupId,
+    String? userId,
+    Map<String, dynamic>? data,
+  }) async {
+    try {
+      await _remoteDataSource.dispatchNotification(
+        title: title,
+        body: body,
+        type: type,
+        groupId: groupId,
+        userId: userId,
+        data: data,
+      );
+      return const Success(null);
+    } on PostgrestException catch (e) {
+      return FailureResult(ServerFailure(e.message, code: e.code));
+    } on AuthException catch (e) {
+      return FailureResult(AuthFailure(e.message, code: e.statusCode));
+    } catch (e) {
+      return FailureResult(ServerFailure(e.toString()));
+    }
+  }
 }

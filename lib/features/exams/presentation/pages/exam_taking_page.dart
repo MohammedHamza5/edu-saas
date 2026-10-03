@@ -12,6 +12,7 @@ import '../widgets/question_option_tile.dart';
 import '../widgets/sat_exam_tools_sheet.dart';
 import 'exam_result_page.dart';
 import 'package:edu_saas/features/question_bank/presentation/widgets/question_display_widgets.dart';
+import '../../../../core/widgets/forensic_watermark_overlay.dart';
 
 class ExamTakingPage extends StatelessWidget {
   const ExamTakingPage({super.key});
@@ -229,273 +230,284 @@ class ExamTakingPage extends StatelessWidget {
                 ),
               ],
             ),
-            body: Column(
-              children: [
-                // Progress indicator
-                LinearProgressIndicator(
-                  value: state.totalQuestions > 0
-                      ? (state.currentQuestionIndex + 1) / state.totalQuestions
-                      : 0,
-                  backgroundColor: AppColors.surfaceVariant,
-                  valueColor: const AlwaysStoppedAnimation<Color>(
-                    AppColors.primary,
+            body: ForensicWatermarkOverlay(
+              child: Column(
+                children: [
+                  // Progress indicator
+                  LinearProgressIndicator(
+                    value: state.totalQuestions > 0
+                        ? (state.currentQuestionIndex + 1) /
+                              state.totalQuestions
+                        : 0,
+                    backgroundColor: AppColors.surfaceVariant,
+                    valueColor: const AlwaysStoppedAnimation<Color>(
+                      AppColors.primary,
+                    ),
+                    minHeight: 4,
                   ),
-                  minHeight: 4,
-                ),
 
-                // Question Header info
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.s16,
-                    vertical: AppSpacing.s12,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        context.l10n.questionProgress(
-                          qIndex + 1,
-                          state.totalQuestions,
-                        ),
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      Text(
-                        context.l10n.solvedCount(
-                          state.answeredCount,
-                          state.totalQuestions,
-                        ),
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: AppColors.textMuted,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const Divider(height: 1, color: AppColors.border),
-
-                // Question Content
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(AppSpacing.s16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  // Question Header info
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.s16,
+                      vertical: AppSpacing.s12,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // Question Card
-                        AppCard(
-                          padding: const EdgeInsets.all(AppSpacing.s16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: AppSpacing.s8,
-                                      vertical: 2,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.surfaceVariant,
-                                      borderRadius: BorderRadius.circular(
-                                        AppSpacing.radiusSmall,
-                                      ),
-                                    ),
-                                    child: Text(
-                                      question.questionType.localizedLabel(
-                                        context,
-                                      ),
-                                      style: const TextStyle(
-                                        fontSize: 11,
-                                        color: AppColors.textSecondary,
-                                      ),
-                                    ),
-                                  ),
-                                  Text(
-                                    context.l10n.scorePoints(question.points),
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.primary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Builder(
-                                builder: (context) {
-                                  final hasExplicitImage = question.imageUrl != null &&
-                                      question.imageUrl!.trim().isNotEmpty;
-                                  final isTextAnImageUrl = QuestionStemView.isImageUrl(
-                                    question.questionText.trim(),
-                                  );
-                                  final effectiveImageUrl = hasExplicitImage
-                                      ? question.imageUrl!
-                                      : (isTextAnImageUrl
-                                          ? question.questionText.trim()
-                                          : null);
-                                  final shouldShowText =
-                                      question.questionText.trim().isNotEmpty &&
-                                          !isTextAnImageUrl;
-
-                                  return Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      if (shouldShowText) ...[
-                                        Text(
-                                          question.questionText,
-                                          style: const TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w600,
-                                            color: AppColors.textPrimary,
-                                            height: 1.4,
-                                          ),
-                                        ),
-                                        const SizedBox(height: AppSpacing.s12),
-                                      ],
-                                      if (effectiveImageUrl != null &&
-                                          effectiveImageUrl.isNotEmpty)
-                                        ExamImageViewer(
-                                          imageUrl: effectiveImageUrl,
-                                          imageMeta: question.imageMeta,
-                                          caption: context.l10n.questionProgress(
-                                            qIndex + 1,
-                                            state.totalQuestions,
-                                          ),
-                                        ),
-                                    ],
-                                  );
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(height: AppSpacing.s20),
-
-                        // Options list
                         Text(
-                          context.l10n.chooseCorrectAnswer,
+                          context.l10n.questionProgress(
+                            qIndex + 1,
+                            state.totalQuestions,
+                          ),
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
                             color: AppColors.textPrimary,
                           ),
                         ),
-                        const SizedBox(height: AppSpacing.s12),
-
-                        ...question.options.asMap().entries.map((optEntry) {
-                          final optIdx = optEntry.key;
-                          final option = optEntry.value;
-                          final isSelected =
-                              state.answers[question.id] == option.id;
-
-                          return Padding(
-                            padding: const EdgeInsets.only(
-                              bottom: AppSpacing.s10,
-                            ),
-                            child: QuestionOptionTile(
-                              option: option,
-                              index: optIdx,
-                              isSelected: isSelected,
-                              onTap: () {
-                                context.read<ExamsCubit>().selectAnswer(
-                                  question.id,
-                                  option.id,
-                                );
-                              },
-                            ),
-                          );
-                        }),
+                        Text(
+                          context.l10n.solvedCount(
+                            state.answeredCount,
+                            state.totalQuestions,
+                          ),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textMuted,
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                ),
+                  const Divider(height: 1, color: AppColors.border),
 
-                // Bottom Navigation Control Bar
-                Container(
-                  padding: const EdgeInsets.all(AppSpacing.s16),
-                  decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    border: const Border(
-                      top: BorderSide(color: AppColors.border),
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.03),
-                        blurRadius: 10,
-                        offset: const Offset(0, -4),
+                  // Question Content
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(AppSpacing.s16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Question Card
+                          AppCard(
+                            padding: const EdgeInsets.all(AppSpacing.s16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: AppSpacing.s8,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.surfaceVariant,
+                                        borderRadius: BorderRadius.circular(
+                                          AppSpacing.radiusSmall,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        question.questionType.localizedLabel(
+                                          context,
+                                        ),
+                                        style: const TextStyle(
+                                          fontSize: 11,
+                                          color: AppColors.textSecondary,
+                                        ),
+                                      ),
+                                    ),
+                                    Text(
+                                      context.l10n.scorePoints(question.points),
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.primary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Builder(
+                                  builder: (context) {
+                                    final hasExplicitImage =
+                                        question.imageUrl != null &&
+                                        question.imageUrl!.trim().isNotEmpty;
+                                    final isTextAnImageUrl =
+                                        QuestionStemView.isImageUrl(
+                                          question.questionText.trim(),
+                                        );
+                                    final effectiveImageUrl = hasExplicitImage
+                                        ? question.imageUrl!
+                                        : (isTextAnImageUrl
+                                              ? question.questionText.trim()
+                                              : null);
+                                    final shouldShowText =
+                                        question.questionText
+                                            .trim()
+                                            .isNotEmpty &&
+                                        !isTextAnImageUrl;
+
+                                    return Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        if (shouldShowText) ...[
+                                          Text(
+                                            question.questionText,
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                              color: AppColors.textPrimary,
+                                              height: 1.4,
+                                            ),
+                                          ),
+                                          const SizedBox(
+                                            height: AppSpacing.s12,
+                                          ),
+                                        ],
+                                        if (effectiveImageUrl != null &&
+                                            effectiveImageUrl.isNotEmpty)
+                                          ExamImageViewer(
+                                            imageUrl: effectiveImageUrl,
+                                            imageMeta: question.imageMeta,
+                                            caption: context.l10n
+                                                .questionProgress(
+                                                  qIndex + 1,
+                                                  state.totalQuestions,
+                                                ),
+                                          ),
+                                      ],
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: AppSpacing.s20),
+
+                          // Options list
+                          Text(
+                            context.l10n.chooseCorrectAnswer,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.s12),
+
+                          ...question.options.asMap().entries.map((optEntry) {
+                            final optIdx = optEntry.key;
+                            final option = optEntry.value;
+                            final isSelected =
+                                state.answers[question.id] == option.id;
+
+                            return Padding(
+                              padding: const EdgeInsets.only(
+                                bottom: AppSpacing.s10,
+                              ),
+                              child: QuestionOptionTile(
+                                option: option,
+                                index: optIdx,
+                                isSelected: isSelected,
+                                onTap: () {
+                                  context.read<ExamsCubit>().selectAnswer(
+                                    question.id,
+                                    option.id,
+                                  );
+                                },
+                              ),
+                            );
+                          }),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
-                  child: Row(
-                    children: [
-                      // Previous button
-                      if (state.hasPrevious)
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed: () {
-                              context.read<ExamsCubit>().goToQuestion(
-                                qIndex - 1,
-                              );
-                            },
-                            icon: const Icon(Icons.arrow_forward, size: 16),
-                            label: Text(context.l10n.previousQuestion),
-                          ),
-                        )
-                      else
-                        const Spacer(),
 
-                      const SizedBox(width: AppSpacing.s12),
-
-                      // Next or Submit button
-                      if (state.hasNext)
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              foregroundColor: Colors.white,
-                            ),
-                            onPressed: () {
-                              context.read<ExamsCubit>().goToQuestion(
-                                qIndex + 1,
-                              );
-                            },
-                            icon: const Icon(Icons.arrow_back, size: 16),
-                            label: Text(context.l10n.nextQuestion),
-                          ),
-                        )
-                      else
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.success,
-                              foregroundColor: Colors.white,
-                            ),
-                            onPressed: state.isSubmitting
-                                ? null
-                                : () => _confirmSubmit(context, state),
-                            icon: const Icon(
-                              Icons.check_circle_outline,
-                              size: 16,
-                            ),
-                            label: state.isSubmitting
-                                ? const AppLoadingView.compact(
-                                    size: 16,
-                                    color: Colors.white,
-                                  )
-                                : Text(context.l10n.submitExamNow),
-                          ),
+                  // Bottom Navigation Control Bar
+                  Container(
+                    padding: const EdgeInsets.all(AppSpacing.s16),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      border: const Border(
+                        top: BorderSide(color: AppColors.border),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.03),
+                          blurRadius: 10,
+                          offset: const Offset(0, -4),
                         ),
-                    ],
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        // Previous button
+                        if (state.hasPrevious)
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: () {
+                                context.read<ExamsCubit>().goToQuestion(
+                                  qIndex - 1,
+                                );
+                              },
+                              icon: const Icon(Icons.arrow_forward, size: 16),
+                              label: Text(context.l10n.previousQuestion),
+                            ),
+                          )
+                        else
+                          const Spacer(),
+
+                        const SizedBox(width: AppSpacing.s12),
+
+                        // Next or Submit button
+                        if (state.hasNext)
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primary,
+                                foregroundColor: Colors.white,
+                              ),
+                              onPressed: () {
+                                context.read<ExamsCubit>().goToQuestion(
+                                  qIndex + 1,
+                                );
+                              },
+                              icon: const Icon(Icons.arrow_back, size: 16),
+                              label: Text(context.l10n.nextQuestion),
+                            ),
+                          )
+                        else
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.success,
+                                foregroundColor: Colors.white,
+                              ),
+                              onPressed: state.isSubmitting
+                                  ? null
+                                  : () => _confirmSubmit(context, state),
+                              icon: const Icon(
+                                Icons.check_circle_outline,
+                                size: 16,
+                              ),
+                              label: state.isSubmitting
+                                  ? const AppLoadingView.compact(
+                                      size: 16,
+                                      color: Colors.white,
+                                    )
+                                  : Text(context.l10n.submitExamNow),
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         );

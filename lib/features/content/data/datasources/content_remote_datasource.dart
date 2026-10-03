@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:typed_data';
 import 'package:dio/dio.dart' as dio;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/network/supabase_service.dart';
 import '../../../../core/utils/group_slug_resolver.dart';
+import '../../../notifications/domain/services/notification_dispatcher.dart';
 import '../models/content_model.dart';
 import '../models/file_attachment_model.dart';
 
@@ -631,6 +633,18 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     }
 
     final model = ContentModel.fromJson(contentRes);
+
+    if (status == 'published' && groupId != null && groupId.isNotEmpty) {
+      unawaited(
+        NotificationDispatcher.notifyNewLecture(
+          title: title,
+          groupId: groupId,
+          contentId: model.id,
+          contentType: type,
+        ),
+      );
+    }
+
     return ContentModel(
       id: model.id,
       tenantId: model.tenantId,
@@ -768,7 +782,28 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
       updatePayload['published_at'] = now;
     }
 
-    await _safeClient.from('content').update(updatePayload).eq('id', contentId);
+    final updated = await _safeClient
+        .from('content')
+        .update(updatePayload)
+        .eq('id', contentId)
+        .select('title, group_id, type')
+        .maybeSingle();
+
+    if (status == 'published' && updated != null) {
+      final grpId = updated['group_id'] as String?;
+      final title = updated['title'] as String? ?? 'محاضرة جديدة';
+      final type = updated['type'] as String? ?? 'lesson';
+      if (grpId != null && grpId.isNotEmpty) {
+        unawaited(
+          NotificationDispatcher.notifyNewLecture(
+            title: title,
+            groupId: grpId,
+            contentId: contentId,
+            contentType: type,
+          ),
+        );
+      }
+    }
   }
 
   @override

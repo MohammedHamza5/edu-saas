@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/config/tenant_registry.dart';
+import '../../../../core/config/tenant_resolver.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -29,6 +29,16 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final resolvedId = TenantResolver.resolveTenantId();
+      context.read<TenantThemeCubit>().loadForTenant(resolvedId);
+    });
+  }
+
+  @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
@@ -49,13 +59,14 @@ class _LoginPageState extends State<LoginPage> {
       try {
         return context.watch<TenantThemeCubit>().state;
       } catch (_) {
-        return TenantRegistry.defaultBranding;
+        return TenantResolver.resolveBranding();
       }
     })();
 
     return BlocConsumer<AuthCubit, AuthState>(
       listener: (context, state) {
         if (state is AuthAuthenticated) {
+          context.read<TenantThemeCubit>().loadForTenant(state.user.tenantId);
           final targetRoute = switch (state.user.role) {
             UserRole.teacher => AppRoutes.teacherDashboard,
             UserRole.parent => AppRoutes.parentDashboard,

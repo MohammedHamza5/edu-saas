@@ -141,7 +141,7 @@ class AppRouter {
         final role = SupabaseService.currentUserRole;
 
         // Redirect already authenticated users away from auth pages
-        if (path == login || path == registerStudent) {
+        if (path == login || path == registerStudent || path == '/register') {
           if (role == 'student') return studentDashboard;
           if (role == 'parent') return parentDashboard;
           return teacherDashboard;
@@ -191,9 +191,17 @@ class AppRouter {
         },
       ),
       GoRoute(
+        path: '/register',
+        redirect: (BuildContext context, GoRouterState state) {
+          final query = state.uri.query;
+          return query.isEmpty ? registerStudent : '$registerStudent?$query';
+        },
+      ),
+      GoRoute(
         path: registerStudent,
         builder: (BuildContext context, GoRouterState state) {
-          final tenantId = state.uri.queryParameters['tenant_id'];
+          final tenantId = state.uri.queryParameters['tenant_id'] ??
+              state.uri.queryParameters['tenant'];
           return RegisterStudentPage(tenantId: tenantId);
         },
       ),

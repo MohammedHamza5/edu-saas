@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/config/tenant_registry.dart';
 import '../../../../core/config/tenant_resolver.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/router/app_routes.dart';
@@ -46,6 +45,20 @@ class _RegisterStudentPageState extends State<RegisterStudentPage> {
   String _selectedTrack = 'SAT';
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final resolvedId = TenantResolver.resolveTenantId(
+        currentUri: (widget.tenantId != null && widget.tenantId!.trim().isNotEmpty)
+            ? Uri(queryParameters: {'tenant': widget.tenantId!})
+            : null,
+      );
+      context.read<TenantThemeCubit>().loadForTenant(resolvedId);
+    });
+  }
+
+  @override
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
@@ -59,8 +72,12 @@ class _RegisterStudentPageState extends State<RegisterStudentPage> {
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
 
-    // Canonical Tenant ID dynamically resolved by subdomain / domain (e.g. antounios.edsentre.com)
-    final tenantId = widget.tenantId ?? TenantResolver.resolveTenantId();
+    // Canonical Tenant ID dynamically resolved by subdomain / domain or query
+    final tenantId = TenantResolver.resolveTenantId(
+      currentUri: (widget.tenantId != null && widget.tenantId!.trim().isNotEmpty)
+          ? Uri(queryParameters: {'tenant': widget.tenantId!})
+          : null,
+    );
 
     final effectiveTrack = _selectedTrack == 'custom'
         ? _customTrackController.text.trim()
@@ -87,7 +104,11 @@ class _RegisterStudentPageState extends State<RegisterStudentPage> {
       try {
         return context.watch<TenantThemeCubit>().state;
       } catch (_) {
-        return TenantRegistry.defaultBranding;
+        return TenantResolver.resolveBranding(
+          currentUri: (widget.tenantId != null && widget.tenantId!.trim().isNotEmpty)
+              ? Uri(queryParameters: {'tenant': widget.tenantId!})
+              : null,
+        );
       }
     })();
     final mathTokens =

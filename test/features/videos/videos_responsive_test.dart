@@ -223,11 +223,11 @@ void main() {
           await tester.pump(const Duration(milliseconds: 100));
 
           // 1. Verify Page Title and CDN Badge rendered
-          expect(find.text('مشاهدة الدرس التعليمي'), findsOneWidget);
+          expect(find.text('مشاهدة المحاضرة التعليمية'), findsOneWidget);
           expect(find.text('بث سحابي محمي'), findsOneWidget);
 
           // 2. Verify Academic Stats Card
-          expect(find.text('التقدم الأكاديمي للدرس'), findsWidgets);
+          expect(find.text('التقدم الأكاديمي للمحاضرة'), findsWidgets);
           expect(find.text('66%'), findsOneWidget);
           expect(find.text('إعادة المحاضرة'), findsOneWidget);
           expect(find.text('قيد المتابعة'), findsOneWidget);

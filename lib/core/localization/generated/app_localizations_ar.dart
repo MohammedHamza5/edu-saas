@@ -659,7 +659,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get groupCapacityLabel => 'السعة الاستيعابية (عدد الطلاب)';
 
   @override
-  String get groupScheduleLabel => 'مواعيد اللقاءات والدروس';
+  String get groupScheduleLabel => 'مواعيد اللقاءات والمحاضرات';
 
   @override
   String get groupScheduleHint => 'مثال: الأحد والثلاثاء الساعة 5:00 مساءً';
@@ -1855,7 +1855,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String assignGroupConfirmBody(String groupName) {
-    return 'سيتم إضافة الطالب لمجموعة \"$groupName\".\nوسيتمكن فوراً من الوصول لدروس وواجبات هذه المجموعة وفقاً لسياسة المحتوى.';
+    return 'سيتم إضافة الطالب لمجموعة \"$groupName\".\nوسيتمكن فوراً من الوصول لمحاضرات وواجبات هذه المجموعة وفقاً لسياسة المحتوى.';
   }
 
   @override
@@ -1895,6 +1895,75 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get createReport => 'إنشاء التقرير';
+
+  @override
+  String get whatsappReportDialogTitle => 'تقرير الواتساب لولي الأمر';
+
+  @override
+  String get whatsappReportDialogSubtitle =>
+      'معاينة وتخصيص تقرير المتابعة وإرساله مباشرة لولي الأمر';
+
+  @override
+  String get whatsappReportTypeLabel => 'نوع التقرير';
+
+  @override
+  String get whatsappReportTypeComprehensive => 'تقرير المتابعة الشامل';
+
+  @override
+  String get whatsappReportTypeAbsence => 'إخطار غياب عن الحصة';
+
+  @override
+  String get whatsappReportTypeExam => 'نتيجة آخر امتحان';
+
+  @override
+  String get whatsappTeacherNotesLabel => 'ملاحظة وتوصية المدرس';
+
+  @override
+  String get whatsappTeacherNotesHint =>
+      'اكتب ملاحظة أو اختر من القوالب السريعة...';
+
+  @override
+  String get whatsappPresetExcellent =>
+      '🌟 الطالب يظهر التزاماً ممتازاً وتطوراً أكاديمياً ملحوظاً.';
+
+  @override
+  String get whatsappPresetNeedsHomework =>
+      '⚠️ يرجى حث الطالب على تسليم الواجبات في المواعيد المحددة.';
+
+  @override
+  String get whatsappPresetAbsentNotice =>
+      '📢 تغيب الطالب عن حصة اليوم، يرجى متابعته لمشاهدة المحاضرة المسجلة.';
+
+  @override
+  String get whatsappSendButton => 'إرسال عبر واتساب';
+
+  @override
+  String get whatsappCopyButton => 'نسخ التقرير';
+
+  @override
+  String whatsappCopiedSuccess(String studentName) {
+    return 'تم نسخ تقرير الطالب $studentName بنجاح! جاهز للإرسال على الواتساب 📋';
+  }
+
+  @override
+  String get whatsappParentPhoneMissing =>
+      'رقم واتساب ولي الأمر غير مسجل لهذا الطالب';
+
+  @override
+  String get whatsappOpenError =>
+      'تعذر فتح تطبيق الواتساب. تم نسخ نص التقرير للحافظة بدلاً من ذلك.';
+
+  @override
+  String get whatsappQuickActionTooltip => 'إرسال تقرير واتساب لولي الأمر';
+
+  @override
+  String get whatsappTargetPhoneLabel => 'الرقم المستلم';
+
+  @override
+  String get whatsappTargetParent => 'ولي الأمر';
+
+  @override
+  String get whatsappTargetStudent => 'الطالب';
 
   @override
   String get statsOverviewTitle => 'الإحصائيات';
@@ -2184,7 +2253,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get eventLogin => 'تسجيل الدخول للمنصة';
 
   @override
-  String get eventContentOpened => 'فتح درس أو محتوى';
+  String get eventContentOpened => 'فتح محاضرة أو محتوى';
 
   @override
   String get eventVideoStarted => 'بدء تشغيل محاضرة';
@@ -2244,6 +2313,18 @@ class AppLocalizationsAr extends AppLocalizations {
   String get notificationTypeImportantAnnouncement => 'إعلان مهم';
 
   @override
+  String get notificationGoToLecture => 'الانتقال إلى المحاضرات';
+
+  @override
+  String get notificationGoToExam => 'الانتقال إلى الاختبارات';
+
+  @override
+  String get notificationGoToAssignment => 'الانتقال إلى الواجبات';
+
+  @override
+  String get notificationGoToAttendance => 'عرض سجل الحضور';
+
+  @override
   String get markAllAsRead => 'قراءة الكل';
 
   @override
@@ -2277,7 +2358,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get instantAcademicAlertDesc =>
-      'سيتم إرسال هذا الإعلان مباشرة لمركز إشعارات الطلاب المستهدفين لحثهم على متابعة الدروس أو المهام.';
+      'سيتم إرسال هذا الإعلان مباشرة لمركز إشعارات الطلاب المستهدفين لحثهم على متابعة المحاضرات أو المهام.';
 
   @override
   String get allPlatformStudents => 'جميع طلاب المنصة (All Students)';
@@ -2321,7 +2402,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get templateExamAlertBody =>
-      'يرجى مراجعة كافة الدروس والمسائل التدريبية استعداداً للاختبار القادم مع تمنياتنا بالتوفيق.';
+      'يرجى مراجعة كافة المحاضرات والمسائل التدريبية استعداداً للاختبار القادم مع تمنياتنا بالتوفيق.';
 
   @override
   String get templateExcellencePraiseLabel => '🎉 تهنئة تفوق';
@@ -2635,7 +2716,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get actionTip => 'ما يمكنك فعله:';
 
   @override
-  String get watchLessonTitle => 'مشاهدة الدرس التعليمي';
+  String get watchLessonTitle => 'مشاهدة المحاضرة التعليمية';
 
   @override
   String get secureCdnBadge => 'بث سحابي محمي';
@@ -2656,7 +2737,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get fullscreenAction => 'شاشة كاملة';
 
   @override
-  String get lessonAcademicProgress => 'التقدم الأكاديمي للدرس';
+  String get lessonAcademicProgress => 'التقدم الأكاديمي للمحاضرة';
 
   @override
   String get statusCompleted => 'مكتمل';
@@ -2678,7 +2759,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get academicMilestonesTitle => 'محطات الدرس الأكاديمية:';
+  String get academicMilestonesTitle => 'محطات المحاضرة الأكاديمية:';
 
   @override
   String get milestoneConcepts => 'المفاهيم والتأسيس';
@@ -2690,16 +2771,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get milestoneAdvanced => 'المسائل المتقدمة';
 
   @override
-  String get milestoneCompletion => 'إتمام الدرس بالكامل';
+  String get milestoneCompletion => 'إتمام المحاضرة بالكامل';
 
   @override
-  String get defaultLessonTitle => 'الدرس التعليمي';
+  String get defaultLessonTitle => 'المحاضرة التعليمية';
 
   @override
   String get protectedStreamCdnNotice => 'بث تعليمي محمي وموثوق عالي الدقة';
 
   @override
-  String get lessonNotesAndTopics => 'ملاحظات ومحاور الدرس:';
+  String get lessonNotesAndTopics => 'ملاحظات ومحاور المحاضرة:';
 
   @override
   String get videoProcessingMessage => 'جاري معالجة الفيديو...';
@@ -2716,7 +2797,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get videoLessonPlaceholder => 'درس فيديو';
+  String get videoLessonPlaceholder => 'محاضرة فيديو';
 
   @override
   String videoPickFailed(String error) {
@@ -2731,18 +2812,18 @@ class AppLocalizationsAr extends AppLocalizations {
       'تم رفع الفيديو بنجاح وجاري معالجته سحابياً!';
 
   @override
-  String get videoPendingUploadTitle => 'الدرس قيد التجهيز';
+  String get videoPendingUploadTitle => 'المحاضرة قيد التجهيز';
 
   @override
   String get studentVideoPendingUploadDesc =>
-      'يقوم المعلم حالياً بتجهيز ورفع الفيديو الخاص بهذا الدرس. يرجى مراجعة الدرس لاحقاً.';
+      'يقوم المعلم حالياً بتجهيز ورفع الفيديو الخاص بهذا المحاضرة. يرجى مراجعة المحاضرة لاحقاً.';
 
   @override
   String get teacherVideoNotUploadedTitle => 'لم يتم رفع ملف الفيديو بعد';
 
   @override
   String get teacherVideoNotUploadedDesc =>
-      'تم إنشاء عنوان الدرس ولكن لم يتم رفع ملف الفيديو إلى خادم البث بعد. يمكنك رفعه الآن لتمكين الطلاب من مشاهدته.';
+      'تم إنشاء عنوان المحاضرة ولكن لم يتم رفع ملف الفيديو إلى خادم البث بعد. يمكنك رفعه الآن لتمكين الطلاب من مشاهدته.';
 
   @override
   String get teacherVideoNotUploadedBadge => 'بانتظار رفع الفيديو';
@@ -2751,10 +2832,11 @@ class AppLocalizationsAr extends AppLocalizations {
   String get backToContentAction => 'العودة للمحتوى';
 
   @override
-  String get videoNotFoundMessage => 'تعذر العثور على الدرس التعليمي المطلوب.';
+  String get videoNotFoundMessage =>
+      'تعذر العثور على المحاضرة التعليمية المطلوبة.';
 
   @override
-  String get uploadNewLessonVideo => 'رفع درس فيديو جديد';
+  String get uploadNewLessonVideo => 'رفع محاضرة فيديو جديد';
 
   @override
   String get fastEncryptedCdnHosting => 'استضافة سريعة ومشفرة بأعلى جودة';
@@ -2773,20 +2855,21 @@ class AppLocalizationsAr extends AppLocalizations {
   String get changeFile => 'تغيير الملف';
 
   @override
-  String get lessonTitleLabel => 'عنوان الدرس';
+  String get lessonTitleLabel => 'عنوان المحاضرة';
 
   @override
-  String get lessonTitleHint => 'مثال: شرح درس الدوال المثلثية - الجزء الأول';
+  String get lessonTitleHint =>
+      'مثال: شرح محاضرة الدوال المثلثية - الجزء الأول';
 
   @override
-  String get lessonTitleRequired => 'يرجى إدخال عنوان الدرس';
+  String get lessonTitleRequired => 'يرجى إدخال عنوان المحاضرة';
 
   @override
-  String get lessonNotesLabel => 'محاور وملاحظات الدرس (اختياري)';
+  String get lessonNotesLabel => 'محاور وملاحظات المحاضرة (اختياري)';
 
   @override
   String get lessonNotesHint =>
-      'نقاط الدرس المهمة، القوانين المذكورة، والواجب المرتبط...';
+      'نقاط المحاضرة المهمة، القوانين المذكورة، والواجب المرتبط...';
 
   @override
   String get uploadingVideoToCdn => 'جاري رفع الفيديو إلى السحابة المشفرة...';
@@ -2860,7 +2943,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get noContentPublishedYet =>
-      'لم يتم نشر أي محتوى دراسي في هذه المجموعة بعد\nستظهر المذكرات والدروس هنا فور نشر المعلم لها.';
+      'لم يتم نشر أي محتوى دراسي في هذه المجموعة بعد\nستظهر المذكرات والمحاضرات هنا فور نشر المعلم لها.';
 
   @override
   String noMatchingContentFound(String query) {
@@ -4770,7 +4853,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get linkingYoutubeVideo => 'جاري ربط فيديو اليوتيوب...';
 
   @override
-  String get uploadingNotice => 'جاري رفع ملزمة الدرس PDF...';
+  String get uploadingNotice => 'جاري رفع ملزمة المحاضرة PDF...';
 
   @override
   String get creatingExam => 'جاري إنشاء كويز المحاضرة...';
@@ -4819,7 +4902,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get lessonHandoutChip => 'ملزمة الشرح PDF';
 
   @override
-  String get lessonQuizChip => 'كويز الدرس';
+  String get lessonQuizChip => 'كويز المحاضرة';
 
   @override
   String get lockedByPrereqTooltip =>
@@ -4870,10 +4953,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get manualUnlockAction => 'فتح يدوي';
 
   @override
-  String get manualUnlockTitle => 'فتح قفل الدرس يدوياً';
+  String get manualUnlockTitle => 'فتح قفل المحاضرة يدوياً';
 
   @override
-  String get manualUnlockWarningText1 => 'أنت على وشك فتح الدرس ';
+  String get manualUnlockWarningText1 => 'أنت على وشك فتح المحاضرة ';
 
   @override
   String get manualUnlockWarningText2 => ' للطالب ';
@@ -4899,7 +4982,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get enforceSequentialLearningDesc =>
-      'يجب على الطلاب اجتياز الاختبارات لفتح الدروس التالية';
+      'يجب على الطلاب اجتياز الاختبارات لفتح المحاضرات التالية';
 
   @override
   String get defaultPassingScore => 'درجة النجاح الافتراضية (%)';
@@ -4912,7 +4995,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get lessonQuizSequentialRequirement =>
-      'هذا الاختبار سيكون شرطاً للطلاب لفتح الدرس التالي (إذا كان التعلم المتسلسل مفعلاً).';
+      'هذا الاختبار سيكون شرطاً للطلاب لفتح المحاضرة التالي (إذا كان التعلم المتسلسل مفعلاً).';
 
   @override
   String get videoLibraryTitle => 'مكتبة الفيديوهات';
@@ -4961,18 +5044,18 @@ class AppLocalizationsAr extends AppLocalizations {
       'اختر المادة التي تريد إضافة هذا الفيديو إليها:';
 
   @override
-  String nCoursesNLessons(int lessons, int students) {
-    return '$lessons دروس · $students طلاب';
+  String nCoursesNLessons(int lessons, int students, Object lectures) {
+    return '$lessons محاضرات · $students طلاب';
   }
 
   @override
-  String get addLesson => 'إضافة درس';
+  String get addLesson => 'إضافة محاضرة';
 
   @override
-  String get addLessonTitle => 'إضافة درس';
+  String get addLessonTitle => 'إضافة محاضرة';
 
   @override
-  String get addLessonSubtitle => 'كيف تريد إضافة هذا الدرس؟';
+  String get addLessonSubtitle => 'كيف تريد إضافة هذا المحاضرة؟';
 
   @override
   String get useExistingVideo => 'استخدام فيديو موجود';
@@ -4987,7 +5070,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get addNewVideoToLessonSubtitle => 'إنشاء فيديو جديد لهذه المادة';
 
   @override
-  String get lessonSetupTitle => 'إعداد الدرس';
+  String get lessonSetupTitle => 'إعداد المحاضرة';
 
   @override
   String get studyMaterial => 'المواد الدراسية';
@@ -5002,13 +5085,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get removePdf => 'إزالة';
 
   @override
-  String get lessonQuizLabel => 'اختبار الدرس';
+  String get lessonQuizLabel => 'اختبار المحاضرة';
 
   @override
-  String get lessonQuizHint => 'اختر اختبار الدرس';
+  String get lessonQuizHint => 'اختر اختبار المحاضرة';
 
   @override
-  String get createLessonQuiz => '+ إنشاء اختبار درس';
+  String get createLessonQuiz => '+ إنشاء اختبار محاضرة';
 
   @override
   String useCourseDefault(int score) {
@@ -5020,14 +5103,14 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String lessonAddedToCourse(String course) {
-    return 'تمت إضافة الدرس إلى $course.';
+    return 'تمت إضافة المحاضرة إلى $course.';
   }
 
   @override
-  String get lessonUpdatedSuccess => 'تم تحديث الدرس بنجاح.';
+  String get lessonUpdatedSuccess => 'تم تحديث المحاضرة بنجاح.';
 
   @override
-  String get manageLessons => 'إدارة الدروس';
+  String get manageLessons => 'إدارة المحاضرات';
 
   @override
   String get courseBuilderTitle => 'منشئ المادة';
@@ -5037,7 +5120,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get sequentialLearningDescription =>
-      'يجب على الطلاب إكمال فيديو كل درس واجتياز اختباره قبل أن يُفتح الدرس التالي.';
+      'يجب على الطلاب إكمال فيديو كل محاضرة واجتياز اختباره قبل أن يُفتح المحاضرة التالي.';
 
   @override
   String get defaultLessonPassingScore => 'درجة النجاح الافتراضية للاختبار';
@@ -5046,13 +5129,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get learningProgression => 'تقدم التعلم';
 
   @override
-  String get noLessonsYet => 'لا توجد دروس بعد';
+  String get noLessonsYet => 'لا توجد محاضرات بعد';
 
   @override
-  String get noLessonsYetSubtitle => 'ابدأ ببناء مادتك بإضافة درس فيديو.';
+  String get noLessonsYetSubtitle => 'ابدأ ببناء مادتك بإضافة محاضرة فيديو.';
 
   @override
-  String get addFirstLesson => 'إضافة أول درس';
+  String get addFirstLesson => 'إضافة أول محاضرة';
 
   @override
   String get videoPickerTitle => 'اختر فيديو';
@@ -5062,23 +5145,23 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String lessonNumber(int n) {
-    return 'الدرس $n';
+    return 'المحاضرة $n';
   }
 
   @override
   String get hasStudyMaterial => 'مواد دراسية';
 
   @override
-  String get hasLessonQuiz => 'اختبار الدرس';
+  String get hasLessonQuiz => 'اختبار المحاضرة';
 
   @override
   String get lessonEditorCreateQuiz => 'إنشاء اختبار جديد';
 
   @override
-  String get editLesson => 'تعديل الدرس';
+  String get editLesson => 'تعديل المحاضرة';
 
   @override
-  String get deleteLesson => 'حذف الدرس';
+  String get deleteLesson => 'حذف المحاضرة';
 
   @override
   String get moveUp => 'تحريك لأعلى';
@@ -5124,15 +5207,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get lessonHandouts => 'المذكرات والمواد الدراسية';
 
   @override
-  String get lessonQuizSettings => 'كويز الدرس ونسبة النجاح';
+  String get lessonQuizSettings => 'كويز المحاضرة ونسبة النجاح';
 
   @override
   String nLessonsCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count دروس',
-      one: 'درس واحد',
+      other: '$count محاضرات',
+      one: 'محاضرة واحدة',
     );
     return '$_temp0';
   }
@@ -5153,10 +5236,11 @@ class AppLocalizationsAr extends AppLocalizations {
       'هذا الفيديو موجود بالفعل في هذه المادة.';
 
   @override
-  String get couldNotAddLesson => 'تعذّر إضافة الدرس. يرجى المحاولة مجدداً.';
+  String get couldNotAddLesson => 'تعذّر إضافة المحاضرة. يرجى المحاولة مجدداً.';
 
   @override
-  String get couldNotUpdateLesson => 'تعذّر تحديث الدرس. يرجى المحاولة مجدداً.';
+  String get couldNotUpdateLesson =>
+      'تعذّر تحديث المحاضرة. يرجى المحاولة مجدداً.';
 
   @override
   String get noCoursesAvailable => 'لا توجد مواد متاحة.';
@@ -5212,71 +5296,71 @@ class AppLocalizationsAr extends AppLocalizations {
       'يتم تجهيز هذه المادة التعليمية حالياً.';
 
   @override
-  String get courseBeingPreparedSubtitle => 'ستظهر دروسك هنا قريباً.';
+  String get courseBeingPreparedSubtitle => 'ستظهر محاضراتك هنا قريباً.';
 
   @override
   String get startCourseAction => 'بدء المادة';
 
   @override
-  String get continueLessonAction => 'متابعة الدرس';
+  String get continueLessonAction => 'متابعة المحاضرة';
 
   @override
-  String get takeLessonQuizAction => 'بدء اختبار الدرس';
+  String get takeLessonQuizAction => 'بدء اختبار المحاضرة';
 
   @override
-  String get retryLessonQuizAction => 'إعادة اختبار الدرس';
+  String get retryLessonQuizAction => 'إعادة اختبار المحاضرة';
 
   @override
   String get reviewCourseAction => 'مراجعة المادة';
 
   @override
-  String get reviewLessonAction => 'مراجعة الدرس';
+  String get reviewLessonAction => 'مراجعة المحاضرة';
 
   @override
-  String get continueToNextLessonAction => 'الانتقال إلى الدرس التالي';
+  String get continueToNextLessonAction => 'الانتقال إلى المحاضرة التالي';
 
   @override
   String completeLessonToUnlock(int n) {
-    return 'أكمل الدرس $n لفتح هذا الدرس.';
+    return 'أكمل المحاضرة $n لفتح هذا المحاضرة.';
   }
 
   @override
   String get availableStatus => 'متاح';
 
   @override
-  String get lessonQuizReadyTitle => 'اختبار الدرس جاهز الآن.';
+  String get lessonQuizReadyTitle => 'اختبار المحاضرة جاهز الآن.';
 
   @override
   String get lessonQuizReadyDesc =>
-      'اختبر فهمك لمحتوى الدرس لفتح الدرس التالي.';
+      'اختبر فهمك لمحتوى المحاضرة لفتح المحاضرة التالي.';
 
   @override
   String get quizNotPassedTitle => 'لم يتم اجتياز الاختبار';
 
   @override
   String get quizNotPassedDesc =>
-      'يمكنك مراجعة محتوى الدرس والمحاولة مرة أخرى.';
+      'يمكنك مراجعة محتوى المحاضرة والمحاولة مرة أخرى.';
 
   @override
-  String get lessonCompletedCongrats => 'اكتمل الدرس بنجاح!';
+  String get lessonCompletedCongrats => 'اكتمل المحاضرة بنجاح!';
 
   @override
-  String get passedQuizNotice => 'لقد اجتزت اختبار الدرس بنجاح.';
+  String get passedQuizNotice => 'لقد اجتزت اختبار المحاضرة بنجاح.';
 
   @override
   String nextLessonLabel(String title) {
-    return 'الدرس التالي: $title';
+    return 'المحاضرة التالي: $title';
   }
 
   @override
-  String get previousLessonAction => 'الدرس السابق';
+  String get previousLessonAction => 'المحاضرة السابقة';
 
   @override
-  String get nextLessonAction => 'الدرس التالي';
+  String get nextLessonAction => 'المحاضرة التالي';
 
   @override
   String lessonXofY(int current, int total) {
-    return 'الدرس $current من $total';
+    return 'المحاضرة $current من $total';
   }
 
   @override
@@ -5287,7 +5371,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get completeVideoToUnlockQuiz =>
-      'أكمل مشاهدة الفيديو لفتح اختبار الدرس.';
+      'أكمل مشاهدة الفيديو لفتح اختبار المحاضرة.';
 
   @override
   String get videoCompletedTitle => 'اكتملت مشاهدة الفيديو';
@@ -5296,10 +5380,11 @@ class AppLocalizationsAr extends AppLocalizations {
   String get courseAssessmentsTitle => 'تقييمات المادة';
 
   @override
-  String get lessonQuizzesSectionTitle => 'اختبارات الدروس';
+  String get lessonQuizzesSectionTitle => 'اختبارات المحاضرات';
 
   @override
-  String get lessonQuizzesSectionDesc => 'تُؤدى كجزء من مسار تقدمك في الدروس.';
+  String get lessonQuizzesSectionDesc =>
+      'تُؤدى كجزء من مسار تقدمك في المحاضرات.';
 
   @override
   String get generalExamsSectionTitle => 'الامتحانات العامة';
@@ -5309,7 +5394,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String lessonsCompletedRatio(int completed, int total) {
-    return 'تم إكمال $completed من أصل $total درس';
+    return 'تم إكمال $completed من أصل $total محاضرة';
   }
 
   @override
@@ -5318,26 +5403,26 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get viewLessonsAction => 'عرض الدروس';
+  String get viewLessonsAction => 'عرض المحاضرات';
 
   @override
-  String get courseLessonsTitle => 'دروس المادة';
+  String get courseLessonsTitle => 'محاضرات المادة';
 
   @override
-  String get addLessonButton => 'إضافة درس';
+  String get addLessonButton => 'إضافة محاضرة';
 
   @override
-  String get courseBuilderEmptyTitle => 'لا توجد دروس بعد';
+  String get courseBuilderEmptyTitle => 'لا توجد محاضرات بعد';
 
   @override
-  String get courseBuilderEmptySubtitle => 'ابدأ في بناء المادة بإضافة درس.';
+  String get courseBuilderEmptySubtitle => 'ابدأ في بناء المادة بإضافة محاضرة.';
 
   @override
   String get sequentialLearning => 'التعلم التسلسلي';
 
   @override
   String get sequentialLearningDesc =>
-      'يجب على الطلاب إكمال فيديو الدرس واجتياز الاختبار قبل أن يُفتح الدرس التالي.';
+      'يجب على الطلاب إكمال فيديو المحاضرة واجتياز الاختبار قبل أن يُفتح المحاضرة التالي.';
 
   @override
   String get lessonEditorErrorSelectVideo => 'يرجى اختيار فيديو أولاً.';
@@ -5346,10 +5431,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get lessonEditorErrorSaving => 'حدث خطأ أثناء الحفظ.';
 
   @override
-  String get lessonEditorEditTitle => 'تعديل الدرس';
+  String get lessonEditorEditTitle => 'تعديل المحاضرة';
 
   @override
-  String get lessonEditorAddTitle => 'إضافة درس جديد';
+  String get lessonEditorAddTitle => 'إضافة محاضرة جديدة';
 
   @override
   String get lessonEditorSourceVideo => 'الفيديو المصدر';
@@ -5364,10 +5449,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get lessonEditorUploadNew => 'رفع جديد';
 
   @override
-  String get lessonEditorLessonTitle => 'عنوان الدرس (تجاوز اختياري)';
+  String get lessonEditorLessonTitle => 'عنوان المحاضرة (تجاوز اختياري)';
 
   @override
-  String get lessonEditorLessonTitleHint => 'أدخل عنوان الدرس';
+  String get lessonEditorLessonTitleHint => 'أدخل عنوان المحاضرة';
 
   @override
   String get lessonEditorStudyMaterial => 'المادة الدراسية (PDF)';
@@ -5376,7 +5461,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get lessonEditorUploadPdf => 'رفع PDF';
 
   @override
-  String get lessonEditorLessonQuiz => 'اختبار الدرس';
+  String get lessonEditorLessonQuiz => 'اختبار المحاضرة';
 
   @override
   String get lessonEditorNoQuizzes => 'لا توجد اختبارات متاحة في هذه المجموعة.';
@@ -5405,7 +5490,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get averageQuizScore => 'متوسط درجات الكويز';
 
   @override
-  String get studentLessonProgressStats => 'إحصائيات إنجاز الطلاب للدرس';
+  String get studentLessonProgressStats => 'إحصائيات إنجاز الطلاب للمحاضرة';
 
   @override
   String overallCompletionRate(int rate) {
@@ -6204,4 +6289,40 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get deleteLessonSmartNote =>
       'سيتم مسح ملفات الـ PDF المرفقة وسجلات التقدم لتوفير مساحة التخزين، بينما ستبقى الاختبارات المرتبطة محفوظة في بنك اختباراتك.';
+
+  @override
+  String get allLecturesOverview => 'كافة محاضرات المجموعة (نظرة شاملة)';
+
+  @override
+  String get lectureSelectionLabel => 'اختر المحاضرة:';
+
+  @override
+  String get syncAttendanceAction => 'مزامنة الحضور من المشاهدات';
+
+  @override
+  String get saveAttendanceSheet => 'حفظ واعتماد الكشف';
+
+  @override
+  String get fastSkippingDetected => 'اشتباه تخطي سريع للمحاضرة';
+
+  @override
+  String get sendLectureWhatsAppNotice => 'إرسال إشعار المتابعة لواتساب';
+
+  @override
+  String completedLecturesRatio(int completed, int total) {
+    return 'أتم $completed من أصل $total محاضرات';
+  }
+
+  @override
+  String lastWatchedTime(String time) {
+    return 'آخر مشاهدة: $time';
+  }
+
+  @override
+  String get noLecturesInGroup =>
+      'لا توجد محاضرات فيديو منشورة في هذه المجموعة بعد';
+
+  @override
+  String get syncAttendanceSuccessMessage =>
+      'تمت مزامنة حالات الحضور بدقة مع نسب مشاهدة الفيديو';
 }

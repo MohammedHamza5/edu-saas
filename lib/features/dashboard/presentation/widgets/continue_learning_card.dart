@@ -196,8 +196,13 @@ class ContinueLearningCard extends StatelessWidget {
             child: ElevatedButton.icon(
               onPressed: () {
                 final encodedGroup = Uri.encodeComponent(item.groupName);
+                final groupParam = item.groupId != null && item.groupId!.isNotEmpty
+                    ? '&groupId=${item.groupId}'
+                    : '';
+                final targetId =
+                    item.contentId.isNotEmpty ? item.contentId : item.videoId;
                 context.push(
-                  '${AppRoutes.videoPlayer}?id=${item.videoId}&groupName=$encodedGroup',
+                  '${AppRoutes.videoPlayer}?id=$targetId&groupName=$encodedGroup$groupParam',
                 );
               },
               style: ElevatedButton.styleFrom(

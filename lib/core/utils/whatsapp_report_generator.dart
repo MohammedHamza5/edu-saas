@@ -1,161 +1,625 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../extensions/localized_context_extension.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 
-/// مولّد تقارير المتابعة الأكاديمية عبر الواتساب بنقرة واحدة
-/// مخصص لمنصة د. أنطونيوس أشرف لتمكينه من إرسال تقارير مهنية فورية لأولياء الأمور
+/// WhatsApp Academic Progress Report Generator
+/// Provides single-click professional reporting for teachers to communicate directly
+/// with parents via WhatsApp without requiring parents to log in to the web app.
 class WhatsAppReportGenerator {
   WhatsAppReportGenerator._();
 
-  /// توليد نص رسالة الواتساب الأسبوعية
+  /// Clean & format phone numbers to standard E.164 without '+' or dashes
+  /// Handles Arabic-Indic numerals, Egyptian local prefixes (01x -> 201x), etc.
+  static String cleanPhoneNumber(String rawPhone) {
+    if (rawPhone.trim().isEmpty) return '';
+
+    // Convert Arabic-Indic numerals (٠-٩) to Western (0-9)
+    const arabicIndic = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    String phone = rawPhone.trim();
+    for (int i = 0; i < arabicIndic.length; i++) {
+      phone = phone.replaceAll(arabicIndic[i], '$i');
+    }
+
+    // Strip non-digits
+    final digits = phone.replaceAll(RegExp(r'\D'), '');
+    if (digits.isEmpty) return '';
+
+    // Egyptian 11-digit mobile: 01xxxxxxxxx -> 201xxxxxxxxx
+    if (digits.startsWith('01') && digits.length == 11) {
+      return '20${digits.substring(1)}';
+    }
+    // Egyptian 10-digit without leading 0: 1xxxxxxxxx -> 201xxxxxxxxx
+    if (digits.startsWith('1') && digits.length == 10) {
+      return '20$digits';
+    }
+    // Saudi 10-digit mobile: 05xxxxxxxx -> 9665xxxxxxxx
+    if (digits.startsWith('05') && digits.length == 10) {
+      return '966${digits.substring(1)}';
+    }
+
+    return digits;
+  }
+
+  /// Launch WhatsApp with phone and message pre-filled
+  static Future<bool> launchWhatsApp({
+    required String phone,
+    required String message,
+  }) async {
+    final cleanPhone = cleanPhoneNumber(phone);
+    if (cleanPhone.isEmpty) return false;
+
+    final encodedMessage = Uri.encodeComponent(message);
+    final url = Uri.parse('https://wa.me/$cleanPhone?text=$encodedMessage');
+
+    try {
+      if (await canLaunchUrl(url)) {
+        return await launchUrl(url, mode: LaunchMode.externalApplication);
+      }
+      return false;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Generates weekly comprehensive academic report
   static String generateStudentWeeklyReport({
     required String studentName,
     String? groupName,
     double attendanceRate = 1.0,
-    double videoWatchRate = 0.95,
-    int completedAssignments = 4,
-    int totalAssignments = 4,
-    int mockExamScore = 740,
-    int targetScore = 800,
+    double videoWatchRate = 0.0,
+    int completedAssignments = 0,
+    int totalAssignments = 0,
+    int mockExamScore = 0,
+    int targetScore = 100,
     int? activeStudyMinutes,
     String? engagementQualityText,
     String? teacherNotes,
-    String teacherName = 'د. أنطونيوس أشرف',
-    String platformName = 'منصة د. أنطونيوس أشرف',
+    String? teacherName = 'د. أنطونيوس أشرف',
+    String? platformName,
   }) {
     final attendancePercent = (attendanceRate * 100).round();
     final videoPercent = (videoWatchRate * 100).round();
-    final actualGroup =
-        groupName ?? 'مجموعة تدريب الـ Digital SAT (Target 800)';
-    final notes =
-        teacherNotes ??
-        'الطالب يظهر التزاماً ممتازاً وسرعة استيعاب عالية في مهارات الجبر وحل المعادلات، ونعمل حالياً على رفع سرعة الحل في مسائل الـ Coordinate Geometry.';
+    final actualGroup = groupName ?? 'المجموعة الأكاديمية';
+    final notes = teacherNotes?.trim() ??
+        'الطالب يظهر التزاماً طيباً وتفاعلاً إيجابياً، ونعمل سوياً على تعزيز سرعة الإنجاز والحل.';
 
     final engagementLine = activeStudyMinutes != null && activeStudyMinutes > 0
         ? '⏱️ وقت التفاعل والمذاكرة النشط: $activeStudyMinutes دقيقة ${engagementQualityText != null ? '($engagementQualityText)' : ''}\n'
+        : '';
+
+    final assignmentsLine = totalAssignments > 0
+        ? '📝 تسليمات الواجبات المحلولة: $completedAssignments من أصل $totalAssignments\n'
+        : (completedAssignments > 0
+            ? '📝 الواجبات المُنجزة: $completedAssignments واجب\n'
+            : '');
+
+    final examLine = mockExamScore > 0
+        ? '🎯 أداء وتقييم الامتحانات: $mockExamScore / $targetScore\n'
+        : '';
+
+    final teacherGreeting = teacherName != null && teacherName.isNotEmpty
+        ? 'تحية طيبة من $teacherName'
+        : 'تحية طيبة';
+    final platformTag = platformName != null && platformName.isNotEmpty
+        ? ' ($platformName)'
         : '';
 
     return '''
 السلام عليكم ورحمة الله وبركاته،
 ولي أمر الطالب العزيز: $studentName 🌟
 
-تحية طيبة من $teacherName ($platformName) 📐
+$teacherGreeting$platformTag 📐
 
-يسعدنا مشاركتكم التقرير الدوري لمتابعة الأداء الأكاديمي والتفاعل الفعلي للطالب في $actualGroup:
+يسعدنا مشاركتكم التقرير الدوري لمتابعة الأداء الأكاديمي والتفاعل الفعلي في $actualGroup:
 ━━━━━━━━━━━━━━━━━━━━
 📊 نسبة الحضور والالتزام: $attendancePercent%
-$engagementLine🎥 نسبة مشاهدة المحاضرات المسجلة: $videoPercent%
-📝 واجبات الـ Drills المحلولة: $completedAssignments من أصل $totalAssignments
-🎯 سكور المحاكاة الأخير (SAT Math): $mockExamScore / $targetScore
-━━━━━━━━━━━━━━━━━━━━
-💡 ملاحظة وتوصية $teacherName:
+$engagementLine🎥 نسبة إنجاز المحاضرات: $videoPercent%
+$assignmentsLine$examLine━━━━━━━━━━━━━━━━━━━━
+💡 ملاحظة وتوصية المدرس:
 $notes
 
-مع تمنياتنا بدوام التميز والتفوق لطلابنا الأعزاء،
-$teacherName
+مع خالص تمنياتنا بدوام التفوق والتميز.
 '''
         .trim();
   }
 
-  /// عرض شاشة معاينة التقرير مع إمكانية النسخ أو الفتح المباشر
+  /// Generates instant absence notification for parents
+  static String generateAbsenceNotice({
+    required String studentName,
+    String? groupName,
+    required String sessionDate,
+    String? teacherName,
+  }) {
+    final group = groupName ?? 'المجموعة';
+    final sender = teacherName != null ? ' - $teacherName' : '';
+
+    return '''
+السلام عليكم ورحمة الله وبركاته،
+ولي أمر الطالب العزيز: $studentName 🌟
+
+نحيط سيادتكم علماً بأن الطالب قد تغيب عن حضور حصة اليوم ($group) بتاريخ: $sessionDate.
+
+⚠️ يرجى متابعة الطالب لمشاهدة تسجيل المحاضرة وحل التكليفات الملحقة لضمان عدم تأخره عن زملائه في المنهج.
+
+شاكرين تعاونكم الدائم وحرصكم المستمر$sender.
+'''
+        .trim();
+  }
+
+  /// Generates instant lecture watch & attendance report for parents
+  static String generateLectureWatchNotice({
+    required String studentName,
+    required String lectureTitle,
+    required double watchProgressPercent,
+    String? groupName,
+    int? watchMinutes,
+    int? totalMinutes,
+    String? teacherName = 'د. أنطونيوس أشرف',
+    String? customNote,
+  }) {
+    final sender = teacherName != null ? ' - $teacherName' : '';
+    final pct = watchProgressPercent.toStringAsFixed(watchProgressPercent < 10 && watchProgressPercent > 0 ? 1 : 0);
+    final statusEmoji = watchProgressPercent >= 80
+        ? '✅ أتم مشاهدة المحاضرة بالكامل'
+        : (watchProgressPercent > 0
+            ? '⚠️ مشاهدة جزئية ($pct%)'
+            : '❌ لم يبدأ المشاهدة بعد');
+
+    final timeLine = (watchMinutes != null && totalMinutes != null && totalMinutes > 0)
+        ? '\n⏱️ مدة المشاهدة: $watchMinutes دقيقة من أصل $totalMinutes دقيقة'
+        : '';
+
+    final noteLine = customNote != null && customNote.trim().isNotEmpty
+        ? '\n💡 ملاحظة وتوجيه المدرس: $customNote'
+        : (watchProgressPercent < 80
+            ? '\n⚠️ يرجى متابعة الطالب لاستكمال مشاهدة المحاضرة وحل التكليفات الملحقة بها.'
+            : '');
+
+    return '''
+السلام عليكم ورحمة الله وبركاته،
+ولي أمر الطالب العزيز: $studentName 🌟
+
+نحيط سيادتكم علماً بتقرير متابعة التفاعل والمشاهدة للمحاضرة المسجلة:
+🎥 $lectureTitle
+
+• حالة المشاهدة: $statusEmoji$timeLine$noteLine
+
+شاكرين تعاونكم وحرصكم الدائم على تفوق وتميز الطالب$sender.
+'''
+        .trim();
+  }
+
+  /// Generates instant exam result report for parents
+  static String generateExamResultReport({
+    required String studentName,
+    required String examTitle,
+    required double score,
+    required double maxScore,
+    required double percentage,
+    String? teacherNotes,
+    String? teacherName,
+  }) {
+    final status = percentage >= 85
+        ? 'ممتاز جداً 🌟'
+        : (percentage >= 65 ? 'جيد جداً 👍' : 'يحتاج مزيداً من التركيز والمراجعة ⚠️');
+    final notes = teacherNotes?.isNotEmpty == true
+        ? '\n💡 ملاحظة المدرس: $teacherNotes'
+        : '';
+    final sender = teacherName != null ? ' - $teacherName' : '';
+
+    return '''
+السلام عليكم ورحمة الله وبركاته،
+ولي أمر الطالب العزيز: $studentName 🌟
+
+يسرنا إخطاركم بنتيجة الطالب في امتحان:
+🎯 $examTitle
+
+• الدرجة المحققة: ${score.toStringAsFixed(1)} من ${maxScore.toStringAsFixed(1)}
+• النسبة المئوية: ${percentage.toStringAsFixed(1)}%
+• التقييم العام: $status$notes
+
+تمنياتنا للطالب بدوام التفوق والتقدم$sender.
+'''
+        .trim();
+  }
+
+  /// Displays interactive dialog with editable message, preset chips, and direct WhatsApp launch
   static void showReportPreviewDialog(
     BuildContext context, {
     required String studentName,
     required String reportText,
     String? phone,
+    String? alternatePhone,
   }) {
     showDialog<void>(
       context: context,
-      builder: (ctx) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+      builder: (ctx) => _WhatsAppInteractiveDialog(
+        studentName: studentName,
+        initialReportText: reportText,
+        phone: phone,
+        alternatePhone: alternatePhone,
+      ),
+    );
+  }
+}
+
+class _WhatsAppInteractiveDialog extends StatefulWidget {
+  final String studentName;
+  final String initialReportText;
+  final String? phone;
+  final String? alternatePhone;
+
+  const _WhatsAppInteractiveDialog({
+    required this.studentName,
+    required this.initialReportText,
+    this.phone,
+    this.alternatePhone,
+  });
+
+  @override
+  State<_WhatsAppInteractiveDialog> createState() =>
+      _WhatsAppInteractiveDialogState();
+}
+
+class _WhatsAppInteractiveDialogState
+    extends State<_WhatsAppInteractiveDialog> {
+  late final TextEditingController _textController;
+  late String _selectedPhone;
+  bool _isSending = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _textController = TextEditingController(text: widget.initialReportText);
+    _selectedPhone = (widget.phone != null && widget.phone!.trim().isNotEmpty)
+        ? widget.phone!.trim()
+        : (widget.alternatePhone?.trim() ?? '');
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
+  }
+
+  void _applyPresetNote(String preset) {
+    final current = _textController.text;
+    const noteMarker = '💡 ملاحظة وتوصية المدرس:';
+    if (current.contains(noteMarker)) {
+      final parts = current.split(noteMarker);
+      final before = parts[0];
+      final afterWithClosing = parts.length > 1 ? parts[1] : '';
+      const closingMarker = 'مع خالص تمنياتنا';
+      if (afterWithClosing.contains(closingMarker)) {
+        final afterParts = afterWithClosing.split(closingMarker);
+        _textController.text =
+            '$before$noteMarker\n$preset\n\n$closingMarker${afterParts[1]}';
+      } else {
+        _textController.text = '$before$noteMarker\n$preset\n';
+      }
+    } else {
+      _textController.text = '$current\n\n💡 ملاحظة:\n$preset';
+    }
+    setState(() {});
+  }
+
+  Future<void> _handleSendWhatsApp() async {
+    final l10n = context.l10n;
+    if (_selectedPhone.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.whatsappParentPhoneMissing),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isSending = true);
+    final text = _textController.text.trim();
+    final launched = await WhatsAppReportGenerator.launchWhatsApp(
+      phone: _selectedPhone,
+      message: text,
+    );
+    if (!mounted) return;
+    setState(() => _isSending = false);
+
+    if (launched) {
+      Navigator.of(context).pop();
+    } else {
+      // Fallback copy to clipboard if launch fails
+      await Clipboard.setData(ClipboardData(text: text));
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.whatsappOpenError),
+          backgroundColor: AppColors.warning,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  void _handleCopy() {
+    final text = _textController.text.trim();
+    Clipboard.setData(ClipboardData(text: text));
+    Navigator.of(context).pop();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(context.l10n.whatsappCopiedSuccess(widget.studentName)),
+        backgroundColor: AppColors.success,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final hasParentPhone =
+        widget.phone != null && widget.phone!.trim().isNotEmpty;
+    final hasAltPhone = widget.alternatePhone != null &&
+        widget.alternatePhone!.trim().isNotEmpty;
+
+    return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+      ),
+      titlePadding: const EdgeInsets.fromLTRB(
+        AppSpacing.s20,
+        AppSpacing.s20,
+        AppSpacing.s20,
+        AppSpacing.s8,
+      ),
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.s20,
+        vertical: AppSpacing.s8,
+      ),
+      title: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(AppSpacing.s8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF25D366).withValues(alpha: 0.15),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.mark_chat_read_rounded,
+              color: Color(0xFF25D366),
+              size: 22,
+            ),
           ),
-          title: const Row(
+          const SizedBox(width: AppSpacing.s12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.whatsappReportDialogTitle,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                Text(
+                  widget.studentName,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      content: SizedBox(
+        width: 520,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(
-                Icons.mark_chat_read_rounded,
-                color: Color(0xFF25D366), // WhatsApp Green
-                size: 24,
+              // Target Phone Selector if both exist
+              if (hasParentPhone && hasAltPhone) ...[
+                Text(
+                  l10n.whatsappTargetPhoneLabel,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.s6),
+                Row(
+                  children: [
+                    ChoiceChip(
+                      label: Text(
+                        '${l10n.whatsappTargetParent} (${widget.phone})',
+                      ),
+                      selected: _selectedPhone == widget.phone!.trim(),
+                      onSelected: (selected) {
+                        if (selected) {
+                          setState(() => _selectedPhone = widget.phone!.trim());
+                        }
+                      },
+                    ),
+                    const SizedBox(width: AppSpacing.s8),
+                    ChoiceChip(
+                      label: Text(
+                        '${l10n.whatsappTargetStudent} (${widget.alternatePhone})',
+                      ),
+                      selected: _selectedPhone == widget.alternatePhone!.trim(),
+                      onSelected: (selected) {
+                        if (selected) {
+                          setState(() => _selectedPhone =
+                              widget.alternatePhone!.trim());
+                        }
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.s12),
+              ] else if (_selectedPhone.isNotEmpty) ...[
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.phone_iphone_rounded,
+                      size: 14,
+                      color: Color(0xFF25D366),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${l10n.whatsappTargetPhoneLabel}: $_selectedPhone',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.s12),
+              ] else ...[
+                Container(
+                  padding: const EdgeInsets.all(AppSpacing.s8),
+                  decoration: BoxDecoration(
+                    color: AppColors.warning.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                    border: Border.all(
+                      color: AppColors.warning.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.warning_amber_rounded,
+                        color: AppColors.warning,
+                        size: 16,
+                      ),
+                      const SizedBox(width: AppSpacing.s8),
+                      Expanded(
+                        child: Text(
+                          l10n.whatsappParentPhoneMissing,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.s12),
+              ],
+
+              // Quick Presets
+              Text(
+                l10n.whatsappTeacherNotesLabel,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
               ),
-              SizedBox(width: AppSpacing.s8),
-              Expanded(
-                child: Text(
-                  'تقرير الواتساب لولي الأمر',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              const SizedBox(height: AppSpacing.s6),
+              Wrap(
+                spacing: AppSpacing.s6,
+                runSpacing: AppSpacing.s6,
+                children: [
+                  ActionChip(
+                    avatar: const Icon(Icons.star_rounded,
+                        size: 14, color: Color(0xFFF59E0B)),
+                    label: Text(l10n.whatsappPresetExcellent,
+                        style: const TextStyle(fontSize: 11)),
+                    onPressed: () =>
+                        _applyPresetNote(l10n.whatsappPresetExcellent),
+                  ),
+                  ActionChip(
+                    avatar: const Icon(Icons.assignment_late_rounded,
+                        size: 14, color: AppColors.warning),
+                    label: Text(l10n.whatsappPresetNeedsHomework,
+                        style: const TextStyle(fontSize: 11)),
+                    onPressed: () =>
+                        _applyPresetNote(l10n.whatsappPresetNeedsHomework),
+                  ),
+                  ActionChip(
+                    avatar: const Icon(Icons.event_busy_rounded,
+                        size: 14, color: AppColors.error),
+                    label: Text(l10n.whatsappPresetAbsentNotice,
+                        style: const TextStyle(fontSize: 11)),
+                    onPressed: () =>
+                        _applyPresetNote(l10n.whatsappPresetAbsentNotice),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.s12),
+
+              // Editable Message Area
+              TextField(
+                controller: _textController,
+                maxLines: 10,
+                style: const TextStyle(
+                  fontSize: 12,
+                  height: 1.5,
+                  color: AppColors.textPrimary,
+                  fontFamily: 'monospace',
+                ),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: AppColors.surfaceVariant.withValues(alpha: 0.5),
+                  contentPadding: const EdgeInsets.all(AppSpacing.s12),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                    borderSide: const BorderSide(color: AppColors.border),
+                  ),
                 ),
               ),
             ],
           ),
-          content: SizedBox(
-            width: 480,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'تم إنشاء تقرير المتابعة تلقائياً بصيغة مخصصة لرسائل الواتساب:',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textSecondary,
-                    ),
+        ),
+      ),
+      actionsPadding: const EdgeInsets.fromLTRB(
+        AppSpacing.s20,
+        AppSpacing.s8,
+        AppSpacing.s20,
+        AppSpacing.s16,
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(context.l10n.cancel),
+        ),
+        OutlinedButton.icon(
+          icon: const Icon(Icons.copy_rounded, size: 16),
+          label: Text(l10n.whatsappCopyButton),
+          onPressed: _handleCopy,
+        ),
+        ElevatedButton.icon(
+          icon: _isSending
+              ? const SizedBox(
+                  width: 14,
+                  height: 14,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                   ),
-                  const SizedBox(height: AppSpacing.s12),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(AppSpacing.s12),
-                    decoration: BoxDecoration(
-                      color: AppColors.surfaceVariant.withValues(alpha: 0.5),
-                      borderRadius: BorderRadius.circular(
-                        AppSpacing.radiusSmall,
-                      ),
-                      border: Border.all(color: AppColors.border),
-                    ),
-                    child: SelectableText(
-                      reportText,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        height: 1.5,
-                        color: AppColors.textPrimary,
-                        fontFamily: 'monospace',
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+                )
+              : const Icon(Icons.send_rounded, size: 16),
+          label: Text(l10n.whatsappSendButton),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF25D366),
+            foregroundColor: Colors.white,
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('إغلاق'),
-            ),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.copy_rounded, size: 16),
-              label: const Text('نسخ التقرير للحافظة'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF25D366),
-                foregroundColor: Colors.white,
-              ),
-              onPressed: () {
-                Clipboard.setData(ClipboardData(text: reportText));
-                Navigator.of(ctx).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      'تم نسخ تقرير الطالب $studentName بنجاح! جاهز للإرسال على الواتساب 📋',
-                    ),
-                    backgroundColor: AppColors.success,
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-              },
-            ),
-          ],
-        );
-      },
+          onPressed: _isSending ? null : _handleSendWhatsApp,
+        ),
+      ],
     );
   }
 }

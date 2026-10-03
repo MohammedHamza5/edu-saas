@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
+import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_empty_view.dart';
 import '../../../../core/widgets/app_error_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
@@ -160,7 +163,55 @@ class _NotificationsCenterPageState extends State<NotificationsCenterPage> {
                 ),
               ),
             ),
-            const SizedBox(height: AppSpacing.s24),
+            const SizedBox(height: AppSpacing.s20),
+
+            // Contextual Action button based on notification type
+            if (item.type == NotificationType.newContent) ...[
+              AppButton(
+                text: context.l10n.notificationGoToLecture,
+                icon: Icons.play_circle_outline_rounded,
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                  final grpId = item.data['group_id']?.toString();
+                  if (grpId != null && grpId.isNotEmpty) {
+                    context.go('/student/groups/$grpId/content');
+                  } else {
+                    context.go(AppRoutes.studentDashboard);
+                  }
+                },
+              ),
+            ] else if (item.type == NotificationType.examPublished ||
+                item.type == NotificationType.examResult) ...[
+              AppButton(
+                text: context.l10n.notificationGoToExam,
+                icon: Icons.quiz_outlined,
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                  context.go(AppRoutes.studentExams);
+                },
+              ),
+            ] else if (item.type == NotificationType.assignmentCreated ||
+                item.type == NotificationType.assignmentReviewed ||
+                item.type == NotificationType.assignmentDue) ...[
+              AppButton(
+                text: context.l10n.notificationGoToAssignment,
+                icon: Icons.assignment_outlined,
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                  context.go(AppRoutes.studentAssignments);
+                },
+              ),
+            ] else if (item.type == NotificationType.attendanceMarked) ...[
+              AppButton(
+                text: context.l10n.notificationGoToAttendance,
+                icon: Icons.fact_check_outlined,
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                  context.go(AppRoutes.studentAttendance);
+                },
+              ),
+            ],
+            const SizedBox(height: AppSpacing.s16),
           ],
         ),
       ),

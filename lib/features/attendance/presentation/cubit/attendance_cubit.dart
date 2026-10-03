@@ -16,23 +16,26 @@ class AttendanceCubit extends Cubit<AttendanceState> {
   Future<void> loadGroupAttendance({
     required String groupId,
     required DateTime date,
+    String? lectureContentId,
     bool forceRefresh = false,
   }) async {
     final dateKey =
         "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
-    final cacheKey = '${groupId}_$dateKey';
+    final cacheKey = '${groupId}_${dateKey}_${lectureContentId ?? "default"}';
     if (forceRefresh) {
       AppCache.attendance.invalidate(cacheKey);
     }
 
     // ── Stale-While-Revalidate: Instant display from memory cache ──────────
     final cached = AppCache.attendance.getStale(cacheKey);
-    if (cached is List<StudentAttendanceItem>) {
+    if (cached is GroupAttendanceData) {
       emit(
         TeacherAttendanceLoaded(
           groupId: groupId,
           selectedDate: date,
-          students: cached,
+          students: cached.students,
+          availableLectures: cached.lectures,
+          selectedLectureContentId: cached.selectedLectureContentId,
         ),
       );
       if (!forceRefresh && AppCache.attendance.has(cacheKey)) {
@@ -45,19 +48,22 @@ class AttendanceCubit extends Cubit<AttendanceState> {
     final result = await _repository.getGroupStudentsWithAttendance(
       groupId: groupId,
       date: date,
+      lectureContentId: lectureContentId,
     );
 
     if (isClosed) return;
 
     result.when(
-      onSuccess: (students) {
+      onSuccess: (data) {
         if (!isClosed) {
-          AppCache.attendance.put(cacheKey, students);
+          AppCache.attendance.put(cacheKey, data);
           emit(
             TeacherAttendanceLoaded(
               groupId: groupId,
               selectedDate: date,
-              students: students,
+              students: data.students,
+              availableLectures: data.lectures,
+              selectedLectureContentId: data.selectedLectureContentId,
             ),
           );
         }
@@ -68,6 +74,40 @@ class AttendanceCubit extends Cubit<AttendanceState> {
         }
       },
     );
+  }
+
+  /// Selects a specific lecture to view watch progress and attendance
+  Future<void> selectLecture(String? contentId) async {
+    final currentState = state;
+    if (currentState is! TeacherAttendanceLoaded) return;
+    await loadGroupAttendance(
+      groupId: currentState.groupId,
+      date: currentState.selectedDate,
+      lectureContentId: contentId,
+    );
+  }
+
+  /// Automatically syncs attendance statuses based on actual lecture watch coverage:
+  /// - >= 80% coverage: present
+  /// - 1% - 79% coverage: late (in progress)
+  /// - 0% coverage: absent
+  void syncAttendanceFromVideos() {
+    final currentState = state;
+    if (currentState is! TeacherAttendanceLoaded) return;
+
+    final updatedStudents = currentState.students.map((student) {
+      final AttendanceStatus autoStatus;
+      if (student.isFullyWatched) {
+        autoStatus = AttendanceStatus.present;
+      } else if (student.hasWatchedAny) {
+        autoStatus = AttendanceStatus.late;
+      } else {
+        autoStatus = AttendanceStatus.absent;
+      }
+      return student.copyWith(status: autoStatus);
+    }).toList();
+
+    emit(currentState.copyWith(students: updatedStudents, saveSuccess: false));
   }
 
   /// Updates the status or note for a specific student locally in the attendance sheet

@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:typed_data';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/network/supabase_service.dart';
+import '../../../notifications/domain/services/notification_dispatcher.dart';
 import '../models/assignment_model.dart';
 import '../models/assignment_submission_model.dart';
 
@@ -394,6 +396,16 @@ class AssignmentsRemoteDataSourceImpl implements AssignmentsRemoteDataSource {
     map['title'] = title;
     map['group_id'] = groupId;
 
+    unawaited(
+      NotificationDispatcher.notifyNewAssignment(
+        title: title,
+        groupId: groupId,
+        assignmentId: assignmentRes['id'] as String,
+        dueAt: dueAt,
+        maxScore: maxScore,
+      ),
+    );
+
     return AssignmentModel.fromJson(map);
   }
 
@@ -536,7 +548,23 @@ class AssignmentsRemoteDataSourceImpl implements AssignmentsRemoteDataSource {
         ''')
         .single();
 
-    return AssignmentSubmissionModel.fromJson(updatedRes);
+    final model = AssignmentSubmissionModel.fromJson(updatedRes);
+    final studentId = updatedRes['student_id'] as String?;
+    final assignmentId = updatedRes['assignment_id'] as String?;
+    if (studentId != null && studentId.isNotEmpty && assignmentId != null) {
+      unawaited(
+        NotificationDispatcher.notifyAssignmentGraded(
+          assignmentTitle: 'الواجب',
+          studentId: studentId,
+          score: score,
+          maxScore: 100,
+          feedback: feedback,
+          submissionId: submissionId,
+          assignmentId: assignmentId,
+        ),
+      );
+    }
+    return model;
   }
 
   @override

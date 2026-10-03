@@ -2,6 +2,7 @@ import 'package:edu_saas/core/errors/failures.dart';
 import 'package:edu_saas/core/errors/result.dart';
 import 'package:edu_saas/core/localization/generated/app_localizations.dart';
 import 'package:edu_saas/core/theme/app_theme.dart';
+import 'package:edu_saas/core/theme/tenant_theme_cubit.dart';
 import 'package:edu_saas/core/widgets/app_button.dart';
 import 'package:edu_saas/features/auth/domain/entities/user_entity.dart';
 import 'package:edu_saas/features/auth/domain/repositories/auth_repository.dart';
@@ -158,14 +159,18 @@ void main() {
 
   group('LoginPage Widget Tests', () {
     Widget createWidgetUnderTest() {
-      return MaterialApp(
-        theme: AppTheme.lightTheme,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        locale: const Locale('ar'),
-        home: BlocProvider<AuthCubit>.value(
-          value: authCubit,
-          child: const LoginPage(),
+      final themeCubit = TenantThemeCubit();
+      return MultiBlocProvider(
+        providers: [
+          BlocProvider<AuthCubit>.value(value: authCubit),
+          BlocProvider<TenantThemeCubit>.value(value: themeCubit),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.lightTheme,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('ar'),
+          home: const LoginPage(),
         ),
       );
     }
@@ -198,14 +203,18 @@ void main() {
 
   group('RegisterStudentPage American System Tracks Tests', () {
     Widget createWidgetUnderTest() {
-      return MaterialApp(
-        theme: AppTheme.lightTheme,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        locale: const Locale('ar'),
-        home: BlocProvider<AuthCubit>.value(
-          value: authCubit,
-          child: const RegisterStudentPage(),
+      final themeCubit = TenantThemeCubit();
+      return MultiBlocProvider(
+        providers: [
+          BlocProvider<AuthCubit>.value(value: authCubit),
+          BlocProvider<TenantThemeCubit>.value(value: themeCubit),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.lightTheme,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('ar'),
+          home: const RegisterStudentPage(),
         ),
       );
     }

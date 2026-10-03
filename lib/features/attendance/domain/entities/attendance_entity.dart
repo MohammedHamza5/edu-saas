@@ -86,6 +86,69 @@ class AttendanceEntity extends Equatable {
   ];
 }
 
+/// Represents a video lecture attached to a group
+class LectureItem extends Equatable {
+  final String contentId;
+  final String? videoId;
+  final String title;
+  final int? durationSeconds;
+  final DateTime? publishedAt;
+  final String? provider;
+  final String? providerVideoId;
+  final int sortOrder;
+
+  const LectureItem({
+    required this.contentId,
+    this.videoId,
+    required this.title,
+    this.durationSeconds,
+    this.publishedAt,
+    this.provider,
+    this.providerVideoId,
+    this.sortOrder = 0,
+  });
+
+  String get formattedDuration {
+    if (durationSeconds == null || durationSeconds! <= 0) return '';
+    final d = Duration(seconds: durationSeconds!);
+    final h = d.inHours;
+    final m = d.inMinutes.remainder(60);
+    final s = d.inSeconds.remainder(60);
+    if (h > 0) {
+      return '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
+    }
+    return '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
+  }
+
+  @override
+  List<Object?> get props => [
+    contentId,
+    videoId,
+    title,
+    durationSeconds,
+    publishedAt,
+    provider,
+    providerVideoId,
+    sortOrder,
+  ];
+}
+
+/// Result container for group attendance including students and available lectures
+class GroupAttendanceData extends Equatable {
+  final List<StudentAttendanceItem> students;
+  final List<LectureItem> lectures;
+  final String? selectedLectureContentId;
+
+  const GroupAttendanceData({
+    required this.students,
+    required this.lectures,
+    this.selectedLectureContentId,
+  });
+
+  @override
+  List<Object?> get props => [students, lectures, selectedLectureContentId];
+}
+
 /// Item representing a student row in the teacher's attendance sheet
 class StudentAttendanceItem extends Equatable {
   final String studentId;
@@ -96,6 +159,18 @@ class StudentAttendanceItem extends Equatable {
   final String? note;
   final String? existingAttendanceId;
 
+  // Real Video Lecture Watch Tracking Fields
+  final double watchProgressPercent;
+  final int watchSeconds;
+  final int totalDurationSeconds;
+  final bool isCompleted;
+  final DateTime? lastWatchedAt;
+  final bool isSkipped;
+  final int totalLecturesCount;
+  final int completedLecturesCount;
+  final int startedLecturesCount;
+  final String? currentLectureTitle;
+
   const StudentAttendanceItem({
     required this.studentId,
     required this.studentName,
@@ -104,7 +179,38 @@ class StudentAttendanceItem extends Equatable {
     required this.status,
     this.note,
     this.existingAttendanceId,
+    this.watchProgressPercent = 0.0,
+    this.watchSeconds = 0,
+    this.totalDurationSeconds = 0,
+    this.isCompleted = false,
+    this.lastWatchedAt,
+    this.isSkipped = false,
+    this.totalLecturesCount = 0,
+    this.completedLecturesCount = 0,
+    this.startedLecturesCount = 0,
+    this.currentLectureTitle,
   });
+
+  String get formattedWatchDuration {
+    if (totalDurationSeconds <= 0 && watchSeconds <= 0) return '';
+    String formatSec(int sec) {
+      final d = Duration(seconds: sec);
+      final h = d.inHours;
+      final m = d.inMinutes.remainder(60);
+      final s = d.inSeconds.remainder(60);
+      if (h > 0) {
+        return '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
+      }
+      return '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
+    }
+    if (totalDurationSeconds > 0) {
+      return '${formatSec(watchSeconds)} / ${formatSec(totalDurationSeconds)}';
+    }
+    return formatSec(watchSeconds);
+  }
+
+  bool get hasWatchedAny => watchProgressPercent > 0;
+  bool get isFullyWatched => isCompleted || watchProgressPercent >= 80.0;
 
   StudentAttendanceItem copyWith({
     String? studentId,
@@ -114,6 +220,16 @@ class StudentAttendanceItem extends Equatable {
     AttendanceStatus? status,
     String? note,
     String? existingAttendanceId,
+    double? watchProgressPercent,
+    int? watchSeconds,
+    int? totalDurationSeconds,
+    bool? isCompleted,
+    DateTime? lastWatchedAt,
+    bool? isSkipped,
+    int? totalLecturesCount,
+    int? completedLecturesCount,
+    int? startedLecturesCount,
+    String? currentLectureTitle,
   }) {
     return StudentAttendanceItem(
       studentId: studentId ?? this.studentId,
@@ -123,6 +239,17 @@ class StudentAttendanceItem extends Equatable {
       status: status ?? this.status,
       note: note ?? this.note,
       existingAttendanceId: existingAttendanceId ?? this.existingAttendanceId,
+      watchProgressPercent: watchProgressPercent ?? this.watchProgressPercent,
+      watchSeconds: watchSeconds ?? this.watchSeconds,
+      totalDurationSeconds: totalDurationSeconds ?? this.totalDurationSeconds,
+      isCompleted: isCompleted ?? this.isCompleted,
+      lastWatchedAt: lastWatchedAt ?? this.lastWatchedAt,
+      isSkipped: isSkipped ?? this.isSkipped,
+      totalLecturesCount: totalLecturesCount ?? this.totalLecturesCount,
+      completedLecturesCount:
+          completedLecturesCount ?? this.completedLecturesCount,
+      startedLecturesCount: startedLecturesCount ?? this.startedLecturesCount,
+      currentLectureTitle: currentLectureTitle ?? this.currentLectureTitle,
     );
   }
 
@@ -135,6 +262,16 @@ class StudentAttendanceItem extends Equatable {
     status,
     note,
     existingAttendanceId,
+    watchProgressPercent,
+    watchSeconds,
+    totalDurationSeconds,
+    isCompleted,
+    lastWatchedAt,
+    isSkipped,
+    totalLecturesCount,
+    completedLecturesCount,
+    startedLecturesCount,
+    currentLectureTitle,
   ];
 }
 
@@ -145,6 +282,7 @@ class AttendanceStats extends Equatable {
   final int absentCount;
   final int lateCount;
   final int excusedCount;
+  final double averageWatchPercentage;
 
   const AttendanceStats({
     required this.totalSessions,
@@ -152,6 +290,7 @@ class AttendanceStats extends Equatable {
     required this.absentCount,
     required this.lateCount,
     required this.excusedCount,
+    this.averageWatchPercentage = 0.0,
   });
 
   const AttendanceStats.empty()
@@ -159,7 +298,8 @@ class AttendanceStats extends Equatable {
       presentCount = 0,
       absentCount = 0,
       lateCount = 0,
-      excusedCount = 0;
+      excusedCount = 0,
+      averageWatchPercentage = 0.0;
 
   factory AttendanceStats.fromRecords(List<AttendanceEntity> records) {
     int present = 0;
@@ -208,5 +348,6 @@ class AttendanceStats extends Equatable {
     absentCount,
     lateCount,
     excusedCount,
+    averageWatchPercentage,
   ];
 }

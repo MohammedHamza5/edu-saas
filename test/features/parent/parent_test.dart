@@ -132,6 +132,16 @@ class FakeNotificationsRepository implements NotificationsRepository {
     required String body,
     String? groupId,
   }) async => const Success(null);
+
+  @override
+  Future<Result<void>> dispatchNotification({
+    required String title,
+    required String body,
+    required NotificationType type,
+    String? groupId,
+    String? userId,
+    Map<String, dynamic>? data,
+  }) async => const Success(null);
 }
 
 class FakeAuthRepository implements AuthRepository {

@@ -997,9 +997,7 @@
     "description": "Draft status"
   },
   "statusPublished": "Published",
-  "@statusPublished": {
-    "description": "Published status"
-  },
+  "@statusPublished": {},
   "uploadFileAction": "Select File to Upload",
   "@uploadFileAction": {
     "description": "Upload file button"
@@ -1404,10 +1402,8 @@
       }
     }
   },
-  "studentAttendanceTitle": "My Attendance Record",
-  "@studentAttendanceTitle": {
-    "description": "Student attendance title"
-  },
+  "studentAttendanceTitle": "Attendance & Commitment",
+  "@studentAttendanceTitle": {},
   "studentAttendanceHistory": "Recorded Sessions History",
   "@studentAttendanceHistory": {
     "description": "Student attendance history"
@@ -2542,6 +2538,111 @@
   "@createReport": {
     "description": "Button"
   },
+  "whatsappReportDialogTitle": "Parent WhatsApp Report",
+  "@whatsappReportDialogTitle": {
+    "description": "Dialog title"
+  },
+  "whatsappReportDialogSubtitle": "Review and send the progress report directly to the parent",
+  "@whatsappReportDialogSubtitle": {
+    "description": "Dialog subtitle"
+  },
+  "whatsappReportTypeLabel": "Report Type",
+  "@whatsappReportTypeLabel": {
+    "description": "Label"
+  },
+  "whatsappReportTypeComprehensive": "Comprehensive Progress Report",
+  "@whatsappReportTypeComprehensive": {
+    "description": "Report type option"
+  },
+  "whatsappReportTypeAbsence": "Absence Notice",
+  "@whatsappReportTypeAbsence": {
+    "description": "Report type option"
+  },
+  "whatsappReportTypeExam": "Latest Exam Result",
+  "@whatsappReportTypeExam": {
+    "description": "Report type option"
+  },
+  "whatsappTeacherNotesLabel": "Teacher's Recommendation / Notes",
+  "@whatsappTeacherNotesLabel": {
+    "description": "Label"
+  },
+  "whatsappTeacherNotesHint": "Write a note or choose a quick preset...",
+  "@whatsappTeacherNotesHint": {
+    "description": "Hint"
+  },
+  "whatsappPeriodWeekly": "Weekly Update ⚡",
+  "@whatsappPeriodWeekly": {
+    "description": "Weekly report tab"
+  },
+  "whatsappPeriodMonthly": "Monthly Summary 📊",
+  "@whatsappPeriodMonthly": {
+    "description": "Monthly report tab"
+  },
+  "whatsappPresetFriendlyKeepUp": "Great commitment and continuous improvement 🌟",
+  "@whatsappPresetFriendlyKeepUp": {
+    "description": "Friendly preset note"
+  },
+  "whatsappPresetFriendlyNeedsFocus": "Doing very well, just needs a bit more focus on drills 💪",
+  "@whatsappPresetFriendlyNeedsFocus": {
+    "description": "Friendly preset note"
+  },
+  "whatsappPresetFriendlyCatchUp": "Please encourage them to catch up on the remaining videos 🌸",
+  "@whatsappPresetFriendlyCatchUp": {
+    "description": "Friendly preset note"
+  },
+  "whatsappPresetExcellent": "🌟 The student shows outstanding commitment and solid academic progress.",
+  "@whatsappPresetExcellent": {
+    "description": "Quick preset note"
+  },
+  "whatsappPresetNeedsHomework": "⚠️ Please follow up with the student on completing assignments on schedule.",
+  "@whatsappPresetNeedsHomework": {
+    "description": "Quick preset note"
+  },
+  "whatsappPresetAbsentNotice": "📢 The student was absent from today's session. Please ensure they catch up with the recorded lecture.",
+  "@whatsappPresetAbsentNotice": {
+    "description": "Quick preset note"
+  },
+  "whatsappSendButton": "Send via WhatsApp",
+  "@whatsappSendButton": {
+    "description": "Button"
+  },
+  "whatsappCopyButton": "Copy Report",
+  "@whatsappCopyButton": {
+    "description": "Button"
+  },
+  "whatsappCopiedSuccess": "Report for {studentName} copied successfully! Ready for WhatsApp 📋",
+  "@whatsappCopiedSuccess": {
+    "description": "Success message",
+    "placeholders": {
+      "studentName": {
+        "type": "String"
+      }
+    }
+  },
+  "whatsappParentPhoneMissing": "Parent WhatsApp number is not registered for this student",
+  "@whatsappParentPhoneMissing": {
+    "description": "Warning message"
+  },
+  "whatsappOpenError": "Could not launch WhatsApp. The text has been copied to your clipboard instead.",
+  "@whatsappOpenError": {
+    "description": "Error fallback message"
+  },
+  "whatsappQuickActionTooltip": "Send WhatsApp Report to Parent",
+  "@whatsappQuickActionTooltip": {
+    "description": "Tooltip"
+  },
+  "whatsappTargetPhoneLabel": "Recipient Number",
+  "@whatsappTargetPhoneLabel": {
+    "description": "Label"
+  },
+  "whatsappTargetParent": "Parent",
+  "@whatsappTargetParent": {
+    "description": "Target option"
+  },
+  "whatsappTargetStudent": "Student",
+  "@whatsappTargetStudent": {
+    "description": "Target option"
+  },
   "statsOverviewTitle": "Performance Statistics",
   "@statsOverviewTitle": {
     "description": "Section header"
@@ -2616,9 +2717,7 @@
     "description": "Tooltip"
   },
   "filterAll": "All",
-  "@filterAll": {
-    "description": "Filter all chip"
-  },
+  "@filterAll": {},
   "newGroupButton": "New Group",
   "@newGroupButton": {
     "description": "FAB button"
@@ -2941,7 +3040,7 @@
   "@eventLogin": {
     "description": "Activity event type"
   },
-  "eventContentOpened": "Opened material or lesson",
+  "eventContentOpened": "Opened material or lecture",
   "@eventContentOpened": {
     "description": "Activity event type"
   },
@@ -3027,6 +3126,22 @@
   "notificationTypeImportantAnnouncement": "Important Announcement",
   "@notificationTypeImportantAnnouncement": {
     "description": "Notification type label"
+  },
+  "notificationGoToLecture": "Go to Lectures",
+  "@notificationGoToLecture": {
+    "description": "Button to open lectures from notification"
+  },
+  "notificationGoToExam": "Go to Exams",
+  "@notificationGoToExam": {
+    "description": "Button to open exams from notification"
+  },
+  "notificationGoToAssignment": "Go to Assignments",
+  "@notificationGoToAssignment": {
+    "description": "Button to open assignments from notification"
+  },
+  "notificationGoToAttendance": "Go to Attendance",
+  "@notificationGoToAttendance": {
+    "description": "Button to open attendance from notification"
   },
   "markAllAsRead": "Mark All as Read",
   "@markAllAsRead": {
@@ -3134,7 +3249,7 @@
   "@templateExamAlertTitle": {
     "description": "Template title"
   },
-  "templateExamAlertBody": "Please review all lessons and practice exercises in preparation for the upcoming exam. Best of luck!",
+  "templateExamAlertBody": "Please review all lectures and practice exercises in preparation for the upcoming exam. Best of luck!",
   "@templateExamAlertBody": {
     "description": "Template body"
   },
@@ -3510,7 +3625,7 @@
   "@actionTip": {
     "description": "Section header for actionable error tips"
   },
-  "watchLessonTitle": "Watch Educational Lesson",
+  "watchLessonTitle": "Watch Educational Lecture",
   "@watchLessonTitle": {
     "description": "Title in app bar for video lesson"
   },
@@ -3538,7 +3653,7 @@
   "@fullscreenAction": {
     "description": "Toggle fullscreen action"
   },
-  "lessonAcademicProgress": "Lesson Academic Progress",
+  "lessonAcademicProgress": "Lecture Academic Progress",
   "@lessonAcademicProgress": {
     "description": "Title for lesson academic stats"
   },
@@ -3591,11 +3706,11 @@
   "@milestoneAdvanced": {
     "description": "75% milestone"
   },
-  "milestoneCompletion": "Full Lesson Completion",
+  "milestoneCompletion": "Full Lecture Completion",
   "@milestoneCompletion": {
     "description": "100% milestone"
   },
-  "defaultLessonTitle": "Educational Lesson",
+  "defaultLessonTitle": "Educational Lecture",
   "@defaultLessonTitle": {
     "description": "Default title when video title is null"
   },
@@ -3603,7 +3718,7 @@
   "@protectedStreamCdnNotice": {
     "description": "Encrypted streaming notice"
   },
-  "lessonNotesAndTopics": "Lesson Notes & Topics:",
+  "lessonNotesAndTopics": "Lecture Notes & Topics:",
   "@lessonNotesAndTopics": {
     "description": "Header for lesson notes"
   },
@@ -3615,7 +3730,7 @@
   "@videoProcessingFailed": {
     "description": "Message when video processing fails"
   },
-  "videoLessonUntitled": "Untitled Video Lesson",
+  "videoLessonUntitled": "Untitled Video Lecture",
   "@videoLessonUntitled": {
     "description": "Placeholder for untitled video"
   },
@@ -3628,7 +3743,7 @@
       }
     }
   },
-  "videoLessonPlaceholder": "Video Lesson",
+  "videoLessonPlaceholder": "Video Lecture",
   "@videoLessonPlaceholder": {
     "description": "Placeholder badge on thumbnail"
   },
@@ -3649,11 +3764,11 @@
   "@videoUploadSuccessToast": {
     "description": "Toast on video upload success"
   },
-  "videoPendingUploadTitle": "Lesson Under Preparation",
+  "videoPendingUploadTitle": "Lecture Under Preparation",
   "@videoPendingUploadTitle": {
     "description": "Title when video is pending upload"
   },
-  "studentVideoPendingUploadDesc": "The teacher is currently preparing and uploading the video for this lesson. Please check back later.",
+  "studentVideoPendingUploadDesc": "The teacher is currently preparing and uploading the video for this lecture. Please check back later.",
   "@studentVideoPendingUploadDesc": {
     "description": "Description for students when video is pending upload"
   },
@@ -3661,7 +3776,7 @@
   "@teacherVideoNotUploadedTitle": {
     "description": "Title for teacher when video is not uploaded"
   },
-  "teacherVideoNotUploadedDesc": "Lesson created, but the video file has not been uploaded to the streaming server yet. You can upload it now so students can watch.",
+  "teacherVideoNotUploadedDesc": "Lecture created, but the video file has not been uploaded to the streaming server yet. You can upload it now so students can watch.",
   "@teacherVideoNotUploadedDesc": {
     "description": "Description for teacher when video is not uploaded"
   },
@@ -3673,11 +3788,11 @@
   "@backToContentAction": {
     "description": "Button to go back to content library/feed"
   },
-  "videoNotFoundMessage": "The requested educational lesson could not be found.",
+  "videoNotFoundMessage": "The requested educational lecture could not be found.",
   "@videoNotFoundMessage": {
     "description": "Error message when lesson video is not found"
   },
-  "uploadNewLessonVideo": "Upload New Lesson Video",
+  "uploadNewLessonVideo": "Upload New Lecture Video",
   "@uploadNewLessonVideo": {
     "description": "Title of video upload dialog"
   },
@@ -3701,7 +3816,7 @@
   "@changeFile": {
     "description": "Tooltip to change selected file"
   },
-  "lessonTitleLabel": "Lesson Title",
+  "lessonTitleLabel": "Lecture Title",
   "@lessonTitleLabel": {
     "description": "Form label for video title"
   },
@@ -3709,11 +3824,11 @@
   "@lessonTitleHint": {
     "description": "Form hint for video title"
   },
-  "lessonTitleRequired": "Please enter lesson title",
+  "lessonTitleRequired": "Please enter lecture title",
   "@lessonTitleRequired": {
     "description": "Validation error for video title"
   },
-  "lessonNotesLabel": "Lesson Topics & Notes (Optional)",
+  "lessonNotesLabel": "Lecture Topics & Notes (Optional)",
   "@lessonNotesLabel": {
     "description": "Form label for video description"
   },
@@ -3743,9 +3858,7 @@
     "description": "Player error message"
   },
   "retryAction": "Retry",
-  "@retryAction": {
-    "description": "Retry button label"
-  },
+  "@retryAction": {},
   "cancelAction": "Cancel",
   "@cancelAction": {
     "description": "Cancel button label"
@@ -3828,7 +3941,7 @@
       }
     }
   },
-  "noContentPublishedYet": "No educational materials published in this group yet.\nNotes and lessons will appear here once published by the teacher.",
+  "noContentPublishedYet": "No educational materials published in this group yet.\nNotes and lectures will appear here once published by the teacher.",
   "@noContentPublishedYet": {
     "description": "Empty state when no materials published"
   },
@@ -3862,9 +3975,7 @@
     "description": "Teacher content library title"
   },
   "refreshTooltip": "Refresh",
-  "@refreshTooltip": {
-    "description": "Refresh button tooltip"
-  },
+  "@refreshTooltip": {},
   "totalMaterials": "Total Materials",
   "@totalMaterials": {
     "description": "Stat card label"
@@ -5573,8 +5684,8 @@
     "description": "Warning not to close page during video upload"
   },
   "sequentialLearningSectionTitle": "Sequential Learning & Exams",
-  "associatedExamBadge": "Associated Exam (Lesson Quiz)",
-  "associatedExamLabel": "Associated Exam (Lesson Quiz)",
+  "associatedExamBadge": "Associated Exam (Lecture Quiz)",
+  "associatedExamLabel": "Associated Exam (Lecture Quiz)",
   "associatedExamTitleLabel": "Associated Exam: {title}",
   "@associatedExamTitleLabel": {
     "placeholders": {
@@ -5583,8 +5694,8 @@
       }
     }
   },
-  "associatedExamHint": "Select an exam for this lesson",
-  "prerequisiteExamLabel": "Prerequisite Exam (Lock Lesson)",
+  "associatedExamHint": "Select an exam for this lecture",
+  "prerequisiteExamLabel": "Prerequisite Exam (Lock Lecture)",
   "prerequisiteExamHint": "Select an exam that must be passed first",
   "noneOption": "None",
   "totalPointsSummary": "Total: {points} / {maxScore} pts",
@@ -5654,9 +5765,9 @@
       }
     }
   },
-  "restartLesson": "Restart Lesson",
+  "restartLesson": "Restart Lecture",
   "clickToSeek": "Click to Seek",
-  "lessonCompletedSuccess": "Lesson Completed!",
+  "lessonCompletedSuccess": "Lecture Completed!",
   "progressSavedAutomatically": "Progress saved automatically",
   "takeRequiredExamAction": "Take Required Exam",
   "attachedLessonMaterial": "Attached Material",
@@ -5679,7 +5790,7 @@
   "addVideoToBankAction": "Add Video to Bank",
   "unassignedBadge": "Unassigned",
   "assignToGroupsAction": "Assign to Groups",
-  "lessonPrerequisiteLocked": "Lesson Locked by Prerequisite",
+  "lessonPrerequisiteLocked": "Lecture Locked by Prerequisite",
   "mustPassExamToUnlock": "You must score at least {score}% on {title} to unlock this.",
   "@mustPassExamToUnlock": {
     "placeholders": {
@@ -5848,7 +5959,7 @@
   "noVideosInBankTitle": "No Videos Yet",
   "studentNavDashboardSubtitle": "Your progress & tasks",
   "studentNavNotificationsSubtitle": "Recent updates",
-  "studentNavContentSubtitle": "Videos & lessons",
+  "studentNavContentSubtitle": "Videos & lectures",
   "studentNavAssignmentsSubtitle": "Homework tasks",
   "studentNavExamsSubtitle": "Quizzes & results",
   "searchAssignmentsHint": "Search assignments...",
@@ -6018,10 +6129,10 @@
     }
   },
   "lessonHandoutChip": "Handout PDF",
-  "lessonQuizChip": "Lesson Quiz",
+  "lessonQuizChip": "Lecture Quiz",
   "lockedByPrereqTooltip": "Locked: Requires passing previous lecture quiz",
   "groupHandoutPdfLabel": "Handout PDF for this group",
-  "groupExamLabel": "Lesson Quiz for this group",
+  "groupExamLabel": "Lecture Quiz for this group",
   "noExamSelected": "No quiz (Optional)",
   "lockUntilPreviousQuizPassed": "Lock until previous quiz is passed",
   "sortOrderInGroup": "Sequence in Group",
@@ -6048,7 +6159,7 @@
   "noContentYet": "No content yet",
   "manualUnlockAction": "Manual Unlock",
   "manualUnlockTitle": "Manual Unlock",
-  "manualUnlockWarningText1": "You are about to unlock the lesson ",
+  "manualUnlockWarningText1": "You are about to unlock the lecture ",
   "manualUnlockWarningText2": " for the student ",
   "manualUnlockWarningText3": " as an exception without requiring the previous exam. This action will be recorded.",
   "manualUnlockReasonLabel": "Reason (Optional)",
@@ -6056,11 +6167,11 @@
   "manualUnlockConfirm": "Confirm Unlock",
   "courseSettingsTitle": "Course Settings",
   "enforceSequentialLearning": "Enforce Sequential Learning",
-  "enforceSequentialLearningDesc": "Students must pass quizzes to unlock next lessons",
+  "enforceSequentialLearningDesc": "Students must pass quizzes to unlock next lectures",
   "defaultPassingScore": "Default Passing Score (%)",
   "passingScoreOverride": "Passing Score Override (%)",
   "passingScoreDefaultHint": "Course Default",
-  "lessonQuizSequentialRequirement": "This Lesson Quiz will be required for students to unlock the next lesson (if Sequential Learning is enabled).",
+  "lessonQuizSequentialRequirement": "This Lecture Quiz will be required for students to unlock the next lecture (if Sequential Learning is enabled).",
   "videoLibraryTitle": "Video Library",
   "videoLibrarySubtitle": "Create videos once and reuse them across multiple courses.",
   "addVideo": "Add Video",
@@ -6080,7 +6191,7 @@
   "addToCourseAfterSave": "Add to Course",
   "selectCourse": "Select Course",
   "selectCourseSubtitle": "Choose which course to add this video to:",
-  "nCoursesNLessons": "{lessons} Lessons · {students} Students",
+  "nCoursesNLessons": "{lectures} Lectures · {students} Students",
   "@nCoursesNLessons": {
     "placeholders": {
       "lessons": {
@@ -6091,21 +6202,21 @@
       }
     }
   },
-  "addLesson": "Add Lesson",
-  "addLessonTitle": "Add Lesson",
-  "addLessonSubtitle": "How would you like to add this lesson?",
+  "addLesson": "Add Lecture",
+  "addLessonTitle": "Add Lecture",
+  "addLessonSubtitle": "How would you like to add this lecture?",
   "useExistingVideo": "Use Existing Video",
   "useExistingVideoSubtitle": "Choose a video from your library",
   "addNewVideoToLesson": "Add New Video",
   "addNewVideoToLessonSubtitle": "Create a new video for this course",
-  "lessonSetupTitle": "Lesson Setup",
+  "lessonSetupTitle": "Lecture Setup",
   "studyMaterial": "Study Material",
   "uploadPdf": "Upload PDF",
   "replacePdf": "Replace",
   "removePdf": "Remove",
-  "lessonQuizLabel": "Lesson Quiz",
-  "lessonQuizHint": "Select Lesson Quiz",
-  "createLessonQuiz": "+ Create Lesson Quiz",
+  "lessonQuizLabel": "Lecture Quiz",
+  "lessonQuizHint": "Select Lecture Quiz",
+  "createLessonQuiz": "+ Create Lecture Quiz",
   "useCourseDefault": "Use course default — {score}%",
   "@useCourseDefault": {
     "placeholders": {
@@ -6115,7 +6226,7 @@
     }
   },
   "customPassingScore": "Custom",
-  "lessonAddedToCourse": "Lesson added to {course}.",
+  "lessonAddedToCourse": "Lecture added to {course}.",
   "@lessonAddedToCourse": {
     "placeholders": {
       "course": {
@@ -6123,19 +6234,19 @@
       }
     }
   },
-  "lessonUpdatedSuccess": "Lesson updated successfully.",
-  "manageLessons": "Manage Lessons",
+  "lessonUpdatedSuccess": "Lecture updated successfully.",
+  "manageLessons": "Manage Lectures",
   "courseBuilderTitle": "Course Builder",
   "sequentialLearningLabel": "Sequential Learning",
-  "sequentialLearningDescription": "Students must complete each lesson's video and pass the lesson quiz before the next lesson becomes available.",
-  "defaultLessonPassingScore": "Default Lesson Quiz Passing Score",
+  "sequentialLearningDescription": "Students must complete each lecture's video and pass the lecture quiz before the next lecture becomes available.",
+  "defaultLessonPassingScore": "Default Lecture Quiz Passing Score",
   "learningProgression": "Learning Progression",
-  "noLessonsYet": "No lessons yet",
-  "noLessonsYetSubtitle": "Start building your course by adding a video lesson.",
-  "addFirstLesson": "Add First Lesson",
+  "noLessonsYet": "No lectures yet",
+  "noLessonsYetSubtitle": "Start building your course by adding a video lecture.",
+  "addFirstLesson": "Add First Lecture",
   "videoPickerTitle": "Select Video",
   "videoPickerSearchHint": "Search videos...",
-  "lessonNumber": "Lesson {n}",
+  "lessonNumber": "Lecture {n}",
   "@lessonNumber": {
     "placeholders": {
       "n": {
@@ -6144,10 +6255,10 @@
     }
   },
   "hasStudyMaterial": "Study Material",
-  "hasLessonQuiz": "Lesson Quiz",
+  "hasLessonQuiz": "Lecture Quiz",
   "lessonEditorCreateQuiz": "Create New Quiz",
-  "editLesson": "Edit Lesson",
-  "deleteLesson": "Delete Lesson",
+  "editLesson": "Edit Lecture",
+  "deleteLesson": "Delete Lecture",
   "moveUp": "Move up",
   "moveDown": "Move down",
   "dragToReorder": "Drag to reorder",
@@ -6155,15 +6266,15 @@
   "showInspector": "Show Editor Panel",
   "hideInspector": "Hide Editor Panel",
   "courseSummary": "Course Summary",
-  "selectLessonToEdit": "Select a lesson to edit details or add a new one",
-  "lessonAnalytics": "Lesson Analytics",
+  "selectLessonToEdit": "Select a lecture to edit details or add a new one",
+  "lessonAnalytics": "Lecture Analytics",
   "backToCourse": "Back to Course",
   "activeEditing": "Currently Editing",
-  "lessonDetails": "Lesson Details",
-  "lessonVideo": "Lesson Video",
+  "lessonDetails": "Lecture Details",
+  "lessonVideo": "Lecture Video",
   "lessonHandouts": "Handouts & Materials",
   "lessonQuizSettings": "Quiz & Passing Score",
-  "nLessonsCount": "{count, plural, one{1 Lesson} other{{count} Lessons}}",
+  "nLessonsCount": "{count, plural, one{1 Lecture} other{{count} Lectures}}",
   "@nLessonsCount": {
     "placeholders": {
       "count": {
@@ -6180,8 +6291,8 @@
     }
   },
   "duplicateVideoInCourse": "This video is already part of this course.",
-  "couldNotAddLesson": "We couldn't add this lesson. Please try again.",
-  "couldNotUpdateLesson": "We couldn't update this lesson. Please try again.",
+  "couldNotAddLesson": "We couldn't add this lecture. Please try again.",
+  "couldNotUpdateLesson": "We couldn't update this lecture. Please try again.",
   "noCoursesAvailable": "No courses available.",
   "noCoursesAvailableSubtitle": "Create a course first, then add videos to it.",
   "videoNotAvailable": "Video not available",
@@ -6204,15 +6315,15 @@
   "noEnrolledCoursesTitle": "No courses yet",
   "noEnrolledCoursesSubtitle": "Your courses will appear here once you are enrolled.",
   "courseBeingPreparedTitle": "This course is being prepared.",
-  "courseBeingPreparedSubtitle": "Your lessons will appear here soon.",
+  "courseBeingPreparedSubtitle": "Your lectures will appear here soon.",
   "startCourseAction": "Start Course",
-  "continueLessonAction": "Continue Lesson",
-  "takeLessonQuizAction": "Start Lesson Quiz",
-  "retryLessonQuizAction": "Retry Lesson Quiz",
+  "continueLessonAction": "Continue Lecture",
+  "takeLessonQuizAction": "Start Lecture Quiz",
+  "retryLessonQuizAction": "Retry Lecture Quiz",
   "reviewCourseAction": "Review Course",
-  "reviewLessonAction": "Review Lesson",
-  "continueToNextLessonAction": "Continue to Next Lesson",
-  "completeLessonToUnlock": "Complete Lesson {n} to unlock this lesson.",
+  "reviewLessonAction": "Review Lecture",
+  "continueToNextLessonAction": "Continue to Next Lecture",
+  "completeLessonToUnlock": "Complete Lecture {n} to unlock this lecture.",
   "@completeLessonToUnlock": {
     "placeholders": {
       "n": {
@@ -6221,13 +6332,13 @@
     }
   },
   "availableStatus": "Available",
-  "lessonQuizReadyTitle": "Your lesson quiz is ready.",
-  "lessonQuizReadyDesc": "Test your understanding of this lesson to unlock the next one.",
+  "lessonQuizReadyTitle": "Your lecture quiz is ready.",
+  "lessonQuizReadyDesc": "Test your understanding of this lecture to unlock the next one.",
   "quizNotPassedTitle": "Quiz not passed",
-  "quizNotPassedDesc": "You can review the lesson and try again.",
-  "lessonCompletedCongrats": "Lesson completed!",
-  "passedQuizNotice": "You passed the lesson quiz.",
-  "nextLessonLabel": "Next lesson: {title}",
+  "quizNotPassedDesc": "You can review the lecture and try again.",
+  "lessonCompletedCongrats": "Lecture completed!",
+  "passedQuizNotice": "You passed the lecture quiz.",
+  "nextLessonLabel": "Next lecture: {title}",
   "@nextLessonLabel": {
     "placeholders": {
       "title": {
@@ -6235,9 +6346,9 @@
       }
     }
   },
-  "previousLessonAction": "Previous Lesson",
-  "nextLessonAction": "Next Lesson",
-  "lessonXofY": "Lesson {current} of {total}",
+  "previousLessonAction": "Previous Lecture",
+  "nextLessonAction": "Next Lecture",
+  "lessonXofY": "Lecture {current} of {total}",
   "@lessonXofY": {
     "placeholders": {
       "current": {
@@ -6248,16 +6359,16 @@
       }
     }
   },
-  "lessonMaterialTitle": "Lesson Material",
+  "lessonMaterialTitle": "Lecture Material",
   "openPdfAction": "Open PDF",
-  "completeVideoToUnlockQuiz": "Complete the video to unlock the lesson quiz.",
+  "completeVideoToUnlockQuiz": "Complete the video to unlock the lecture quiz.",
   "videoCompletedTitle": "Video completed",
   "courseAssessmentsTitle": "Course Assessments",
-  "lessonQuizzesSectionTitle": "Lesson Quizzes",
-  "lessonQuizzesSectionDesc": "Completed as part of your lesson progression.",
+  "lessonQuizzesSectionTitle": "Lecture Quizzes",
+  "lessonQuizzesSectionDesc": "Completed as part of your lecture progression.",
   "generalExamsSectionTitle": "General Exams",
   "generalExamsSectionDesc": "Additional course-wide assessments.",
-  "lessonsCompletedRatio": "{completed} of {total} lessons completed",
+  "lessonsCompletedRatio": "{completed} of {total} lectures completed",
   "@lessonsCompletedRatio": {
     "placeholders": {
       "completed": {
@@ -6276,13 +6387,13 @@
       }
     }
   },
-  "viewLessonsAction": "View Lessons",
-  "courseLessonsTitle": "Course Lessons",
-  "addLessonButton": "Add Lesson",
-  "courseBuilderEmptyTitle": "No Lessons Yet",
-  "courseBuilderEmptySubtitle": "Start building your course by adding a lesson.",
+  "viewLessonsAction": "View Lectures",
+  "courseLessonsTitle": "Course Lectures",
+  "addLessonButton": "Add Lecture",
+  "courseBuilderEmptyTitle": "No Lectures Yet",
+  "courseBuilderEmptySubtitle": "Start building your course by adding a lecture.",
   "sequentialLearning": "Sequential Learning",
-  "sequentialLearningDesc": "Students must complete each lesson's video and pass the lesson quiz before the next lesson unlocks.",
+  "sequentialLearningDesc": "Students must complete each lecture's video and pass the lecture quiz before the next lecture unlocks.",
   "lessonEditorErrorSelectVideo": "Please select a video first.",
   "@lessonEditorErrorSelectVideo": {
     "description": "Error when no video selected"
@@ -6291,11 +6402,11 @@
   "@lessonEditorErrorSaving": {
     "description": "Error saving lesson"
   },
-  "lessonEditorEditTitle": "Edit Lesson",
+  "lessonEditorEditTitle": "Edit Lecture",
   "@lessonEditorEditTitle": {
     "description": "Edit lesson dialog title"
   },
-  "lessonEditorAddTitle": "Add New Lesson",
+  "lessonEditorAddTitle": "Add New Lecture",
   "@lessonEditorAddTitle": {
     "description": "Add new lesson dialog title"
   },
@@ -6315,11 +6426,11 @@
   "@lessonEditorUploadNew": {
     "description": "Button to upload new video"
   },
-  "lessonEditorLessonTitle": "Lesson Title (Optional Override)",
+  "lessonEditorLessonTitle": "Lecture Title (Optional Override)",
   "@lessonEditorLessonTitle": {
     "description": "Lesson title field label"
   },
-  "lessonEditorLessonTitleHint": "Enter lesson title",
+  "lessonEditorLessonTitleHint": "Enter lecture title",
   "@lessonEditorLessonTitleHint": {
     "description": "Hint for lesson title field"
   },
@@ -6331,7 +6442,7 @@
   "@lessonEditorUploadPdf": {
     "description": "Upload PDF button"
   },
-  "lessonEditorLessonQuiz": "Lesson Quiz",
+  "lessonEditorLessonQuiz": "Lecture Quiz",
   "@lessonEditorLessonQuiz": {
     "description": "Lesson quiz section title"
   },
@@ -6365,7 +6476,7 @@
   "@totalViews": {
     "description": "Total views for a lesson"
   },
-  "completedLesson": "Completed Lesson",
+  "completedLesson": "Completed Lecture",
   "@completedLesson": {
     "description": "Number of students who completed the lesson"
   },
@@ -6373,7 +6484,7 @@
   "@averageQuizScore": {
     "description": "Average quiz score for the lesson"
   },
-  "studentLessonProgressStats": "Student Lesson Progress",
+  "studentLessonProgressStats": "Student Lecture Progress",
   "@studentLessonProgressStats": {
     "description": "Title for student lesson progress card"
   },
@@ -6398,7 +6509,7 @@
   "@analyticsAvailableAfterPublish": {
     "description": "Message when analytics are not yet available"
   },
-  "editLessonTitle": "Edit Lesson",
+  "editLessonTitle": "Edit Lecture",
   "@editLessonTitle": {
     "description": "Title for editing a lesson"
   },
@@ -6502,18 +6613,16 @@
   "@mergeWithNextAction": {},
   "splitQuestionAction": "Split Question",
   "@splitQuestionAction": {},
-  "duplicateClusterTitle": "Duplicate Cluster",
+  "duplicateClusterTitle": "Duplicate",
   "@duplicateClusterTitle": {},
   "restoreRevisionAction": "Restore Revision",
   "@restoreRevisionAction": {},
-  "secondReviewRequiredBadge": "Second Review Required",
+  "secondReviewRequiredBadge": "2nd Review Req",
   "@secondReviewRequiredBadge": {},
   "priorityScoreLabel": "Priority Score",
   "@priorityScoreLabel": {},
-  "uploadExamFile": "Upload Exam File (PDF)",
-  "@uploadExamFile": {
-    "description": "Button to upload exam PDF file in question bank"
-  },
+  "uploadExamFile": "Upload Exam File",
+  "@uploadExamFile": {},
   "primaryExamFile": "Exam Questions File (PDF)",
   "@primaryExamFile": {
     "description": "Label for primary exam PDF file"
@@ -6551,9 +6660,9 @@
   "@statQuarantined": {},
   "reviewAndAuditAction": "Review & Audit",
   "@reviewAndAuditAction": {},
-  "satDomainTag": "SAT â€¢ EST â€¢ ACT",
+  "satDomainTag": "SAT/EST",
   "@satDomainTag": {},
-  "priorityScoreBadge": "Priority: {score}",
+  "priorityScoreBadge": "Score: {score}",
   "@priorityScoreBadge": {
     "placeholders": {
       "score": {
@@ -6847,55 +6956,55 @@
   "@lessonVisibilityDraft": {
     "description": "Visibility status draft"
   },
-  "hideLessonTooltip": "Hide lesson from students",
+  "hideLessonTooltip": "Hide lecture from students",
   "@hideLessonTooltip": {
     "description": "Tooltip to hide lesson"
   },
-  "publishLessonTooltip": "Publish lesson to students",
+  "publishLessonTooltip": "Publish lecture to students",
   "@publishLessonTooltip": {
     "description": "Tooltip to publish lesson"
   },
-  "lessonStatusLabel": "Lesson Publishing Status",
+  "lessonStatusLabel": "Lecture Publishing Status",
   "@lessonStatusLabel": {
     "description": "Label for lesson publishing status"
   },
-  "lessonStatusPublishedDesc": "The lesson is live and visible to enrolled students in this group.",
+  "lessonStatusPublishedDesc": "The lecture is live and visible to enrolled students in this group.",
   "@lessonStatusPublishedDesc": {
     "description": "Description when lesson is published"
   },
-  "lessonStatusDraftDesc": "The lesson is private and visible only to the teacher for drafting.",
+  "lessonStatusDraftDesc": "The lecture is private and visible only to the teacher for drafting.",
   "@lessonStatusDraftDesc": {
     "description": "Description when lesson is draft"
   },
-  "lessonVisibilityUpdatedToast": "Lesson visibility updated successfully.",
+  "lessonVisibilityUpdatedToast": "Lecture visibility updated successfully.",
   "@lessonVisibilityUpdatedToast": {
     "description": "Toast message when single lesson visibility is toggled"
   },
-  "publishAllLessonsConfirmTitle": "Publish All Lessons?",
+  "publishAllLessonsConfirmTitle": "Publish All Lectures?",
   "@publishAllLessonsConfirmTitle": {
     "description": "Dialog title to publish all lessons"
   },
-  "hideAllLessonsConfirmTitle": "Hide All Lessons?",
+  "hideAllLessonsConfirmTitle": "Hide All Lectures?",
   "@hideAllLessonsConfirmTitle": {
     "description": "Dialog title to hide all lessons"
   },
-  "publishAllLessonsConfirmMessage": "Are you sure you want to publish all lessons in this course? Students will be able to access them.",
+  "publishAllLessonsConfirmMessage": "Are you sure you want to publish all lectures in this course? Students will be able to access them.",
   "@publishAllLessonsConfirmMessage": {
     "description": "Dialog body when publishing all lessons"
   },
-  "hideAllLessonsConfirmMessage": "Are you sure you want to hide all lessons in this course? They will become drafts.",
+  "hideAllLessonsConfirmMessage": "Are you sure you want to hide all lectures in this course? They will become drafts.",
   "@hideAllLessonsConfirmMessage": {
     "description": "Dialog body when hiding all lessons"
   },
-  "publishAllLessonsAction": "Publish All Lessons",
+  "publishAllLessonsAction": "Publish All Lectures",
   "@publishAllLessonsAction": {
     "description": "Button text to publish all lessons"
   },
-  "hideAllLessonsAction": "Hide All Lessons",
+  "hideAllLessonsAction": "Hide All Lectures",
   "@hideAllLessonsAction": {
     "description": "Button text to hide all lessons"
   },
-  "allLessonsVisibilityUpdatedToast": "All lessons visibility updated successfully.",
+  "allLessonsVisibilityUpdatedToast": "All lectures visibility updated successfully.",
   "@allLessonsVisibilityUpdatedToast": {
     "description": "Toast when bulk visibility is toggled"
   },
@@ -6905,15 +7014,15 @@
   "@zoomAsset": {},
   "deleteQuestionTitle": "Delete Question",
   "@deleteQuestionTitle": {},
-  "deleteQuestionConfirm": "Are you sure you want to delete question {sourceLabel}?",
+  "deleteQuestionConfirm": "Are you sure you want to delete question \\\"{qLabel}\\\"? This action cannot be undone.",
   "@deleteQuestionConfirm": {
     "placeholders": {
-      "sourceLabel": {
+      "qLabel": {
         "type": "String"
       }
     }
   },
-  "pageCountBadge": "{count, plural, =1{1 Page} other{{count} Pages}}",
+  "pageCountBadge": "{count} Pages",
   "@pageCountBadge": {
     "placeholders": {
       "count": {
@@ -6921,33 +7030,33 @@
       }
     }
   },
-  "noQuestionsInDocumentTitle": "No Extracted Questions",
+  "noQuestionsInDocumentTitle": "No Questions Extracted",
   "@noQuestionsInDocumentTitle": {},
-  "noQuestionsInDocumentSubtitle": "No questions have been extracted from this document yet.",
+  "noQuestionsInDocumentSubtitle": "We couldn't extract any questions from this document.",
   "@noQuestionsInDocumentSubtitle": {},
   "deleteDocumentTitle": "Delete Document",
   "@deleteDocumentTitle": {},
-  "deleteDocumentConfirm": "Are you sure you want to delete document \"{filename}\" and all its questions?",
+  "deleteDocumentConfirm": "Are you sure you want to delete the document \\\"{docName}\\\"? All associated questions and revisions will be permanently deleted.",
   "@deleteDocumentConfirm": {
     "placeholders": {
-      "filename": {
+      "docName": {
         "type": "String"
       }
     }
   },
-  "emptyDocumentsTitle": "No Documents Uploaded",
+  "emptyDocumentsTitle": "No Documents Found",
   "@emptyDocumentsTitle": {},
-  "emptyDocumentsSubtitle": "Upload PDF files to start extracting and reviewing question bank.",
+  "emptyDocumentsSubtitle": "Upload a PDF or Word document to start extracting questions automatically.",
   "@emptyDocumentsSubtitle": {},
   "statTotalDocuments": "Total Documents",
   "@statTotalDocuments": {},
-  "statDocumentsDone": "Completed",
+  "statDocumentsDone": "Done",
   "@statDocumentsDone": {},
   "statDocumentsPending": "Pending",
   "@statDocumentsPending": {},
   "statDocumentsFailed": "Failed",
   "@statDocumentsFailed": {},
-  "questionCountBadge": "{count, plural, =1{1 Question} other{{count} Questions}}",
+  "questionCountBadge": "{count} Questions",
   "@questionCountBadge": {
     "placeholders": {
       "count": {
@@ -6965,92 +7074,6 @@
   "@statusProcessing": {},
   "statusPending": "Pending",
   "@statusPending": {},
-  "deleteDocumentTitle": "Delete Document",
-  "@deleteDocumentTitle": {},
-  "deleteDocumentConfirm": "Are you sure you want to delete the document \\\"{docName}\\\"? All associated questions and revisions will be permanently deleted.",
-  "@deleteDocumentConfirm": {
-    "placeholders": {
-      "docName": {
-        "type": "String"
-      }
-    }
-  },
-  "emptyDocumentsTitle": "No Documents Found",
-  "@emptyDocumentsTitle": {},
-  "emptyDocumentsSubtitle": "Upload a PDF or Word document to start extracting questions automatically.",
-  "@emptyDocumentsSubtitle": {},
-  "uploadExamFile": "Upload Exam File",
-  "@uploadExamFile": {},
-  "statTotalDocuments": "Total Documents",
-  "@statTotalDocuments": {},
-  "statTotalQuestions": "Total Questions",
-  "@statTotalQuestions": {},
-  "statDocumentsDone": "Done",
-  "@statDocumentsDone": {},
-  "statDocumentsPending": "Pending",
-  "@statDocumentsPending": {},
-  "statDocumentsFailed": "Failed",
-  "@statDocumentsFailed": {},
-  "questionCountBadge": "{count} Questions",
-  "@questionCountBadge": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "pageCountBadge": "{count} Pages",
-  "@pageCountBadge": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "retryAction": "Retry",
-  "@retryAction": {},
-  "viewQuestionsAction": "View Questions",
-  "@viewQuestionsAction": {},
-  "satDomainTag": "SAT/EST",
-  "@satDomainTag": {},
-  "refreshTooltip": "Refresh",
-  "@refreshTooltip": {},
-  "deleteQuestionTitle": "Delete Question",
-  "@deleteQuestionTitle": {},
-  "deleteQuestionConfirm": "Are you sure you want to delete question \\\"{qLabel}\\\"? This action cannot be undone.",
-  "@deleteQuestionConfirm": {
-    "placeholders": {
-      "qLabel": {
-        "type": "String"
-      }
-    }
-  },
-  "noQuestionsInDocumentTitle": "No Questions Extracted",
-  "@noQuestionsInDocumentTitle": {},
-  "noQuestionsInDocumentSubtitle": "We couldn't extract any questions from this document.",
-  "@noQuestionsInDocumentSubtitle": {},
-  "filterAll": "All",
-  "@filterAll": {},
-  "statusQuarantined": "Quarantined",
-  "@statusQuarantined": {},
-  "priorityScoreBadge": "Score: {score}",
-  "@priorityScoreBadge": {
-    "placeholders": {
-      "score": {
-        "type": "String"
-      }
-    }
-  },
-  "secondReviewRequiredBadge": "2nd Review Req",
-  "@secondReviewRequiredBadge": {},
-  "duplicateClusterTitle": "Duplicate",
-  "@duplicateClusterTitle": {},
-  "reviewAndAuditAction": "Review & Audit",
-  "@reviewAndAuditAction": {},
-  "statusPublished": "Published",
-  "@statusPublished": {},
-  "statusExtracted": "Extracted",
-  "@statusExtracted": {},
   "centralQuestionBankTitle": "Central Question Bank",
   "@centralQuestionBankTitle": {},
   "centralQuestionBankDesc": "AI exam question extraction, tagging, and LaTeX math verification",
@@ -7059,8 +7082,6 @@
   "@videoLibraryCardTitle": {},
   "videoLibraryCardDesc": "Manage cloud video assets and protected encrypted HLS streaming",
   "@videoLibraryCardDesc": {},
-  "studentAttendanceTitle": "Attendance & Commitment",
-  "@studentAttendanceTitle": {},
   "selectCourseTitle": "Select Course",
   "@selectCourseTitle": {},
   "selectCoursePrompt": "You are enrolled in multiple groups. Choose a course to continue:",
@@ -7157,7 +7178,7 @@
   "@gatekeeperQuizTitle": {},
   "gatekeeperQuizSubtitle": "Students must pass this quiz to unlock the next lecture in sequential order.",
   "@gatekeeperQuizSubtitle": {},
-  "createInstantQuizAction": "Create Quiz for this Lesson",
+  "createInstantQuizAction": "Create Quiz for this Lecture",
   "@createInstantQuizAction": {},
   "selectExistingQuizAction": "Select from Existing Quizzes",
   "@selectExistingQuizAction": {},
@@ -7204,5 +7225,48 @@
   "groupDeletedSuccess": "Group deleted successfully.",
   "@groupDeletedSuccess": {},
   "deleteLessonSmartNote": "Handout files and student progress records will be removed to free storage, while attached exams remain preserved in your exam bank.",
-  "@deleteLessonSmartNote": {}
+  "@deleteLessonSmartNote": {},
+  "allLecturesOverview": "All Group Lectures (Overview)",
+  "@allLecturesOverview": {},
+  "lectureSelectionLabel": "Select Lecture:",
+  "@lectureSelectionLabel": {},
+  "syncAttendanceAction": "Sync Attendance from Videos",
+  "@syncAttendanceAction": {},
+  "saveAttendanceSheet": "Save Attendance Sheet",
+  "@saveAttendanceSheet": {},
+  "fastSkippingDetected": "Fast Skipping Detected",
+  "@fastSkippingDetected": {},
+  "sendLectureWhatsAppNotice": "Send WhatsApp Watch Notice",
+  "@sendLectureWhatsAppNotice": {},
+  "completedLecturesRatio": "Completed {completed} of {total} lectures",
+  "@completedLecturesRatio": {
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "lastWatchedTime": "Last watched: {time}",
+  "@lastWatchedTime": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "noLecturesInGroup": "No video lectures published in this group yet",
+  "@noLecturesInGroup": {},
+  "attendanceStatusPresent": "Present",
+  "@attendanceStatusPresent": {},
+  "attendanceStatusLate": "Late",
+  "@attendanceStatusLate": {},
+  "attendanceStatusAbsent": "Absent",
+  "@attendanceStatusAbsent": {},
+  "attendanceStatusExcused": "Excused",
+  "@attendanceStatusExcused": {},
+  "syncAttendanceSuccessMessage": "Attendance statuses synced with video watch coverage",
+  "@syncAttendanceSuccessMessage": {}
 }

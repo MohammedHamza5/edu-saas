@@ -236,32 +236,49 @@ class StudentDashboardRemoteDataSourceImpl
         final videoPercentage =
             (data['video_avg_percentage'] as num?)?.toDouble() ?? 0.0;
 
-        // Continue learning video from video_insights
+        // Continue learning video from continue_learning_item or video_insights
         ContinueLearningItem? continueItem;
-        final insights = data['video_insights'] as List<dynamic>?;
-        if (insights != null && insights.isNotEmpty) {
-          for (final vi in insights) {
-            if (vi is Map<String, dynamic>) {
-              final completed = vi['completed'] == true;
-              final progressSec =
-                  (vi['progress_seconds'] as num?)?.toInt() ?? 0;
-              if (!completed && progressSec > 0) {
-                final videoId = (vi['video_id'] as String?) ?? '';
-                final title = (vi['video_title'] as String?) ?? 'Video Lesson';
-                final durationSec =
-                    (vi['duration_seconds'] as num?)?.toInt() ?? 0;
-                final pct = (vi['percentage'] as num?)?.toDouble() ?? 0.0;
+        final cli = data['continue_learning_item'];
+        if (cli is Map<String, dynamic>) {
+          continueItem = ContinueLearningItem(
+            videoId: (cli['video_id'] as String?) ?? '',
+            contentId: (cli['content_id'] as String?) ??
+                (cli['video_id'] as String? ?? ''),
+            title: (cli['title'] as String?) ?? 'Video Lesson',
+            groupName: (cli['group_name'] as String?) ?? groupName,
+            groupId: cli['group_id'] as String?,
+            progressSeconds: (cli['progress_seconds'] as num?)?.toInt() ?? 0,
+            durationSeconds: (cli['duration_seconds'] as num?)?.toInt() ?? 0,
+            percentage: (cli['percentage'] as num?)?.toDouble() ?? 0.0,
+          );
+        } else {
+          final insights = data['video_insights'] as List<dynamic>?;
+          if (insights != null && insights.isNotEmpty) {
+            for (final vi in insights) {
+              if (vi is Map<String, dynamic>) {
+                final completed = vi['completed'] == true;
+                final progressSec =
+                    (vi['progress_seconds'] as num?)?.toInt() ?? 0;
+                if (!completed && progressSec > 0) {
+                  final videoId = (vi['video_id'] as String?) ?? '';
+                  final contentId = (vi['content_id'] as String?) ?? videoId;
+                  final title =
+                      (vi['video_title'] as String?) ?? 'Video Lesson';
+                  final durationSec =
+                      (vi['duration_seconds'] as num?)?.toInt() ?? 0;
+                  final pct = (vi['percentage'] as num?)?.toDouble() ?? 0.0;
 
-                continueItem = ContinueLearningItem(
-                  videoId: videoId,
-                  contentId: videoId,
-                  title: title,
-                  groupName: groupName,
-                  progressSeconds: progressSec,
-                  durationSeconds: durationSec,
-                  percentage: pct,
-                );
-                break;
+                  continueItem = ContinueLearningItem(
+                    videoId: videoId,
+                    contentId: contentId,
+                    title: title,
+                    groupName: groupName,
+                    progressSeconds: progressSec,
+                    durationSeconds: durationSec,
+                    percentage: pct,
+                  );
+                  break;
+                }
               }
             }
           }
@@ -330,9 +347,10 @@ class StudentDashboardRemoteDataSourceImpl
             duration,
             content (
               id,
+              group_id,
               title,
               status,
-              groups (name)
+              groups (id, name)
             )
           )
         ''')
@@ -415,8 +433,14 @@ class StudentDashboardRemoteDataSourceImpl
           final contentId = (contentMap['id'] as String?) ?? '';
           final groupsMap = contentMap['groups'];
           String itemGroupName = groupName;
-          if (groupsMap is Map<String, dynamic> && groupsMap['name'] != null) {
-            itemGroupName = groupsMap['name'] as String;
+          String? itemGroupId = contentMap['group_id'] as String?;
+          if (groupsMap is Map<String, dynamic>) {
+            if (groupsMap['name'] != null) {
+              itemGroupName = groupsMap['name'] as String;
+            }
+            if (itemGroupId == null && groupsMap['id'] != null) {
+              itemGroupId = groupsMap['id'] as String;
+            }
           }
           final progressSec =
               (videoProgressResponse['progress_seconds'] as num?)?.toInt() ?? 0;
@@ -432,6 +456,7 @@ class StudentDashboardRemoteDataSourceImpl
             contentId: contentId,
             title: title,
             groupName: itemGroupName,
+            groupId: itemGroupId,
             progressSeconds: progressSec,
             durationSeconds: durationSec,
             percentage: pct,

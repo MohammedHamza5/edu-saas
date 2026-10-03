@@ -6,6 +6,7 @@ class ContinueLearningItem extends Equatable {
   final String contentId;
   final String title;
   final String groupName;
+  final String? groupId;
   final int progressSeconds;
   final int durationSeconds;
   final double percentage;
@@ -15,6 +16,7 @@ class ContinueLearningItem extends Equatable {
     required this.contentId,
     required this.title,
     required this.groupName,
+    this.groupId,
     required this.progressSeconds,
     required this.durationSeconds,
     required this.percentage,
@@ -26,6 +28,7 @@ class ContinueLearningItem extends Equatable {
     contentId,
     title,
     groupName,
+    groupId,
     progressSeconds,
     durationSeconds,
     percentage,

@@ -8,6 +8,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/responsive_breakpoints.dart';
 import '../../../../core/utils/app_feedback.dart';
+import '../../../../core/utils/whatsapp_report_generator.dart';
 import '../../../../core/widgets/app_badge.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_empty_view.dart';
@@ -373,6 +374,23 @@ class _StudentsListPageState extends State<StudentsListPage> {
                                 )
                               : null,
                           onDelete: () => _confirmDeleteStudent(context, student),
+                          onWhatsApp: (student.parentPhone?.isNotEmpty == true ||
+                                  student.phone?.isNotEmpty == true)
+                              ? () {
+                                  final report =
+                                      WhatsAppReportGenerator.generateStudentWeeklyReport(
+                                    studentName: student.fullName,
+                                    attendanceRate: 1.0,
+                                  );
+                                  WhatsAppReportGenerator.showReportPreviewDialog(
+                                    context,
+                                    studentName: student.fullName,
+                                    reportText: report,
+                                    phone: student.parentPhone,
+                                    alternatePhone: student.phone,
+                                  );
+                                }
+                              : null,
                         );
                       },
                     );
@@ -472,6 +490,7 @@ class _StudentCard extends StatelessWidget {
   final VoidCallback? onSuspend;
   final VoidCallback? onActivate;
   final VoidCallback? onDelete;
+  final VoidCallback? onWhatsApp;
 
   const _StudentCard({
     required this.student,
@@ -482,6 +501,7 @@ class _StudentCard extends StatelessWidget {
     this.onSuspend,
     this.onActivate,
     this.onDelete,
+    this.onWhatsApp,
   });
 
   @override
@@ -623,6 +643,7 @@ class _StudentCard extends StatelessWidget {
               onSuspend != null ||
               onActivate != null ||
               onAssignGroups != null ||
+              onWhatsApp != null ||
               onDelete != null) ...[
             const SizedBox(height: AppSpacing.s12),
             const Divider(height: 1),
@@ -633,13 +654,26 @@ class _StudentCard extends StatelessWidget {
               alignment: WrapAlignment.spaceBetween,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                if (onAssignGroups != null)
-                  _ActionBtn(
-                    label: context.l10n.assignGroupsAction,
-                    icon: Icons.group_add_rounded,
-                    color: AppColors.primary,
-                    onPressed: onAssignGroups!,
-                  ),
+                Wrap(
+                  spacing: AppSpacing.s8,
+                  runSpacing: AppSpacing.s8,
+                  children: [
+                    if (onAssignGroups != null)
+                      _ActionBtn(
+                        label: context.l10n.assignGroupsAction,
+                        icon: Icons.group_add_rounded,
+                        color: AppColors.primary,
+                        onPressed: onAssignGroups!,
+                      ),
+                    if (onWhatsApp != null)
+                      _ActionBtn(
+                        label: context.l10n.whatsappQuickActionTooltip,
+                        icon: Icons.mark_chat_read_rounded,
+                        color: const Color(0xFF25D366),
+                        onPressed: onWhatsApp!,
+                      ),
+                  ],
+                ),
                 Wrap(
                   spacing: AppSpacing.s8,
                   runSpacing: AppSpacing.s8,

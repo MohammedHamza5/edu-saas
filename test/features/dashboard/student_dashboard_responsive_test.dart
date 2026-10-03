@@ -76,6 +76,17 @@ class _FakeNotificationsRepository implements NotificationsRepository {
   }) async {
     return const Success(null);
   }
+
+  @override
+  Future<Result<void>> dispatchNotification({
+    required String title,
+    required String body,
+    required NotificationType type,
+    String? groupId,
+    String? userId,
+    Map<String, dynamic>? data,
+  }) async =>
+      const Success(null);
 }
 
 class _FakeStudentDashboardRepository implements StudentDashboardRepository {

@@ -22,6 +22,7 @@ void main() {
           completedAssignments: 4,
           totalAssignments: 4,
           mockExamScore: 760,
+          targetScore: 800,
         );
 
         expect(message, contains('يوسف أحمد'));
