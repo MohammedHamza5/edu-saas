@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -109,16 +110,58 @@ class _UploadVideoToBankDialogState extends State<UploadVideoToBankDialog> {
       return;
     }
 
-    final success = await context.read<VideoBankCubit>().uploadVideo(
-      title: _titleController.text.trim(),
-      description: _descriptionController.text.trim().isNotEmpty
-          ? _descriptionController.text.trim()
-          : null,
-      videoBytes: _fileBytes!,
+    final title = _titleController.text.trim();
+    final description = _descriptionController.text.trim().isNotEmpty
+        ? _descriptionController.text.trim()
+        : null;
+    final bytes = _fileBytes!;
+    final l10n = context.l10n;
+
+    // 1. Trigger background upload on the persistent VideoBankCubit
+    unawaited(
+      context.read<VideoBankCubit>().uploadVideo(
+        title: title,
+        description: description,
+        videoBytes: bytes,
+      ),
     );
 
-    if (success && mounted) {
+    // 2. Dismiss dialog immediately so teacher is free to work
+    if (mounted) {
       Navigator.of(context).pop(true);
+    }
+
+    // 3. Show smooth SnackBar feedback
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(
+                Icons.cloud_upload_rounded,
+                color: Colors.white,
+                size: 22,
+              ),
+              const SizedBox(width: AppSpacing.s12),
+              Expanded(
+                child: Text(
+                  l10n.uploadStartedInBackground,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: AppColors.primary,
+          duration: const Duration(seconds: 4),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      );
     }
   }
 

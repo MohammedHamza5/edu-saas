@@ -6638,4 +6638,39 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get backToPrevious => 'الرجوع للسابق';
+
+  @override
+  String get uploadStartedInBackground =>
+      'بدأ رفع الفيديو في الخلفية. يمكنك متابعة تصفح المنصة وإنجاز أعمالك بحرية.';
+
+  @override
+  String get uploadWarningDoNotClose =>
+      '⚠️ يُرجى عدم إغلاق المنصة أو تحديث الصفحة حتى يكتمل الرفع.';
+
+  @override
+  String get cancelUpload => 'إلغاء الرفع';
+
+  @override
+  String get cancelUploadConfirmTitle => 'هل تريد إلغاء رفع الفيديو؟';
+
+  @override
+  String get cancelUploadConfirmMessage =>
+      'سيتم إيقاف عملية الرفع وحذف الملف غير المكتمل من السحابة.';
+
+  @override
+  String get uploadCancelledSuccess => 'تم إلغاء رفع الفيديو بنجاح.';
+
+  @override
+  String get uploadCompleteProcessing =>
+      'تم رفع الفيديو بنجاح! جاري المعالجة السحابية الآن.';
+
+  @override
+  String get minimizeUploadBanner => 'تصغير شريط الرفع';
+
+  @override
+  String get expandUploadBanner => 'توسيع شريط الرفع';
+
+  @override
+  String get browserTabCloseWarning =>
+      'يوجد فيديو قيد الرفع حالياً. إغلاق المنصة أو تحديثها سيؤدي إلى إلغاء عملية الرفع.';
 }

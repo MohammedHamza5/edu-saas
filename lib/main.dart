@@ -22,6 +22,7 @@ import 'features/auth/presentation/cubit/auth_cubit.dart';
 import 'features/groups/presentation/cubit/groups_cubit.dart';
 import 'features/notifications/presentation/cubit/notifications_cubit.dart';
 import 'features/students/presentation/cubit/students_cubit.dart';
+import 'features/videos/presentation/cubit/video_bank_cubit.dart';
 
 Future<void> main() async {
   // ── 0. Enable HTML5 Clean Path URLs before engine binding initializes ────────
@@ -157,6 +158,12 @@ class EduSaaSApp extends StatelessWidget {
           create: (_) {
             AppLogger.d('DI', 'Creating StudentsCubit (root)');
             return InjectionContainer.createStudentsCubit();
+          },
+        ),
+        BlocProvider<VideoBankCubit>(
+          create: (_) {
+            AppLogger.d('DI', 'Creating VideoBankCubit (root)');
+            return InjectionContainer.createVideoBankCubit();
           },
         ),
         BlocProvider<TenantThemeCubit>(

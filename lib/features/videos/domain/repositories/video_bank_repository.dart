@@ -34,6 +34,9 @@ abstract interface class VideoBankRepository {
     void Function(int sentBytes, int totalBytes)? onProgress,
   });
 
+  /// Cancels any currently active binary video upload stream
+  void cancelActiveUpload();
+
   Future<Result<LibraryVideoEntity>> syncVideoStatus(String libraryVideoId);
 
   Future<Result<void>> deleteVideo(String id);

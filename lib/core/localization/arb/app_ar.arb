@@ -2207,5 +2207,15 @@
   "changeVideo": "تغيير الفيديو",
   "savingChanges": "جاري الحفظ...",
   "requiredField": "هذا الحقل مطلوب",
-  "backToPrevious": "الرجوع للسابق"
+  "backToPrevious": "الرجوع للسابق",
+  "uploadStartedInBackground": "بدأ رفع الفيديو في الخلفية. يمكنك متابعة تصفح المنصة وإنجاز أعمالك بحرية.",
+  "uploadWarningDoNotClose": "⚠️ يُرجى عدم إغلاق المنصة أو تحديث الصفحة حتى يكتمل الرفع.",
+  "cancelUpload": "إلغاء الرفع",
+  "cancelUploadConfirmTitle": "هل تريد إلغاء رفع الفيديو؟",
+  "cancelUploadConfirmMessage": "سيتم إيقاف عملية الرفع وحذف الملف غير المكتمل من السحابة.",
+  "uploadCancelledSuccess": "تم إلغاء رفع الفيديو بنجاح.",
+  "uploadCompleteProcessing": "تم رفع الفيديو بنجاح! جاري المعالجة السحابية الآن.",
+  "minimizeUploadBanner": "تصغير شريط الرفع",
+  "expandUploadBanner": "توسيع شريط الرفع",
+  "browserTabCloseWarning": "يوجد فيديو قيد الرفع حالياً. إغلاق المنصة أو تحديثها سيؤدي إلى إلغاء عملية الرفع."
 }

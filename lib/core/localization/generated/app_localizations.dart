@@ -11844,6 +11844,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Back to previous'**
   String get backToPrevious;
+
+  /// No description provided for @uploadStartedInBackground.
+  ///
+  /// In en, this message translates to:
+  /// **'Video upload started in background. You can navigate and work freely.'**
+  String get uploadStartedInBackground;
+
+  /// No description provided for @uploadWarningDoNotClose.
+  ///
+  /// In en, this message translates to:
+  /// **'⚠️ Please do not close or refresh the platform until upload finishes.'**
+  String get uploadWarningDoNotClose;
+
+  /// No description provided for @cancelUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel Upload'**
+  String get cancelUpload;
+
+  /// No description provided for @cancelUploadConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel Video Upload?'**
+  String get cancelUploadConfirmTitle;
+
+  /// No description provided for @cancelUploadConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The upload will be aborted and the incomplete file will be removed from the cloud.'**
+  String get cancelUploadConfirmMessage;
+
+  /// No description provided for @uploadCancelledSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Video upload was cancelled.'**
+  String get uploadCancelledSuccess;
+
+  /// No description provided for @uploadCompleteProcessing.
+  ///
+  /// In en, this message translates to:
+  /// **'Video uploaded successfully! Cloud processing is underway.'**
+  String get uploadCompleteProcessing;
+
+  /// No description provided for @minimizeUploadBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimize upload banner'**
+  String get minimizeUploadBanner;
+
+  /// No description provided for @expandUploadBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand upload banner'**
+  String get expandUploadBanner;
+
+  /// No description provided for @browserTabCloseWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'A video upload is currently in progress. Leaving or reloading will cancel the upload.'**
+  String get browserTabCloseWarning;
 }
 
 class _AppLocalizationsDelegate

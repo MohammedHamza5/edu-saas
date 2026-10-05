@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/errors/result.dart';
+import '../../../../core/utils/browser_tab_guard.dart';
 import '../../domain/entities/library_video_entity.dart';
 import '../../domain/entities/video_folder_entity.dart';
 import '../../domain/repositories/video_bank_repository.dart';
@@ -22,6 +23,7 @@ class VideoBankCubit extends Cubit<VideoBankState> {
   @override
   Future<void> close() {
     _pollingTimer?.cancel();
+    disableTabCloseWarning();
     return super.close();
   }
 
@@ -484,6 +486,10 @@ class VideoBankCubit extends Cubit<VideoBankState> {
       ),
     );
 
+    enableTabCloseWarning(
+      'يوجد فيديو قيد الرفع حالياً. إغلاق المنصة أو تحديثها سيؤدي إلى إلغاء عملية الرفع.',
+    );
+
     final result = await _repository.uploadVideo(
       title: title,
       description: description,
@@ -505,6 +511,8 @@ class VideoBankCubit extends Cubit<VideoBankState> {
       },
     );
 
+    disableTabCloseWarning();
+
     if (result.isSuccess) {
       final current = currentLoadedState ?? prev;
       emit(
@@ -525,10 +533,21 @@ class VideoBankCubit extends Cubit<VideoBankState> {
       return true;
     } else {
       final current = currentLoadedState ?? prev;
+      final code = result.failureOrNull?.code;
+      if (code == 'UPLOAD_CANCELLED') {
+        emit(
+          current.copyWith(
+            uploadProgress: () => null,
+            uploadingTitle: () => null,
+          ),
+        );
+        return false;
+      }
+
       emit(
         VideoBankError(
           result.failureOrNull?.message ?? 'Failed to upload video',
-          code: result.failureOrNull?.code,
+          code: code,
           lastLoaded: current.copyWith(
             uploadProgress: () => null,
             uploadingTitle: () => null,
@@ -536,6 +555,21 @@ class VideoBankCubit extends Cubit<VideoBankState> {
         ),
       );
       return false;
+    }
+  }
+
+  /// Cancels any currently active binary video upload stream
+  void cancelUpload() {
+    _repository.cancelActiveUpload();
+    disableTabCloseWarning();
+    final current = currentLoadedState;
+    if (current != null) {
+      emit(
+        current.copyWith(
+          uploadProgress: () => null,
+          uploadingTitle: () => null,
+        ),
+      );
     }
   }
 

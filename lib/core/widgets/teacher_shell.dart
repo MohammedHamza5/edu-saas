@@ -16,6 +16,7 @@ import '../../features/students/presentation/cubit/students_cubit.dart';
 import '../../features/students/presentation/cubit/students_state.dart';
 import 'adaptive_scaffold.dart';
 import 'app_logo.dart';
+import '../../features/videos/presentation/widgets/global_video_upload_floating_banner.dart';
 
 /// Permanent application shell for Teacher role screens.
 /// Features a comprehensive, categorized, mathematical sidebar that stays pinned.
@@ -222,7 +223,12 @@ class TeacherShell extends StatelessWidget {
       onNavigationIndexChanged: (idx) => _onNavigationChanged(context, idx),
       sidebarHeader: _buildSidebarHeader(context),
       sidebarFooter: _buildSidebarFooter(context),
-      body: child,
+      body: Stack(
+        children: [
+          child,
+          const GlobalVideoUploadFloatingBanner(),
+        ],
+      ),
     );
   }
 

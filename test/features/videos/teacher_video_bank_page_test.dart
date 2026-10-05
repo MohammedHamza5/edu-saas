@@ -121,6 +121,9 @@ class _FakeVideoBankRepository implements VideoBankRepository {
     required String contentId,
     required String title,
   }) async => const Success(null);
+
+  @override
+  void cancelActiveUpload() {}
 }
 
 class _FakeGroupsRepository implements GroupsRepository {

@@ -44,6 +44,7 @@ abstract interface class VideoBankRemoteDataSource {
     required int expire,
     required List<int> videoBytes,
     void Function(int sentBytes, int totalBytes)? onProgress,
+    CancelToken? cancelToken,
   });
 
   Future<LibraryVideoModel> syncVideoStatus(String libraryVideoId);
@@ -296,6 +297,7 @@ class VideoBankRemoteDataSourceImpl implements VideoBankRemoteDataSource {
     required int expire,
     required List<int> videoBytes,
     void Function(int sentBytes, int totalBytes)? onProgress,
+    CancelToken? cancelToken,
   }) async {
     try {
       final payloadBytes = videoBytes is Uint8List
@@ -305,6 +307,7 @@ class VideoBankRemoteDataSourceImpl implements VideoBankRemoteDataSource {
       // Step 1: Create TUS session
       final tusCreateResponse = await _dio.post<dynamic>(
         tusEndpoint,
+        cancelToken: cancelToken,
         options: Options(
           headers: {
             'Upload-Length': payloadBytes.length.toString(),
@@ -335,6 +338,7 @@ class VideoBankRemoteDataSourceImpl implements VideoBankRemoteDataSource {
       await _dio.patch<dynamic>(
         uploadUrl,
         data: payloadBytes,
+        cancelToken: cancelToken,
         options: Options(
           headers: {
             'Upload-Offset': '0',
@@ -349,6 +353,12 @@ class VideoBankRemoteDataSourceImpl implements VideoBankRemoteDataSource {
         onSendProgress: onProgress,
       );
     } on DioException catch (e) {
+      if (CancelToken.isCancel(e) || e.type == DioExceptionType.cancel) {
+        throw const ServerException(
+          'Upload cancelled by user',
+          code: 'UPLOAD_CANCELLED',
+        );
+      }
       throw ServerException(
         e.response?.data?.toString() ??
             e.message ??

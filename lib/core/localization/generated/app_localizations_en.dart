@@ -6673,4 +6673,39 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get backToPrevious => 'Back to previous';
+
+  @override
+  String get uploadStartedInBackground =>
+      'Video upload started in background. You can navigate and work freely.';
+
+  @override
+  String get uploadWarningDoNotClose =>
+      '⚠️ Please do not close or refresh the platform until upload finishes.';
+
+  @override
+  String get cancelUpload => 'Cancel Upload';
+
+  @override
+  String get cancelUploadConfirmTitle => 'Cancel Video Upload?';
+
+  @override
+  String get cancelUploadConfirmMessage =>
+      'The upload will be aborted and the incomplete file will be removed from the cloud.';
+
+  @override
+  String get uploadCancelledSuccess => 'Video upload was cancelled.';
+
+  @override
+  String get uploadCompleteProcessing =>
+      'Video uploaded successfully! Cloud processing is underway.';
+
+  @override
+  String get minimizeUploadBanner => 'Minimize upload banner';
+
+  @override
+  String get expandUploadBanner => 'Expand upload banner';
+
+  @override
+  String get browserTabCloseWarning =>
+      'A video upload is currently in progress. Leaving or reloading will cancel the upload.';
 }

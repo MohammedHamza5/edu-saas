@@ -445,19 +445,8 @@ class AppRouter {
           GoRoute(
             path: teacherVideos,
             pageBuilder: (BuildContext context, GoRouterState state) =>
-                NoTransitionPage(
-                  child: MultiBlocProvider(
-                    providers: [
-                      BlocProvider(
-                        create: (_) =>
-                            InjectionContainer.createVideoBankCubit(),
-                      ),
-                      BlocProvider(
-                        create: (_) => InjectionContainer.createGroupsCubit(),
-                      ),
-                    ],
-                    child: const TeacherVideoBankPage(),
-                  ),
+                const NoTransitionPage(
+                  child: TeacherVideoBankPage(),
                 ),
           ),
           GoRoute(

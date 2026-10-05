@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/errors/result.dart';
@@ -8,8 +9,10 @@ import '../datasources/video_bank_remote_datasource.dart';
 
 class VideoBankRepositoryImpl implements VideoBankRepository {
   final VideoBankRemoteDataSource _remoteDataSource;
+  CancelToken? _activeUploadCancelToken;
+  String? _activeLibraryVideoId;
 
-  const VideoBankRepositoryImpl({
+  VideoBankRepositoryImpl({
     required VideoBankRemoteDataSource remoteDataSource,
   }) : _remoteDataSource = remoteDataSource;
 
@@ -135,6 +138,9 @@ class VideoBankRepositoryImpl implements VideoBankRepository {
       final signature = initData['signature'] as String;
       final expire = initData['expire'] as int;
 
+      _activeUploadCancelToken = CancelToken();
+      _activeLibraryVideoId = libraryVideoId;
+
       // 2. Upload binary stream via TUS with onProgress
       await _remoteDataSource.uploadVideoBytes(
         tusEndpoint: tusEndpoint,
@@ -144,15 +150,34 @@ class VideoBankRepositoryImpl implements VideoBankRepository {
         expire: expire,
         videoBytes: videoBytes,
         onProgress: onProgress,
+        cancelToken: _activeUploadCancelToken,
       );
+
+      _activeUploadCancelToken = null;
+      _activeLibraryVideoId = null;
 
       // 3. Return latest record
       final video = await _remoteDataSource.getVideoById(libraryVideoId);
       return Result.success(video);
     } on ServerException catch (e) {
+      _activeUploadCancelToken = null;
+      _activeLibraryVideoId = null;
       return Result.failure(ServerFailure(e.message, code: e.code));
     } catch (e) {
+      _activeUploadCancelToken = null;
+      _activeLibraryVideoId = null;
       return Result.failure(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  void cancelActiveUpload() {
+    _activeUploadCancelToken?.cancel('Upload cancelled by user');
+    _activeUploadCancelToken = null;
+    final toDeleteId = _activeLibraryVideoId;
+    _activeLibraryVideoId = null;
+    if (toDeleteId != null) {
+      _remoteDataSource.deleteVideo(toDeleteId).ignore();
     }
   }
 
