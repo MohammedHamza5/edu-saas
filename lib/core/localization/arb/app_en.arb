@@ -6283,6 +6283,17 @@
   "addFirstLesson": "Add First Lecture",
   "videoPickerTitle": "Select Video",
   "videoPickerSearchHint": "Search videos...",
+  "videoAlreadyAddedToThisGroup": "Already added to this group",
+  "videoNotAddedToAnyGroup": "Not added to any group",
+  "videoAddedToGroups": "Added to: {groups}",
+  "@videoAddedToGroups": {
+    "placeholders": {
+      "groups": {
+        "type": "String"
+      }
+    }
+  },
+  "videoAlreadyAddedNotice": "This video is already added as a lesson in this group",
   "lessonNumber": "Lecture {n}",
   "@lessonNumber": {
     "placeholders": {

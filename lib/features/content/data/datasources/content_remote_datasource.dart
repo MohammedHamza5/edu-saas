@@ -908,7 +908,9 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     try {
       final libResponse = await _safeClient
           .from('video_library')
-          .select('*, videos(id, content(group:groups(name)))')
+          .select(
+            '*, videos(id, library_video_id, provider_video_id, content(id, group_id, group:groups(id, name), content_groups(group_id, groups(id, name))))',
+          )
           .neq('status', 'failed')
           .order('created_at', ascending: false);
 
@@ -916,14 +918,36 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
       for (final item in libList) {
         final row = item as Map<String, dynamic>;
         final List<String> assignedNames = [];
+        final List<String> assignedIds = [];
         final videosList = row['videos'] as List<dynamic>?;
         if (videosList != null) {
           for (final v in videosList) {
             final c = v['content'] as Map<String, dynamic>?;
-            final g = c?['group'] as Map<String, dynamic>?;
-            final name = g?['name'] as String?;
-            if (name != null && !assignedNames.contains(name)) {
-              assignedNames.add(name);
+            if (c != null) {
+              final gId = c['group_id'] as String?;
+              if (gId != null && !assignedIds.contains(gId)) {
+                assignedIds.add(gId);
+              }
+              final g = c['group'] as Map<String, dynamic>?;
+              final name = g?['name'] as String?;
+              if (name != null && !assignedNames.contains(name)) {
+                assignedNames.add(name);
+              }
+              final cGroups = c['content_groups'] as List<dynamic>?;
+              if (cGroups != null) {
+                for (final cg in cGroups) {
+                  final cgMap = cg as Map<String, dynamic>?;
+                  final cgId = cgMap?['group_id'] as String?;
+                  if (cgId != null && !assignedIds.contains(cgId)) {
+                    assignedIds.add(cgId);
+                  }
+                  final cgGroup = cgMap?['groups'] as Map<String, dynamic>?;
+                  final cgName = cgGroup?['name'] as String?;
+                  if (cgName != null && !assignedNames.contains(cgName)) {
+                    assignedNames.add(cgName);
+                  }
+                }
+              }
             }
           }
         }
@@ -943,6 +967,7 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
             videoStatus: row['status'] as String? ?? 'ready',
             videoProviderId: row['provider_video_id'] as String?,
             videoProvider: row['provider'] as String? ?? 'bunny',
+            assignedGroupIds: assignedIds,
             assignedGroupNames: assignedNames,
             isPublishedInGroup: true,
           ),
@@ -955,7 +980,7 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
       final response = await _safeClient
           .from('content')
           .select(
-            '*, files(*), videos(*), content_groups(group_id, groups(name)), '
+            '*, files(*), videos(*), content_groups(group_id, groups(id, name)), '
             'associated_exam:exams!content_associated_exam_id_fkey(id, title), '
             'prerequisite_exam:exams!content_prerequisite_exam_id_fkey(id, title, passing_score)',
           )
@@ -968,12 +993,64 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
           .toList();
 
       for (final c in contentModels) {
-        final alreadyPresent = allVideos.any((v) =>
-            v.id == c.id ||
-            (v.videoProviderId != null &&
-                v.videoProviderId == c.videoProviderId));
-        if (!alreadyPresent) {
-          allVideos.add(c);
+        final existingIdx = allVideos.indexWhere((v) {
+          final matchId = v.id == c.id || (c.videoId != null && v.id == c.videoId);
+          final matchProvider = v.videoProviderId != null &&
+              v.videoProviderId!.isNotEmpty &&
+              c.videoProviderId != null &&
+              v.videoProviderId == c.videoProviderId;
+          final matchTitle = v.title.trim().toLowerCase() ==
+              c.title.trim().toLowerCase();
+          return matchId || matchProvider || matchTitle;
+        });
+
+        if (existingIdx != -1) {
+          // Merge assigned groups into the existing video bank item
+          final existing = allVideos[existingIdx];
+          final mergedIds = Set<String>.from(existing.assignedGroupIds)
+            ..addAll(c.assignedGroupIds);
+          final mergedNames = Set<String>.from(existing.assignedGroupNames)
+            ..addAll(c.assignedGroupNames);
+
+          allVideos[existingIdx] = ContentModel(
+            id: existing.id,
+            tenantId: existing.tenantId,
+            groupId: existing.groupId,
+            title: existing.title,
+            description: existing.description ?? c.description,
+            type: existing.type,
+            status: existing.status,
+            sortOrder: existing.sortOrder,
+            publishedAt: existing.publishedAt,
+            createdAt: existing.createdAt,
+            updatedAt: existing.updatedAt,
+            file: existing.file,
+            videoId: existing.videoId,
+            videoStatus: existing.videoStatus,
+            videoProviderId: existing.videoProviderId,
+            videoProvider: existing.videoProvider ?? c.videoProvider,
+            assignedGroupIds: mergedIds.toList(),
+            assignedGroupNames: mergedNames.toList(),
+            associatedExamId: existing.associatedExamId,
+            associatedExamTitle: existing.associatedExamTitle,
+            prerequisiteExamId: existing.prerequisiteExamId,
+            prerequisiteExamTitle: existing.prerequisiteExamTitle,
+            prerequisitePassingScore: existing.prerequisitePassingScore,
+            isLocked: existing.isLocked,
+            isVideoCompleted: existing.isVideoCompleted,
+            videoProgressPercentage: existing.videoProgressPercentage,
+            isExamPassed: existing.isExamPassed,
+            isPublishedInGroup: existing.isPublishedInGroup,
+          );
+        } else {
+          // Only add standalone videos that actually have a valid video source (YouTube or video record)
+          final hasVideo = (c.videoProviderId != null && c.videoProviderId!.isNotEmpty) ||
+              (c.videoId != null && c.videoId!.isNotEmpty) ||
+              c.videoProvider == 'youtube' ||
+              c.type == ContentType.video;
+          if (hasVideo && c.title.trim().isNotEmpty) {
+            allVideos.add(c);
+          }
         }
       }
     } catch (_) {}

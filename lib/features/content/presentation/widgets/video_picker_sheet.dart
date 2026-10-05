@@ -14,12 +14,28 @@ import '../../../videos/presentation/dialogs/select_video_from_bank_dialog.dart'
 /// A bottom sheet that shows all videos in the central Video Bank,
 /// allowing the teacher to pick one for adding as a lesson.
 class VideoPickerSheet extends StatefulWidget {
+  final String? currentGroupId;
+  final String? currentGroupName;
+  final Set<String>? alreadyAddedVideoIds;
+  final Set<String>? alreadyAddedTitles;
   final Set<String>? excludedVideoIds;
-  const VideoPickerSheet({super.key, this.excludedVideoIds});
+
+  const VideoPickerSheet({
+    super.key,
+    this.currentGroupId,
+    this.currentGroupName,
+    this.alreadyAddedVideoIds,
+    this.alreadyAddedTitles,
+    this.excludedVideoIds,
+  });
 
   /// Shows the picker and returns the selected [ContentEntity], or null if cancelled.
   static Future<ContentEntity?> show(
     BuildContext context, {
+    String? currentGroupId,
+    String? currentGroupName,
+    Set<String>? alreadyAddedVideoIds,
+    Set<String>? alreadyAddedTitles,
     Set<String>? excludedVideoIds,
   }) {
     final pickerCubit = InjectionContainer.createContentCubit();
@@ -31,7 +47,13 @@ class VideoPickerSheet extends StatefulWidget {
       backgroundColor: Colors.transparent,
       builder: (_) => BlocProvider(
         create: (_) => pickerCubit..loadCentralVideoBank(forceRefresh: true),
-        child: VideoPickerSheet(excludedVideoIds: excludedVideoIds),
+        child: VideoPickerSheet(
+          currentGroupId: currentGroupId,
+          currentGroupName: currentGroupName,
+          alreadyAddedVideoIds: alreadyAddedVideoIds,
+          alreadyAddedTitles: alreadyAddedTitles,
+          excludedVideoIds: excludedVideoIds,
+        ),
       ),
     );
   }
@@ -55,6 +77,64 @@ class _VideoPickerSheetState extends State<VideoPickerSheet> {
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  bool _isAlreadyAddedToCurrentGroup(ContentEntity video) {
+    // 1. Direct group ID match
+    if (widget.currentGroupId != null &&
+        widget.currentGroupId!.isNotEmpty &&
+        video.assignedGroupIds.contains(widget.currentGroupId)) {
+      return true;
+    }
+
+    // 2. Direct group Name match
+    if (widget.currentGroupName != null &&
+        widget.currentGroupName!.isNotEmpty &&
+        video.assignedGroupNames.any(
+          (name) =>
+              name.trim().toLowerCase() ==
+              widget.currentGroupName!.trim().toLowerCase(),
+        )) {
+      return true;
+    }
+
+    // 3. Matched in alreadyAddedVideoIds set (e.g. from current group lessons)
+    if (widget.alreadyAddedVideoIds != null &&
+        widget.alreadyAddedVideoIds!.isNotEmpty) {
+      if (widget.alreadyAddedVideoIds!.contains(video.id)) return true;
+      if (video.videoId != null &&
+          widget.alreadyAddedVideoIds!.contains(video.videoId)) {
+        return true;
+      }
+      if (video.videoProviderId != null &&
+          widget.alreadyAddedVideoIds!.contains(video.videoProviderId)) {
+        return true;
+      }
+    }
+
+    // 4. Same title already exists in the group
+    if (widget.alreadyAddedTitles != null &&
+        widget.alreadyAddedTitles!.isNotEmpty) {
+      if (widget.alreadyAddedTitles!.contains(
+        video.title.trim().toLowerCase(),
+      )) {
+        return true;
+      }
+    }
+
+    // 5. Explicitly excluded IDs
+    if (widget.excludedVideoIds != null &&
+        widget.excludedVideoIds!.isNotEmpty) {
+      if (widget.excludedVideoIds!.contains(video.id) ||
+          (video.videoId != null &&
+              widget.excludedVideoIds!.contains(video.videoId)) ||
+          (video.videoProviderId != null &&
+              widget.excludedVideoIds!.contains(video.videoProviderId))) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   List<ContentEntity> _filter(List<ContentEntity> items) {
@@ -113,8 +193,11 @@ class _VideoPickerSheetState extends State<VideoPickerSheet> {
                 ),
                 OutlinedButton.icon(
                   onPressed: () async {
-                    final picked =
-                        await SelectVideoFromBankDialog.show(context);
+                    final picked = await SelectVideoFromBankDialog.show(
+                      context,
+                      currentGroupId: widget.currentGroupId,
+                      currentGroupName: widget.currentGroupName,
+                    );
                     if (picked != null && context.mounted) {
                       final mapped = ContentEntity(
                         id: picked.id,
@@ -205,9 +288,7 @@ class _VideoPickerSheetState extends State<VideoPickerSheet> {
                                     (i.videoProviderId != null &&
                                         i.videoProviderId!.isNotEmpty) ||
                                     (i.videoId != null &&
-                                        i.videoId!.isNotEmpty)) &&
-                                !(widget.excludedVideoIds?.contains(i.id) ??
-                                    false),
+                                        i.videoId!.isNotEmpty)),
                           )
                           .toList()
                     : <ContentEntity>[];
@@ -244,7 +325,11 @@ class _VideoPickerSheetState extends State<VideoPickerSheet> {
                           OutlinedButton.icon(
                             onPressed: () async {
                               final picked =
-                                  await SelectVideoFromBankDialog.show(context);
+                                  await SelectVideoFromBankDialog.show(
+                                context,
+                                currentGroupId: widget.currentGroupId,
+                                currentGroupName: widget.currentGroupName,
+                              );
                               if (picked != null && context.mounted) {
                                 final mapped = ContentEntity(
                                   id: picked.id,
@@ -264,8 +349,10 @@ class _VideoPickerSheetState extends State<VideoPickerSheet> {
                                 Navigator.of(context).pop(mapped);
                               }
                             },
-                            icon:
-                                const Icon(Icons.folder_open_rounded, size: 18),
+                            icon: const Icon(
+                              Icons.folder_open_rounded,
+                              size: 18,
+                            ),
                             label: Text(l10n.selectFromBank),
                           ),
                         ],
@@ -291,10 +378,11 @@ class _VideoPickerSheetState extends State<VideoPickerSheet> {
                   ),
                   itemCount: filtered.length,
                   separatorBuilder: (_, __) =>
-                      const SizedBox(height: AppSpacing.s4),
+                      const SizedBox(height: AppSpacing.s6),
                   itemBuilder: (context, index) {
                     final video = filtered[index];
                     final isSelected = _selected?.id == video.id;
+                    final isAlreadyAdded = _isAlreadyAddedToCurrentGroup(video);
                     final youtubeId = video.videoProviderId;
                     final thumbUrl = (youtubeId != null && youtubeId.isNotEmpty)
                         ? 'https://img.youtube.com/vi/$youtubeId/mqdefault.jpg'
@@ -311,10 +399,14 @@ class _VideoPickerSheetState extends State<VideoPickerSheet> {
                         decoration: BoxDecoration(
                           color: isSelected
                               ? AppColors.primary.withValues(alpha: 0.08)
+                              : isAlreadyAdded
+                              ? AppColors.success.withValues(alpha: 0.04)
                               : Colors.transparent,
                           border: Border.all(
                             color: isSelected
-                                ? AppColors.primary.withValues(alpha: 0.4)
+                                ? AppColors.primary.withValues(alpha: 0.5)
+                                : isAlreadyAdded
+                                ? AppColors.success.withValues(alpha: 0.35)
                                 : AppColors.border.withValues(alpha: 0.5),
                             width: isSelected ? 1.5 : 1,
                           ),
@@ -328,8 +420,9 @@ class _VideoPickerSheetState extends State<VideoPickerSheet> {
                               child: Container(
                                 width: 72,
                                 height: 48,
-                                color:
-                                    AppColors.primary.withValues(alpha: 0.08),
+                                color: isAlreadyAdded
+                                    ? AppColors.success.withValues(alpha: 0.08)
+                                    : AppColors.primary.withValues(alpha: 0.08),
                                 child: thumbUrl != null
                                     ? CachedNetworkImage(
                                         imageUrl: thumbUrl,
@@ -343,10 +436,14 @@ class _VideoPickerSheetState extends State<VideoPickerSheet> {
                                           ),
                                         ),
                                       )
-                                    : const Center(
+                                    : Center(
                                         child: Icon(
-                                          Icons.play_circle_fill_rounded,
-                                          color: AppColors.primary,
+                                          isAlreadyAdded
+                                              ? Icons.task_alt_rounded
+                                              : Icons.play_circle_fill_rounded,
+                                          color: isAlreadyAdded
+                                              ? AppColors.success
+                                              : AppColors.primary,
                                           size: 24,
                                         ),
                                       ),
@@ -359,9 +456,10 @@ class _VideoPickerSheetState extends State<VideoPickerSheet> {
                                 children: [
                                   Text(
                                     video.title,
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                    style: theme.textTheme.bodyMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -375,6 +473,77 @@ class _VideoPickerSheetState extends State<VideoPickerSheet> {
                                       fontSize: 11,
                                     ),
                                   ),
+                                  if (isAlreadyAdded) ...[
+                                    const SizedBox(height: 6),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 3,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.success.withValues(
+                                          alpha: 0.12,
+                                        ),
+                                        borderRadius: BorderRadius.circular(6),
+                                        border: Border.all(
+                                          color: AppColors.success.withValues(
+                                            alpha: 0.35,
+                                          ),
+                                        ),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Icon(
+                                            Icons.check_circle_rounded,
+                                            size: 13,
+                                            color: AppColors.success,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Flexible(
+                                            child: Text(
+                                              context
+                                                  .l10n
+                                                  .videoAlreadyAddedToThisGroup,
+                                              style: const TextStyle(
+                                                color: AppColors.success,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 11,
+                                              ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ] else if (video
+                                      .assignedGroupNames
+                                      .isNotEmpty) ...[
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      context.l10n.videoAddedToGroups(
+                                        video.assignedGroupNames.join('، '),
+                                      ),
+                                      style: theme.textTheme.bodySmall
+                                          ?.copyWith(
+                                            color: AppColors.textSecondary,
+                                            fontSize: 11,
+                                          ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ] else ...[
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      context.l10n.videoNotAddedToAnyGroup,
+                                      style: theme.textTheme.bodySmall
+                                          ?.copyWith(
+                                            color: AppColors.textSecondary,
+                                            fontSize: 11,
+                                          ),
+                                    ),
+                                  ],
                                 ],
                               ),
                             ),
@@ -408,29 +577,72 @@ class _VideoPickerSheetState extends State<VideoPickerSheet> {
               left: AppSpacing.s24,
               right: AppSpacing.s24,
               top: AppSpacing.s16,
-              bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.s24,
+              bottom:
+                  MediaQuery.of(context).viewInsets.bottom + AppSpacing.s24,
             ),
-            child: Row(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: Text(l10n.cancel),
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.s12),
-                Expanded(
-                  flex: 2,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
+                if (_selected != null &&
+                    _isAlreadyAddedToCurrentGroup(_selected!)) ...[
+                  Container(
+                    margin: const EdgeInsets.only(bottom: AppSpacing.s12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
                     ),
-                    onPressed: _selected == null
-                        ? null
-                        : () => Navigator.of(context).pop(_selected),
-                    child: Text(l10n.save),
+                    decoration: BoxDecoration(
+                      color: AppColors.warning.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: AppColors.warning.withValues(alpha: 0.4),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.info_outline_rounded,
+                          size: 16,
+                          color: AppColors.warning,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            l10n.videoAlreadyAddedNotice,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: AppColors.warning,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
+                ],
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: Text(l10n.cancel),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.s12),
+                    Expanded(
+                      flex: 2,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                        ),
+                        onPressed: _selected == null
+                            ? null
+                            : () => Navigator.of(context).pop(_selected),
+                        child: Text(l10n.save),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

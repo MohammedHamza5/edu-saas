@@ -291,18 +291,31 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
   }
 
   Future<void> _pickVideoFromBank() async {
-    Set<String> excludedIds = {};
+    final Set<String> alreadyAddedIds = {};
+    final Set<String> alreadyAddedTitles = {};
     try {
       final cubit = context.read<ContentCubit>();
       if (cubit.state is ContentLoaded) {
         final items = (cubit.state as ContentLoaded).items;
-        excludedIds = items.map((e) => e.id).toSet();
+        for (final item in items) {
+          alreadyAddedIds.add(item.id);
+          if (item.videoId != null) alreadyAddedIds.add(item.videoId!);
+          if (item.videoProviderId != null) {
+            alreadyAddedIds.add(item.videoProviderId!);
+          }
+          if (item.title.trim().isNotEmpty) {
+            alreadyAddedTitles.add(item.title.trim().toLowerCase());
+          }
+        }
       }
     } catch (_) {}
 
     final video = await VideoPickerSheet.show(
       context,
-      excludedVideoIds: excludedIds,
+      currentGroupId: widget.groupId,
+      currentGroupName: widget.groupName,
+      alreadyAddedVideoIds: alreadyAddedIds,
+      alreadyAddedTitles: alreadyAddedTitles,
     );
     if (video != null && mounted) {
       setState(() {

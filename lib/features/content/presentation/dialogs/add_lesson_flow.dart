@@ -93,7 +93,11 @@ class AddLessonFlow extends StatelessWidget {
     Navigator.of(context).pop(); // close choice dialog
 
     // Step 2a: Pick video from library
-    final video = await VideoPickerSheet.show(context);
+    final video = await VideoPickerSheet.show(
+      context,
+      currentGroupId: groupId,
+      currentGroupName: groupName,
+    );
     if (video == null || !context.mounted) return;
 
     // Step 3: Lesson setup

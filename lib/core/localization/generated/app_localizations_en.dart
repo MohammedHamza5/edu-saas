@@ -5265,6 +5265,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get videoPickerSearchHint => 'Search videos...';
 
   @override
+  String get videoAlreadyAddedToThisGroup => 'Already added to this group';
+
+  @override
+  String get videoNotAddedToAnyGroup => 'Not added to any group';
+
+  @override
+  String videoAddedToGroups(String groups) {
+    return 'Added to: $groups';
+  }
+
+  @override
+  String get videoAlreadyAddedNotice =>
+      'This video is already added as a lesson in this group';
+
+  @override
   String lessonNumber(int n) {
     return 'Lecture $n';
   }

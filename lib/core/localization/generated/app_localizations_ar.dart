@@ -5238,6 +5238,21 @@ class AppLocalizationsAr extends AppLocalizations {
   String get videoPickerSearchHint => 'ابحث عن فيديو...';
 
   @override
+  String get videoAlreadyAddedToThisGroup => 'مضاف بالفعل لهذه المجموعة';
+
+  @override
+  String get videoNotAddedToAnyGroup => 'غير مضاف لأي مجموعة';
+
+  @override
+  String videoAddedToGroups(String groups) {
+    return 'مضاف إلى: $groups';
+  }
+
+  @override
+  String get videoAlreadyAddedNotice =>
+      'هذا الفيديو مضاف بالفعل كدرس في هذه المجموعة';
+
+  @override
   String lessonNumber(int n) {
     return 'المحاضرة $n';
   }

@@ -1692,6 +1692,17 @@
   "addFirstLesson": "إضافة أول محاضرة",
   "videoPickerTitle": "اختر فيديو",
   "videoPickerSearchHint": "ابحث عن فيديو...",
+  "videoAlreadyAddedToThisGroup": "مضاف بالفعل لهذه المجموعة",
+  "videoNotAddedToAnyGroup": "غير مضاف لأي مجموعة",
+  "videoAddedToGroups": "مضاف إلى: {groups}",
+  "@videoAddedToGroups": {
+    "placeholders": {
+      "groups": {
+        "type": "String"
+      }
+    }
+  },
+  "videoAlreadyAddedNotice": "هذا الفيديو مضاف بالفعل كدرس في هذه المجموعة",
   "lessonNumber": "المحاضرة {n}",
   "@lessonNumber": {
     "placeholders": {

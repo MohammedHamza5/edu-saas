@@ -13,16 +13,30 @@ import '../cubit/video_bank_cubit.dart';
 import '../cubit/video_bank_state.dart';
 
 class SelectVideoFromBankDialog extends StatefulWidget {
-  const SelectVideoFromBankDialog({super.key});
+  final String? currentGroupId;
+  final String? currentGroupName;
 
-  static Future<LibraryVideoEntity?> show(BuildContext context) {
+  const SelectVideoFromBankDialog({
+    super.key,
+    this.currentGroupId,
+    this.currentGroupName,
+  });
+
+  static Future<LibraryVideoEntity?> show(
+    BuildContext context, {
+    String? currentGroupId,
+    String? currentGroupName,
+  }) {
     return showDialog<LibraryVideoEntity>(
       context: context,
       barrierDismissible: true,
       builder: (dialogCtx) => BlocProvider(
         create: (_) =>
             InjectionContainer.createVideoBankCubit()..loadFolder(),
-        child: const SelectVideoFromBankDialog(),
+        child: SelectVideoFromBankDialog(
+          currentGroupId: currentGroupId,
+          currentGroupName: currentGroupName,
+        ),
       ),
     );
   }
@@ -429,7 +443,47 @@ class _SelectVideoFromBankDialogState extends State<SelectVideoFromBankDialog> {
                                                       TextOverflow.ellipsis,
                                                 ),
                                                 const Spacer(),
-                                                if (v.assignedLecturesCount >
+                                                if (widget.currentGroupName !=
+                                                        null &&
+                                                    v.assignedGroupNames.any(
+                                                      (name) =>
+                                                          name
+                                                              .trim()
+                                                              .toLowerCase() ==
+                                                          widget
+                                                              .currentGroupName!
+                                                              .trim()
+                                                              .toLowerCase(),
+                                                    )) ...[
+                                                  Container(
+                                                    padding:
+                                                        const EdgeInsets
+                                                            .symmetric(
+                                                      horizontal: 6,
+                                                      vertical: 2,
+                                                    ),
+                                                    decoration: BoxDecoration(
+                                                      color: AppColors.success
+                                                          .withValues(
+                                                        alpha: 0.12,
+                                                      ),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                        4,
+                                                      ),
+                                                    ),
+                                                    child: Text(
+                                                      l10n.videoAlreadyAddedToThisGroup,
+                                                      style: const TextStyle(
+                                                        fontSize: 10,
+                                                        color:
+                                                            AppColors.success,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ] else if (v.assignedLecturesCount >
                                                     0)
                                                   Text(
                                                     l10n.usedInNCourses(

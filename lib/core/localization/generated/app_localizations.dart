@@ -9367,6 +9367,30 @@ abstract class AppLocalizations {
   /// **'Search videos...'**
   String get videoPickerSearchHint;
 
+  /// No description provided for @videoAlreadyAddedToThisGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Already added to this group'**
+  String get videoAlreadyAddedToThisGroup;
+
+  /// No description provided for @videoNotAddedToAnyGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Not added to any group'**
+  String get videoNotAddedToAnyGroup;
+
+  /// No description provided for @videoAddedToGroups.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to: {groups}'**
+  String videoAddedToGroups(String groups);
+
+  /// No description provided for @videoAlreadyAddedNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'This video is already added as a lesson in this group'**
+  String get videoAlreadyAddedNotice;
+
   /// No description provided for @lessonNumber.
   ///
   /// In en, this message translates to:
