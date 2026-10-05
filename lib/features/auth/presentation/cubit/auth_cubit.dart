@@ -34,6 +34,7 @@ class AuthCubit extends Cubit<AuthState> {
       onSuccess: (user) {
         if (user == null) {
           SupabaseService.currentRole = null;
+          SupabaseService.currentStatus = null;
           AppLogger.i(_tag, 'No active session — user unauthenticated');
           emit(const AuthUnauthenticated());
         } else {
@@ -52,6 +53,7 @@ class AuthCubit extends Cubit<AuthState> {
       },
       onFailure: (failure) {
         SupabaseService.currentRole = null;
+        SupabaseService.currentStatus = null;
         AppLogger.w(
           _tag,
           'checkAuthStatus failed — treating as unauthenticated',
@@ -137,6 +139,8 @@ class AuthCubit extends Cubit<AuthState> {
           'Student registered — awaiting teacher approval',
           data: {'userId': user.id, 'email': user.email},
         );
+        SupabaseService.currentRole = user.role.name;
+        SupabaseService.currentStatus = user.status.name;
         emit(AuthPendingApproval(user));
       },
       onFailure: (failure) {
@@ -152,6 +156,7 @@ class AuthCubit extends Cubit<AuthState> {
 
   Future<void> logout() async {
     SupabaseService.currentRole = null;
+    SupabaseService.currentStatus = null;
     // Stop student engagement tracking
     StudentActivityTracker.instance.stop();
     // Clear all cached data to prevent stale data across sessions
@@ -186,6 +191,7 @@ class AuthCubit extends Cubit<AuthState> {
 
   void _routeUserByState(UserEntity user) {
     SupabaseService.currentRole = user.role.name;
+    SupabaseService.currentStatus = user.status.name;
     AppLogger.d(_tag, 'Routing user by status: ${user.status.name}');
     switch (user.status) {
       case UserStatus.pending:

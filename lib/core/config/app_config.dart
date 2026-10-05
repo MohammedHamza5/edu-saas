@@ -28,44 +28,7 @@ class AppConfig {
     );
   }
 
-  // ---------- Bunny Stream Config ----------
-  static String get bunnyLibraryId {
-    if (dotenv.isInitialized) {
-      final val = dotenv.env['BUNNY_LIBRARY_ID'];
-      if (val != null && val.isNotEmpty) return val;
-    }
-    return const String.fromEnvironment(
-      'BUNNY_LIBRARY_ID',
-      defaultValue: '747497',
-    );
-  }
 
-  static String get bunnyApiKey {
-    if (dotenv.isInitialized) {
-      final val = dotenv.env['BUNNY_API_KEY'];
-      if (val != null && val.isNotEmpty) return val;
-    }
-    return const String.fromEnvironment('BUNNY_API_KEY', defaultValue: '');
-  }
-
-  static String get bunnyCdnHostname {
-    if (dotenv.isInitialized) {
-      final val = dotenv.env['BUNNY_CDN_HOSTNAME'];
-      if (val != null && val.isNotEmpty) return val;
-    }
-    return const String.fromEnvironment(
-      'BUNNY_CDN_HOSTNAME',
-      defaultValue: 'vz-04d07c5c-73c.b-cdn.net',
-    );
-  }
-
-  static String get bunnyTokenKey {
-    if (dotenv.isInitialized) {
-      final val = dotenv.env['BUNNY_TOKEN_KEY'];
-      if (val != null && val.isNotEmpty) return val;
-    }
-    return const String.fromEnvironment('BUNNY_TOKEN_KEY', defaultValue: '');
-  }
 
   static String get defaultVideoProvider {
     if (dotenv.isInitialized) {

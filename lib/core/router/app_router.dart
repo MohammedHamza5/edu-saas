@@ -34,6 +34,8 @@ import '../../features/assignments/presentation/pages/teacher_assignments_page.d
 import '../../features/assignments/presentation/pages/student_assignments_page.dart';
 import '../../features/exams/presentation/pages/teacher_exams_page.dart';
 import '../../features/exams/presentation/pages/student_exams_page.dart';
+import '../../features/exams/presentation/pages/student_mistakes_page.dart';
+import '../../features/exams/presentation/pages/mistakes_practice_page.dart';
 import '../../features/settings/presentation/pages/teacher_settings_page.dart';
 import '../../features/question_bank/presentation/pages/question_bank_page.dart';
 import '../../features/question_bank/presentation/pages/document_questions_page.dart';
@@ -100,6 +102,8 @@ class AppRouter {
   static const String teacherExams = AppRoutes.teacherExams;
   static const String teacherGroupExams = AppRoutes.teacherGroupExams;
   static const String studentExams = AppRoutes.studentExams;
+  static const String studentMistakes = AppRoutes.studentMistakes;
+  static const String mistakesPractice = AppRoutes.mistakesPractice;
 
   // Feature: Platform Onboarding
   static const String platformOnboarding = AppRoutes.platformOnboarding;
@@ -117,66 +121,103 @@ class AppRouter {
   static const String documentQuestions = AppRoutes.documentQuestions;
   static const String reviewConsole = AppRoutes.reviewConsole;
 
-  static final GoRouter router = GoRouter(
-    initialLocation: splash,
-    observers: [AppRouteObserver.instance],
-    redirect: (BuildContext context, GoRouterState state) {
-      final isAuthenticated = SupabaseService.isAuthenticated;
-      final path = state.matchedLocation;
+  static String? redirectLogic(BuildContext context, GoRouterState state) {
+    final isAuthenticated = SupabaseService.isAuthenticated;
+    final path = state.matchedLocation;
 
-      // Unauthenticated users trying to access protected role routes
-      if (!isAuthenticated) {
-        final isProtected =
-            path.startsWith('/teacher') ||
-            path.startsWith('/student') ||
-            path.startsWith('/parent') ||
-            path.startsWith('/platform') ||
-            path.startsWith('/notifications') ||
-            path.startsWith('/videos') ||
-            path.startsWith('/video');
-        if (isProtected) {
-          return login;
-        }
-      } else {
-        final role = SupabaseService.currentUserRole;
+    // Unauthenticated users trying to access protected role routes
+    if (!isAuthenticated) {
+      final isProtected =
+          path.startsWith('/teacher') ||
+          path.startsWith('/student') ||
+          path.startsWith('/parent') ||
+          path.startsWith('/platform') ||
+          path.startsWith('/notifications') ||
+          path.startsWith('/videos') ||
+          path.startsWith('/video') ||
+          path == studentPending;
+      if (isProtected) {
+        return login;
+      }
+    } else {
+      final role = SupabaseService.currentUserRole;
+      final status = SupabaseService.currentUserStatus;
 
-        // Redirect already authenticated users away from auth pages
-        if (path == login || path == registerStudent || path == '/register') {
-          if (role == 'student') return studentDashboard;
-          if (role == 'parent') return parentDashboard;
-          return teacherDashboard;
+      // ── 1. Pending Student Lockdown ──────────────────────────────
+      // If an authenticated student's status is 'pending', they are strictly
+      // forbidden from accessing the dashboard or any academic content.
+      if (role == 'student' && status == 'pending') {
+        if (path == studentPending) {
+          return null; // Allowed on the waiting page
         }
+        return studentPending;
+      }
 
-        // Redirect generic /notifications to role-specific notifications shell route
-        if (path == notificationsCenter) {
-          if (role == 'student') return studentNotifications;
-          return teacherNotifications;
-        }
-
-        // Enforce strict role-based access isolation
-        if (role == 'student') {
-          if (path.startsWith('/teacher') ||
-              path.startsWith('/platform') ||
-              path.startsWith('/parent')) {
-            return studentDashboard;
-          }
-        }
-        if (role == 'teacher') {
-          if (path.startsWith('/student') || path.startsWith('/parent')) {
-            return teacherDashboard;
-          }
-        }
-        if (role == 'parent') {
-          if (path.startsWith('/teacher') ||
-              path.startsWith('/platform') ||
-              path.startsWith('/student')) {
-            return parentDashboard;
-          }
+      // If an active student or non-pending user tries to access /student-pending,
+      // redirect them to their dashboard
+      if (path == studentPending) {
+        if (status == 'active') {
+          return role == 'student' ? studentDashboard : teacherDashboard;
         }
       }
 
-      return null;
-    },
+      // ── 2. Suspended / Rejected Account Lockdown ─────────────────
+      if (status == 'suspended' || status == 'rejected') {
+        if (path == login || path == tenantSuspended) {
+          return null; // Stay on login or suspended page
+        }
+        return login;
+      }
+
+      // ── 3. Redirect already authenticated users away from auth pages
+      if (path == login || path == registerStudent || path == '/register') {
+        if (role == 'student') {
+          if (status == 'pending') return studentPending;
+          return studentDashboard;
+        }
+        if (role == 'parent') return parentDashboard;
+        return teacherDashboard;
+      }
+
+      // ── 4. Redirect generic /notifications to role-specific notifications shell route
+      if (path == notificationsCenter) {
+        if (role == 'student') return studentNotifications;
+        return teacherNotifications;
+      }
+
+      // ── 5. Enforce strict role-based access isolation ─────────────
+      if (role == 'student') {
+        // If status is not active, never allow student portal
+        if (status != null && status != 'active') {
+          return studentPending;
+        }
+        if (path.startsWith('/teacher') ||
+            path.startsWith('/platform') ||
+            path.startsWith('/parent')) {
+          return studentDashboard;
+        }
+      }
+      if (role == 'teacher') {
+        if (path.startsWith('/student') || path.startsWith('/parent')) {
+          return teacherDashboard;
+        }
+      }
+      if (role == 'parent') {
+        if (path.startsWith('/teacher') ||
+            path.startsWith('/platform') ||
+            path.startsWith('/student')) {
+          return parentDashboard;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  static final GoRouter router = GoRouter(
+    initialLocation: splash,
+    observers: [AppRouteObserver.instance],
+    redirect: redirectLogic,
     routes: [
       GoRoute(
         path: splash,
@@ -408,7 +449,8 @@ class AppRouter {
                   child: MultiBlocProvider(
                     providers: [
                       BlocProvider(
-                        create: (_) => InjectionContainer.createContentCubit(),
+                        create: (_) =>
+                            InjectionContainer.createVideoBankCubit(),
                       ),
                       BlocProvider(
                         create: (_) => InjectionContainer.createGroupsCubit(),
@@ -581,6 +623,28 @@ class AppRouter {
                 child: BlocProvider(
                   create: (_) => InjectionContainer.createExamsCubit(),
                   child: StudentExamsPage(initialExamId: examId),
+                ),
+              );
+            },
+          ),
+          GoRoute(
+            path: studentMistakes,
+            pageBuilder: (BuildContext context, GoRouterState state) =>
+                NoTransitionPage(
+                  child: BlocProvider(
+                    create: (_) => InjectionContainer.createMistakesCubit(),
+                    child: const StudentMistakesPage(),
+                  ),
+                ),
+          ),
+          GoRoute(
+            path: mistakesPractice,
+            pageBuilder: (BuildContext context, GoRouterState state) {
+              final examId = state.uri.queryParameters['examId'];
+              return NoTransitionPage(
+                child: BlocProvider(
+                  create: (_) => InjectionContainer.createMistakesCubit(),
+                  child: MistakesPracticePage(sourceExamId: examId),
                 ),
               );
             },

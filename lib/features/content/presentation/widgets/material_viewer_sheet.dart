@@ -32,18 +32,29 @@ class MaterialViewerSheet extends StatefulWidget {
     required Future<String?> Function(String storagePath) onGetSignedUrl,
   }) async {
     final width = MediaQuery.of(context).size.width;
+    final height = MediaQuery.of(context).size.height;
     final isPdf = content.type == ContentType.pdf;
     if (width >= 600) {
+      final dialogWidth = isPdf
+          ? (width > 1100 ? 1000.0 : (width * 0.92).clamp(700.0, 1000.0))
+          : 520.0;
+      final dialogMaxHeight = isPdf
+          ? (height * 0.92).clamp(550.0, 920.0)
+          : 640.0;
       await showDialog<void>(
         context: context,
         builder: (ctx) => Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppSpacing.radiusLarge),
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.s16,
+            vertical: AppSpacing.s20,
           ),
           child: ConstrainedBox(
             constraints: BoxConstraints(
-              maxWidth: isPdf ? 980 : 520,
-              maxHeight: isPdf ? MediaQuery.of(ctx).size.height * 0.90 : 640,
+              minWidth: dialogWidth,
+              maxWidth: dialogWidth,
+              minHeight: isPdf ? dialogMaxHeight : 0,
+              maxHeight: dialogMaxHeight,
             ),
             child: MaterialViewerSheet(
               content: content,
@@ -59,6 +70,7 @@ class MaterialViewerSheet extends StatefulWidget {
         backgroundColor: Colors.transparent,
         builder: (ctx) => ConstrainedBox(
           constraints: BoxConstraints(
+            minHeight: isPdf ? MediaQuery.of(ctx).size.height * 0.92 : 0,
             maxHeight: MediaQuery.of(ctx).size.height * 0.92,
           ),
           child: MaterialViewerSheet(
@@ -86,8 +98,16 @@ class _MaterialViewerSheetState extends State<MaterialViewerSheet> {
   }
 
   Future<void> _fetchUrl() async {
-    final storagePath = widget.content.file?.storagePath;
-    if (storagePath == null || storagePath.isEmpty) return;
+    if (widget.content.file?.signedUrl != null &&
+        widget.content.file!.signedUrl!.isNotEmpty) {
+      setState(() {
+        _signedUrl = widget.content.file!.signedUrl;
+        _isLoadingUrl = false;
+      });
+      return;
+    }
+
+    final storagePath = widget.content.file?.storagePath ?? '';
 
     setState(() {
       _isLoadingUrl = true;
@@ -100,7 +120,7 @@ class _MaterialViewerSheetState extends State<MaterialViewerSheet> {
         setState(() {
           _isLoadingUrl = false;
           _signedUrl = url;
-          if (url == null) {
+          if (url == null || url.isEmpty) {
             _errorMessage = context.l10n.secureUrlErrorFallback;
           }
         });
@@ -153,32 +173,37 @@ class _MaterialViewerSheetState extends State<MaterialViewerSheet> {
     };
 
     final isTeacher = SupabaseService.currentUserRole == 'teacher';
+    final isDesktop = MediaQuery.of(context).size.width >= 600;
 
     return ForensicWatermarkOverlay(
       child: Container(
         decoration: BoxDecoration(
           color: theme.scaffoldBackgroundColor,
-          borderRadius: const BorderRadius.vertical(
-            top: Radius.circular(AppSpacing.radiusLarge),
-          ),
+          borderRadius: isDesktop
+              ? BorderRadius.circular(AppSpacing.radiusLarge)
+              : const BorderRadius.vertical(
+                  top: Radius.circular(AppSpacing.radiusLarge),
+                ),
         ),
         padding: const EdgeInsets.all(AppSpacing.s20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Drag handle pill for bottom sheet
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                margin: const EdgeInsets.only(bottom: AppSpacing.s16),
-                decoration: BoxDecoration(
-                  color: AppColors.border,
-                  borderRadius: BorderRadius.circular(2),
+        child: _ScrollIf(
+          scroll: !isPdf,
+          child: Column(
+            mainAxisSize: isPdf ? MainAxisSize.max : MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (!isDesktop)
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: AppSpacing.s16),
+                    decoration: BoxDecoration(
+                      color: AppColors.border,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
                 ),
-              ),
-            ),
 
             // Header
             Row(
@@ -219,7 +244,7 @@ class _MaterialViewerSheetState extends State<MaterialViewerSheet> {
                             label: widget.content.type.localizedLabel(context),
                             variant: AppBadgeVariant.neutral,
                           ),
-                          if (file != null)
+                          if (file != null && file.fileSize > 0)
                             AppBadge(
                               label: file.formattedFileSize,
                               variant: AppBadgeVariant.neutral,
@@ -289,30 +314,32 @@ class _MaterialViewerSheetState extends State<MaterialViewerSheet> {
                         ),
                       ],
                     ),
-                    const Divider(height: AppSpacing.s16),
-                    Wrap(
-                      alignment: WrapAlignment.spaceBetween,
-                      spacing: AppSpacing.s12,
-                      runSpacing: 4,
-                      children: [
-                        Text(
-                          context.l10n.fileSizeLabel(file.formattedFileSize),
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: AppColors.textMuted,
+                    if (file.fileSize > 0) ...[
+                      const Divider(height: AppSpacing.s16),
+                      Wrap(
+                        alignment: WrapAlignment.spaceBetween,
+                        spacing: AppSpacing.s12,
+                        runSpacing: 4,
+                        children: [
+                          Text(
+                            context.l10n.fileSizeLabel(file.formattedFileSize),
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: AppColors.textMuted,
+                            ),
                           ),
-                        ),
-                        Text(
-                          context.l10n.fileTypeLabel(
-                            file.mimeType.split('/').last.toUpperCase(),
+                          Text(
+                            context.l10n.fileTypeLabel(
+                              file.mimeType.split('/').last.toUpperCase(),
+                            ),
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: AppColors.textMuted,
+                            ),
                           ),
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: AppColors.textMuted,
-                          ),
-                        ),
-                      ],
-                    ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -322,28 +349,31 @@ class _MaterialViewerSheetState extends State<MaterialViewerSheet> {
 
             // State of URL loading or action
             if (_isLoadingUrl) ...[
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.s12),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const AppLoadingView.compact(size: 18),
-                      const SizedBox(width: AppSpacing.s8),
-                      Flexible(
-                        child: Text(
-                          context.l10n.preparingSecureUrl,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: AppColors.textSecondary,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
+              Container(
+                height: isDesktop ? 340 : 200,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceVariant.withAlpha(20),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                  border: Border.all(color: AppColors.border.withAlpha(60)),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const AppLoadingView.compact(size: 28),
+                    const SizedBox(height: AppSpacing.s12),
+                    Text(
+                      context.l10n.preparingSecureUrl,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w500,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
+              const SizedBox(height: AppSpacing.s12),
             ] else if (_errorMessage != null) ...[
               Container(
                 padding: const EdgeInsets.all(AppSpacing.s8),
@@ -413,20 +443,21 @@ class _MaterialViewerSheetState extends State<MaterialViewerSheet> {
                 ),
               ],
               if (isPdf) ...[
-                Container(
-                  height: MediaQuery.of(context).size.width >= 600 ? 520 : 380,
-                  margin: const EdgeInsets.only(bottom: AppSpacing.s12),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(
-                      AppSpacing.radiusMedium,
+                Expanded(
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: AppSpacing.s12),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.radiusMedium,
+                      ),
+                      border: Border.all(color: AppColors.border),
                     ),
-                    border: Border.all(color: AppColors.border),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(
-                      AppSpacing.radiusMedium,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.radiusMedium,
+                      ),
+                      child: buildSecurePdfViewer(pdfUrl: _signedUrl!),
                     ),
-                    child: buildSecurePdfViewer(pdfUrl: _signedUrl!),
                   ),
                 ),
               ],
@@ -476,6 +507,33 @@ class _MaterialViewerSheetState extends State<MaterialViewerSheet> {
                   },
                 ),
               ],
+            ] else ...[
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.s16),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceVariant.withAlpha(20),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.info_outline_rounded,
+                      size: 20,
+                      color: AppColors.textMuted,
+                    ),
+                    const SizedBox(width: AppSpacing.s8),
+                    Expanded(
+                      child: Text(
+                        context.l10n.emptyData,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ],
 
             const SizedBox(height: AppSpacing.s12),
@@ -517,6 +575,21 @@ class _MaterialViewerSheetState extends State<MaterialViewerSheet> {
           ],
         ),
       ),
-    );
+    ),
+  );
+  }
+}
+
+/// Wraps [child] in a [SingleChildScrollView] only when [scroll] is true.
+/// PDFs render inside a native iframe that must not be nested in a scroll view.
+class _ScrollIf extends StatelessWidget {
+  final bool scroll;
+  final Widget child;
+
+  const _ScrollIf({required this.scroll, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return scroll ? SingleChildScrollView(child: child) : child;
   }
 }

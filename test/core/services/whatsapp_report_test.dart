@@ -84,5 +84,103 @@ void main() {
       expect(report, contains('92 / 100'));
       expect(report, contains('120 دقيقة'));
     });
+
+    group('Natural Online WhatsApp Reports (Zero Physical Attendance)', () {
+      test('generateNaturalWeeklyReport omits missing homework and exam metrics completely', () {
+        // Online scenario: No homework was assigned, no mock exam taken
+        final report = WhatsAppReportGenerator.generateNaturalWeeklyReport(
+          studentName: 'زياد طارق',
+          groupName: 'SAT Advanced',
+          videoWatchRate: 1.0,
+          totalAssignments: 0,
+          completedAssignments: 0,
+          mockExamScore: 0,
+          activeStudyMinutes: 75,
+        );
+
+        // Friendly, warm tone
+        expect(report, contains('أهلاً بحضرتك يا فندم 🌸'));
+        expect(report, contains('زياد طارق'));
+        expect(report, contains('SAT Advanced'));
+
+        // Videos present (100% watched)
+        expect(report, contains('🎬 شاف كل فيديوهات ومحاضرات الأسبوع ده بالكامل.'));
+
+        // Active study time formatted in hours
+        expect(report, contains('⏱️ وقت مذاكرته وتفاعله على المنصة: حوالي 1.3 ساعة.'));
+
+        // Strictly NO homework or exam lines when missing / zero
+        expect(report.contains('📝'), isFalse);
+        expect(report.contains('واجب'), isFalse);
+        expect(report.contains('تدريبات'), isFalse);
+        expect(report.contains('🎯'), isFalse);
+        expect(report.contains('سكور'), isFalse);
+        expect(report.contains('امتحان'), isFalse);
+      });
+
+      test('generateNaturalWeeklyReport formats all active metrics when available', () {
+        final report = WhatsAppReportGenerator.generateNaturalWeeklyReport(
+          studentName: 'سارة خالد',
+          groupName: 'EST 101',
+          videoWatchRate: 0.80,
+          totalAssignments: 4,
+          completedAssignments: 4,
+          mockExamScore: 720,
+          targetScore: 800,
+          activeStudyMinutes: 45,
+          teacherNotes: 'حل رائع وتطور ملحوظ في مسائل الهندسة.',
+          teacherName: 'د. أنطونيوس أشرف',
+        );
+
+        expect(report, contains('أهلاً بحضرتك يا فندم 🌸'));
+        expect(report, contains('سارة خالد'));
+        expect(report, contains('🎬 شاف 80% من شروحات ومحاضرات الأسبوع ده.'));
+        expect(report, contains('⏱️ وقت مذاكرته وتفاعله على المنصة: حوالي 45 دقيقة.'));
+        expect(report, contains('📝 سلّم كل واجبات وتدريبات الأسبوع ده في موعدها.'));
+        expect(report, contains('🎯 سكور الكويز/الامتحان الأخير: 720 من 800.'));
+        expect(report, contains('💡 ملاحظة:\nحل رائع وتطور ملحوظ في مسائل الهندسة.'));
+        expect(report, contains('د. أنطونيوس أشرف'));
+      });
+
+      test('generateNaturalMonthlyReport omits missing metrics and formats monthly summary', () {
+        final report = WhatsAppReportGenerator.generateNaturalMonthlyReport(
+          studentName: 'يوسف إبراهيم',
+          groupName: 'SAT Math',
+          videoWatchRate: 0.95,
+          totalAssignments: 8,
+          completedAssignments: 6,
+          mockExamScore: 710,
+          targetScore: 800,
+          activeStudyMinutes: 360, // 6 hours
+          teacherNotes: 'الاستمرار بنفس العزيمة سيضمن الـ 750+ بإذن الله.',
+        );
+
+        expect(report, contains('أهلاً بحضرتك يا فندم 🌸'));
+        expect(report, contains('ملخص مجهوده معانا خلال الشهر ده في SAT Math:'));
+        expect(report, contains('📚 أتم بنجاح كل محاضرات وكورسات الشهر ده بالكامل.'));
+        expect(report, contains('⏱️ إجمالي ساعات مذاكرته وتفاعله على المنصة: حوالي 6 ساعة.'));
+        expect(report, contains('📝 إجمالي الواجبات المُسلّمة: 6 من أصل 8 واجب.'));
+        expect(report, contains('🎯 متوسط درجاته في امتحانات وتدريبات الشهر: 710 من 800.'));
+        expect(report, contains('💡 تقييم وتوصية المدرس للشهر القادم:'));
+        expect(report, contains('فخورين بالتزامه وماشيين معاه خطوة بخطوة'));
+      });
+
+      test('generateNaturalMonthlyReport omits homework when no homework assigned in the month', () {
+        final report = WhatsAppReportGenerator.generateNaturalMonthlyReport(
+          studentName: 'نور الدين',
+          groupName: 'Algebra Foundations',
+          videoWatchRate: 0.60,
+          totalAssignments: 0,
+          completedAssignments: 0,
+          mockExamScore: 0,
+        );
+
+        expect(report, contains('نور الدين'));
+        expect(report, contains('📚 نسبة إنجازه للمحاضرات والشروحات الشهر ده: 60%.'));
+        expect(report.contains('📝'), isFalse);
+        expect(report.contains('واجب'), isFalse);
+        expect(report.contains('🎯'), isFalse);
+      });
+    });
   });
 }

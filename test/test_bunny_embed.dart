@@ -4,8 +4,8 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 
 void main() async {
-  const tokenKey = 'd472d690-df72-45d1-8233-a5a9a8ccd155';
-  const libraryId = '747497';
+  const tokenKey = 'cbd15974-8efd-4555-af5d-dc2a22a8e96e';
+  const libraryId = '770018';
   const videoId = 'eb03f081-1264-475b-9ae5-db3752cc635c';
   final expires =
       (DateTime.now().toUtc().millisecondsSinceEpoch ~/ 1000) + 10800;

@@ -16,6 +16,7 @@ class AppTextField extends StatefulWidget {
   final bool enabled;
   final int maxLines;
   final TextStyle? style;
+  final bool autofocus;
 
   const AppTextField({
     super.key,
@@ -33,6 +34,7 @@ class AppTextField extends StatefulWidget {
     this.enabled = true,
     this.maxLines = 1,
     this.style,
+    this.autofocus = false,
   });
 
   @override
@@ -80,6 +82,7 @@ class _AppTextFieldState extends State<AppTextField> {
       controller: widget.controller,
       obscureText: _obscureText,
       keyboardType: widget.keyboardType,
+      autofocus: widget.autofocus,
       onChanged: widget.onChanged,
       validator: widget.validator,
       enabled: widget.enabled,

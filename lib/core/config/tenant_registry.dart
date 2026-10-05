@@ -30,6 +30,7 @@ class TenantRegistry {
     logoAsset: 'assets/images/dr_antounios_logo.png',
     supportPhone: '+201000000000',
     supportEmail: 'contact@antounios.edsentre.com',
+    videoProvider: 'bunny',
   );
 
   /// Default Platform Branding (Set to Dr. Antounios Ashraf)
@@ -61,6 +62,7 @@ class TenantRegistry {
       logoAsset: 'assets/images/dr_antounios_logo.png',
       supportPhone: '+201000000001',
       supportEmail: 'test.teacher@edusaas.com',
+      videoProvider: 'bunny',
     ),
     'teacher-1-slot': drAntouniosBranding,
     'antounios': drAntouniosBranding,

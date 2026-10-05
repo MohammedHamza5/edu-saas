@@ -15,7 +15,7 @@ class MockVideosRepository implements VideosRepository {
   List<VideoEntity> videosResponse = [];
   VideoEntity? singleVideoResponse;
   String playbackUrlResponse =
-      'https://vz-04d07c5c-73c.b-cdn.net/test-guid/playlist.m3u8?token=mocktoken&expires=9999999999';
+      'https://vz-1854ca75-182.b-cdn.net/test-guid/playlist.m3u8?token=mocktoken&expires=9999999999';
   VideoProgressEntity? progressResponse;
   Failure? failureToThrow;
 
@@ -351,7 +351,7 @@ void main() {
         expect(cubit.state, isA<VideosLoaded>());
         final state = cubit.state as VideosLoaded;
         expect(state.currentVideo?.id, equals('vid-1'));
-        expect(state.playbackUrl, contains('vz-04d07c5c-73c.b-cdn.net'));
+        expect(state.playbackUrl, contains('vz-1854ca75-182.b-cdn.net'));
         expect(state.playbackUrl, contains('token='));
         expect(state.progress?.progressSeconds, equals(320));
       },

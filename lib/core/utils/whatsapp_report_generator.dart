@@ -6,8 +6,8 @@ import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 
 /// WhatsApp Academic Progress Report Generator
-/// Provides single-click professional reporting for teachers to communicate directly
-/// with parents via WhatsApp without requiring parents to log in to the web app.
+/// Provides single-click natural, conversational reporting for teachers to communicate
+/// directly with parents on WhatsApp for online learning without requiring parents to log in.
 class WhatsAppReportGenerator {
   WhatsAppReportGenerator._();
 
@@ -64,7 +64,143 @@ class WhatsAppReportGenerator {
     }
   }
 
-  /// Generates weekly comprehensive academic report
+  /// Generates natural, warm weekly progress report for online learning
+  /// Dynamically omits any metric that was not assigned or has no data
+  static String generateNaturalWeeklyReport({
+    required String studentName,
+    String? groupName,
+    double videoWatchRate = 0.0,
+    int completedAssignments = 0,
+    int totalAssignments = 0,
+    int mockExamScore = 0,
+    int targetScore = 100,
+    int? activeStudyMinutes,
+    String? teacherNotes,
+    String? teacherName = 'د. أنطونيوس أشرف',
+  }) {
+    final videoPercent = (videoWatchRate * 100).round();
+    final group = (groupName != null && groupName.isNotEmpty) ? ' في $groupName' : '';
+    final sender = (teacherName != null && teacherName.isNotEmpty) ? '\n$teacherName' : '';
+
+    final lines = <String>[];
+
+    // 1. Video lectures progress (ONLY if > 0)
+    if (videoPercent > 0) {
+      if (videoPercent >= 95) {
+        lines.add('🎬 شاف كل فيديوهات ومحاضرات الأسبوع ده بالكامل.');
+      } else {
+        lines.add('🎬 شاف $videoPercent% من شروحات ومحاضرات الأسبوع ده.');
+      }
+    }
+
+    // 2. Active study minutes (ONLY if > 0)
+    if (activeStudyMinutes != null && activeStudyMinutes > 0) {
+      if (activeStudyMinutes >= 60) {
+        final hours = (activeStudyMinutes / 60).toStringAsFixed(1).replaceAll('.0', '');
+        lines.add('⏱️ وقت مذاكرته وتفاعله على المنصة: حوالي $hours ساعة.');
+      } else {
+        lines.add('⏱️ وقت مذاكرته وتفاعله على المنصة: حوالي $activeStudyMinutes دقيقة.');
+      }
+    }
+
+    // 3. Homework assignments (ONLY if assigned > 0 or completed > 0)
+    if (totalAssignments > 0 || completedAssignments > 0) {
+      if (totalAssignments > 0 && completedAssignments >= totalAssignments) {
+        lines.add('📝 سلّم كل واجبات وتدريبات الأسبوع ده في موعدها.');
+      } else if (totalAssignments > 0) {
+        lines.add('📝 سلّم $completedAssignments من أصل $totalAssignments من تدريبات الأسبوع.');
+      } else {
+        lines.add('📝 أنجز $completedAssignments من التكليفات والتدريبات.');
+      }
+    }
+
+    // 4. Exam / Quiz score (ONLY if > 0)
+    if (mockExamScore > 0) {
+      lines.add('🎯 سكور الكويز/الامتحان الأخير: $mockExamScore من $targetScore.');
+    }
+
+    final bulletsText = lines.isNotEmpty ? '\n${lines.join('\n')}\n' : '';
+
+    final noteSection = (teacherNotes != null && teacherNotes.trim().isNotEmpty)
+        ? '\n💡 ملاحظة:\n${teacherNotes.trim()}\n'
+        : '';
+
+    return '''
+أهلاً بحضرتك يا فندم 🌸
+حبيت أشارك مع حضرتك متابعة سريعة لمذاكرة $studentName خلال الأسبوع ده$group:
+$bulletsText$noteSection
+ربنا يوفقه دايماً يا رب، ومع حضرتك في أي وقت لو حابب تسأل عن أي تفاصيل 🌸$sender
+'''
+        .trim();
+  }
+
+  /// Generates natural, comprehensive monthly progress report for online learning
+  /// Dynamically omits any metric that was not assigned or has no data
+  static String generateNaturalMonthlyReport({
+    required String studentName,
+    String? groupName,
+    double videoWatchRate = 0.0,
+    int completedAssignments = 0,
+    int totalAssignments = 0,
+    int mockExamScore = 0,
+    int targetScore = 100,
+    int? activeStudyMinutes,
+    String? teacherNotes,
+    String? teacherName = 'د. أنطونيوس أشرف',
+  }) {
+    final videoPercent = (videoWatchRate * 100).round();
+    final group = (groupName != null && groupName.isNotEmpty) ? ' في $groupName' : '';
+    final sender = (teacherName != null && teacherName.isNotEmpty) ? '\n$teacherName' : '';
+
+    final lines = <String>[];
+
+    // 1. Video / Lecture monthly progress (ONLY if > 0)
+    if (videoPercent > 0) {
+      if (videoPercent >= 95) {
+        lines.add('📚 أتم بنجاح كل محاضرات وكورسات الشهر ده بالكامل.');
+      } else {
+        lines.add('📚 نسبة إنجازه للمحاضرات والشروحات الشهر ده: $videoPercent%.');
+      }
+    }
+
+    // 2. Active study hours (ONLY if > 0)
+    if (activeStudyMinutes != null && activeStudyMinutes > 0) {
+      final hours = (activeStudyMinutes / 60).toStringAsFixed(1).replaceAll('.0', '');
+      lines.add('⏱️ إجمالي ساعات مذاكرته وتفاعله على المنصة: حوالي $hours ساعة.');
+    }
+
+    // 3. Homework assignments (ONLY if assigned > 0 or completed > 0)
+    if (totalAssignments > 0 || completedAssignments > 0) {
+      if (totalAssignments > 0 && completedAssignments >= totalAssignments) {
+        lines.add('📝 سلّم كل واجبات الشهر بانتظام والتزام ممتاز ($completedAssignments واجب).');
+      } else if (totalAssignments > 0) {
+        lines.add('📝 إجمالي الواجبات المُسلّمة: $completedAssignments من أصل $totalAssignments واجب.');
+      } else {
+        lines.add('📝 أنجز $completedAssignments من الواجبات والتطبيقات.');
+      }
+    }
+
+    // 4. Exam average score (ONLY if > 0)
+    if (mockExamScore > 0) {
+      lines.add('🎯 متوسط درجاته في امتحانات وتدريبات الشهر: $mockExamScore من $targetScore.');
+    }
+
+    final bulletsText = lines.isNotEmpty ? '\n${lines.join('\n')}\n' : '';
+
+    final noteSection = (teacherNotes != null && teacherNotes.trim().isNotEmpty)
+        ? '\n💡 تقييم وتوصية المدرس للشهر القادم:\n${teacherNotes.trim()}\n'
+        : '';
+
+    return '''
+أهلاً بحضرتك يا فندم 🌸
+حبيت أطمن حضرتك على مستوى $studentName وملخص مجهوده معانا خلال الشهر ده$group:
+$bulletsText$noteSection
+فخورين بالتزامه وماشيين معاه خطوة بخطوة عشان يوصل لأعلى سكور إن شاء الله 🌟$sender
+'''
+        .trim();
+  }
+
+  /// Backwards-compatible weekly academic report generator
   static String generateStudentWeeklyReport({
     required String studentName,
     String? groupName,
@@ -233,6 +369,14 @@ $notes
     required String reportText,
     String? phone,
     String? alternatePhone,
+    String? groupName,
+    double videoWatchRate = 0.0,
+    int completedAssignments = 0,
+    int totalAssignments = 0,
+    int mockExamScore = 0,
+    int targetScore = 100,
+    int? activeStudyMinutes,
+    String? teacherName = 'د. أنطونيوس أشرف',
   }) {
     showDialog<void>(
       context: context,
@@ -241,6 +385,14 @@ $notes
         initialReportText: reportText,
         phone: phone,
         alternatePhone: alternatePhone,
+        groupName: groupName,
+        videoWatchRate: videoWatchRate,
+        completedAssignments: completedAssignments,
+        totalAssignments: totalAssignments,
+        mockExamScore: mockExamScore,
+        targetScore: targetScore,
+        activeStudyMinutes: activeStudyMinutes,
+        teacherName: teacherName,
       ),
     );
   }
@@ -251,12 +403,28 @@ class _WhatsAppInteractiveDialog extends StatefulWidget {
   final String initialReportText;
   final String? phone;
   final String? alternatePhone;
+  final String? groupName;
+  final double videoWatchRate;
+  final int completedAssignments;
+  final int totalAssignments;
+  final int mockExamScore;
+  final int targetScore;
+  final int? activeStudyMinutes;
+  final String? teacherName;
 
   const _WhatsAppInteractiveDialog({
     required this.studentName,
     required this.initialReportText,
     this.phone,
     this.alternatePhone,
+    this.groupName,
+    this.videoWatchRate = 0.0,
+    this.completedAssignments = 0,
+    this.totalAssignments = 0,
+    this.mockExamScore = 0,
+    this.targetScore = 100,
+    this.activeStudyMinutes,
+    this.teacherName,
   });
 
   @override
@@ -268,15 +436,50 @@ class _WhatsAppInteractiveDialogState
     extends State<_WhatsAppInteractiveDialog> {
   late final TextEditingController _textController;
   late String _selectedPhone;
+  bool _isMonthly = false;
+  String _currentCustomNote = '';
   bool _isSending = false;
 
   @override
   void initState() {
     super.initState();
-    _textController = TextEditingController(text: widget.initialReportText);
+    _textController = TextEditingController(
+      text: widget.initialReportText.trim().isNotEmpty
+          ? widget.initialReportText
+          : _generateActiveReport(),
+    );
     _selectedPhone = (widget.phone != null && widget.phone!.trim().isNotEmpty)
         ? widget.phone!.trim()
         : (widget.alternatePhone?.trim() ?? '');
+  }
+
+  String _generateActiveReport() {
+    if (_isMonthly) {
+      return WhatsAppReportGenerator.generateNaturalMonthlyReport(
+        studentName: widget.studentName,
+        groupName: widget.groupName,
+        videoWatchRate: widget.videoWatchRate,
+        completedAssignments: widget.completedAssignments,
+        totalAssignments: widget.totalAssignments,
+        mockExamScore: widget.mockExamScore,
+        targetScore: widget.targetScore,
+        activeStudyMinutes: widget.activeStudyMinutes,
+        teacherNotes: _currentCustomNote,
+        teacherName: widget.teacherName,
+      );
+    }
+    return WhatsAppReportGenerator.generateNaturalWeeklyReport(
+      studentName: widget.studentName,
+      groupName: widget.groupName,
+      videoWatchRate: widget.videoWatchRate,
+      completedAssignments: widget.completedAssignments,
+      totalAssignments: widget.totalAssignments,
+      mockExamScore: widget.mockExamScore,
+      targetScore: widget.targetScore,
+      activeStudyMinutes: widget.activeStudyMinutes,
+      teacherNotes: _currentCustomNote,
+      teacherName: widget.teacherName,
+    );
   }
 
   @override
@@ -285,25 +488,19 @@ class _WhatsAppInteractiveDialogState
     super.dispose();
   }
 
+  void _switchPeriod(bool isMonthly) {
+    if (_isMonthly == isMonthly) return;
+    setState(() {
+      _isMonthly = isMonthly;
+      _textController.text = _generateActiveReport();
+    });
+  }
+
   void _applyPresetNote(String preset) {
-    final current = _textController.text;
-    const noteMarker = '💡 ملاحظة وتوصية المدرس:';
-    if (current.contains(noteMarker)) {
-      final parts = current.split(noteMarker);
-      final before = parts[0];
-      final afterWithClosing = parts.length > 1 ? parts[1] : '';
-      const closingMarker = 'مع خالص تمنياتنا';
-      if (afterWithClosing.contains(closingMarker)) {
-        final afterParts = afterWithClosing.split(closingMarker);
-        _textController.text =
-            '$before$noteMarker\n$preset\n\n$closingMarker${afterParts[1]}';
-      } else {
-        _textController.text = '$before$noteMarker\n$preset\n';
-      }
-    } else {
-      _textController.text = '$current\n\n💡 ملاحظة:\n$preset';
-    }
-    setState(() {});
+    setState(() {
+      _currentCustomNote = preset;
+      _textController.text = _generateActiveReport();
+    });
   }
 
   Future<void> _handleSendWhatsApp() async {
@@ -426,6 +623,50 @@ class _WhatsAppInteractiveDialogState
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Period Toggle: Weekly vs Monthly
+              Row(
+                children: [
+                  ChoiceChip(
+                    avatar: Icon(
+                      Icons.bolt_rounded,
+                      size: 16,
+                      color: !_isMonthly ? Colors.white : AppColors.primary,
+                    ),
+                    label: Text(l10n.whatsappPeriodWeekly),
+                    selected: !_isMonthly,
+                    selectedColor: AppColors.primary,
+                    labelStyle: TextStyle(
+                      color: !_isMonthly ? Colors.white : AppColors.textPrimary,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                    onSelected: (selected) {
+                      if (selected) _switchPeriod(false);
+                    },
+                  ),
+                  const SizedBox(width: AppSpacing.s8),
+                  ChoiceChip(
+                    avatar: Icon(
+                      Icons.calendar_month_rounded,
+                      size: 16,
+                      color: _isMonthly ? Colors.white : AppColors.primary,
+                    ),
+                    label: Text(l10n.whatsappPeriodMonthly),
+                    selected: _isMonthly,
+                    selectedColor: AppColors.primary,
+                    labelStyle: TextStyle(
+                      color: _isMonthly ? Colors.white : AppColors.textPrimary,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                    onSelected: (selected) {
+                      if (selected) _switchPeriod(true);
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.s12),
+
               // Target Phone Selector if both exist
               if (hasParentPhone && hasAltPhone) ...[
                 Text(
@@ -519,7 +760,7 @@ class _WhatsAppInteractiveDialogState
                 const SizedBox(height: AppSpacing.s12),
               ],
 
-              // Quick Presets
+              // Quick Friendly Presets
               Text(
                 l10n.whatsappTeacherNotesLabel,
                 style: const TextStyle(
@@ -536,26 +777,26 @@ class _WhatsAppInteractiveDialogState
                   ActionChip(
                     avatar: const Icon(Icons.star_rounded,
                         size: 14, color: Color(0xFFF59E0B)),
-                    label: Text(l10n.whatsappPresetExcellent,
+                    label: Text(l10n.whatsappPresetFriendlyKeepUp,
                         style: const TextStyle(fontSize: 11)),
                     onPressed: () =>
-                        _applyPresetNote(l10n.whatsappPresetExcellent),
+                        _applyPresetNote(l10n.whatsappPresetFriendlyKeepUp),
                   ),
                   ActionChip(
-                    avatar: const Icon(Icons.assignment_late_rounded,
-                        size: 14, color: AppColors.warning),
-                    label: Text(l10n.whatsappPresetNeedsHomework,
+                    avatar: const Icon(Icons.fitness_center_rounded,
+                        size: 14, color: AppColors.primary),
+                    label: Text(l10n.whatsappPresetFriendlyNeedsFocus,
                         style: const TextStyle(fontSize: 11)),
                     onPressed: () =>
-                        _applyPresetNote(l10n.whatsappPresetNeedsHomework),
+                        _applyPresetNote(l10n.whatsappPresetFriendlyNeedsFocus),
                   ),
                   ActionChip(
-                    avatar: const Icon(Icons.event_busy_rounded,
-                        size: 14, color: AppColors.error),
-                    label: Text(l10n.whatsappPresetAbsentNotice,
+                    avatar: const Icon(Icons.play_circle_outline_rounded,
+                        size: 14, color: AppColors.info),
+                    label: Text(l10n.whatsappPresetFriendlyCatchUp,
                         style: const TextStyle(fontSize: 11)),
                     onPressed: () =>
-                        _applyPresetNote(l10n.whatsappPresetAbsentNotice),
+                        _applyPresetNote(l10n.whatsappPresetFriendlyCatchUp),
                   ),
                 ],
               ),
@@ -566,10 +807,10 @@ class _WhatsAppInteractiveDialogState
                 controller: _textController,
                 maxLines: 10,
                 style: const TextStyle(
-                  fontSize: 12,
-                  height: 1.5,
+                  fontSize: 13,
+                  height: 1.6,
                   color: AppColors.textPrimary,
-                  fontFamily: 'monospace',
+                  fontFamily: 'Cairo',
                 ),
                 decoration: InputDecoration(
                   filled: true,

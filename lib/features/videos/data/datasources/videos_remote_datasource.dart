@@ -1,9 +1,6 @@
-import 'dart:convert';
 import 'dart:typed_data';
-import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../../core/config/app_config.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/network/supabase_service.dart';
 import '../../../../core/utils/youtube_url_parser.dart';
@@ -94,7 +91,7 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
         if (model.providerVideoId != null && model.status.isReady) {
           final playbackUrl = model.isYouTube
               ? YouTubeUrlParser.getEmbedUrl(model.providerVideoId!)
-              : _generateSignedPlaybackUrl(model.providerVideoId!);
+              : null; // Bunny URLs are fetched securely on-demand via Edge Function
           return model.copyWithPlaybackUrl(playbackUrl);
         }
         return model;
@@ -122,7 +119,7 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
             model.providerVideoId!.isNotEmpty) {
           final playbackUrl = model.isYouTube
               ? YouTubeUrlParser.getEmbedUrl(model.providerVideoId!)
-              : _generateSignedPlaybackUrl(model.providerVideoId!);
+              : null; // Bunny URLs are fetched securely on-demand via Edge Function
           return model.copyWithPlaybackUrl(playbackUrl);
         }
         return model;
@@ -168,14 +165,35 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
 
   @override
   Future<String> getPlaybackUrl(String videoId) async {
-    try {
-      final res = await _c.rpc<dynamic>(
-        'get_video_playback_url',
-        params: {'p_video_id': videoId},
+    final video = await getVideoById(videoId);
+    
+    if (video.providerVideoId == null || video.providerVideoId!.isEmpty) {
+      throw const ServerException(
+        'Video file is not available',
+        code: 'VIDEO_NOT_READY',
       );
-      if (res is Map && res['playback_url'] != null) {
-        return res['playback_url'] as String;
+    }
+    
+    if (video.isYouTube) {
+      return YouTubeUrlParser.getEmbedUrl(video.providerVideoId!);
+    }
+
+    try {
+      final res = await _c.functions.invoke(
+        'video-playback',
+        body: {'video_id': videoId},
+      );
+      
+      if (res.status == 200 && res.data != null) {
+        final data = res.data as Map<String, dynamic>;
+        if (data['error'] != null) {
+          throw ServerException(data['error'].toString());
+        }
+        if (data['playback_url'] != null) {
+          return data['playback_url'] as String;
+        }
       }
+      throw ServerException('Failed to generate playback url: ${res.status}');
     } catch (e) {
       final msg = e.toString();
       if (msg.contains('VIDEO_NOT_READY')) {
@@ -199,39 +217,8 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
           code: 'VIDEO_NOT_FOUND',
         );
       }
+      throw ServerException('Failed to securely fetch video: $msg');
     }
-
-    final video = await getVideoById(videoId);
-    if (video.providerVideoId == null || video.providerVideoId!.isEmpty) {
-      throw const ServerException(
-        'Video file is not available',
-        code: 'VIDEO_NOT_READY',
-      );
-    }
-    if (video.isYouTube) {
-      return YouTubeUrlParser.getEmbedUrl(video.providerVideoId!);
-    }
-    return _generateSignedPlaybackUrl(video.providerVideoId!);
-  }
-
-  /// Generates a secure, time-limited Tokenized Embed URL from Bunny Stream (fallback when token is available)
-  String _generateSignedPlaybackUrl(String providerVideoId) {
-    final tokenKey = AppConfig.bunnyTokenKey;
-    final libraryId = AppConfig.bunnyLibraryId;
-
-    if (tokenKey.isEmpty) {
-      return 'https://iframe.mediadelivery.net/embed/$libraryId/$providerVideoId?autoplay=true&preload=true&responsive=true&playerjs=true';
-    }
-
-    // Expires in 4 hours (14400 seconds)
-    final expires =
-        (DateTime.now().toUtc().millisecondsSinceEpoch ~/ 1000) + 14400;
-
-    // SHA256(token_key + video_id + expires)
-    final hashInput = '$tokenKey$providerVideoId$expires';
-    final token = sha256.convert(utf8.encode(hashInput)).toString();
-
-    return 'https://iframe.mediadelivery.net/embed/$libraryId/$providerVideoId?token=$token&expires=$expires&autoplay=true&preload=true&responsive=true&playerjs=true';
   }
 
   /// Resolves the actual videos.id whether passed an id or content_id
@@ -361,85 +348,91 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
     void Function(int sentBytes, int totalBytes)? onProgress,
   }) async {
     try {
-      final libraryId = AppConfig.bunnyLibraryId;
-      final apiKey = AppConfig.bunnyApiKey;
-      final cdnHost = AppConfig.bunnyCdnHostname;
-
-      // 1. Create Video Object in Bunny Stream
-      final createResponse = await _dio.post<Map<String, dynamic>>(
-        'https://video.bunnycdn.com/library/$libraryId/videos',
-        data: {'title': title},
-        options: Options(
-          headers: {
-            'AccessKey': apiKey,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-        ),
+      // 1. Invoke Edge Function to create video and get TUS signature
+      final response = await _c.functions.invoke(
+        'bunny-video',
+        body: {
+          'action': 'create-upload',
+          'content_id': contentId,
+          'title': title,
+        },
       );
 
-      final videoGuid = createResponse.data?['guid'] as String?;
-      if (videoGuid == null || videoGuid.isEmpty) {
-        throw const ServerException(
-          'Failed to initialize video processing',
+      if (response.status != 200 || response.data == null) {
+        throw ServerException(
+          'Failed to initialize video processing: ${response.status}',
           code: 'VIDEO_INIT_FAILED',
         );
       }
 
-      // 2. Direct Binary Upload to Bunny Stream
+      final data = response.data as Map<String, dynamic>;
+      if (data['error'] != null) {
+        throw ServerException(
+          data['error'].toString(),
+          code: 'VIDEO_INIT_FAILED',
+        );
+      }
+
+      final videoId = data['video_id'] as String;
+      final videoGuid = data['video_guid'] as String;
+      final libraryId = data['library_id'].toString();
+      final tusEndpoint = data['tus_endpoint'] as String;
+      final signature = data['signature'] as String;
+      final expire = data['expire'] as int;
+
+      // 2. TUS Upload - Step 1: Create TUS upload session
       final payloadBytes = videoBytes is Uint8List
           ? videoBytes
           : Uint8List.fromList(videoBytes);
-      await _dio.put<void>(
-        'https://video.bunnycdn.com/library/$libraryId/videos/$videoGuid',
+
+      final tusCreateResponse = await _dio.post<dynamic>(
+        tusEndpoint,
+        options: Options(
+          headers: {
+            'Upload-Length': payloadBytes.length.toString(),
+            'Tus-Resumable': '1.0.0',
+            'AuthorizationSignature': signature,
+            'AuthorizationExpire': expire.toString(),
+            'VideoId': videoGuid,
+            'LibraryId': libraryId,
+          },
+          validateStatus: (status) => status != null && status >= 200 && status < 300,
+        ),
+      );
+
+      final location = tusCreateResponse.headers.value('Location');
+      if (location == null || location.isEmpty) {
+        throw const ServerException(
+          'Failed to create TUS upload session',
+          code: 'TUS_INIT_FAILED',
+        );
+      }
+      
+      // Ensure absolute URL if Location is relative
+      final uploadUrl = location.startsWith('http') 
+          ? location 
+          : 'https://video.bunnycdn.com$location';
+
+      // 3. TUS Upload - Step 2: Upload bytes
+      await _dio.patch<dynamic>(
+        uploadUrl,
         data: payloadBytes,
         options: Options(
           headers: {
-            'AccessKey': apiKey,
-            'Content-Type': 'application/octet-stream',
-            'Content-Length': payloadBytes.length.toString(),
+            'Upload-Offset': '0',
+            'Content-Type': 'application/offset+octet-stream',
+            'Tus-Resumable': '1.0.0',
+            'AuthorizationSignature': signature,
+            'AuthorizationExpire': expire.toString(),
+            'VideoId': videoGuid,
+            'LibraryId': libraryId,
           },
         ),
         onSendProgress: onProgress,
       );
 
-      // 3. Save or Update Video Record in Supabase
-      final thumbnailUrl = 'https://$cdnHost/$videoGuid/thumbnail.jpg';
-      final existing = await _c
-          .from('videos')
-          .select('id')
-          .eq('content_id', contentId)
-          .maybeSingle();
-
-      Map<String, dynamic> videoData;
-      if (existing != null && existing['id'] != null) {
-        videoData = await _c
-            .from('videos')
-            .update({
-              'provider': 'bunny',
-              'provider_video_id': videoGuid,
-              'status': 'processing',
-              'thumbnail_url': thumbnailUrl,
-              'updated_at': DateTime.now().toUtc().toIso8601String(),
-            })
-            .eq('id', existing['id'] as String)
-            .select('*, content(*)')
-            .single();
-      } else {
-        videoData = await _c
-            .from('videos')
-            .insert({
-              'content_id': contentId,
-              'provider': 'bunny',
-              'provider_video_id': videoGuid,
-              'status': 'processing',
-              'thumbnail_url': thumbnailUrl,
-            })
-            .select('*, content(*)')
-            .single();
-      }
-
-      return VideoModel.fromJson(videoData);
+      // 4. Return refreshed VideoModel
+      return await getVideoById(videoId);
     } on DioException catch (e) {
       throw ServerException(
         e.response?.data?.toString() ??
@@ -447,9 +440,8 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
             'Network error uploading video',
         code: 'UPLOAD_FAILED',
       );
-    } on PostgrestException catch (e) {
-      throw ServerException(e.message, code: e.code);
     } catch (e) {
+      if (e is ServerException) rethrow;
       throw ServerException(e.toString());
     }
   }

@@ -411,6 +411,8 @@
       100% { left: 100%; width: 40%; }
     }
   </style>
+  <!-- In-App Canvas-Based PDF Engine (Zero-tab, cross-platform tablet & mobile support) -->
+  <script src="pdf.min.js"></script>
 </head>
 <body>
   <!-- Crawler & Search Engine Semantic Indexing (Googlebot, Bingbot, etc.) -->
@@ -993,18 +995,219 @@
         }
       };
 
-      // Secure In-App PDF Viewer (Hides browser download/print toolbar)
+      // Modern High-Performance In-App PDF Viewer (Multi-device, Zero external tabs, Full touch support)
       window.createPdfViewer = function(src, viewId) {
-        var iframe = document.createElement('iframe');
-        iframe.id = 'pdf_frame_' + viewId;
-        var separator = src.indexOf('#') === -1 ? '#' : '&';
-        iframe.src = src + (src.indexOf('toolbar=') === -1 ? (separator + 'toolbar=0&navpanes=0') : '');
-        iframe.style.width = '100%';
-        iframe.style.height = '100%';
-        iframe.style.border = '0';
-        iframe.style.borderRadius = '8px';
-        iframe.style.backgroundColor = '#FFFFFF';
-        return iframe;
+        var container = document.createElement('div');
+        container.id = 'pdf_container_' + viewId;
+        container.style.width = '100%';
+        container.style.height = '100%';
+        container.style.display = 'flex';
+        container.style.flexDirection = 'column';
+        container.style.backgroundColor = '#0F172A';
+        container.style.borderRadius = '8px';
+        container.style.overflow = 'hidden';
+        container.style.position = 'relative';
+        container.style.userSelect = 'none';
+        container.style.webkitUserSelect = 'none';
+
+        // 1. Sleek Navigation & Zoom Toolbar
+        var toolbar = document.createElement('div');
+        toolbar.style.display = 'flex';
+        toolbar.style.alignItems = 'center';
+        toolbar.style.justifyContent = 'space-between';
+        toolbar.style.padding = '8px 12px';
+        toolbar.style.backgroundColor = '#1E293B';
+        toolbar.style.borderBottom = '1px solid #334155';
+        toolbar.style.color = '#F8FAFC';
+        toolbar.style.fontSize = '13px';
+        toolbar.style.fontWeight = '500';
+        toolbar.style.flexShrink = '0';
+        toolbar.style.direction = 'rtl';
+
+        // Page info
+        var pageInfo = document.createElement('span');
+        pageInfo.id = 'pdf_page_info_' + viewId;
+        pageInfo.textContent = 'جاري التحميل...';
+        pageInfo.style.color = '#94A3B8';
+
+        // Controls container
+        var controls = document.createElement('div');
+        controls.style.display = 'flex';
+        controls.style.alignItems = 'center';
+        controls.style.gap = '8px';
+        controls.style.direction = 'ltr';
+
+        function createBtn(text, title, onClick) {
+          var btn = document.createElement('button');
+          btn.textContent = text;
+          btn.title = title;
+          btn.style.background = '#334155';
+          btn.style.color = '#F8FAFC';
+          btn.style.border = 'none';
+          btn.style.borderRadius = '4px';
+          btn.style.padding = '4px 10px';
+          btn.style.fontSize = '14px';
+          btn.style.fontWeight = 'bold';
+          btn.style.cursor = 'pointer';
+          btn.style.transition = 'background 0.2s';
+          btn.onmouseover = function() { btn.style.background = '#475569'; };
+          btn.onmouseout = function() { btn.style.background = '#334155'; };
+          btn.onclick = onClick;
+          return btn;
+        }
+
+        var currentZoom = 1.0;
+        var baseScale = 1.0;
+        var zoomLabel = document.createElement('span');
+        zoomLabel.textContent = '100%';
+        zoomLabel.style.minWidth = '42px';
+        zoomLabel.style.textAlign = 'center';
+        zoomLabel.style.color = '#38BDF8';
+        zoomLabel.style.fontSize = '12px';
+
+        // 2. Viewport for Canvas Pages
+        var viewport = document.createElement('div');
+        viewport.id = 'pdf_viewport_' + viewId;
+        viewport.style.flex = '1';
+        viewport.style.overflowY = 'auto';
+        viewport.style.overflowX = 'auto';
+        viewport.style.webkitOverflowScrolling = 'touch';
+        viewport.style.padding = '12px 6px';
+        viewport.style.display = 'flex';
+        viewport.style.flexDirection = 'column';
+        viewport.style.alignItems = 'center';
+        viewport.style.gap = '14px';
+        viewport.style.background = '#090D16';
+
+        // 3. Loading Indicator
+        var loadingBox = document.createElement('div');
+        loadingBox.style.display = 'flex';
+        loadingBox.style.flexDirection = 'column';
+        loadingBox.style.alignItems = 'center';
+        loadingBox.style.justifyContent = 'center';
+        loadingBox.style.height = '100%';
+        loadingBox.style.color = '#94A3B8';
+        loadingBox.style.gap = '12px';
+        loadingBox.innerHTML = '<div style="width:36px;height:36px;border:3px solid #334155;border-top-color:#38BDF8;border-radius:50%;animation:pdfSpin 0.8s linear infinite;"></div><span style="font-size:13px;">جاري تجهيز المستند بدقة عالية...</span><style>@keyframes pdfSpin{to{transform:rotate(360deg)}}</style>';
+        viewport.appendChild(loadingBox);
+
+        toolbar.appendChild(pageInfo);
+        toolbar.appendChild(controls);
+        container.appendChild(toolbar);
+        container.appendChild(viewport);
+
+        // Security: disable right-click inspect / save
+        container.addEventListener('contextmenu', function(e) { e.preventDefault(); return false; });
+
+        // PDF.js Engine Execution
+        if (window.pdfjsLib) {
+          window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.min.js';
+
+          var loadingTask = window.pdfjsLib.getDocument({
+            url: src,
+            withCredentials: false
+          });
+
+          var pdfDoc = null;
+          var totalPages = 0;
+
+          function renderAllPages() {
+            if (!pdfDoc) return;
+            viewport.innerHTML = '';
+
+            var viewWidth = (viewport.clientWidth || container.clientWidth || window.innerWidth) - 24;
+            if (viewWidth < 200) viewWidth = 600;
+
+            pdfDoc.getPage(1).then(function(firstPage) {
+              var unscaledVp = firstPage.getViewport({ scale: 1.0 });
+              baseScale = viewWidth / unscaledVp.width;
+              var effectiveScale = baseScale * currentZoom;
+              zoomLabel.textContent = Math.round(currentZoom * 100) + '%';
+              pageInfo.textContent = 'عدد الصفحات: ' + totalPages;
+
+              for (var i = 1; i <= totalPages; i++) {
+                (function(pageNum) {
+                  var pageWrapper = document.createElement('div');
+                  pageWrapper.style.position = 'relative';
+                  pageWrapper.style.boxShadow = '0 6px 20px rgba(0,0,0,0.5)';
+                  pageWrapper.style.borderRadius = '4px';
+                  pageWrapper.style.overflow = 'hidden';
+                  pageWrapper.style.background = '#FFFFFF';
+
+                  var canvas = document.createElement('canvas');
+                  pageWrapper.appendChild(canvas);
+                  viewport.appendChild(pageWrapper);
+
+                  pdfDoc.getPage(pageNum).then(function(page) {
+                    var vp = page.getViewport({ scale: effectiveScale });
+                    var dpr = window.devicePixelRatio || 1;
+                    canvas.width = Math.floor(vp.width * dpr);
+                    canvas.height = Math.floor(vp.height * dpr);
+                    canvas.style.width = Math.floor(vp.width) + 'px';
+                    canvas.style.height = Math.floor(vp.height) + 'px';
+
+                    var ctx = canvas.getContext('2d');
+                    ctx.scale(dpr, dpr);
+                    page.render({
+                      canvasContext: ctx,
+                      viewport: vp
+                    });
+                  });
+                })(i);
+              }
+            });
+          }
+
+          var zoomInBtn = createBtn('+', 'تكبير', function() {
+            if (currentZoom < 2.5) {
+              currentZoom += 0.25;
+              renderAllPages();
+            }
+          });
+
+          var zoomOutBtn = createBtn('−', 'تصغير', function() {
+            if (currentZoom > 0.5) {
+              currentZoom -= 0.25;
+              renderAllPages();
+            }
+          });
+
+          var fitBtn = createBtn('⤢', 'ملائمة العرض', function() {
+            currentZoom = 1.0;
+            renderAllPages();
+          });
+
+          controls.appendChild(zoomOutBtn);
+          controls.appendChild(zoomLabel);
+          controls.appendChild(zoomInBtn);
+          controls.appendChild(fitBtn);
+
+          loadingTask.promise.then(function(doc) {
+            pdfDoc = doc;
+            totalPages = doc.numPages;
+            renderAllPages();
+          }).catch(function(err) {
+            console.warn('[PDF.js] Render error, falling back to iframe:', err);
+            viewport.innerHTML = '';
+            var fallbackFrame = document.createElement('iframe');
+            fallbackFrame.src = src;
+            fallbackFrame.style.width = '100%';
+            fallbackFrame.style.height = '100%';
+            fallbackFrame.style.border = '0';
+            viewport.appendChild(fallbackFrame);
+          });
+        } else {
+          // Fallback if pdf.js script didn't load
+          viewport.innerHTML = '';
+          var fallbackFrame = document.createElement('iframe');
+          fallbackFrame.src = src;
+          fallbackFrame.style.width = '100%';
+          fallbackFrame.style.height = '100%';
+          fallbackFrame.style.border = '0';
+          viewport.appendChild(fallbackFrame);
+        }
+
+        return container;
       };
     })();
   </script>

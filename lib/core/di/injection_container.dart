@@ -39,9 +39,13 @@ import '../../features/content/domain/repositories/content_repository.dart';
 import '../../features/content/presentation/cubit/content_cubit.dart';
 import '../../features/content/presentation/cubit/course_progress_cubit.dart';
 import '../../features/videos/data/datasources/videos_remote_datasource.dart';
+import '../../features/videos/data/datasources/video_bank_remote_datasource.dart';
 import '../../features/videos/data/repositories/videos_repository_impl.dart';
+import '../../features/videos/data/repositories/video_bank_repository_impl.dart';
 import '../../features/videos/domain/repositories/videos_repository.dart';
+import '../../features/videos/domain/repositories/video_bank_repository.dart';
 import '../../features/videos/presentation/cubit/videos_cubit.dart';
+import '../../features/videos/presentation/cubit/video_bank_cubit.dart';
 import '../../features/assignments/data/datasources/assignments_remote_datasource.dart';
 import '../../features/assignments/data/repositories/assignments_repository_impl.dart';
 import '../../features/assignments/domain/repositories/assignments_repository.dart';
@@ -50,6 +54,7 @@ import '../../features/exams/data/datasources/exams_remote_datasource.dart';
 import '../../features/exams/data/repositories/exams_repository_impl.dart';
 import '../../features/exams/domain/repositories/exams_repository.dart';
 import '../../features/exams/presentation/cubit/exams_cubit.dart';
+import '../../features/exams/presentation/cubit/mistakes_cubit.dart';
 import '../../features/dashboard/data/datasources/student_dashboard_remote_datasource.dart';
 import '../../features/dashboard/data/datasources/teacher_dashboard_remote_datasource.dart';
 import '../../features/dashboard/data/repositories/student_dashboard_repository_impl.dart';
@@ -104,6 +109,10 @@ class InjectionContainer {
   static late final VideosRemoteDataSource videosRemoteDataSource;
   static late final VideosRepository videosRepository;
 
+  // Feature: Video Bank CMS (Folders & Reusable Library Assets)
+  static late final VideoBankRemoteDataSource videoBankRemoteDataSource;
+  static late final VideoBankRepository videoBankRepository;
+
   // Feature: Content Singletons & Repositories
   static late final ContentRemoteDataSource contentRemoteDataSource;
   static late final ContentRepository contentRepository;
@@ -146,6 +155,8 @@ class InjectionContainer {
       ParentCubit(repository: parentRepository);
   static VideosCubit createVideosCubit() =>
       VideosCubit(repository: videosRepository);
+  static VideoBankCubit createVideoBankCubit() =>
+      VideoBankCubit(repository: videoBankRepository);
   static ContentCubit createContentCubit() =>
       ContentCubit(repository: contentRepository);
   static CourseProgressCubit createCourseProgressCubit() =>
@@ -154,6 +165,8 @@ class InjectionContainer {
       AssignmentsCubit(repository: assignmentsRepository);
   static ExamsCubit createExamsCubit() =>
       ExamsCubit(repository: examsRepository);
+  static MistakesCubit createMistakesCubit() =>
+      MistakesCubit(repository: examsRepository);
   static StudentDashboardCubit createStudentDashboardCubit() =>
       StudentDashboardCubit(repository: studentDashboardRepository);
   static TeacherDashboardCubit createTeacherDashboardCubit() =>
@@ -233,6 +246,15 @@ class InjectionContainer {
       remoteDataSource: videosRemoteDataSource,
     );
     AppLogger.i('DI', '✅ Videos layer ready');
+
+    // Video Bank CMS Dependencies
+    videoBankRemoteDataSource = VideoBankRemoteDataSourceImpl(
+      client: customClient,
+    );
+    videoBankRepository = VideoBankRepositoryImpl(
+      remoteDataSource: videoBankRemoteDataSource,
+    );
+    AppLogger.i('DI', '✅ Video Bank CMS layer ready');
 
     // 10. Content Dependencies
     contentRemoteDataSource = ContentRemoteDataSourceImpl(client: customClient);

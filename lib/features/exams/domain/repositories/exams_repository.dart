@@ -1,5 +1,6 @@
 import '../../../../core/errors/result.dart';
 import '../entities/exam_entity.dart';
+import '../entities/mistake_entities.dart';
 
 abstract class ExamsRepository {
   /// Fetches all exams belonging to a specific group (Teacher view).
@@ -54,4 +55,19 @@ abstract class ExamsRepository {
 
   /// Fetches full attempt details including student answers and points earned.
   Future<Result<ExamAttemptEntity>> getAttemptDetails(String attemptId);
+
+  /// Fetches summary metrics of student mistakes (total, unresolved, resolved, sources breakdown).
+  Future<Result<MistakeSummaryEntity>> getStudentMistakesSummary(String studentId);
+
+  /// Fetches mistake questions for review or practice session.
+  Future<Result<List<MistakeQuestionEntity>>> getStudentMistakesQuestions(
+    String studentId, {
+    String? examId,
+    bool onlyUnresolved = true,
+  });
+
+  /// Submits student answers for a mistakes practice session and returns feedback.
+  Future<Result<MistakePracticeResultEntity>> submitMistakesPractice(
+    List<Map<String, String>> answers,
+  );
 }

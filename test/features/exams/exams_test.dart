@@ -4,6 +4,7 @@ import 'package:edu_saas/core/localization/generated/app_localizations.dart';
 import 'package:edu_saas/core/theme/app_theme.dart';
 import 'package:edu_saas/core/utils/cache_manager.dart';
 import 'package:edu_saas/features/exams/domain/entities/exam_entity.dart';
+import 'package:edu_saas/features/exams/domain/entities/mistake_entities.dart';
 import 'package:edu_saas/features/exams/domain/repositories/exams_repository.dart';
 import 'package:edu_saas/features/exams/presentation/cubit/exams_cubit.dart';
 import 'package:edu_saas/features/exams/presentation/cubit/exams_state.dart';
@@ -210,6 +211,46 @@ class FakeExamsRepository implements ExamsRepository {
       orElse: () => mockAttempts.first,
     );
     return Success(attempt);
+  }
+
+  @override
+  Future<Result<MistakeSummaryEntity>> getStudentMistakesSummary(
+    String studentId,
+  ) async {
+    if (shouldFail) return FailureResult(ServerFailure(failureMessage));
+    return const Success(
+      MistakeSummaryEntity(
+        totalMistakes: 0,
+        unresolvedCount: 0,
+        resolvedCount: 0,
+        sources: [],
+      ),
+    );
+  }
+
+  @override
+  Future<Result<List<MistakeQuestionEntity>>> getStudentMistakesQuestions(
+    String studentId, {
+    String? examId,
+    bool onlyUnresolved = true,
+  }) async {
+    if (shouldFail) return FailureResult(ServerFailure(failureMessage));
+    return const Success([]);
+  }
+
+  @override
+  Future<Result<MistakePracticeResultEntity>> submitMistakesPractice(
+    List<Map<String, String>> answers,
+  ) async {
+    if (shouldFail) return FailureResult(ServerFailure(failureMessage));
+    return const Success(
+      MistakePracticeResultEntity(
+        totalQuestions: 0,
+        correctCount: 0,
+        percentage: 100.0,
+        results: [],
+      ),
+    );
   }
 
   static ExamEntity _sampleExam({

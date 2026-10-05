@@ -13,12 +13,40 @@ import 'exam_taking_page.dart';
 class ExamIntroPage extends StatelessWidget {
   final ExamEntity exam;
 
-  const ExamIntroPage({super.key, required this.exam});
+  /// امتحان مرتبط بمحاضرة: لا نافذة زمنية ولا تنبيه تأخير.
+  final bool isLectureExam;
+
+  const ExamIntroPage({
+    super.key,
+    required this.exam,
+    this.isLectureExam = false,
+  });
+
+  String? _lateText(BuildContext context) {
+    final end = exam.endAt;
+    if (isLectureExam || end == null) return null;
+    final late = DateTime.now().difference(end);
+    if (late.isNegative || late == Duration.zero) return null;
+    final l10n = context.l10n;
+    final days = late.inDays;
+    final hours = late.inHours % 24;
+    final minutes = late.inMinutes % 60;
+    final parts = <String>[
+      if (days > 0) l10n.examLateDays(days),
+      if (hours > 0) l10n.examLateHours(hours),
+      if (days == 0) if (minutes > 0 || hours == 0) l10n.examLateMinutes(minutes),
+    ];
+    return l10n.examLateBanner(parts.join(l10n.examLateJoiner));
+  }
 
   @override
   Widget build(BuildContext context) {
     final hasActive = exam.hasActiveAttempt;
-    final canTake = exam.canTakeExam;
+    final isPassed = exam.myBestScore != null &&
+        (exam.passingScore == null || exam.myBestScore! >= exam.passingScore!);
+    final canTake = isLectureExam
+        ? (!isPassed || exam.allowRetake || hasActive)
+        : exam.canTakeExam;
 
     return Scaffold(
       appBar: AppBar(
@@ -110,9 +138,15 @@ class ExamIntroPage extends StatelessWidget {
                   child: _buildInfoTile(
                     Icons.replay_outlined,
                     context.l10n.retakePolicy,
-                    exam.allowRetake
-                        ? context.l10n.allowedHighestScore
-                        : context.l10n.notAllowed,
+                    isLectureExam
+                        ? (!isPassed
+                            ? context.l10n.allowedUntilPassed
+                            : (exam.allowRetake
+                                ? context.l10n.allowedHighestScore
+                                : context.l10n.notAllowed))
+                        : (exam.allowRetake
+                            ? context.l10n.allowedHighestScore
+                            : context.l10n.notAllowed),
                   ),
                 ),
               ],
@@ -153,6 +187,39 @@ class ExamIntroPage extends StatelessWidget {
 
             const SizedBox(height: AppSpacing.s32),
 
+            if (_lateText(context) case final lateText?) ...[
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(AppSpacing.s16),
+                decoration: BoxDecoration(
+                  color: AppColors.warning.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                  border: Border.all(color: AppColors.warning),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.schedule_outlined,
+                      color: AppColors.warning,
+                      size: 20,
+                    ),
+                    const SizedBox(width: AppSpacing.s12),
+                    Expanded(
+                      child: Text(
+                        lateText,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppSpacing.s16),
+            ],
+
             // Action Button
             if (canTake) ...[
               BlocConsumer<ExamsCubit, ExamsState>(
@@ -171,10 +238,14 @@ class ExamIntroPage extends StatelessWidget {
                   return AppButton(
                     text: hasActive
                         ? context.l10n.resumeCurrentExam
-                        : context.l10n.startExamNow,
+                        : (isLectureExam && exam.hasAttempted && !isPassed
+                            ? context.l10n.retakeExamNow
+                            : context.l10n.startExamNow),
                     icon: hasActive
                         ? Icons.play_arrow
-                        : Icons.rocket_launch_outlined,
+                        : (isLectureExam && exam.hasAttempted && !isPassed
+                            ? Icons.replay_outlined
+                            : Icons.rocket_launch_outlined),
                     isLoading: isLoading,
                     onPressed: isLoading
                         ? null
@@ -204,18 +275,30 @@ class ExamIntroPage extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(AppSpacing.s16),
                 decoration: BoxDecoration(
-                  color: AppColors.warning.withValues(alpha: 0.1),
+                  color: (isLectureExam && isPassed
+                          ? AppColors.success
+                          : AppColors.warning)
+                      .withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                  border: Border.all(color: AppColors.warning),
+                  border: Border.all(
+                    color: isLectureExam && isPassed
+                        ? AppColors.success
+                        : AppColors.warning,
+                  ),
                 ),
                 child: Center(
                   child: Text(
-                    exam.myBestScore != null
-                        ? context.l10n.examAlreadyCompletedNoRetake(
+                    isLectureExam && isPassed
+                        ? context.l10n.examPassedUnlockedNextLesson(
                             exam.myBestScore!,
                             exam.maxScore,
                           )
-                        : context.l10n.examCannotBeTaken,
+                        : (exam.myBestScore != null
+                            ? context.l10n.examAlreadyCompletedNoRetake(
+                                exam.myBestScore!,
+                                exam.maxScore,
+                              )
+                            : context.l10n.examCannotBeTaken),
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       fontSize: 13,

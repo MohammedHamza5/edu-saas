@@ -351,52 +351,8 @@ class _Student360PageState extends State<Student360Page> {
                                         ),
                                       ),
                                     ),
-                                    onPressed: () {
-                                      final isSatGroup = stats.groups.any((g) =>
-                                          g.groupName.toUpperCase().contains('SAT') ||
-                                          g.groupLevel.toUpperCase().contains('SAT'));
-                                      final targetScore = isSatGroup ? 800 : 100;
-                                      final examScore = stats.examAverage > 0
-                                          ? (isSatGroup
-                                              ? (stats.examAverage * 8).round()
-                                              : stats.examAverage.round())
-                                          : 0;
-
-                                      final report =
-                                          WhatsAppReportGenerator.generateStudentWeeklyReport(
-                                            studentName: student.fullName,
-                                            groupName: stats.groups.isNotEmpty
-                                                ? stats.groups.first.groupName
-                                                : null,
-                                            attendanceRate:
-                                                (stats.attendancePercentage /
-                                                        100)
-                                                    .clamp(0.0, 1.0),
-                                            videoWatchRate:
-                                                (stats.videoCompletionPercentage /
-                                                        100)
-                                                    .clamp(0.0, 1.0),
-                                            completedAssignments:
-                                                stats.assignmentsSubmitted,
-                                            totalAssignments:
-                                                stats.assignmentsSubmitted,
-                                            mockExamScore: examScore,
-                                            targetScore: targetScore,
-                                            activeStudyMinutes:
-                                                stats.todayActiveMinutes,
-                                            engagementQualityText:
-                                                _getEngagementText(
-                                                  stats.engagementQuality,
-                                                ),
-                                          );
-                                      WhatsAppReportGenerator.showReportPreviewDialog(
-                                        context,
-                                        studentName: student.fullName,
-                                        reportText: report,
-                                        phone: student.parentPhone,
-                                        alternatePhone: student.phone,
-                                      );
-                                    },
+                                    onPressed: () =>
+                                        _openWhatsAppReport(context, student, stats),
                                   ),
                                 ),
                               ],
@@ -458,51 +414,8 @@ class _Student360PageState extends State<Student360Page> {
                                     ),
                                   ),
                                 ),
-                                onPressed: () {
-                                  final isSatGroup = stats.groups.any((g) =>
-                                      g.groupName.toUpperCase().contains('SAT') ||
-                                      g.groupLevel.toUpperCase().contains('SAT'));
-                                  final targetScore = isSatGroup ? 800 : 100;
-                                  final examScore = stats.examAverage > 0
-                                      ? (isSatGroup
-                                          ? (stats.examAverage * 8).round()
-                                          : stats.examAverage.round())
-                                      : 0;
-
-                                  final report =
-                                      WhatsAppReportGenerator.generateStudentWeeklyReport(
-                                        studentName: student.fullName,
-                                        groupName: stats.groups.isNotEmpty
-                                            ? stats.groups.first.groupName
-                                            : null,
-                                        attendanceRate:
-                                            (stats.attendancePercentage / 100)
-                                                .clamp(0.0, 1.0),
-                                        videoWatchRate:
-                                            (stats.videoCompletionPercentage /
-                                                    100)
-                                                .clamp(0.0, 1.0),
-                                        completedAssignments:
-                                            stats.assignmentsSubmitted,
-                                        totalAssignments:
-                                            stats.assignmentsSubmitted,
-                                        mockExamScore: examScore,
-                                        targetScore: targetScore,
-                                        activeStudyMinutes:
-                                            stats.todayActiveMinutes,
-                                        engagementQualityText:
-                                            _getEngagementText(
-                                              stats.engagementQuality,
-                                            ),
-                                      );
-                                  WhatsAppReportGenerator.showReportPreviewDialog(
-                                    context,
-                                    studentName: student.fullName,
-                                    reportText: report,
-                                    phone: student.parentPhone,
-                                    alternatePhone: student.phone,
-                                  );
-                                },
+                                onPressed: () =>
+                                    _openWhatsAppReport(context, student, stats),
                               ),
                             ],
                           );
@@ -724,18 +637,53 @@ class _Student360PageState extends State<Student360Page> {
     );
   }
 
-  String _getEngagementText(EngagementQuality quality) {
-    switch (quality) {
-      case EngagementQuality.active:
-        return 'حضور نشط ومتفاعل';
-      case EngagementQuality.moderate:
-        return 'تفاعل متوسط';
-      case EngagementQuality.ghostPresence:
-        return 'حضور شكلي / يحتاج متابعة';
-      case EngagementQuality.noData:
-        return 'لم يدخل المنصة اليوم';
-    }
+  void _openWhatsAppReport(
+    BuildContext context,
+    StudentEntity student,
+    Student360Entity stats,
+  ) {
+    final isSatGroup = stats.groups.any((g) =>
+        g.groupName.toUpperCase().contains('SAT') ||
+        g.groupLevel.toUpperCase().contains('SAT'));
+    final targetScore = isSatGroup ? 800 : 100;
+    final examScore = stats.examAverage > 0
+        ? (isSatGroup
+            ? (stats.examAverage * 8).round()
+            : stats.examAverage.round())
+        : 0;
+    final groupName = stats.groups.isNotEmpty
+        ? stats.groups.first.groupName
+        : null;
+    final videoRate = (stats.videoCompletionPercentage / 100).clamp(0.0, 1.0);
+
+    final report = WhatsAppReportGenerator.generateNaturalWeeklyReport(
+      studentName: student.fullName,
+      groupName: groupName,
+      videoWatchRate: videoRate,
+      completedAssignments: stats.assignmentsSubmitted,
+      totalAssignments: stats.assignmentsSubmitted,
+      mockExamScore: examScore,
+      targetScore: targetScore,
+      activeStudyMinutes: stats.todayActiveMinutes,
+    );
+
+    WhatsAppReportGenerator.showReportPreviewDialog(
+      context,
+      studentName: student.fullName,
+      reportText: report,
+      phone: student.parentPhone,
+      alternatePhone: student.phone,
+      groupName: groupName,
+      videoWatchRate: videoRate,
+      completedAssignments: stats.assignmentsSubmitted,
+      totalAssignments: stats.assignmentsSubmitted,
+      mockExamScore: examScore,
+      targetScore: targetScore,
+      activeStudyMinutes: stats.todayActiveMinutes,
+    );
   }
+
+
 
   Color _pctColor(double pct) {
     if (pct >= 75) return AppColors.success;

@@ -1,18 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:edu_saas/core/config/app_config.dart';
+
 import 'package:edu_saas/core/widgets/forensic_watermark_overlay.dart';
 import 'package:edu_saas/features/exams/data/models/question_option_model.dart';
 
 void main() {
   group('Material Security & Forensic Hardening Tests', () {
-    test(
-      'AppConfig master secrets default to empty to prevent binary leakage',
-      () {
-        expect(AppConfig.bunnyApiKey, isEmpty);
-        expect(AppConfig.bunnyTokenKey, isEmpty);
-      },
-    );
 
     test(
       'QuestionOptionModel safely handles stripped is_correct for student protection',

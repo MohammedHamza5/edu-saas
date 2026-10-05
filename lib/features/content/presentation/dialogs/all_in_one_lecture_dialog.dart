@@ -16,9 +16,11 @@ import '../../../../core/widgets/app_text_field.dart';
 import '../../../exams/data/models/exam_question_model.dart';
 import '../../../exams/data/models/question_option_model.dart';
 import '../../../exams/domain/entities/exam_entity.dart';
+import '../../../videos/domain/entities/library_video_entity.dart';
+import '../../../videos/presentation/dialogs/select_video_from_bank_dialog.dart';
 import '../../domain/entities/content_entity.dart';
 
-enum VideoSourceType { youtube, bunny, none }
+enum VideoSourceType { bank, bunny, youtube, none }
 
 class InlineQuizQuestionData {
   QuestionType type;
@@ -89,7 +91,8 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
   final _youtubeUrlController = TextEditingController();
   final _passingScoreController = TextEditingController(text: '60');
 
-  VideoSourceType _selectedSource = VideoSourceType.youtube;
+  VideoSourceType _selectedSource = VideoSourceType.bank;
+  LibraryVideoEntity? _selectedBankVideo;
   String? _extractedYouTubeId;
 
   // Bunny File
@@ -238,6 +241,16 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
       }
     }
 
+    if (_selectedSource == VideoSourceType.bank && _selectedBankVideo == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: AppColors.error,
+          content: Text(context.l10n.selectFromBank),
+        ),
+      );
+      return;
+    }
+
     setState(() {
       _isLoading = true;
       _loadingMessage = context.l10n.creatingContent;
@@ -269,7 +282,20 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
       final contentId = content.id;
 
       // 2. Video linking
-      if (_selectedSource == VideoSourceType.youtube) {
+      if (_selectedSource == VideoSourceType.bank && _selectedBankVideo != null) {
+        setState(() => _loadingMessage = context.l10n.savingChanges);
+        final bankRes = await InjectionContainer.videoBankRepository
+            .linkToLectureContent(
+              libraryVideoId: _selectedBankVideo!.id,
+              contentId: contentId,
+              title: title,
+            );
+        if (!bankRes.isSuccess) {
+          throw Exception(
+            bankRes.failureOrNull?.message ?? 'Failed to link video from bank',
+          );
+        }
+      } else if (_selectedSource == VideoSourceType.youtube) {
         setState(() => _loadingMessage = context.l10n.linkingYoutubeVideo);
         final yRes = await InjectionContainer.videosRepository.linkYouTubeVideo(
           contentId: contentId,
@@ -681,11 +707,11 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
           SegmentedButton<VideoSourceType>(
             segments: [
               ButtonSegment(
-                value: VideoSourceType.youtube,
-                label: Text(context.l10n.videoSourceYoutube),
+                value: VideoSourceType.bank,
+                label: Text(context.l10n.videoBankCmsTitle),
                 icon: const Icon(
-                  Icons.play_circle_fill_rounded,
-                  color: Colors.red,
+                  Icons.video_library_rounded,
+                  color: AppColors.primary,
                 ),
               ),
               ButtonSegment(
@@ -694,6 +720,14 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
                 icon: const Icon(
                   Icons.cloud_upload_rounded,
                   color: AppColors.primary,
+                ),
+              ),
+              ButtonSegment(
+                value: VideoSourceType.youtube,
+                label: Text(context.l10n.videoSourceYoutube),
+                icon: const Icon(
+                  Icons.play_circle_fill_rounded,
+                  color: Colors.red,
                 ),
               ),
               ButtonSegment(
@@ -709,7 +743,153 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
           ),
           const SizedBox(height: AppSpacing.s16),
 
-          if (_selectedSource == VideoSourceType.youtube) ...[
+          if (_selectedSource == VideoSourceType.bank) ...[
+            if (_selectedBankVideo == null) ...[
+              InkWell(
+                onTap: () async {
+                  final picked = await SelectVideoFromBankDialog.show(context);
+                  if (picked != null) {
+                    setState(() {
+                      _selectedBankVideo = picked;
+                      if (_titleController.text.trim().isEmpty) {
+                        _titleController.text = picked.title;
+                      }
+                      if (_descriptionController.text.trim().isEmpty &&
+                          picked.description != null) {
+                        _descriptionController.text = picked.description!;
+                      }
+                    });
+                  }
+                },
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: AppSpacing.s20,
+                    horizontal: AppSpacing.s16,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.04),
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                    border: Border.all(
+                      color: AppColors.primary.withValues(alpha: 0.3),
+                      style: BorderStyle.solid,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.video_library_outlined,
+                        color: AppColors.primary,
+                        size: 26,
+                      ),
+                      const SizedBox(width: AppSpacing.s10),
+                      Text(
+                        context.l10n.selectFromBank,
+                        style: const TextStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ] else ...[
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.s12),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                  border: Border.all(
+                    color: AppColors.primary.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: Container(
+                        width: 90,
+                        height: 52,
+                        color: AppColors.surfaceVariant,
+                        child: _selectedBankVideo!.thumbnailUrl != null
+                            ? CachedNetworkImage(
+                                imageUrl: _selectedBankVideo!.thumbnailUrl!,
+                                fit: BoxFit.cover,
+                                errorWidget: (_, __, ___) => const Center(
+                                  child: Icon(Icons.videocam_rounded),
+                                ),
+                              )
+                            : const Center(child: Icon(Icons.videocam_rounded)),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.s12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.success
+                                      .withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  context.l10n.videoSelectedFromBank,
+                                  style: const TextStyle(
+                                    color: AppColors.success,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                _selectedBankVideo!.formattedDuration,
+                                style: const TextStyle(
+                                  color: AppColors.textSecondary,
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            _selectedBankVideo!.title,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                    TextButton.icon(
+                      icon: const Icon(Icons.swap_horiz_rounded, size: 16),
+                      label: Text(context.l10n.changeVideo),
+                      onPressed: () async {
+                        final picked =
+                            await SelectVideoFromBankDialog.show(context);
+                        if (picked != null) {
+                          setState(() => _selectedBankVideo = picked);
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ] else if (_selectedSource == VideoSourceType.youtube) ...[
             AppTextField(
               controller: _youtubeUrlController,
               label: context.l10n.youtubeUrlLabel,

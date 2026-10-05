@@ -378,9 +378,8 @@ class _StudentsListPageState extends State<StudentsListPage> {
                                   student.phone?.isNotEmpty == true)
                               ? () {
                                   final report =
-                                      WhatsAppReportGenerator.generateStudentWeeklyReport(
+                                      WhatsAppReportGenerator.generateNaturalWeeklyReport(
                                     studentName: student.fullName,
-                                    attendanceRate: 1.0,
                                   );
                                   WhatsAppReportGenerator.showReportPreviewDialog(
                                     context,

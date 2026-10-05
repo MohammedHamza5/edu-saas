@@ -11,6 +11,7 @@ class SupabaseService {
   SupabaseService._();
 
   static const String _roleStorageKey = 'cached_user_role';
+  static const String _statusStorageKey = 'cached_user_status';
 
   static bool get isInitialized {
     try {
@@ -36,9 +37,12 @@ class SupabaseService {
       },
     );
 
-    // Restore cached role from hardware secure storage immediately
+    // Restore cached role and status from hardware secure storage immediately
     try {
       _cachedRole = await SecureStorageHelper.read(key: _roleStorageKey);
+    } catch (_) {}
+    try {
+      _cachedStatus = await SecureStorageHelper.read(key: _statusStorageKey);
     } catch (_) {}
 
     await Supabase.initialize(
@@ -84,7 +88,11 @@ class SupabaseService {
 
   static User? get currentUser =>
       isInitialized ? client.auth.currentUser : null;
-  static bool get isAuthenticated => currentUser != null;
+  /// Visible for testing only: override isAuthenticated in unit tests
+  static bool? debugIsAuthenticated;
+
+  static bool get isAuthenticated =>
+      debugIsAuthenticated ?? (currentUser != null);
   static String? get currentUserId => currentUser?.id;
   static String? _cachedRole;
   static set currentRole(String? role) {
@@ -96,9 +104,22 @@ class SupabaseService {
     }
   }
 
+  static String? _cachedStatus;
+  static set currentStatus(String? status) {
+    _cachedStatus = status;
+    if (status != null) {
+      SecureStorageHelper.write(key: _statusStorageKey, value: status);
+    } else {
+      SecureStorageHelper.delete(key: _statusStorageKey);
+    }
+  }
+
   static String? get cachedRole => _cachedRole;
   static String? get currentUserRole =>
       _cachedRole ?? (currentUser?.userMetadata?['role'] as String?);
+  static String? get cachedStatus => _cachedStatus;
+  static String? get currentUserStatus =>
+      _cachedStatus ?? (currentUser?.userMetadata?['status'] as String?);
   static String? get currentTenantId =>
       (currentUser?.userMetadata?['tenant_id'] as String?) ??
       (currentUser?.appMetadata['tenant_id'] as String?);

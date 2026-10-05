@@ -1,31 +1,8 @@
-import 'dart:convert';
-import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:edu_saas/core/config/app_config.dart';
 import 'package:edu_saas/features/videos/data/models/video_progress_model.dart';
 
 void main() {
-  group('Bunny Stream Playback URL Generation', () {
-    test('generates expected tokenized Bunny Embed URL structure', () {
-      const providerVideoId = 'eb03f081-1264-475b-9ae5-db3752cc635c';
-      final tokenKey = AppConfig.bunnyTokenKey;
-      final libraryId = AppConfig.bunnyLibraryId;
 
-      final expires =
-          (DateTime.now().toUtc().millisecondsSinceEpoch ~/ 1000) + 14400;
-      final hashInput = '$tokenKey$providerVideoId$expires';
-      final token = sha256.convert(utf8.encode(hashInput)).toString();
-
-      final expectedUrl =
-          'https://iframe.mediadelivery.net/embed/$libraryId/$providerVideoId?token=$token&expires=$expires&autoplay=true&preload=true&responsive=true&playerjs=true';
-
-      expect(expectedUrl, contains('iframe.mediadelivery.net/embed/747497/'));
-      expect(expectedUrl, contains('eb03f081-1264-475b-9ae5-db3752cc635c'));
-      expect(expectedUrl, contains('token='));
-      expect(expectedUrl, contains('expires='));
-      expect(expectedUrl, contains('responsive=true'));
-    });
-  });
 
   group('Student Video Progress Integrity & Anti-Cheat Logic', () {
     const durationSeconds = 1000;

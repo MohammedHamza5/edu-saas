@@ -264,6 +264,14 @@ class AppLocalizationsAr extends AppLocalizations {
   String get checkStatusButton => 'التحقق من حالة الحساب';
 
   @override
+  String get stillPendingNotice =>
+      'حسابك لا يزال قيد مراجعة واعتماد المعلم، يرجى التحقق لاحقاً.';
+
+  @override
+  String get approvalConfirmedNotice =>
+      'تهانينا! تمت الموافقة على حسابك بنجاح.';
+
+  @override
   String get tenantSuspendedTitle => 'الحساب معلق';
 
   @override
@@ -1150,7 +1158,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get studentRegistrationBadge => 'التسجيل في دفعة أكاديمية جديدة';
 
   @override
-  String get fullNameInputHint => 'الاسم الكامل (كما هو في البطاقة/الهوية)';
+  String get fullNameInputHint => 'أدخل اسم الطالب ثلاثي أو رباعي';
 
   @override
   String get pleaseEnterFullName => 'يرجى إدخال اسم الطالب';
@@ -1888,7 +1896,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get whatsappParentReportSubtitle =>
-      'توليد تقرير أسبوعي احترافي جاهز للإرسال يضم الحضور، المشاهدات، ودرجات الامتحانات';
+      'توليد تقرير متابعة فوري وجاهز للإرسال يضم مشاهدات المحاضرات، تسليمات الواجبات، ودرجات الامتحانات';
 
   @override
   String get createAndShareReport => 'إنشاء ومشاركة التقرير';
@@ -1921,6 +1929,24 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get whatsappTeacherNotesHint =>
       'اكتب ملاحظة أو اختر من القوالب السريعة...';
+
+  @override
+  String get whatsappPeriodWeekly => 'متابعة أسبوعية ⚡';
+
+  @override
+  String get whatsappPeriodMonthly => 'ملخص شهري 📊';
+
+  @override
+  String get whatsappPresetFriendlyKeepUp =>
+      'ما شاء الله عليه ملتزم ومستواه في تقدم مستمر 🌟';
+
+  @override
+  String get whatsappPresetFriendlyNeedsFocus =>
+      'مستواه ممتاز جداً بس محتاجين نشجعه يركز أكتر في التمارين والواجبات 💪';
+
+  @override
+  String get whatsappPresetFriendlyCatchUp =>
+      'ياريت حضرتك تفكره يكمل باقي الفيديوهات عشان مفيش حاجة تتراكم عليه 🌸';
 
   @override
   String get whatsappPresetExcellent =>
@@ -3415,6 +3441,64 @@ class AppLocalizationsAr extends AppLocalizations {
   String get examCannotBeTaken => 'لا يمكن تقديم هذا الامتحان حالياً.';
 
   @override
+  String get allowedUntilPassed => 'مسموحة حتى الاجتياز';
+
+  @override
+  String examPassedUnlockedNextLesson(int score, int maxScore) {
+    return 'لقد اجتزت هذا الامتحان بنجاح بنتيجة: $score/$maxScore. تم فتح المحاضرة التالية.';
+  }
+
+  @override
+  String get retakeExamNow => 'إعادة الامتحان الآن';
+
+  @override
+  String examLateBanner(String duration) {
+    return 'أنت متأخر عن موعد التسليم بمقدار $duration. ما زال بإمكانك دخول الامتحان.';
+  }
+
+  @override
+  String examLateDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count يومًا',
+      few: '$count أيام',
+      two: 'يومان',
+      one: 'يوم واحد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String examLateHours(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ساعة',
+      few: '$count ساعات',
+      two: 'ساعتان',
+      one: 'ساعة واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String examLateMinutes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count دقيقة',
+      few: '$count دقائق',
+      two: 'دقيقتان',
+      one: 'دقيقة واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get examLateJoiner => ' و ';
+
+  @override
   String get confirmSubmitExamTitle => 'تأكيد تسليم الامتحان';
 
   @override
@@ -4669,6 +4753,16 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get providerUpdatedToast => 'تم تحديث قناة البث بنجاح';
+
+  @override
+  String get providerActiveStatusBadge => 'القناة المفعلة';
+
+  @override
+  String get providerLockedByAdminBadge => 'محدد من الإدارة';
+
+  @override
+  String get providerLockedNoticeToast =>
+      'قناة بث المحاضرات مدارة ومثبتة بواسطة إدارة المنصة فقط';
 
   @override
   String get allInOneStudioTitle => 'استوديو المحاضرة المتكامل';
@@ -6076,7 +6170,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get statusDone => 'مكتمل';
 
   @override
-  String get statusFailed => 'فشل';
+  String get statusFailed => 'فشل الرفع';
 
   @override
   String get statusProcessing => 'قيد المعالجة';
@@ -6325,4 +6419,223 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get syncAttendanceSuccessMessage =>
       'تمت مزامنة حالات الحضور بدقة مع نسب مشاهدة الفيديو';
+
+  @override
+  String get mistakesBankTitle => 'بنك الأخطاء';
+
+  @override
+  String get mistakesBankSubtitle =>
+      'سجل أخطائك في كافة الاختبارات والمحاضرات للتدريب عليها وتثبيت المفاهيم';
+
+  @override
+  String get mistakesBankBannerAction => 'مراجعة بنك الأخطاء';
+
+  @override
+  String get unresolvedMistakesCount => 'أخطاء قيد المراجعة';
+
+  @override
+  String get resolvedMistakesCount => 'أخطاء تم تجاوزها';
+
+  @override
+  String get totalMistakesCount => 'إجمالي الأخطاء';
+
+  @override
+  String get startMistakesPractice => 'بدء اختبار الأخطاء';
+
+  @override
+  String get noMistakesFound => 'رائع! لا توجد أخطاء مسجلة حالياً 🎉';
+
+  @override
+  String get noMistakesFoundSub =>
+      'عند الوقوع في خطأ بأي اختبار قادم، سيتم إضافته هنا تلقائياً لتعيد التدرب عليه حتى تتقنه.';
+
+  @override
+  String get filterAllMistakes => 'الكل';
+
+  @override
+  String get filterUnresolved => 'غير المحلولة فقط';
+
+  @override
+  String get filterResolved => 'المتجاوزة';
+
+  @override
+  String get filterBySourceExam => 'تصفية حسب الاختبار';
+
+  @override
+  String timesFailedLabel(int count) {
+    return 'تكرر الخطأ: $count مرات';
+  }
+
+  @override
+  String lastMistakeDate(String date) {
+    return 'آخر محاولة: $date';
+  }
+
+  @override
+  String get statusMastered => 'تم التجاوز بنجاح';
+
+  @override
+  String get statusNeedsReview => 'يحتاج مراجعة';
+
+  @override
+  String get practiceExamTitle => 'اختبار بنك الأخطاء';
+
+  @override
+  String get practiceExamInstruction =>
+      'أجب عن الأسئلة بدقة، سيتم اعتبار السؤال متجاوزاً ومتقناً فور إجابتك الصحيحة عليه.';
+
+  @override
+  String get submitPracticeExam => 'تسليم وتصحيح الاختبار';
+
+  @override
+  String get submittingPractice => 'جاري التصحيح الفوري...';
+
+  @override
+  String get practiceResultsTitle => 'نتيجة التدريب على الأخطاء';
+
+  @override
+  String practiceSuccessSummary(int resolved, int total) {
+    return 'أحسنت! تم تجاوز $resolved سؤال من أصل $total بنجاح!';
+  }
+
+  @override
+  String practicePartialSummary(int resolved) {
+    return 'تم تجاوز $resolved سؤال. استمر في المحاولة لتجاوز باقي الأخطاء!';
+  }
+
+  @override
+  String get backToMistakesBank => 'العودة لبنك الأخطاء';
+
+  @override
+  String get retakeMistakesPractice => 'إعادة اختبار الأخطاء المتبقية';
+
+  @override
+  String get allExamsFilter => 'كافة المصادر';
+
+  @override
+  String get videoBankCmsTitle => 'بنك الفيديوهات';
+
+  @override
+  String get videoBankCmsSubtitle =>
+      'نظّم محاضراتك في مجموعات ومجلدات واستخدمها في أي مادة بضغطة زر.';
+
+  @override
+  String get createFolder => 'مجلد جديد';
+
+  @override
+  String get folderName => 'اسم المجلد';
+
+  @override
+  String get folderNameHint => 'مثال: أساسيات الجبر وحل المعادلات';
+
+  @override
+  String get folderCreatedSuccess => 'تم إنشاء المجلد بنجاح';
+
+  @override
+  String get renameFolder => 'إعادة تسمية المجلد';
+
+  @override
+  String get renameVideo => 'إعادة تسمية الفيديو';
+
+  @override
+  String get videoTitleHint => 'أدخل عنوان الفيديو';
+
+  @override
+  String get deleteFolderConfirm =>
+      'هل أنت متأكد من حذف هذا المجلد؟ سيتم حذف كافة المجلدات الفرعية التابعة له.';
+
+  @override
+  String get deleteVideoConfirm =>
+      'هل أنت متأكد من حذف هذا الفيديو من بنك الفيديوهات؟';
+
+  @override
+  String get moveVideo => 'نقل الفيديو';
+
+  @override
+  String get selectTargetFolder => 'اختر المجلد الوجهة';
+
+  @override
+  String get moveToRoot => 'المكتبة الرئيسية (الكل)';
+
+  @override
+  String get videoMovedSuccess => 'تم نقل الفيديو بنجاح';
+
+  @override
+  String get uploadToBank => 'رفع فيديو للبنك';
+
+  @override
+  String get selectVideoFile => 'اختيار ملف الفيديو';
+
+  @override
+  String get videoFileTypesHint => 'يدعم صيغ MP4, MOV, MKV, WebM';
+
+  @override
+  String get uploadingVideo => 'جاري رفع الفيديو...';
+
+  @override
+  String get videoProcessingInfo =>
+      'جاري معالجة وضغط الفيديو عبر Bunny Stream بأعلى جودة...';
+
+  @override
+  String get statusReady => 'جاهز';
+
+  @override
+  String get statusUploading => 'قيد الرفع';
+
+  @override
+  String get selectFromBank => 'اختيار من بنك الفيديوهات';
+
+  @override
+  String get selectFromBankSubtitle =>
+      'اختر فيديو تم رفعه ومعالجته مسبقاً في بنك الفيديوهات دون الحاجة لإعادة الرفع.';
+
+  @override
+  String get videoSelectedFromBank => 'تم الاختيار من بنك الفيديوهات';
+
+  @override
+  String get noVideosInFolder =>
+      'هذا المجلد فارغ حالياً. يمكنك رفع فيديو جديد أو إنشاء مجلدات فرعية.';
+
+  @override
+  String get rootFolderTitle => 'كافة الفيديوهات';
+
+  @override
+  String get openFolder => 'فتح المجلد';
+
+  @override
+  String get previewVideo => 'معاينة الفيديو';
+
+  @override
+  String nVideos(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count فيديوهات',
+      one: 'فيديو واحد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String nSubfolders(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count مجلدات',
+      one: 'مجلد واحد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get changeVideo => 'تغيير الفيديو';
+
+  @override
+  String get savingChanges => 'جاري الحفظ...';
+
+  @override
+  String get requiredField => 'هذا الحقل مطلوب';
+
+  @override
+  String get backToPrevious => 'الرجوع للسابق';
 }

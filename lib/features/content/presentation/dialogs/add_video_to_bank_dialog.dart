@@ -1,6 +1,4 @@
-import 'dart:typed_data';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injection_container.dart';
@@ -58,8 +56,6 @@ class _AddVideoToBankDialogState extends State<AddVideoToBankDialog> {
   final _descController = TextEditingController();
 
   String? _extractedVideoId;
-  PlatformFile? _selectedPdfFile;
-  Uint8List? _pdfBytes;
   bool _isSaving = false;
 
   @override
@@ -81,33 +77,6 @@ class _AddVideoToBankDialogState extends State<AddVideoToBankDialog> {
     });
   }
 
-  Future<void> _pickPdfHandout() async {
-    try {
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['pdf'],
-        withData: true,
-      );
-
-      if (result != null && result.files.isNotEmpty) {
-        final file = result.files.first;
-        setState(() {
-          _selectedPdfFile = file;
-          _pdfBytes = file.bytes;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
-    }
-  }
-
   Future<void> _handleSave() async {
     if (!_formKey.currentState!.validate()) return;
     if (_extractedVideoId == null) {
@@ -127,16 +96,6 @@ class _AddVideoToBankDialogState extends State<AddVideoToBankDialog> {
       final videosCubit = context.read<VideosCubit>();
 
       // 1. Create content in bank (groupId null)
-      String? storagePath;
-      if (_selectedPdfFile != null && _pdfBytes != null) {
-        final timestamp = DateTime.now().millisecondsSinceEpoch;
-        final sanitizedName = _selectedPdfFile!.name.toLowerCase().replaceAll(
-          RegExp(r'[^a-z0-9_.-]'),
-          '_',
-        );
-        storagePath = 'bank_handouts/${timestamp}_$sanitizedName';
-      }
-
       final repo = InjectionContainer.contentRepository;
       final createResult = await repo.createContent(
         groupId: null,
@@ -146,11 +105,6 @@ class _AddVideoToBankDialogState extends State<AddVideoToBankDialog> {
             : null,
         type: ContentType.video,
         status: ContentStatus.published,
-        fileName: _selectedPdfFile?.name,
-        storagePath: storagePath,
-        mimeType: _selectedPdfFile != null ? 'application/pdf' : null,
-        fileSize: _selectedPdfFile?.size,
-        fileBytes: _pdfBytes,
       );
 
       final createdContent = createResult.dataOrNull;
@@ -374,84 +328,6 @@ class _AddVideoToBankDialogState extends State<AddVideoToBankDialog> {
                           hintText: l10n.lessonNotesHint,
                           prefixIcon: const Icon(Icons.description_outlined),
                           maxLines: 2,
-                        ),
-
-                        const SizedBox(height: AppSpacing.s16),
-
-                        // Attached PDF Handout (Material)
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: AppColors.surfaceVariant.withValues(
-                              alpha: 0.3,
-                            ),
-                            border: Border.all(color: AppColors.border),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  const Icon(
-                                    Icons.picture_as_pdf_rounded,
-                                    color: Colors.redAccent,
-                                    size: 20,
-                                  ),
-                                  const SizedBox(width: AppSpacing.s4),
-                                  Text(
-                                    l10n.materialAttachmentTitle,
-                                    style: theme.textTheme.titleSmall?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  const Spacer(),
-                                  TextButton.icon(
-                                    onPressed: _isSaving
-                                        ? null
-                                        : _pickPdfHandout,
-                                    icon: const Icon(
-                                      Icons.attach_file,
-                                      size: 16,
-                                    ),
-                                    label: Text(
-                                      _selectedPdfFile == null
-                                          ? l10n.chooseMaterialFile
-                                          : l10n.changePdfFileAction,
-                                      style: const TextStyle(fontSize: 12),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              if (_selectedPdfFile != null) ...[
-                                const SizedBox(height: 4),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        _selectedPdfFile!.name,
-                                        style: theme.textTheme.bodySmall
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                              color: AppColors.primary,
-                                            ),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(Icons.clear, size: 16),
-                                      onPressed: () {
-                                        setState(() {
-                                          _selectedPdfFile = null;
-                                          _pdfBytes = null;
-                                        });
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ],
-                          ),
                         ),
                       ],
                     ),

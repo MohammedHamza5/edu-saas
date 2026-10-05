@@ -7,6 +7,7 @@ import '../models/exam_attempt_model.dart';
 import '../models/exam_model.dart';
 import '../models/exam_question_model.dart';
 import '../models/exam_version_model.dart';
+import '../models/mistake_models.dart';
 
 abstract interface class ExamsRemoteDataSource {
   Future<List<ExamModel>> getGroupExams(
@@ -39,6 +40,15 @@ abstract interface class ExamsRemoteDataSource {
   });
   Future<List<ExamAttemptModel>> getExamAttempts(String examId);
   Future<ExamAttemptModel> getAttemptDetails(String attemptId);
+  Future<MistakeSummaryModel> getStudentMistakesSummary(String studentId);
+  Future<List<MistakeQuestionModel>> getStudentMistakesQuestions(
+    String studentId, {
+    String? examId,
+    bool onlyUnresolved = true,
+  });
+  Future<MistakePracticeResultModel> submitMistakesPractice(
+    List<Map<String, String>> answers,
+  );
 }
 
 class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
@@ -251,6 +261,22 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
 
   @override
   Future<ExamModel> getExamDetails(String examId) async {
+    try {
+      final rpcRes = await _safeClient.rpc<dynamic>(
+        'get_exam_details',
+        params: {'p_exam_id': examId},
+      );
+      if (rpcRes is Map<String, dynamic>) {
+        return ExamModel.fromJson(rpcRes);
+      } else if (rpcRes is Map) {
+        return ExamModel.fromJson(Map<String, dynamic>.from(rpcRes));
+      }
+    } on PostgrestException catch (e) {
+      // Fall back to the direct select only if the RPC doesn't exist yet.
+      // Any other error (auth, authorization, ...) must surface as-is.
+      if (e.code != 'PGRST202' && e.code != '42883') rethrow;
+    }
+
     final isTeacher = SupabaseService.currentUserRole == 'teacher';
     final optionsFields = isTeacher
         ? 'id, question_id, option_text, sort_order, is_correct'
@@ -514,6 +540,9 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
               'question_type': qMap['question_type'],
               'points': qMap['points'],
               'sort_order': qMap['sort_order'],
+              if (qMap['image_url'] != null) 'image_url': qMap['image_url'],
+              if (qMap['image_meta'] != null) 'image_meta': qMap['image_meta'],
+              if (qMap['context_id'] != null) 'context_id': qMap['context_id'],
             })
             .select('id')
             .single();
@@ -528,6 +557,8 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
               'option_text': optMap['option_text'],
               'sort_order': optMap['sort_order'],
               'is_correct': optMap['is_correct'],
+              if (optMap['image_url'] != null) 'image_url': optMap['image_url'],
+              if (optMap['image_meta'] != null) 'image_meta': optMap['image_meta'],
             });
           }
         }
@@ -751,5 +782,58 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
         .single();
 
     return ExamAttemptModel.fromJson(Map<String, dynamic>.from(response));
+  }
+
+  @override
+  Future<MistakeSummaryModel> getStudentMistakesSummary(String studentId) async {
+    final response = await _safeClient.rpc<dynamic>(
+      'get_student_mistakes_summary',
+      params: {'p_student_id': studentId},
+    );
+    if (response is Map) {
+      return MistakeSummaryModel.fromJson(Map<String, dynamic>.from(response));
+    }
+    return const MistakeSummaryModel(
+      totalMistakes: 0,
+      unresolvedCount: 0,
+      resolvedCount: 0,
+      sources: [],
+    );
+  }
+
+  @override
+  Future<List<MistakeQuestionModel>> getStudentMistakesQuestions(
+    String studentId, {
+    String? examId,
+    bool onlyUnresolved = true,
+  }) async {
+    final response = await _safeClient.rpc<dynamic>(
+      'get_student_mistakes_questions',
+      params: {
+        'p_student_id': studentId,
+        if (examId != null) 'p_exam_id': examId,
+        'p_only_unresolved': onlyUnresolved,
+      },
+    );
+    if (response is List) {
+      return response
+          .map((q) => MistakeQuestionModel.fromJson(Map<String, dynamic>.from(q as Map)))
+          .toList();
+    }
+    return [];
+  }
+
+  @override
+  Future<MistakePracticeResultModel> submitMistakesPractice(
+    List<Map<String, String>> answers,
+  ) async {
+    final response = await _safeClient.rpc<dynamic>(
+      'submit_mistakes_practice',
+      params: {'p_answers': answers},
+    );
+    if (response is Map) {
+      return MistakePracticeResultModel.fromJson(Map<String, dynamic>.from(response));
+    }
+    throw const PostgrestException(message: 'Invalid response from submit_mistakes_practice');
   }
 }

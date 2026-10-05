@@ -602,6 +602,18 @@ abstract class AppLocalizations {
   /// **'Check Status'**
   String get checkStatusButton;
 
+  /// Notice shown when student checks approval status and is still pending
+  ///
+  /// In en, this message translates to:
+  /// **'Your account is still awaiting approval from the teacher. Please check back later.'**
+  String get stillPendingNotice;
+
+  /// Notice shown when student account is newly approved
+  ///
+  /// In en, this message translates to:
+  /// **'Congratulations! Your account has been approved.'**
+  String get approvalConfirmedNotice;
+
   /// Tenant suspended title
   ///
   /// In en, this message translates to:
@@ -2273,7 +2285,7 @@ abstract class AppLocalizations {
   /// Full name input hint
   ///
   /// In en, this message translates to:
-  /// **'Full Name (as on student ID)'**
+  /// **'Full name (e.g. John Doe)'**
   String get fullNameInputHint;
 
   /// Validation error
@@ -3556,7 +3568,7 @@ abstract class AppLocalizations {
   /// WhatsApp report card subtitle
   ///
   /// In en, this message translates to:
-  /// **'Generate a professional weekly report ready to send including attendance, views, and exam scores'**
+  /// **'Generate an instant progress report ready to send including lecture views, assignments, and exam scores'**
   String get whatsappParentReportSubtitle;
 
   /// Button
@@ -3618,6 +3630,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Write a note or choose a quick preset...'**
   String get whatsappTeacherNotesHint;
+
+  /// Weekly report tab
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly Update ⚡'**
+  String get whatsappPeriodWeekly;
+
+  /// Monthly report tab
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Summary 📊'**
+  String get whatsappPeriodMonthly;
+
+  /// Friendly preset note
+  ///
+  /// In en, this message translates to:
+  /// **'Great commitment and continuous improvement 🌟'**
+  String get whatsappPresetFriendlyKeepUp;
+
+  /// Friendly preset note
+  ///
+  /// In en, this message translates to:
+  /// **'Doing very well, just needs a bit more focus on drills 💪'**
+  String get whatsappPresetFriendlyNeedsFocus;
+
+  /// Friendly preset note
+  ///
+  /// In en, this message translates to:
+  /// **'Please encourage them to catch up on the remaining videos 🌸'**
+  String get whatsappPresetFriendlyCatchUp;
 
   /// Quick preset note
   ///
@@ -6223,6 +6265,54 @@ abstract class AppLocalizations {
   /// **'This exam cannot be taken at this time.'**
   String get examCannotBeTaken;
 
+  /// No description provided for @allowedUntilPassed.
+  ///
+  /// In en, this message translates to:
+  /// **'Allowed until passed'**
+  String get allowedUntilPassed;
+
+  /// Passed lecture exam message
+  ///
+  /// In en, this message translates to:
+  /// **'You passed this exam with score: {score}/{maxScore}. The next lesson is unlocked.'**
+  String examPassedUnlockedNextLesson(int score, int maxScore);
+
+  /// Retake exam button label
+  ///
+  /// In en, this message translates to:
+  /// **'Retake Exam Now'**
+  String get retakeExamNow;
+
+  /// No description provided for @examLateBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'You are late: the deadline passed {duration} ago. You can still take the exam.'**
+  String examLateBanner(String duration);
+
+  /// No description provided for @examLateDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day} other{{count} days}}'**
+  String examLateDays(int count);
+
+  /// No description provided for @examLateHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 hour} other{{count} hours}}'**
+  String examLateHours(int count);
+
+  /// No description provided for @examLateMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 minute} other{{count} minutes}}'**
+  String examLateMinutes(int count);
+
+  /// No description provided for @examLateJoiner.
+  ///
+  /// In en, this message translates to:
+  /// **' and '**
+  String get examLateJoiner;
+
   /// Confirm submit dialog title
   ///
   /// In en, this message translates to:
@@ -8412,6 +8502,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Streaming provider updated successfully'**
   String get providerUpdatedToast;
+
+  /// No description provided for @providerActiveStatusBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Provider'**
+  String get providerActiveStatusBadge;
+
+  /// No description provided for @providerLockedByAdminBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Managed by Admin'**
+  String get providerLockedByAdminBadge;
+
+  /// No description provided for @providerLockedNoticeToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Lecture streaming channel is managed and configured by platform administration only'**
+  String get providerLockedNoticeToast;
 
   /// No description provided for @allInOneStudioTitle.
   ///
@@ -11364,6 +11472,378 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Attendance statuses synced with video watch coverage'**
   String get syncAttendanceSuccessMessage;
+
+  /// No description provided for @mistakesBankTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mistakes Bank'**
+  String get mistakesBankTitle;
+
+  /// No description provided for @mistakesBankSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Track and practice your errors across all exams and lectures for mastery'**
+  String get mistakesBankSubtitle;
+
+  /// No description provided for @mistakesBankBannerAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Review Mistakes Bank'**
+  String get mistakesBankBannerAction;
+
+  /// No description provided for @unresolvedMistakesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Mistakes'**
+  String get unresolvedMistakesCount;
+
+  /// No description provided for @resolvedMistakesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Mastered Mistakes'**
+  String get resolvedMistakesCount;
+
+  /// No description provided for @totalMistakesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Mistakes'**
+  String get totalMistakesCount;
+
+  /// No description provided for @startMistakesPractice.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Mistakes Practice'**
+  String get startMistakesPractice;
+
+  /// No description provided for @noMistakesFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Awesome! No mistakes recorded at the moment 🎉'**
+  String get noMistakesFound;
+
+  /// No description provided for @noMistakesFoundSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Whenever you make an error in any upcoming exam, it will appear here automatically for practice.'**
+  String get noMistakesFoundSub;
+
+  /// No description provided for @filterAllMistakes.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get filterAllMistakes;
+
+  /// No description provided for @filterUnresolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Unresolved Only'**
+  String get filterUnresolved;
+
+  /// No description provided for @filterResolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Mastered'**
+  String get filterResolved;
+
+  /// No description provided for @filterBySourceExam.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by Exam'**
+  String get filterBySourceExam;
+
+  /// No description provided for @timesFailedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed: {count} times'**
+  String timesFailedLabel(int count);
+
+  /// No description provided for @lastMistakeDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Last attempt: {date}'**
+  String lastMistakeDate(String date);
+
+  /// No description provided for @statusMastered.
+  ///
+  /// In en, this message translates to:
+  /// **'Mastered'**
+  String get statusMastered;
+
+  /// No description provided for @statusNeedsReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs Review'**
+  String get statusNeedsReview;
+
+  /// No description provided for @practiceExamTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mistakes Bank Practice'**
+  String get practiceExamTitle;
+
+  /// No description provided for @practiceExamInstruction.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer carefully; questions answered correctly will be marked as mastered.'**
+  String get practiceExamInstruction;
+
+  /// No description provided for @submitPracticeExam.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit Practice Exam'**
+  String get submitPracticeExam;
+
+  /// No description provided for @submittingPractice.
+  ///
+  /// In en, this message translates to:
+  /// **'Grading...'**
+  String get submittingPractice;
+
+  /// No description provided for @practiceResultsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mistakes Practice Results'**
+  String get practiceResultsTitle;
+
+  /// No description provided for @practiceSuccessSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Well done! You mastered {resolved} out of {total} questions!'**
+  String practiceSuccessSummary(int resolved, int total);
+
+  /// No description provided for @practicePartialSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Mastered {resolved} questions. Keep going to master the rest!'**
+  String practicePartialSummary(int resolved);
+
+  /// No description provided for @backToMistakesBank.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Mistakes Bank'**
+  String get backToMistakesBank;
+
+  /// No description provided for @retakeMistakesPractice.
+  ///
+  /// In en, this message translates to:
+  /// **'Retake Remaining Mistakes'**
+  String get retakeMistakesPractice;
+
+  /// No description provided for @allExamsFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'All Sources'**
+  String get allExamsFilter;
+
+  /// No description provided for @videoBankCmsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Video Bank'**
+  String get videoBankCmsTitle;
+
+  /// No description provided for @videoBankCmsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Organize lectures into folders and assign them to any course seamlessly.'**
+  String get videoBankCmsSubtitle;
+
+  /// No description provided for @createFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'New Folder'**
+  String get createFolder;
+
+  /// No description provided for @folderName.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder Name'**
+  String get folderName;
+
+  /// No description provided for @folderNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Algebra Basics'**
+  String get folderNameHint;
+
+  /// No description provided for @folderCreatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder created successfully'**
+  String get folderCreatedSuccess;
+
+  /// No description provided for @renameFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename Folder'**
+  String get renameFolder;
+
+  /// No description provided for @renameVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename Video'**
+  String get renameVideo;
+
+  /// No description provided for @videoTitleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter video title'**
+  String get videoTitleHint;
+
+  /// No description provided for @deleteFolderConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this folder? All contained subfolders will be deleted.'**
+  String get deleteFolderConfirm;
+
+  /// No description provided for @deleteVideoConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this video from the bank?'**
+  String get deleteVideoConfirm;
+
+  /// No description provided for @moveVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Move Video'**
+  String get moveVideo;
+
+  /// No description provided for @selectTargetFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Destination Folder'**
+  String get selectTargetFolder;
+
+  /// No description provided for @moveToRoot.
+  ///
+  /// In en, this message translates to:
+  /// **'Main Library (Root)'**
+  String get moveToRoot;
+
+  /// No description provided for @videoMovedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Video moved successfully'**
+  String get videoMovedSuccess;
+
+  /// No description provided for @uploadToBank.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Video'**
+  String get uploadToBank;
+
+  /// No description provided for @selectVideoFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Video File'**
+  String get selectVideoFile;
+
+  /// No description provided for @videoFileTypesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Supports MP4, MOV, MKV, WebM'**
+  String get videoFileTypesHint;
+
+  /// No description provided for @uploadingVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading video...'**
+  String get uploadingVideo;
+
+  /// No description provided for @videoProcessingInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Video is being transcoded and optimized by Bunny Stream...'**
+  String get videoProcessingInfo;
+
+  /// No description provided for @statusReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready'**
+  String get statusReady;
+
+  /// No description provided for @statusUploading.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading'**
+  String get statusUploading;
+
+  /// No description provided for @selectFromBank.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from Video Bank'**
+  String get selectFromBank;
+
+  /// No description provided for @selectFromBankSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select an already uploaded video from your bank without re-uploading.'**
+  String get selectFromBankSubtitle;
+
+  /// No description provided for @videoSelectedFromBank.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected from Video Bank'**
+  String get videoSelectedFromBank;
+
+  /// No description provided for @noVideosInFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'This folder is empty. Upload a video or create subfolders.'**
+  String get noVideosInFolder;
+
+  /// No description provided for @rootFolderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'All Videos'**
+  String get rootFolderTitle;
+
+  /// No description provided for @openFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Folder'**
+  String get openFolder;
+
+  /// No description provided for @previewVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview Video'**
+  String get previewVideo;
+
+  /// No description provided for @nVideos.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 Video} other{{count} Videos}}'**
+  String nVideos(int count);
+
+  /// No description provided for @nSubfolders.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 Folder} other{{count} Folders}}'**
+  String nSubfolders(int count);
+
+  /// No description provided for @changeVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Video'**
+  String get changeVideo;
+
+  /// No description provided for @savingChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving...'**
+  String get savingChanges;
+
+  /// No description provided for @requiredField.
+  ///
+  /// In en, this message translates to:
+  /// **'This field is required'**
+  String get requiredField;
+
+  /// No description provided for @backToPrevious.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to previous'**
+  String get backToPrevious;
 }
 
 class _AppLocalizationsDelegate

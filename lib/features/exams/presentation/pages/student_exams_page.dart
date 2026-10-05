@@ -210,6 +210,111 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
                 maxWidth: ResponsiveBreakpoints.maxContentWidth,
                 child: Column(
                   children: [
+                    // Mistakes Bank Banner
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.s16,
+                        AppSpacing.s12,
+                        AppSpacing.s16,
+                        AppSpacing.s4,
+                      ),
+                      child: InkWell(
+                        onTap: () => context.push(AppRoutes.studentMistakes),
+                        borderRadius:
+                            BorderRadius.circular(AppSpacing.radiusMedium),
+                        child: Container(
+                          padding: const EdgeInsets.all(AppSpacing.s16),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withValues(alpha: 0.08),
+                                Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withValues(alpha: 0.02),
+                              ],
+                            ),
+                            borderRadius:
+                                BorderRadius.circular(AppSpacing.radiusMedium),
+                            border: Border.all(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .primary
+                                  .withValues(alpha: 0.25),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(AppSpacing.s8),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .primary
+                                      .withValues(alpha: 0.12),
+                                  borderRadius:
+                                      BorderRadius.circular(AppSpacing.radiusSmall),
+                                ),
+                                child: Icon(
+                                  Icons.auto_stories_rounded,
+                                  color: Theme.of(context).colorScheme.primary,
+                                  size: 24,
+                                ),
+                              ),
+                              const SizedBox(width: AppSpacing.s16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      context.l10n.mistakesBankTitle,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleSmall
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .primary,
+                                          ),
+                                    ),
+                                    Text(
+                                      context.l10n.mistakesBankSubtitle,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                            color: AppColors.textSecondary,
+                                          ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: AppSpacing.s8),
+                              ElevatedButton(
+                                onPressed: () =>
+                                    context.push(AppRoutes.studentMistakes),
+                                style: ElevatedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: AppSpacing.s16,
+                                    vertical: AppSpacing.s4,
+                                  ),
+                                  visualDensity: VisualDensity.compact,
+                                ),
+                                child:
+                                    Text(context.l10n.mistakesBankBannerAction),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+
                     // Status Filter Chips
                     Padding(
                       padding: const EdgeInsets.symmetric(

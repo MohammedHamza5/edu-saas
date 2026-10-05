@@ -186,89 +186,110 @@ class _AcademicAuthScaffoldState extends State<AcademicAuthScaffold>
           Positioned.fill(
             child: SafeArea(
               child: Center(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.s20,
-                    vertical: AppSpacing.s28,
-                  ),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: widget.maxWidth),
-                    child: FadeTransition(
-                      opacity: _fadeAnimation,
-                      child: SlideTransition(
-                        position: _slideAnimation,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(
-                            AppSpacing.radiusLarge + 6,
-                          ),
-                          child: BackdropFilter(
-                            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: const Color(
-                                  0xFF0F172A,
-                                ).withValues(alpha: 0.82),
-                                borderRadius: BorderRadius.circular(
-                                  AppSpacing.radiusLarge + 6,
-                                ),
-                                border: Border.all(
-                                  color: Colors.white.withValues(alpha: 0.15),
-                                  width: 1.2,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.55),
-                                    blurRadius: 40,
-                                    offset: const Offset(0, 20),
-                                    spreadRadius: -4,
-                                  ),
-                                  BoxShadow(
-                                    color: branding.primaryColor.withValues(
-                                      alpha: 0.3,
-                                    ),
-                                    blurRadius: 32,
-                                    offset: const Offset(0, 10),
-                                    spreadRadius: -2,
-                                  ),
-                                ],
-                              ),
-                              child: Stack(
-                                children: [
-                                  // Top Accent Indicator Line
-                                  Positioned(
-                                    top: 0,
-                                    left: 0,
-                                    right: 0,
-                                    height: 4,
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        gradient:
-                                            mathTokens.primaryButtonGradient,
-                                      ),
-                                    ),
-                                  ),
+                child: Builder(
+                  builder: (context) {
+                    final screenWidth = MediaQuery.of(context).size.width;
+                    final isMobile = screenWidth < 600;
 
-                                  // Inner Form Content with Academic Dark Theme
-                                  Padding(
-                                    padding: const EdgeInsets.fromLTRB(
-                                      AppSpacing.s28,
-                                      AppSpacing.s32,
-                                      AppSpacing.s28,
-                                      AppSpacing.s28,
+                    return SingleChildScrollView(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isMobile ? AppSpacing.s12 : AppSpacing.s20,
+                        vertical: isMobile ? AppSpacing.s16 : AppSpacing.s28,
+                      ),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(maxWidth: widget.maxWidth),
+                        child: FadeTransition(
+                          opacity: _fadeAnimation,
+                          child: SlideTransition(
+                            position: _slideAnimation,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.radiusLarge + 6,
+                              ),
+                              child: BackdropFilter(
+                                filter: ImageFilter.blur(
+                                  sigmaX: 20,
+                                  sigmaY: 20,
+                                ),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: const Color(
+                                      0xFF0F172A,
+                                    ).withValues(alpha: 0.82),
+                                    borderRadius: BorderRadius.circular(
+                                      AppSpacing.radiusLarge + 6,
                                     ),
-                                    child: Theme(
-                                      data: Theme.of(context).copyWith(
-                                        brightness: Brightness.dark,
-                                        colorScheme: Theme.of(context)
-                                            .colorScheme
-                                            .copyWith(
-                                              brightness: Brightness.dark,
-                                              surface: const Color(0xFF131C35),
-                                              onSurface: Colors.white,
-                                              primary: branding.primaryLight,
-                                            ),
-                                        inputDecorationTheme:
-                                            InputDecorationTheme(
+                                    border: Border.all(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.15,
+                                      ),
+                                      width: 1.2,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(
+                                          alpha: 0.55,
+                                        ),
+                                        blurRadius: 40,
+                                        offset: const Offset(0, 20),
+                                        spreadRadius: -4,
+                                      ),
+                                      BoxShadow(
+                                        color: branding.primaryColor.withValues(
+                                          alpha: 0.3,
+                                        ),
+                                        blurRadius: 32,
+                                        offset: const Offset(0, 10),
+                                        spreadRadius: -2,
+                                      ),
+                                    ],
+                                  ),
+                                  child: Stack(
+                                    children: [
+                                      // Top Accent Indicator Line
+                                      Positioned(
+                                        top: 0,
+                                        left: 0,
+                                        right: 0,
+                                        height: 4,
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            gradient: mathTokens
+                                                .primaryButtonGradient,
+                                          ),
+                                        ),
+                                      ),
+
+                                      // Inner Form Content with Academic Dark Theme
+                                      Padding(
+                                        padding: isMobile
+                                            ? const EdgeInsets.fromLTRB(
+                                                AppSpacing.s16,
+                                                AppSpacing.s20,
+                                                AppSpacing.s16,
+                                                AppSpacing.s20,
+                                              )
+                                            : const EdgeInsets.fromLTRB(
+                                                AppSpacing.s28,
+                                                AppSpacing.s32,
+                                                AppSpacing.s28,
+                                                AppSpacing.s28,
+                                              ),
+                                        child: Theme(
+                                          data: Theme.of(context).copyWith(
+                                            brightness: Brightness.dark,
+                                            colorScheme: Theme.of(context)
+                                                .colorScheme
+                                                .copyWith(
+                                                  brightness: Brightness.dark,
+                                                  surface: const Color(
+                                                    0xFF131C35,
+                                                  ),
+                                                  onSurface: Colors.white,
+                                                  primary:
+                                                      branding.primaryLight,
+                                                ),
+                                            inputDecorationTheme: InputDecorationTheme(
                                               filled: true,
                                               fillColor: const Color(
                                                 0xFF1E293B,
@@ -348,28 +369,30 @@ class _AcademicAuthScaffoldState extends State<AcademicAuthScaffold>
                                                 0xFF94A3B8,
                                               ),
                                             ),
-                                        textSelectionTheme:
-                                            TextSelectionThemeData(
-                                              cursorColor:
-                                                  branding.primaryLight,
-                                              selectionColor: branding
-                                                  .primaryColor
-                                                  .withValues(alpha: 0.45),
-                                              selectionHandleColor:
-                                                  branding.primaryLight,
-                                            ),
+                                            textSelectionTheme:
+                                                TextSelectionThemeData(
+                                                  cursorColor:
+                                                      branding.primaryLight,
+                                                  selectionColor: branding
+                                                      .primaryColor
+                                                      .withValues(alpha: 0.45),
+                                                  selectionHandleColor:
+                                                      branding.primaryLight,
+                                                ),
+                                          ),
+                                          child: widget.child,
+                                        ),
                                       ),
-                                      child: widget.child,
-                                    ),
+                                    ],
                                   ),
-                                ],
+                                ),
                               ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  ),
+                    );
+                  },
                 ),
               ),
             ),

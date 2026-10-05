@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/config/tenant_registry.dart';
+import '../../../../core/config/tenant_resolver.dart';
 import '../../../../core/localization/generated/app_localizations.dart';
 import '../../../../core/localization/locale_cubit.dart';
 import '../../../../core/network/supabase_service.dart';
@@ -36,8 +37,6 @@ class _TeacherSettingsPageState extends State<TeacherSettingsPage> {
 
   bool _isSaving = false;
   String _selectedVideoProvider = TenantRegistry.defaultBranding.videoProvider;
-  bool _isUpdatingProvider = false;
-
   @override
   void initState() {
     super.initState();
@@ -58,7 +57,8 @@ class _TeacherSettingsPageState extends State<TeacherSettingsPage> {
 
   Future<void> _loadTenantProvider() async {
     try {
-      final tenantId = TenantRegistry.defaultBranding.tenantId;
+      final tenantId = SupabaseService.currentTenantId ??
+          TenantResolver.resolveTenantId();
       final row = await SupabaseService.client
           .from('tenants')
           .select('video_provider')
@@ -78,53 +78,6 @@ class _TeacherSettingsPageState extends State<TeacherSettingsPage> {
         } catch (_) {}
       }
     } catch (_) {}
-  }
-
-  Future<void> _updateVideoProvider(String newProvider) async {
-    if (_selectedVideoProvider == newProvider || _isUpdatingProvider) return;
-    setState(() {
-      _selectedVideoProvider = newProvider;
-      _isUpdatingProvider = true;
-    });
-
-    try {
-      final tenantId = TenantRegistry.defaultBranding.tenantId;
-      await SupabaseService.client
-          .from('tenants')
-          .update({'video_provider': newProvider})
-          .eq('id', tenantId);
-
-      final updated = TenantRegistry.defaultBranding.copyWith(
-        videoProvider: newProvider,
-      );
-      TenantRegistry.register(updated);
-      if (mounted) {
-        try {
-          context.read<TenantThemeCubit>().setBranding(updated);
-        } catch (_) {}
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.providerUpdatedToast),
-            backgroundColor: AppColors.success,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: AppColors.error,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isUpdatingProvider = false);
-      }
-    }
   }
 
   @override
@@ -163,6 +116,14 @@ class _TeacherSettingsPageState extends State<TeacherSettingsPage> {
     TenantRegistry.register(updatedBranding);
     try {
       context.read<TenantThemeCubit>().setBranding(updatedBranding);
+    } catch (_) {}
+
+    // Also persist video provider if changed
+    try {
+      SupabaseService.client.rpc<void>(
+        'update_tenant_video_provider',
+        params: {'p_provider': _selectedVideoProvider},
+      );
     } catch (_) {}
 
     setState(() => _isSaving = false);
@@ -405,23 +366,26 @@ class _TeacherSettingsPageState extends State<TeacherSettingsPage> {
                               children: [
                                 _buildProviderOptionCard(
                                   context,
-                                  providerKey: 'youtube',
-                                  providerName: l10n.providerYoutubeLabel,
-                                  subtitle: l10n.providerYoutubeDesc,
-                                  icon: Icons.play_circle_fill_rounded,
-                                  iconColor: const Color(0xFFFF0000),
-                                  isSelected:
-                                      _selectedVideoProvider == 'youtube',
-                                ),
-                                const SizedBox(height: AppSpacing.s12),
-                                _buildProviderOptionCard(
-                                  context,
                                   providerKey: 'bunny',
                                   providerName: l10n.providerBunnyLabel,
                                   subtitle: l10n.providerBunnyDesc,
                                   icon: Icons.cloud_done_rounded,
                                   iconColor: const Color(0xFFF97316),
-                                  isSelected: _selectedVideoProvider == 'bunny',
+                                  isSelected: true,
+                                  isLocked: false,
+                                  onTap: null,
+                                ),
+                                const SizedBox(height: AppSpacing.s12),
+                                _buildProviderOptionCard(
+                                  context,
+                                  providerKey: 'youtube',
+                                  providerName: l10n.providerYoutubeLabel,
+                                  subtitle: l10n.providerYoutubeDesc,
+                                  icon: Icons.play_circle_fill_rounded,
+                                  iconColor: const Color(0xFFFF0000),
+                                  isSelected: false,
+                                  isLocked: true,
+                                  onTap: null,
                                 ),
                               ],
                             );
@@ -431,25 +395,28 @@ class _TeacherSettingsPageState extends State<TeacherSettingsPage> {
                               Expanded(
                                 child: _buildProviderOptionCard(
                                   context,
-                                  providerKey: 'youtube',
-                                  providerName: l10n.providerYoutubeLabel,
-                                  subtitle: l10n.providerYoutubeDesc,
-                                  icon: Icons.play_circle_fill_rounded,
-                                  iconColor: const Color(0xFFFF0000),
-                                  isSelected:
-                                      _selectedVideoProvider == 'youtube',
+                                  providerKey: 'bunny',
+                                  providerName: l10n.providerBunnyLabel,
+                                  subtitle: l10n.providerBunnyDesc,
+                                  icon: Icons.cloud_done_rounded,
+                                  iconColor: const Color(0xFFF97316),
+                                  isSelected: true,
+                                  isLocked: false,
+                                  onTap: null,
                                 ),
                               ),
                               const SizedBox(width: AppSpacing.s16),
                               Expanded(
                                 child: _buildProviderOptionCard(
                                   context,
-                                  providerKey: 'bunny',
-                                  providerName: l10n.providerBunnyLabel,
-                                  subtitle: l10n.providerBunnyDesc,
-                                  icon: Icons.cloud_done_rounded,
-                                  iconColor: const Color(0xFFF97316),
-                                  isSelected: _selectedVideoProvider == 'bunny',
+                                  providerKey: 'youtube',
+                                  providerName: l10n.providerYoutubeLabel,
+                                  subtitle: l10n.providerYoutubeDesc,
+                                  icon: Icons.play_circle_fill_rounded,
+                                  iconColor: const Color(0xFFFF0000),
+                                  isSelected: false,
+                                  isLocked: true,
+                                  onTap: null,
                                 ),
                               ),
                             ],
@@ -740,76 +707,185 @@ class _TeacherSettingsPageState extends State<TeacherSettingsPage> {
     required IconData icon,
     required Color iconColor,
     required bool isSelected,
+    bool isLocked = false,
+    VoidCallback? onTap,
   }) {
-    return InkWell(
-      onTap: _isUpdatingProvider
-          ? null
-          : () => _updateVideoProvider(providerKey),
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.s16),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.primary.withValues(alpha: 0.08)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.borderDark,
-            width: isSelected ? 2 : 1,
+    final l10n = AppLocalizations.of(context)!;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: isLocked
+            ? () {
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Row(
+                      children: [
+                        const Icon(
+                          Icons.lock_rounded,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                        const SizedBox(width: AppSpacing.s12),
+                        Expanded(
+                          child: Text(
+                            l10n.providerLockedNoticeToast,
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ],
+                    ),
+                    backgroundColor: AppColors.surfaceElevated,
+                    behavior: SnackBarBehavior.floating,
+                    duration: const Duration(seconds: 3),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      side: const BorderSide(color: AppColors.borderDark),
+                    ),
+                  ),
+                );
+              }
+            : onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Opacity(
+          opacity: isLocked ? 0.60 : 1.0,
+          child: Container(
+            padding: const EdgeInsets.all(AppSpacing.s16),
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? AppColors.primary.withValues(alpha: 0.08)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isSelected
+                    ? AppColors.primary
+                    : AppColors.borderDark
+                        .withValues(alpha: isLocked ? 0.5 : 1.0),
+                width: isSelected ? 2 : 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(AppSpacing.s8),
+                  decoration: BoxDecoration(
+                    color: iconColor.withValues(alpha: isLocked ? 0.06 : 0.12),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    icon,
+                    color:
+                        isLocked ? iconColor.withValues(alpha: 0.6) : iconColor,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.s12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              providerName,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                                color: isSelected
+                                    ? AppColors.primary
+                                    : (isLocked
+                                        ? AppColors.textSecondary
+                                        : AppColors.textPrimary),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.s8),
+                          if (isSelected)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                l10n.providerActiveStatusBadge,
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            )
+                          else if (isLocked)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.surfaceVariant,
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(
+                                  color: AppColors.borderDark
+                                      .withValues(alpha: 0.6),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.lock_rounded,
+                                    size: 10,
+                                    color: AppColors.textMuted,
+                                  ),
+                                  const SizedBox(width: 3),
+                                  Text(
+                                    l10n.providerLockedByAdminBadge,
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.textMuted,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: isLocked
+                              ? AppColors.textMuted
+                              : AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.s8),
+                if (isSelected)
+                  const Icon(
+                    Icons.check_circle_rounded,
+                    color: AppColors.primary,
+                    size: 22,
+                  )
+                else
+                  const Icon(
+                    Icons.lock_outline_rounded,
+                    color: AppColors.textMuted,
+                    size: 20,
+                  ),
+              ],
+            ),
           ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.s8),
-              decoration: BoxDecoration(
-                color: iconColor.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(icon, color: iconColor, size: 24),
-            ),
-            const SizedBox(width: AppSpacing.s12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    providerName,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                      color: isSelected
-                          ? AppColors.primary
-                          : AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    style: const TextStyle(
-                      fontSize: 11,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: AppSpacing.s8),
-            if (_isUpdatingProvider && _selectedVideoProvider == providerKey)
-              const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-            else
-              Icon(
-                isSelected
-                    ? Icons.check_circle_rounded
-                    : Icons.radio_button_unchecked_rounded,
-                color: isSelected ? AppColors.primary : AppColors.textMuted,
-                size: 22,
-              ),
-          ],
         ),
       ),
     );

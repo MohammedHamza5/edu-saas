@@ -18,6 +18,7 @@ import '../../../../core/widgets/responsive_container.dart';
 import '../../../auth/presentation/cubit/auth_cubit.dart';
 import '../../../auth/presentation/cubit/auth_state.dart';
 import '../../../content/domain/entities/content_entity.dart';
+import '../../../content/domain/entities/file_attachment_entity.dart';
 import '../../../content/domain/entities/lesson_assignment_entity.dart';
 import '../../../content/presentation/widgets/material_viewer_sheet.dart';
 import '../../../exams/domain/entities/exam_entity.dart';
@@ -201,7 +202,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
           MaterialPageRoute<void>(
             builder: (_) => BlocProvider<ExamsCubit>.value(
               value: examsCubit,
-              child: ExamIntroPage(exam: exam),
+              child: ExamIntroPage(exam: exam, isLectureExam: true),
             ),
           ),
         );
@@ -2486,6 +2487,16 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                     description: video.description,
                     type: ContentType.pdf,
                     status: ContentStatus.published,
+                    file: FileAttachmentEntity(
+                      id: '',
+                      tenantId: '',
+                      contentId: video.contentId,
+                      storagePath: _groupPdfStoragePath!,
+                      fileName: _groupPdfFileName!,
+                      mimeType: 'application/pdf',
+                      fileSize: 0,
+                      createdAt: video.createdAt,
+                    ),
                     createdAt: video.createdAt,
                     updatedAt: video.updatedAt,
                   );
@@ -2493,8 +2504,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                   MaterialViewerSheet.show(
                     context,
                     content: contentWrapper,
-                    onGetSignedUrl: (_) =>
-                        cubit.getSignedFileUrl(_groupPdfStoragePath!),
+                    onGetSignedUrl: (path) => cubit.getSignedFileUrl(
+                      path.isNotEmpty ? path : _groupPdfStoragePath!,
+                    ),
                   );
                 } else {
                   _handleOpenAttachedMaterial(video!);

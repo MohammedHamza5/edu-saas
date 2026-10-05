@@ -72,7 +72,7 @@ class VideoModel extends VideoEntity {
     };
   }
 
-  VideoModel copyWithPlaybackUrl(String url) {
+  VideoModel copyWithPlaybackUrl(String? url) {
     return VideoModel(
       id: id,
       contentId: contentId,

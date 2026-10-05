@@ -8,6 +8,8 @@ import 'package:edu_saas/features/auth/domain/entities/user_entity.dart';
 import 'package:edu_saas/features/auth/domain/repositories/auth_repository.dart';
 import 'package:edu_saas/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:edu_saas/features/auth/presentation/cubit/auth_state.dart';
+import 'package:edu_saas/core/network/supabase_service.dart';
+import 'package:edu_saas/features/auth/presentation/pages/student_pending_page.dart';
 import 'package:edu_saas/features/auth/presentation/pages/login_page.dart';
 import 'package:edu_saas/features/auth/presentation/pages/register_student_page.dart';
 import 'package:flutter/material.dart';
@@ -201,7 +203,7 @@ void main() {
     );
   });
 
-  group('RegisterStudentPage American System Tracks Tests', () {
+  group('RegisterStudentPage Tests', () {
     Widget createWidgetUnderTest() {
       final themeCubit = TenantThemeCubit();
       return MultiBlocProvider(
@@ -219,37 +221,107 @@ void main() {
       );
     }
 
-    testWidgets('renders all American System track choice chips', (
+    testWidgets('renders all registration input fields and submit button', (
       tester,
     ) async {
       await tester.pumpWidget(createWidgetUnderTest());
       await tester.pumpAndSettle();
 
-      expect(find.text('SAT'), findsOneWidget);
-      expect(find.text('EST'), findsOneWidget);
-      expect(find.text('ACT'), findsOneWidget);
-      expect(find.text('Basics'), findsOneWidget);
-      expect(find.text('Advanced'), findsOneWidget);
-      expect(find.text('مخصص'), findsOneWidget);
+      expect(find.byType(RegisterStudentPage), findsOneWidget);
+      expect(find.text('تسجيل طالب جديد'), findsOneWidget);
+      expect(find.text('إنشاء الحساب وبدء التعلم ←'), findsOneWidget);
     });
 
-    testWidgets('tapping مخصص displays custom track input field', (
+    testWidgets('validates required fields on submit with empty inputs', (
       tester,
     ) async {
       await tester.pumpWidget(createWidgetUnderTest());
       await tester.pumpAndSettle();
 
-      // Initially custom track field is not present
-      expect(find.text('المسار أو المجموعة المخصصة'), findsNothing);
-
-      // Scroll and Tap on 'مخصص' choice chip
-      final customChip = find.text('مخصص');
-      await tester.ensureVisible(customChip);
-      await tester.tap(customChip);
+      final submitBtn = find.text('إنشاء الحساب وبدء التعلم ←');
+      await tester.ensureVisible(submitBtn);
+      await tester.tap(submitBtn);
       await tester.pumpAndSettle();
 
-      // Custom track field is now visible
-      expect(find.text('المسار أو المجموعة المخصصة'), findsOneWidget);
+      expect(find.text('يرجى إدخال اسم الطالب'), findsOneWidget);
+    });
+  });
+
+  group('StudentPendingPage Widget & Security Tests', () {
+    Widget createWidgetUnderTest() {
+      final themeCubit = TenantThemeCubit();
+      return MultiBlocProvider(
+        providers: [
+          BlocProvider<AuthCubit>.value(value: authCubit),
+          BlocProvider<TenantThemeCubit>.value(value: themeCubit),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.lightTheme,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('ar'),
+          home: const StudentPendingPage(studentName: 'أحمد علي'),
+        ),
+      );
+    }
+
+    testWidgets('renders waiting icon, title, and both action buttons', (
+      tester,
+    ) async {
+      await tester.pumpWidget(createWidgetUnderTest());
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.hourglass_top_rounded), findsOneWidget);
+      expect(find.text('الحساب قيد المراجعة والاعتماد'), findsOneWidget);
+      expect(find.text('التحقق من حالة الحساب'), findsOneWidget);
+      expect(find.text('العودة لتسجيل الدخول'), findsOneWidget);
+    });
+
+    testWidgets(
+      'tapping check status button calls checkAuthStatus and displays pending feedback',
+      (tester) async {
+        fakeRepo.currentUser = const UserEntity(
+          id: 'new-student-id',
+          tenantId: '11111111-1111-1111-1111-111111111111',
+          role: UserRole.student,
+          fullName: 'أحمد علي',
+          email: 'ahmed@example.com',
+          status: UserStatus.pending,
+        );
+
+        await tester.pumpWidget(createWidgetUnderTest());
+        await tester.pumpAndSettle();
+
+        final checkStatusBtn = find.text('التحقق من حالة الحساب');
+        await tester.ensureVisible(checkStatusBtn);
+        await tester.tap(checkStatusBtn);
+        await tester.pumpAndSettle();
+
+        expect(
+          find.text('حسابك لا يزال قيد مراجعة واعتماد المعلم، يرجى التحقق لاحقاً.'),
+          findsOneWidget,
+        );
+      },
+    );
+
+    testWidgets('tapping back to login calls logout and clears session', (
+      tester,
+    ) async {
+      SupabaseService.currentRole = 'student';
+      SupabaseService.currentStatus = 'pending';
+
+      await tester.pumpWidget(createWidgetUnderTest());
+      await tester.pumpAndSettle();
+
+      final backToLoginBtn = find.text('العودة لتسجيل الدخول');
+      await tester.ensureVisible(backToLoginBtn);
+      await tester.tap(backToLoginBtn);
+      await tester.pumpAndSettle();
+
+      expect(SupabaseService.currentUserRole, isNull);
+      expect(SupabaseService.currentUserStatus, isNull);
+      expect(authCubit.state, const AuthUnauthenticated());
     });
   });
 }
+

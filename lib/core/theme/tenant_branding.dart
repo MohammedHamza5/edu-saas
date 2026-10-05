@@ -64,7 +64,7 @@ class TenantBranding extends Equatable {
     this.avatarUrl,
     this.supportPhone,
     this.supportEmail,
-    this.videoProvider = 'youtube',
+    this.videoProvider = 'bunny',
   });
 
   /// Default baseline identity (Deep Indigo Academic SAT theme)
@@ -120,7 +120,7 @@ class TenantBranding extends Equatable {
     String? avatarUrl,
     String? supportPhone,
     String? supportEmail,
-    String videoProvider = 'youtube',
+    String videoProvider = 'bunny',
   }) {
     final hsl = HSLColor.fromColor(primaryColor);
 

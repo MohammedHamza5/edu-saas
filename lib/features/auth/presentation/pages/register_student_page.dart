@@ -31,18 +31,6 @@ class _RegisterStudentPageState extends State<RegisterStudentPage> {
   final _phoneController = TextEditingController();
   final _parentPhoneController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _customTrackController = TextEditingController();
-
-  static const List<String> _tracks = [
-    'SAT',
-    'EST',
-    'ACT',
-    'Basics',
-    'Advanced',
-    'custom',
-  ];
-
-  String _selectedTrack = 'SAT';
 
   @override
   void initState() {
@@ -50,7 +38,8 @@ class _RegisterStudentPageState extends State<RegisterStudentPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final resolvedId = TenantResolver.resolveTenantId(
-        currentUri: (widget.tenantId != null && widget.tenantId!.trim().isNotEmpty)
+        currentUri:
+            (widget.tenantId != null && widget.tenantId!.trim().isNotEmpty)
             ? Uri(queryParameters: {'tenant': widget.tenantId!})
             : null,
       );
@@ -65,7 +54,6 @@ class _RegisterStudentPageState extends State<RegisterStudentPage> {
     _phoneController.dispose();
     _parentPhoneController.dispose();
     _passwordController.dispose();
-    _customTrackController.dispose();
     super.dispose();
   }
 
@@ -74,24 +62,18 @@ class _RegisterStudentPageState extends State<RegisterStudentPage> {
 
     // Canonical Tenant ID dynamically resolved by subdomain / domain or query
     final tenantId = TenantResolver.resolveTenantId(
-      currentUri: (widget.tenantId != null && widget.tenantId!.trim().isNotEmpty)
+      currentUri:
+          (widget.tenantId != null && widget.tenantId!.trim().isNotEmpty)
           ? Uri(queryParameters: {'tenant': widget.tenantId!})
           : null,
     );
 
-    final effectiveTrack = _selectedTrack == 'custom'
-        ? _customTrackController.text.trim()
-        : _selectedTrack;
-
     final studentFullName = _nameController.text.trim();
-    final displayName = effectiveTrack.isNotEmpty
-        ? '$studentFullName ($effectiveTrack)'
-        : studentFullName;
 
     context.read<AuthCubit>().registerStudent(
       email: _emailController.text.trim(),
       password: _passwordController.text,
-      fullName: displayName,
+      fullName: studentFullName,
       phone: _phoneController.text.trim(),
       parentPhone: _parentPhoneController.text.trim(),
       tenantId: tenantId,
@@ -105,7 +87,8 @@ class _RegisterStudentPageState extends State<RegisterStudentPage> {
         return context.watch<TenantThemeCubit>().state;
       } catch (_) {
         return TenantResolver.resolveBranding(
-          currentUri: (widget.tenantId != null && widget.tenantId!.trim().isNotEmpty)
+          currentUri:
+              (widget.tenantId != null && widget.tenantId!.trim().isNotEmpty)
               ? Uri(queryParameters: {'tenant': widget.tenantId!})
               : null,
         );
@@ -251,7 +234,8 @@ class _RegisterStudentPageState extends State<RegisterStudentPage> {
                 // ── 4. Student Full Name ──────────────────────────────────────
                 AppTextField(
                   controller: _nameController,
-                  labelText: context.l10n.fullNameInputHint,
+                  labelText: context.l10n.fullNameLabel,
+                  hintText: context.l10n.fullNameInputHint,
                   prefixIcon: const Icon(Icons.person_outline, size: 20),
                   validator: (val) {
                     if (val == null || val.trim().isEmpty) {
@@ -269,6 +253,7 @@ class _RegisterStudentPageState extends State<RegisterStudentPage> {
                 AppTextField(
                   controller: _emailController,
                   labelText: context.l10n.emailLabel,
+                  hintText: context.l10n.emailHint,
                   keyboardType: TextInputType.emailAddress,
                   prefixIcon: const Icon(Icons.email_outlined, size: 20),
                   validator: (val) {
@@ -283,7 +268,8 @@ class _RegisterStudentPageState extends State<RegisterStudentPage> {
                 // ── 6. WhatsApp Phone Number (Student) ───────────────────────
                 AppTextField(
                   controller: _phoneController,
-                  labelText: context.l10n.studentWhatsappPhone,
+                  labelText: context.l10n.phoneLabel,
+                  hintText: context.l10n.studentWhatsappPhone,
                   keyboardType: TextInputType.phone,
                   prefixIcon: const Icon(Icons.phone_outlined, size: 20),
                   validator: (val) {
@@ -298,7 +284,8 @@ class _RegisterStudentPageState extends State<RegisterStudentPage> {
                 // ── 6.5. Parent WhatsApp Phone Number (for Reports) ───────────
                 AppTextField(
                   controller: _parentPhoneController,
-                  labelText: context.l10n.parentWhatsappPhone,
+                  labelText: context.l10n.parentPhoneLabel,
+                  hintText: context.l10n.parentWhatsappPhone,
                   keyboardType: TextInputType.phone,
                   prefixIcon: const Icon(
                     Icons.family_restroom_rounded,
@@ -313,80 +300,12 @@ class _RegisterStudentPageState extends State<RegisterStudentPage> {
                 ),
                 const SizedBox(height: AppSpacing.s16),
 
-                // ── 7. Academic Track Selection ──────────────────────────────
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      context.l10n.targetAcademicTrack,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF94A3B8),
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.s8),
-                    Wrap(
-                      spacing: AppSpacing.s8,
-                      runSpacing: AppSpacing.s8,
-                      children: _tracks.map((track) {
-                        final isSelected = _selectedTrack == track;
-                        final displayLabel = track == 'custom'
-                            ? context.l10n.customTrack
-                            : track;
-                        return ChoiceChip(
-                          label: Text(displayLabel),
-                          selected: isSelected,
-                          onSelected: (selected) {
-                            if (selected) {
-                              setState(() => _selectedTrack = track);
-                            }
-                          },
-                          selectedColor: branding.primaryColor,
-                          backgroundColor: const Color(
-                            0xFF1E293B,
-                          ).withValues(alpha: 0.7),
-                          labelStyle: TextStyle(
-                            color: isSelected
-                                ? Colors.white
-                                : const Color(0xFFCBD5E1),
-                            fontWeight: isSelected
-                                ? FontWeight.bold
-                                : FontWeight.normal,
-                            fontSize: 12,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                              AppSpacing.radiusSmall,
-                            ),
-                            side: BorderSide(
-                              color: isSelected
-                                  ? branding.primaryLight
-                                  : Colors.white.withValues(alpha: 0.14),
-                              width: isSelected ? 1.5 : 1.0,
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ],
-                ),
-
-                if (_selectedTrack == 'custom') ...[
-                  const SizedBox(height: AppSpacing.s12),
-                  AppTextField(
-                    controller: _customTrackController,
-                    labelText: 'المسار أو المجموعة المخصصة',
-                    prefixIcon: const Icon(Icons.edit_outlined, size: 20),
-                  ),
-                ],
-                const SizedBox(height: AppSpacing.s16),
-
-                // ── 8. Password ──────────────────────────────────────────────
+                // ── 7. Password ──────────────────────────────────────────────
                 AppTextField(
                   controller: _passwordController,
                   isPassword: true,
-                  labelText: context.l10n.passwordFieldHint,
+                  labelText: context.l10n.passwordLabel,
+                  hintText: context.l10n.passwordFieldHint,
                   prefixIcon: const Icon(Icons.lock_outline, size: 20),
                   validator: (val) {
                     if (val == null || val.length < 6) {

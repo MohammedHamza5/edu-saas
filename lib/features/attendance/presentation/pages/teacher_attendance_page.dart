@@ -23,6 +23,7 @@ import '../widgets/attendance_stat_card.dart';
 import '../widgets/student_attendance_row_card.dart';
 import '../../../../core/widgets/teacher_group_filter_bar.dart';
 import '../../../groups/presentation/widgets/create_group_dialog.dart';
+import '../../../../core/utils/whatsapp_report_generator.dart';
 
 class TeacherAttendancePage extends StatefulWidget {
   final String? initialGroupId;
@@ -172,6 +173,64 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
     );
   }
 
+  Future<void> _syncAttendanceFromVideos() async {
+    _attendanceCubit.syncAttendanceFromVideos();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.syncAttendanceSuccessMessage),
+          backgroundColor: AppColors.success,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  Future<void> _saveAttendance() async {
+    await _attendanceCubit.saveAttendance();
+  }
+
+  void _showWhatsAppNotice(
+    BuildContext context,
+    StudentAttendanceItem student,
+    TeacherAttendanceLoaded loadedState,
+  ) {
+    final groupsState = context.read<GroupsCubit>().state;
+    String? groupName;
+    if (groupsState is GroupsLoaded) {
+      final match = groupsState.groups.where((g) => g.id == _selectedGroupId);
+      if (match.isNotEmpty) {
+        groupName = match.first.name;
+      }
+    }
+
+    final activeLecture = loadedState.activeLecture;
+    final lectureTitle = activeLecture != null
+        ? activeLecture.title
+        : (student.currentLectureTitle ?? context.l10n.allLecturesOverview);
+
+    final reportText = WhatsAppReportGenerator.generateLectureWatchNotice(
+      studentName: student.studentName,
+      lectureTitle: lectureTitle,
+      watchProgressPercent: student.watchProgressPercent,
+      groupName: groupName,
+      watchMinutes: student.watchSeconds > 0
+          ? (student.watchSeconds / 60).round()
+          : null,
+      totalMinutes: student.totalDurationSeconds > 0
+          ? (student.totalDurationSeconds / 60).round()
+          : null,
+      customNote: student.note,
+    );
+
+    WhatsAppReportGenerator.showReportPreviewDialog(
+      context,
+      studentName: student.studentName,
+      reportText: reportText,
+      phone: student.phone,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final locale = Localizations.localeOf(context).languageCode;
@@ -223,10 +282,10 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
                     child: Column(
                       children: [
                         // Modern Web SaaS Hero Header (Zero AppBar!)
-                        _buildHeroHeader(context),
+                        _buildHeroHeader(context, attendanceState),
 
                         // Top Filter Header: Group & Lecture Selector
-                        _buildHeaderBar(context, dateStr),
+                        _buildHeaderBar(context, dateStr, attendanceState),
 
                         // Main Content
                         Expanded(
@@ -396,7 +455,10 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
     );
   }
 
-  Widget _buildHeroHeader(BuildContext context) {
+  Widget _buildHeroHeader(
+    BuildContext context, [
+    AttendanceState? attendanceState,
+  ]) {
     final isMobile = context.screenWidth < 600;
 
     return Container(
@@ -498,6 +560,59 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
               ],
             ),
           ),
+          if (attendanceState is TeacherAttendanceLoaded) ...[
+            if (context.screenWidth >= 1100) ...[
+              OutlinedButton.icon(
+                onPressed: _syncAttendanceFromVideos,
+                icon: const Icon(Icons.sync_rounded, size: 16),
+                label: Text(context.l10n.syncAttendanceAction),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.primary,
+                  side: const BorderSide(color: AppColors.primary),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.s12,
+                    vertical: AppSpacing.s8,
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.s8),
+              FilledButton.icon(
+                onPressed: attendanceState.isSaving ? null : _saveAttendance,
+                icon: attendanceState.isSaving
+                    ? const SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Icon(Icons.save_rounded, size: 16),
+                label: Text(context.l10n.saveAttendanceSheet),
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.s14,
+                    vertical: AppSpacing.s8,
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.s8),
+            ] else ...[
+              IconButton.filledTonal(
+                icon: const Icon(Icons.sync_rounded, size: 20),
+                tooltip: context.l10n.syncAttendanceAction,
+                onPressed: _syncAttendanceFromVideos,
+              ),
+              const SizedBox(width: AppSpacing.s6),
+              IconButton.filled(
+                icon: const Icon(Icons.save_rounded, size: 20),
+                tooltip: context.l10n.saveAttendanceSheet,
+                onPressed: attendanceState.isSaving ? null : _saveAttendance,
+              ),
+              const SizedBox(width: AppSpacing.s6),
+            ],
+          ],
           IconButton.filledTonal(
             icon: const Icon(Icons.refresh_rounded, size: 20),
             tooltip: context.l10n.refreshAttendanceSheetTooltip,
@@ -508,11 +623,21 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
     );
   }
 
-  Widget _buildHeaderBar(BuildContext context, String formattedDate) {
+  Widget _buildHeaderBar(
+    BuildContext context,
+    String formattedDate,
+    AttendanceState attendanceState,
+  ) {
     final isCompact = context.screenWidth < 600;
 
     final groupSelector = BlocBuilder<GroupsCubit, GroupsState>(
       builder: (context, groupsState) {
+        if (groupsState is GroupsInitial) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) context.read<GroupsCubit>().loadGroups();
+          });
+        }
+
         if (groupsState is GroupsLoaded) {
           final groups = groupsState.groups;
           if (groups.isNotEmpty && _selectedGroupId == null) {
@@ -523,9 +648,13 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
             });
           }
 
+          final currentValue = groups.any((g) => g.id == _selectedGroupId)
+              ? _selectedGroupId
+              : (groups.isNotEmpty ? groups.first.id : null);
+
           return DropdownButtonFormField<String>(
             isExpanded: true,
-            value: _selectedGroupId,
+            value: currentValue,
             decoration: InputDecoration(
               labelText: context.l10n.studyGroupLabel,
               prefixIcon: const Icon(
@@ -671,27 +800,144 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
       ),
     );
 
+    Widget? lectureSelectorSection;
+    if (attendanceState is TeacherAttendanceLoaded &&
+        attendanceState.availableLectures.isNotEmpty) {
+      final lectures = attendanceState.availableLectures;
+      final selectedId = attendanceState.selectedLectureContentId;
+
+      lectureSelectorSection = Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: AppSpacing.s12),
+          Row(
+            children: [
+              const Icon(
+                Icons.video_library_rounded,
+                size: 16,
+                color: AppColors.primary,
+              ),
+              const SizedBox(width: AppSpacing.s6),
+              Text(
+                context.l10n.lectureSelectionLabel,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.s6),
+          SizedBox(
+            height: 38,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: [
+                ChoiceChip(
+                  label: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.apps_rounded, size: 14),
+                      const SizedBox(width: 4),
+                      Text(context.l10n.allLecturesOverview),
+                    ],
+                  ),
+                  selected: selectedId == null,
+                  selectedColor: AppColors.primary.withValues(alpha: 0.15),
+                  checkmarkColor: AppColors.primary,
+                  labelStyle: TextStyle(
+                    fontSize: 12,
+                    fontWeight: selectedId == null
+                        ? FontWeight.w700
+                        : FontWeight.w500,
+                    color: selectedId == null
+                        ? AppColors.primary
+                        : AppColors.textPrimary,
+                  ),
+                  onSelected: (val) {
+                    if (val) _attendanceCubit.selectLecture(null);
+                  },
+                ),
+                const SizedBox(width: AppSpacing.s8),
+                ...lectures.map((lec) {
+                  final isSelected = selectedId == lec.contentId;
+                  final durStr = lec.formattedDuration;
+                  return Padding(
+                    padding: const EdgeInsets.only(right: AppSpacing.s8),
+                    child: ChoiceChip(
+                      label: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.play_circle_outline_rounded,
+                            size: 14,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(lec.title),
+                          if (durStr.isNotEmpty) ...[
+                            const SizedBox(width: 4),
+                            Text(
+                              '($durStr)',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: isSelected
+                                    ? AppColors.primary
+                                    : AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      selected: isSelected,
+                      selectedColor: AppColors.primary.withValues(alpha: 0.15),
+                      checkmarkColor: AppColors.primary,
+                      labelStyle: TextStyle(
+                        fontSize: 12,
+                        fontWeight:
+                            isSelected ? FontWeight.w700 : FontWeight.w500,
+                        color: isSelected
+                            ? AppColors.primary
+                            : AppColors.textPrimary,
+                      ),
+                      onSelected: (val) {
+                        if (val) _attendanceCubit.selectLecture(lec.contentId);
+                      },
+                    ),
+                  );
+                }),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
+
     return Container(
       padding: const EdgeInsets.all(AppSpacing.s16),
       decoration: const BoxDecoration(
         color: AppColors.surface,
         border: Border(bottom: BorderSide(color: AppColors.border)),
       ),
-      child: isCompact
-          ? Column(
-              children: [
-                groupSelector,
-                const SizedBox(height: AppSpacing.s10),
-                dateSelectorSection,
-              ],
-            )
-          : Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (isCompact) ...[
+            groupSelector,
+            const SizedBox(height: AppSpacing.s10),
+            dateSelectorSection,
+          ] else ...[
+            Row(
               children: [
                 Expanded(flex: 3, child: groupSelector),
                 const SizedBox(width: AppSpacing.s12),
                 Expanded(flex: 4, child: dateSelectorSection),
               ],
             ),
+          ],
+          if (lectureSelectorSection != null) lectureSelectorSection,
+        ],
+      ),
     );
   }
 
@@ -783,8 +1029,11 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
                 ),
                 AttendanceStatCard(
                   title: context.l10n.attendanceRateTitle,
-                  value: '${stats.attendancePercentage.toStringAsFixed(0)}%',
-                  subtitle: context.l10n.groupCommitmentRateSubtitle,
+                  value:
+                      '${stats.averageWatchPercentage.toStringAsFixed(stats.averageWatchPercentage > 0 && stats.averageWatchPercentage < 10 ? 1 : 0)}%',
+                  subtitle: attendanceState.activeLecture != null
+                      ? attendanceState.activeLecture!.title
+                      : context.l10n.groupCommitmentRateSubtitle,
                   color: AppColors.primary,
                   icon: Icons.analytics_rounded,
                 ),
@@ -950,7 +1199,11 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
                         const SizedBox(height: AppSpacing.s8),
                     itemBuilder: (context, index) {
                       final student = displayedStudents[index];
-                      return _buildStudentAttendanceRow(context, student);
+                      return _buildStudentAttendanceRow(
+                        context,
+                        student,
+                        attendanceState,
+                      );
                     },
                   ),
           ),
@@ -1054,6 +1307,7 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
   Widget _buildStudentAttendanceRow(
     BuildContext context,
     StudentAttendanceItem student,
+    TeacherAttendanceLoaded attendanceState,
   ) {
     return StudentAttendanceRowCard(
       student: student,
@@ -1061,6 +1315,8 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
         _attendanceCubit.updateStudentStatus(student.studentId, status);
       },
       onNoteTap: () => _showNoteDialog(context, student),
+      onWhatsAppTap: () =>
+          _showWhatsAppNotice(context, student, attendanceState),
     );
   }
 }

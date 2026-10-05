@@ -63,7 +63,10 @@ class _StudentShellState extends State<StudentShell> {
     }
     if (path.contains('/content')) return 2;
     if (path.startsWith('/student/assignments')) return 3;
-    if (path.startsWith('/student/exams')) return 4;
+    if (path.startsWith('/student/exams') ||
+        path.startsWith('/student/mistakes')) {
+      return 4;
+    }
     if (path.startsWith('/student/attendance')) return 5;
     return 0;
   }
@@ -267,8 +270,17 @@ class _StudentShellState extends State<StudentShell> {
   @override
   Widget build(BuildContext context) {
     final role = SupabaseService.currentUserRole;
+    final status = SupabaseService.currentUserStatus;
     if (role != null && role != 'student') {
       return widget.child;
+    }
+    if (status != null && status != 'active') {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) {
+          context.go(AppRoutes.studentPending);
+        }
+      });
+      return const SizedBox.shrink();
     }
 
     final currentIndex = _computeIndex(widget.currentLocation);

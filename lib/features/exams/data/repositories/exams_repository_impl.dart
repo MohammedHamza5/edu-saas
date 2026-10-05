@@ -2,6 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/errors/result.dart';
 import '../../domain/entities/exam_entity.dart';
+import '../../domain/entities/mistake_entities.dart';
 import '../../domain/repositories/exams_repository.dart';
 import '../datasources/exams_remote_datasource.dart';
 import '../models/exam_question_model.dart';
@@ -93,6 +94,9 @@ class ExamsRepositoryImpl implements ExamsRepository {
           points: q.points,
           sortOrder: q.sortOrder,
           options: q.options,
+          imageUrl: q.imageUrl,
+          imageMeta: q.imageMeta,
+          contextId: q.contextId,
         );
       }).toList();
 
@@ -201,6 +205,58 @@ class ExamsRepositoryImpl implements ExamsRepository {
     try {
       final attempt = await _remoteDataSource.getAttemptDetails(attemptId);
       return Success(attempt);
+    } on PostgrestException catch (e) {
+      return FailureResult(ServerFailure(e.message, code: e.code));
+    } on AuthException catch (e) {
+      return FailureResult(AuthFailure(e.message, code: e.statusCode));
+    } catch (e) {
+      return FailureResult(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<MistakeSummaryEntity>> getStudentMistakesSummary(String studentId) async {
+    try {
+      final summary = await _remoteDataSource.getStudentMistakesSummary(studentId);
+      return Success(summary);
+    } on PostgrestException catch (e) {
+      return FailureResult(ServerFailure(e.message, code: e.code));
+    } on AuthException catch (e) {
+      return FailureResult(AuthFailure(e.message, code: e.statusCode));
+    } catch (e) {
+      return FailureResult(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<List<MistakeQuestionEntity>>> getStudentMistakesQuestions(
+    String studentId, {
+    String? examId,
+    bool onlyUnresolved = true,
+  }) async {
+    try {
+      final questions = await _remoteDataSource.getStudentMistakesQuestions(
+        studentId,
+        examId: examId,
+        onlyUnresolved: onlyUnresolved,
+      );
+      return Success(questions);
+    } on PostgrestException catch (e) {
+      return FailureResult(ServerFailure(e.message, code: e.code));
+    } on AuthException catch (e) {
+      return FailureResult(AuthFailure(e.message, code: e.statusCode));
+    } catch (e) {
+      return FailureResult(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<MistakePracticeResultEntity>> submitMistakesPractice(
+    List<Map<String, String>> answers,
+  ) async {
+    try {
+      final result = await _remoteDataSource.submitMistakesPractice(answers);
+      return Success(result);
     } on PostgrestException catch (e) {
       return FailureResult(ServerFailure(e.message, code: e.code));
     } on AuthException catch (e) {

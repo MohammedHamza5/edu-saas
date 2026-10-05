@@ -264,6 +264,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get checkStatusButton => 'Check Status';
 
   @override
+  String get stillPendingNotice =>
+      'Your account is still awaiting approval from the teacher. Please check back later.';
+
+  @override
+  String get approvalConfirmedNotice =>
+      'Congratulations! Your account has been approved.';
+
+  @override
   String get tenantSuspendedTitle => 'Account Suspended';
 
   @override
@@ -1153,7 +1161,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get studentRegistrationBadge => 'Enroll in New Academic Cohort';
 
   @override
-  String get fullNameInputHint => 'Full Name (as on student ID)';
+  String get fullNameInputHint => 'Full name (e.g. John Doe)';
 
   @override
   String get pleaseEnterFullName => 'Please enter student name';
@@ -1898,7 +1906,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get whatsappParentReportSubtitle =>
-      'Generate a professional weekly report ready to send including attendance, views, and exam scores';
+      'Generate an instant progress report ready to send including lecture views, assignments, and exam scores';
 
   @override
   String get createAndShareReport => 'Generate & Share Report';
@@ -1931,6 +1939,24 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get whatsappTeacherNotesHint =>
       'Write a note or choose a quick preset...';
+
+  @override
+  String get whatsappPeriodWeekly => 'Weekly Update ⚡';
+
+  @override
+  String get whatsappPeriodMonthly => 'Monthly Summary 📊';
+
+  @override
+  String get whatsappPresetFriendlyKeepUp =>
+      'Great commitment and continuous improvement 🌟';
+
+  @override
+  String get whatsappPresetFriendlyNeedsFocus =>
+      'Doing very well, just needs a bit more focus on drills 💪';
+
+  @override
+  String get whatsappPresetFriendlyCatchUp =>
+      'Please encourage them to catch up on the remaining videos 🌸';
 
   @override
   String get whatsappPresetExcellent =>
@@ -3430,6 +3456,58 @@ class AppLocalizationsEn extends AppLocalizations {
   String get examCannotBeTaken => 'This exam cannot be taken at this time.';
 
   @override
+  String get allowedUntilPassed => 'Allowed until passed';
+
+  @override
+  String examPassedUnlockedNextLesson(int score, int maxScore) {
+    return 'You passed this exam with score: $score/$maxScore. The next lesson is unlocked.';
+  }
+
+  @override
+  String get retakeExamNow => 'Retake Exam Now';
+
+  @override
+  String examLateBanner(String duration) {
+    return 'You are late: the deadline passed $duration ago. You can still take the exam.';
+  }
+
+  @override
+  String examLateDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String examLateHours(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count hours',
+      one: '1 hour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String examLateMinutes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count minutes',
+      one: '1 minute',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get examLateJoiner => ' and ';
+
+  @override
   String get confirmSubmitExamTitle => 'Confirm Exam Submission';
 
   @override
@@ -4698,6 +4776,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get providerUpdatedToast => 'Streaming provider updated successfully';
+
+  @override
+  String get providerActiveStatusBadge => 'Active Provider';
+
+  @override
+  String get providerLockedByAdminBadge => 'Managed by Admin';
+
+  @override
+  String get providerLockedNoticeToast =>
+      'Lecture streaming channel is managed and configured by platform administration only';
 
   @override
   String get allInOneStudioTitle => 'All-in-One Lecture Studio';
@@ -6365,4 +6453,224 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get syncAttendanceSuccessMessage =>
       'Attendance statuses synced with video watch coverage';
+
+  @override
+  String get mistakesBankTitle => 'Mistakes Bank';
+
+  @override
+  String get mistakesBankSubtitle =>
+      'Track and practice your errors across all exams and lectures for mastery';
+
+  @override
+  String get mistakesBankBannerAction => 'Review Mistakes Bank';
+
+  @override
+  String get unresolvedMistakesCount => 'Pending Mistakes';
+
+  @override
+  String get resolvedMistakesCount => 'Mastered Mistakes';
+
+  @override
+  String get totalMistakesCount => 'Total Mistakes';
+
+  @override
+  String get startMistakesPractice => 'Start Mistakes Practice';
+
+  @override
+  String get noMistakesFound =>
+      'Awesome! No mistakes recorded at the moment 🎉';
+
+  @override
+  String get noMistakesFoundSub =>
+      'Whenever you make an error in any upcoming exam, it will appear here automatically for practice.';
+
+  @override
+  String get filterAllMistakes => 'All';
+
+  @override
+  String get filterUnresolved => 'Unresolved Only';
+
+  @override
+  String get filterResolved => 'Mastered';
+
+  @override
+  String get filterBySourceExam => 'Filter by Exam';
+
+  @override
+  String timesFailedLabel(int count) {
+    return 'Failed: $count times';
+  }
+
+  @override
+  String lastMistakeDate(String date) {
+    return 'Last attempt: $date';
+  }
+
+  @override
+  String get statusMastered => 'Mastered';
+
+  @override
+  String get statusNeedsReview => 'Needs Review';
+
+  @override
+  String get practiceExamTitle => 'Mistakes Bank Practice';
+
+  @override
+  String get practiceExamInstruction =>
+      'Answer carefully; questions answered correctly will be marked as mastered.';
+
+  @override
+  String get submitPracticeExam => 'Submit Practice Exam';
+
+  @override
+  String get submittingPractice => 'Grading...';
+
+  @override
+  String get practiceResultsTitle => 'Mistakes Practice Results';
+
+  @override
+  String practiceSuccessSummary(int resolved, int total) {
+    return 'Well done! You mastered $resolved out of $total questions!';
+  }
+
+  @override
+  String practicePartialSummary(int resolved) {
+    return 'Mastered $resolved questions. Keep going to master the rest!';
+  }
+
+  @override
+  String get backToMistakesBank => 'Back to Mistakes Bank';
+
+  @override
+  String get retakeMistakesPractice => 'Retake Remaining Mistakes';
+
+  @override
+  String get allExamsFilter => 'All Sources';
+
+  @override
+  String get videoBankCmsTitle => 'Video Bank';
+
+  @override
+  String get videoBankCmsSubtitle =>
+      'Organize lectures into folders and assign them to any course seamlessly.';
+
+  @override
+  String get createFolder => 'New Folder';
+
+  @override
+  String get folderName => 'Folder Name';
+
+  @override
+  String get folderNameHint => 'e.g. Algebra Basics';
+
+  @override
+  String get folderCreatedSuccess => 'Folder created successfully';
+
+  @override
+  String get renameFolder => 'Rename Folder';
+
+  @override
+  String get renameVideo => 'Rename Video';
+
+  @override
+  String get videoTitleHint => 'Enter video title';
+
+  @override
+  String get deleteFolderConfirm =>
+      'Are you sure you want to delete this folder? All contained subfolders will be deleted.';
+
+  @override
+  String get deleteVideoConfirm =>
+      'Are you sure you want to delete this video from the bank?';
+
+  @override
+  String get moveVideo => 'Move Video';
+
+  @override
+  String get selectTargetFolder => 'Select Destination Folder';
+
+  @override
+  String get moveToRoot => 'Main Library (Root)';
+
+  @override
+  String get videoMovedSuccess => 'Video moved successfully';
+
+  @override
+  String get uploadToBank => 'Upload Video';
+
+  @override
+  String get selectVideoFile => 'Choose Video File';
+
+  @override
+  String get videoFileTypesHint => 'Supports MP4, MOV, MKV, WebM';
+
+  @override
+  String get uploadingVideo => 'Uploading video...';
+
+  @override
+  String get videoProcessingInfo =>
+      'Video is being transcoded and optimized by Bunny Stream...';
+
+  @override
+  String get statusReady => 'Ready';
+
+  @override
+  String get statusUploading => 'Uploading';
+
+  @override
+  String get selectFromBank => 'Choose from Video Bank';
+
+  @override
+  String get selectFromBankSubtitle =>
+      'Select an already uploaded video from your bank without re-uploading.';
+
+  @override
+  String get videoSelectedFromBank => 'Selected from Video Bank';
+
+  @override
+  String get noVideosInFolder =>
+      'This folder is empty. Upload a video or create subfolders.';
+
+  @override
+  String get rootFolderTitle => 'All Videos';
+
+  @override
+  String get openFolder => 'Open Folder';
+
+  @override
+  String get previewVideo => 'Preview Video';
+
+  @override
+  String nVideos(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Videos',
+      one: '1 Video',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String nSubfolders(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Folders',
+      one: '1 Folder',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get changeVideo => 'Change Video';
+
+  @override
+  String get savingChanges => 'Saving...';
+
+  @override
+  String get requiredField => 'This field is required';
+
+  @override
+  String get backToPrevious => 'Back to previous';
 }

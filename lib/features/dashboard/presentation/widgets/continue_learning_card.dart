@@ -25,8 +25,13 @@ class ContinueLearningCard extends StatelessWidget {
     final theme = Theme.of(context);
     final currentPosFormatted = _formatSeconds(item.progressSeconds);
     final durationFormatted = _formatSeconds(item.durationSeconds);
-    final pctValue = (item.percentage / 100.0).clamp(0.0, 1.0);
-    final pctString = item.percentage.toStringAsFixed(0);
+    final effectivePercentage = item.percentage > 0
+        ? item.percentage
+        : (item.durationSeconds > 0
+            ? (item.progressSeconds / item.durationSeconds * 100.0).clamp(0.0, 100.0)
+            : 0.0);
+    final pctValue = (effectivePercentage / 100.0).clamp(0.0, 1.0);
+    final pctString = effectivePercentage.toStringAsFixed(0);
 
     return AppCard(
       variant: AppCardVariant.elevated,

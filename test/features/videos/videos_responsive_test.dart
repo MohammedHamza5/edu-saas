@@ -53,7 +53,7 @@ class _FakeVideosRepository implements VideosRepository {
   @override
   Future<Result<String>> getPlaybackUrl(String videoId) async {
     return const Success(
-      'https://vz-04d07c5c-73c.b-cdn.net/sample-guid/playlist.m3u8?token=mocktoken',
+      'https://vz-1854ca75-182.b-cdn.net/sample-guid/playlist.m3u8?token=mocktoken',
     );
   }
 

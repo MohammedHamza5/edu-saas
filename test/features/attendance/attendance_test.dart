@@ -438,6 +438,10 @@ void main() {
     testWidgets('TeacherAttendancePage renders with group and date controls', (
       tester,
     ) async {
+      tester.view.physicalSize = const Size(1280, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
       final groupsRepo = FakeGroupsRepository();
       final groupsCubit = GroupsCubit(repository: groupsRepo);
       final attendanceRepo = FakeAttendanceRepository();

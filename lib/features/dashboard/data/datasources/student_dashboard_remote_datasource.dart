@@ -118,14 +118,20 @@ class StudentDashboardRemoteDataSourceImpl
     ContinueLearningItem? continueItem;
     final ci = data['continue_learning_item'];
     if (ci is Map<String, dynamic>) {
+      final pSec = (ci['progress_seconds'] as num?)?.toInt() ?? 0;
+      final dSec = (ci['duration_seconds'] as num?)?.toInt() ?? 0;
+      final rawPct = (ci['percentage'] as num?)?.toDouble() ?? 0.0;
+      final calculatedPct = dSec > 0 ? (pSec / dSec * 100.0).clamp(0.0, 100.0) : 0.0;
+      final effectivePct = rawPct > 0 ? rawPct : calculatedPct;
+
       continueItem = ContinueLearningItem(
         videoId: (ci['video_id'] as String?) ?? '',
         contentId: (ci['content_id'] as String?) ?? '',
         title: (ci['title'] as String?) ?? 'Video Lesson',
         groupName: (ci['group_name'] as String?) ?? activeGroupName,
-        progressSeconds: (ci['progress_seconds'] as num?)?.toInt() ?? 0,
-        durationSeconds: (ci['duration_seconds'] as num?)?.toInt() ?? 0,
-        percentage: (ci['percentage'] as num?)?.toDouble() ?? 0.0,
+        progressSeconds: pSec,
+        durationSeconds: dSec,
+        percentage: effectivePct,
       );
     }
 
@@ -448,8 +454,12 @@ class StudentDashboardRemoteDataSourceImpl
               (videoProgressResponse['duration_seconds'] as num?)?.toInt() ??
               (vidMap['duration'] as num?)?.toInt() ??
               0;
-          final pct =
+          final rawPct =
               (videoProgressResponse['percentage'] as num?)?.toDouble() ?? 0.0;
+          final calcPct = durationSec > 0
+              ? (progressSec / durationSec * 100.0).clamp(0.0, 100.0)
+              : 0.0;
+          final effectivePct = rawPct > 0 ? rawPct : calcPct;
 
           continueItem = ContinueLearningItem(
             videoId: (videoProgressResponse['video_id'] as String?) ?? '',
@@ -459,7 +469,7 @@ class StudentDashboardRemoteDataSourceImpl
             groupId: itemGroupId,
             progressSeconds: progressSec,
             durationSeconds: durationSec,
-            percentage: pct,
+            percentage: effectivePct,
           );
         }
       }

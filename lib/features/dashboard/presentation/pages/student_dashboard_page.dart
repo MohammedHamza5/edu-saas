@@ -519,7 +519,72 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
                             ),
                           ),
 
-                          // Card D: Teacher Announcements & Updates
+                          // Card D: Mistakes Bank (بنك الأخطاء)
+                          AppCard(
+                            variant: AppCardVariant.elevated,
+                            onTap: () =>
+                                context.push(AppRoutes.studentMistakes),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 46,
+                                  height: 46,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.warning.withValues(
+                                      alpha: 0.15,
+                                    ),
+                                    borderRadius: BorderRadius.circular(
+                                      AppSpacing.radiusSmall,
+                                    ),
+                                    border: Border.all(
+                                      color: AppColors.warning.withValues(
+                                        alpha: 0.25,
+                                      ),
+                                    ),
+                                  ),
+                                  child: const Icon(
+                                    Icons.auto_stories_rounded,
+                                    color: AppColors.warning,
+                                    size: 24,
+                                  ),
+                                ),
+                                const SizedBox(width: AppSpacing.s16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        context.l10n.mistakesBankTitle,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 15,
+                                          color: AppColors.textPrimary,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        context.l10n.mistakesBankSubtitle,
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: AppColors.textSecondary,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const Icon(
+                                  Icons.arrow_forward_ios_rounded,
+                                  size: 16,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          // Card E: Teacher Announcements & Updates
                           AppCard(
                             variant: AppCardVariant.elevated,
                             onTap: () =>
