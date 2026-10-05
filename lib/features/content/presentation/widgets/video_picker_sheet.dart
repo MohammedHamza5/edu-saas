@@ -5,11 +5,11 @@ import '../../../../core/di/injection_container.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/widgets/app_empty_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
 import '../../domain/entities/content_entity.dart';
 import '../cubit/content_cubit.dart';
 import '../cubit/content_state.dart';
+import '../../../videos/presentation/dialogs/select_video_from_bank_dialog.dart';
 
 /// A bottom sheet that shows all videos in the central Video Bank,
 /// allowing the teacher to pick one for adding as a lesson.
@@ -111,6 +111,40 @@ class _VideoPickerSheetState extends State<VideoPickerSheet> {
                     ),
                   ),
                 ),
+                OutlinedButton.icon(
+                  onPressed: () async {
+                    final picked =
+                        await SelectVideoFromBankDialog.show(context);
+                    if (picked != null && context.mounted) {
+                      final mapped = ContentEntity(
+                        id: picked.id,
+                        tenantId: picked.tenantId,
+                        title: picked.title,
+                        description: picked.description,
+                        type: ContentType.video,
+                        status: ContentStatus.published,
+                        videoProvider: picked.provider,
+                        videoProviderId: picked.providerVideoId,
+                        videoId: picked.id,
+                        videoStatus: picked.status.name,
+                        createdAt: picked.createdAt,
+                        updatedAt: picked.updatedAt,
+                        assignedGroupNames: picked.assignedGroupNames,
+                      );
+                      Navigator.of(context).pop(mapped);
+                    }
+                  },
+                  icon: const Icon(Icons.folder_open_rounded, size: 16),
+                  label: Text(l10n.selectFromBank),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    textStyle: const TextStyle(fontSize: 12),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.s8),
                 IconButton(
                   icon: const Icon(Icons.close_rounded),
                   onPressed: () => Navigator.of(context).pop(),
@@ -180,10 +214,63 @@ class _VideoPickerSheetState extends State<VideoPickerSheet> {
                 final filtered = _filter(all);
 
                 if (all.isEmpty) {
-                  return AppEmptyView(
-                    icon: Icons.video_library_outlined,
-                    message: l10n.videoLibraryEmpty,
-                    subtitle: l10n.videoLibraryEmptySubtitle,
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppSpacing.s24),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.video_library_outlined,
+                            size: 48,
+                            color: AppColors.textMuted,
+                          ),
+                          const SizedBox(height: AppSpacing.s12),
+                          Text(
+                            l10n.videoLibraryEmpty,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.s4),
+                          Text(
+                            l10n.videoLibraryEmptySubtitle,
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.s16),
+                          OutlinedButton.icon(
+                            onPressed: () async {
+                              final picked =
+                                  await SelectVideoFromBankDialog.show(context);
+                              if (picked != null && context.mounted) {
+                                final mapped = ContentEntity(
+                                  id: picked.id,
+                                  tenantId: picked.tenantId,
+                                  title: picked.title,
+                                  description: picked.description,
+                                  type: ContentType.video,
+                                  status: ContentStatus.published,
+                                  videoProvider: picked.provider,
+                                  videoProviderId: picked.providerVideoId,
+                                  videoId: picked.id,
+                                  videoStatus: picked.status.name,
+                                  createdAt: picked.createdAt,
+                                  updatedAt: picked.updatedAt,
+                                  assignedGroupNames: picked.assignedGroupNames,
+                                );
+                                Navigator.of(context).pop(mapped);
+                              }
+                            },
+                            icon:
+                                const Icon(Icons.folder_open_rounded, size: 18),
+                            label: Text(l10n.selectFromBank),
+                          ),
+                        ],
+                      ),
+                    ),
                   );
                 }
                 if (filtered.isEmpty) {
@@ -238,26 +325,29 @@ class _VideoPickerSheetState extends State<VideoPickerSheet> {
                             // Thumbnail
                             ClipRRect(
                               borderRadius: BorderRadius.circular(6),
-                              child: SizedBox(
+                              child: Container(
                                 width: 72,
                                 height: 48,
+                                color:
+                                    AppColors.primary.withValues(alpha: 0.08),
                                 child: thumbUrl != null
                                     ? CachedNetworkImage(
                                         imageUrl: thumbUrl,
                                         fit: BoxFit.cover,
-                                        errorWidget: (_, __, ___) => Container(
-                                          color: AppColors.surfaceVariant,
-                                          child: const Icon(
-                                            Icons.videocam_rounded,
-                                            size: 20,
+                                        errorWidget: (_, __, ___) =>
+                                            const Center(
+                                          child: Icon(
+                                            Icons.play_circle_fill_rounded,
+                                            color: AppColors.primary,
+                                            size: 24,
                                           ),
                                         ),
                                       )
-                                    : Container(
-                                        color: AppColors.surfaceVariant,
-                                        child: const Icon(
-                                          Icons.videocam_rounded,
-                                          size: 20,
+                                    : const Center(
+                                        child: Icon(
+                                          Icons.play_circle_fill_rounded,
+                                          color: AppColors.primary,
+                                          size: 24,
                                         ),
                                       ),
                               ),

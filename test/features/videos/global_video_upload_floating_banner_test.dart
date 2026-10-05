@@ -5,7 +5,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:edu_saas/core/errors/result.dart';
 import 'package:edu_saas/core/localization/generated/app_localizations.dart';
 import 'package:edu_saas/features/videos/domain/entities/library_video_entity.dart';
-import 'package:edu_saas/features/videos/domain/entities/video_entity.dart';
 import 'package:edu_saas/features/videos/domain/entities/video_folder_entity.dart';
 import 'package:edu_saas/features/videos/domain/repositories/video_bank_repository.dart';
 import 'package:edu_saas/features/videos/presentation/cubit/video_bank_cubit.dart';

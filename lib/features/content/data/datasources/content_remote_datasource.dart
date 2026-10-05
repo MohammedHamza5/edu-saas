@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/network/supabase_service.dart';
 import '../../../../core/utils/group_slug_resolver.dart';
 import '../../../notifications/domain/services/notification_dispatcher.dart';
+import '../../domain/entities/content_entity.dart';
 import '../models/content_model.dart';
 import '../models/file_attachment_model.dart';
 
@@ -901,24 +902,83 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     int page = 0,
     int pageSize = 100,
   }) async {
-    final startIndex = page * pageSize;
-    final endIndex = startIndex + pageSize - 1;
+    final List<ContentModel> allVideos = [];
 
-    final response = await _safeClient
-        .from('content')
-        .select(
-          '*, files(*), videos(*), content_groups(group_id, groups(name)), '
-          'associated_exam:exams!content_associated_exam_id_fkey(id, title), '
-          'prerequisite_exam:exams!content_prerequisite_exam_id_fkey(id, title, passing_score)',
-        )
-        .inFilter('type', ['video', 'youtube'])
-        .order('created_at', ascending: false)
-        .range(startIndex, endIndex);
+    // 1. Fetch all ready videos from video_library (Central Video Bank CMS)
+    try {
+      final libResponse = await _safeClient
+          .from('video_library')
+          .select('*, videos(id, content(group:groups(name)))')
+          .neq('status', 'failed')
+          .order('created_at', ascending: false);
 
-    final list = response as List<dynamic>;
-    return list
-        .map((e) => ContentModel.fromJson(e as Map<String, dynamic>))
-        .toList();
+      final libList = libResponse as List<dynamic>;
+      for (final item in libList) {
+        final row = item as Map<String, dynamic>;
+        final List<String> assignedNames = [];
+        final videosList = row['videos'] as List<dynamic>?;
+        if (videosList != null) {
+          for (final v in videosList) {
+            final c = v['content'] as Map<String, dynamic>?;
+            final g = c?['group'] as Map<String, dynamic>?;
+            final name = g?['name'] as String?;
+            if (name != null && !assignedNames.contains(name)) {
+              assignedNames.add(name);
+            }
+          }
+        }
+
+        allVideos.add(
+          ContentModel(
+            id: row['id'] as String,
+            tenantId: row['tenant_id'] as String,
+            title: row['title'] as String,
+            description: row['description'] as String?,
+            type: ContentType.video,
+            status: ContentStatus.published,
+            sortOrder: 0,
+            createdAt: DateTime.parse(row['created_at'] as String),
+            updatedAt: DateTime.parse(row['updated_at'] as String),
+            videoId: row['id'] as String,
+            videoStatus: row['status'] as String? ?? 'ready',
+            videoProviderId: row['provider_video_id'] as String?,
+            videoProvider: row['provider'] as String? ?? 'bunny',
+            assignedGroupNames: assignedNames,
+            isPublishedInGroup: true,
+          ),
+        );
+      }
+    } catch (_) {}
+
+    // 2. Fetch standalone / existing lessons from content table
+    try {
+      final response = await _safeClient
+          .from('content')
+          .select(
+            '*, files(*), videos(*), content_groups(group_id, groups(name)), '
+            'associated_exam:exams!content_associated_exam_id_fkey(id, title), '
+            'prerequisite_exam:exams!content_prerequisite_exam_id_fkey(id, title, passing_score)',
+          )
+          .inFilter('type', ['video', 'youtube'])
+          .order('created_at', ascending: false);
+
+      final list = response as List<dynamic>;
+      final contentModels = list
+          .map((e) => ContentModel.fromJson(e as Map<String, dynamic>))
+          .toList();
+
+      for (final c in contentModels) {
+        final alreadyPresent = allVideos.any((v) =>
+            v.id == c.id ||
+            (v.videoProviderId != null &&
+                v.videoProviderId == c.videoProviderId));
+        if (!alreadyPresent) {
+          allVideos.add(c);
+        }
+      }
+    } catch (_) {}
+
+    return allVideos;
   }
 
   @override
@@ -927,10 +987,68 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     required List<String> groupIds,
     List<Map<String, dynamic>>? groupConfigs,
   }) async {
+    // 1. Check if contentId exists in `content` table
+    final contentCheck = await _safeClient
+        .from('content')
+        .select('id')
+        .eq('id', contentId)
+        .maybeSingle();
+
+    String actualContentId = contentId;
+
+    // 2. If not found in `content`, it must be a master video from `video_library`
+    if (contentCheck == null) {
+      final libVideo = await _safeClient
+          .from('video_library')
+          .select()
+          .eq('id', contentId)
+          .maybeSingle();
+
+      if (libVideo != null) {
+        final tenantId = libVideo['tenant_id'] as String;
+        final customTitle = (groupConfigs != null &&
+                groupConfigs.isNotEmpty &&
+                groupConfigs.first['custom_title'] != null)
+            ? groupConfigs.first['custom_title'] as String
+            : null;
+        final title = customTitle ?? (libVideo['title'] as String);
+
+        // Create the content record in public.content
+        final contentInsert = await _safeClient
+            .from('content')
+            .insert({
+              'tenant_id': tenantId,
+              'title': title,
+              'description': libVideo['description'],
+              'type': 'video',
+              'status': 'published',
+            })
+            .select('id')
+            .single();
+
+        actualContentId = contentInsert['id'] as String;
+
+        // Insert into videos table linking to video_library
+        await _safeClient.from('videos').insert({
+          'tenant_id': tenantId,
+          'content_id': actualContentId,
+          'library_video_id': contentId,
+          'title': title,
+          'description': libVideo['description'],
+          'provider': libVideo['provider'] ?? 'bunny',
+          'provider_video_id': libVideo['provider_video_id'],
+          'thumbnail_url': libVideo['thumbnail_url'],
+          'duration': libVideo['duration'],
+          'status': libVideo['status'] ?? 'ready',
+        });
+      }
+    }
+
+    // 3. Assign actualContentId to groups via atomic RPC
     await _safeClient.rpc<void>(
       'assign_content_to_groups',
       params: {
-        'p_content_id': contentId,
+        'p_content_id': actualContentId,
         'p_group_ids': groupIds,
         'p_group_configs': groupConfigs ?? [],
       },
