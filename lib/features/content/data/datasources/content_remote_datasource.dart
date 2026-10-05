@@ -1064,6 +1064,15 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     required List<String> groupIds,
     List<Map<String, dynamic>>? groupConfigs,
   }) async {
+    final resolvedGroupIds = groupIds.map(GroupSlugResolver.toId).toList();
+    final resolvedConfigs = groupConfigs?.map((cfg) {
+      final copy = Map<String, dynamic>.from(cfg);
+      if (copy['group_id'] != null) {
+        copy['group_id'] = GroupSlugResolver.toId(copy['group_id'] as String);
+      }
+      return copy;
+    }).toList();
+
     // 1. Check if contentId exists in `content` table
     final contentCheck = await _safeClient
         .from('content')
@@ -1083,10 +1092,10 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
 
       if (libVideo != null) {
         final tenantId = libVideo['tenant_id'] as String;
-        final customTitle = (groupConfigs != null &&
-                groupConfigs.isNotEmpty &&
-                groupConfigs.first['custom_title'] != null)
-            ? groupConfigs.first['custom_title'] as String
+        final customTitle = (resolvedConfigs != null &&
+                resolvedConfigs.isNotEmpty &&
+                resolvedConfigs.first['custom_title'] != null)
+            ? resolvedConfigs.first['custom_title'] as String
             : null;
         final title = customTitle ?? (libVideo['title'] as String);
 
@@ -1095,6 +1104,7 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
             .from('content')
             .insert({
               'tenant_id': tenantId,
+              'group_id': resolvedGroupIds.isNotEmpty ? resolvedGroupIds.first : null,
               'title': title,
               'description': libVideo['description'],
               'type': 'video',
@@ -1107,11 +1117,8 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
 
         // Insert into videos table linking to video_library
         await _safeClient.from('videos').insert({
-          'tenant_id': tenantId,
           'content_id': actualContentId,
           'library_video_id': contentId,
-          'title': title,
-          'description': libVideo['description'],
           'provider': libVideo['provider'] ?? 'bunny',
           'provider_video_id': libVideo['provider_video_id'],
           'thumbnail_url': libVideo['thumbnail_url'],
@@ -1126,8 +1133,8 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
       'assign_content_to_groups',
       params: {
         'p_content_id': actualContentId,
-        'p_group_ids': groupIds,
-        'p_group_configs': groupConfigs ?? [],
+        'p_group_ids': resolvedGroupIds,
+        'p_group_configs': resolvedConfigs ?? [],
       },
     );
   }

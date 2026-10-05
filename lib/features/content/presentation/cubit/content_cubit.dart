@@ -246,6 +246,8 @@ class ContentCubit extends Cubit<ContentState> {
       case Success():
         if (_currentGroupId != null) {
           await loadGroupContent(_currentGroupId!, forceRefresh: true);
+        } else if (groupIds.isNotEmpty) {
+          await loadGroupContent(groupIds.first, forceRefresh: true);
         } else {
           await loadCentralVideoBank(forceRefresh: true);
         }

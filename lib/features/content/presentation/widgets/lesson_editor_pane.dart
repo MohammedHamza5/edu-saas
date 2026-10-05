@@ -256,7 +256,7 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
         }
       }
 
-      await cubit.assignContentToGroups(
+      final success = await cubit.assignContentToGroups(
         contentId: _selectedVideo!.id,
         groupIds: [widget.groupId],
         groupConfigs: [
@@ -275,7 +275,19 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
         ],
       );
 
-      widget.onSaved();
+      if (success) {
+        widget.onSaved();
+      } else if (mounted) {
+        final errorMsg = cubit.state is ContentError
+            ? (cubit.state as ContentError).message
+            : context.l10n.lessonEditorErrorSaving;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMsg),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
