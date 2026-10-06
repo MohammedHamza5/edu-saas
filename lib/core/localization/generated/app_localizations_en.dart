@@ -3442,6 +3442,20 @@ class AppLocalizationsEn extends AppLocalizations {
       'Please do not close or refresh the exam window until confirmation of successful submission appears.';
 
   @override
+  String get unlimitedTime => 'Unlimited (Open)';
+
+  @override
+  String get untimedExamBadge => 'Untimed Exam';
+
+  @override
+  String get ruleUntimedLectureExam =>
+      'This exam is linked to a lecture and has no time limit. Take your full time to solve and understand the questions.';
+
+  @override
+  String get ruleRetakeAllowedNotice =>
+      'You can retake this quiz if needed to achieve the passing score and unlock subsequent lectures.';
+
+  @override
   String get resumeCurrentExam => 'Resume In-Progress Exam';
 
   @override
@@ -6573,6 +6587,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get createFolder => 'New Folder';
 
   @override
+  String get createFolderSubtitle =>
+      'Organize your videos into a structured folder for easy access.';
+
+  @override
   String get folderName => 'Folder Name';
 
   @override
@@ -6583,6 +6601,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get renameFolder => 'Rename Folder';
+
+  @override
+  String get renameFolderSubtitle =>
+      'Update the display name of this folder across your library.';
 
   @override
   String get renameVideo => 'Rename Video';
@@ -6723,4 +6745,104 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get browserTabCloseWarning =>
       'A video upload is currently in progress. Leaving or reloading will cancel the upload.';
+
+  @override
+  String get syncVideoStatus => 'Check / Sync Status';
+
+  @override
+  String get videoStatusRefreshed => 'Video status updated successfully';
+
+  @override
+  String get videoStatusRefreshFailed =>
+      'Failed to update video status. Please try again.';
+
+  @override
+  String get reviewExamAnswersAction => 'Review Answers & Grades';
+
+  @override
+  String get reviewExamTitle => 'Exam Review';
+
+  @override
+  String get yourCorrectAnswer => 'Your Answer (Correct)';
+
+  @override
+  String get yourWrongAnswer => 'Your Answer (Incorrect)';
+
+  @override
+  String get correctAnswerLabel => 'Correct Model Answer';
+
+  @override
+  String pointsEarnedOutOf(num earned, num total) {
+    return 'Score: $earned of $total';
+  }
+
+  @override
+  String retakeToUnlockNextLesson(num score, num max) {
+    return 'Passing score not reached yet ($score/$max). Retake to pass and unlock the next lesson.';
+  }
+
+  @override
+  String get reviewPreviousAttempt => 'Review Previous Attempt Mistakes';
+
+  @override
+  String get reviewExamAnswers => 'Review Questions & Answers';
+
+  @override
+  String get examAlreadyPassedTitle => 'Exam Passed Successfully';
+
+  @override
+  String examAlreadyPassedSubtitle(num score, num max) {
+    return 'You achieved the required passing score ($score/$max) and the next lesson is unlocked. You can review your answers anytime.';
+  }
+
+  @override
+  String get noAnswersRecorded => 'No answers were recorded in this attempt.';
+
+  @override
+  String reviewQuestionIndex(num current, num total) {
+    return 'Question $current of $total';
+  }
+
+  @override
+  String get unansweredQuestion => 'You did not answer this question';
+
+  @override
+  String get lectureQuizzesFilter => 'Lecture Quizzes';
+
+  @override
+  String get generalExamsFilter => 'General Exams';
+
+  @override
+  String get lectureQuizBadge => 'Lecture Quiz';
+
+  @override
+  String get generalExamBadge => 'General Exam';
+
+  @override
+  String get allMistakesMastered =>
+      'Well done! You have mastered all questions and resolved all previous mistakes.';
+
+  @override
+  String get noMistakesRecordedYet =>
+      'No mistakes recorded yet! Your previous answers are excellent.';
+
+  @override
+  String startPracticeCount(num count) {
+    return 'Start Practice ($count)';
+  }
+
+  @override
+  String get reviewMistakesBankBtn => 'View Mistakes';
+
+  @override
+  String get lectureQuizzesSectionTitle => 'Lecture Quizzes & Assessments';
+
+  @override
+  String get lectureQuizzesSectionDesc =>
+      'Quizzes associated with lectures to measure comprehension';
+
+  @override
+  String questionsNeedingReviewCount(num count) {
+    return 'You have $count questions needing review and practice for mastery.';
+  }
 }

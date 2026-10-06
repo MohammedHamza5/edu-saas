@@ -52,11 +52,11 @@ function json(
 }
 
 /**
- * Generate Bunny CDN Token Authentication hash.
+ * Generate Bunny Stream Embed View Token Authentication hash.
  *
- * Formula (from Bunny docs):
- *   token = SHA256( tokenKey + videoGuid + expires )
- * Result is Base64 URL-safe encoded then stripped of padding.
+ * Formula (from official Bunny Stream docs):
+ *   token = SHA256_HEX( tokenKey + videoGuid + expires )
+ * Result is a 64-character lowercase HEX string.
  */
 async function generateBunnyToken(
   tokenKey: string,
@@ -68,12 +68,9 @@ async function generateBunnyToken(
     "SHA-256",
     new TextEncoder().encode(input),
   );
-  // Convert to Base64 URL-safe (Bunny expects this format)
-  const base64 = btoa(String.fromCharCode(...new Uint8Array(digest)));
-  return base64
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
+  return Array.from(new Uint8Array(digest))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 }
 
 // deno-lint-ignore no-explicit-any
@@ -241,9 +238,9 @@ Deno.serve(async (req: Request) => {
     const expires = Math.floor(Date.now() / 1000) + TOKEN_TTL_SECONDS;
     const token = await generateBunnyToken(tokenKey, providerVideoId, expires);
 
-    // Bunny embed URL with Token Authentication + player options
+    // Bunny Stream Embed URL
     const playbackUrl =
-      `https://iframe.mediadelivery.net/embed/${libraryId}/${providerVideoId}` +
+      `https://player.mediadelivery.net/embed/${libraryId}/${providerVideoId}` +
       `?token=${token}` +
       `&expires=${expires}` +
       `&autoplay=false` +

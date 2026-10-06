@@ -677,6 +677,9 @@
         var iframe = document.createElement('iframe');
         iframe.id = 'bunny_frame_' + viewId;
         iframe.src = src;
+        // Bunny Stream security requirement
+        iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+        iframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
         iframe.style.width = '100%';
         iframe.style.height = '100%';
         iframe.style.border = '0';

@@ -370,7 +370,7 @@ class ContentCubit extends Cubit<ContentState> {
     updatedList.sort((a, b) {
       final s = a.sortOrder.compareTo(b.sortOrder);
       if (s != 0) return s;
-      return b.createdAt.compareTo(a.createdAt);
+      return a.createdAt.compareTo(b.createdAt);
     });
 
     // Optimistically update UI order immediately

@@ -167,6 +167,8 @@ class _CreateExamPageState extends State<CreateExamPage> {
       for (final rev in revisions) {
         final draftQ = _DraftQuestion();
         draftQ.textController.text = rev.stemText;
+        draftQ.imageUrl = rev.imageUrl;
+        draftQ.imageMeta = rev.imageMeta;
 
         if (rev.options.isNotEmpty) {
           draftQ.type = QuestionType.multipleChoice;

@@ -361,7 +361,10 @@ class ExamsCubit extends Cubit<ExamsState> {
   }
 
   /// Starts or resumes an exam attempt for the student (Student taking environment)
-  Future<bool> startExamTaking(ExamEntity exam) async {
+  Future<bool> startExamTaking(
+    ExamEntity exam, {
+    bool isLectureExam = false,
+  }) async {
     emit(const ExamsLoading());
 
     // 1. Fetch full details to ensure we have questions
@@ -385,16 +388,23 @@ class ExamsCubit extends Cubit<ExamsState> {
           return false;
         }
 
-        // Calculate remaining seconds
-        final elapsedSeconds = DateTime.now()
-            .difference(attempt.startedAt)
-            .inSeconds;
-        final totalSeconds = fullExam.durationMinutes * 60;
-        final remaining = totalSeconds - elapsedSeconds;
+        final isUntimed = isLectureExam ||
+            fullExam.durationMinutes <= 0 ||
+            exam.durationMinutes <= 0;
+        int remaining = 0;
 
-        if (remaining <= 0) {
-          emit(const ExamsError('انتهت المدة الزمنية المحددة لهذا الامتحان'));
-          return false;
+        if (!isUntimed) {
+          // Calculate remaining seconds for timed exams
+          final elapsedSeconds = DateTime.now()
+              .difference(attempt.startedAt)
+              .inSeconds;
+          final totalSeconds = fullExam.durationMinutes * 60;
+          remaining = totalSeconds - elapsedSeconds;
+
+          if (remaining <= 0) {
+            emit(const ExamsError('انتهت المدة الزمنية المحددة لهذا الامتحان'));
+            return false;
+          }
         }
 
         emit(
@@ -403,10 +413,13 @@ class ExamsCubit extends Cubit<ExamsState> {
             attempt: attempt,
             questions: questions,
             remainingSeconds: remaining,
+            isUntimed: isUntimed,
           ),
         );
 
-        _startTimer();
+        if (!isUntimed) {
+          _startTimer();
+        }
         return true;
       },
       onFailure: (failure) {
@@ -418,9 +431,13 @@ class ExamsCubit extends Cubit<ExamsState> {
 
   void _startTimer() {
     _countdownTimer?.cancel();
+    final currentState = state;
+    if (currentState is ExamTakingState && currentState.isUntimed) {
+      return;
+    }
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       final currentState = state;
-      if (currentState is! ExamTakingState) {
+      if (currentState is! ExamTakingState || currentState.isUntimed) {
         timer.cancel();
         return;
       }
@@ -474,6 +491,8 @@ class ExamsCubit extends Cubit<ExamsState> {
 
     return result.when(
       onSuccess: (submitResult) {
+        AppCache.exams.clear();
+        AppCache.content.clear();
         emit(
           currentState.copyWith(
             isSubmitting: false,

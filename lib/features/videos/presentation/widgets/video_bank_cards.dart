@@ -204,6 +204,7 @@ class VideoBankVideoCard extends StatefulWidget {
   final VoidCallback onMove;
   final VoidCallback onRename;
   final VoidCallback onDelete;
+  final VoidCallback? onSync;
 
   const VideoBankVideoCard({
     super.key,
@@ -213,6 +214,7 @@ class VideoBankVideoCard extends StatefulWidget {
     required this.onMove,
     required this.onRename,
     required this.onDelete,
+    this.onSync,
   });
 
   @override
@@ -503,12 +505,34 @@ class _VideoBankVideoCardState extends State<VideoBankVideoCard> {
                       minHeight: 32,
                     ),
                     onSelected: (val) {
+                      if (val == 'sync') widget.onSync?.call();
                       if (val == 'preview') widget.onPreview();
                       if (val == 'move') widget.onMove();
                       if (val == 'rename') widget.onRename();
                       if (val == 'delete') widget.onDelete();
                     },
                     itemBuilder: (ctx) => [
+                      if (v.isProcessing && widget.onSync != null)
+                        PopupMenuItem(
+                          value: 'sync',
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.sync_rounded,
+                                size: 16,
+                                color: AppColors.primary,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                l10n.syncVideoStatus,
+                                style: const TextStyle(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       if (v.isReady)
                         PopupMenuItem(
                           value: 'preview',
@@ -595,33 +619,48 @@ class _VideoBankVideoCardState extends State<VideoBankVideoCard> {
     }
 
     if (v.isProcessing) {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-        decoration: BoxDecoration(
-          color: AppColors.primary,
+      return Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: widget.onSync,
           borderRadius: BorderRadius.circular(4),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(
-              width: 8,
-              height: 8,
-              child: CircularProgressIndicator(
-                strokeWidth: 1.5,
-                color: Colors.white,
-              ),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(4),
             ),
-            const SizedBox(width: 4),
-            Text(
-              l10n.statusProcessing,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 9,
-                fontWeight: FontWeight.bold,
-              ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(
+                  width: 8,
+                  height: 8,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 1.5,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  l10n.statusProcessing,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 9,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                if (widget.onSync != null) ...[
+                  const SizedBox(width: 3),
+                  const Icon(
+                    Icons.refresh_rounded,
+                    size: 10,
+                    color: Colors.white,
+                  ),
+                ],
+              ],
             ),
-          ],
+          ),
         ),
       );
     }

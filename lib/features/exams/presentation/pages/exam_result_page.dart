@@ -6,6 +6,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../domain/entities/exam_entity.dart';
+import 'exam_review_page.dart';
 
 class ExamResultPage extends StatelessWidget {
   final ExamEntity exam;
@@ -203,8 +204,25 @@ class ExamResultPage extends StatelessWidget {
             const SizedBox(height: AppSpacing.s32),
 
             AppButton(
+              text: context.l10n.reviewExamAnswersAction,
+              icon: Icons.fact_check_outlined,
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => ExamReviewPage(
+                      attemptId: attempt.id,
+                      exam: exam,
+                      initialAttempt: attempt,
+                    ),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: AppSpacing.s12),
+            AppButton(
               text: context.l10n.backToExamsList,
               icon: Icons.home_outlined,
+              variant: AppButtonVariant.secondary,
               onPressed: () {
                 Navigator.of(context).pop();
               },

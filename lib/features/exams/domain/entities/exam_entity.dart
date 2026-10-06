@@ -531,10 +531,13 @@ class ExamEntity extends Equatable {
   });
 
   bool get hasAttempted => myLatestAttempt != null;
+  bool get isUntimed => durationMinutes <= 0;
+
   bool get hasActiveAttempt {
     if (myLatestAttempt == null) return false;
     if (!myLatestAttempt!.isInProgress) return false;
-    // An attempt is only active if it has not exceeded the exam duration
+    // An untimed exam is always active while in progress
+    if (isUntimed) return true;
     final elapsedMinutes = DateTime.now()
         .difference(myLatestAttempt!.startedAt)
         .inMinutes;

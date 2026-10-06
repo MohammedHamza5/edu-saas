@@ -71,6 +71,12 @@ class _TeacherLessonDetailsPageState extends State<TeacherLessonDetailsPage>
       _totalViews = 0;
       _completedStudents = 0;
       _averageQuizScore = null;
+      try {
+        final cubit = context.read<ContentCubit>();
+        if (cubit.state is! ContentLoaded) {
+          await cubit.loadGroupContent(widget.groupId);
+        }
+      } catch (_) {}
       if (mounted) setState(() => _isLoading = false);
       return;
     }

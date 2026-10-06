@@ -3427,6 +3427,20 @@ class AppLocalizationsAr extends AppLocalizations {
       'يُرجى عدم إغلاق نافذة الامتحان حتى ظهور رسالة التسليم بنجاح.';
 
   @override
+  String get unlimitedTime => 'غير محدد (مفتوح)';
+
+  @override
+  String get untimedExamBadge => 'اختبار مفتوح (بدون وقت)';
+
+  @override
+  String get ruleUntimedLectureExam =>
+      'هذا الاختبار مرتبط بمحاضرة وبدون حد زمني، خذ وقتك بالكامل في الحل والفهم.';
+
+  @override
+  String get ruleRetakeAllowedNotice =>
+      'يمكنك إعادة المحاولة لاحقاً لاجتياز المحاضرة وفتح المحاضرات التالية.';
+
+  @override
   String get resumeCurrentExam => 'استئناف الامتحان الحالي';
 
   @override
@@ -6538,6 +6552,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get createFolder => 'مجلد جديد';
 
   @override
+  String get createFolderSubtitle =>
+      'نظّم فيديوهاتك في مجلد مخصص لتسهيل الوصول إليها وإضافتها للمحاضرات.';
+
+  @override
   String get folderName => 'اسم المجلد';
 
   @override
@@ -6548,6 +6566,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get renameFolder => 'إعادة تسمية المجلد';
+
+  @override
+  String get renameFolderSubtitle =>
+      'تعديل اسم هذا المجلد في بنك الفيديوهات والمحاضرات المرتبطة.';
 
   @override
   String get renameVideo => 'إعادة تسمية الفيديو';
@@ -6688,4 +6710,104 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get browserTabCloseWarning =>
       'يوجد فيديو قيد الرفع حالياً. إغلاق المنصة أو تحديثها سيؤدي إلى إلغاء عملية الرفع.';
+
+  @override
+  String get syncVideoStatus => 'فحص وتحديث حالة المعالجة';
+
+  @override
+  String get videoStatusRefreshed => 'تم فحص وتحديث حالة الفيديو بنجاح';
+
+  @override
+  String get videoStatusRefreshFailed =>
+      'تعذر تحديث حالة الفيديو. يُرجى المحاولة مرة أخرى.';
+
+  @override
+  String get reviewExamAnswersAction => 'مراجعة الإجابات والدرجات';
+
+  @override
+  String get reviewExamTitle => 'مراجعة الاختبار';
+
+  @override
+  String get yourCorrectAnswer => 'إجابتك (صحيحة)';
+
+  @override
+  String get yourWrongAnswer => 'إجابتك (غير صحيحة)';
+
+  @override
+  String get correctAnswerLabel => 'الإجابة النموذجية الصحيحة';
+
+  @override
+  String pointsEarnedOutOf(num earned, num total) {
+    return 'الدرجة: $earned من $total';
+  }
+
+  @override
+  String retakeToUnlockNextLesson(num score, num max) {
+    return 'لم تجتز درجة النجاح بعد ($score/$max). أعد المحاولة لاجتياز الاختبار وفتح المحاضرة التالية.';
+  }
+
+  @override
+  String get reviewPreviousAttempt => 'مراجعة أخطائي في المحاولة السابقة';
+
+  @override
+  String get reviewExamAnswers => 'مراجعة الأسئلة والإجابات';
+
+  @override
+  String get examAlreadyPassedTitle => 'تم اجتياز الاختبار بنجاح';
+
+  @override
+  String examAlreadyPassedSubtitle(num score, num max) {
+    return 'لقد حققت درجة النجاح المطلوبة ($score/$max) وتم فتح المحاضرة التالية. يمكنك مراجعة إجاباتك في أي وقت.';
+  }
+
+  @override
+  String get noAnswersRecorded => 'لم يتم تسجيل أي إجابات في هذه المحاولة.';
+
+  @override
+  String reviewQuestionIndex(num current, num total) {
+    return 'السؤال $current من $total';
+  }
+
+  @override
+  String get unansweredQuestion => 'لم تقم بالإجابة على هذا السؤال';
+
+  @override
+  String get lectureQuizzesFilter => 'اختبارات المحاضرات';
+
+  @override
+  String get generalExamsFilter => 'الامتحانات العامة';
+
+  @override
+  String get lectureQuizBadge => 'اختبار محاضرة';
+
+  @override
+  String get generalExamBadge => 'امتحان عام';
+
+  @override
+  String get allMistakesMastered =>
+      'أحسنت! لقد أتقنت جميع الأسئلة وتجاوزت كافة الأخطاء السابقة.';
+
+  @override
+  String get noMistakesRecordedYet =>
+      'لا توجد أخطاء مسجلة حالياً! إجاباتك السابقة ممتازة.';
+
+  @override
+  String startPracticeCount(num count) {
+    return 'بدء التدريب الفوري ($count)';
+  }
+
+  @override
+  String get reviewMistakesBankBtn => 'استعراض الأسئلة الخاطئة';
+
+  @override
+  String get lectureQuizzesSectionTitle => 'اختبارات وكويزات المحاضرات';
+
+  @override
+  String get lectureQuizzesSectionDesc =>
+      'الاختبارات المرتبطة بالمحاضرات والدروس لقياس استيعابك وتثبيت المفاهيم';
+
+  @override
+  String questionsNeedingReviewCount(num count) {
+    return 'لديك $count أسئلة تحتاج لمراجعتها وتصحيحها لتثبيت المفاهيم الأكاديمية.';
+  }
 }

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/network/supabase_service.dart';
+import '../../../../core/utils/app_logger.dart';
 import '../../domain/entities/exam_entity.dart';
 import '../../../notifications/domain/services/notification_dispatcher.dart';
 import '../models/exam_attempt_model.dart';
@@ -214,7 +215,7 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
 
     final list = rawList.where((item) {
       final id = (item as Map<String, dynamic>)['id'] as String?;
-      return id != null && !lessonExamIds.contains(id);
+      return id != null;
     }).toList();
 
     if (list.isEmpty) return [];
@@ -343,7 +344,32 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
         .eq('id', examId)
         .single();
 
-    return ExamModel.fromJson(Map<String, dynamic>.from(response));
+    final map = Map<String, dynamic>.from(response);
+    final currentUserId = _safeClient.auth.currentUser?.id;
+    if (currentUserId != null) {
+      try {
+        final attempts = await _safeClient
+            .from('exam_attempts')
+            .select('''
+              id,
+              exam_id,
+              exam_version_id,
+              student_id,
+              started_at,
+              submitted_at,
+              status,
+              score,
+              percentage
+            ''')
+            .eq('exam_id', examId)
+            .eq('student_id', currentUserId)
+            .order('started_at', ascending: false);
+
+        map['exam_attempts'] = attempts;
+      } catch (_) {}
+    }
+
+    return ExamModel.fromJson(map);
   }
 
   @override
@@ -654,84 +680,14 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
         score: (map['score'] as num?)?.toInt(),
         percentage: percentage,
       );
-    } catch (_) {
-      // Fallback for offline test environments: calculate server-side
-      final attemptRes = await _safeClient
-          .from('exam_attempts')
-          .select('id, exam_id, exam_version_id, student_id, started_at')
-          .eq('id', attemptId)
-          .single();
-
-      final versionId = attemptRes['exam_version_id'] as String;
-
-      // Fetch version questions with correct options
-      final questionsRes = await _safeClient
-          .from('exam_questions')
-          .select('id, points, question_options(id, is_correct)')
-          .eq('exam_version_id', versionId);
-
-      int totalScore = 0;
-      int maxScore = 0;
-
-      for (final q in questionsRes as List) {
-        final qMap = q as Map<String, dynamic>;
-        final points = (qMap['points'] as num?)?.toInt() ?? 1;
-        maxScore += points;
-
-        final qId = qMap['id'] as String;
-        final selectedOpt = answers[qId];
-
-        if (selectedOpt != null && qMap['question_options'] is List) {
-          final options = qMap['question_options'] as List;
-          final match = options.firstWhere(
-            (o) => o['id'] == selectedOpt && o['is_correct'] == true,
-            orElse: () => null,
-          );
-
-          final isCorrect = match != null;
-          final earned = isCorrect ? points.toDouble() : 0.0;
-          if (isCorrect) totalScore += points;
-
-          await _safeClient.from('exam_answers').insert({
-            'attempt_id': attemptId,
-            'question_id': qId,
-            'selected_option_id': selectedOpt,
-            'is_correct': isCorrect,
-            'points_earned': earned,
-          });
-        }
-      }
-
-      final percentage = maxScore > 0 ? (totalScore / maxScore) * 100 : 0.0;
-
-      final updated = await _safeClient
-          .from('exam_attempts')
-          .update({
-            'status': 'submitted',
-            'submitted_at': DateTime.now().toUtc().toIso8601String(),
-            'score': totalScore,
-            'percentage': percentage,
-          })
-          .eq('id', attemptId)
-          .select()
-          .single();
-
-      final studentId = attemptRes['student_id'] as String;
-      if (studentId.isNotEmpty) {
-        unawaited(
-          NotificationDispatcher.notifyExamResult(
-            examTitle: 'الاختبار',
-            studentId: studentId,
-            score: totalScore,
-            maxScore: maxScore,
-            percentage: percentage.round(),
-            attemptId: attemptId,
-            examId: attemptRes['exam_id'] as String? ?? '',
-          ),
-        );
-      }
-
-      return ExamAttemptModel.fromJson(Map<String, dynamic>.from(updated));
+    } catch (e, st) {
+      AppLogger.e(
+        'ExamsRemoteDataSource',
+        'submit_exam RPC failed: $e',
+        error: e,
+        stackTrace: st,
+      );
+      rethrow;
     }
   }
 
@@ -763,6 +719,23 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
 
   @override
   Future<ExamAttemptModel> getAttemptDetails(String attemptId) async {
+    try {
+      final rpcRes = await _safeClient.rpc<dynamic>(
+        'get_exam_review',
+        params: {'p_attempt_id': attemptId},
+      );
+      if (rpcRes is Map<String, dynamic>) {
+        return ExamAttemptModel.fromJson(rpcRes);
+      } else if (rpcRes is Map) {
+        return ExamAttemptModel.fromJson(Map<String, dynamic>.from(rpcRes));
+      }
+    } catch (e) {
+      AppLogger.w(
+        'ExamsRemoteDataSource',
+        'get_exam_review RPC failed, falling back to direct select: $e',
+      );
+    }
+
     final response = await _safeClient
         .from('exam_attempts')
         .select('''

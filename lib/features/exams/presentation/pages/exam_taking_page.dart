@@ -159,7 +159,7 @@ class ExamTakingPage extends StatelessWidget {
 
         final qIndex = state.currentQuestionIndex;
         final question = state.currentQuestion;
-        final isUrgent = state.remainingSeconds < 300; // < 5 minutes
+        final isUrgent = !state.isUntimed && state.remainingSeconds < 300; // < 5 minutes
 
         return PopScope(
           canPop: false,
@@ -186,48 +186,87 @@ class ExamTakingPage extends StatelessWidget {
                   tooltip: context.l10n.calculatorTooltip,
                   onPressed: () => SatExamToolsSheet.showCalculator(context),
                 ),
-                // Timer badge
-                Container(
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.s12,
-                    vertical: AppSpacing.s8,
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.s12,
-                    vertical: AppSpacing.s6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isUrgent
-                        ? AppColors.error.withValues(alpha: 0.15)
-                        : AppColors.surfaceVariant,
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                    border: isUrgent
-                        ? Border.all(color: AppColors.error)
-                        : null,
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.timer_outlined,
-                        size: 16,
-                        color: isUrgent
-                            ? AppColors.error
-                            : AppColors.textPrimary,
+                // Timer / Untimed badge
+                if (state.isUntimed)
+                  Container(
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.s12,
+                      vertical: AppSpacing.s8,
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.s12,
+                      vertical: AppSpacing.s6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.1),
+                      borderRadius:
+                          BorderRadius.circular(AppSpacing.radiusSmall),
+                      border: Border.all(
+                        color: AppColors.primary.withValues(alpha: 0.3),
                       ),
-                      const SizedBox(width: AppSpacing.s6),
-                      Text(
-                        _formatDuration(state.remainingSeconds),
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.all_inclusive_rounded,
+                          size: 16,
+                          color: AppColors.primary,
+                        ),
+                        const SizedBox(width: AppSpacing.s6),
+                        Text(
+                          context.l10n.untimedExamBadge,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                else
+                  Container(
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.s12,
+                      vertical: AppSpacing.s8,
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.s12,
+                      vertical: AppSpacing.s6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isUrgent
+                          ? AppColors.error.withValues(alpha: 0.15)
+                          : AppColors.surfaceVariant,
+                      borderRadius:
+                          BorderRadius.circular(AppSpacing.radiusSmall),
+                      border: isUrgent
+                          ? Border.all(color: AppColors.error)
+                          : null,
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.timer_outlined,
+                          size: 16,
                           color: isUrgent
                               ? AppColors.error
                               : AppColors.textPrimary,
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: AppSpacing.s6),
+                        Text(
+                          _formatDuration(state.remainingSeconds),
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: isUrgent
+                                ? AppColors.error
+                                : AppColors.textPrimary,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
               ],
             ),
             body: ForensicWatermarkOverlay(

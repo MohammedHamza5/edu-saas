@@ -143,6 +143,7 @@ final class ExamTakingState extends ExamsState {
   final int currentQuestionIndex;
   final Map<String, String> answers; // questionId -> selectedOptionId
   final int remainingSeconds;
+  final bool isUntimed;
   final bool isSubmitting;
   final bool isExpired;
   final bool submitSuccess;
@@ -156,6 +157,7 @@ final class ExamTakingState extends ExamsState {
     this.currentQuestionIndex = 0,
     this.answers = const {},
     this.remainingSeconds = 0,
+    this.isUntimed = false,
     this.isSubmitting = false,
     this.isExpired = false,
     this.submitSuccess = false,
@@ -176,6 +178,7 @@ final class ExamTakingState extends ExamsState {
     int? currentQuestionIndex,
     Map<String, String>? answers,
     int? remainingSeconds,
+    bool? isUntimed,
     bool? isSubmitting,
     bool? isExpired,
     bool? submitSuccess,
@@ -189,6 +192,7 @@ final class ExamTakingState extends ExamsState {
       currentQuestionIndex: currentQuestionIndex ?? this.currentQuestionIndex,
       answers: answers ?? this.answers,
       remainingSeconds: remainingSeconds ?? this.remainingSeconds,
+      isUntimed: isUntimed ?? this.isUntimed,
       isSubmitting: isSubmitting ?? this.isSubmitting,
       isExpired: isExpired ?? this.isExpired,
       submitSuccess: submitSuccess ?? this.submitSuccess,
@@ -205,6 +209,7 @@ final class ExamTakingState extends ExamsState {
     currentQuestionIndex,
     answers,
     remainingSeconds,
+    isUntimed,
     isSubmitting,
     isExpired,
     submitSuccess,

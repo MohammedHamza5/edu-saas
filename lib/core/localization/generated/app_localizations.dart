@@ -6241,6 +6241,30 @@ abstract class AppLocalizations {
   /// **'Please do not close or refresh the exam window until confirmation of successful submission appears.'**
   String get ruleDoNotCloseWindow;
 
+  /// Indicates an exam has no time limit
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited (Open)'**
+  String get unlimitedTime;
+
+  /// Badge label for exams without countdown
+  ///
+  /// In en, this message translates to:
+  /// **'Untimed Exam'**
+  String get untimedExamBadge;
+
+  /// Rule for lecture exams without time limit
+  ///
+  /// In en, this message translates to:
+  /// **'This exam is linked to a lecture and has no time limit. Take your full time to solve and understand the questions.'**
+  String get ruleUntimedLectureExam;
+
+  /// Rule informing students retakes are permitted until passing
+  ///
+  /// In en, this message translates to:
+  /// **'You can retake this quiz if needed to achieve the passing score and unlock subsequent lectures.'**
+  String get ruleRetakeAllowedNotice;
+
   /// Resume exam button
   ///
   /// In en, this message translates to:
@@ -11677,6 +11701,12 @@ abstract class AppLocalizations {
   /// **'New Folder'**
   String get createFolder;
 
+  /// No description provided for @createFolderSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Organize your videos into a structured folder for easy access.'**
+  String get createFolderSubtitle;
+
   /// No description provided for @folderName.
   ///
   /// In en, this message translates to:
@@ -11700,6 +11730,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Rename Folder'**
   String get renameFolder;
+
+  /// No description provided for @renameFolderSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Update the display name of this folder across your library.'**
+  String get renameFolderSubtitle;
 
   /// No description provided for @renameVideo.
   ///
@@ -11928,6 +11964,174 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'A video upload is currently in progress. Leaving or reloading will cancel the upload.'**
   String get browserTabCloseWarning;
+
+  /// No description provided for @syncVideoStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Check / Sync Status'**
+  String get syncVideoStatus;
+
+  /// No description provided for @videoStatusRefreshed.
+  ///
+  /// In en, this message translates to:
+  /// **'Video status updated successfully'**
+  String get videoStatusRefreshed;
+
+  /// No description provided for @videoStatusRefreshFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update video status. Please try again.'**
+  String get videoStatusRefreshFailed;
+
+  /// No description provided for @reviewExamAnswersAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Review Answers & Grades'**
+  String get reviewExamAnswersAction;
+
+  /// No description provided for @reviewExamTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam Review'**
+  String get reviewExamTitle;
+
+  /// No description provided for @yourCorrectAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Answer (Correct)'**
+  String get yourCorrectAnswer;
+
+  /// No description provided for @yourWrongAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Answer (Incorrect)'**
+  String get yourWrongAnswer;
+
+  /// No description provided for @correctAnswerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct Model Answer'**
+  String get correctAnswerLabel;
+
+  /// No description provided for @pointsEarnedOutOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Score: {earned} of {total}'**
+  String pointsEarnedOutOf(num earned, num total);
+
+  /// No description provided for @retakeToUnlockNextLesson.
+  ///
+  /// In en, this message translates to:
+  /// **'Passing score not reached yet ({score}/{max}). Retake to pass and unlock the next lesson.'**
+  String retakeToUnlockNextLesson(num score, num max);
+
+  /// No description provided for @reviewPreviousAttempt.
+  ///
+  /// In en, this message translates to:
+  /// **'Review Previous Attempt Mistakes'**
+  String get reviewPreviousAttempt;
+
+  /// No description provided for @reviewExamAnswers.
+  ///
+  /// In en, this message translates to:
+  /// **'Review Questions & Answers'**
+  String get reviewExamAnswers;
+
+  /// No description provided for @examAlreadyPassedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam Passed Successfully'**
+  String get examAlreadyPassedTitle;
+
+  /// No description provided for @examAlreadyPassedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You achieved the required passing score ({score}/{max}) and the next lesson is unlocked. You can review your answers anytime.'**
+  String examAlreadyPassedSubtitle(num score, num max);
+
+  /// No description provided for @noAnswersRecorded.
+  ///
+  /// In en, this message translates to:
+  /// **'No answers were recorded in this attempt.'**
+  String get noAnswersRecorded;
+
+  /// No description provided for @reviewQuestionIndex.
+  ///
+  /// In en, this message translates to:
+  /// **'Question {current} of {total}'**
+  String reviewQuestionIndex(num current, num total);
+
+  /// No description provided for @unansweredQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'You did not answer this question'**
+  String get unansweredQuestion;
+
+  /// No description provided for @lectureQuizzesFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Lecture Quizzes'**
+  String get lectureQuizzesFilter;
+
+  /// No description provided for @generalExamsFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'General Exams'**
+  String get generalExamsFilter;
+
+  /// No description provided for @lectureQuizBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Lecture Quiz'**
+  String get lectureQuizBadge;
+
+  /// No description provided for @generalExamBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'General Exam'**
+  String get generalExamBadge;
+
+  /// No description provided for @allMistakesMastered.
+  ///
+  /// In en, this message translates to:
+  /// **'Well done! You have mastered all questions and resolved all previous mistakes.'**
+  String get allMistakesMastered;
+
+  /// No description provided for @noMistakesRecordedYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No mistakes recorded yet! Your previous answers are excellent.'**
+  String get noMistakesRecordedYet;
+
+  /// No description provided for @startPracticeCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Practice ({count})'**
+  String startPracticeCount(num count);
+
+  /// No description provided for @reviewMistakesBankBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'View Mistakes'**
+  String get reviewMistakesBankBtn;
+
+  /// No description provided for @lectureQuizzesSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Lecture Quizzes & Assessments'**
+  String get lectureQuizzesSectionTitle;
+
+  /// No description provided for @lectureQuizzesSectionDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Quizzes associated with lectures to measure comprehension'**
+  String get lectureQuizzesSectionDesc;
+
+  /// No description provided for @questionsNeedingReviewCount.
+  ///
+  /// In en, this message translates to:
+  /// **'You have {count} questions needing review and practice for mastery.'**
+  String questionsNeedingReviewCount(num count);
 }
 
 class _AppLocalizationsDelegate

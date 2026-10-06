@@ -232,6 +232,22 @@ class _TeacherVideoBankPageState extends State<TeacherVideoBankPage> {
     }
   }
 
+  Future<void> _handleSyncVideo(LibraryVideoEntity video) async {
+    final l10n = context.l10n;
+    final success = await context.read<VideoBankCubit>().syncVideo(video.id);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            success ? l10n.videoStatusRefreshed : l10n.videoStatusRefreshFailed,
+          ),
+          backgroundColor: success ? AppColors.success : AppColors.error,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
   Future<void> _handleAddToCourse(LibraryVideoEntity video) async {
     // Map LibraryVideoEntity to ContentEntity for the AddToCourseFlow
     final contentEntity = ContentEntity(
@@ -797,6 +813,7 @@ class _TeacherVideoBankPageState extends State<TeacherVideoBankPage> {
                           onMove: () => _handleMoveVideo(v),
                           onRename: () => _handleRenameVideo(v),
                           onDelete: () => _handleDeleteVideo(v),
+                          onSync: () => _handleSyncVideo(v),
                         );
                       }, childCount: filteredVideos.length),
                     ),

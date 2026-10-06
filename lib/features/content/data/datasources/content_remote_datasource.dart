@@ -189,7 +189,7 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
 
     final response = await query
         .order('sort_order', ascending: true)
-        .order('created_at', ascending: false)
+        .order('created_at', ascending: true)
         .range(page * pageSize, (page + 1) * pageSize - 1);
 
     final list = response as List<dynamic>;
@@ -276,7 +276,7 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     models.sort((a, b) {
       final s = a.sortOrder.compareTo(b.sortOrder);
       if (s != 0) return s;
-      return b.createdAt.compareTo(a.createdAt);
+      return a.createdAt.compareTo(b.createdAt);
     });
 
     // Check student sequential progression lock status
@@ -301,10 +301,10 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
         final Set<String> passedExamIds = {};
         for (final att in (attemptsRes as List<dynamic>)) {
           final examObj = att['exams'] as Map<String, dynamic>?;
-          final passScore = (examObj?['passing_score'] as num?)?.toInt() ?? 60;
+          final passScore = (examObj?['passing_score'] as num?)?.toInt();
           final score = (att['score'] as num?)?.toInt() ?? 0;
-          final pct = (att['percentage'] as num?)?.toDouble() ?? 0.0;
-          if (score >= passScore || pct >= passScore) {
+          final isPassed = passScore == null || score >= passScore;
+          if (isPassed) {
             final eId = att['exam_id'] as String?;
             if (eId != null) passedExamIds.add(eId);
           }
@@ -561,16 +561,30 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     // Calculate max sort_order if not provided
     var order = sortOrder;
     if (order == null && groupId != null) {
-      final existing = await _safeClient
+      final existingCg = await _safeClient
+          .from('content_groups')
+          .select('sort_order')
+          .eq('group_id', groupId)
+          .order('sort_order', ascending: false)
+          .limit(1);
+      final existingCgList = existingCg as List<dynamic>;
+      final maxCg = existingCgList.isNotEmpty
+          ? ((existingCgList.first['sort_order'] as num?)?.toInt() ?? -1)
+          : -1;
+
+      final existingContent = await _safeClient
           .from('content')
           .select('sort_order')
           .eq('group_id', groupId)
           .order('sort_order', ascending: false)
           .limit(1);
-      final existingList = existing as List<dynamic>;
-      order = existingList.isNotEmpty
-          ? ((existingList.first['sort_order'] as num?)?.toInt() ?? 0) + 1
-          : 0;
+      final existingContentList = existingContent as List<dynamic>;
+      final maxContent = existingContentList.isNotEmpty
+          ? ((existingContentList.first['sort_order'] as num?)?.toInt() ?? -1)
+          : -1;
+
+      final highest = maxCg > maxContent ? maxCg : maxContent;
+      order = highest >= 0 ? highest + 1 : 0;
     }
 
     final insertPayload = <String, dynamic>{
@@ -1099,6 +1113,26 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
             : null;
         final title = customTitle ?? (libVideo['title'] as String);
 
+        // Calculate sort_order so newly added video appends to the end
+        int initialSortOrder = 0;
+        final cfgOrder = resolvedConfigs?.firstOrNull?['sort_order'];
+        if (cfgOrder != null && cfgOrder is num) {
+          initialSortOrder = cfgOrder.toInt();
+        } else if (resolvedGroupIds.isNotEmpty) {
+          final targetGrp = resolvedGroupIds.first;
+          final existingCg = await _safeClient
+              .from('content_groups')
+              .select('sort_order')
+              .eq('group_id', targetGrp)
+              .order('sort_order', ascending: false)
+              .limit(1);
+          final existingCgList = existingCg as List<dynamic>;
+          if (existingCgList.isNotEmpty) {
+            initialSortOrder =
+                ((existingCgList.first['sort_order'] as num?)?.toInt() ?? -1) + 1;
+          }
+        }
+
         // Create the content record in public.content
         final contentInsert = await _safeClient
             .from('content')
@@ -1109,6 +1143,7 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
               'description': libVideo['description'],
               'type': 'video',
               'status': 'published',
+              'sort_order': initialSortOrder,
             })
             .select('id')
             .single();

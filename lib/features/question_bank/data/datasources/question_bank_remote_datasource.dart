@@ -910,10 +910,17 @@ class QuestionBankRemoteDataSourceImpl implements QuestionBankRemoteDataSource {
 
       final stemList = (latestRev?.content['stem'] as List?) ?? [];
       final stemParts = stemList
-          .map((b) => (b is Map) ? (b['value'] ?? b['latex'] ?? '') : '')
+          .map((b) => (b is Map && (b['type'] == 'text' || b['type'] == 'math'))
+              ? (b['value'] ?? b['latex'] ?? '')
+              : '')
           .where((s) => s.toString().trim().isNotEmpty)
           .join('\n');
-      final questionText = stemParts.isNotEmpty ? stemParts : q.sourceLabel;
+
+      final qImageUrl = latestRev?.imageUrl;
+      final qImageMeta = latestRev?.imageMeta;
+      final questionText = stemParts.isNotEmpty
+          ? stemParts
+          : (qImageUrl != null ? ' ' : q.sourceLabel);
 
       final optionsList = (latestRev?.content['options'] as List?) ?? [];
       final correctKey =
@@ -928,6 +935,8 @@ class QuestionBankRemoteDataSourceImpl implements QuestionBankRemoteDataSource {
             'question_type': 'multiple_choice',
             'points': 10,
             'sort_order': i + 1,
+            if (qImageUrl != null) 'image_url': qImageUrl,
+            if (qImageMeta != null) 'image_meta': qImageMeta,
           })
           .select('id')
           .single();

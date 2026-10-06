@@ -609,8 +609,15 @@ class AppRouter {
             pageBuilder: (BuildContext context, GoRouterState state) {
               final examId = state.uri.queryParameters['examId'];
               return NoTransitionPage(
-                child: BlocProvider(
-                  create: (_) => InjectionContainer.createExamsCubit(),
+                child: MultiBlocProvider(
+                  providers: [
+                    BlocProvider(
+                      create: (_) => InjectionContainer.createExamsCubit(),
+                    ),
+                    BlocProvider(
+                      create: (_) => InjectionContainer.createMistakesCubit(),
+                    ),
+                  ],
                   child: StudentExamsPage(initialExamId: examId),
                 ),
               );

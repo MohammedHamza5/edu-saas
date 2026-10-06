@@ -11,6 +11,7 @@ import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/responsive_breakpoints.dart';
+import '../../../../core/utils/cache_manager.dart';
 import '../../../../core/utils/fullscreen_util.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_loading_view.dart';
@@ -207,6 +208,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
           ),
         );
         if (mounted) {
+          AppCache.content.clear();
+          AppCache.exams.clear();
           await _loadLessonContext();
         }
       } else {
@@ -259,33 +262,26 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       final dur = _liveDurationSecs.value > 0
           ? _liveDurationSecs.value
           : _currentVideo!.duration;
+      final videoId = _currentVideo!.id;
+      final studentId = _activeStudentId;
+      final furthest = _furthestPositionSecs;
+      final newSegment = _segmentStart != null && _segmentEnd != null
+          ? [_segmentStart!, _segmentEnd!]
+          : null;
+
       if (pos > 0 && dur > 0) {
         try {
-          await context.read<VideosCubit>().updateProgress(
-            videoId: _currentVideo!.id,
-            studentId: _activeStudentId,
-            progressSeconds: pos,
-            durationSeconds: dur,
-            furthestPositionSeconds: _furthestPositionSecs,
-            force: true,
-            newSegment: _segmentStart != null && _segmentEnd != null
-                ? [_segmentStart!, _segmentEnd!]
-                : null,
-          );
-        } catch (_) {
-          try {
-            await InjectionContainer.videosRepository.updateVideoProgress(
-              videoId: _currentVideo!.id,
-              studentId: _activeStudentId,
-              progressSeconds: pos,
-              durationSeconds: dur,
-              furthestPositionSeconds: _furthestPositionSecs,
-              newSegment: _segmentStart != null && _segmentEnd != null
-                  ? [_segmentStart!, _segmentEnd!]
-                  : null,
-            );
-          } catch (_) {}
-        }
+          await InjectionContainer.videosRepository
+              .updateVideoProgress(
+                videoId: videoId,
+                studentId: studentId,
+                progressSeconds: pos,
+                durationSeconds: dur,
+                furthestPositionSeconds: furthest,
+                newSegment: newSegment,
+              )
+              .timeout(const Duration(seconds: 4));
+        } catch (_) {}
       }
     }
   }
@@ -300,7 +296,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     if (_isFlushingProgress) return;
     _isFlushingProgress = true;
 
-    await _forceFlushProgressToDB();
+    // Fire-and-forget progress flush in background so navigation happens instantly without lag
+    unawaited(_forceFlushProgressToDB());
 
     if (mounted) {
       if (thenNavigateToLesson != null) {
@@ -741,10 +738,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     final theme = Theme.of(context);
 
     return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) async {
-        if (didPop) return;
-        await _flushProgressAndExit();
+      canPop: true,
+      onPopInvokedWithResult: (didPop, result) {
+        unawaited(_forceFlushProgressToDB());
       },
       child: Scaffold(
         backgroundColor: _isFullscreen

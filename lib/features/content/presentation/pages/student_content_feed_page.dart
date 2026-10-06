@@ -102,7 +102,8 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
           final match = _studentGroups.where((g) {
             return g.id == _activeGroupId ||
                 g.id == widget.groupId ||
-                GroupSlugResolver.toSlug(g.id, g.name).toLowerCase() == widget.groupId.toLowerCase() ||
+                GroupSlugResolver.toSlug(g.id, g.name).toLowerCase() ==
+                    widget.groupId.toLowerCase() ||
                 g.name.toLowerCase() == widget.groupId.toLowerCase();
           });
           if (match.isNotEmpty) {
@@ -112,7 +113,9 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
         });
 
         // If it wasn't loaded because widget.groupId was an unresolved slug, load now
-        if (mounted && !hadValidUuidBefore && GroupSlugResolver.isUuid(_activeGroupId)) {
+        if (mounted &&
+            !hadValidUuidBefore &&
+            GroupSlugResolver.isUuid(_activeGroupId)) {
           unawaited(
             context.read<CourseProgressCubit>().loadCourseProgress(
               _activeGroupId,
@@ -218,7 +221,7 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
         break;
     }
 
-    // Refresh course progress when returning from any content view (Phase E)
+    // Refresh course progress when returning from any content view
     if (mounted) {
       unawaited(
         context.read<CourseProgressCubit>().loadCourseProgress(
@@ -319,8 +322,9 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
             final videoLectures = state.lessons
                 .where((i) => i.type == ContentType.video)
                 .toList();
-            final allPublished =
-                videoLectures.isNotEmpty ? videoLectures : state.lessons;
+            final allPublished = videoLectures.isNotEmpty
+                ? videoLectures
+                : state.lessons;
 
             final completedCount = allPublished
                 .where((i) => i.isEffectivelyCompleted)
@@ -529,30 +533,46 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                       // 2. Search Bar
                       SliverToBoxAdapter(
                         child: Padding(
-                          padding: const EdgeInsets.only(top: AppSpacing.s12),
-                          child: AppTextField(
-                            controller: _searchController,
-                            hintText: context.l10n.searchContentPlaceholder,
-                            prefixIcon: const Icon(
-                              Icons.search_rounded,
-                              color: AppColors.textSecondary,
-                              size: 20,
+                          padding: const EdgeInsets.only(
+                            top: AppSpacing.s4,
+                            bottom: AppSpacing.s16,
+                          ),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: AppColors.surface,
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.radiusMedium,
+                              ),
+                              border: Border.all(
+                                color: AppColors.border,
+                                width: 1,
+                              ),
                             ),
-                            suffixIcon: _searchQuery.isNotEmpty
-                                ? IconButton(
-                                    icon: const Icon(
-                                      Icons.clear_rounded,
-                                      size: 18,
-                                    ),
-                                    onPressed: () {
-                                      _searchController.clear();
-                                      setState(() => _searchQuery = '');
-                                    },
-                                  )
-                                : null,
-                            onChanged: (val) {
-                              setState(() => _searchQuery = val.trim());
-                            },
+                            child: AppTextField(
+                              controller: _searchController,
+                              hintText: context.l10n.searchContentPlaceholder,
+                              prefixIcon: const Icon(
+                                Icons.search_rounded,
+                                color: AppColors.primaryLight,
+                                size: 20,
+                              ),
+                              suffixIcon: _searchQuery.isNotEmpty
+                                  ? IconButton(
+                                      icon: const Icon(
+                                        Icons.clear_rounded,
+                                        size: 18,
+                                        color: AppColors.textMuted,
+                                      ),
+                                      onPressed: () {
+                                        _searchController.clear();
+                                        setState(() => _searchQuery = '');
+                                      },
+                                    )
+                                  : null,
+                              onChanged: (val) {
+                                setState(() => _searchQuery = val.trim());
+                              },
+                            ),
                           ),
                         ),
                       ),
@@ -562,8 +582,8 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                           allPublished.any((i) => i.type == ContentType.image))
                         SliverToBoxAdapter(
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              vertical: AppSpacing.s8,
+                            padding: const EdgeInsets.only(
+                              bottom: AppSpacing.s16,
                             ),
                             child: SingleChildScrollView(
                               scrollDirection: Axis.horizontal,
@@ -578,54 +598,68 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                                       () => _selectedTypeFilter = null,
                                     ),
                                   ),
-                                  if (allPublished.any((i) => i.type == ContentType.pdf)) ...[
+                                  if (allPublished.any(
+                                    (i) => i.type == ContentType.pdf,
+                                  )) ...[
                                     const SizedBox(width: AppSpacing.s8),
                                     _buildFilterChip(
                                       label: context.l10n.filterPdfsWithCount(
                                         allPublished
-                                            .where((i) => i.type == ContentType.pdf)
+                                            .where(
+                                              (i) => i.type == ContentType.pdf,
+                                            )
                                             .length,
                                       ),
                                       isSelected:
-                                          _selectedTypeFilter == ContentType.pdf,
+                                          _selectedTypeFilter ==
+                                          ContentType.pdf,
                                       onSelected: () => setState(
-                                        () => _selectedTypeFilter = ContentType.pdf,
+                                        () => _selectedTypeFilter =
+                                            ContentType.pdf,
                                       ),
                                     ),
                                   ],
-                                  if (allPublished.any((i) => i.type == ContentType.image)) ...[
+                                  if (allPublished.any(
+                                    (i) => i.type == ContentType.image,
+                                  )) ...[
                                     const SizedBox(width: AppSpacing.s8),
                                     _buildFilterChip(
                                       label: context.l10n.filterImagesWithCount(
                                         allPublished
                                             .where(
-                                              (i) => i.type == ContentType.image,
+                                              (i) =>
+                                                  i.type == ContentType.image,
                                             )
                                             .length,
                                       ),
                                       isSelected:
-                                          _selectedTypeFilter == ContentType.image,
+                                          _selectedTypeFilter ==
+                                          ContentType.image,
                                       onSelected: () => setState(
-                                        () =>
-                                            _selectedTypeFilter = ContentType.image,
+                                        () => _selectedTypeFilter =
+                                            ContentType.image,
                                       ),
                                     ),
                                   ],
-                                  if (allPublished.any((i) => i.type == ContentType.video)) ...[
+                                  if (allPublished.any(
+                                    (i) => i.type == ContentType.video,
+                                  )) ...[
                                     const SizedBox(width: AppSpacing.s8),
                                     _buildFilterChip(
                                       label: context.l10n.filterVideosWithCount(
                                         allPublished
                                             .where(
-                                              (i) => i.type == ContentType.video,
+                                              (i) =>
+                                                  i.type == ContentType.video,
                                             )
                                             .length,
                                       ),
                                       isSelected:
-                                          _selectedTypeFilter == ContentType.video,
+                                          _selectedTypeFilter ==
+                                          ContentType.video,
                                       onSelected: () => setState(
-                                        () =>
-                                            _selectedTypeFilter = ContentType.video,
+                                        () => _selectedTypeFilter =
+                                            ContentType.video,
                                       ),
                                     ),
                                   ],
@@ -680,7 +714,10 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                         )
                       else
                         SliverPadding(
-                          padding: const EdgeInsets.only(bottom: 32),
+                          padding: const EdgeInsets.only(
+                            top: AppSpacing.s4,
+                            bottom: 40,
+                          ),
                           sliver: SliverList.builder(
                             itemCount: items.length,
                             itemBuilder: (context, index) {
@@ -738,10 +775,21 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                                       }
                                     : null,
                                 onTakeQuiz: item.hasLessonExam
-                                    ? () {
-                                        context.push(
+                                    ? () async {
+                                        final nav = Navigator.of(context);
+                                        await context.push(
                                           '${AppRoutes.studentExams}?examId=${item.lessonExamId}',
                                         );
+                                        if (mounted && nav.mounted) {
+                                          unawaited(
+                                            nav.context
+                                                .read<CourseProgressCubit>()
+                                                .loadCourseProgress(
+                                                  _activeGroupId,
+                                                  studentId: _currentUserId,
+                                                ),
+                                          );
+                                        }
                                       }
                                     : null,
                               );

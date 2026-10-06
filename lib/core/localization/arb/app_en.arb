@@ -4578,6 +4578,22 @@
   "@ruleDoNotCloseWindow": {
     "description": "Rule do not close"
   },
+  "unlimitedTime": "Unlimited (Open)",
+  "@unlimitedTime": {
+    "description": "Indicates an exam has no time limit"
+  },
+  "untimedExamBadge": "Untimed Exam",
+  "@untimedExamBadge": {
+    "description": "Badge label for exams without countdown"
+  },
+  "ruleUntimedLectureExam": "This exam is linked to a lecture and has no time limit. Take your full time to solve and understand the questions.",
+  "@ruleUntimedLectureExam": {
+    "description": "Rule for lecture exams without time limit"
+  },
+  "ruleRetakeAllowedNotice": "You can retake this quiz if needed to achieve the passing score and unlock subsequent lectures.",
+  "@ruleRetakeAllowedNotice": {
+    "description": "Rule informing students retakes are permitted until passing"
+  },
   "resumeCurrentExam": "Resume In-Progress Exam",
   "@resumeCurrentExam": {
     "description": "Resume exam button"
@@ -7404,6 +7420,8 @@
   "@videoBankCmsSubtitle": {},
   "createFolder": "New Folder",
   "@createFolder": {},
+  "createFolderSubtitle": "Organize your videos into a structured folder for easy access.",
+  "@createFolderSubtitle": {},
   "folderName": "Folder Name",
   "@folderName": {},
   "folderNameHint": "e.g. Algebra Basics",
@@ -7412,6 +7430,8 @@
   "@folderCreatedSuccess": {},
   "renameFolder": "Rename Folder",
   "@renameFolder": {},
+  "renameFolderSubtitle": "Update the display name of this folder across your library.",
+  "@renameFolderSubtitle": {},
   "renameVideo": "Rename Video",
   "@renameVideo": {},
   "videoTitleHint": "Enter video title",
@@ -7503,5 +7523,109 @@
   "expandUploadBanner": "Expand upload banner",
   "@expandUploadBanner": {},
   "browserTabCloseWarning": "A video upload is currently in progress. Leaving or reloading will cancel the upload.",
-  "@browserTabCloseWarning": {}
+  "@browserTabCloseWarning": {},
+  "syncVideoStatus": "Check / Sync Status",
+  "@syncVideoStatus": {},
+  "videoStatusRefreshed": "Video status updated successfully",
+  "@videoStatusRefreshed": {},
+  "videoStatusRefreshFailed": "Failed to update video status. Please try again.",
+  "@videoStatusRefreshFailed": {},
+  "reviewExamAnswersAction": "Review Answers & Grades",
+  "@reviewExamAnswersAction": {},
+  "reviewExamTitle": "Exam Review",
+  "@reviewExamTitle": {},
+  "yourCorrectAnswer": "Your Answer (Correct)",
+  "@yourCorrectAnswer": {},
+  "yourWrongAnswer": "Your Answer (Incorrect)",
+  "@yourWrongAnswer": {},
+  "correctAnswerLabel": "Correct Model Answer",
+  "@correctAnswerLabel": {},
+  "pointsEarnedOutOf": "Score: {earned} of {total}",
+  "@pointsEarnedOutOf": {
+    "placeholders": {
+      "earned": {
+        "type": "num"
+      },
+      "total": {
+        "type": "num"
+      }
+    }
+  },
+  "retakeToUnlockNextLesson": "Passing score not reached yet ({score}/{max}). Retake to pass and unlock the next lesson.",
+  "@retakeToUnlockNextLesson": {
+    "placeholders": {
+      "score": {
+        "type": "num"
+      },
+      "max": {
+        "type": "num"
+      }
+    }
+  },
+  "reviewPreviousAttempt": "Review Previous Attempt Mistakes",
+  "@reviewPreviousAttempt": {},
+  "reviewExamAnswers": "Review Questions & Answers",
+  "@reviewExamAnswers": {},
+  "examAlreadyPassedTitle": "Exam Passed Successfully",
+  "@examAlreadyPassedTitle": {},
+  "examAlreadyPassedSubtitle": "You achieved the required passing score ({score}/{max}) and the next lesson is unlocked. You can review your answers anytime.",
+  "@examAlreadyPassedSubtitle": {
+    "placeholders": {
+      "score": {
+        "type": "num"
+      },
+      "max": {
+        "type": "num"
+      }
+    }
+  },
+  "noAnswersRecorded": "No answers were recorded in this attempt.",
+  "@noAnswersRecorded": {},
+  "reviewQuestionIndex": "Question {current} of {total}",
+  "@reviewQuestionIndex": {
+    "placeholders": {
+      "current": {
+        "type": "num"
+      },
+      "total": {
+        "type": "num"
+      }
+    }
+  },
+  "unansweredQuestion": "You did not answer this question",
+  "@unansweredQuestion": {},
+  "lectureQuizzesFilter": "Lecture Quizzes",
+  "@lectureQuizzesFilter": {},
+  "generalExamsFilter": "General Exams",
+  "@generalExamsFilter": {},
+  "lectureQuizBadge": "Lecture Quiz",
+  "@lectureQuizBadge": {},
+  "generalExamBadge": "General Exam",
+  "@generalExamBadge": {},
+  "allMistakesMastered": "Well done! You have mastered all questions and resolved all previous mistakes.",
+  "@allMistakesMastered": {},
+  "noMistakesRecordedYet": "No mistakes recorded yet! Your previous answers are excellent.",
+  "@noMistakesRecordedYet": {},
+  "startPracticeCount": "Start Practice ({count})",
+  "@startPracticeCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "reviewMistakesBankBtn": "View Mistakes",
+  "@reviewMistakesBankBtn": {},
+  "lectureQuizzesSectionTitle": "Lecture Quizzes & Assessments",
+  "@lectureQuizzesSectionTitle": {},
+  "lectureQuizzesSectionDesc": "Quizzes associated with lectures to measure comprehension",
+  "@lectureQuizzesSectionDesc": {},
+  "questionsNeedingReviewCount": "You have {count} questions needing review and practice for mastery.",
+  "@questionsNeedingReviewCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  }
 }

@@ -17,6 +17,8 @@ class AppTextField extends StatefulWidget {
   final int maxLines;
   final TextStyle? style;
   final bool autofocus;
+  final TextInputAction? textInputAction;
+  final ValueChanged<String>? onFieldSubmitted;
 
   const AppTextField({
     super.key,
@@ -35,6 +37,8 @@ class AppTextField extends StatefulWidget {
     this.maxLines = 1,
     this.style,
     this.autofocus = false,
+    this.textInputAction,
+    this.onFieldSubmitted,
   });
 
   @override
@@ -82,6 +86,8 @@ class _AppTextFieldState extends State<AppTextField> {
       controller: widget.controller,
       obscureText: _obscureText,
       keyboardType: widget.keyboardType,
+      textInputAction: widget.textInputAction,
+      onFieldSubmitted: widget.onFieldSubmitted,
       autofocus: widget.autofocus,
       onChanged: widget.onChanged,
       validator: widget.validator,

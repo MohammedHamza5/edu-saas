@@ -598,6 +598,23 @@ void main() {
         final takingState = examsCubit.state as ExamTakingState;
         expect(takingState.questions.length, 2);
         expect(takingState.remainingSeconds, greaterThan(0));
+        expect(takingState.isUntimed, isFalse);
+      },
+    );
+
+    test(
+      'startExamTaking for untimed/lecture exam sets isUntimed to true and does not expire',
+      () async {
+        final sample = FakeExamsRepository._sampleExam().copyWith(durationMinutes: 0);
+        fakeRepository.mockExams = [sample];
+
+        final success = await examsCubit.startExamTaking(sample, isLectureExam: true);
+
+        expect(success, isTrue);
+        expect(examsCubit.state, isA<ExamTakingState>());
+        final takingState = examsCubit.state as ExamTakingState;
+        expect(takingState.isUntimed, isTrue);
+        expect(takingState.remainingSeconds, 0);
       },
     );
 

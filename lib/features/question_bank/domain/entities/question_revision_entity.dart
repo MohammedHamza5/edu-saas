@@ -60,6 +60,31 @@ class QuestionRevisionEntity extends Equatable {
     return [];
   }
 
+  /// Extracts primary image URL if any block in the stem is of type 'image' or 'asset'
+  String? get imageUrl {
+    for (final b in stemBlocks) {
+      if (b['type'] == 'image' || b['type'] == 'asset') {
+        final val = b['value']?.toString() ?? b['url']?.toString();
+        if (val != null && val.trim().isNotEmpty) {
+          return val.trim();
+        }
+      }
+    }
+    return null;
+  }
+
+  /// Extracts image metadata from the image block if present
+  Map<String, dynamic>? get imageMeta {
+    for (final b in stemBlocks) {
+      if (b['type'] == 'image' || b['type'] == 'asset') {
+        if (b['meta'] is Map) {
+          return Map<String, dynamic>.from(b['meta'] as Map);
+        }
+      }
+    }
+    return null;
+  }
+
   /// Extracts MCQ options if present
   List<Map<String, dynamic>> get options {
     final opts = content['options'];

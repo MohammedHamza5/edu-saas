@@ -9,12 +9,16 @@ class ExamCard extends StatelessWidget {
   final ExamEntity exam;
   final VoidCallback onTap;
   final bool isTeacher;
+  final bool isLessonQuiz;
+  final VoidCallback? onReview;
 
   const ExamCard({
     super.key,
     required this.exam,
     required this.onTap,
     this.isTeacher = false,
+    this.isLessonQuiz = false,
+    this.onReview,
   });
 
   @override
@@ -34,15 +38,25 @@ class ExamCard extends StatelessWidget {
                 width: 46,
                 height: 46,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
+                  color: (isLessonQuiz
+                          ? const Color(0xFF0284C7)
+                          : AppColors.primary)
+                      .withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
                   border: Border.all(
-                    color: AppColors.primary.withValues(alpha: 0.25),
+                    color: (isLessonQuiz
+                            ? const Color(0xFF0284C7)
+                            : AppColors.primary)
+                        .withValues(alpha: 0.25),
                   ),
                 ),
-                child: const Icon(
-                  Icons.quiz_outlined,
-                  color: AppColors.primary,
+                child: Icon(
+                  isLessonQuiz
+                      ? Icons.menu_book_rounded
+                      : Icons.quiz_outlined,
+                  color: isLessonQuiz
+                      ? const Color(0xFF0284C7)
+                      : AppColors.primary,
                   size: 24,
                 ),
               ),
@@ -75,7 +89,56 @@ class ExamCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.s8),
-              _buildStatusBadge(context),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  if (!isTeacher) ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.s8,
+                        vertical: AppSpacing.s4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: (isLessonQuiz
+                                ? const Color(0xFF0284C7)
+                                : const Color(0xFF7C3AED))
+                            .withValues(alpha: 0.12),
+                        borderRadius:
+                            BorderRadius.circular(AppSpacing.radiusSmall),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            isLessonQuiz
+                                ? Icons.menu_book_rounded
+                                : Icons.assignment_rounded,
+                            size: 11,
+                            color: isLessonQuiz
+                                ? const Color(0xFF0284C7)
+                                : const Color(0xFF7C3AED),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            isLessonQuiz
+                                ? context.l10n.lectureQuizBadge
+                                : context.l10n.generalExamBadge,
+                            style: TextStyle(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.bold,
+                              color: isLessonQuiz
+                                  ? const Color(0xFF0284C7)
+                                  : const Color(0xFF7C3AED),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                  ],
+                  _buildStatusBadge(context),
+                ],
+              ),
             ],
           ),
 
@@ -90,7 +153,9 @@ class ExamCard extends StatelessWidget {
             children: [
               _buildMetaTag(
                 Icons.timer_outlined,
-                context.l10n.minutesDuration(exam.durationMinutes),
+                exam.isUntimed
+                    ? context.l10n.unlimitedTime
+                    : context.l10n.minutesDuration(exam.durationMinutes),
               ),
               _buildMetaTag(
                 Icons.grade_outlined,
@@ -130,6 +195,38 @@ class ExamCard extends StatelessWidget {
                   ),
                 ),
               ],
+            ),
+          ],
+
+          // Student review action button
+          if (!isTeacher &&
+              exam.hasAttempted &&
+              exam.myLatestAttempt?.isSubmitted == true &&
+              onReview != null) ...[
+            const SizedBox(height: AppSpacing.s10),
+            const Divider(height: 1, color: AppColors.border),
+            const SizedBox(height: AppSpacing.s6),
+            Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: TextButton.icon(
+                onPressed: onReview,
+                icon: const Icon(Icons.fact_check_outlined, size: 16),
+                label: Text(
+                  context.l10n.reviewExamAnswersAction,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.primary,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.s12,
+                    vertical: AppSpacing.s4,
+                  ),
+                  visualDensity: VisualDensity.compact,
+                ),
+              ),
             ),
           ],
         ],

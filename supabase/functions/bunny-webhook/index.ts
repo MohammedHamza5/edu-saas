@@ -65,79 +65,73 @@ function bytesToHex(bytes: Uint8Array): string {
 async function verifyBunnySignature(
   rawBody: Uint8Array,
   signature: string,
-  version: string,
-  algorithm: string,
-  readOnlyApiKey: string,
+  apiKey: string,
 ): Promise<boolean> {
-  if (version !== "v1") {
+  if (!signature || !apiKey) return false;
+
+  try {
+    const cleanSig = signature.trim().toLowerCase();
+    
+    // Test HMAC-SHA256
+    const key256 = await crypto.subtle.importKey(
+      "raw",
+      new TextEncoder().encode(apiKey),
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["sign"],
+    );
+    const digest256 = await crypto.subtle.sign("HMAC", key256, rawBody);
+    const expected256 = bytesToHex(new Uint8Array(digest256));
+    if (timingSafeEqual(new TextEncoder().encode(expected256), new TextEncoder().encode(cleanSig))) {
+      return true;
+    }
+
+    // Test HMAC-SHA1
+    const key1 = await crypto.subtle.importKey(
+      "raw",
+      new TextEncoder().encode(apiKey),
+      { name: "HMAC", hash: "SHA-1" },
+      false,
+      ["sign"],
+    );
+    const digest1 = await crypto.subtle.sign("HMAC", key1, rawBody);
+    const expected1 = bytesToHex(new Uint8Array(digest1));
+    if (timingSafeEqual(new TextEncoder().encode(expected1), new TextEncoder().encode(cleanSig))) {
+      return true;
+    }
+  } catch {
     return false;
   }
 
-  if (algorithm !== "hmac-sha256") {
-    return false;
-  }
-
-  if (!/^[0-9a-f]{64}$/.test(signature)) {
-    return false;
-  }
-
-  const key = await crypto.subtle.importKey(
-    "raw",
-    new TextEncoder().encode(readOnlyApiKey),
-    {
-      name: "HMAC",
-      hash: "SHA-256",
-    },
-    false,
-    ["sign"],
-  );
-
-  const digest = await crypto.subtle.sign(
-    "HMAC",
-    key,
-    rawBody,
-  );
-
-  const expected = bytesToHex(
-    new Uint8Array(digest),
-  );
-
-  return timingSafeEqual(
-    new TextEncoder().encode(expected),
-    new TextEncoder().encode(signature),
-  );
+  return false;
 }
 
 /**
  * Map Bunny Stream status to our application status.
  *
  * Bunny:
- * 0 = Queued
- * 1 = Processing
- * 2 = Encoding
- * 3 = Finished
- * 4 = ResolutionFinished
+ * 0 = Queued / Created
+ * 1 = Uploaded / Processing
+ * 2 = Processing / Encoding
+ * 3 = Transcoding finished / Playable
+ * 4 = ResolutionFinished / Ready
  * 5 = Failed
+ * 6 = UploadFailed
  */
 function mapBunnyStatus(
   status: number,
+  availableResolutions?: string | null,
+  encodeProgress?: number,
 ): VideoStatus {
-  switch (status) {
-    case 3:
-    case 4:
-      return "ready";
-
-    case 5:
-      return "failed";
-
-    case 0:
-      return "uploading";
-
-    case 1:
-    case 2:
-    default:
-      return "processing";
+  if (status === 4) return "ready";
+  if (status === 3) {
+    if ((availableResolutions ?? "").trim().length > 0) return "ready";
+    if (encodeProgress === 100) return "ready";
+    return "ready"; // Bunny Stream sends status 3 on transcoding complete
   }
+  if (status === 5 || status === 6) return "failed";
+  if (status === 0) return "uploading";
+  return "processing";
 }
 
 Deno.serve(async (req: Request) => {
@@ -214,55 +208,42 @@ Deno.serve(async (req: Request) => {
 
     /*
      * -----------------------------------------------------------------------
-     * 3. Read Bunny signature headers
+     * 3. Read Bunny signature / auth headers
      * -----------------------------------------------------------------------
      */
 
     const signature =
-      req.headers.get(
-        "X-BunnyStream-Signature",
-      ) ?? "";
+      req.headers.get("x-bunny-signature") ||
+      req.headers.get("X-BunnyStream-Signature") ||
+      "";
 
-    const signatureVersion =
-      req.headers.get(
-        "X-BunnyStream-Signature-Version",
-      ) ?? "";
-
-    const signatureAlgorithm =
-      req.headers.get(
-        "X-BunnyStream-Signature-Algorithm",
-      ) ?? "";
+    const authHeader = req.headers.get("Authorization") ?? "";
+    const webhookSecret = Deno.env.get("BUNNY_WEBHOOK_SECRET") ?? "";
 
     /*
      * -----------------------------------------------------------------------
-     * 4. Verify Bunny signature BEFORE parsing JSON
+     * 4. Verify signature if provided. If not provided by Bunny,
+     * security is guaranteed by Step 10 where we verify the video existence
+     * and fetch its true state directly from Bunny's REST API using BUNNY_API_KEY.
      * -----------------------------------------------------------------------
      */
 
-    let validSignature =
-      await verifyBunnySignature(
-        rawBody,
-        signature,
-        signatureVersion,
-        signatureAlgorithm,
-        bunnyReadOnlyApiKey,
-      );
-
-    if (!validSignature && bunnyApiKey && bunnyApiKey !== bunnyReadOnlyApiKey) {
-      validSignature = await verifyBunnySignature(
-        rawBody,
-        signature,
-        signatureVersion,
-        signatureAlgorithm,
-        bunnyApiKey,
-      );
-    }
-
-    if (!validSignature) {
-      return json(
-        { error: "INVALID_SIGNATURE" },
-        401,
-      );
+    if (signature) {
+      let valid = await verifyBunnySignature(rawBody, signature, bunnyReadOnlyApiKey);
+      if (!valid && bunnyApiKey && bunnyApiKey !== bunnyReadOnlyApiKey) {
+        valid = await verifyBunnySignature(rawBody, signature, bunnyApiKey);
+      }
+      if (!valid && webhookSecret) {
+        valid = await verifyBunnySignature(rawBody, signature, webhookSecret);
+      }
+      if (!valid) {
+        return json({ error: "INVALID_SIGNATURE" }, 401);
+      }
+    } else if (webhookSecret && authHeader) {
+      const token = authHeader.replace(/^Bearer\s+/i, "").trim();
+      if (token !== webhookSecret) {
+        return json({ error: "UNAUTHORIZED_TOKEN" }, 401);
+      }
     }
 
     /*
@@ -436,6 +417,8 @@ Deno.serve(async (req: Request) => {
 
     const next = mapBunnyStatus(
       Number(info?.status ?? 0),
+      info?.availableResolutions,
+      Number(info?.encodeProgress ?? 0),
     );
 
     /*

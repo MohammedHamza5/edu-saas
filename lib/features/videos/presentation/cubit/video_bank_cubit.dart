@@ -154,6 +154,9 @@ class VideoBankCubit extends Cubit<VideoBankState> {
             ),
           );
         }
+        if (vList.any((v) => v.isProcessing)) {
+          _startStatusPolling();
+        }
       }
     } catch (_) {
       // Background silent refresh ignores errors
@@ -196,6 +199,9 @@ class VideoBankCubit extends Cubit<VideoBankState> {
           isActionLoading: false,
         ),
       );
+      if (cached.videos.any((v) => v.isProcessing)) {
+        _startStatusPolling();
+      }
       // Silently refresh in background
       unawaited(_silentRefresh(folder.id, currentTrail));
       return;
@@ -707,6 +713,22 @@ class VideoBankCubit extends Cubit<VideoBankState> {
     return result.dataOrNull;
   }
 
+  /// Manually sync video encoding status with Bunny and refresh UI
+  Future<bool> syncVideo(String libraryVideoId) async {
+    final result = await _repository.syncVideoStatus(libraryVideoId);
+    if (result.isSuccess) {
+      final updated = result.data;
+      final prev = currentLoadedState;
+      if (prev != null) {
+        final newVideos = prev.videos.map((v) => v.id == updated.id ? updated : v).toList();
+        _cache[prev.currentFolder?.id] = (folders: prev.folders, videos: newVideos);
+        emit(prev.copyWith(videos: newVideos));
+      }
+      return true;
+    }
+    return false;
+  }
+
   void _startStatusPolling() {
     _pollingTimer?.cancel();
     int polls = 0;
@@ -720,7 +742,7 @@ class VideoBankCubit extends Cubit<VideoBankState> {
       }
 
       final processingVideos = prev.videos.where((v) => v.isProcessing).toList();
-      if (processingVideos.isEmpty || polls > 25) {
+      if (processingVideos.isEmpty || polls > 60) {
         timer.cancel();
         return;
       }

@@ -244,13 +244,20 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
       int? targetSortOrder;
       if (widget.editingLesson != null) {
         targetSortOrder = widget.editingLesson!.sortOrder;
-      } else if (cubit.state is ContentLoaded) {
-        final currentItems = (cubit.state as ContentLoaded).items;
-        if (currentItems.isNotEmpty) {
-          final maxOrder = currentItems
-              .map((e) => e.sortOrder)
-              .fold<int>(0, (prev, elem) => elem > prev ? elem : prev);
-          targetSortOrder = maxOrder + 1;
+      } else {
+        if (cubit.state is! ContentLoaded) {
+          await cubit.loadGroupContent(widget.groupId);
+        }
+        if (cubit.state is ContentLoaded) {
+          final currentItems = (cubit.state as ContentLoaded).items;
+          if (currentItems.isNotEmpty) {
+            final maxOrder = currentItems
+                .map((e) => e.sortOrder)
+                .fold<int>(0, (prev, elem) => elem > prev ? elem : prev);
+            targetSortOrder = maxOrder + 1;
+          } else {
+            targetSortOrder = 0;
+          }
         } else {
           targetSortOrder = 0;
         }
@@ -263,7 +270,7 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
           {
             'group_id': widget.groupId,
             'is_published': _isPublished,
-            if (targetSortOrder != null) 'sort_order': targetSortOrder,
+            'sort_order': targetSortOrder,
             if (lessonTitle != null) 'custom_title': lessonTitle,
             if (fileId != null) 'file_id': fileId,
             if (fileId == null && _removePdf) 'file_id': null,
