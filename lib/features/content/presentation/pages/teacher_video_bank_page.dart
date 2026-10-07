@@ -12,6 +12,7 @@ import '../../../videos/domain/entities/library_video_entity.dart';
 import '../../../videos/domain/entities/video_folder_entity.dart';
 import '../../../videos/presentation/cubit/video_bank_cubit.dart';
 import '../../../videos/presentation/cubit/video_bank_state.dart';
+import '../../../videos/presentation/dialogs/assign_folder_as_chapter_dialog.dart';
 import '../../../videos/presentation/dialogs/upload_video_to_bank_dialog.dart';
 import '../../../videos/presentation/dialogs/video_bank_folder_dialogs.dart';
 import '../../../videos/presentation/dialogs/video_preview_dialog.dart';
@@ -73,6 +74,21 @@ class _TeacherVideoBankPageState extends State<TeacherVideoBankPage> {
           ),
         );
       }
+    }
+  }
+
+  Future<void> _handleAssignFolderAsChapter(VideoFolderEntity folder) async {
+    final success = await AssignFolderAsChapterDialog.show(
+      context,
+      folder: folder,
+    );
+    if (success == true && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.assignFolderAsChapterSuccess),
+          backgroundColor: AppColors.success,
+        ),
+      );
     }
   }
 
@@ -477,6 +493,35 @@ class _TeacherVideoBankPageState extends State<TeacherVideoBankPage> {
                                   ],
                                 ),
                               ),
+                              if (isInsideFolder && loaded.currentFolder != null) ...[
+                                OutlinedButton.icon(
+                                  onPressed: () => _handleAssignFolderAsChapter(
+                                    loaded.currentFolder!,
+                                  ),
+                                  icon: const Icon(
+                                    Icons.auto_stories_rounded,
+                                    size: 18,
+                                    color: AppColors.primary,
+                                  ),
+                                  label: Text(
+                                    l10n.assignFolderAsChapter,
+                                    style: const TextStyle(
+                                      color: AppColors.primary,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  style: OutlinedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 14,
+                                      vertical: 12,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: AppSpacing.s8),
+                              ],
                               OutlinedButton.icon(
                                 onPressed: _handleCreateFolder,
                                 icon: const Icon(
@@ -769,6 +814,8 @@ class _TeacherVideoBankPageState extends State<TeacherVideoBankPage> {
                           folder: f,
                           onOpen: () =>
                               context.read<VideoBankCubit>().openFolder(f),
+                          onAssignAsChapter: () =>
+                              _handleAssignFolderAsChapter(f),
                           onRename: () => _handleRenameFolder(f),
                           onDelete: () => _handleDeleteFolder(f),
                         );

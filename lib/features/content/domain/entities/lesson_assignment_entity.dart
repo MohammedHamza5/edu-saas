@@ -56,6 +56,11 @@ class LessonAssignmentEntity extends Equatable {
   /// اختبار شرط لفتح هذا الدرس (prerequisite)
   final String? prerequisiteExamId;
 
+  /// معرّف الفصل الأكاديمي (Chapter)
+  final String? chapterId;
+  final String? chapterTitle;
+  final int? chapterSortOrder;
+
   // ─── حالة الطالب (من الـ DB الموحد) ─────────────────────────────────
 
   final LessonAccess access;
@@ -106,6 +111,9 @@ class LessonAssignmentEntity extends Equatable {
     this.lessonExamTitle,
     this.effectivePassingScore = 60,
     this.prerequisiteExamId,
+    this.chapterId,
+    this.chapterTitle,
+    this.chapterSortOrder,
     this.access = LessonAccess.locked,
     this.progress = LessonProgress.notStarted,
     this.unlockSource,
@@ -154,6 +162,9 @@ class LessonAssignmentEntity extends Equatable {
       status: isPublished ? ContentStatus.published : ContentStatus.draft,
       isPublishedInGroup: isPublished,
       sortOrder: sortOrder,
+      chapterId: chapterId,
+      chapterTitle: chapterTitle,
+      chapterSortOrder: chapterSortOrder,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
       videoId: type == ContentType.video ? contentId : null,
@@ -194,6 +205,9 @@ class LessonAssignmentEntity extends Equatable {
     String? lessonExamTitle,
     int? effectivePassingScore,
     String? prerequisiteExamId,
+    String? chapterId,
+    String? chapterTitle,
+    int? chapterSortOrder,
     LessonAccess? access,
     LessonProgress? progress,
     UnlockSource? unlockSource,
@@ -223,6 +237,9 @@ class LessonAssignmentEntity extends Equatable {
       effectivePassingScore:
           effectivePassingScore ?? this.effectivePassingScore,
       prerequisiteExamId: prerequisiteExamId ?? this.prerequisiteExamId,
+      chapterId: chapterId ?? this.chapterId,
+      chapterTitle: chapterTitle ?? this.chapterTitle,
+      chapterSortOrder: chapterSortOrder ?? this.chapterSortOrder,
       access: access ?? this.access,
       progress: progress ?? this.progress,
       unlockSource: unlockSource ?? this.unlockSource,
@@ -261,6 +278,9 @@ class LessonAssignmentEntity extends Equatable {
       effectivePassingScore:
           (json['effective_passing_score'] as num?)?.toInt() ?? 60,
       prerequisiteExamId: json['prerequisite_exam_id'] as String?,
+      chapterId: json['chapter_id'] as String?,
+      chapterTitle: json['chapter_title'] as String?,
+      chapterSortOrder: (json['chapter_sort_order'] as num?)?.toInt(),
       access: _parseAccess(json['access_state'] as String?),
       progress: _parseProgress(json['progress_state'] as String?),
       unlockSource: _parseUnlockSource(json['unlock_source'] as String?),
@@ -332,6 +352,9 @@ class LessonAssignmentEntity extends Equatable {
     lessonExamTitle,
     effectivePassingScore,
     prerequisiteExamId,
+    chapterId,
+    chapterTitle,
+    chapterSortOrder,
     access,
     progress,
     unlockSource,

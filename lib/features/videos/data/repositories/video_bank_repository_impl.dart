@@ -276,4 +276,24 @@ class VideoBankRepositoryImpl implements VideoBankRepository {
       return Result.failure(ServerFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Result<Map<String, dynamic>>> assignFolderAsChapter({
+    required String folderId,
+    required String groupId,
+    String? chapterTitle,
+  }) async {
+    try {
+      final res = await _remoteDataSource.assignFolderAsChapter(
+        folderId: folderId,
+        groupId: groupId,
+        chapterTitle: chapterTitle,
+      );
+      return Result.success(res);
+    } on ServerException catch (e) {
+      return Result.failure(ServerFailure(e.message, code: e.code));
+    } catch (e) {
+      return Result.failure(ServerFailure(e.toString()));
+    }
+  }
 }

@@ -12132,6 +12132,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You have {count} questions needing review and practice for mastery.'**
   String questionsNeedingReviewCount(num count);
+
+  /// No description provided for @assignFolderAsChapter.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign Folder as Course Chapter'**
+  String get assignFolderAsChapter;
+
+  /// No description provided for @assignFolderAsChapterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign Folder as Chapter'**
+  String get assignFolderAsChapterTitle;
+
+  /// No description provided for @assignFolderAsChapterDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'A new chapter will be created in the selected course with all ready videos from this folder as lessons.'**
+  String get assignFolderAsChapterDesc;
+
+  /// No description provided for @selectTargetCourse.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Course / Group'**
+  String get selectTargetCourse;
+
+  /// No description provided for @chapterTitleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter Title'**
+  String get chapterTitleLabel;
+
+  /// No description provided for @chapterTitleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., Chapter 1: Basics of Algebra'**
+  String get chapterTitleHint;
+
+  /// No description provided for @assignFolderAsChapterConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm & Add Chapter'**
+  String get assignFolderAsChapterConfirm;
+
+  /// No description provided for @assignFolderAsChapterSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter created and lessons assigned successfully!'**
+  String get assignFolderAsChapterSuccess;
+
+  /// No description provided for @assignFolderAsChapterError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error assigning folder as chapter'**
+  String get assignFolderAsChapterError;
+
+  /// No description provided for @chapterLessonsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 Lesson} other{{count} Lessons}}'**
+  String chapterLessonsCount(num count);
+
+  /// No description provided for @chapterCompletedLessons.
+  ///
+  /// In en, this message translates to:
+  /// **'{completed} of {total} completed'**
+  String chapterCompletedLessons(num completed, num total);
+
+  /// No description provided for @chapterCompletedBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get chapterCompletedBadge;
+
+  /// No description provided for @chapterLockedBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked'**
+  String get chapterLockedBadge;
+
+  /// No description provided for @chapterInProgressBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'In Progress'**
+  String get chapterInProgressBadge;
+
+  /// No description provided for @chapterLockedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlocks automatically after completing previous chapters'**
+  String get chapterLockedMessage;
+
+  /// No description provided for @generalLessonsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'General Lessons'**
+  String get generalLessonsTitle;
+
+  /// No description provided for @generalLessonsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional lessons not assigned to a specific chapter'**
+  String get generalLessonsDesc;
+
+  /// No description provided for @expandChapter.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand Lessons'**
+  String get expandChapter;
+
+  /// No description provided for @collapseChapter.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse Lessons'**
+  String get collapseChapter;
+
+  /// No description provided for @chapterPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter'**
+  String get chapterPrefix;
+
+  /// No description provided for @noVideosInFolderToAssign.
+  ///
+  /// In en, this message translates to:
+  /// **'No ready videos found in this folder to assign'**
+  String get noVideosInFolderToAssign;
 }
 
 class _AppLocalizationsDelegate

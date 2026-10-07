@@ -124,6 +124,13 @@ class _FakeVideoBankRepository implements VideoBankRepository {
 
   @override
   void cancelActiveUpload() {}
+
+  @override
+  Future<Result<Map<String, dynamic>>> assignFolderAsChapter({
+    required String folderId,
+    required String groupId,
+    String? chapterTitle,
+  }) async => const Success({'chapter_id': 'chap-1', 'lessons_count': 1});
 }
 
 class _FakeGroupsRepository implements GroupsRepository {

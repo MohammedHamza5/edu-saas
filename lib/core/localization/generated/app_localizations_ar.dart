@@ -6810,4 +6810,81 @@ class AppLocalizationsAr extends AppLocalizations {
   String questionsNeedingReviewCount(num count) {
     return 'لديك $count أسئلة تحتاج لمراجعتها وتصحيحها لتثبيت المفاهيم الأكاديمية.';
   }
+
+  @override
+  String get assignFolderAsChapter => 'تعيين كمحاضرات شبتر في كورس';
+
+  @override
+  String get assignFolderAsChapterTitle => 'تعيين المجلد كـ شبتر في كورس';
+
+  @override
+  String get assignFolderAsChapterDesc =>
+      'سيتم إنشاء شبتر جديد في الكورس المحدد وإضافة كافة الفيديوهات الجاهزة في هذا المجلد كمحاضرات مرتبة بداخله.';
+
+  @override
+  String get selectTargetCourse => 'اختر الكورس / المجموعة';
+
+  @override
+  String get chapterTitleLabel => 'عنوان الشبتر';
+
+  @override
+  String get chapterTitleHint => 'مثال: الفصل الأول - أساسيات الجبر';
+
+  @override
+  String get assignFolderAsChapterConfirm => 'تأكيد وإضافة الشبتر';
+
+  @override
+  String get assignFolderAsChapterSuccess =>
+      'تم إنشاء الشبتر وتعيين المحاضرات بنجاح!';
+
+  @override
+  String get assignFolderAsChapterError => 'حدث خطأ أثناء تعيين المجلد كـ شبتر';
+
+  @override
+  String chapterLessonsCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count محاضرات',
+      one: 'محاضرة واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chapterCompletedLessons(num completed, num total) {
+    return '$completed من $total مكتملة';
+  }
+
+  @override
+  String get chapterCompletedBadge => 'مكتمل';
+
+  @override
+  String get chapterLockedBadge => 'مغلق';
+
+  @override
+  String get chapterInProgressBadge => 'قيد الدراسة';
+
+  @override
+  String get chapterLockedMessage =>
+      'يُفتح تلقائياً بعد إتمام محاضرات الشباتر السابقة';
+
+  @override
+  String get generalLessonsTitle => 'المحاضرات العامة';
+
+  @override
+  String get generalLessonsDesc => 'محاضرات ودروس إضافية غير مرتبطة بشبتر محدد';
+
+  @override
+  String get expandChapter => 'عرض المحاضرات';
+
+  @override
+  String get collapseChapter => 'طي المحاضرات';
+
+  @override
+  String get chapterPrefix => 'الفصل';
+
+  @override
+  String get noVideosInFolderToAssign =>
+      'لا توجد فيديوهات بحالة جاهزة في هذا المجلد لإضافتها';
 }

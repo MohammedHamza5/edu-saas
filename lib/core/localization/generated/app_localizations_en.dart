@@ -6845,4 +6845,82 @@ class AppLocalizationsEn extends AppLocalizations {
   String questionsNeedingReviewCount(num count) {
     return 'You have $count questions needing review and practice for mastery.';
   }
+
+  @override
+  String get assignFolderAsChapter => 'Assign Folder as Course Chapter';
+
+  @override
+  String get assignFolderAsChapterTitle => 'Assign Folder as Chapter';
+
+  @override
+  String get assignFolderAsChapterDesc =>
+      'A new chapter will be created in the selected course with all ready videos from this folder as lessons.';
+
+  @override
+  String get selectTargetCourse => 'Select Course / Group';
+
+  @override
+  String get chapterTitleLabel => 'Chapter Title';
+
+  @override
+  String get chapterTitleHint => 'e.g., Chapter 1: Basics of Algebra';
+
+  @override
+  String get assignFolderAsChapterConfirm => 'Confirm & Add Chapter';
+
+  @override
+  String get assignFolderAsChapterSuccess =>
+      'Chapter created and lessons assigned successfully!';
+
+  @override
+  String get assignFolderAsChapterError => 'Error assigning folder as chapter';
+
+  @override
+  String chapterLessonsCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Lessons',
+      one: '1 Lesson',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chapterCompletedLessons(num completed, num total) {
+    return '$completed of $total completed';
+  }
+
+  @override
+  String get chapterCompletedBadge => 'Completed';
+
+  @override
+  String get chapterLockedBadge => 'Locked';
+
+  @override
+  String get chapterInProgressBadge => 'In Progress';
+
+  @override
+  String get chapterLockedMessage =>
+      'Unlocks automatically after completing previous chapters';
+
+  @override
+  String get generalLessonsTitle => 'General Lessons';
+
+  @override
+  String get generalLessonsDesc =>
+      'Additional lessons not assigned to a specific chapter';
+
+  @override
+  String get expandChapter => 'Expand Lessons';
+
+  @override
+  String get collapseChapter => 'Collapse Lessons';
+
+  @override
+  String get chapterPrefix => 'Chapter';
+
+  @override
+  String get noVideosInFolderToAssign =>
+      'No ready videos found in this folder to assign';
 }

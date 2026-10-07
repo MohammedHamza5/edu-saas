@@ -11,6 +11,7 @@ class VideoBankFolderCard extends StatefulWidget {
   final VoidCallback onOpen;
   final VoidCallback onRename;
   final VoidCallback onDelete;
+  final VoidCallback? onAssignAsChapter;
 
   const VideoBankFolderCard({
     super.key,
@@ -18,6 +19,7 @@ class VideoBankFolderCard extends StatefulWidget {
     required this.onOpen,
     required this.onRename,
     required this.onDelete,
+    this.onAssignAsChapter,
   });
 
   @override
@@ -145,6 +147,7 @@ class _VideoBankFolderCardState extends State<VideoBankFolderCard> {
                   tooltip: '',
                   onSelected: (val) {
                     if (val == 'open') widget.onOpen();
+                    if (val == 'assign_chapter') widget.onAssignAsChapter?.call();
                     if (val == 'rename') widget.onRename();
                     if (val == 'delete') widget.onDelete();
                   },
@@ -159,6 +162,27 @@ class _VideoBankFolderCardState extends State<VideoBankFolderCard> {
                         ],
                       ),
                     ),
+                    if (widget.onAssignAsChapter != null)
+                      PopupMenuItem(
+                        value: 'assign_chapter',
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.auto_stories_rounded,
+                              size: 16,
+                              color: AppColors.primary,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              l10n.assignFolderAsChapter,
+                              style: const TextStyle(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     PopupMenuItem(
                       value: 'rename',
                       child: Row(

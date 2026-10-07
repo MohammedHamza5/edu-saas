@@ -69,6 +69,12 @@ abstract interface class VideoBankRemoteDataSource {
     required String contentId,
     required String title,
   });
+
+  Future<Map<String, dynamic>> assignFolderAsChapter({
+    required String folderId,
+    required String groupId,
+    String? chapterTitle,
+  });
 }
 
 class VideoBankRemoteDataSourceImpl implements VideoBankRemoteDataSource {
@@ -498,6 +504,33 @@ class VideoBankRemoteDataSourceImpl implements VideoBankRemoteDataSource {
         'duration': libVideo.duration,
         'status': libVideo.status.name,
       });
+    } on PostgrestException catch (e) {
+      throw ServerException(e.message, code: e.code);
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> assignFolderAsChapter({
+    required String folderId,
+    required String groupId,
+    String? chapterTitle,
+  }) async {
+    try {
+      final res = await _c.rpc<dynamic>(
+        'assign_folder_as_chapter_to_group',
+        params: {
+          'p_folder_id': folderId,
+          'p_group_id': groupId,
+          if (chapterTitle != null && chapterTitle.trim().isNotEmpty)
+            'p_chapter_title': chapterTitle.trim(),
+        },
+      );
+      if (res is Map) {
+        return Map<String, dynamic>.from(res);
+      }
+      return {};
     } on PostgrestException catch (e) {
       throw ServerException(e.message, code: e.code);
     } catch (e) {

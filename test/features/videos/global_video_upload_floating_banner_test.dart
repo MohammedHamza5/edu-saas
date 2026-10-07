@@ -91,6 +91,13 @@ class _FakeVideoBankRepoForBanner implements VideoBankRepository {
   void cancelActiveUpload() {
     cancelCalled = true;
   }
+
+  @override
+  Future<Result<Map<String, dynamic>>> assignFolderAsChapter({
+    required String folderId,
+    required String groupId,
+    String? chapterTitle,
+  }) async => const Success({'chapter_id': 'chap-1', 'lessons_count': 1});
 }
 
 Widget createTestBannerWidget({required VideoBankCubit cubit}) {

@@ -59,4 +59,10 @@ abstract interface class VideoBankRepository {
     required String contentId,
     required String title,
   });
+
+  Future<Result<Map<String, dynamic>>> assignFolderAsChapter({
+    required String folderId,
+    required String groupId,
+    String? chapterTitle,
+  });
 }

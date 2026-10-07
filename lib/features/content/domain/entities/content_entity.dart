@@ -120,6 +120,11 @@ class ContentEntity extends Equatable {
   /// Group-level visibility (from content_groups.is_published)
   final bool isPublishedInGroup;
 
+  /// Chapter organisation
+  final String? chapterId;
+  final String? chapterTitle;
+  final int? chapterSortOrder;
+
   const ContentEntity({
     required this.id,
     required this.tenantId,
@@ -149,6 +154,9 @@ class ContentEntity extends Equatable {
     this.videoProgressPercentage = 0.0,
     this.isExamPassed = false,
     this.isPublishedInGroup = true,
+    this.chapterId,
+    this.chapterTitle,
+    this.chapterSortOrder,
   });
 
   bool get isPublished =>
@@ -212,6 +220,9 @@ class ContentEntity extends Equatable {
     double? videoProgressPercentage,
     bool? isExamPassed,
     bool? isPublishedInGroup,
+    Object? chapterId = _sentinel,
+    Object? chapterTitle = _sentinel,
+    Object? chapterSortOrder = _sentinel,
   }) {
     return ContentEntity(
       id: id ?? this.id,
@@ -259,6 +270,13 @@ class ContentEntity extends Equatable {
           videoProgressPercentage ?? this.videoProgressPercentage,
       isExamPassed: isExamPassed ?? this.isExamPassed,
       isPublishedInGroup: isPublishedInGroup ?? this.isPublishedInGroup,
+      chapterId: chapterId == _sentinel ? this.chapterId : chapterId as String?,
+      chapterTitle: chapterTitle == _sentinel
+          ? this.chapterTitle
+          : chapterTitle as String?,
+      chapterSortOrder: chapterSortOrder == _sentinel
+          ? this.chapterSortOrder
+          : chapterSortOrder as int?,
     );
   }
 
@@ -294,5 +312,8 @@ class ContentEntity extends Equatable {
     videoProgressPercentage,
     isExamPassed,
     isPublishedInGroup,
+    chapterId,
+    chapterTitle,
+    chapterSortOrder,
   ];
 }

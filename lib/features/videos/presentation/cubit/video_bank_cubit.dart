@@ -765,4 +765,25 @@ class VideoBankCubit extends Cubit<VideoBankState> {
       }
     });
   }
+
+  /// Assign an entire folder to a course as a chapter with all ready videos
+  Future<Result<Map<String, dynamic>>> assignFolderAsChapter({
+    required String folderId,
+    required String groupId,
+    String? chapterTitle,
+  }) async {
+    final prev = currentLoadedState;
+    if (prev != null) {
+      emit(prev.copyWith(isActionLoading: true));
+    }
+    final result = await _repository.assignFolderAsChapter(
+      folderId: folderId,
+      groupId: groupId,
+      chapterTitle: chapterTitle,
+    );
+    if (prev != null && !isClosed) {
+      emit(prev.copyWith(isActionLoading: false));
+    }
+    return result;
+  }
 }

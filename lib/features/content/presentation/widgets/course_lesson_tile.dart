@@ -299,6 +299,15 @@ class _CourseLessonTileState extends State<CourseLessonTile> {
                                 color: const Color(0xFFEA580C),
                               ),
 
+                            // Chapter chip
+                            if (widget.content.chapterTitle != null &&
+                                widget.content.chapterTitle!.isNotEmpty)
+                              _buildMiniChip(
+                                icon: Icons.folder_special_rounded,
+                                label: widget.content.chapterTitle!,
+                                color: AppColors.info,
+                              ),
+
                             // Quiz chip
                             if (widget.quizTitle != null)
                               _buildMiniChip(

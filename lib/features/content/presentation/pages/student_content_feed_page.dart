@@ -24,6 +24,7 @@ import '../../domain/repositories/content_repository.dart';
 import '../cubit/course_progress_cubit.dart';
 import '../cubit/course_progress_state.dart';
 import '../widgets/material_viewer_sheet.dart';
+import '../widgets/student_chapter_accordion_card.dart';
 import '../widgets/student_lesson_tile.dart';
 import '../widgets/student_mission_command_deck.dart';
 
@@ -41,6 +42,19 @@ class StudentContentFeedPage extends StatefulWidget {
   State<StudentContentFeedPage> createState() => _StudentContentFeedPageState();
 }
 
+class _ChapterBucket {
+  final String? chapterId;
+  final String title;
+  final int sortOrder;
+  final List<LessonAssignmentEntity> lessons = [];
+
+  _ChapterBucket({
+    required this.chapterId,
+    required this.title,
+    required this.sortOrder,
+  });
+}
+
 class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
   final ScrollController _scrollController = ScrollController();
   late String _activeGroupId;
@@ -51,6 +65,8 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   bool _isRoadmapMode = true;
+  final Set<String> _expandedChapterIds = {};
+  String? _lastGroupIdForExpansion;
 
   String? get _currentUserId {
     try {
@@ -230,6 +246,92 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
         ),
       );
     }
+  }
+
+  Future<void> _handleOpenHandout(LessonAssignmentEntity item) async {
+    if (item.pdfFileId == null) return;
+    await MaterialViewerSheet.show(
+      context,
+      content: ContentEntity(
+        id: item.contentId,
+        tenantId: '',
+        groupId: item.groupId,
+        title: item.title,
+        type: item.type,
+        status: ContentStatus.published,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+        file: FileAttachmentEntity(
+          id: item.pdfFileId!,
+          tenantId: '',
+          contentId: item.contentId,
+          fileName: item.pdfFileName ?? '',
+          storagePath: item.pdfStoragePath ?? '',
+          mimeType: '',
+          fileSize: 0,
+          createdAt: DateTime.now(),
+        ),
+      ),
+      onGetSignedUrl: (storagePath) => context
+          .read<ContentRepository>()
+          .getSignedFileUrl(storagePath: storagePath)
+          .then((value) => value.dataOrNull ?? ''),
+    );
+  }
+
+  Future<void> _handleTakeQuiz(LessonAssignmentEntity item) async {
+    if (!item.hasLessonExam) return;
+    final nav = Navigator.of(context);
+    await context.push('${AppRoutes.studentExams}?examId=${item.lessonExamId}');
+    if (mounted && nav.mounted) {
+      unawaited(
+        nav.context.read<CourseProgressCubit>().loadCourseProgress(
+          _activeGroupId,
+          studentId: _currentUserId,
+        ),
+      );
+    }
+  }
+
+  List<_ChapterBucket> _buildChapterBuckets(
+    List<LessonAssignmentEntity> items,
+    BuildContext context,
+  ) {
+    final Map<String, _ChapterBucket> map = {};
+    _ChapterBucket? generalBucket;
+
+    for (final item in items) {
+      if (item.chapterId != null && item.chapterId!.isNotEmpty) {
+        final id = item.chapterId!;
+        map
+            .putIfAbsent(
+              id,
+              () => _ChapterBucket(
+                chapterId: id,
+                title: item.chapterTitle ?? context.l10n.chapterPrefix,
+                sortOrder: item.chapterSortOrder ?? 999999,
+              ),
+            )
+            .lessons
+            .add(item);
+      } else {
+        generalBucket ??= _ChapterBucket(
+          chapterId: '__general__',
+          title: context.l10n.generalLessonsTitle,
+          sortOrder: 9999999,
+        );
+        generalBucket.lessons.add(item);
+      }
+    }
+
+    final buckets = map.values.toList()
+      ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+
+    if (generalBucket != null) {
+      buckets.add(generalBucket);
+    }
+
+    return buckets;
   }
 
   @override
@@ -712,90 +814,129 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                             ),
                           ),
                         )
-                      else
-                        SliverPadding(
-                          padding: const EdgeInsets.only(
-                            top: AppSpacing.s4,
-                            bottom: 40,
-                          ),
-                          sliver: SliverList.builder(
-                            itemCount: items.length,
-                            itemBuilder: (context, index) {
-                              final item = items[index];
-                              return StudentLessonTile(
-                                content: item.toContentEntity(),
-                                lesson: item,
-                                index: index + 1,
-                                isLast: index == items.length - 1,
-                                isRoadmapMode:
-                                    _isRoadmapMode &&
-                                    _selectedTypeFilter == null &&
-                                    _searchQuery.isEmpty,
-                                onTap: () => _handleContentTap(
-                                  item,
-                                  index: index + 1,
-                                  totalCount: items.length,
-                                ),
-                                onOpenHandout: item.pdfFileId != null
-                                    ? () async {
-                                        await MaterialViewerSheet.show(
-                                          context,
-                                          content: ContentEntity(
-                                            id: item.contentId,
-                                            tenantId: '',
-                                            groupId: item.groupId,
-                                            title: item.title,
-                                            type: item.type,
-                                            status: ContentStatus.published,
-                                            createdAt: DateTime.now(),
-                                            updatedAt: DateTime.now(),
-                                            file: FileAttachmentEntity(
-                                              id: item.pdfFileId!,
-                                              tenantId: '',
-                                              contentId: item.contentId,
-                                              fileName: item.pdfFileName ?? '',
-                                              storagePath:
-                                                  item.pdfStoragePath ?? '',
-                                              mimeType: '',
-                                              fileSize: 0,
-                                              createdAt: DateTime.now(),
-                                            ),
-                                          ),
-                                          onGetSignedUrl: (storagePath) =>
-                                              context
-                                                  .read<ContentRepository>()
-                                                  .getSignedFileUrl(
-                                                    storagePath: storagePath,
-                                                  )
-                                                  .then(
-                                                    (value) =>
-                                                        value.dataOrNull ?? '',
-                                                  ),
-                                        );
+                      else ...[
+                        () {
+                          final hasChapters = items.any(
+                            (i) =>
+                                i.chapterId != null && i.chapterId!.isNotEmpty,
+                          );
+
+                          if (!hasChapters) {
+                            return SliverPadding(
+                              padding: const EdgeInsets.only(
+                                top: AppSpacing.s4,
+                                bottom: 40,
+                              ),
+                              sliver: SliverList.builder(
+                                itemCount: items.length,
+                                itemBuilder: (context, index) {
+                                  final item = items[index];
+                                  return StudentLessonTile(
+                                    content: item.toContentEntity(),
+                                    lesson: item,
+                                    index: index + 1,
+                                    isLast: index == items.length - 1,
+                                    isRoadmapMode:
+                                        _isRoadmapMode &&
+                                        _selectedTypeFilter == null &&
+                                        _searchQuery.isEmpty,
+                                    onTap: () => _handleContentTap(
+                                      item,
+                                      index: index + 1,
+                                      totalCount: items.length,
+                                    ),
+                                    onOpenHandout: item.pdfFileId != null
+                                        ? () => _handleOpenHandout(item)
+                                        : null,
+                                    onTakeQuiz: item.hasLessonExam
+                                        ? () => _handleTakeQuiz(item)
+                                        : null,
+                                  );
+                                },
+                              ),
+                            );
+                          }
+
+                          // Option 1: Accordion View by Academic Chapters
+                          final buckets = _buildChapterBuckets(items, context);
+
+                          // Manage auto-expansion for active chapter
+                          if (_lastGroupIdForExpansion != _activeGroupId) {
+                            _lastGroupIdForExpansion = _activeGroupId;
+                            _expandedChapterIds.clear();
+                          }
+
+                          if (_expandedChapterIds.isEmpty &&
+                              buckets.isNotEmpty) {
+                            final activeBucket = buckets.firstWhere(
+                              (b) => b.lessons.any(
+                                (l) => !l.isLocked && !l.isEffectivelyCompleted,
+                              ),
+                              orElse: () => buckets.first,
+                            );
+                            _expandedChapterIds.add(
+                              activeBucket.chapterId ?? '__general__',
+                            );
+                          }
+
+                          int calcGlobalIndex(int bucketIndex) {
+                            int count = 1;
+                            for (int i = 0; i < bucketIndex; i++) {
+                              count += buckets[i].lessons.length;
+                            }
+                            return count;
+                          }
+
+                          return SliverPadding(
+                            padding: const EdgeInsets.only(
+                              top: AppSpacing.s4,
+                              bottom: 40,
+                            ),
+                            sliver: SliverList.builder(
+                              itemCount: buckets.length,
+                              itemBuilder: (context, bIdx) {
+                                final bucket = buckets[bIdx];
+                                final key = bucket.chapterId ?? '__general__';
+                                final isExpanded =
+                                    _searchQuery.isNotEmpty ||
+                                    _expandedChapterIds.contains(key);
+
+                                return StudentChapterAccordionCard(
+                                  key: ValueKey('chapter_accordion_$key'),
+                                  chapterId: bucket.chapterId,
+                                  chapterTitle: bucket.title,
+                                  chapterIndex: bIdx + 1,
+                                  lessons: bucket.lessons,
+                                  globalStartIndex: calcGlobalIndex(bIdx),
+                                  isExpanded: isExpanded,
+                                  isRoadmapMode:
+                                      _isRoadmapMode &&
+                                      _selectedTypeFilter == null &&
+                                      _searchQuery.isEmpty,
+                                  onToggle: () {
+                                    setState(() {
+                                      if (_expandedChapterIds.contains(key)) {
+                                        _expandedChapterIds.remove(key);
+                                      } else {
+                                        _expandedChapterIds.add(key);
                                       }
-                                    : null,
-                                onTakeQuiz: item.hasLessonExam
-                                    ? () async {
-                                        final nav = Navigator.of(context);
-                                        await context.push(
-                                          '${AppRoutes.studentExams}?examId=${item.lessonExamId}',
-                                        );
-                                        if (mounted && nav.mounted) {
-                                          unawaited(
-                                            nav.context
-                                                .read<CourseProgressCubit>()
-                                                .loadCourseProgress(
-                                                  _activeGroupId,
-                                                  studentId: _currentUserId,
-                                                ),
-                                          );
-                                        }
-                                      }
-                                    : null,
-                              );
-                            },
-                          ),
-                        ),
+                                    });
+                                  },
+                                  onLessonTap: (item, globalIndex) =>
+                                      _handleContentTap(
+                                        item,
+                                        index: globalIndex,
+                                        totalCount: items.length,
+                                      ),
+                                  onOpenHandout: (item) =>
+                                      _handleOpenHandout(item),
+                                  onTakeQuiz: (item) => _handleTakeQuiz(item),
+                                );
+                              },
+                            ),
+                          );
+                        }(),
+                      ],
                     ],
                   ),
                 ),

@@ -7627,5 +7627,62 @@
         "type": "num"
       }
     }
-  }
+  },
+  "assignFolderAsChapter": "Assign Folder as Course Chapter",
+  "@assignFolderAsChapter": {},
+  "assignFolderAsChapterTitle": "Assign Folder as Chapter",
+  "@assignFolderAsChapterTitle": {},
+  "assignFolderAsChapterDesc": "A new chapter will be created in the selected course with all ready videos from this folder as lessons.",
+  "@assignFolderAsChapterDesc": {},
+  "selectTargetCourse": "Select Course / Group",
+  "@selectTargetCourse": {},
+  "chapterTitleLabel": "Chapter Title",
+  "@chapterTitleLabel": {},
+  "chapterTitleHint": "e.g., Chapter 1: Basics of Algebra",
+  "@chapterTitleHint": {},
+  "assignFolderAsChapterConfirm": "Confirm & Add Chapter",
+  "@assignFolderAsChapterConfirm": {},
+  "assignFolderAsChapterSuccess": "Chapter created and lessons assigned successfully!",
+  "@assignFolderAsChapterSuccess": {},
+  "assignFolderAsChapterError": "Error assigning folder as chapter",
+  "@assignFolderAsChapterError": {},
+  "chapterLessonsCount": "{count, plural, one{1 Lesson} other{{count} Lessons}}",
+  "@chapterLessonsCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "chapterCompletedLessons": "{completed} of {total} completed",
+  "@chapterCompletedLessons": {
+    "placeholders": {
+      "completed": {
+        "type": "num"
+      },
+      "total": {
+        "type": "num"
+      }
+    }
+  },
+  "chapterCompletedBadge": "Completed",
+  "@chapterCompletedBadge": {},
+  "chapterLockedBadge": "Locked",
+  "@chapterLockedBadge": {},
+  "chapterInProgressBadge": "In Progress",
+  "@chapterInProgressBadge": {},
+  "chapterLockedMessage": "Unlocks automatically after completing previous chapters",
+  "@chapterLockedMessage": {},
+  "generalLessonsTitle": "General Lessons",
+  "@generalLessonsTitle": {},
+  "generalLessonsDesc": "Additional lessons not assigned to a specific chapter",
+  "@generalLessonsDesc": {},
+  "expandChapter": "Expand Lessons",
+  "@expandChapter": {},
+  "collapseChapter": "Collapse Lessons",
+  "@collapseChapter": {},
+  "chapterPrefix": "Chapter",
+  "@chapterPrefix": {},
+  "noVideosInFolderToAssign": "No ready videos found in this folder to assign",
+  "@noVideosInFolderToAssign": {}
 }

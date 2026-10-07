@@ -221,6 +221,9 @@ class ContentModel extends ContentEntity {
     double? videoProgressPercentage,
     bool? isExamPassed,
     bool? isPublishedInGroup,
+    Object? chapterId = _sentinel,
+    Object? chapterTitle = _sentinel,
+    Object? chapterSortOrder = _sentinel,
   }) {
     final entity = super.copyWith(
       id: id,
@@ -251,6 +254,9 @@ class ContentModel extends ContentEntity {
       videoProgressPercentage: videoProgressPercentage,
       isExamPassed: isExamPassed,
       isPublishedInGroup: isPublishedInGroup,
+      chapterId: chapterId,
+      chapterTitle: chapterTitle,
+      chapterSortOrder: chapterSortOrder,
     );
     return ContentModel.fromEntity(entity);
   }
