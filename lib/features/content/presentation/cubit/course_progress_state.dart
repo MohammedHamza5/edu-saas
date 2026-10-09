@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../domain/entities/chapter_entity.dart';
 import '../../domain/entities/lesson_assignment_entity.dart';
 
 abstract class CourseProgressState extends Equatable {
@@ -18,25 +19,29 @@ class CourseProgressLoading extends CourseProgressState {
 
 class CourseProgressLoaded extends CourseProgressState {
   final List<LessonAssignmentEntity> lessons;
+  final List<ChapterEntity> chapters;
   final bool isRefreshing;
 
   const CourseProgressLoaded({
     required this.lessons,
+    this.chapters = const [],
     this.isRefreshing = false,
   });
 
   CourseProgressLoaded copyWith({
     List<LessonAssignmentEntity>? lessons,
+    List<ChapterEntity>? chapters,
     bool? isRefreshing,
   }) {
     return CourseProgressLoaded(
       lessons: lessons ?? this.lessons,
+      chapters: chapters ?? this.chapters,
       isRefreshing: isRefreshing ?? this.isRefreshing,
     );
   }
 
   @override
-  List<Object?> get props => [lessons, isRefreshing];
+  List<Object?> get props => [lessons, chapters, isRefreshing];
 }
 
 class CourseProgressError extends CourseProgressState {

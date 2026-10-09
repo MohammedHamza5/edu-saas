@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
@@ -32,6 +33,8 @@ class TeacherVideoBankPage extends StatefulWidget {
 
 class _TeacherVideoBankPageState extends State<TeacherVideoBankPage> {
   final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
+  Timer? _searchDebounce;
   _VideoFilter _filter = _VideoFilter.all;
 
   @override
@@ -43,8 +46,19 @@ class _TeacherVideoBankPageState extends State<TeacherVideoBankPage> {
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
+    _searchFocusNode.dispose();
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _onSearchChanged(String query) {
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 300), () {
+      if (mounted) {
+        context.read<VideoBankCubit>().search(query);
+      }
+    });
   }
 
   List<LibraryVideoEntity> _applyFilter(List<LibraryVideoEntity> items) {
@@ -63,14 +77,38 @@ class _TeacherVideoBankPageState extends State<TeacherVideoBankPage> {
   }
 
   Future<void> _handleCreateFolder() async {
-    final name = await CreateFolderDialog.show(context);
-    if (name != null && name.trim().isNotEmpty && mounted) {
-      final success = await context.read<VideoBankCubit>().createFolder(name);
+    final result = await CreateFolderDialog.show(context);
+    if (result != null && result.name.trim().isNotEmpty && mounted) {
+      final success = await context
+          .read<VideoBankCubit>()
+          .createFolder(result.name, color: result.color);
       if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(context.l10n.folderCreatedSuccess),
             backgroundColor: AppColors.success,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _handleChangeFolderColor(VideoFolderEntity folder) async {
+    final newColor = await ChangeFolderColorDialog.show(
+      context,
+      folder: folder,
+    );
+    if (newColor != null && mounted) {
+      final actualColor = newColor.isEmpty ? null : newColor;
+      final success = await context
+          .read<VideoBankCubit>()
+          .updateFolderColor(folder.id, actualColor);
+      if (success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.l10n.folderColorUpdated),
+            backgroundColor: AppColors.success,
+            duration: const Duration(seconds: 2),
           ),
         );
       }
@@ -352,29 +390,34 @@ class _TeacherVideoBankPageState extends State<TeacherVideoBankPage> {
                 context.read<VideoBankCubit>().loadFolder(forceRefresh: true),
             child: CustomScrollView(
               slivers: [
-                if (loaded.isActionLoading)
-                  const SliverToBoxAdapter(
-                    child: LinearProgressIndicator(
-                      minHeight: 2.5,
-                      backgroundColor: Colors.transparent,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        AppColors.primary,
-                      ),
-                    ),
-                  ),
                 // ── Header Banner ─────────────────────────────────────────
                 SliverToBoxAdapter(
+                  key: const PageStorageKey('video_bank_header_sliver'),
                   child: Container(
                     color: AppColors.surface,
-                    padding: EdgeInsets.fromLTRB(
-                      hPadding,
-                      AppSpacing.s16,
-                      hPadding,
-                      AppSpacing.s16,
-                    ),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
+                        if (loaded.isActionLoading)
+                          const LinearProgressIndicator(
+                            minHeight: 2.5,
+                            backgroundColor: Colors.transparent,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              AppColors.primary,
+                            ),
+                          )
+                        else
+                          const SizedBox(height: 2.5),
+                        Padding(
+                          padding: EdgeInsets.fromLTRB(
+                            hPadding,
+                            AppSpacing.s16,
+                            hPadding,
+                            AppSpacing.s16,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
                         // Title row & action buttons (Responsive for Mobile)
                         if (isMobile) ...[
                           Row(
@@ -628,16 +671,18 @@ class _TeacherVideoBankPageState extends State<TeacherVideoBankPage> {
 
                         // Search Bar & Filter chips
                         TextField(
+                          key: const ValueKey('video_bank_search_field'),
                           controller: _searchController,
-                          onChanged: (v) =>
-                              context.read<VideoBankCubit>().search(v),
+                          focusNode: _searchFocusNode,
+                          onChanged: _onSearchChanged,
                           decoration: InputDecoration(
-                            hintText: l10n.videoPickerSearchHint,
+                            hintText: l10n.videoBankSearchHint,
                             prefixIcon: const Icon(Icons.search_rounded),
                             suffixIcon: _searchController.text.isNotEmpty
                                 ? IconButton(
                                     icon: const Icon(Icons.clear, size: 18),
                                     onPressed: () {
+                                      _searchDebounce?.cancel();
                                       _searchController.clear();
                                       context.read<VideoBankCubit>().search('');
                                     },
@@ -702,7 +747,10 @@ class _TeacherVideoBankPageState extends State<TeacherVideoBankPage> {
                       ],
                     ),
                   ),
-                ),
+                ],
+              ),
+            ),
+          ),
                 // ── Breadcrumbs Navigation Bar ────────────────────────────
                 SliverToBoxAdapter(
                   child: Container(
@@ -802,20 +850,27 @@ class _TeacherVideoBankPageState extends State<TeacherVideoBankPage> {
                     padding: EdgeInsets.symmetric(horizontal: hPadding),
                     sliver: SliverGrid(
                       gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                        maxCrossAxisExtent: isMobile ? 600 : 320,
+                        maxCrossAxisExtent: isMobile ? 600 : 380,
                         mainAxisSpacing: AppSpacing.s12,
                         crossAxisSpacing: AppSpacing.s12,
-                        mainAxisExtent: 72,
+                        mainAxisExtent: isMobile ? 120 : 116,
                       ),
                       delegate: SliverChildBuilderDelegate((ctx, i) {
                         final f = folders[i];
                         return VideoBankFolderCard(
                           key: ValueKey('folder_${f.id}'),
                           folder: f,
-                          onOpen: () =>
-                              context.read<VideoBankCubit>().openFolder(f),
+                          onOpen: () {
+                            if (_searchController.text.isNotEmpty) {
+                              _searchDebounce?.cancel();
+                              _searchController.clear();
+                            }
+                            context.read<VideoBankCubit>().openFolder(f);
+                          },
                           onAssignAsChapter: () =>
                               _handleAssignFolderAsChapter(f),
+                          onChangeColor: () =>
+                              _handleChangeFolderColor(f),
                           onRename: () => _handleRenameFolder(f),
                           onDelete: () => _handleDeleteFolder(f),
                         );

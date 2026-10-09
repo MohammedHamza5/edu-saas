@@ -1,5 +1,6 @@
 import '../../../../core/errors/failures.dart';
 import '../../../../core/errors/result.dart';
+import '../../domain/entities/chapter_entity.dart';
 import '../../domain/entities/content_entity.dart';
 import '../../domain/entities/lesson_assignment_entity.dart';
 import '../../domain/repositories/content_repository.dart';
@@ -218,6 +219,24 @@ class ContentRepositoryImpl implements ContentRepository {
   }
 
   @override
+  Future<Result<void>> assignBatchContentToGroup({
+    required String groupId,
+    required List<Map<String, dynamic>> items,
+  }) async {
+    try {
+      await _remoteDataSource.assignBatchContentToGroup(
+        groupId: groupId,
+        items: items,
+      );
+      return const Success(null);
+    } catch (e) {
+      return FailureResult(
+        ServerFailure('فشل في ربط المحتوى بالمجموعة: ${e.toString()}'),
+      );
+    }
+  }
+
+  @override
   Future<Result<void>> linkLessonExam({
     required String contentId,
     required String examId,
@@ -341,6 +360,160 @@ class ContentRepositoryImpl implements ContentRepository {
       return Success(fileId);
     } catch (e) {
       return FailureResult(ServerFailure('فشل في رفع الملف', details: e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<List<ChapterEntity>>> getGroupChapters(String groupId) async {
+    try {
+      final chapters = await _remoteDataSource.getGroupChapters(groupId);
+      return Success(chapters);
+    } catch (e) {
+      return FailureResult(
+        ServerFailure('فشل في جلب فصول المجموعة', details: e.toString()),
+      );
+    }
+  }
+
+  @override
+  Future<Result<ChapterEntity>> createChapter({
+    required String groupId,
+    required String title,
+    bool isPublished = true,
+  }) async {
+    try {
+      final chapter = await _remoteDataSource.createChapter(
+        groupId: groupId,
+        title: title,
+        isPublished: isPublished,
+      );
+      return Success(chapter);
+    } catch (e) {
+      return FailureResult(
+        ServerFailure('فشل في إنشاء الفصل', details: e.toString()),
+      );
+    }
+  }
+
+  @override
+  Future<Result<void>> toggleChapterVisibility({
+    required String chapterId,
+    required bool isPublished,
+  }) async {
+    try {
+      await _remoteDataSource.toggleChapterVisibility(
+        chapterId: chapterId,
+        isPublished: isPublished,
+      );
+      return const Success(null);
+    } catch (e) {
+      return FailureResult(
+        ServerFailure('فشل في تعديل حالة ظهور الفصل', details: e.toString()),
+      );
+    }
+  }
+
+  @override
+  Future<Result<void>> updateChapter({
+    required String chapterId,
+    required String title,
+  }) async {
+    try {
+      await _remoteDataSource.updateChapter(
+        chapterId: chapterId,
+        title: title,
+      );
+      return const Success(null);
+    } catch (e) {
+      return FailureResult(
+        ServerFailure('فشل في تحديث الفصل', details: e.toString()),
+      );
+    }
+  }
+
+  @override
+  Future<Result<void>> deleteChapter(String chapterId) async {
+    try {
+      await _remoteDataSource.deleteChapter(chapterId);
+      return const Success(null);
+    } catch (e) {
+      return FailureResult(
+        ServerFailure('فشل في حذف الفصل', details: e.toString()),
+      );
+    }
+  }
+
+  @override
+  Future<Result<void>> setLessonChapter({
+    required String contentId,
+    required String groupId,
+    String? chapterId,
+  }) async {
+    try {
+      await _remoteDataSource.setLessonChapter(
+        contentId: contentId,
+        groupId: groupId,
+        chapterId: chapterId,
+      );
+      return const Success(null);
+    } catch (e) {
+      return FailureResult(
+        ServerFailure('فشل في تعيين فصل المحاضرة', details: e.toString()),
+      );
+    }
+  }
+
+  @override
+  Future<Result<void>> reorderChapterLessons({
+    required String groupId,
+    required List<String> contentIdsInOrder,
+  }) async {
+    try {
+      await _remoteDataSource.reorderChapterLessons(
+        groupId: groupId,
+        contentIdsInOrder: contentIdsInOrder,
+      );
+      return const Success(null);
+    } catch (e) {
+      return FailureResult(
+        ServerFailure('فشل في إعادة ترتيب محاضرات الفصل', details: e.toString()),
+      );
+    }
+  }
+
+  @override
+  Future<Result<void>> reorderCourseChapters({
+    required String groupId,
+    required List<String> chapterIdsInOrder,
+  }) async {
+    try {
+      await _remoteDataSource.reorderCourseChapters(
+        groupId: groupId,
+        chapterIdsInOrder: chapterIdsInOrder,
+      );
+      return const Success(null);
+    } catch (e) {
+      return FailureResult(
+        ServerFailure('فشل في إعادة ترتيب الفصول', details: e.toString()),
+      );
+    }
+  }
+
+  @override
+  Future<Result<void>> removeLessonFromGroup({
+    required String contentId,
+    required String groupId,
+  }) async {
+    try {
+      await _remoteDataSource.removeLessonFromGroup(
+        contentId: contentId,
+        groupId: groupId,
+      );
+      return const Success(null);
+    } catch (e) {
+      return FailureResult(
+        ServerFailure('فشل في إزالة المحاضرة من المجموعة', details: e.toString()),
+      );
     }
   }
 }

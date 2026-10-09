@@ -44,11 +44,13 @@ class VideoBankRepositoryImpl implements VideoBankRepository {
   Future<Result<VideoFolderEntity>> createFolder({
     required String name,
     String? parentId,
+    String? color,
   }) async {
     try {
       final folder = await _remoteDataSource.createFolder(
         name: name,
         parentId: parentId,
+        color: color,
       );
       return Result.success(folder);
     } on ServerException catch (e) {
@@ -62,9 +64,32 @@ class VideoBankRepositoryImpl implements VideoBankRepository {
   Future<Result<VideoFolderEntity>> updateFolder({
     required String id,
     required String name,
+    String? color,
   }) async {
     try {
-      final folder = await _remoteDataSource.updateFolder(id: id, name: name);
+      final folder = await _remoteDataSource.updateFolder(
+        id: id,
+        name: name,
+        color: color,
+      );
+      return Result.success(folder);
+    } on ServerException catch (e) {
+      return Result.failure(ServerFailure(e.message, code: e.code));
+    } catch (e) {
+      return Result.failure(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<VideoFolderEntity>> updateFolderColor({
+    required String id,
+    String? color,
+  }) async {
+    try {
+      final folder = await _remoteDataSource.updateFolderColor(
+        id: id,
+        color: color,
+      );
       return Result.success(folder);
     } on ServerException catch (e) {
       return Result.failure(ServerFailure(e.message, code: e.code));

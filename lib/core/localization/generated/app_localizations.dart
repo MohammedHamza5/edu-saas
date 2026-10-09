@@ -9310,7 +9310,7 @@ abstract class AppLocalizations {
   /// No description provided for @customPassingScore.
   ///
   /// In en, this message translates to:
-  /// **'Custom'**
+  /// **'Custom passing score (%)'**
   String get customPassingScore;
 
   /// No description provided for @lessonAddedToCourse.
@@ -9390,6 +9390,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Search videos...'**
   String get videoPickerSearchHint;
+
+  /// No description provided for @videoBankSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search videos or folders...'**
+  String get videoBankSearchHint;
 
   /// No description provided for @videoAlreadyAddedToThisGroup.
   ///
@@ -12166,7 +12172,7 @@ abstract class AppLocalizations {
   /// No description provided for @chapterTitleHint.
   ///
   /// In en, this message translates to:
-  /// **'e.g., Chapter 1: Basics of Algebra'**
+  /// **'e.g., Chapter 1: Functions & Graphs'**
   String get chapterTitleHint;
 
   /// No description provided for @assignFolderAsChapterConfirm.
@@ -12258,6 +12264,546 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No ready videos found in this folder to assign'**
   String get noVideosInFolderToAssign;
+
+  /// No description provided for @changeFolderColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Folder Color'**
+  String get changeFolderColor;
+
+  /// No description provided for @changeFolderColorSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a distinct color to easily identify and organize this folder'**
+  String get changeFolderColorSubtitle;
+
+  /// No description provided for @defaultFolderColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Default (No custom color)'**
+  String get defaultFolderColor;
+
+  /// No description provided for @folderColorUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder color updated successfully'**
+  String get folderColorUpdated;
+
+  /// No description provided for @folderDurationBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours}h {minutes}m'**
+  String folderDurationBadge(int hours, int minutes);
+
+  /// No description provided for @folderDurationMinutesOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes}m'**
+  String folderDurationMinutesOnly(int minutes);
+
+  /// No description provided for @folderAllVideosReady.
+  ///
+  /// In en, this message translates to:
+  /// **'All videos ready'**
+  String get folderAllVideosReady;
+
+  /// No description provided for @folderVideosProcessing.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} processing'**
+  String folderVideosProcessing(int count);
+
+  /// No description provided for @folderAssignedToCourse.
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned: {courseName}'**
+  String folderAssignedToCourse(String courseName);
+
+  /// No description provided for @folderNotAssignedYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Unassigned (Ready)'**
+  String get folderNotAssignedYet;
+
+  /// No description provided for @folderMultipleCoursesAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned in {count} courses'**
+  String folderMultipleCoursesAssigned(int count);
+
+  /// No description provided for @folderColorIndigo.
+  ///
+  /// In en, this message translates to:
+  /// **'Mathematical Indigo'**
+  String get folderColorIndigo;
+
+  /// No description provided for @folderColorCyan.
+  ///
+  /// In en, this message translates to:
+  /// **'Electric Cyan'**
+  String get folderColorCyan;
+
+  /// No description provided for @folderColorEmerald.
+  ///
+  /// In en, this message translates to:
+  /// **'Emerald Green'**
+  String get folderColorEmerald;
+
+  /// No description provided for @folderColorAmber.
+  ///
+  /// In en, this message translates to:
+  /// **'Amber Gold'**
+  String get folderColorAmber;
+
+  /// No description provided for @folderColorRuby.
+  ///
+  /// In en, this message translates to:
+  /// **'Ruby Crimson'**
+  String get folderColorRuby;
+
+  /// No description provided for @folderColorViolet.
+  ///
+  /// In en, this message translates to:
+  /// **'Royal Violet'**
+  String get folderColorViolet;
+
+  /// No description provided for @folderColorRose.
+  ///
+  /// In en, this message translates to:
+  /// **'Rose Pink'**
+  String get folderColorRose;
+
+  /// No description provided for @folderColorSlate.
+  ///
+  /// In en, this message translates to:
+  /// **'Graphite Slate'**
+  String get folderColorSlate;
+
+  /// No description provided for @selectFolderColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder Color'**
+  String get selectFolderColor;
+
+  /// No description provided for @addNewChapter.
+  ///
+  /// In en, this message translates to:
+  /// **'Add New Chapter'**
+  String get addNewChapter;
+
+  /// No description provided for @newChapterDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add New Chapter'**
+  String get newChapterDialogTitle;
+
+  /// No description provided for @editChapterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Chapter Title'**
+  String get editChapterTitle;
+
+  /// No description provided for @deleteChapterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Chapter'**
+  String get deleteChapterTitle;
+
+  /// No description provided for @deleteChapterConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this chapter? Its lectures will be preserved and moved to General Lectures.'**
+  String get deleteChapterConfirm;
+
+  /// No description provided for @addLectureToChapter.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Lecture to this Chapter'**
+  String get addLectureToChapter;
+
+  /// No description provided for @emptyChapterPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'This chapter is currently empty'**
+  String get emptyChapterPlaceholder;
+
+  /// No description provided for @emptyChapterTeacherAction.
+  ///
+  /// In en, this message translates to:
+  /// **'+ Add First Lecture to this Chapter'**
+  String get emptyChapterTeacherAction;
+
+  /// No description provided for @moveLectureToChapter.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to Chapter...'**
+  String get moveLectureToChapter;
+
+  /// No description provided for @removeFromChapter.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from Chapter (Make General)'**
+  String get removeFromChapter;
+
+  /// No description provided for @removeFromCourse.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from Course'**
+  String get removeFromCourse;
+
+  /// No description provided for @chapterUpdatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter updated successfully'**
+  String get chapterUpdatedSuccess;
+
+  /// No description provided for @chapterCreatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter created successfully'**
+  String get chapterCreatedSuccess;
+
+  /// No description provided for @chapterDeletedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter deleted successfully'**
+  String get chapterDeletedSuccess;
+
+  /// No description provided for @lectureMovedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Lecture chapter updated successfully'**
+  String get lectureMovedSuccess;
+
+  /// No description provided for @unassignedLecturesSection.
+  ///
+  /// In en, this message translates to:
+  /// **'General Lectures (Unassigned)'**
+  String get unassignedLecturesSection;
+
+  /// No description provided for @unassignedLecturesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Lectures available in the course not assigned to a specific chapter'**
+  String get unassignedLecturesDesc;
+
+  /// No description provided for @chapterUpcomingStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get chapterUpcomingStatus;
+
+  /// No description provided for @emptyChapterStudentNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'No lectures have been added to this chapter yet; your teacher will publish them soon.'**
+  String get emptyChapterStudentNotice;
+
+  /// No description provided for @selectTargetChapter.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Target Chapter'**
+  String get selectTargetChapter;
+
+  /// No description provided for @noChapterOption.
+  ///
+  /// In en, this message translates to:
+  /// **'No Chapter (General Lecture)'**
+  String get noChapterOption;
+
+  /// No description provided for @chapterVisibilityPublished.
+  ///
+  /// In en, this message translates to:
+  /// **'Published'**
+  String get chapterVisibilityPublished;
+
+  /// No description provided for @chapterVisibilityDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft (Hidden)'**
+  String get chapterVisibilityDraft;
+
+  /// No description provided for @hideChapterTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide chapter and all its lessons from students'**
+  String get hideChapterTooltip;
+
+  /// No description provided for @publishChapterTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish chapter to students'**
+  String get publishChapterTooltip;
+
+  /// No description provided for @chapterPublishedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter is now published to students'**
+  String get chapterPublishedToast;
+
+  /// No description provided for @chapterHiddenToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter is now hidden from students'**
+  String get chapterHiddenToast;
+
+  /// No description provided for @toggleChapterVisibilityAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle Visibility'**
+  String get toggleChapterVisibilityAction;
+
+  /// No description provided for @publishChapterAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish Chapter'**
+  String get publishChapterAction;
+
+  /// No description provided for @hideChapterAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide Chapter'**
+  String get hideChapterAction;
+
+  /// No description provided for @lessonStudioTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Lesson Studio'**
+  String get lessonStudioTitle;
+
+  /// No description provided for @lessonStudioSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select videos from your library, organize them into chapters, and configure materials'**
+  String get lessonStudioSubtitle;
+
+  /// No description provided for @videoBankSidebarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Video Bank & Folders'**
+  String get videoBankSidebarTitle;
+
+  /// No description provided for @searchVideosAndFoldersHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search videos or folders...'**
+  String get searchVideosAndFoldersHint;
+
+  /// No description provided for @allVideosFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get allVideosFilter;
+
+  /// No description provided for @unusedVideosFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Not in Course'**
+  String get unusedVideosFilter;
+
+  /// No description provided for @selectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Select All'**
+  String get selectAll;
+
+  /// No description provided for @clearSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Selection'**
+  String get clearSelection;
+
+  /// No description provided for @uploadNewVideoShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Video'**
+  String get uploadNewVideoShort;
+
+  /// No description provided for @collapseSidebar.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse Panel'**
+  String get collapseSidebar;
+
+  /// No description provided for @expandSidebar.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand Panel'**
+  String get expandSidebar;
+
+  /// No description provided for @alreadyAddedBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'In Course'**
+  String get alreadyAddedBadge;
+
+  /// No description provided for @noVideosSelectedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No Videos Selected'**
+  String get noVideosSelectedTitle;
+
+  /// No description provided for @noVideosSelectedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a video or an entire folder from the left panel to configure lectures'**
+  String get noVideosSelectedSubtitle;
+
+  /// No description provided for @batchModeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch Setup ({count} Selected)'**
+  String batchModeTitle(int count);
+
+  /// No description provided for @batchModeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply settings to all selected videos at once, or customize each individually'**
+  String get batchModeSubtitle;
+
+  /// No description provided for @applyChapterToAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply Chapter to All'**
+  String get applyChapterToAll;
+
+  /// No description provided for @publishAllBatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish All Immediately'**
+  String get publishAllBatch;
+
+  /// No description provided for @draftAllBatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Save All as Drafts'**
+  String get draftAllBatch;
+
+  /// No description provided for @addBatchLecturesButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Add {count} Lectures to Course'**
+  String addBatchLecturesButton(int count);
+
+  /// No description provided for @addingBatchProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Adding lecture {current} of {total}...'**
+  String addingBatchProgress(int current, int total);
+
+  /// No description provided for @batchAddSuccessToast.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} lectures added to course successfully!'**
+  String batchAddSuccessToast(int count);
+
+  /// No description provided for @singleLectureSetup.
+  ///
+  /// In en, this message translates to:
+  /// **'Lecture Configuration'**
+  String get singleLectureSetup;
+
+  /// No description provided for @useVideoTitleAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Video File Name'**
+  String get useVideoTitleAction;
+
+  /// No description provided for @targetChapterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Target Academic Chapter'**
+  String get targetChapterLabel;
+
+  /// No description provided for @quickCreateChapter.
+  ///
+  /// In en, this message translates to:
+  /// **'+ New Chapter'**
+  String get quickCreateChapter;
+
+  /// No description provided for @pdfHandoutSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Study Material (PDF Handout)'**
+  String get pdfHandoutSection;
+
+  /// No description provided for @uploadPdfHandout.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload PDF Handout'**
+  String get uploadPdfHandout;
+
+  /// No description provided for @removePdfHandout.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove PDF'**
+  String get removePdfHandout;
+
+  /// No description provided for @mandatoryQuizSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Mandatory Lecture Quiz'**
+  String get mandatoryQuizSection;
+
+  /// No description provided for @noQuizAttached.
+  ///
+  /// In en, this message translates to:
+  /// **'No Quiz Required'**
+  String get noQuizAttached;
+
+  /// No description provided for @createQuizQuick.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Quiz'**
+  String get createQuizQuick;
+
+  /// No description provided for @passingScoreRequirement.
+  ///
+  /// In en, this message translates to:
+  /// **'Passing Score Requirement'**
+  String get passingScoreRequirement;
+
+  /// No description provided for @useDefaultGroupScore.
+  ///
+  /// In en, this message translates to:
+  /// **'Use default group passing score ({score}%)'**
+  String useDefaultGroupScore(int score);
+
+  /// No description provided for @lecturePublishStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish to Students'**
+  String get lecturePublishStatus;
+
+  /// No description provided for @lecturePublishedDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Students will be able to watch this lecture immediately'**
+  String get lecturePublishedDescription;
+
+  /// No description provided for @lectureDraftDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Lecture will be saved as draft and hidden from students'**
+  String get lectureDraftDescription;
+
+  /// No description provided for @saveLectureButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Save & Add Lecture'**
+  String get saveLectureButton;
+
+  /// No description provided for @unassignedFolderVideos.
+  ///
+  /// In en, this message translates to:
+  /// **'General / Root Videos'**
+  String get unassignedFolderVideos;
+
+  /// No description provided for @folderVideosCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} videos'**
+  String folderVideosCount(int count);
 }
 
 class _AppLocalizationsDelegate

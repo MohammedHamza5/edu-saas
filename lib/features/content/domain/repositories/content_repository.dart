@@ -1,4 +1,5 @@
 import '../../../../core/errors/result.dart';
+import '../entities/chapter_entity.dart';
 import '../entities/content_entity.dart';
 import '../entities/lesson_assignment_entity.dart';
 
@@ -82,6 +83,12 @@ abstract class ContentRepository {
     List<Map<String, dynamic>>? groupConfigs,
   });
 
+  /// Atomically assigns multiple content items/videos to a group in one transaction
+  Future<Result<void>> assignBatchContentToGroup({
+    required String groupId,
+    required List<Map<String, dynamic>> items,
+  });
+
   /// Links a quiz/exam to a lesson unit
   Future<Result<void>> linkLessonExam({
     required String contentId,
@@ -124,5 +131,55 @@ abstract class ContentRepository {
     required String mimeType,
     required List<int> fileBytes,
     required String storagePath,
+  });
+
+  /// Fetches chapters belonging to a group
+  Future<Result<List<ChapterEntity>>> getGroupChapters(String groupId);
+
+  /// Creates a new chapter for a group
+  Future<Result<ChapterEntity>> createChapter({
+    required String groupId,
+    required String title,
+    bool isPublished = true,
+  });
+
+  /// Toggles chapter visibility (published/draft)
+  Future<Result<void>> toggleChapterVisibility({
+    required String chapterId,
+    required bool isPublished,
+  });
+
+  /// Updates chapter title
+  Future<Result<void>> updateChapter({
+    required String chapterId,
+    required String title,
+  });
+
+  /// Deletes a chapter
+  Future<Result<void>> deleteChapter(String chapterId);
+
+  /// Moves or sets a lesson to a chapter
+  Future<Result<void>> setLessonChapter({
+    required String contentId,
+    required String groupId,
+    String? chapterId,
+  });
+
+  /// Reorders lessons within a chapter or course
+  Future<Result<void>> reorderChapterLessons({
+    required String groupId,
+    required List<String> contentIdsInOrder,
+  });
+
+  /// Reorders chapters within a course
+  Future<Result<void>> reorderCourseChapters({
+    required String groupId,
+    required List<String> chapterIdsInOrder,
+  });
+
+  /// Removes a lesson from a group
+  Future<Result<void>> removeLessonFromGroup({
+    required String contentId,
+    required String groupId,
   });
 }

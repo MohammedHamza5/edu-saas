@@ -6,12 +6,15 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../domain/entities/library_video_entity.dart';
 import '../../domain/entities/video_folder_entity.dart';
 
+import '../utils/folder_color_palette.dart';
+
 class VideoBankFolderCard extends StatefulWidget {
   final VideoFolderEntity folder;
   final VoidCallback onOpen;
   final VoidCallback onRename;
   final VoidCallback onDelete;
   final VoidCallback? onAssignAsChapter;
+  final VoidCallback? onChangeColor;
 
   const VideoBankFolderCard({
     super.key,
@@ -20,6 +23,7 @@ class VideoBankFolderCard extends StatefulWidget {
     required this.onRename,
     required this.onDelete,
     this.onAssignAsChapter,
+    this.onChangeColor,
   });
 
   @override
@@ -29,11 +33,25 @@ class VideoBankFolderCard extends StatefulWidget {
 class _VideoBankFolderCardState extends State<VideoBankFolderCard> {
   bool _isHovered = false;
 
+  String _formatDuration(BuildContext context, int totalSecs) {
+    final l10n = context.l10n;
+    final hours = totalSecs ~/ 3600;
+    final minutes = (totalSecs % 3600) ~/ 60;
+    if (hours > 0) {
+      return l10n.folderDurationBadge(hours, minutes);
+    } else if (minutes > 0) {
+      return l10n.folderDurationMinutesOnly(minutes);
+    }
+    return '';
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final f = widget.folder;
+    final folderColor = FolderColorPalette.getFolderColor(f.color);
+    final isCustomColor = f.color != null && f.color!.isNotEmpty;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
@@ -45,15 +63,17 @@ class _VideoBankFolderCardState extends State<VideoBankFolderCard> {
           borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
           border: Border.all(
             color: _isHovered
-                ? Colors.amber.shade700.withValues(alpha: 0.5)
-                : AppColors.border,
-            width: _isHovered ? 1.5 : 1,
+                ? folderColor.withValues(alpha: 0.75)
+                : isCustomColor
+                    ? folderColor.withValues(alpha: 0.35)
+                    : AppColors.border,
+            width: _isHovered ? 1.5 : (isCustomColor ? 1.2 : 1),
           ),
           boxShadow: _isHovered
               ? [
                   BoxShadow(
-                    color: Colors.amber.shade700.withValues(alpha: 0.1),
-                    blurRadius: 10,
+                    color: folderColor.withValues(alpha: 0.15),
+                    blurRadius: 12,
                     offset: const Offset(0, 3),
                   ),
                 ]
@@ -69,19 +89,24 @@ class _VideoBankFolderCardState extends State<VideoBankFolderCard> {
           onTap: widget.onOpen,
           borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 // Folder Icon
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: Colors.amber.shade50,
+                    color: folderColor.withValues(alpha: 0.14),
                     borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: folderColor.withValues(alpha: 0.28),
+                      width: 1,
+                    ),
                   ),
                   child: Icon(
                     Icons.folder_rounded,
-                    color: Colors.amber.shade700,
+                    color: folderColor,
                     size: 28,
                   ),
                 ),
@@ -101,7 +126,7 @@ class _VideoBankFolderCardState extends State<VideoBankFolderCard> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: 3),
                       Row(
                         children: [
                           Flexible(
@@ -132,6 +157,164 @@ class _VideoBankFolderCardState extends State<VideoBankFolderCard> {
                               ),
                             ),
                           ],
+                          if (f.totalDurationSeconds > 0) ...[
+                            const Text(
+                              ' • ',
+                              style: TextStyle(color: AppColors.textMuted),
+                            ),
+                            Flexible(
+                              child: Text(
+                                _formatDuration(context, f.totalDurationSeconds),
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: AppColors.primaryLight,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+
+                      // Badges: Course Assignment + Readiness
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 4,
+                        children: [
+                          // Course Assignment Badge
+                          if (f.isAssigned)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.school_rounded,
+                                    size: 11,
+                                    color: AppColors.primaryLight,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Flexible(
+                                    child: Text(
+                                      l10n.folderAssignedToCourse(
+                                        f.primaryAssignedGroupName ?? '',
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
+                                      style: const TextStyle(
+                                        fontSize: 10,
+                                        color: AppColors.primaryLight,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          else
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.surfaceVariant.withValues(alpha: 0.6),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                l10n.folderNotAssignedYet,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  color: AppColors.textMuted,
+                                ),
+                              ),
+                            ),
+
+                          // Readiness indicator (only if folder has videos)
+                          if (f.hasVideos) ...[
+                            if (f.allVideosReady)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.success.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.check_circle_rounded,
+                                      size: 10,
+                                      color: AppColors.success,
+                                    ),
+                                    const SizedBox(width: 3),
+                                    Flexible(
+                                      child: Text(
+                                        l10n.folderAllVideosReady,
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 1,
+                                        style: const TextStyle(
+                                          fontSize: 10,
+                                          color: AppColors.success,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            else if (f.hasPendingVideos)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.warning.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.sync_rounded,
+                                      size: 10,
+                                      color: AppColors.warning,
+                                    ),
+                                    const SizedBox(width: 3),
+                                    Flexible(
+                                      child: Text(
+                                        l10n.folderVideosProcessing(
+                                          f.videoCount - f.readyVideoCount,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 1,
+                                        style: const TextStyle(
+                                          fontSize: 10,
+                                          color: AppColors.warning,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          ],
                         ],
                       ),
                     ],
@@ -148,6 +331,7 @@ class _VideoBankFolderCardState extends State<VideoBankFolderCard> {
                   onSelected: (val) {
                     if (val == 'open') widget.onOpen();
                     if (val == 'assign_chapter') widget.onAssignAsChapter?.call();
+                    if (val == 'change_color') widget.onChangeColor?.call();
                     if (val == 'rename') widget.onRename();
                     if (val == 'delete') widget.onDelete();
                   },
@@ -180,6 +364,21 @@ class _VideoBankFolderCardState extends State<VideoBankFolderCard> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
+                          ],
+                        ),
+                      ),
+                    if (widget.onChangeColor != null)
+                      PopupMenuItem(
+                        value: 'change_color',
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.palette_rounded,
+                              size: 16,
+                              color: folderColor,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(l10n.changeFolderColor),
                           ],
                         ),
                       ),

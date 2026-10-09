@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/network/supabase_service.dart';
 import '../../../../core/utils/group_slug_resolver.dart';
 import '../../../notifications/domain/services/notification_dispatcher.dart';
+import '../../domain/entities/chapter_entity.dart';
 import '../../domain/entities/content_entity.dart';
 import '../models/content_model.dart';
 import '../models/file_attachment_model.dart';
@@ -86,6 +87,12 @@ abstract interface class ContentRemoteDataSource {
     List<Map<String, dynamic>>? groupConfigs,
   });
 
+  /// Atomically assigns multiple content items/videos to a group in one transaction
+  Future<void> assignBatchContentToGroup({
+    required String groupId,
+    required List<Map<String, dynamic>> items,
+  });
+
   /// Links a quiz/exam to a lesson unit
   Future<void> linkLessonExam({
     required String contentId,
@@ -129,6 +136,56 @@ abstract interface class ContentRemoteDataSource {
     required List<int> fileBytes,
     required String storagePath,
   });
+
+  /// Fetches chapters belonging to a group ordered by sort_order
+  Future<List<ChapterEntity>> getGroupChapters(String groupId);
+
+  /// Creates a new chapter for a group
+  Future<ChapterEntity> createChapter({
+    required String groupId,
+    required String title,
+    bool isPublished = true,
+  });
+
+  /// Toggles visibility of a chapter (published/draft)
+  Future<void> toggleChapterVisibility({
+    required String chapterId,
+    required bool isPublished,
+  });
+
+  /// Renames / updates an existing chapter
+  Future<void> updateChapter({
+    required String chapterId,
+    required String title,
+  });
+
+  /// Deletes a chapter (unlinks its lessons to general)
+  Future<void> deleteChapter(String chapterId);
+
+  /// Assigns or unassigns a lesson to/from a chapter
+  Future<void> setLessonChapter({
+    required String contentId,
+    required String groupId,
+    String? chapterId,
+  });
+
+  /// Reorders lessons within a chapter or course
+  Future<void> reorderChapterLessons({
+    required String groupId,
+    required List<String> contentIdsInOrder,
+  });
+
+  /// Reorders chapters within a course
+  Future<void> reorderCourseChapters({
+    required String groupId,
+    required List<String> chapterIdsInOrder,
+  });
+
+  /// Removes a lesson from a group (without deleting underlying central asset)
+  Future<void> removeLessonFromGroup({
+    required String contentId,
+    required String groupId,
+  });
 }
 
 class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
@@ -150,10 +207,11 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     final junctionRes = await _safeClient
         .from('content_groups')
         .select(
-          'content_id, file_id, associated_exam_id, prerequisite_exam_id, sort_order, custom_title, is_published, '
+          'content_id, file_id, associated_exam_id, prerequisite_exam_id, sort_order, custom_title, is_published, chapter_id, '
           'file:files!content_groups_file_id_fkey(*), '
           'associated_exam:exams!content_groups_associated_exam_id_fkey(id, title, content:content!exams_content_id_fkey(title)), '
-          'prerequisite_exam:exams!content_groups_prerequisite_exam_id_fkey(id, title, passing_score, content:content!exams_content_id_fkey(title))',
+          'prerequisite_exam:exams!content_groups_prerequisite_exam_id_fkey(id, title, passing_score, content:content!exams_content_id_fkey(title)), '
+          'chapter:chapters!content_groups_chapter_id_fkey(id, title, sort_order)',
         )
         .eq('group_id', resolvedGroupId);
 
@@ -259,6 +317,17 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
           isPublishedInGroup = cfg['is_published'] == true;
         }
 
+        String? chapterId = cfg['chapter_id'] as String?;
+        String? chapterTitle;
+        int? chapterSortOrder;
+        if (chapterId != null) {
+          final chapObj = cfg['chapter'] as Map<String, dynamic>?;
+          if (chapObj != null) {
+            chapterTitle = chapObj['title'] as String?;
+            chapterSortOrder = (chapObj['sort_order'] as num?)?.toInt();
+          }
+        }
+
         models[i] = m.copyWith(
           title: title,
           file: customFile,
@@ -269,11 +338,22 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
           prerequisitePassingScore: prereqPassingScore,
           sortOrder: sortOrder,
           isPublishedInGroup: isPublishedInGroup,
+          chapterId: chapterId,
+          chapterTitle: chapterTitle,
+          chapterSortOrder: chapterSortOrder,
         );
       }
     }
 
     models.sort((a, b) {
+      if (a.chapterSortOrder != null && b.chapterSortOrder != null) {
+        final c = a.chapterSortOrder!.compareTo(b.chapterSortOrder!);
+        if (c != 0) return c;
+      } else if (a.chapterSortOrder != null && b.chapterSortOrder == null) {
+        return -1;
+      } else if (a.chapterSortOrder == null && b.chapterSortOrder != null) {
+        return 1;
+      }
       final s = a.sortOrder.compareTo(b.sortOrder);
       if (s != 0) return s;
       return a.createdAt.compareTo(b.createdAt);
@@ -1175,6 +1255,21 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
   }
 
   @override
+  Future<void> assignBatchContentToGroup({
+    required String groupId,
+    required List<Map<String, dynamic>> items,
+  }) async {
+    final resolvedGroupId = GroupSlugResolver.toId(groupId);
+    await _safeClient.rpc<void>(
+      'assign_batch_content_to_group',
+      params: {
+        'p_group_id': resolvedGroupId,
+        'p_items': items,
+      },
+    );
+  }
+
+  @override
   Future<void> linkLessonExam({
     required String contentId,
     required String examId,
@@ -1263,6 +1358,149 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     await _safeClient.rpc<void>(
       'toggle_group_all_content_visibility',
       params: {'p_group_id': resolvedGroupId, 'p_is_published': isPublished},
+    );
+  }
+
+  @override
+  Future<List<ChapterEntity>> getGroupChapters(String groupId) async {
+    final resolvedGroupId = GroupSlugResolver.toId(groupId);
+    final response = await _safeClient
+        .from('chapters')
+        .select()
+        .eq('group_id', resolvedGroupId)
+        .order('sort_order', ascending: true)
+        .order('created_at', ascending: true);
+
+    return (response as List<dynamic>)
+        .map((json) => ChapterEntity.fromJson(json as Map<String, dynamic>))
+        .toList();
+  }
+
+  @override
+  Future<ChapterEntity> createChapter({
+    required String groupId,
+    required String title,
+    bool isPublished = true,
+  }) async {
+    final resolvedGroupId = GroupSlugResolver.toId(groupId);
+    final res = await _safeClient.rpc<dynamic>(
+      'create_chapter',
+      params: {
+        'p_group_id': resolvedGroupId,
+        'p_title': title.trim(),
+        'p_is_published': isPublished,
+      },
+    );
+
+    final map = res is Map<String, dynamic>
+        ? res
+        : Map<String, dynamic>.from(res as Map);
+    return ChapterEntity(
+      id: map['id'] as String? ?? '',
+      title: map['title'] as String? ?? title.trim(),
+      sortOrder: (map['sort_order'] as num?)?.toInt() ?? 0,
+      isPublished: (map['is_published'] as bool?) ?? isPublished,
+    );
+  }
+
+  @override
+  Future<void> toggleChapterVisibility({
+    required String chapterId,
+    required bool isPublished,
+  }) async {
+    await _safeClient.rpc<void>(
+      'toggle_chapter_visibility',
+      params: {
+        'p_chapter_id': chapterId,
+        'p_is_published': isPublished,
+      },
+    );
+  }
+
+  @override
+  Future<void> updateChapter({
+    required String chapterId,
+    required String title,
+  }) async {
+    await _safeClient.rpc<void>(
+      'update_chapter',
+      params: {
+        'p_chapter_id': chapterId,
+        'p_title': title.trim(),
+      },
+    );
+  }
+
+  @override
+  Future<void> deleteChapter(String chapterId) async {
+    await _safeClient.rpc<void>(
+      'delete_chapter',
+      params: {
+        'p_chapter_id': chapterId,
+      },
+    );
+  }
+
+  @override
+  Future<void> setLessonChapter({
+    required String contentId,
+    required String groupId,
+    String? chapterId,
+  }) async {
+    final resolvedGroupId = GroupSlugResolver.toId(groupId);
+    await _safeClient.rpc<void>(
+      'set_lesson_chapter',
+      params: {
+        'p_content_id': contentId,
+        'p_group_id': resolvedGroupId,
+        if (chapterId != null && chapterId.isNotEmpty)
+          'p_chapter_id': chapterId,
+      },
+    );
+  }
+
+  @override
+  Future<void> reorderChapterLessons({
+    required String groupId,
+    required List<String> contentIdsInOrder,
+  }) async {
+    final resolvedGroupId = GroupSlugResolver.toId(groupId);
+    await _safeClient.rpc<void>(
+      'reorder_chapter_lessons',
+      params: {
+        'p_group_id': resolvedGroupId,
+        'p_content_ids': contentIdsInOrder,
+      },
+    );
+  }
+
+  @override
+  Future<void> reorderCourseChapters({
+    required String groupId,
+    required List<String> chapterIdsInOrder,
+  }) async {
+    final resolvedGroupId = GroupSlugResolver.toId(groupId);
+    await _safeClient.rpc<void>(
+      'reorder_course_chapters',
+      params: {
+        'p_group_id': resolvedGroupId,
+        'p_chapter_ids': chapterIdsInOrder,
+      },
+    );
+  }
+
+  @override
+  Future<void> removeLessonFromGroup({
+    required String contentId,
+    required String groupId,
+  }) async {
+    final resolvedGroupId = GroupSlugResolver.toId(groupId);
+    await _safeClient.rpc<void>(
+      'remove_lesson_from_group',
+      params: {
+        'p_content_id': contentId,
+        'p_group_id': resolvedGroupId,
+      },
     );
   }
 }

@@ -196,6 +196,7 @@ class VideoBankCubit extends Cubit<VideoBankState> {
           breadcrumbs: currentTrail,
           folders: cached.folders,
           videos: cached.videos,
+          searchQuery: '',
           isActionLoading: false,
         ),
       );
@@ -215,6 +216,7 @@ class VideoBankCubit extends Cubit<VideoBankState> {
           breadcrumbs: currentTrail,
           folders: const [],
           videos: const [],
+          searchQuery: '',
           isActionLoading: true,
         ),
       );
@@ -341,22 +343,42 @@ class VideoBankCubit extends Cubit<VideoBankState> {
 
     emit(prev.copyWith(searchQuery: trimmed, isActionLoading: true));
 
+    // Ensure all folders are cached for folder search
+    if (_cachedAllFolders.isEmpty) {
+      final allFoldersRes = await _repository.getAllFolders();
+      if (allFoldersRes.isSuccess) {
+        _cachedAllFolders = allFoldersRes.data;
+      }
+    }
+
+    final queryLower = trimmed.toLowerCase();
+    final matchingFolders = _cachedAllFolders
+        .where((f) => f.name.toLowerCase().contains(queryLower))
+        .toList();
+
     final searchRes = await _repository.getVideos(search: trimmed);
     if (searchRes.isSuccess) {
       emit(
         prev.copyWith(
           searchQuery: trimmed,
           videos: searchRes.data,
+          folders: matchingFolders,
           isActionLoading: false,
         ),
       );
     } else {
-      emit(prev.copyWith(isActionLoading: false));
+      emit(
+        prev.copyWith(
+          searchQuery: trimmed,
+          folders: matchingFolders,
+          isActionLoading: false,
+        ),
+      );
     }
   }
 
   /// Create folder with optimistic instant UI update (zero screen reload)
-  Future<bool> createFolder(String name) async {
+  Future<bool> createFolder(String name, {String? color}) async {
     final prev = currentLoadedState;
     if (prev == null) return false;
 
@@ -364,6 +386,7 @@ class VideoBankCubit extends Cubit<VideoBankState> {
     final result = await _repository.createFolder(
       name: name,
       parentId: prev.currentFolder?.id,
+      color: color,
     );
 
     if (result.isSuccess) {
@@ -407,15 +430,9 @@ class VideoBankCubit extends Cubit<VideoBankState> {
     // Optimistically update
     final updatedFolders = prev.folders.map((f) {
       if (f.id == folderId) {
-        return VideoFolderEntity(
-          id: f.id,
-          tenantId: f.tenantId,
-          parentId: f.parentId,
+        return f.copyWith(
           name: newName.trim(),
-          createdAt: f.createdAt,
           updatedAt: DateTime.now(),
-          videoCount: f.videoCount,
-          subfolderCount: f.subfolderCount,
         );
       }
       return f;
@@ -437,6 +454,43 @@ class VideoBankCubit extends Cubit<VideoBankState> {
       emit(
         VideoBankError(
           result.failureOrNull?.message ?? 'Failed to rename folder',
+          code: result.failureOrNull?.code,
+          lastLoaded: prev.copyWith(isActionLoading: false),
+        ),
+      );
+      return false;
+    }
+  }
+
+  /// Update folder color with optimistic UI update
+  Future<bool> updateFolderColor(String folderId, String? color) async {
+    final prev = currentLoadedState;
+    if (prev == null) return false;
+
+    final updatedFolders = prev.folders.map((f) {
+      if (f.id == folderId) {
+        return f.copyWith(color: color);
+      }
+      return f;
+    }).toList();
+
+    _cache[prev.currentFolder?.id] = (
+      folders: updatedFolders,
+      videos: prev.videos,
+    );
+
+    emit(prev.copyWith(folders: updatedFolders, isActionLoading: true));
+    final result =
+        await _repository.updateFolderColor(id: folderId, color: color);
+
+    if (result.isSuccess) {
+      emit(prev.copyWith(folders: updatedFolders, isActionLoading: false));
+      unawaited(_silentRefresh(prev.currentFolder?.id, prev.breadcrumbs));
+      return true;
+    } else {
+      emit(
+        VideoBankError(
+          result.failureOrNull?.message ?? 'Failed to update folder color',
           code: result.failureOrNull?.code,
           lastLoaded: prev.copyWith(isActionLoading: false),
         ),

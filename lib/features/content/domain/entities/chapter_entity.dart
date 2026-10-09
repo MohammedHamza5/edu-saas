@@ -7,6 +7,7 @@ class ChapterEntity extends Equatable {
   final String? description;
   final int sortOrder;
   final String? sourceFolderId;
+  final bool isPublished;
   final DateTime? createdAt;
 
   const ChapterEntity({
@@ -15,6 +16,7 @@ class ChapterEntity extends Equatable {
     this.description,
     this.sortOrder = 0,
     this.sourceFolderId,
+    this.isPublished = true,
     this.createdAt,
   });
 
@@ -25,6 +27,7 @@ class ChapterEntity extends Equatable {
       description: json['description'] as String?,
       sortOrder: (json['sort_order'] as num?)?.toInt() ?? 0,
       sourceFolderId: json['source_folder_id'] as String?,
+      isPublished: (json['is_published'] as bool?) ?? true,
       createdAt: json['created_at'] != null
           ? DateTime.tryParse(json['created_at'] as String)
           : null,
@@ -38,6 +41,7 @@ class ChapterEntity extends Equatable {
       if (description != null) 'description': description,
       'sort_order': sortOrder,
       if (sourceFolderId != null) 'source_folder_id': sourceFolderId,
+      'is_published': isPublished,
       if (createdAt != null) 'created_at': createdAt!.toIso8601String(),
     };
   }
@@ -48,6 +52,7 @@ class ChapterEntity extends Equatable {
     String? description,
     int? sortOrder,
     String? sourceFolderId,
+    bool? isPublished,
     DateTime? createdAt,
   }) {
     return ChapterEntity(
@@ -56,6 +61,7 @@ class ChapterEntity extends Equatable {
       description: description ?? this.description,
       sortOrder: sortOrder ?? this.sortOrder,
       sourceFolderId: sourceFolderId ?? this.sourceFolderId,
+      isPublished: isPublished ?? this.isPublished,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -67,6 +73,7 @@ class ChapterEntity extends Equatable {
         description,
         sortOrder,
         sourceFolderId,
+        isPublished,
         createdAt,
       ];
 }

@@ -12,23 +12,29 @@ import '../../domain/entities/content_entity.dart';
 import '../cubit/content_cubit.dart';
 import '../cubit/content_state.dart';
 import '../widgets/lesson_editor_pane.dart';
+import '../widgets/lesson_studio_workspace.dart';
 
 /// Full-page dedicated workspace for a single Lesson/Lecture in the Course Builder.
 ///
 /// Provides:
 /// 1. Top Breadcrumb & Back to Syllabus navigation (`← العودة للمنهج`).
-/// 2. Tab 1: Comprehensive Lesson Editor (Video, Title, PDF Handout, Quiz, Gating).
-/// 3. Tab 2: 100% Real Live Analytics from Supabase (Zero mock/fake numbers).
+/// 2. Full-Screen Studio Workspace when creating new lectures (Batch + Single).
+/// 3. Tab 1: Comprehensive Lesson Editor when editing an existing lesson.
+/// 4. Tab 2: 100% Real Live Analytics from Supabase (Zero mock/fake numbers).
 class TeacherLessonDetailsPage extends StatefulWidget {
   final String groupId;
   final String lessonId; // Can be a UUID or 'new'
   final String? groupName;
+  final String? initialChapterId;
+  final String? initialTab;
 
   const TeacherLessonDetailsPage({
     super.key,
     required this.groupId,
     required this.lessonId,
     this.groupName,
+    this.initialChapterId,
+    this.initialTab,
   });
 
   @override
@@ -52,7 +58,12 @@ class _TeacherLessonDetailsPageState extends State<TeacherLessonDetailsPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    final initialIndex = widget.initialTab == 'analytics' ? 1 : 0;
+    _tabController = TabController(
+      length: 2,
+      vsync: this,
+      initialIndex: initialIndex,
+    );
     _loadLessonData();
   }
 
@@ -73,8 +84,9 @@ class _TeacherLessonDetailsPageState extends State<TeacherLessonDetailsPage>
       _averageQuizScore = null;
       try {
         final cubit = context.read<ContentCubit>();
-        if (cubit.state is! ContentLoaded) {
-          await cubit.loadGroupContent(widget.groupId);
+        if (cubit.state is! ContentLoaded ||
+            (cubit.state as ContentLoaded).chapters.isEmpty) {
+          await cubit.loadGroupContent(widget.groupId, forceRefresh: true);
         }
       } catch (_) {}
       if (mounted) setState(() => _isLoading = false);
@@ -205,9 +217,21 @@ class _TeacherLessonDetailsPageState extends State<TeacherLessonDetailsPage>
       );
     }
 
-    final displayHeaderTitle = isNew
-        ? l10n.lessonEditorAddTitle
-        : '${widget.groupName ?? ""} / ${_lesson?.title ?? l10n.lessonDetails}';
+    if (isNew) {
+      return Scaffold(
+        backgroundColor: AppColors.background,
+        body: LessonStudioWorkspace(
+          groupId: widget.groupId,
+          groupName: widget.groupName ?? '',
+          initialChapterId: widget.initialChapterId,
+          onSaved: _navigateBack,
+          onCancel: _navigateBack,
+        ),
+      );
+    }
+
+    final displayHeaderTitle =
+        '${widget.groupName ?? ""} / ${_lesson?.title ?? l10n.lessonDetails}';
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -336,10 +360,10 @@ class _TeacherLessonDetailsPageState extends State<TeacherLessonDetailsPage>
               tabs: [
                 Tab(
                   icon: const Icon(Icons.edit_note_rounded, size: 18),
-                  text: l10n.lessonDetails,
+                  text: l10n.editLessonTitle,
                 ),
                 Tab(
-                  icon: const Icon(Icons.analytics_rounded, size: 18),
+                  icon: const Icon(Icons.insights_rounded, size: 18),
                   text: l10n.lessonAnalytics,
                 ),
               ],
@@ -351,35 +375,27 @@ class _TeacherLessonDetailsPageState extends State<TeacherLessonDetailsPage>
             child: TabBarView(
               controller: _tabController,
               children: [
-                // Tab 1: Full-Page Lesson Editor
-                Padding(
-                  padding: const EdgeInsets.all(AppSpacing.s20),
-                  child: Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 900),
-                      child: LessonEditorPane(
-                        editingLesson: _lesson,
-                        groupId: widget.groupId,
-                        groupName: widget.groupName ?? '',
-                        defaultPassingScore: 70,
-                        onSaved: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(l10n.contentUpdatedToast),
-                              backgroundColor: AppColors.success,
-                            ),
-                          );
-                          if (isNew) {
-                            _navigateBack();
-                          } else {
-                            _loadLessonData();
-                          }
-                        },
-                        onCancel: _navigateBack,
-                        onClose: _navigateBack,
+                // Tab 1: Full-Page Modern Lesson Editor
+                LessonEditorPane(
+                  editingLesson: _lesson,
+                  groupId: widget.groupId,
+                  groupName: widget.groupName ?? '',
+                  defaultPassingScore: 70,
+                  onSaved: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(l10n.contentUpdatedToast),
+                        backgroundColor: AppColors.success,
                       ),
-                    ),
-                  ),
+                    );
+                    if (isNew) {
+                      _navigateBack();
+                    } else {
+                      _loadLessonData();
+                    }
+                  },
+                  onCancel: _navigateBack,
+                  onClose: _navigateBack,
                 ),
 
                 // Tab 2: Analytics & Student Progress (100% Real Supabase Data)

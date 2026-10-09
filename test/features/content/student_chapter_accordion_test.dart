@@ -88,7 +88,7 @@ void main() {
 
       // Verify Chapter title & number
       expect(find.text('الفصل الأول: الجبر'), findsOneWidget);
-      expect(find.text('1'), findsOneWidget);
+      expect(find.text('01'), findsOneWidget);
 
       // Verify Lesson titles inside expanded accordion
       expect(find.text('المحاضرة 1: مقدمة الجبر'), findsOneWidget);

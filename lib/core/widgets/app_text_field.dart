@@ -19,6 +19,7 @@ class AppTextField extends StatefulWidget {
   final bool autofocus;
   final TextInputAction? textInputAction;
   final ValueChanged<String>? onFieldSubmitted;
+  final bool? isDense;
 
   const AppTextField({
     super.key,
@@ -39,6 +40,7 @@ class AppTextField extends StatefulWidget {
     this.autofocus = false,
     this.textInputAction,
     this.onFieldSubmitted,
+    this.isDense,
   });
 
   @override

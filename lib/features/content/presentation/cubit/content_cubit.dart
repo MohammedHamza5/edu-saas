@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/errors/result.dart';
 import '../../../../core/utils/cache_manager.dart';
+import '../../domain/entities/chapter_entity.dart';
 import '../../domain/entities/content_entity.dart';
 import '../../domain/repositories/content_repository.dart';
 import 'content_state.dart';
@@ -30,40 +31,60 @@ class ContentCubit extends Cubit<ContentState> {
     _currentPage = 0;
     _isStudent = isStudent;
     final cacheKey = '${groupId}_${statusFilter?.name ?? 'all'}_$isStudent';
+    final chaptersKey = '${groupId}_chapters';
 
     if (forceRefresh) {
       AppCache.content.invalidatePrefix(groupId);
     } else {
       // ── Stale-While-Revalidate: Instant display from memory cache ──────────
       final cached = AppCache.content.getStale(cacheKey);
+      final cachedChapters =
+          AppCache.content.getStale(chaptersKey) as List<ChapterEntity>?;
       if (cached is List<ContentEntity>) {
         emit(
           ContentLoaded(
             items: cached,
+            chapters: cachedChapters ?? const [],
             activeFilter: statusFilter,
             hasMore: cached.length >= _pageSize,
           ),
         );
-        if (AppCache.content.has(cacheKey)) return; // Fresh cache, skip network
+        if (AppCache.content.has(cacheKey) &&
+            cachedChapters != null &&
+            AppCache.content.has(chaptersKey)) {
+          return; // Fresh cache for both content and chapters, skip network
+        }
       } else {
         emit(const ContentLoading());
       }
     }
 
     final filter = isStudent ? ContentStatus.published : statusFilter;
-    final result = await _repository.getGroupContent(
+    final contentFuture = _repository.getGroupContent(
       groupId: groupId,
       statusFilter: filter,
       page: 0,
       pageSize: _pageSize,
     );
+    final chaptersFuture = _repository.getGroupChapters(groupId);
 
-    switch (result) {
+    final results = await Future.wait([contentFuture, chaptersFuture]);
+    final contentRes = results[0] as Result<List<ContentEntity>>;
+    final chaptersRes = results[1] as Result<List<ChapterEntity>>;
+
+    List<ChapterEntity> chapters = [];
+    if (chaptersRes is Success<List<ChapterEntity>>) {
+      chapters = chaptersRes.data;
+      AppCache.content.put(chaptersKey, chapters);
+    }
+
+    switch (contentRes) {
       case Success(:final data):
         AppCache.content.put(cacheKey, data);
         emit(
           ContentLoaded(
             items: data,
+            chapters: chapters,
             activeFilter: statusFilter,
             hasMore: data.length == _pageSize,
             isLoadingMore: false,
@@ -251,6 +272,24 @@ class ContentCubit extends Cubit<ContentState> {
         } else {
           await loadCentralVideoBank(forceRefresh: true);
         }
+        return true;
+      case FailureResult(:final failure):
+        emit(ContentError(failure.message));
+        return false;
+    }
+  }
+
+  Future<bool> assignBatchContentToGroup({
+    required String groupId,
+    required List<Map<String, dynamic>> items,
+  }) async {
+    final result = await _repository.assignBatchContentToGroup(
+      groupId: groupId,
+      items: items,
+    );
+    switch (result) {
+      case Success():
+        await loadGroupContent(groupId, forceRefresh: true);
         return true;
       case FailureResult(:final failure):
         emit(ContentError(failure.message));
@@ -547,6 +586,151 @@ class ContentCubit extends Cubit<ContentState> {
         if (targetGroupId == _currentGroupId) {
           await loadGroupContent(targetGroupId, forceRefresh: true);
         }
+        return false;
+    }
+  }
+
+  bool _isCreatingChapter = false;
+
+  /// Creates a new chapter for the active group
+  Future<ChapterEntity?> createChapter({
+    required String groupId,
+    required String title,
+    bool isPublished = true,
+  }) async {
+    if (_isCreatingChapter) return null;
+    _isCreatingChapter = true;
+    try {
+      final result = await _repository.createChapter(
+        groupId: groupId,
+        title: title,
+        isPublished: isPublished,
+      );
+      switch (result) {
+        case Success(:final data):
+          await loadGroupContent(groupId, forceRefresh: true);
+          return data;
+        case FailureResult(:final failure):
+          emit(ContentError(failure.message));
+          return null;
+      }
+    } finally {
+      _isCreatingChapter = false;
+    }
+  }
+
+  /// Toggles chapter visibility (published/draft)
+  Future<bool> toggleChapterVisibility({
+    required String chapterId,
+    required bool isPublished,
+  }) async {
+    final result = await _repository.toggleChapterVisibility(
+      chapterId: chapterId,
+      isPublished: isPublished,
+    );
+    switch (result) {
+      case Success():
+        if (_currentGroupId != null) {
+          await loadGroupContent(_currentGroupId!, forceRefresh: true);
+        }
+        return true;
+      case FailureResult(:final failure):
+        emit(ContentError(failure.message));
+        return false;
+    }
+  }
+
+  /// Renames an existing chapter
+  Future<bool> updateChapter({
+    required String chapterId,
+    required String title,
+  }) async {
+    final result = await _repository.updateChapter(
+      chapterId: chapterId,
+      title: title,
+    );
+    switch (result) {
+      case Success():
+        if (_currentGroupId != null) {
+          await loadGroupContent(_currentGroupId!, forceRefresh: true);
+        }
+        return true;
+      case FailureResult(:final failure):
+        emit(ContentError(failure.message));
+        return false;
+    }
+  }
+
+  /// Deletes a chapter (unlinks its lessons back to general)
+  Future<bool> deleteChapter(String chapterId) async {
+    final result = await _repository.deleteChapter(chapterId);
+    switch (result) {
+      case Success():
+        if (_currentGroupId != null) {
+          await loadGroupContent(_currentGroupId!, forceRefresh: true);
+        }
+        return true;
+      case FailureResult(:final failure):
+        emit(ContentError(failure.message));
+        return false;
+    }
+  }
+
+  /// Assigns or unassigns a lesson to a chapter
+  Future<bool> setLessonChapter({
+    required String contentId,
+    required String groupId,
+    String? chapterId,
+  }) async {
+    final result = await _repository.setLessonChapter(
+      contentId: contentId,
+      groupId: groupId,
+      chapterId: chapterId,
+    );
+    switch (result) {
+      case Success():
+        await loadGroupContent(groupId, forceRefresh: true);
+        return true;
+      case FailureResult(:final failure):
+        emit(ContentError(failure.message));
+        return false;
+    }
+  }
+
+  /// Removes a lesson from a group
+  Future<bool> removeLessonFromGroup({
+    required String contentId,
+    required String groupId,
+  }) async {
+    final result = await _repository.removeLessonFromGroup(
+      contentId: contentId,
+      groupId: groupId,
+    );
+    switch (result) {
+      case Success():
+        await loadGroupContent(groupId, forceRefresh: true);
+        return true;
+      case FailureResult(:final failure):
+        emit(ContentError(failure.message));
+        return false;
+    }
+  }
+
+  /// Reorders lessons within a chapter
+  Future<bool> reorderChapterLessons({
+    required String groupId,
+    required List<String> contentIdsInOrder,
+  }) async {
+    final result = await _repository.reorderChapterLessons(
+      groupId: groupId,
+      contentIdsInOrder: contentIdsInOrder,
+    );
+    switch (result) {
+      case Success():
+        await loadGroupContent(groupId, forceRefresh: true);
+        return true;
+      case FailureResult(:final failure):
+        emit(ContentError(failure.message));
         return false;
     }
   }

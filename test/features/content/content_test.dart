@@ -7,6 +7,7 @@ import 'package:edu_saas/core/theme/app_theme.dart';
 import 'package:edu_saas/core/utils/cache_manager.dart';
 import 'package:edu_saas/features/content/data/models/content_model.dart';
 import 'package:edu_saas/features/content/data/models/file_attachment_model.dart';
+import 'package:edu_saas/features/content/domain/entities/chapter_entity.dart';
 import 'package:edu_saas/features/content/domain/entities/content_entity.dart';
 import 'package:edu_saas/features/content/domain/entities/file_attachment_entity.dart';
 import 'package:edu_saas/features/content/domain/repositories/content_repository.dart';
@@ -266,6 +267,17 @@ class _FakeContentRepository implements ContentRepository {
   }
 
   @override
+  Future<Result<void>> assignBatchContentToGroup({
+    required String groupId,
+    required List<Map<String, dynamic>> items,
+  }) async {
+    if (shouldFail) {
+      return const FailureResult(ServerFailure('Failed to assign batch'));
+    }
+    return const Success(null);
+  }
+
+  @override
   Future<Result<void>> linkLessonExam({
     required String contentId,
     required String examId,
@@ -323,6 +335,58 @@ class _FakeContentRepository implements ContentRepository {
     }
     return const Success('new-file-123');
   }
+
+  @override
+  Future<Result<List<ChapterEntity>>> getGroupChapters(String groupId) async =>
+      const Success([]);
+
+  @override
+  Future<Result<ChapterEntity>> createChapter({
+    required String groupId,
+    required String title,
+    bool isPublished = true,
+  }) async => throw UnimplementedError();
+
+  @override
+  Future<Result<void>> toggleChapterVisibility({
+    required String chapterId,
+    required bool isPublished,
+  }) async => const Success(null);
+
+  @override
+  Future<Result<void>> updateChapter({
+    required String chapterId,
+    required String title,
+  }) async => const Success(null);
+
+  @override
+  Future<Result<void>> deleteChapter(String chapterId) async =>
+      const Success(null);
+
+  @override
+  Future<Result<void>> setLessonChapter({
+    required String contentId,
+    required String groupId,
+    String? chapterId,
+  }) async => const Success(null);
+
+  @override
+  Future<Result<void>> reorderChapterLessons({
+    required String groupId,
+    required List<String> contentIdsInOrder,
+  }) async => const Success(null);
+
+  @override
+  Future<Result<void>> reorderCourseChapters({
+    required String groupId,
+    required List<String> chapterIdsInOrder,
+  }) async => const Success(null);
+
+  @override
+  Future<Result<void>> removeLessonFromGroup({
+    required String contentId,
+    required String groupId,
+  }) async => const Success(null);
 }
 
 void main() {

@@ -430,13 +430,26 @@ class AppRouter {
               final groupId = GroupSlugResolver.toId(rawGroupId);
               final lessonId = state.pathParameters['lessonId']!;
               final groupName = state.uri.queryParameters['name'];
+              final chapterId = state.uri.queryParameters['chapterId'];
+              final tab = state.uri.queryParameters['tab'];
               return NoTransitionPage(
-                child: BlocProvider(
-                  create: (_) => InjectionContainer.createContentCubit(),
+                child: MultiBlocProvider(
+                  providers: [
+                    BlocProvider(
+                      create: (_) => InjectionContainer.createContentCubit()
+                        ..loadGroupContent(groupId),
+                    ),
+                    BlocProvider(
+                      create: (_) =>
+                          InjectionContainer.createVideoBankCubit()..loadFolder(),
+                    ),
+                  ],
                   child: TeacherLessonDetailsPage(
                     groupId: groupId,
                     lessonId: lessonId,
                     groupName: groupName,
+                    initialChapterId: chapterId,
+                    initialTab: tab,
                   ),
                 ),
               );

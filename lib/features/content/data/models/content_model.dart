@@ -32,6 +32,9 @@ class ContentModel extends ContentEntity {
     super.videoProgressPercentage = 0.0,
     super.isExamPassed = false,
     super.isPublishedInGroup = true,
+    super.chapterId,
+    super.chapterTitle,
+    super.chapterSortOrder,
   });
 
   factory ContentModel.fromJson(Map<String, dynamic> json) {
@@ -155,6 +158,9 @@ class ContentModel extends ContentEntity {
           (json['video_progress_percentage'] as num?)?.toDouble() ?? 0.0,
       isExamPassed: json['is_exam_passed'] == true,
       isPublishedInGroup: isPublishedInGroup,
+      chapterId: json['chapter_id'] as String?,
+      chapterTitle: json['chapter_title'] as String?,
+      chapterSortOrder: (json['chapter_sort_order'] as num?)?.toInt(),
     );
   }
 
@@ -188,6 +194,9 @@ class ContentModel extends ContentEntity {
       videoProgressPercentage: entity.videoProgressPercentage,
       isExamPassed: entity.isExamPassed,
       isPublishedInGroup: entity.isPublishedInGroup,
+      chapterId: entity.chapterId,
+      chapterTitle: entity.chapterTitle,
+      chapterSortOrder: entity.chapterSortOrder,
     );
   }
 

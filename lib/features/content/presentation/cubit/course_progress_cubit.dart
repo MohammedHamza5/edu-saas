@@ -1,5 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/errors/result.dart';
+import '../../domain/entities/chapter_entity.dart';
+import '../../domain/entities/lesson_assignment_entity.dart';
 import '../../domain/repositories/content_repository.dart';
 import 'course_progress_state.dart';
 
@@ -21,14 +23,20 @@ class CourseProgressCubit extends Cubit<CourseProgressState> {
       emit(const CourseProgressLoading());
     }
 
-    final result = await _repository.getGroupCourseProgress(
+    final progressFuture = _repository.getGroupCourseProgress(
       groupId: groupId,
       studentId: studentId,
     );
+    final chaptersFuture = _repository.getGroupChapters(groupId);
 
-    switch (result) {
+    final results = await Future.wait([progressFuture, chaptersFuture]);
+    final progressResult = results[0] as Result<List<LessonAssignmentEntity>>;
+    final chaptersResult = results[1] as Result<List<ChapterEntity>>;
+
+    switch (progressResult) {
       case Success(:final data):
-        emit(CourseProgressLoaded(lessons: data));
+        final chapters = chaptersResult.dataOrNull ?? [];
+        emit(CourseProgressLoaded(lessons: data, chapters: chapters));
       case FailureResult(:final failure):
         emit(CourseProgressError(failure.message));
     }

@@ -10,11 +10,18 @@ abstract interface class VideoBankRepository {
   Future<Result<VideoFolderEntity>> createFolder({
     required String name,
     String? parentId,
+    String? color,
   });
 
   Future<Result<VideoFolderEntity>> updateFolder({
     required String id,
     required String name,
+    String? color,
+  });
+
+  Future<Result<VideoFolderEntity>> updateFolderColor({
+    required String id,
+    String? color,
   });
 
   Future<Result<void>> deleteFolder(String id);

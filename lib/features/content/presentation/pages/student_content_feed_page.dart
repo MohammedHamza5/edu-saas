@@ -17,6 +17,7 @@ import '../../../../core/widgets/app_loading_view.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/responsive_container.dart';
 import 'package:edu_saas/features/groups/domain/entities/group_entity.dart';
+import '../../domain/entities/chapter_entity.dart';
 import '../../domain/entities/content_entity.dart';
 import '../../domain/entities/file_attachment_entity.dart';
 import '../../domain/entities/lesson_assignment_entity.dart';
@@ -295,11 +296,24 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
 
   List<_ChapterBucket> _buildChapterBuckets(
     List<LessonAssignmentEntity> items,
+    List<ChapterEntity> allChapters,
     BuildContext context,
   ) {
     final Map<String, _ChapterBucket> map = {};
+
+    // 1. Pre-populate defined course chapters that are published
+    for (final ch in allChapters) {
+      if (!ch.isPublished) continue;
+      map[ch.id] = _ChapterBucket(
+        chapterId: ch.id,
+        title: ch.title,
+        sortOrder: ch.sortOrder,
+      );
+    }
+
     _ChapterBucket? generalBucket;
 
+    // 2. Distribute lessons into their corresponding chapters
     for (final item in items) {
       if (item.chapterId != null && item.chapterId!.isNotEmpty) {
         final id = item.chapterId!;
@@ -324,8 +338,11 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
       }
     }
 
-    final buckets = map.values.toList()
+    var buckets = map.values.toList()
       ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+
+    // Never show empty or WIP chapters to students — only chapters with actual published lessons appear
+    buckets = buckets.where((b) => b.lessons.isNotEmpty).toList();
 
     if (generalBucket != null) {
       buckets.add(generalBucket);
@@ -772,7 +789,7 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                         ),
 
                       // 4. Content Feed List or Empty State
-                      if (allPublished.isEmpty)
+                      if (allPublished.isEmpty && state.chapters.isEmpty)
                         SliverToBoxAdapter(
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 48),
@@ -786,7 +803,7 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                             ),
                           ),
                         )
-                      else if (items.isEmpty)
+                      else if (items.isEmpty && state.chapters.isEmpty)
                         SliverToBoxAdapter(
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 48),
@@ -816,10 +833,12 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                         )
                       else ...[
                         () {
-                          final hasChapters = items.any(
-                            (i) =>
-                                i.chapterId != null && i.chapterId!.isNotEmpty,
-                          );
+                          final hasChapters = state.chapters.isNotEmpty ||
+                              items.any(
+                                (i) =>
+                                    i.chapterId != null &&
+                                    i.chapterId!.isNotEmpty,
+                              );
 
                           if (!hasChapters) {
                             return SliverPadding(
@@ -858,7 +877,42 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                           }
 
                           // Option 1: Accordion View by Academic Chapters
-                          final buckets = _buildChapterBuckets(items, context);
+                          final buckets = _buildChapterBuckets(
+                            items,
+                            state.chapters,
+                            context,
+                          );
+
+                          if (buckets.isEmpty) {
+                            return SliverToBoxAdapter(
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 48),
+                                child: Center(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(
+                                        Icons.search_off_rounded,
+                                        size: 48,
+                                        color: AppColors.textMuted,
+                                      ),
+                                      const SizedBox(height: AppSpacing.s12),
+                                      Text(
+                                        context.l10n.noMatchingContentFound(
+                                          _searchQuery,
+                                        ),
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.textSecondary,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
 
                           // Manage auto-expansion for active chapter
                           if (_lastGroupIdForExpansion != _activeGroupId) {

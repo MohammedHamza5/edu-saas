@@ -5233,7 +5233,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get customPassingScore => 'Custom';
+  String get customPassingScore => 'Custom passing score (%)';
 
   @override
   String lessonAddedToCourse(String course) {
@@ -5277,6 +5277,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get videoPickerSearchHint => 'Search videos...';
+
+  @override
+  String get videoBankSearchHint => 'Search videos or folders...';
 
   @override
   String get videoAlreadyAddedToThisGroup => 'Already added to this group';
@@ -6863,7 +6866,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chapterTitleLabel => 'Chapter Title';
 
   @override
-  String get chapterTitleHint => 'e.g., Chapter 1: Basics of Algebra';
+  String get chapterTitleHint => 'e.g., Chapter 1: Functions & Graphs';
 
   @override
   String get assignFolderAsChapterConfirm => 'Confirm & Add Chapter';
@@ -6923,4 +6926,306 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get noVideosInFolderToAssign =>
       'No ready videos found in this folder to assign';
+
+  @override
+  String get changeFolderColor => 'Change Folder Color';
+
+  @override
+  String get changeFolderColorSubtitle =>
+      'Pick a distinct color to easily identify and organize this folder';
+
+  @override
+  String get defaultFolderColor => 'Default (No custom color)';
+
+  @override
+  String get folderColorUpdated => 'Folder color updated successfully';
+
+  @override
+  String folderDurationBadge(int hours, int minutes) {
+    return '${hours}h ${minutes}m';
+  }
+
+  @override
+  String folderDurationMinutesOnly(int minutes) {
+    return '${minutes}m';
+  }
+
+  @override
+  String get folderAllVideosReady => 'All videos ready';
+
+  @override
+  String folderVideosProcessing(int count) {
+    return '$count processing';
+  }
+
+  @override
+  String folderAssignedToCourse(String courseName) {
+    return 'Assigned: $courseName';
+  }
+
+  @override
+  String get folderNotAssignedYet => 'Unassigned (Ready)';
+
+  @override
+  String folderMultipleCoursesAssigned(int count) {
+    return 'Assigned in $count courses';
+  }
+
+  @override
+  String get folderColorIndigo => 'Mathematical Indigo';
+
+  @override
+  String get folderColorCyan => 'Electric Cyan';
+
+  @override
+  String get folderColorEmerald => 'Emerald Green';
+
+  @override
+  String get folderColorAmber => 'Amber Gold';
+
+  @override
+  String get folderColorRuby => 'Ruby Crimson';
+
+  @override
+  String get folderColorViolet => 'Royal Violet';
+
+  @override
+  String get folderColorRose => 'Rose Pink';
+
+  @override
+  String get folderColorSlate => 'Graphite Slate';
+
+  @override
+  String get selectFolderColor => 'Folder Color';
+
+  @override
+  String get addNewChapter => 'Add New Chapter';
+
+  @override
+  String get newChapterDialogTitle => 'Add New Chapter';
+
+  @override
+  String get editChapterTitle => 'Edit Chapter Title';
+
+  @override
+  String get deleteChapterTitle => 'Delete Chapter';
+
+  @override
+  String get deleteChapterConfirm =>
+      'Are you sure you want to delete this chapter? Its lectures will be preserved and moved to General Lectures.';
+
+  @override
+  String get addLectureToChapter => 'Add Lecture to this Chapter';
+
+  @override
+  String get emptyChapterPlaceholder => 'This chapter is currently empty';
+
+  @override
+  String get emptyChapterTeacherAction => '+ Add First Lecture to this Chapter';
+
+  @override
+  String get moveLectureToChapter => 'Move to Chapter...';
+
+  @override
+  String get removeFromChapter => 'Remove from Chapter (Make General)';
+
+  @override
+  String get removeFromCourse => 'Remove from Course';
+
+  @override
+  String get chapterUpdatedSuccess => 'Chapter updated successfully';
+
+  @override
+  String get chapterCreatedSuccess => 'Chapter created successfully';
+
+  @override
+  String get chapterDeletedSuccess => 'Chapter deleted successfully';
+
+  @override
+  String get lectureMovedSuccess => 'Lecture chapter updated successfully';
+
+  @override
+  String get unassignedLecturesSection => 'General Lectures (Unassigned)';
+
+  @override
+  String get unassignedLecturesDesc =>
+      'Lectures available in the course not assigned to a specific chapter';
+
+  @override
+  String get chapterUpcomingStatus => 'Upcoming';
+
+  @override
+  String get emptyChapterStudentNotice =>
+      'No lectures have been added to this chapter yet; your teacher will publish them soon.';
+
+  @override
+  String get selectTargetChapter => 'Select Target Chapter';
+
+  @override
+  String get noChapterOption => 'No Chapter (General Lecture)';
+
+  @override
+  String get chapterVisibilityPublished => 'Published';
+
+  @override
+  String get chapterVisibilityDraft => 'Draft (Hidden)';
+
+  @override
+  String get hideChapterTooltip =>
+      'Hide chapter and all its lessons from students';
+
+  @override
+  String get publishChapterTooltip => 'Publish chapter to students';
+
+  @override
+  String get chapterPublishedToast => 'Chapter is now published to students';
+
+  @override
+  String get chapterHiddenToast => 'Chapter is now hidden from students';
+
+  @override
+  String get toggleChapterVisibilityAction => 'Toggle Visibility';
+
+  @override
+  String get publishChapterAction => 'Publish Chapter';
+
+  @override
+  String get hideChapterAction => 'Hide Chapter';
+
+  @override
+  String get lessonStudioTitle => 'Lesson Studio';
+
+  @override
+  String get lessonStudioSubtitle =>
+      'Select videos from your library, organize them into chapters, and configure materials';
+
+  @override
+  String get videoBankSidebarTitle => 'Video Bank & Folders';
+
+  @override
+  String get searchVideosAndFoldersHint => 'Search videos or folders...';
+
+  @override
+  String get allVideosFilter => 'All';
+
+  @override
+  String get unusedVideosFilter => 'Not in Course';
+
+  @override
+  String get selectAll => 'Select All';
+
+  @override
+  String get clearSelection => 'Clear Selection';
+
+  @override
+  String get uploadNewVideoShort => 'Upload Video';
+
+  @override
+  String get collapseSidebar => 'Collapse Panel';
+
+  @override
+  String get expandSidebar => 'Expand Panel';
+
+  @override
+  String get alreadyAddedBadge => 'In Course';
+
+  @override
+  String get noVideosSelectedTitle => 'No Videos Selected';
+
+  @override
+  String get noVideosSelectedSubtitle =>
+      'Pick a video or an entire folder from the left panel to configure lectures';
+
+  @override
+  String batchModeTitle(int count) {
+    return 'Batch Setup ($count Selected)';
+  }
+
+  @override
+  String get batchModeSubtitle =>
+      'Apply settings to all selected videos at once, or customize each individually';
+
+  @override
+  String get applyChapterToAll => 'Apply Chapter to All';
+
+  @override
+  String get publishAllBatch => 'Publish All Immediately';
+
+  @override
+  String get draftAllBatch => 'Save All as Drafts';
+
+  @override
+  String addBatchLecturesButton(int count) {
+    return 'Add $count Lectures to Course';
+  }
+
+  @override
+  String addingBatchProgress(int current, int total) {
+    return 'Adding lecture $current of $total...';
+  }
+
+  @override
+  String batchAddSuccessToast(int count) {
+    return '$count lectures added to course successfully!';
+  }
+
+  @override
+  String get singleLectureSetup => 'Lecture Configuration';
+
+  @override
+  String get useVideoTitleAction => 'Use Video File Name';
+
+  @override
+  String get targetChapterLabel => 'Target Academic Chapter';
+
+  @override
+  String get quickCreateChapter => '+ New Chapter';
+
+  @override
+  String get pdfHandoutSection => 'Study Material (PDF Handout)';
+
+  @override
+  String get uploadPdfHandout => 'Upload PDF Handout';
+
+  @override
+  String get removePdfHandout => 'Remove PDF';
+
+  @override
+  String get mandatoryQuizSection => 'Mandatory Lecture Quiz';
+
+  @override
+  String get noQuizAttached => 'No Quiz Required';
+
+  @override
+  String get createQuizQuick => 'Create Quiz';
+
+  @override
+  String get passingScoreRequirement => 'Passing Score Requirement';
+
+  @override
+  String useDefaultGroupScore(int score) {
+    return 'Use default group passing score ($score%)';
+  }
+
+  @override
+  String get lecturePublishStatus => 'Publish to Students';
+
+  @override
+  String get lecturePublishedDescription =>
+      'Students will be able to watch this lecture immediately';
+
+  @override
+  String get lectureDraftDescription =>
+      'Lecture will be saved as draft and hidden from students';
+
+  @override
+  String get saveLectureButton => 'Save & Add Lecture';
+
+  @override
+  String get unassignedFolderVideos => 'General / Root Videos';
+
+  @override
+  String folderVideosCount(int count) {
+    return '$count videos';
+  }
 }

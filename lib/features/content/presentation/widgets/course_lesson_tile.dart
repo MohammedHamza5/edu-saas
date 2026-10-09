@@ -33,7 +33,9 @@ class CourseLessonTile extends StatefulWidget {
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
   final VoidCallback? onToggleVisibility;
+  final VoidCallback? onViewAnalytics;
   final VoidCallback? onOpenFullPage;
+  final VoidCallback? onMoveToChapter;
   final bool canMoveUp;
   final bool canMoveDown;
   final VoidCallback? onMoveUp;
@@ -51,7 +53,9 @@ class CourseLessonTile extends StatefulWidget {
     this.onEdit,
     this.onDelete,
     this.onToggleVisibility,
+    this.onViewAnalytics,
     this.onOpenFullPage,
+    this.onMoveToChapter,
     this.canMoveUp = false,
     this.canMoveDown = false,
     this.onMoveUp,
@@ -74,6 +78,7 @@ class _CourseLessonTileState extends State<CourseLessonTile> {
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final isSelected = widget.isSelected;
+    final isCompact = MediaQuery.sizeOf(context).width < 360;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
@@ -123,8 +128,8 @@ class _CourseLessonTileState extends State<CourseLessonTile> {
             onTap: widget.onTap ?? widget.onEdit,
             borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.s12,
+              padding: EdgeInsets.symmetric(
+                horizontal: isCompact ? 8 : AppSpacing.s12,
                 vertical: AppSpacing.s10,
               ),
               child: Row(
@@ -139,8 +144,8 @@ class _CourseLessonTileState extends State<CourseLessonTile> {
                         index: widget.index,
                         child: Container(
                           color: Colors.transparent,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.s6,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: isCompact ? 3 : AppSpacing.s6,
                             vertical: AppSpacing.s8,
                           ),
                           child: const Icon(
@@ -200,9 +205,9 @@ class _CourseLessonTileState extends State<CourseLessonTile> {
                         ),
                       ],
                     ),
-                    const SizedBox(width: AppSpacing.s6),
+                    SizedBox(width: isCompact ? 4 : AppSpacing.s6),
                   ] else ...[
-                    const SizedBox(width: AppSpacing.s6),
+                    SizedBox(width: isCompact ? 4 : AppSpacing.s6),
                   ],
 
                   // Lesson Number Badge
@@ -233,7 +238,7 @@ class _CourseLessonTileState extends State<CourseLessonTile> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: AppSpacing.s12),
+                  SizedBox(width: isCompact ? 6 : AppSpacing.s12),
 
                   // Title + Metadata
                   Expanded(
@@ -337,22 +342,112 @@ class _CourseLessonTileState extends State<CourseLessonTile> {
                               ? l10n.hideLessonTooltip
                               : l10n.publishLessonTooltip,
                           onTap: widget.onToggleVisibility,
+                          isCompact: isCompact,
                         ),
-                        const SizedBox(width: AppSpacing.s6),
+                        SizedBox(width: isCompact ? 4 : AppSpacing.s6),
+                      ],
+                      if (!isCompact && widget.onViewAnalytics != null) ...[
+                        _buildActionButton(
+                          icon: Icons.insights_rounded,
+                          color: const Color(0xFF0284C7),
+                          tooltip: l10n.lessonAnalytics,
+                          onTap: widget.onViewAnalytics,
+                          isCompact: isCompact,
+                        ),
+                        SizedBox(width: isCompact ? 4 : AppSpacing.s6),
                       ],
                       _buildActionButton(
                         icon: Icons.edit_rounded,
                         color: AppColors.primary,
                         tooltip: l10n.editLesson,
                         onTap: widget.onEdit ?? widget.onTap,
+                        isCompact: isCompact,
                       ),
-                      if (widget.onDelete != null) ...[
-                        const SizedBox(width: AppSpacing.s6),
+                      if (!isCompact && widget.onMoveToChapter != null) ...[
+                        SizedBox(width: isCompact ? 4 : AppSpacing.s6),
+                        _buildActionButton(
+                          icon: Icons.drive_file_move_outlined,
+                          color: const Color(0xFF6366F1),
+                          tooltip: l10n.moveLectureToChapter,
+                          onTap: widget.onMoveToChapter,
+                          isCompact: isCompact,
+                        ),
+                      ],
+                      if (!isCompact && widget.onDelete != null) ...[
+                        SizedBox(width: isCompact ? 4 : AppSpacing.s6),
                         _buildActionButton(
                           icon: Icons.delete_outline_rounded,
                           color: AppColors.error,
                           tooltip: l10n.deleteLesson,
                           onTap: widget.onDelete,
+                          isCompact: isCompact,
+                        ),
+                      ],
+                      if (isCompact) ...[
+                        SizedBox(width: isCompact ? 2 : AppSpacing.s6),
+                        PopupMenuButton<String>(
+                          icon: const Icon(
+                            Icons.more_vert_rounded,
+                            size: 16,
+                            color: AppColors.textSecondary,
+                          ),
+                          padding: EdgeInsets.zero,
+                          itemBuilder: (context) => [
+                            if (widget.onViewAnalytics != null)
+                              PopupMenuItem(
+                                value: 'analytics',
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.insights_rounded,
+                                      size: 16,
+                                      color: Color(0xFF0284C7),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(l10n.lessonAnalytics),
+                                  ],
+                                ),
+                              ),
+                            if (widget.onMoveToChapter != null)
+                              PopupMenuItem(
+                                value: 'move',
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.drive_file_move_outlined,
+                                      size: 16,
+                                      color: Color(0xFF6366F1),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(l10n.moveLectureToChapter),
+                                  ],
+                                ),
+                              ),
+                            if (widget.onDelete != null)
+                              PopupMenuItem(
+                                value: 'delete',
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.delete_outline_rounded,
+                                      size: 16,
+                                      color: AppColors.error,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(l10n.deleteLesson),
+                                  ],
+                                ),
+                              ),
+                          ],
+                          onSelected: (val) {
+                            if (val == 'analytics') {
+                              widget.onViewAnalytics?.call();
+                            } else if (val == 'move') {
+                              widget.onMoveToChapter?.call();
+                            } else if (val == 'delete') {
+                              widget.onDelete?.call();
+                            }
+                          },
                         ),
                       ],
                     ],
@@ -405,6 +500,7 @@ class _CourseLessonTileState extends State<CourseLessonTile> {
     required Color color,
     required String tooltip,
     VoidCallback? onTap,
+    bool isCompact = false,
   }) {
     return Tooltip(
       message: tooltip,
@@ -415,7 +511,7 @@ class _CourseLessonTileState extends State<CourseLessonTile> {
           borderRadius: BorderRadius.circular(6),
           hoverColor: color.withValues(alpha: 0.15),
           child: Container(
-            padding: const EdgeInsets.all(7),
+            padding: EdgeInsets.all(isCompact ? 5 : 7),
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(6),
@@ -424,7 +520,7 @@ class _CourseLessonTileState extends State<CourseLessonTile> {
                 width: 1,
               ),
             ),
-            child: Icon(icon, size: 16, color: color),
+            child: Icon(icon, size: isCompact ? 14 : 16, color: color),
           ),
         ),
       ),

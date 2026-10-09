@@ -14,11 +14,18 @@ abstract interface class VideoBankRemoteDataSource {
   Future<VideoFolderModel> createFolder({
     required String name,
     String? parentId,
+    String? color,
   });
 
   Future<VideoFolderModel> updateFolder({
     required String id,
     required String name,
+    String? color,
+  });
+
+  Future<VideoFolderModel> updateFolderColor({
+    required String id,
+    String? color,
   });
 
   Future<void> deleteFolder(String id);
@@ -154,16 +161,22 @@ class VideoBankRemoteDataSourceImpl implements VideoBankRemoteDataSource {
   Future<VideoFolderModel> createFolder({
     required String name,
     String? parentId,
+    String? color,
   }) async {
     try {
       final tenantId = await _resolveTenantId();
+      final insertData = <String, dynamic>{
+        'tenant_id': tenantId,
+        'name': name.trim(),
+        'parent_id': parentId,
+      };
+      if (color != null && color.trim().isNotEmpty) {
+        insertData['color'] = color.trim();
+      }
+
       final response = await _c
           .from('video_folders')
-          .insert({
-            'tenant_id': tenantId,
-            'name': name.trim(),
-            'parent_id': parentId,
-          })
+          .insert(insertData)
           .select()
           .single();
 
@@ -179,16 +192,54 @@ class VideoBankRemoteDataSourceImpl implements VideoBankRemoteDataSource {
   Future<VideoFolderModel> updateFolder({
     required String id,
     required String name,
+    String? color,
   }) async {
     try {
+      final updateData = <String, dynamic>{
+        'name': name.trim(),
+        'updated_at': DateTime.now().toIso8601String(),
+      };
+      if (color != null) {
+        updateData['color'] = color.trim().isEmpty ? null : color.trim();
+      }
+
       final response = await _c
           .from('video_folders')
-          .update({'name': name.trim(), 'updated_at': DateTime.now().toIso8601String()})
+          .update(updateData)
           .eq('id', id)
           .select()
           .single();
 
       return VideoFolderModel.fromJson(response);
+    } on PostgrestException catch (e) {
+      throw ServerException(e.message, code: e.code);
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<VideoFolderModel> updateFolderColor({
+    required String id,
+    String? color,
+  }) async {
+    try {
+      final res = await _c.rpc<dynamic>(
+        'update_video_folder_color',
+        params: {
+          'p_folder_id': id,
+          'p_color': color,
+        },
+      );
+      if (res is Map) {
+        return VideoFolderModel.fromJson(Map<String, dynamic>.from(res));
+      }
+      final row = await _c
+          .from('video_folders_with_counts')
+          .select()
+          .eq('id', id)
+          .single();
+      return VideoFolderModel.fromJson(row);
     } on PostgrestException catch (e) {
       throw ServerException(e.message, code: e.code);
     } catch (e) {

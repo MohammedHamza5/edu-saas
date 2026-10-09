@@ -16,6 +16,7 @@ class AppButton extends StatefulWidget {
   final double? width;
   final bool isFullWidth;
   final EdgeInsetsGeometry? padding;
+  final double? size;
 
   const AppButton({
     super.key,
@@ -27,6 +28,7 @@ class AppButton extends StatefulWidget {
     this.width,
     this.isFullWidth = false,
     this.padding,
+    this.size,
   });
 
   @override

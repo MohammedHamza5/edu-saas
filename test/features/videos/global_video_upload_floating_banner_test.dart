@@ -26,12 +26,20 @@ class _FakeVideoBankRepoForBanner implements VideoBankRepository {
   Future<Result<VideoFolderEntity>> createFolder({
     required String name,
     String? parentId,
+    String? color,
   }) async => throw UnimplementedError();
 
   @override
   Future<Result<VideoFolderEntity>> updateFolder({
     required String id,
     required String name,
+    String? color,
+  }) async => throw UnimplementedError();
+
+  @override
+  Future<Result<VideoFolderEntity>> updateFolderColor({
+    required String id,
+    String? color,
   }) async => throw UnimplementedError();
 
   @override

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../domain/entities/chapter_entity.dart';
 import '../../domain/entities/content_entity.dart';
 
 sealed class ContentState extends Equatable {
@@ -22,6 +23,7 @@ class ContentLoading extends ContentState {
 
 class ContentLoaded extends ContentState {
   final List<ContentEntity> items;
+  final List<ChapterEntity> chapters;
   final ContentStatus? activeFilter;
   final bool isReordering;
   final bool hasMore;
@@ -29,6 +31,7 @@ class ContentLoaded extends ContentState {
 
   const ContentLoaded({
     required this.items,
+    this.chapters = const [],
     this.activeFilter,
     this.isReordering = false,
     this.hasMore = true,
@@ -50,6 +53,7 @@ class ContentLoaded extends ContentState {
 
   ContentLoaded copyWith({
     List<ContentEntity>? items,
+    List<ChapterEntity>? chapters,
     ContentStatus? activeFilter,
     bool clearFilter = false,
     bool? isReordering,
@@ -58,6 +62,7 @@ class ContentLoaded extends ContentState {
   }) {
     return ContentLoaded(
       items: items ?? this.items,
+      chapters: chapters ?? this.chapters,
       activeFilter: clearFilter ? null : (activeFilter ?? this.activeFilter),
       isReordering: isReordering ?? this.isReordering,
       hasMore: hasMore ?? this.hasMore,
@@ -68,6 +73,7 @@ class ContentLoaded extends ContentState {
   @override
   List<Object?> get props => [
     items,
+    chapters,
     activeFilter,
     isReordering,
     hasMore,

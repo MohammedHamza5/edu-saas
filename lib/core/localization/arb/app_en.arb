@@ -6299,6 +6299,7 @@
   "addFirstLesson": "Add First Lecture",
   "videoPickerTitle": "Select Video",
   "videoPickerSearchHint": "Search videos...",
+  "videoBankSearchHint": "Search videos or folders...",
   "videoAlreadyAddedToThisGroup": "Already added to this group",
   "videoNotAddedToAnyGroup": "Not added to any group",
   "videoAddedToGroups": "Added to: {groups}",
@@ -7684,5 +7685,249 @@
   "chapterPrefix": "Chapter",
   "@chapterPrefix": {},
   "noVideosInFolderToAssign": "No ready videos found in this folder to assign",
-  "@noVideosInFolderToAssign": {}
+  "@noVideosInFolderToAssign": {},
+  "changeFolderColor": "Change Folder Color",
+  "@changeFolderColor": {},
+  "changeFolderColorSubtitle": "Pick a distinct color to easily identify and organize this folder",
+  "@changeFolderColorSubtitle": {},
+  "defaultFolderColor": "Default (No custom color)",
+  "@defaultFolderColor": {},
+  "folderColorUpdated": "Folder color updated successfully",
+  "@folderColorUpdated": {},
+  "folderDurationBadge": "{hours}h {minutes}m",
+  "@folderDurationBadge": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "folderDurationMinutesOnly": "{minutes}m",
+  "@folderDurationMinutesOnly": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "folderAllVideosReady": "All videos ready",
+  "@folderAllVideosReady": {},
+  "folderVideosProcessing": "{count} processing",
+  "@folderVideosProcessing": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "folderAssignedToCourse": "Assigned: {courseName}",
+  "@folderAssignedToCourse": {
+    "placeholders": {
+      "courseName": {
+        "type": "String"
+      }
+    }
+  },
+  "folderNotAssignedYet": "Unassigned (Ready)",
+  "@folderNotAssignedYet": {},
+  "folderMultipleCoursesAssigned": "Assigned in {count} courses",
+  "@folderMultipleCoursesAssigned": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "folderColorIndigo": "Mathematical Indigo",
+  "@folderColorIndigo": {},
+  "folderColorCyan": "Electric Cyan",
+  "@folderColorCyan": {},
+  "folderColorEmerald": "Emerald Green",
+  "@folderColorEmerald": {},
+  "folderColorAmber": "Amber Gold",
+  "@folderColorAmber": {},
+  "folderColorRuby": "Ruby Crimson",
+  "@folderColorRuby": {},
+  "folderColorViolet": "Royal Violet",
+  "@folderColorViolet": {},
+  "folderColorRose": "Rose Pink",
+  "@folderColorRose": {},
+  "folderColorSlate": "Graphite Slate",
+  "@folderColorSlate": {},
+  "selectFolderColor": "Folder Color",
+  "@selectFolderColor": {},
+  "addNewChapter": "Add New Chapter",
+  "@addNewChapter": {},
+  "newChapterDialogTitle": "Add New Chapter",
+  "@newChapterDialogTitle": {},
+  "chapterTitleLabel": "Chapter Title",
+  "@chapterTitleLabel": {},
+  "chapterTitleHint": "e.g., Chapter 1: Functions & Graphs",
+  "@chapterTitleHint": {},
+  "editChapterTitle": "Edit Chapter Title",
+  "@editChapterTitle": {},
+  "deleteChapterTitle": "Delete Chapter",
+  "@deleteChapterTitle": {},
+  "deleteChapterConfirm": "Are you sure you want to delete this chapter? Its lectures will be preserved and moved to General Lectures.",
+  "@deleteChapterConfirm": {},
+  "addLectureToChapter": "Add Lecture to this Chapter",
+  "@addLectureToChapter": {},
+  "emptyChapterPlaceholder": "This chapter is currently empty",
+  "@emptyChapterPlaceholder": {},
+  "emptyChapterTeacherAction": "+ Add First Lecture to this Chapter",
+  "@emptyChapterTeacherAction": {},
+  "moveLectureToChapter": "Move to Chapter...",
+  "@moveLectureToChapter": {},
+  "removeFromChapter": "Remove from Chapter (Make General)",
+  "@removeFromChapter": {},
+  "removeFromCourse": "Remove from Course",
+  "@removeFromCourse": {},
+  "chapterUpdatedSuccess": "Chapter updated successfully",
+  "@chapterUpdatedSuccess": {},
+  "chapterCreatedSuccess": "Chapter created successfully",
+  "@chapterCreatedSuccess": {},
+  "chapterDeletedSuccess": "Chapter deleted successfully",
+  "@chapterDeletedSuccess": {},
+  "lectureMovedSuccess": "Lecture chapter updated successfully",
+  "@lectureMovedSuccess": {},
+  "unassignedLecturesSection": "General Lectures (Unassigned)",
+  "@unassignedLecturesSection": {},
+  "unassignedLecturesDesc": "Lectures available in the course not assigned to a specific chapter",
+  "@unassignedLecturesDesc": {},
+  "chapterUpcomingStatus": "Upcoming",
+  "@chapterUpcomingStatus": {},
+  "emptyChapterStudentNotice": "No lectures have been added to this chapter yet; your teacher will publish them soon.",
+  "@emptyChapterStudentNotice": {},
+  "selectTargetChapter": "Select Target Chapter",
+  "@selectTargetChapter": {},
+  "noChapterOption": "No Chapter (General Lecture)",
+  "@noChapterOption": {},
+  "chapterVisibilityPublished": "Published",
+  "@chapterVisibilityPublished": {},
+  "chapterVisibilityDraft": "Draft (Hidden)",
+  "@chapterVisibilityDraft": {},
+  "hideChapterTooltip": "Hide chapter and all its lessons from students",
+  "@hideChapterTooltip": {},
+  "publishChapterTooltip": "Publish chapter to students",
+  "@publishChapterTooltip": {},
+  "chapterPublishedToast": "Chapter is now published to students",
+  "@chapterPublishedToast": {},
+  "chapterHiddenToast": "Chapter is now hidden from students",
+  "@chapterHiddenToast": {},
+  "toggleChapterVisibilityAction": "Toggle Visibility",
+  "@toggleChapterVisibilityAction": {},
+  "publishChapterAction": "Publish Chapter",
+  "@publishChapterAction": {},
+  "hideChapterAction": "Hide Chapter",
+  "@hideChapterAction": {},
+  "lessonStudioTitle": "Lesson Studio",
+  "@lessonStudioTitle": {},
+  "lessonStudioSubtitle": "Select videos from your library, organize them into chapters, and configure materials",
+  "@lessonStudioSubtitle": {},
+  "videoBankSidebarTitle": "Video Bank & Folders",
+  "@videoBankSidebarTitle": {},
+  "searchVideosAndFoldersHint": "Search videos or folders...",
+  "@searchVideosAndFoldersHint": {},
+  "allVideosFilter": "All",
+  "@allVideosFilter": {},
+  "unusedVideosFilter": "Not in Course",
+  "@unusedVideosFilter": {},
+  "selectAll": "Select All",
+  "@selectAll": {},
+  "clearSelection": "Clear Selection",
+  "@clearSelection": {},
+  "uploadNewVideoShort": "Upload Video",
+  "@uploadNewVideoShort": {},
+  "collapseSidebar": "Collapse Panel",
+  "@collapseSidebar": {},
+  "expandSidebar": "Expand Panel",
+  "@expandSidebar": {},
+  "alreadyAddedBadge": "In Course",
+  "@alreadyAddedBadge": {},
+  "noVideosSelectedTitle": "No Videos Selected",
+  "@noVideosSelectedTitle": {},
+  "noVideosSelectedSubtitle": "Pick a video or an entire folder from the left panel to configure lectures",
+  "@noVideosSelectedSubtitle": {},
+  "batchModeTitle": "Batch Setup ({count} Selected)",
+  "@batchModeTitle": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "batchModeSubtitle": "Apply settings to all selected videos at once, or customize each individually",
+  "@batchModeSubtitle": {},
+  "applyChapterToAll": "Apply Chapter to All",
+  "@applyChapterToAll": {},
+  "publishAllBatch": "Publish All Immediately",
+  "@publishAllBatch": {},
+  "draftAllBatch": "Save All as Drafts",
+  "@draftAllBatch": {},
+  "addBatchLecturesButton": "Add {count} Lectures to Course",
+  "@addBatchLecturesButton": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "addingBatchProgress": "Adding lecture {current} of {total}...",
+  "@addingBatchProgress": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "batchAddSuccessToast": "{count} lectures added to course successfully!",
+  "@batchAddSuccessToast": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "singleLectureSetup": "Lecture Configuration",
+  "@singleLectureSetup": {},
+  "useVideoTitleAction": "Use Video File Name",
+  "@useVideoTitleAction": {},
+  "targetChapterLabel": "Target Academic Chapter",
+  "@targetChapterLabel": {},
+  "quickCreateChapter": "+ New Chapter",
+  "@quickCreateChapter": {},
+  "pdfHandoutSection": "Study Material (PDF Handout)",
+  "@pdfHandoutSection": {},
+  "uploadPdfHandout": "Upload PDF Handout",
+  "@uploadPdfHandout": {},
+  "removePdfHandout": "Remove PDF",
+  "@removePdfHandout": {},
+  "mandatoryQuizSection": "Mandatory Lecture Quiz",
+  "@mandatoryQuizSection": {},
+  "noQuizAttached": "No Quiz Required",
+  "@noQuizAttached": {},
+  "createQuizQuick": "Create Quiz",
+  "@createQuizQuick": {},
+  "passingScoreRequirement": "Passing Score Requirement",
+  "@passingScoreRequirement": {},
+  "useDefaultGroupScore": "Use default group passing score ({score}%)",
+  "@useDefaultGroupScore": {
+    "placeholders": {
+      "score": { "type": "int" }
+    }
+  },
+  "customPassingScore": "Custom passing score (%)",
+  "@customPassingScore": {},
+  "lecturePublishStatus": "Publish to Students",
+  "@lecturePublishStatus": {},
+  "lecturePublishedDescription": "Students will be able to watch this lecture immediately",
+  "@lecturePublishedDescription": {},
+  "lectureDraftDescription": "Lecture will be saved as draft and hidden from students",
+  "@lectureDraftDescription": {},
+  "saveLectureButton": "Save & Add Lecture",
+  "@saveLectureButton": {},
+  "unassignedFolderVideos": "General / Root Videos",
+  "@unassignedFolderVideos": {},
+  "folderVideosCount": "{count} videos",
+  "@folderVideosCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  }
 }

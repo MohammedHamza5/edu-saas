@@ -5207,7 +5207,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get customPassingScore => 'مخصص';
+  String get customPassingScore => 'تخصيص درجة النجاح (%)';
 
   @override
   String lessonAddedToCourse(String course) {
@@ -5250,6 +5250,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get videoPickerSearchHint => 'ابحث عن فيديو...';
+
+  @override
+  String get videoBankSearchHint => 'ابحث عن فيديو أو مجلد...';
 
   @override
   String get videoAlreadyAddedToThisGroup => 'مضاف بالفعل لهذه المجموعة';
@@ -6825,10 +6828,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get selectTargetCourse => 'اختر الكورس / المجموعة';
 
   @override
-  String get chapterTitleLabel => 'عنوان الشبتر';
+  String get chapterTitleLabel => 'عنوان الشبتر / الفصل';
 
   @override
-  String get chapterTitleHint => 'مثال: الفصل الأول - أساسيات الجبر';
+  String get chapterTitleHint => 'مثال: Chapter 1: Functions & Graphs';
 
   @override
   String get assignFolderAsChapterConfirm => 'تأكيد وإضافة الشبتر';
@@ -6887,4 +6890,304 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get noVideosInFolderToAssign =>
       'لا توجد فيديوهات بحالة جاهزة في هذا المجلد لإضافتها';
+
+  @override
+  String get changeFolderColor => 'تغيير لون المجلد';
+
+  @override
+  String get changeFolderColorSubtitle =>
+      'اختر لوناً مميزاً للمجلد للتمييز السريع وتنظيم المحتوى';
+
+  @override
+  String get defaultFolderColor => 'الافتراضي (بدون لون مخصص)';
+
+  @override
+  String get folderColorUpdated => 'تم تحديث لون المجلد بنجاح';
+
+  @override
+  String folderDurationBadge(int hours, int minutes) {
+    return '$hours س $minutes د';
+  }
+
+  @override
+  String folderDurationMinutesOnly(int minutes) {
+    return '$minutes دقيقة';
+  }
+
+  @override
+  String get folderAllVideosReady => 'جميع الفيديوهات جاهزة للبث';
+
+  @override
+  String folderVideosProcessing(int count) {
+    return '$count قيد المعالجة';
+  }
+
+  @override
+  String folderAssignedToCourse(String courseName) {
+    return 'مُعيّن في: $courseName';
+  }
+
+  @override
+  String get folderNotAssignedYet => 'غير مُعيّن (جاهز)';
+
+  @override
+  String folderMultipleCoursesAssigned(int count) {
+    return 'مُعيّن في $count كورسات';
+  }
+
+  @override
+  String get folderColorIndigo => 'أزرق نيلي رياضي';
+
+  @override
+  String get folderColorCyan => 'سماوي كهربائي';
+
+  @override
+  String get folderColorEmerald => 'أخضر زمردي';
+
+  @override
+  String get folderColorAmber => 'ذهبي عنبري';
+
+  @override
+  String get folderColorRuby => 'أحمر ياقوتي';
+
+  @override
+  String get folderColorViolet => 'بنفسجي ملكي';
+
+  @override
+  String get folderColorRose => 'وردي زهري';
+
+  @override
+  String get folderColorSlate => 'رمادي صخري';
+
+  @override
+  String get selectFolderColor => 'لون المجلد';
+
+  @override
+  String get addNewChapter => 'إضافة شبتر جديد';
+
+  @override
+  String get newChapterDialogTitle => 'إضافة شبتر جديد للمادة';
+
+  @override
+  String get editChapterTitle => 'تعديل اسم الشبتر';
+
+  @override
+  String get deleteChapterTitle => 'حذف الشبتر';
+
+  @override
+  String get deleteChapterConfirm =>
+      'هل أنت متأكد من حذف هذا الشبتر؟ سيتم الاحتفاظ بالمحاضرات ونقلها إلى المحاضرات العامة دون حذفها.';
+
+  @override
+  String get addLectureToChapter => 'إضافة محاضرة لهذا الشبتر';
+
+  @override
+  String get emptyChapterPlaceholder => 'هذا الشبتر فارغ حالياً';
+
+  @override
+  String get emptyChapterTeacherAction => '+ أضف أول محاضرة لهذا الشبتر';
+
+  @override
+  String get moveLectureToChapter => 'نقل إلى شبتر...';
+
+  @override
+  String get removeFromChapter => 'إزالة من الشبتر (تحويل لمحاضرة عامة)';
+
+  @override
+  String get removeFromCourse => 'حذف من المادة';
+
+  @override
+  String get chapterUpdatedSuccess => 'تم تحديث اسم الشبتر بنجاح';
+
+  @override
+  String get chapterCreatedSuccess => 'تم إنشاء الشبتر بنجاح';
+
+  @override
+  String get chapterDeletedSuccess => 'تم حذف الشبتر بنجاح';
+
+  @override
+  String get lectureMovedSuccess => 'تم تحديث شبتر المحاضرة بنجاح';
+
+  @override
+  String get unassignedLecturesSection => 'المحاضرات العامة (بدون شبتر)';
+
+  @override
+  String get unassignedLecturesDesc =>
+      'محاضرات متاحة في المادة ولم تُعيّن داخل شبتر محدد';
+
+  @override
+  String get chapterUpcomingStatus => 'قيد الإعداد';
+
+  @override
+  String get emptyChapterStudentNotice =>
+      'لم تتم إضافة محاضرات لهذا الفصل بعد، سيقوم المعلم بإتاحتها قريباً.';
+
+  @override
+  String get selectTargetChapter => 'اختر الشبتر الهدف';
+
+  @override
+  String get noChapterOption => 'بدون شبتر (محاضرة عامة)';
+
+  @override
+  String get chapterVisibilityPublished => 'منشور للطلاب';
+
+  @override
+  String get chapterVisibilityDraft => 'مسودة (مخفي عن الطلاب)';
+
+  @override
+  String get hideChapterTooltip => 'إخفاء الشبتر وجميع محاضراته عن الطلاب';
+
+  @override
+  String get publishChapterTooltip => 'نشر وإتاحة الشبتر للطلاب';
+
+  @override
+  String get chapterPublishedToast => 'تم نشر الشبتر للطلاب بنجاح';
+
+  @override
+  String get chapterHiddenToast => 'تم إخفاء الشبتر عن الطلاب بنجاح';
+
+  @override
+  String get toggleChapterVisibilityAction => 'تعديل حالة النشر والظهور';
+
+  @override
+  String get publishChapterAction => 'نشر الشبتر';
+
+  @override
+  String get hideChapterAction => 'إخفاء الشبتر';
+
+  @override
+  String get lessonStudioTitle => 'استوديو إضافة المحاضرات';
+
+  @override
+  String get lessonStudioSubtitle =>
+      'اختر الفيديوهات من المكتبة ونظمها داخل الشباتر وأرفق الملازم والاختبارات بسهولة';
+
+  @override
+  String get videoBankSidebarTitle => 'بنك الفيديوهات والمجلدات';
+
+  @override
+  String get searchVideosAndFoldersHint => 'ابحث عن فيديو أو مجلد...';
+
+  @override
+  String get allVideosFilter => 'الكل';
+
+  @override
+  String get unusedVideosFilter => 'غير مضاف للمادة';
+
+  @override
+  String get selectAll => 'تحديد الكل';
+
+  @override
+  String get clearSelection => 'إلغاء التحديد';
+
+  @override
+  String get uploadNewVideoShort => 'رفع فيديو';
+
+  @override
+  String get collapseSidebar => 'طي الشريط';
+
+  @override
+  String get expandSidebar => 'إظهار الشريط';
+
+  @override
+  String get alreadyAddedBadge => 'مضاف للمادة';
+
+  @override
+  String get noVideosSelectedTitle => 'لم يتم تحديد أي فيديو بعد';
+
+  @override
+  String get noVideosSelectedSubtitle =>
+      'اختر فيديو أو حدد مجلداً كاملاً من القائمة الجانبية لتجهيز المحاضرات';
+
+  @override
+  String batchModeTitle(int count) {
+    return 'تجهيز محاضرات مجمعة ($count محددة)';
+  }
+
+  @override
+  String get batchModeSubtitle =>
+      'طبّق الإعدادات على جميع الفيديوهات دفعة واحدة، أو خصص كل محاضرة على حدة';
+
+  @override
+  String get applyChapterToAll => 'تعيين الشبتر للجميع';
+
+  @override
+  String get publishAllBatch => 'نشر جميع المحاضرات فوراً';
+
+  @override
+  String get draftAllBatch => 'حفظ الكل كمسودات (مخفية)';
+
+  @override
+  String addBatchLecturesButton(int count) {
+    return 'إضافة $count محاضرات دفعة واحدة للمنهج 🚀';
+  }
+
+  @override
+  String addingBatchProgress(int current, int total) {
+    return 'جاري إضافة المحاضرة $current من $total...';
+  }
+
+  @override
+  String batchAddSuccessToast(int count) {
+    return 'تمت إضافة $count محاضرات بنجاح إلى المنهج! 🚀';
+  }
+
+  @override
+  String get singleLectureSetup => 'إعداد وتخصيص المحاضرة';
+
+  @override
+  String get useVideoTitleAction => 'اقتباس اسم الفيديو الأصلي';
+
+  @override
+  String get targetChapterLabel => 'الشبتر الأكاديمي المستهدف';
+
+  @override
+  String get quickCreateChapter => '+ شبتر جديد';
+
+  @override
+  String get pdfHandoutSection => 'المادة الدراسية (ملزمة PDF)';
+
+  @override
+  String get uploadPdfHandout => 'رفع ملزمة PDF';
+
+  @override
+  String get removePdfHandout => 'حذف الملف';
+
+  @override
+  String get mandatoryQuizSection => 'اختبار المحاضرة الإلزامي';
+
+  @override
+  String get noQuizAttached => 'بدون اختبار إلزامي';
+
+  @override
+  String get createQuizQuick => 'إنشاء كويز';
+
+  @override
+  String get passingScoreRequirement => 'درجة النجاح المشروطة';
+
+  @override
+  String useDefaultGroupScore(int score) {
+    return 'استخدام درجة النجاح الافتراضية للمجموعة ($score%)';
+  }
+
+  @override
+  String get lecturePublishStatus => 'حالة نشر المحاضرة للطلاب';
+
+  @override
+  String get lecturePublishedDescription =>
+      'سيتمكن الطلاب من مشاهدة المحاضرة فوراً في المنهج';
+
+  @override
+  String get lectureDraftDescription => 'ستبقى المحاضرة كمسودة مخفية عن الطلاب';
+
+  @override
+  String get saveLectureButton => 'حفظ وإضافة المحاضرة';
+
+  @override
+  String get unassignedFolderVideos => 'فيديوهات عامة (خارج المجلدات)';
+
+  @override
+  String folderVideosCount(int count) {
+    return '$count فيديو';
+  }
 }

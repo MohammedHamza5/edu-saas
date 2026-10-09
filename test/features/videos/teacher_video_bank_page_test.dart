@@ -33,12 +33,14 @@ class _FakeVideoBankRepository implements VideoBankRepository {
   Future<Result<VideoFolderEntity>> createFolder({
     required String name,
     String? parentId,
+    String? color,
   }) async => Success(
     VideoFolderEntity(
       id: 'f-new',
       tenantId: 'tenant-1',
       name: name,
       parentId: parentId,
+      color: color,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
     ),
@@ -48,11 +50,28 @@ class _FakeVideoBankRepository implements VideoBankRepository {
   Future<Result<VideoFolderEntity>> updateFolder({
     required String id,
     required String name,
+    String? color,
   }) async => Success(
     VideoFolderEntity(
       id: id,
       tenantId: 'tenant-1',
       name: name,
+      color: color,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    ),
+  );
+
+  @override
+  Future<Result<VideoFolderEntity>> updateFolderColor({
+    required String id,
+    String? color,
+  }) async => Success(
+    VideoFolderEntity(
+      id: id,
+      tenantId: 'tenant-1',
+      name: 'Folder',
+      color: color,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
     ),
