@@ -1,6 +1,6 @@
-import 'dart:typed_data';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/config/app_config.dart';
@@ -133,18 +133,46 @@ class _VideoUploadDialogState extends State<VideoUploadDialog> {
 
       if (result != null && result.files.isNotEmpty) {
         final file = result.files.first;
-        setState(() {
-          _selectedFile = file;
-          _fileBytes = file.bytes;
-          if (_titleController.text.trim().isEmpty) {
-            // Clean up filename into human readable title
-            final cleanName = file.name
-                .replaceAll(RegExp(r'\.[a-zA-Z0-9]+$'), '')
-                .replaceAll(RegExp(r'[_-]'), ' ')
-                .trim();
-            _titleController.text = cleanName;
+        final sizeMb = (file.size / (1024 * 1024)).toStringAsFixed(1);
+
+        if (kIsWeb && file.size > 2000 * 1024 * 1024) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(context.l10n.videoFileTooLargeForWeb(sizeMb)),
+                backgroundColor: AppColors.error,
+                duration: const Duration(seconds: 8),
+              ),
+            );
           }
-        });
+          return;
+        }
+
+        final bytes = file.bytes;
+        if (bytes != null) {
+          setState(() {
+            _selectedFile = file;
+            _fileBytes = bytes;
+            if (_titleController.text.trim().isEmpty) {
+              // Clean up filename into human readable title
+              final cleanName = file.name
+                  .replaceAll(RegExp(r'\.[a-zA-Z0-9]+$'), '')
+                  .replaceAll(RegExp(r'[_-]'), ' ')
+                  .trim();
+              _titleController.text = cleanName;
+            }
+          });
+        } else {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(context.l10n.videoFileMemoryError(sizeMb)),
+                backgroundColor: AppColors.error,
+                duration: const Duration(seconds: 8),
+              ),
+            );
+          }
+        }
       }
     } catch (e) {
       if (mounted) {

@@ -63,6 +63,8 @@ class _InteractiveLightboxDialogState extends State<InteractiveLightboxDialog> {
                 maxScale: 6.0,
                 child: CachedNetworkImage(
                   imageUrl: widget.imageUrl,
+                  memCacheWidth: 1600,
+                  maxWidthDiskCache: 2048,
                   fit: BoxFit.contain,
                   placeholder: (ctx, _) => const Center(
                     child: CircularProgressIndicator(color: Colors.white),

@@ -59,6 +59,23 @@ class FakeAssignmentsRepository implements AssignmentsRepository {
   }
 
   @override
+  Future<Result<AssignmentEntity>> updateAssignment({
+    required String assignmentId,
+    required String title,
+    String? instructions,
+    DateTime? dueAt,
+    bool? allowLateSubmission,
+    int? maxScore,
+  }) async {
+    if (shouldFail) return FailureResult(ServerFailure(failureMessage));
+    final item = mockAssignments.firstWhere(
+      (a) => a.id == assignmentId,
+      orElse: () => mockAssignments.first,
+    );
+    return Success(item);
+  }
+
+  @override
   Future<Result<List<AssignmentSubmissionEntity>>> getSubmissions(
     String assignmentId,
   ) async {

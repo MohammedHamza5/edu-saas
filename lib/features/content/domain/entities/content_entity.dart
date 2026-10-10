@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'attached_lesson_exam_entity.dart';
 import 'file_attachment_entity.dart';
 
 import 'package:flutter/widgets.dart';
@@ -106,8 +107,9 @@ class ContentEntity extends Equatable {
   final List<String> assignedGroupNames;
 
   /// Integrated Lesson Unit & Prerequisite Progression
-  final String? associatedExamId; // The quiz for this lesson unit
+  final String? associatedExamId; // The quiz for this lesson unit (primary)
   final String? associatedExamTitle;
+  final List<AttachedLessonExamEntity> attachedExams; // All quizzes attached to this lesson
   final String? prerequisiteExamId; // Prerequisite exam that must be passed
   final String? prerequisiteExamTitle;
   final int? prerequisitePassingScore;
@@ -146,6 +148,7 @@ class ContentEntity extends Equatable {
     this.assignedGroupNames = const [],
     this.associatedExamId,
     this.associatedExamTitle,
+    this.attachedExams = const [],
     this.prerequisiteExamId,
     this.prerequisiteExamTitle,
     this.prerequisitePassingScore,
@@ -183,10 +186,18 @@ class ContentEntity extends Equatable {
   bool get isBunny => videoProvider == 'bunny';
 
   /// True when the student has completed the entire lecture unit
-  /// (both video watched >=90% and associated exam passed, or whatever is required).
-  bool get isCompleted =>
-      (videoId == null || isVideoCompleted) &&
-      (associatedExamId == null || isExamPassed);
+  /// (both video watched >=90% and all required exams passed).
+  bool get isCompleted {
+    if (videoId != null && !isVideoCompleted) return false;
+    if (attachedExams.isNotEmpty) {
+      final requiredExams = attachedExams.where((e) => e.isRequired);
+      if (requiredExams.isNotEmpty) {
+        return requiredExams.every((e) => e.isPassed);
+      }
+      return true;
+    }
+    return associatedExamId == null || isExamPassed;
+  }
 
   /// True when student can take the associated exam (must have watched video first)
   bool get canTakeExam => !isLocked && (videoId == null || isVideoCompleted);
@@ -212,6 +223,7 @@ class ContentEntity extends Equatable {
     List<String>? assignedGroupNames,
     Object? associatedExamId = _sentinel,
     Object? associatedExamTitle = _sentinel,
+    List<AttachedLessonExamEntity>? attachedExams,
     Object? prerequisiteExamId = _sentinel,
     Object? prerequisiteExamTitle = _sentinel,
     Object? prerequisitePassingScore = _sentinel,
@@ -255,6 +267,7 @@ class ContentEntity extends Equatable {
       associatedExamTitle: associatedExamTitle == _sentinel
           ? this.associatedExamTitle
           : associatedExamTitle as String?,
+      attachedExams: attachedExams ?? this.attachedExams,
       prerequisiteExamId: prerequisiteExamId == _sentinel
           ? this.prerequisiteExamId
           : prerequisiteExamId as String?,
@@ -304,6 +317,7 @@ class ContentEntity extends Equatable {
     assignedGroupNames,
     associatedExamId,
     associatedExamTitle,
+    attachedExams,
     prerequisiteExamId,
     prerequisiteExamTitle,
     prerequisitePassingScore,

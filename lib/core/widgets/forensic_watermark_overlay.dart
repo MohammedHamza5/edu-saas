@@ -231,10 +231,17 @@ class _RepeatingWatermarkPainter extends CustomPainter {
     if (size.width <= 0 || size.height <= 0) return;
 
     final textStyle = TextStyle(
-      color: Colors.white.withAlpha(16), // ~6% opacity, ultra subtle
+      color: Colors.black.withAlpha(24),
       fontSize: 11,
-      fontWeight: FontWeight.w500,
+      fontWeight: FontWeight.w600,
       letterSpacing: 0.5,
+      shadows: [
+        Shadow(
+          color: Colors.white.withAlpha(45),
+          offset: const Offset(1, 1),
+          blurRadius: 1,
+        ),
+      ],
     );
 
     final textSpan = TextSpan(text: text, style: textStyle);

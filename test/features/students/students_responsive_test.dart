@@ -5,6 +5,7 @@ import 'package:edu_saas/core/errors/result.dart';
 import 'package:edu_saas/core/theme/app_theme.dart';
 import 'package:edu_saas/core/widgets/responsive_container.dart';
 import 'package:edu_saas/features/students/domain/entities/student_360_entity.dart';
+import 'package:edu_saas/features/students/domain/entities/student_academic_report_entity.dart';
 import 'package:edu_saas/features/students/domain/entities/student_entity.dart';
 import 'package:edu_saas/features/students/domain/repositories/students_repository.dart';
 import 'package:edu_saas/features/students/presentation/cubit/students_cubit.dart';
@@ -72,6 +73,21 @@ class _FakeStudentsRepository implements StudentsRepository {
   Future<Result<void>> deleteStudent(String studentId) async {
     students.removeWhere((s) => s.id == studentId);
     return const Success(null);
+  }
+
+  @override
+  Future<Result<StudentAcademicReportEntity>> getStudentAcademicReport(
+    String studentId, {
+    int? days,
+  }) async {
+    final s = students.firstWhere((e) => e.id == studentId);
+    return Success(
+      StudentAcademicReportEntity(
+        studentId: s.id,
+        studentName: s.fullName,
+        periodDays: days,
+      ),
+    );
   }
 }
 

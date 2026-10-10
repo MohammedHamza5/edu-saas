@@ -274,6 +274,33 @@
   "whatsappTeacherNotesHint": "اكتب ملاحظة أو اختر من القوالب السريعة...",
   "whatsappPeriodWeekly": "متابعة أسبوعية ⚡",
   "whatsappPeriodMonthly": "ملخص شهري 📊",
+  "whatsappPeriod7Days": "آخر أسبوع (7 أيام)",
+  "whatsappPeriod14Days": "آخر أسبوعين (14 يوماً)",
+  "whatsappPeriod30Days": "آخر شهر (30 يوماً)",
+  "whatsappPeriodAllTime": "المدة كاملة (تراكمي)",
+  "whatsappFetchingData": "جاري استخراج السجلات الأكاديمية الحقيقية...",
+  "whatsappDataFetchError": "تعذر جلب بيانات التقرير الأكاديمي",
+  "whatsappDecisionsTitle": "القرار والتوجيه الأكاديمي",
+  "whatsappDecisionConsistent": "🌟 أداء متميز والتزام مستقر، ونؤكد على استمرار نفس وتيرة المذاكرة والتطبيق.",
+  "whatsappDecisionImproving": "📈 تحسن ملحوظ واستيعاب قوي للمفاهيم، ومطلوب الاستمرار في حل الاختبارات.",
+  "whatsappDecisionNeedsDrills": "⚠️ يحتاج لمزيد من التركيز ومراجعة بنك الأخطاء في الاختبار الأخير لتقفيل الدرجة.",
+  "whatsappDecisionCatchUp": "⏳ يرجى حث الطالب على إنهاء الواجبات والمحاضرات المتأخرة لتجنب تراكم المنهج.",
+  "whatsappDecisionNeglect": "📢 يوجد تقصير ملحوظ في الحضور والمتابعة؛ مطلوب تواصل عاجل مع المدرس لضبط الخطة.",
+  "whatsappChipConsistent": "🌟 أداء متميز",
+  "whatsappChipImproving": "📈 تحسن ملحوظ",
+  "whatsappChipNeedsDrills": "⚠️ مراجعة الأخطاء",
+  "whatsappChipCatchUp": "⏳ مهام متأخرة",
+  "whatsappChipNeglect": "📢 تقصير ومتابعة",
+  "whatsappReportHeaderTitle": "تقرير متابعة الأداء الأكاديمي",
+  "whatsappStudentLabel": "الطالب",
+  "whatsappGroupLabel": "المجموعة",
+  "whatsappPeriodLabel": "الفترة",
+  "whatsappLecturesStat": "المحاضرات",
+  "whatsappAssignmentsStat": "التدريبات والواجبات",
+  "whatsappExamsStat": "الاختبارات والتقييمات",
+  "whatsappStudyTimeStat": "وقت المذاكرة النشط",
+  "whatsappAttendanceStat": "نسبة الحضور",
+  "whatsappNoDataPeriod": "لا توجد أنشطة مسجلة في هذه الفترة",
   "whatsappPresetFriendlyKeepUp": "ما شاء الله عليه ملتزم ومستواه في تقدم مستمر 🌟",
   "whatsappPresetFriendlyNeedsFocus": "مستواه ممتاز جداً بس محتاجين نشجعه يركز أكتر في التمارين والواجبات 💪",
   "whatsappPresetFriendlyCatchUp": "ياريت حضرتك تفكره يكمل باقي الفيديوهات عشان مفيش حاجة تتراكم عليه 🌸",
@@ -818,6 +845,12 @@
   "questionTextHint": "اكتب نص السؤال الرياضي هنا...",
   "questionTypeField": "نوع السؤال",
   "pointsField": "الدرجات",
+  "defaultQuestionPointsLabel": "درجة كل سؤال",
+  "defaultQuestionPointsHint": "الدرجة الموحدة لجميع الأسئلة",
+  "applyPointsToAllAction": "تطبيق على الكل",
+  "applyPointsToAllTooltip": "توحيد درجة جميع الأسئلة الحالية والجديدة دفعة واحدة",
+  "pointsAppliedToAllSuccess": "تم توحيد الدرجة ({points}) لجميع الأسئلة بنجاح ({count} سؤال)",
+  "invalidPointsError": "يرجى إدخال درجة صحيحة أكبر من صفر",
   "optionsSelectCorrectPrompt": "الخيارات (حدد الخيار الصحيح):",
   "optionNumberHint": "الخيار {number}",
   "saveAndPublishExam": "حفظ ونشر الامتحان (تجميد v1)",
@@ -846,7 +879,6 @@
   "pendingReview": "بانتظار المراجعة",
   "pastDue": "فات الموعد",
   "actionRequired": "مطلوب التسليم",
-  "attemptNumberLabel": "محاولة {number}",
   "attachedFilesCount": "{count} ملفات مرفقة",
   "myHomeworkTitle": "واجباتي المدرسية",
   "noAssignmentsInGroup": "لا توجد واجبات مطلوب تسليمها في مجموعاتك حالياً",
@@ -1081,7 +1113,7 @@
   "gradingQueueSubtitle": "تسليمات الطلاب التي تنتظر رصد الدرجة",
   "recentActivityTitle": "أحدث الأنشطة على المنصة",
   "quickStatsTitle": "نظرة عامة على الأداء الأكاديمي",
-  "activeStudentsCount": "الطلاب النشطون",
+  "activeStudentsCount": "عدد الطلاب النشطين",
   "totalGroupsCount": "المجموعات الدراسية النشطة",
   "scheduledExamsCount": "الامتحانات المجدولة",
   "publishedMaterialsCount": "المواد المنشورة",
@@ -1565,7 +1597,7 @@
   "falseOptionLabel": "خطأ (False)",
   "completedBadge": "مكتملة",
   "currentActiveLectureBadge": "المحاضرة الحالية",
-  "overallCourseProgress": "التقدم العام: {completed} من {total} مكتملة ({percentage}%)",
+  "overallCourseProgress": "نسبة إنجاز المنهج الكلي",
   "reviewQuizResultAction": "مراجعة نتيجة الكويز",
   "rewatchLectureAction": "إعادة مشاهدة المحاضرة",
   "startLectureAction": "مشاهدة المحاضرة",
@@ -1675,7 +1707,7 @@
       }
     }
   },
-  "customPassingScore": "مخصص",
+  "customPassingScore": "تخصيص درجة النجاح (%)",
   "lessonAddedToCourse": "تمت إضافة المحاضرة إلى {course}.",
   "@lessonAddedToCourse": {
     "placeholders": {
@@ -2068,7 +2100,7 @@
   "questionCountBadge": "{count} أسئلة",
   "viewQuestionsAction": "عرض الأسئلة",
   "statusDone": "مكتمل",
-  "statusFailed": "فشل",
+  "statusFailed": "فشل الرفع",
   "statusProcessing": "قيد المعالجة",
   "statusPending": "قيد الانتظار",
   "centralQuestionBankTitle": "بنك الأسئلة المركزي",
@@ -2131,6 +2163,19 @@
   "createInstantQuizAction": "إنشاء كويز لهذه المحاضرة فوراً",
   "selectExistingQuizAction": "اختيار من الاختبارات السابقة",
   "unlinkQuizAction": "إلغاء ربط الاختبار",
+  "attachedQuizzesSection": "الاختبارات والكويزات المرفقة",
+  "attachedQuizzesSectionSubtitle": "يمكنك ربط اختبار أو أكثر بهذه المحاضرة. الاختبارات الإلزامية يجب اجتيازها لفتح المحاضرات التالية.",
+  "addQuizToLessonAction": "إضافة اختبار للمحاضرة",
+  "requiredForProgression": "إلزامي للاجتياز",
+  "optionalPractice": "تدريبي / اختياري",
+  "makeQuizRequiredTooltip": "اضغط لجعله اختباراً إلزامياً لفتح ما بعده",
+  "makeQuizOptionalTooltip": "اضغط لجعله اختباراً اختيارياً/تدريبياً",
+  "attachedQuizzesCount": "تم إرفاق {count} اختبارات",
+  "noQuizzesAttached": "لم يتم إرفاق أي اختبارات بهذه المحاضرة حتى الآن",
+  "attachedQuizzesProgressHeader": "اختبارات المحاضرة والتقدم",
+  "requiredQuizzesCompletedProgress": "تم اجتياز {passed} من {total} اختبارات مطلوبة",
+  "allRequiredQuizzesPassedCongrats": "تم اجتياز جميع الاختبارات الإلزامية بنجاح! اكتملت المحاضرة.",
+  "quizScoreBadge": "الدرجة: {score}%",
   "studentNavLectures": "المحاضرات",
   "studentNavLecturesSubtitle": "الفيديوهات والمحاضرات التعليمية",
   "studentLecturesCardSubtitle": "مشاهدة المحاضرات المسجلة ومتابعة التقدم الأكاديمي",
@@ -2155,10 +2200,6 @@
   "completedLecturesRatio": "أتم {completed} من أصل {total} محاضرات",
   "lastWatchedTime": "آخر مشاهدة: {time}",
   "noLecturesInGroup": "لا توجد محاضرات فيديو منشورة في هذه المجموعة بعد",
-  "attendanceStatusPresent": "حاضر",
-  "attendanceStatusLate": "متأخر",
-  "attendanceStatusAbsent": "غائب",
-  "attendanceStatusExcused": "معذور",
   "syncAttendanceSuccessMessage": "تمت مزامنة حالات الحضور بدقة مع نسب مشاهدة الفيديو",
   "mistakesBankTitle": "بنك الأخطاء",
   "mistakesBankSubtitle": "سجل أخطائك في كافة الاختبارات والمحاضرات للتدريب عليها وتثبيت المفاهيم",
@@ -2210,9 +2251,7 @@
   "uploadingVideo": "جاري رفع الفيديو...",
   "videoProcessingInfo": "جاري معالجة وضغط الفيديو عبر Bunny Stream بأعلى جودة...",
   "statusReady": "جاهز",
-  "statusProcessing": "قيد المعالجة",
   "statusUploading": "قيد الرفع",
-  "statusFailed": "فشل الرفع",
   "selectFromBank": "اختيار من بنك الفيديوهات",
   "selectFromBankSubtitle": "اختر فيديو تم رفعه ومعالجته مسبقاً في بنك الفيديوهات دون الحاجة لإعادة الرفع.",
   "videoSelectedFromBank": "تم الاختيار من بنك الفيديوهات",
@@ -2268,8 +2307,8 @@
   "assignFolderAsChapterTitle": "تعيين المجلد كـ شبتر في كورس",
   "assignFolderAsChapterDesc": "سيتم إنشاء شبتر جديد في الكورس المحدد وإضافة كافة الفيديوهات الجاهزة في هذا المجلد كمحاضرات مرتبة بداخله.",
   "selectTargetCourse": "اختر الكورس / المجموعة",
-  "chapterTitleLabel": "عنوان الشبتر",
-  "chapterTitleHint": "مثال: الفصل الأول - أساسيات الجبر",
+  "chapterTitleLabel": "عنوان الشبتر / الفصل",
+  "chapterTitleHint": "مثال: Chapter 1: Functions & Graphs",
   "assignFolderAsChapterConfirm": "تأكيد وإضافة الشبتر",
   "assignFolderAsChapterSuccess": "تم إنشاء الشبتر وتعيين المحاضرات بنجاح!",
   "assignFolderAsChapterError": "حدث خطأ أثناء تعيين المجلد كـ شبتر",
@@ -2307,8 +2346,6 @@
   "selectFolderColor": "لون المجلد",
   "addNewChapter": "إضافة شبتر جديد",
   "newChapterDialogTitle": "إضافة شبتر جديد للمادة",
-  "chapterTitleLabel": "عنوان الشبتر / الفصل",
-  "chapterTitleHint": "مثال: Chapter 1: Functions & Graphs",
   "editChapterTitle": "تعديل اسم الشبتر",
   "deleteChapterTitle": "حذف الشبتر",
   "deleteChapterConfirm": "هل أنت متأكد من حذف هذا الشبتر؟ سيتم الاحتفاظ بالمحاضرات ونقلها إلى المحاضرات العامة دون حذفها.",
@@ -2371,11 +2408,517 @@
   "createQuizQuick": "إنشاء كويز",
   "passingScoreRequirement": "درجة النجاح المشروطة",
   "useDefaultGroupScore": "استخدام درجة النجاح الافتراضية للمجموعة ({score}%)",
-  "customPassingScore": "تخصيص درجة النجاح (%)",
   "lecturePublishStatus": "حالة نشر المحاضرة للطلاب",
   "lecturePublishedDescription": "سيتمكن الطلاب من مشاهدة المحاضرة فوراً في المنهج",
   "lectureDraftDescription": "ستبقى المحاضرة كمسودة مخفية عن الطلاب",
   "saveLectureButton": "حفظ وإضافة المحاضرة",
   "unassignedFolderVideos": "فيديوهات عامة (خارج المجلدات)",
-  "folderVideosCount": "{count} فيديو"
+  "folderVideosCount": "{count} فيديو",
+  "collapseAllChapters": "طي كافة الشباتر",
+  "expandAllChapters": "فرد كافة الشباتر",
+  "moveChapterUp": "نقل الشبتر لأعلى",
+  "moveChapterDown": "نقل الشبتر لأسفل",
+  "chapterAnalytics": "تحليلات الشبتر",
+  "groupAnalytics": "تحليلات المجموعة",
+  "chapterCompletionRate": "نسبة إكمال الشبتر",
+  "chapterBreakdown": "أداء الطلاب حسب الشباتر",
+  "studentsNeedingAttention": "طلاب بحاجة لمتابعة",
+  "totalChapterViews": "إجمالي مشاهدات الشبتر",
+  "averageChapterQuizScore": "متوسط كويزات الشبتر",
+  "noStudentsNeedingAttention": "جميع الطلاب يحققون تقدماً ممتازاً ومستمراً",
+  "completedAllChapterLessons": "أكملوا جميع محاضرات الشبتر",
+  "inProgressChapterLessons": "قيد المتابعة والدراسة",
+  "notStartedChapterLessons": "لم يبدأوا هذا الشبتر بعد",
+  "studentProgressDistribution": "توزيع تقدم الطلاب في الشبتر",
+  "chapterAnalyticsDialogTitle": "تحليلات شبتر: {title}",
+  "groupAnalyticsDialogTitle": "التحليلات الأكاديمية للمجموعة",
+  "courseWatchEngagement": "إجمالي مشاهدات المنهج",
+  "overallQuizzesAverage": "متوسط كويزات واختبارات المنهج",
+  "studentCompletionRate": "نسبة الإنجاز: {rate}%",
+  "chapterLessonsCountLabel": "{count} محاضرات",
+  "studentEngagementTitle": "التزام وإنجاز الطلاب",
+  "studentEngagementSubtitle": "متابعة تلقائية فورية لمشاهدات الطلاب، تقدم المحاضرات، ونشاطهم على المنصة دون أي رصد يدوي",
+  "studentEngagementBadge": "⚡ رصد آلي 100%",
+  "viewByLecture": "حسب المحاضرة",
+  "viewByStudentOverview": "مجمل إنجاز الطلاب",
+  "lectureCompletedBadge": "أتم المحاضرة",
+  "lectureInProgressBadge": "قيد المتابعة",
+  "lectureNotStartedBadge": "لم يبدأ بعد",
+  "engagementHigh": "ملتزم ممتاز",
+  "engagementMedium": "مستوى متوسط",
+  "engagementLow": "بحاجة لمتابعة",
+  "groupCommitmentRate": "معدل التزام المجموعة",
+  "totalEnrolledStudents": "إجمالي طلاب المجموعة",
+  "committedStudentsCount": "طلاب ملتزمون",
+  "needsFollowupCount": "بحاجة لمتابعة",
+  "completedLecturesSummary": "أنجز {completed} من أصل {total} محاضرات ({percent}%)",
+  "sendParentEngagementReport": "إرسال تقرير الالتزام عبر واتساب",
+  "studentNoteSavedSuccess": "تم حفظ ملاحظة الطالب بنجاح",
+  "refreshEngagementTooltip": "تحديث فوري لبيانات المشاهدات والالتزام",
+  "noLecturesInGroupYet": "لا توجد محاضرات فيديو منشورة في هذه المجموعة بعد",
+  "filterCommitted": "ملتزمون ({count})",
+  "filterNeedsFollowup": "بحاجة لمتابعة ({count})",
+  "filterModerate": "متوسطون ({count})",
+  "editExamTitle": "تعديل بيانات الاختبار",
+  "editExamAction": "تعديل الاختبار",
+  "examUpdatedSuccess": "تم تحديث بيانات الاختبار بنجاح",
+  "examTitleLabel": "عنوان الاختبار",
+  "examDurationLabel": "المدة (بالدقائق)",
+  "unlimitedDuration": "غير محدد (مفتوح)",
+  "passingScorePercentLabel": "درجة النجاح (%)",
+  "shuffleQuestionsLabel": "خلط ترتيب الأسئلة عشوائياً",
+  "showResultLabel": "إظهار النتيجة فوراً بعد التسليم",
+  "allowRetakeLabel": "السماح بإعادة المحاولة",
+  "saveChangesAction": "حفظ التغييرات",
+  "editGroupTitle": "تعديل بيانات المجموعة",
+  "editGroupAction": "تعديل المجموعة",
+  "groupUpdatedSuccess": "تم تحديث بيانات المجموعة بنجاح",
+  "groupNameLabel": "اسم المجموعة",
+  "groupLevelLabel": "المسار الأكاديمي / المستوى",
+  "groupDescriptionLabel": "وصف المجموعة",
+  "previousContentAccessLabel": "سياسة المحتوى القديم للطلاب الجدد",
+  "allowPreviousContent": "إتاحة المحتوى السابق لتاريخ الانضمام",
+  "denyPreviousContent": "إتاحة المحتوى الجديد فقط من تاريخ الانضمام",
+  "editAssignmentTitle": "تعديل بيانات الواجب",
+  "editAssignmentAction": "تعديل الواجب",
+  "assignmentUpdatedSuccess": "تم تحديث بيانات الواجب بنجاح",
+  "assignmentTitleLabel": "عنوان الواجب",
+  "assignmentInstructionsLabel": "تعليمات وإرشادات الواجب",
+  "dueDateLabel": "آخر موعد للتسليم",
+  "allowLateSubmissionLabel": "السماح بالتسليم بعد انتهاء الموعد",
+  "chapterNameAlreadyExists": "يوجد شابتر بنفس هذا الاسم بالفعل في هذه المجموعة",
+  "chapterUpdateFailed": "فشل تحديث الشابتر، يرجى المحاولة مرة أخرى.",
+  "deleteExamAction": "حذف الاختبار",
+  "deleteExamDialogTitle": "حذف الاختبار نهائياً؟",
+  "deleteExamDialogBody": "هل أنت متأكد من حذف اختبار \"{title}\"؟ سيتم حذف جميع الأسئلة والخيارات المرتبطة به نهائياً.",
+  "@deleteExamDialogBody": {
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "deleteExamConfirmButton": "نعم، حذف الاختبار",
+  "archiveOrDeleteExamDialogTitle": "أرشفة / إخفاء الاختبار",
+  "archiveOrDeleteExamDialogBody": "هذا الاختبار يحتوي على {count} محاولة من الطلاب. لحماية سجلاتهم الأكاديمية، سيتم أرشفة الاختبار وإخفاؤه عن الطلاب دون مساس بدرجاتهم.",
+  "@archiveOrDeleteExamDialogBody": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "archiveExamConfirmButton": "أرشفة وإخفاء الاختبار",
+  "examDeletedSuccessToast": "تم حذف الاختبار بنجاح",
+  "examArchivedSuccessToast": "تم أرشفة الاختبار وإخفاؤه بنجاح",
+  "smartApproveTitle": "قبول وتسكين الطالب",
+  "smartApproveSelectGroupPrompt": "اختر المجموعة أو المجموعات الدراسية لتسكين الطالب فوراً:",
+  "smartApproveEnrollNotice": "بمجرد القبول، سيتم تفعيل حساب الطالب وإتاحة كافة المحاضرات والمحتوى المصرح به للمجموعات المختارة.",
+  "smartApproveNoGroupsWarning": "لا توجد مجموعات دراسية حالياً. سيتم تفعيل حساب الطالب ويمكنك إسناده لمجموعة لاحقاً.",
+  "smartApproveAndEnrollAction": "قبول وتسكين الطالب فوراً",
+  "smartApproveSuccessWithGroupsToast": "تم قبول الطالب {name} وتسكينه في {count} مجموعة بنجاح!",
+  "@smartApproveSuccessWithGroupsToast": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "count": { "type": "int" }
+    }
+  },
+  "smartApproveSuccessNoGroupsToast": "تم قبول الطالب {name} بنجاح!",
+  "@smartApproveSuccessNoGroupsToast": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "skipGroupEnrollment": "المتابعة بدون تسكين في مجموعة حالياً",
+  "dailyQuickActionsTitle": "الإجراءات اليومية السريعة",
+  "dailyQuickActionsSubtitle": "الوصول المباشر للمهام التعليمية الأكثر تكراراً",
+  "quickActionUploadLessonTitle": "رفع حصة جديدة",
+  "quickActionUploadLessonDesc": "إضافة محاضرة فيديو، مذكرة PDF، أو كويز",
+  "quickActionAssessmentTitle": "إنشاء واجب أو كويز",
+  "quickActionAssessmentDesc": "واجبات منزلية، كويزات سريعة، أو اختبارات",
+  "quickActionPendingStudentsTitle": "طلبات الطلاب الجدد",
+  "quickActionPendingStudentsDesc": "مراجعة واعتماد وتسكين الطلاب في المجموعات",
+  "pendingStudentsCountBadge": "{count} طلاب بانتظار الموافقة",
+  "@pendingStudentsCountBadge": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "noPendingStudentsBadge": "لا توجد طلبات معلقة",
+  "createAssessmentChoiceTitle": "ماذا تريد أن تنشئ اليوم؟",
+  "createAssessmentChoiceSubtitle": "اختر نوع التقييم الأكاديمي للانتقال مباشرة إلى منشئ المحتوى:",
+  "createHomeworkAction": "إنشاء واجب منزلي جديد",
+  "createHomeworkActionDesc": "تحديد موعد تسليم، ملفات مرفقة، وتعليمات للطلاب",
+  "createExamOrQuizAction": "إنشاء امتحان أو كويز",
+  "createExamOrQuizActionDesc": "اختيار من متعدد، مؤقت زمني، وتصحيح تلقائي",
+  "examFilterTabAll": "الكل ({count})",
+  "@examFilterTabAll": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "examFilterTabGeneral": "اختبارات عامة ({count})",
+  "@examFilterTabGeneral": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "examFilterTabLectureQuizzes": "اختبارات المحاضرات ({count})",
+  "@examFilterTabLectureQuizzes": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "examFilterSubAll": "الكل",
+  "examFilterSubLinked": "مرتبطة بمحاضرة ({count})",
+  "@examFilterSubLinked": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "examFilterSubUnlinked": "بانتظار الربط ({count})",
+  "@examFilterSubUnlinked": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "statTotalExamsTitle": "إجمالي الاختبارات",
+  "statTotalExamsDesc": "جميع التقييمات في المجموعة",
+  "statGeneralExamsTitle": "اختبارات عامة وشاملة",
+  "statGeneralExamsDesc": "منشورة مباشرة للطلاب وغير مرتبطة بمحاضرة",
+  "statLectureQuizzesTitle": "اختبارات المحاضرات",
+  "statLectureQuizzesDesc": "كويزات اجتياز مشروطة لفتح المحاضرات",
+  "statUnlinkedAlert": "{count} بانتظار الربط بمحاضرة",
+  "@statUnlinkedAlert": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "badgeGeneralExam": "اختبار عام",
+  "badgeLectureQuiz": "اختبار محاضرة",
+  "linkedToLecturePill": "مرتبط بمحاضرة: {title}",
+  "@linkedToLecturePill": {
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "unlinkedQuizPill": "غير مرتبط بمحاضرة بعد - جاهز للربط",
+  "linkToLectureNowAction": "ربط بمحاضرة الآن",
+  "linkOrChangeLectureAction": "ربط / تغيير المحاضرة المرتبطة",
+  "unlinkFromLectureAction": "فك الارتباط (تحويل لاختبار عام)",
+  "convertToLectureQuizAction": "تحويل لاختبار محاضرة",
+  "convertToGeneralExamAction": "تحويل لاختبار عام",
+  "viewExamDetailsAndAttempts": "التفاصيل ومحاولات الطلاب",
+  "linkExamToLectureDialogTitle": "ربط الاختبار بمحاضرة",
+  "linkExamToLectureDialogSubtitle": "اختر المحاضرة التي سيلزم الطالب باجتياز هذا الاختبار لفتح المحاضرة التالية:",
+  "searchLecturesHint": "ابحث في محاضرات المجموعة...",
+  "noLecturesFound": "لا توجد محاضرات في هذه المجموعة",
+  "currentExamAttachedWarning": "مرتبطة حالياً باختبار: {title}",
+  "@currentExamAttachedWarning": {
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "lectureFreeForLinking": "متاحة للربط",
+  "confirmLinkExamAction": "تأكيد الربط بالمحاضرة",
+  "examLinkedSuccessToast": "تم ربط الاختبار بمحاضرة «{title}» بنجاح",
+  "@examLinkedSuccessToast": {
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "examUnlinkedSuccessToast": "تم فك ارتباط الاختبار وأصبح اختباراً عاماً بنجاح",
+  "examConvertedToLectureSuccess": "تم تحويل الاختبار إلى اختبار محاضرة",
+  "confirmUnlinkDialogTitle": "فك ارتباط الاختبار؟",
+  "confirmUnlinkDialogBody": "هل تريد فك ارتباط «{title}» بالمحاضرة وجعله اختباراً عاماً للطلاب؟",
+  "@confirmUnlinkDialogBody": {
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "confirmUnlinkButton": "نعم، فك الارتباط",
+  "draftVersionNotice": "النسخة الحالية مسودة قابلة للتعديل مباشرة دون حاجة لإنشاء نسخ جديدة.",
+  "publishCurrentDraftAction": "نشر هذه النسخة الآن",
+  "editDraftQuestionsAction": "تعديل الأسئلة والإعدادات",
+  "versionPublishedPill": "منشورة",
+  "versionDraftPill": "مسودة",
+  "creatingNewVersionLoading": "جارٍ إنشاء النسخة الجديدة...",
+  "publishingVersionLoading": "جارٍ نشر النسخة...",
+  "versionPublishedSuccess": "تم نشر النسخة بنجاح وأصبحت متاحة للطلاب",
+  "unpublishExamAction": "إلغاء النشر (تحويل لمسودة)",
+  "unpublishingExamLoading": "جارٍ إلغاء النشر...",
+  "examUnpublishedSuccess": "تم إلغاء نشر الاختبار وإعادته كمسودة وإخفاؤه عن الطلاب بنجاح",
+  "confirmUnpublishExamTitle": "إلغاء نشر الاختبار وإخفاؤه؟",
+  "confirmUnpublishExamBody": "هل أنت متأكد من رغبتك في إلغاء نشر اختبار «{title}»؟ سيتم تحويله إلى مسودة وإخفاؤه تماماً عن الطلاب.",
+  "@confirmUnpublishExamBody": {
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "confirmUnpublishButton": "نعم، ألغِ النشر وحوّله لمسودة",
+  "noOptionsAvailableForQuestionWarning": "تنبيه: لم يتم العثور على خيارات إجابة مسجلة لهذا السؤال. يرجى التواصل مع المعلم.",
+  "newVersionFailedError": "تعذر إنشاء نسخة جديدة: {error}",
+  "@newVersionFailedError": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "deleteExamAction": "حذف الاختبار",
+  "deleteExamDialogTitle": "حذف الاختبار نهائياً؟",
+  "deleteExamDialogBody": "هل أنت متأكد من رغبتك في حذف اختبار «{title}» نهائياً؟ لا يمكن التراجع عن هذا الإجراء.",
+  "@deleteExamDialogBody": {
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "deleteExamConfirmButton": "نعم، احذف الاختبار",
+  "archiveOrDeleteExamDialogTitle": "أرشفة الاختبار (يوجد محاولات للطلاب)",
+  "archiveOrDeleteExamDialogBody": "الاختبار «{title}» يحتوي على {count} محاولة مكتملة من الطلاب. لحماية سجلات ودرجات الطلاب، سيتم أرشفته وإخفاؤه تماماً من قوائم المدرس والطلاب بدلاً من تدمير بياناتهم.",
+  "@archiveOrDeleteExamDialogBody": {
+    "placeholders": {
+      "title": { "type": "String" },
+      "count": { "type": "int" }
+    }
+  },
+  "archiveExamConfirmButton": "أرشفة وإخفاء الاختبار",
+  "examDeletedSuccessToast": "تم حذف الاختبار نهائياً بنجاح",
+  "examArchivedSuccessToast": "تم أرشفة الاختبار وإخفاؤه بنجاح مع الحفاظ على درجات الطلاب",
+  "studentAttemptsGroupCount": "{count} محاولات",
+  "@studentAttemptsGroupCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "singleStudentAttemptBadge": "محاولة واحدة",
+  "highestScoreBadge": "الأعلى: {score}",
+  "@highestScoreBadge": {
+    "placeholders": {
+      "score": { "type": "String" }
+    }
+  },
+  "attemptNumberLabel": "محاولة {number}",
+  "@attemptNumberLabel": {
+    "placeholders": {
+      "number": { "type": "int" }
+    }
+  },
+  "allAttemptsHistoryHeader": "سجل محاولات الطالب ({count}):",
+  "@allAttemptsHistoryHeader": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "studentsCountSummary": "{count} طالب خاضوا الاختبار",
+  "@studentsCountSummary": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "totalAttemptsSummary": "{count} محاولة مسجلة",
+  "@totalAttemptsSummary": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "editDraftExamTitle": "تعديل مسودة الاختبار",
+  "editDraftQuestionsAction": "تعديل الأسئلة والمحتوى",
+  "editExamSettingsAction": "الإعدادات السريعة",
+  "saveExamDraftChanges": "حفظ تعديلات المسودة",
+  "examDraftUpdatedSuccess": "تم تحديث مسودة الاختبار وأسئلته بنجاح",
+  "examDraftPublishedSuccess": "تم تحديث الاختبار ونشره للطلاب بنجاح",
+  "examUpdateFailed": "فشل تحديث الاختبار: {error}",
+  "@examUpdateFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "editQuestionsNow": "تعديل الأسئلة الآن",
+  "cannotEditPublishedExamWithAttempts": "لا يمكن تعديل أسئلة اختبار تم أداؤه من قِبل الطلاب حفاظاً على نزاهة الدرجات. يمكنك إنشاء نسخة جديدة (v2) بدلاً من ذلك.",
+  "collapseAllQuestions": "طي كافة الأسئلة",
+  "expandAllQuestions": "توسيع كافة الأسئلة",
+  "questionSummaryEmpty": "لم يتم كتابة نص للسؤال بعد",
+  "hasAttachedImage": "مرفق صورة",
+  "clickToEditQuestion": "انقر لتوسيع وتعديل السؤال",
+  "videoSecurityPausedNotice": "تم إيقاف التشغيل مؤقتاً لحماية المحتوى التعليمي. يُرجى البقاء داخل نافذة المشغل وعدم مشاركة الشاشة.",
+  "resumePlaybackAction": "استئناف المشاهدة",
+  "examSecurityAlertTitle": "تنبيه أمني: رصد مغادرة نافذة الامتحان",
+  "examSecurityAlertMessage": "يُمنع منعاً باتاً مغادرة نافذة الامتحان أو التبديل بين التطبيقات أو مشاركة الشاشة. تم تسجيل هذه المحاولة في سجل النشاط الأكاديمي.",
+  "examSecurityViolationsCount": "مخالفة رقم {current} من أصل {max} محاولات مسموحة",
+  "@examSecurityViolationsCount": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "max": { "type": "int" }
+    }
+  },
+  "examPrivacyShieldNotice": "تم حجب أسئلة الامتحان أثناء عدم التركيز على النافذة لحماية النزاهة ومنع التسريب.",
+  "returnToExamAction": "العودة للاختبار ومتابعة الحل",
+  "examAutoSubmittedDueToViolations": "تم تسليم الامتحان تلقائياً لتجاوز الحد الأقصى لمخالفات مغادرة النافذة.",
+  "videoFileTooLargeForWeb": "حجم الفيديو ({sizeMb} ميجابايت) يتجاوز الحد الأقصى لذاكرة المتصفح (2 جيجابايت). يُرجى تقليل الـ Bitrate في برنامج المونتاج (CapCut) ليكون حجم الملف أقل من 1.5 جيجابايت وتسريع الرفع.",
+  "@videoFileTooLargeForWeb": {
+    "placeholders": {
+      "sizeMb": { "type": "String" }
+    }
+  },
+  "videoFileMemoryError": "تعذر قراءة بيانات الفيديو داخل المتصفح ({sizeMb} ميجابايت). قد يكون حجم الملف كبيراً جداً على ذاكرة المتصفح. يُرجى تصدير الفيديو بحجم أصغر من 1.5 جيجابايت.",
+  "@videoFileMemoryError": {
+    "placeholders": {
+      "sizeMb": { "type": "String" }
+    }
+  },
+  "longVideoExportTip": "💡 للمحاضرات الطويلة (أكثر من ساعة): اضبط Bitrate في برنامج المونتاج على 2,500 Kbps ليكون حجم الملف في حدود 1 جيجابايت لتفادي قيود ذاكرة المتصفح وضمان رفع سريع وسلس.",
+  "@longVideoExportTip": {},
+  "examParentDispatchHubTitle": "نتائج الاختبار وإرسال درجات أولياء الأمور",
+  "@examParentDispatchHubTitle": {},
+  "examParentDispatchHeroTitle": "إرسال النتائج لأولياء الأمور عبر واتساب",
+  "@examParentDispatchHeroTitle": {},
+  "examParentDispatchHeroSubtitle": "أخطر أولياء الأمور بنتائج أبنائهم فوراً بضغطة زر واحدة ورسائل مخصصة",
+  "@examParentDispatchHeroSubtitle": {},
+  "openParentDispatchHubAction": "فتح لوحة الإرسال",
+  "@openParentDispatchHubAction": {},
+  "sendScoreToParentAction": "إرسال لولي الأمر",
+  "@sendScoreToParentAction": {},
+  "resendToParentAction": "إعادة الإرسال",
+  "@resendToParentAction": {},
+  "dispatchSentBadge": "تم الإرسال",
+  "@dispatchSentBadge": {},
+  "missingParentPhonePrompt": "لا يوجد رقم ولي أمر",
+  "@missingParentPhonePrompt": {},
+  "examStatusNotTakenShort": "لم يؤدِ الاختبار",
+  "@examStatusNotTakenShort": {},
+  "awaitingExamSubmissionNotice": "بانتظار أداء الاختبار",
+  "@awaitingExamSubmissionNotice": {},
+  "examStudentScoreLabel": "النتيجة: {score}",
+  "@examStudentScoreLabel": {
+    "placeholders": {
+      "score": { "type": "String" }
+    }
+  },
+  "examStudentNotTakenNotice": "الطالب لم يؤدِ الاختبار بعد",
+  "@examStudentNotTakenNotice": {},
+  "examStudentNotTakenHint": "يمكنك إرسال تنبيه ودي لولي الأمر لمتابعة الطالب وحثه على أداء الاختبار.",
+  "@examStudentNotTakenHint": {},
+  "examRatingExcellent": "أداء ممتاز ومستوى استثنائي 🌟",
+  "@examRatingExcellent": {},
+  "examRatingVeryGood": "مستوى جيد جداً واجتياز ناجح 👍",
+  "@examRatingVeryGood": {},
+  "examRatingNeedsFocus": "يحتاج إلى مضاعفة التركيز والمراجعة ⚠️",
+  "@examRatingNeedsFocus": {},
+  "dispatchRecipientPhoneTitle": "الرقم المستهدف لإرسال الإشعار:",
+  "@dispatchRecipientPhoneTitle": {},
+  "parentPhoneRecipientLabel": "رقم ولي الأمر",
+  "@parentPhoneRecipientLabel": {},
+  "studentPhoneRecipientLabel": "رقم الطالب",
+  "@studentPhoneRecipientLabel": {},
+  "enterParentPhoneHint": "أدخل رقم هاتف ولي الأمر (واتساب)...",
+  "@enterParentPhoneHint": {},
+  "savePhoneAction": "حفظ الرقم",
+  "@savePhoneAction": {},
+  "parentPhoneSavedSuccess": "تم حفظ رقم هاتف ولي الأمر بنجاح",
+  "@parentPhoneSavedSuccess": {},
+  "parentPhoneSaveFailed": "فشل حفظ رقم هاتف ولي الأمر",
+  "@parentPhoneSaveFailed": {},
+  "quickTeacherPresetsTitle": "الملاحظات والتوجيهات السريعة للمدرس (نقرة واحدة):",
+  "@quickTeacherPresetsTitle": {},
+  "customTeacherNoteHint": "اكتب ملاحظة أو توجيه خاص لولي الأمر (اختياري)...",
+  "@customTeacherNoteHint": {},
+  "liveWhatsAppPreviewTitle": "معاينة نص رسالة الواتساب:",
+  "@liveWhatsAppPreviewTitle": {},
+  "copyMessageAction": "نسخ نص الرسالة",
+  "@copyMessageAction": {},
+  "messageCopiedToast": "تم نسخ نص الرسالة إلى الحافظة",
+  "@messageCopiedToast": {},
+  "copyActionShort": "نسخ",
+  "@copyActionShort": {},
+  "sendViaWhatsAppNowAction": "إرسال عبر واتساب الآن",
+  "@sendViaWhatsAppNowAction": {},
+  "missingPhoneWarningToast": "يرجى إدخال رقم الهاتف أولاً لإرسال الرسالة",
+  "@missingPhoneWarningToast": {},
+  "whatsAppLaunchFailedToast": "تعذر فتح تطبيق واتساب، يمكنك نسخ الرسالة يدوياً",
+  "@whatsAppLaunchFailedToast": {},
+  "nextStudentInQueueAction": "التالي: {studentName} ➡️",
+  "@nextStudentInQueueAction": {
+    "placeholders": {
+      "studentName": { "type": "String" }
+    }
+  },
+  "copyRosterSummaryTooltip": "نسخ ملخص كشف الدرجات",
+  "@copyRosterSummaryTooltip": {},
+  "sequentialDispatchActionShort": "الإرسال المتتابع ⚡",
+  "@sequentialDispatchActionShort": {},
+  "rosterCopiedToast": "تم نسخ كشف درجات الاختبار بالكامل إلى الحافظة",
+  "@rosterCopiedToast": {},
+  "noMatchingStudentsFound": "لا يوجد طلاب مطابقين للبحث أو الفلتر",
+  "@noMatchingStudentsFound": {},
+  "sortOptionsTooltip": "خيارات الترتيب",
+  "@sortOptionsTooltip": {},
+  "sortHighestScoreFirst": "الأعلى درجة أولاً",
+  "@sortHighestScoreFirst": {},
+  "sortLowestScoreFirst": "الأقل درجة أولاً",
+  "@sortLowestScoreFirst": {},
+  "sortStudentNameAlphabetical": "حسب اسم الطالب (أبجدياً)",
+  "@sortStudentNameAlphabetical": {},
+  "sortLatestSubmittedFirst": "تاريخ التسليم الأحدث",
+  "@sortLatestSubmittedFirst": {},
+  "metricSubmissionsRateTitle": "نسبة التسليم",
+  "@metricSubmissionsRateTitle": {},
+  "metricAverageScoreTitle": "متوسط الدرجات",
+  "@metricAverageScoreTitle": {},
+  "metricPassRateTitle": "نسبة النجاح",
+  "@metricPassRateTitle": {},
+  "metricWhatsAppDispatchedTitle": "إشعارات أولياء الأمور",
+  "@metricWhatsAppDispatchedTitle": {},
+  "notifiedBadgeShort": "تم إخطارهم",
+  "@notifiedBadgeShort": {},
+  "searchStudentOrPhoneHint": "ابحث باسم الطالب أو رقم الهاتف أو المجموعة...",
+  "@searchStudentOrPhoneHint": {},
+  "filterAllRoster": "الكل ({count})",
+  "@filterAllRoster": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "filterSubmittedRoster": "تم التسليم ({count})",
+  "@filterSubmittedRoster": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "filterPassedRoster": "اجتاز بنجاح ({count})",
+  "@filterPassedRoster": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "filterNeedsAttentionRoster": "يحتاج متابعة ({count})",
+  "@filterNeedsAttentionRoster": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "filterNotStartedRoster": "لم يؤدِ الاختبار ({count})",
+  "@filterNotStartedRoster": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "filterUnnotifiedRoster": "بانتظار الإرسال ({count})",
+  "@filterUnnotifiedRoster": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "filterNotifiedRoster": "تم الإرسال ({count})",
+  "@filterNotifiedRoster": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "filterMissingPhoneRoster": "بدون رقم ولي أمر",
+  "@filterMissingPhoneRoster": {},
+  "editParentPhoneDialogTitle": "تعديل رقم ولي أمر الطالب: {studentName}",
+  "@editParentPhoneDialogTitle": {
+    "placeholders": {
+      "studentName": { "type": "String" }
+    }
+  },
+  "editParentPhoneDialogBody": "أدخل رقم هاتف ولي الأمر (واتساب) لربطه بحساب الطالب وإرسال التقارير.",
+  "@editParentPhoneDialogBody": {},
+  "saveActionShort": "حفظ",
+  "@saveActionShort": {}
 }

@@ -4,10 +4,12 @@ import 'package:edu_saas/core/localization/generated/app_localizations.dart';
 import 'package:edu_saas/core/theme/app_theme.dart';
 import 'package:edu_saas/core/utils/cache_manager.dart';
 import 'package:edu_saas/features/exams/domain/entities/exam_entity.dart';
+import 'package:edu_saas/features/exams/domain/entities/exam_parent_dispatch_entity.dart';
 import 'package:edu_saas/features/exams/domain/entities/mistake_entities.dart';
 import 'package:edu_saas/features/exams/domain/repositories/exams_repository.dart';
 import 'package:edu_saas/features/exams/presentation/cubit/exams_cubit.dart';
 import 'package:edu_saas/features/exams/presentation/cubit/exams_state.dart';
+import 'package:edu_saas/features/exams/presentation/pages/create_exam_page.dart';
 import 'package:edu_saas/features/exams/presentation/pages/exam_intro_page.dart';
 import 'package:edu_saas/features/exams/presentation/pages/exam_result_page.dart';
 import 'package:edu_saas/features/exams/presentation/pages/student_exams_page.dart';
@@ -109,6 +111,51 @@ class FakeExamsRepository implements ExamsRepository {
   }
 
   @override
+  Future<Result<ExamEntity>> updateExam({
+    required String examId,
+    required String title,
+    int? durationMinutes,
+    int? maxScore,
+    int? passingScore,
+    bool? shuffleQuestions,
+    bool? showResult,
+    bool? allowRetake,
+    DateTime? startAt,
+    DateTime? endAt,
+    bool? isPublished,
+  }) async {
+    if (shouldFail) return FailureResult(ServerFailure(failureMessage));
+    final exam = mockExams.firstWhere(
+      (e) => e.id == examId,
+      orElse: () => _sampleExam(),
+    );
+    return Success(exam);
+  }
+
+  @override
+  Future<Result<ExamEntity>> updateDraftExamQuestions({
+    required String examId,
+    required String title,
+    int? durationMinutes,
+    int? maxScore,
+    int? passingScore,
+    bool? shuffleQuestions,
+    bool? showResult,
+    bool? allowRetake,
+    DateTime? startAt,
+    DateTime? endAt,
+    required List<ExamQuestionEntity> questions,
+    bool? isPublished,
+  }) async {
+    if (shouldFail) return FailureResult(ServerFailure(failureMessage));
+    final exam = mockExams.firstWhere(
+      (e) => e.id == examId,
+      orElse: () => _sampleExam(),
+    );
+    return Success(exam);
+  }
+
+  @override
   Future<Result<ExamVersionEntity>> publishExamVersion(String versionId) async {
     if (shouldFail) return FailureResult(ServerFailure(failureMessage));
 
@@ -123,6 +170,26 @@ class FakeExamsRepository implements ExamsRepository {
     );
 
     return Success(updatedVersion);
+  }
+
+
+  @override
+  Future<Result<void>> unpublishExamVersion({
+    required String examId,
+    required String versionId,
+  }) async {
+    if (shouldFail) return FailureResult(ServerFailure(failureMessage));
+    final index = mockExams.indexWhere((e) => e.id == examId);
+    if (index != -1) {
+      final exam = mockExams[index];
+      if (exam.activeVersion != null) {
+        final updatedVersion = exam.activeVersion!.copyWith(
+          status: ExamStatus.draft,
+        );
+        mockExams[index] = exam.copyWith(activeVersion: updatedVersion);
+      }
+    }
+    return const Success(null);
   }
 
   @override
@@ -251,6 +318,72 @@ class FakeExamsRepository implements ExamsRepository {
         results: [],
       ),
     );
+  }
+
+  @override
+  Future<Result<List<Map<String, dynamic>>>> getGroupLessons(
+    String groupId,
+  ) async {
+    if (shouldFail) return FailureResult(ServerFailure(failureMessage));
+    return const Success([]);
+  }
+
+  @override
+  Future<Result<void>> linkExamToLesson({
+    required String examId,
+    required String lessonId,
+    required String groupId,
+  }) async {
+    if (shouldFail) return FailureResult(ServerFailure(failureMessage));
+    return const Success(null);
+  }
+
+  @override
+  Future<Result<void>> unlinkExamFromLesson({
+    required String examId,
+    required String groupId,
+    bool makeGeneralExam = false,
+  }) async {
+    if (shouldFail) return FailureResult(ServerFailure(failureMessage));
+    return const Success(null);
+  }
+
+  @override
+  Future<Result<void>> convertExamType({
+    required String examId,
+    required String contentId,
+    required bool toLectureExam,
+    required String groupId,
+  }) async {
+    if (shouldFail) return FailureResult(ServerFailure(failureMessage));
+    return const Success(null);
+  }
+
+  @override
+  Future<Result<bool>> deleteExam({
+    required String examId,
+    bool force = false,
+  }) async {
+    if (shouldFail) return FailureResult(ServerFailure(failureMessage));
+    mockExams.removeWhere((e) => e.id == examId);
+    return const Success(true);
+  }
+
+  @override
+  Future<Result<ExamParentDispatchRosterEntity>> getExamParentDispatchRoster(
+    String examId,
+  ) async {
+    if (shouldFail) return FailureResult(ServerFailure(failureMessage));
+    return const FailureResult(ServerFailure('Not implemented'));
+  }
+
+  @override
+  Future<Result<bool>> updateStudentParentPhone({
+    required String studentId,
+    required String parentPhone,
+  }) async {
+    if (shouldFail) return FailureResult(ServerFailure(failureMessage));
+    return const Success(true);
   }
 
   static ExamEntity _sampleExam({
@@ -671,6 +804,47 @@ void main() {
 
       await sub.cancel();
     });
+
+    test('deleteExam removes exam and updates TeacherExamsLoaded state', () async {
+      final exam1 = FakeExamsRepository._sampleExam(id: 'exam-to-delete');
+      final exam2 = FakeExamsRepository._sampleExam(id: 'exam-to-keep');
+      fakeRepository.mockExams = [exam1, exam2];
+
+      await examsCubit.loadGroupExams('group-1');
+      expect(examsCubit.state, isA<TeacherExamsLoaded>());
+      final initialLoaded = examsCubit.state as TeacherExamsLoaded;
+      expect(initialLoaded.exams.length, 2);
+
+      final success = await examsCubit.deleteExam(examId: 'exam-to-delete');
+      expect(success, isTrue);
+
+      expect(examsCubit.state, isA<TeacherExamsLoaded>());
+      final afterDelete = examsCubit.state as TeacherExamsLoaded;
+      expect(afterDelete.exams.length, 1);
+      expect(afterDelete.exams.first.id, 'exam-to-keep');
+    });
+
+    test('unpublishVersion reverts active version to draft', () async {
+      final sample = FakeExamsRepository._sampleExam(
+        id: 'exam-published',
+        status: ExamStatus.published,
+      );
+      fakeRepository.mockExams = [sample];
+
+      await examsCubit.loadGroupExams('group-1');
+      expect(examsCubit.state, isA<TeacherExamsLoaded>());
+
+      final success = await examsCubit.unpublishVersion(
+        examId: 'exam-published',
+        versionId: 'version-1',
+      );
+      expect(success, isTrue);
+
+      final updatedExam = fakeRepository.mockExams.firstWhere(
+        (e) => e.id == 'exam-published',
+      );
+      expect(updatedExam.activeVersion?.status, ExamStatus.draft);
+    });
   });
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -911,6 +1085,39 @@ void main() {
         final success = await examsCubit.startExamTaking(examWithoutQuestions);
         expect(success, isFalse);
         expect(examsCubit.state, isA<ExamsError>());
+      },
+    );
+
+    testWidgets(
+      'CreateExamPage renders default question points input and apply to all button',
+      (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: const [Locale('ar')],
+            locale: const Locale('ar'),
+            home: BlocProvider.value(
+              value: examsCubit,
+              child: const Scaffold(
+                body: CreateExamPage(
+                  groupId: 'group-1',
+                  groupName: 'SAT Math',
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        // Verify the label for uniform question points exists
+        expect(find.text('درجة كل سؤال'), findsWidgets);
+        expect(find.text('تطبيق على الكل'), findsWidgets);
       },
     );
   });

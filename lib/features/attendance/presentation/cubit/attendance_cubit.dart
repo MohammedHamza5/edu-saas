@@ -84,6 +84,7 @@ class AttendanceCubit extends Cubit<AttendanceState> {
       groupId: currentState.groupId,
       date: currentState.selectedDate,
       lectureContentId: contentId,
+      forceRefresh: true,
     );
   }
 
@@ -128,6 +129,28 @@ class AttendanceCubit extends Cubit<AttendanceState> {
 
     emit(currentState.copyWith(students: updatedStudents, saveSuccess: false));
   }
+
+  /// Updates and automatically persists an academic note for a student in background
+  Future<void> updateStudentNote(String studentId, String note) async {
+    final currentState = state;
+    if (currentState is! TeacherAttendanceLoaded) return;
+
+    final updatedStudents = currentState.students.map((student) {
+      if (student.studentId == studentId) {
+        return student.copyWith(note: note);
+      }
+      return student;
+    }).toList();
+
+    emit(currentState.copyWith(students: updatedStudents));
+
+    await _repository.saveGroupAttendance(
+      groupId: currentState.groupId,
+      date: currentState.selectedDate,
+      items: updatedStudents,
+    );
+  }
+
 
   /// Quickly marks all students with the given status (e.g., "Mark All Present")
   void markAll(AttendanceStatus status) {

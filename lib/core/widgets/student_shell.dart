@@ -366,6 +366,8 @@ class _StudentShellState extends State<StudentShell> {
       onNavigationIndexChanged: (idx) => _onNavigationChanged(context, idx),
       sidebarHeader: _buildSidebarHeader(context),
       sidebarFooter: _buildSidebarFooter(context),
+      collapsedSidebarHeader: _buildCollapsedSidebarHeader(context),
+      collapsedSidebarFooter: _buildCollapsedSidebarFooter(context),
       body: widget.child,
     );
   }
@@ -391,6 +393,31 @@ class _StudentShellState extends State<StudentShell> {
         subtitle:
             '${branding.localizedBrandName(context)} • ${context.l10n.academicMathematics}',
         nameColor: Colors.white,
+      ),
+    );
+  }
+
+  Widget _buildCollapsedSidebarHeader(BuildContext context) {
+    final branding = (() {
+      try {
+        return context.watch<TenantThemeCubit>().state;
+      } catch (_) {
+        return TenantRegistry.defaultBranding;
+      }
+    })();
+
+    return Tooltip(
+      message:
+          '${context.l10n.studentPortal} • ${branding.localizedBrandName(context)}',
+      preferBelow: false,
+      child: InkWell(
+        onTap: () => context.go(AppRoutes.studentDashboard),
+        mouseCursor: SystemMouseCursors.click,
+        borderRadius: BorderRadius.circular(10),
+        child: const AppLogo.badge(
+          size: 38,
+          withGlow: true,
+        ),
       ),
     );
   }
@@ -438,38 +465,73 @@ class _StudentShellState extends State<StudentShell> {
             icon: const Icon(Icons.logout_rounded, size: 18),
             tooltip: context.l10n.logout,
             color: const Color(0xFFF87171),
-            onPressed: () async {
-              final confirmed = await showDialog<bool>(
-                context: context,
-                builder: (ctx) => AlertDialog(
-                  title: Text(ctx.l10n.logoutDialogTitle),
-                  content: Text(ctx.l10n.logoutDialogContent),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.of(ctx).pop(false),
-                      child: Text(ctx.l10n.cancel),
-                    ),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.error,
-                        foregroundColor: Colors.white,
-                      ),
-                      onPressed: () => Navigator.of(ctx).pop(true),
-                      child: Text(ctx.l10n.logout),
-                    ),
-                  ],
-                ),
-              );
-              if (confirmed == true && context.mounted) {
-                await context.read<AuthCubit>().logout();
-                if (context.mounted) {
-                  context.go(AppRoutes.login);
-                }
-              }
-            },
+            onPressed: () => _handleLogout(context),
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildCollapsedSidebarFooter(BuildContext context) {
+    final userEmail =
+        SupabaseService.currentUser?.email ?? context.l10n.roleStudent;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Tooltip(
+          message: userEmail,
+          preferBelow: false,
+          child: const CircleAvatar(
+            radius: 16,
+            backgroundColor: Color(0xFF334155),
+            child: Icon(
+              Icons.school_rounded,
+              size: 18,
+              color: Color(0xFF38BDF8),
+            ),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.s10),
+        const LanguageSwitcherButton(compact: true),
+        const SizedBox(height: AppSpacing.s6),
+        IconButton(
+          icon: const Icon(Icons.logout_rounded, size: 18),
+          tooltip: context.l10n.logout,
+          color: const Color(0xFFF87171),
+          onPressed: () => _handleLogout(context),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _handleLogout(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(ctx.l10n.logoutDialogTitle),
+        content: Text(ctx.l10n.logoutDialogContent),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(ctx.l10n.cancel),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.error,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(ctx.l10n.logout),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && context.mounted) {
+      await context.read<AuthCubit>().logout();
+      if (context.mounted) {
+        context.go(AppRoutes.login);
+      }
+    }
   }
 }

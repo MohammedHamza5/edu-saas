@@ -497,6 +497,8 @@ class _VideoBankVideoCardState extends State<VideoBankVideoCard> {
                   if (v.thumbnailUrl != null)
                     CachedNetworkImage(
                       imageUrl: v.thumbnailUrl!,
+                      memCacheWidth: 400,
+                      maxWidthDiskCache: 600,
                       fit: BoxFit.cover,
                       errorWidget: (_, __, ___) => _thumbFallback(),
                     )

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/network/supabase_service.dart';
 import '../../../../core/utils/app_logger.dart';
+import '../models/student_academic_report_model.dart';
 import '../models/student_model.dart';
 
 /// All DB calls for the students feature.
@@ -39,6 +40,12 @@ abstract interface class StudentsRemoteDataSource {
 
   /// Permanently deletes a student and all cascading records via delete_student RPC.
   Future<void> deleteStudent(String studentId);
+
+  /// Verified academic progress report for WhatsApp and parent communication.
+  Future<StudentAcademicReportModel> getStudentAcademicReport(
+    String studentId, {
+    int? days,
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -352,5 +359,46 @@ class StudentsRemoteDataSourceImpl implements StudentsRemoteDataSource {
   @override
   Future<void> deleteStudent(String studentId) async {
     await _c.rpc<void>('delete_student', params: {'p_student_id': studentId});
+  }
+
+  @override
+  Future<StudentAcademicReportModel> getStudentAcademicReport(
+    String studentId, {
+    int? days,
+  }) async {
+    try {
+      final params = <String, dynamic>{
+        'p_student_id': studentId,
+        if (days != null) 'p_days': days,
+      };
+      final result = await _c.rpc<dynamic>(
+        'get_student_academic_report',
+        params: params,
+      );
+      if (result != null) {
+        final Map<String, dynamic> data;
+        if (result is Map) {
+          data = Map<String, dynamic>.from(result);
+        } else if (result is String) {
+          data = Map<String, dynamic>.from(jsonDecode(result) as Map);
+        } else {
+          data = <String, dynamic>{};
+        }
+        return StudentAcademicReportModel.fromJson(
+          data,
+          fallbackStudentId: studentId,
+        );
+      }
+    } catch (e) {
+      AppLogger.e(
+        'StudentsRemoteDataSource',
+        'Failed to fetch academic report ($studentId): $e',
+      );
+    }
+    return StudentAcademicReportModel(
+      studentId: studentId,
+      studentName: '',
+      periodDays: days,
+    );
   }
 }

@@ -656,7 +656,9 @@ class ContentCubit extends Cubit<ContentState> {
         }
         return true;
       case FailureResult(:final failure):
-        emit(ContentError(failure.message));
+        if (state is! ContentLoaded) {
+          emit(ContentError(failure.message));
+        }
         return false;
     }
   }
@@ -734,4 +736,45 @@ class ContentCubit extends Cubit<ContentState> {
         return false;
     }
   }
+
+  /// Reorders chapters within a course/group
+  Future<bool> reorderCourseChapters({
+    required String groupId,
+    required List<String> chapterIdsInOrder,
+  }) async {
+    final currentState = state;
+    if (currentState is ContentLoaded) {
+      // Optimistic reorder of chapters in UI
+      final chapterMap = {for (final c in currentState.chapters) c.id: c};
+      final reordered = <ChapterEntity>[];
+      for (final id in chapterIdsInOrder) {
+        final ch = chapterMap[id];
+        if (ch != null) {
+          reordered.add(ch);
+        }
+      }
+      for (final c in currentState.chapters) {
+        if (!chapterIdsInOrder.contains(c.id)) {
+          reordered.add(c);
+        }
+      }
+      emit(currentState.copyWith(chapters: reordered));
+    }
+
+    final result = await _repository.reorderCourseChapters(
+      groupId: groupId,
+      chapterIdsInOrder: chapterIdsInOrder,
+    );
+    switch (result) {
+      case Success():
+        AppCache.content.invalidatePrefix(groupId);
+        await loadGroupContent(groupId, forceRefresh: true);
+        return true;
+      case FailureResult(:final failure):
+        emit(ContentError(failure.message));
+        await loadGroupContent(groupId, forceRefresh: true);
+        return false;
+    }
+  }
 }
+

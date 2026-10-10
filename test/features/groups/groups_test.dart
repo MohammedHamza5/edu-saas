@@ -12,6 +12,7 @@ import 'package:edu_saas/features/groups/presentation/pages/groups_list_page.dar
 import 'package:edu_saas/features/groups/presentation/widgets/add_member_dialog.dart';
 import 'package:edu_saas/features/groups/presentation/widgets/create_group_dialog.dart';
 import 'package:edu_saas/features/students/domain/entities/student_360_entity.dart';
+import 'package:edu_saas/features/students/domain/entities/student_academic_report_entity.dart';
 import 'package:edu_saas/features/students/domain/entities/student_entity.dart';
 import 'package:edu_saas/features/students/domain/repositories/students_repository.dart';
 import 'package:flutter/material.dart';
@@ -64,6 +65,18 @@ class FakeStudentsRepository implements StudentsRepository {
   @override
   Future<Result<void>> deleteStudent(String studentId) async =>
       const Success(null);
+
+  @override
+  Future<Result<StudentAcademicReportEntity>> getStudentAcademicReport(
+    String studentId, {
+    int? days,
+  }) async => Success(
+    StudentAcademicReportEntity(
+      studentId: studentId,
+      studentName: 'Test Student',
+      periodDays: days,
+    ),
+  );
 }
 
 class FakeGroupsRepository implements GroupsRepository {

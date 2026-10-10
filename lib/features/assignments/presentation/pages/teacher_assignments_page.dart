@@ -21,6 +21,7 @@ import '../../../groups/domain/entities/group_entity.dart';
 import '../../../groups/presentation/cubit/groups_cubit.dart';
 import '../../../groups/presentation/cubit/groups_state.dart';
 import '../widgets/assignment_card.dart';
+import '../widgets/edit_assignment_dialog.dart';
 import '../widgets/submission_tile.dart';
 import 'grade_submission_page.dart';
 
@@ -432,6 +433,14 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.edit_outlined, size: 20),
+                                  tooltip: context.l10n.editAssignmentAction,
+                                  onPressed: () {
+                                    Navigator.of(ctx).pop();
+                                    EditAssignmentDialog.show(context, assignment);
+                                  },
                                 ),
                                 IconButton(
                                   icon: const Icon(Icons.close),
@@ -938,6 +947,8 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
                                     isTeacher: true,
                                     onTap: () =>
                                         _showSubmissionsSheet(assignment),
+                                    onEdit: () =>
+                                        EditAssignmentDialog.show(context, assignment),
                                   );
                                 }).toList(),
                               ),

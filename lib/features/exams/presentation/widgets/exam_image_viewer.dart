@@ -60,6 +60,9 @@ class ExamImageViewer extends StatelessWidget {
                         ),
                         child: CachedNetworkImage(
                           imageUrl: imageUrl,
+                          memCacheWidth: 800,
+                          memCacheHeight: 800,
+                          maxWidthDiskCache: 1200,
                           fit: BoxFit.contain,
                           placeholder: (ctx, _) => Container(
                             height: 180,

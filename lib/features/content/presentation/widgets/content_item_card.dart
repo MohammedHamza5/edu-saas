@@ -311,7 +311,8 @@ class ContentItemCard extends StatelessWidget {
                 ],
 
                 // Associated Lesson Quiz Gating Banner
-                if (content.associatedExamTitle != null) ...[
+                if (content.attachedExams.isNotEmpty ||
+                    content.associatedExamTitle != null) ...[
                   const SizedBox(height: AppSpacing.s8),
                   _buildAssociatedExamBanner(context),
                 ],
@@ -704,7 +705,8 @@ class ContentItemCard extends StatelessWidget {
   Widget _buildPillarsRow(BuildContext context) {
     final hasVideo = content.type == ContentType.video || content.hasVideo;
     final hasHandout = content.file != null;
-    final hasQuiz = content.associatedExamId != null;
+    final hasQuiz =
+        content.attachedExams.isNotEmpty || content.associatedExamId != null;
 
     return Container(
       margin: const EdgeInsets.only(top: AppSpacing.s8),
@@ -800,7 +802,13 @@ class ContentItemCard extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  content.associatedExamTitle ?? context.l10n.quizPrefix,
+                  content.attachedExams.length > 1
+                      ? '${content.attachedExams.where((e) => e.isPassed).length}/${content.attachedExams.length} ${context.l10n.attachedQuizzesSection}'
+                      : (content.attachedExams.isNotEmpty &&
+                              content.attachedExams.first.examTitle.isNotEmpty
+                          ? content.attachedExams.first.examTitle
+                          : (content.associatedExamTitle ??
+                              context.l10n.quizPrefix)),
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.bold,

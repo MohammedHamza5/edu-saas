@@ -80,7 +80,7 @@ class SubmissionTile extends StatelessWidget {
                         ),
                         child: Text(
                           context.l10n.attemptNumberLabel(
-                            submission.attemptNumber.toString(),
+                            submission.attemptNumber,
                           ),
                           style: const TextStyle(
                             fontSize: 10,

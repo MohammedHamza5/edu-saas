@@ -19,8 +19,9 @@ class ExamQuestionModel extends ExamQuestionEntity {
     final rawOptions = json['options'] ?? json['question_options'];
     final optionsList =
         (rawOptions as List<dynamic>?)
-            ?.map(
-              (o) => QuestionOptionModel.fromJson(o as Map<String, dynamic>),
+            ?.whereType<Map<dynamic, dynamic>>()
+            .map(
+              (o) => QuestionOptionModel.fromJson(Map<String, dynamic>.from(o)),
             )
             .toList() ??
         <QuestionOptionModel>[];

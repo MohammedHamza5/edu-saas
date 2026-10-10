@@ -70,7 +70,8 @@ class _BunnyEmbedPlayerWeb extends StatefulWidget {
   State<_BunnyEmbedPlayerWeb> createState() => _BunnyEmbedPlayerWebState();
 }
 
-class _BunnyEmbedPlayerWebState extends State<_BunnyEmbedPlayerWeb> {
+class _BunnyEmbedPlayerWebState extends State<_BunnyEmbedPlayerWeb>
+    with WidgetsBindingObserver {
   late final String _viewId;
   late final String _viewType;
   bool _isPlaying = false;
@@ -84,6 +85,7 @@ class _BunnyEmbedPlayerWebState extends State<_BunnyEmbedPlayerWeb> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _viewId = 'bunny_${DateTime.now().microsecondsSinceEpoch}';
     _viewType = 'bunny-player-view-$_viewId';
 
@@ -207,8 +209,26 @@ class _BunnyEmbedPlayerWebState extends State<_BunnyEmbedPlayerWeb> {
     } catch (_) {}
   }
 
+  void pause() {
+    try {
+      _bunnyPostMessage(_viewId.toJS, 'pause'.toJS, null);
+    } catch (_) {}
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden) {
+      if (_isPlaying) {
+        pause();
+      }
+    }
+  }
+
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _watchHeartbeatTimer?.cancel();
     try {
       _onBunnyPlayerMessage = null;

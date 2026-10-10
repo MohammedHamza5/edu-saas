@@ -121,7 +121,7 @@ class AppLogo extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           emblem,
-          const SizedBox(width: 12),
+          const SizedBox(width: 14),
           Flexible(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -132,24 +132,22 @@ class AppLogo extends StatelessWidget {
                   style: theme.textTheme.titleMedium?.copyWith(
                     color: effectiveNameColor,
                     fontWeight: FontWeight.w800,
-                    letterSpacing: -0.3,
-                    height: 1.2,
+                    letterSpacing: -0.2,
+                    height: 1.35,
+                    fontSize: 13.5,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 if (subtitle != null) ...[
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 5),
                   Text(
                     subtitle!,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color:
-                          theme.textTheme.bodySmall?.color?.withValues(
-                            alpha: 0.7,
-                          ) ??
-                          effectivePrimary.withValues(alpha: 0.7),
+                      color: const Color(0xFF94A3B8),
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
+                      height: 1.35,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -167,7 +165,7 @@ class AppLogo extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         emblem,
-        SizedBox(height: size * 0.16),
+        SizedBox(height: size * 0.20),
         Text(
           effectiveName,
           textAlign: TextAlign.center,
@@ -175,19 +173,20 @@ class AppLogo extends StatelessWidget {
             color: effectiveNameColor,
             fontSize: size * 0.26,
             fontWeight: FontWeight.w800,
-            letterSpacing: -0.5,
-            height: 1.1,
+            letterSpacing: -0.4,
+            height: 1.25,
           ),
         ),
         if (subtitle != null) ...[
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
           Text(
             subtitle!,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: effectivePrimary.withValues(alpha: 0.75),
+              color: effectivePrimary.withValues(alpha: 0.8),
               fontSize: size * 0.16,
               fontWeight: FontWeight.w500,
+              height: 1.35,
             ),
           ),
         ],

@@ -18,6 +18,8 @@ import '../cubit/content_cubit.dart';
 import '../cubit/content_state.dart';
 
 import '../widgets/course_lesson_tile.dart';
+import '../widgets/chapter_analytics_sheet.dart';
+import '../widgets/group_analytics_sheet.dart';
 import '../../../../core/widgets/teacher_group_filter_bar.dart';
 import '../../../groups/domain/entities/group_entity.dart';
 import '../../../groups/presentation/cubit/groups_cubit.dart';
@@ -49,6 +51,75 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
   String? _selectedGroupName;
   bool _isCreatingChapter = false;
   bool _isEditingChapter = false;
+  final Set<String> _collapsedChapterIds = {};
+
+  void _toggleChapterCollapse(String chapterId) {
+    setState(() {
+      if (_collapsedChapterIds.contains(chapterId)) {
+        _collapsedChapterIds.remove(chapterId);
+      } else {
+        _collapsedChapterIds.add(chapterId);
+      }
+    });
+  }
+
+  void _toggleAllChaptersCollapse(List<ChapterEntity> allChapters) {
+    setState(() {
+      if (_collapsedChapterIds.length >= allChapters.length) {
+        _collapsedChapterIds.clear();
+      } else {
+        _collapsedChapterIds.addAll(allChapters.map((c) => c.id));
+      }
+    });
+  }
+
+  Future<void> _moveChapter(
+    List<ChapterEntity> allChapters,
+    int currentIndex,
+    int delta,
+  ) async {
+    if (_selectedGroupId == null) return;
+    final newIndex = currentIndex + delta;
+    if (newIndex < 0 || newIndex >= allChapters.length) return;
+
+    final reordered = List<ChapterEntity>.from(allChapters);
+    final movedItem = reordered.removeAt(currentIndex);
+    reordered.insert(newIndex, movedItem);
+
+    final idsInOrder = reordered.map((c) => c.id).toList();
+    await context.read<ContentCubit>().reorderCourseChapters(
+          groupId: _selectedGroupId!,
+          chapterIdsInOrder: idsInOrder,
+        );
+  }
+
+  void _openChapterAnalytics(
+    ChapterEntity chapter,
+    List<ContentEntity> chapterLessons,
+  ) {
+    if (_selectedGroupId == null) return;
+    ChapterAnalyticsSheet.show(
+      context,
+      groupId: _selectedGroupId!,
+      chapter: chapter,
+      chapterLessons: chapterLessons,
+    );
+  }
+
+  void _openGroupAnalytics(
+    List<ChapterEntity> chapters,
+    List<ContentEntity> lessons,
+  ) {
+    if (_selectedGroupId == null) return;
+    GroupAnalyticsSheet.show(
+      context,
+      groupId: _selectedGroupId!,
+      groupName: _selectedGroupName ?? '',
+      chapters: chapters,
+      lessons: lessons,
+    );
+  }
+
 
   @override
   void initState() {
@@ -373,6 +444,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
     try {
       final controller = TextEditingController(text: chapter.title);
       final l10n = context.l10n;
+      String? errorMessage;
 
       bool isSubmitting = false;
 
@@ -385,7 +457,30 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
               final text = controller.text.trim();
               if (text.isEmpty || isSubmitting) return;
 
-              setDialogState(() => isSubmitting = true);
+              if (text.toLowerCase() == chapter.title.trim().toLowerCase()) {
+                Navigator.of(dialogCtx).pop(true);
+                return;
+              }
+
+              final currentState = context.read<ContentCubit>().state;
+              if (currentState is ContentLoaded) {
+                final isDuplicate = currentState.chapters.any(
+                  (c) =>
+                      c.id != chapter.id &&
+                      c.title.trim().toLowerCase() == text.toLowerCase(),
+                );
+                if (isDuplicate) {
+                  setDialogState(() {
+                    errorMessage = l10n.chapterNameAlreadyExists;
+                  });
+                  return;
+                }
+              }
+
+              setDialogState(() {
+                isSubmitting = true;
+                errorMessage = null;
+              });
 
               final success = await context.read<ContentCubit>().updateChapter(
                 chapterId: chapter.id,
@@ -393,7 +488,14 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
               );
 
               if (dialogCtx.mounted) {
-                Navigator.of(dialogCtx).pop(success);
+                if (success) {
+                  Navigator.of(dialogCtx).pop(true);
+                } else {
+                  setDialogState(() {
+                    isSubmitting = false;
+                    errorMessage = l10n.chapterUpdateFailed;
+                  });
+                }
               }
             }
 
@@ -420,8 +522,14 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                     enabled: !isSubmitting,
                     decoration: InputDecoration(
                       labelText: l10n.chapterTitleLabel,
+                      errorText: errorMessage,
                       border: const OutlineInputBorder(),
                     ),
+                    onChanged: (_) {
+                      if (errorMessage != null) {
+                        setDialogState(() => errorMessage = null);
+                      }
+                    },
                     onSubmitted: (_) {
                       if (!isSubmitting) unawaited(submit());
                     },
@@ -719,11 +827,13 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
             ),
-      body: Center(
-        child: ResponsiveContainer(
-          maxWidth: ResponsiveBreakpoints.maxContentWidth,
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16),
-          child: Column(
+      body: ResponsiveContainer(
+        maxWidth: ResponsiveBreakpoints.maxContentWidth,
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.s20,
+          vertical: AppSpacing.s4,
+        ),
+        child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // 1. Group Selector Bar (Full width, top of page)
@@ -1061,9 +1171,36 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                               ),
                                             ),
                                             const SizedBox(
-                                              width: AppSpacing.s12,
+                                              width: AppSpacing.s8,
+                                            ),
+                                            IconButton(
+                                              tooltip: _collapsedChapterIds.length >= chapters.length
+                                                  ? context.l10n.expandAllChapters
+                                                  : context.l10n.collapseAllChapters,
+                                              icon: Icon(
+                                                _collapsedChapterIds.length >= chapters.length
+                                                    ? Icons.unfold_more_rounded
+                                                    : Icons.unfold_less_rounded,
+                                                size: 20,
+                                                color: AppColors.textPrimary,
+                                              ),
+                                              onPressed: () =>
+                                                  _toggleAllChaptersCollapse(chapters),
+                                            ),
+                                            const SizedBox(
+                                              width: AppSpacing.s4,
                                             ),
                                             bulkVisibilityMenu,
+                                            const SizedBox(
+                                              width: AppSpacing.s8,
+                                            ),
+                                            AppButton(
+                                              text: context.l10n.groupAnalytics,
+                                              icon: Icons.insights_rounded,
+                                              variant: AppButtonVariant.outlined,
+                                              onPressed: () =>
+                                                  _openGroupAnalytics(chapters, lessons),
+                                            ),
                                             const SizedBox(
                                               width: AppSpacing.s8,
                                             ),
@@ -1134,12 +1271,45 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                                         ),
                                                   ),
                                                 ),
+                                                IconButton(
+                                                  tooltip: _collapsedChapterIds.length >= chapters.length
+                                                      ? context.l10n.expandAllChapters
+                                                      : context.l10n.collapseAllChapters,
+                                                  icon: Icon(
+                                                    _collapsedChapterIds.length >= chapters.length
+                                                        ? Icons.unfold_more_rounded
+                                                        : Icons.unfold_less_rounded,
+                                                    size: 20,
+                                                    color: AppColors.textPrimary,
+                                                  ),
+                                                  onPressed: () =>
+                                                      _toggleAllChaptersCollapse(chapters),
+                                                ),
+                                                const SizedBox(width: 4),
                                                 bulkVisibilityMenu,
                                               ],
                                             ),
                                             const SizedBox(height: 8),
                                             Row(
                                               children: [
+                                                IconButton(
+                                                  onPressed: () =>
+                                                      _openGroupAnalytics(chapters, lessons),
+                                                  tooltip: context.l10n.groupAnalytics,
+                                                  icon: const Icon(
+                                                    Icons.insights_rounded,
+                                                    color: AppColors.primary,
+                                                    size: 20,
+                                                  ),
+                                                  style: IconButton.styleFrom(
+                                                    backgroundColor: AppColors.primary
+                                                        .withValues(alpha: 0.08),
+                                                    padding: const EdgeInsets.all(8),
+                                                  ),
+                                                ),
+                                                const SizedBox(
+                                                  width: AppSpacing.s6,
+                                                ),
                                                 Expanded(
                                                   child: AppButton(
                                                     text: context
@@ -1160,7 +1330,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                                   ),
                                                 ),
                                                 const SizedBox(
-                                                  width: AppSpacing.s8,
+                                                  width: AppSpacing.s6,
                                                 ),
                                                 Expanded(
                                                   child: AppButton(
@@ -1271,8 +1441,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
             ],
           ),
         ),
-      ),
-    );
+      );
   }
 
   Widget _buildBannerStat({
@@ -1280,20 +1449,32 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
     required String label,
     required Color color,
   }) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 14, color: color),
-        const SizedBox(width: 4),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: color,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: color.withValues(alpha: 0.28)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 13, color: color),
+          const SizedBox(width: 5),
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 11.5,
+                fontWeight: FontWeight.w600,
+                color: color,
+              ),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -1306,6 +1487,10 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
   }) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
+    final isCollapsed = _collapsedChapterIds.contains(chapter.id);
+    final chIdx = chapterNumber - 1;
+    final canMoveUp = chIdx > 0;
+    final canMoveDown = chIdx < allChapters.length - 1;
 
     return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.s16),
@@ -1325,379 +1510,401 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Chapter Header Bar
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.s16),
-            decoration: BoxDecoration(
-              color: AppColors.background.withValues(alpha: 0.6),
-              border: const Border(
-                bottom: BorderSide(color: AppColors.border),
-              ),
-            ),
-            child: Row(
-              children: [
-                // Chapter Number Badge
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                    border: Border.all(
-                      color: AppColors.primary.withValues(alpha: 0.25),
-                    ),
-                  ),
-                  child: Center(
-                    child: Text(
-                      chapterNumber.toString().padLeft(2, '0'),
-                      style: const TextStyle(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
+          // Chapter Header Bar (Clickable for quick expand/collapse)
+          InkWell(
+            onTap: () => _toggleChapterCollapse(chapter.id),
+            child: Container(
+              padding: const EdgeInsets.all(AppSpacing.s16),
+              decoration: BoxDecoration(
+                color: AppColors.background.withValues(alpha: 0.6),
+                border: Border(
+                  bottom: isCollapsed
+                      ? BorderSide.none
+                      : const BorderSide(color: AppColors.border),
                 ),
-                const SizedBox(width: AppSpacing.s12),
-
-                // Chapter Title & Counter
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        chapter.title,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
-                          fontSize: 15.5,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+              ),
+              child: Row(
+                children: [
+                  // Chapter Number Badge
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.12),
+                      borderRadius:
+                          BorderRadius.circular(AppSpacing.radiusMedium),
+                      border: Border.all(
+                        color: AppColors.primary.withValues(alpha: 0.25),
                       ),
-                      const SizedBox(height: 2),
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 1.5,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.surfaceVariant,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              l10n.chapterLessonsCount(chapterLessons.length),
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: AppColors.textSecondary,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
+                    ),
+                    child: Center(
+                      child: Text(
+                        chapterNumber.toString().padLeft(2, '0'),
+                        style: const TextStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.s12),
+
+                  // Chapter Title & Counter
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          chapter.title,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                            fontSize: 15.5,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 2),
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 1.5,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.surfaceVariant,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                l10n.chapterLessonsCount(chapterLessons.length),
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: AppColors.textSecondary,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: AppSpacing.s6),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 1.5,
-                            ),
-                            decoration: BoxDecoration(
-                              color: (chapter.isPublished
-                                      ? AppColors.success
-                                      : AppColors.warning)
-                                  .withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(4),
-                              border: Border.all(
+                            const SizedBox(width: AppSpacing.s6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 1.5,
+                              ),
+                              decoration: BoxDecoration(
                                 color: (chapter.isPublished
                                         ? AppColors.success
                                         : AppColors.warning)
-                                    .withValues(alpha: 0.3),
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  chapter.isPublished
-                                      ? Icons.visibility_rounded
-                                      : Icons.visibility_off_rounded,
-                                  size: 11,
-                                  color: chapter.isPublished
-                                      ? AppColors.success
-                                      : AppColors.warning,
+                                    .withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(4),
+                                border: Border.all(
+                                  color: (chapter.isPublished
+                                          ? AppColors.success
+                                          : AppColors.warning)
+                                      .withValues(alpha: 0.3),
                                 ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  chapter.isPublished
-                                      ? l10n.chapterVisibilityPublished
-                                      : l10n.chapterVisibilityDraft,
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    chapter.isPublished
+                                        ? Icons.visibility_rounded
+                                        : Icons.visibility_off_rounded,
+                                    size: 11,
                                     color: chapter.isPublished
                                         ? AppColors.success
                                         : AppColors.warning,
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    chapter.isPublished
+                                        ? l10n.chapterVisibilityPublished
+                                        : l10n.chapterVisibilityDraft,
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      color: chapter.isPublished
+                                          ? AppColors.success
+                                          : AppColors.warning,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.s8),
+
+                  // Actions: Move Chapter Up / Down
+                  IconButton(
+                    icon: const Icon(Icons.arrow_upward_rounded, size: 18),
+                    tooltip: l10n.moveChapterUp,
+                    visualDensity: VisualDensity.compact,
+                    onPressed: canMoveUp
+                        ? () => _moveChapter(allChapters, chIdx, -1)
+                        : null,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.arrow_downward_rounded, size: 18),
+                    tooltip: l10n.moveChapterDown,
+                    visualDensity: VisualDensity.compact,
+                    onPressed: canMoveDown
+                        ? () => _moveChapter(allChapters, chIdx, 1)
+                        : null,
+                  ),
+                  const SizedBox(width: 2),
+
+                  // Actions: Chapter Analytics
+                  IconButton(
+                    icon: const Icon(
+                      Icons.analytics_outlined,
+                      size: 18,
+                      color: AppColors.primary,
+                    ),
+                    tooltip: l10n.chapterAnalytics,
+                    visualDensity: VisualDensity.compact,
+                    onPressed: () =>
+                        _openChapterAnalytics(chapter, chapterLessons),
+                  ),
+                  const SizedBox(width: 2),
+
+                  // Actions: Add lecture to chapter
+                  if (MediaQuery.of(context).size.width < 500)
+                    IconButton(
+                      onPressed: () => _handleAddLesson(chapterId: chapter.id),
+                      tooltip: l10n.addLectureToChapter,
+                      icon: const Icon(Icons.add_rounded, size: 20),
+                      visualDensity: VisualDensity.compact,
+                      style: IconButton.styleFrom(
+                        foregroundColor: AppColors.primary,
+                        backgroundColor:
+                            AppColors.primary.withValues(alpha: 0.08),
+                      ),
+                    )
+                  else
+                    OutlinedButton.icon(
+                      onPressed: () => _handleAddLesson(chapterId: chapter.id),
+                      icon: const Icon(Icons.add_rounded, size: 16),
+                      label: Text(
+                        l10n.addLectureToChapter,
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
+                        visualDensity: VisualDensity.compact,
+                        side: BorderSide(
+                          color: AppColors.primary.withValues(alpha: 0.4),
+                        ),
+                      ),
+                    ),
+                  const SizedBox(width: AppSpacing.s4),
+
+                  // Chapter Options Menu
+                  PopupMenuButton<String>(
+                    tooltip: l10n.more,
+                    icon: const Icon(
+                      Icons.more_vert_rounded,
+                      color: AppColors.textSecondary,
+                      size: 20,
+                    ),
+                    itemBuilder: (ctx) => [
+                      PopupMenuItem(
+                        value: 'toggle_visibility',
+                        child: Row(
+                          children: [
+                            Icon(
+                              chapter.isPublished
+                                  ? Icons.visibility_off_rounded
+                                  : Icons.visibility_rounded,
+                              color: chapter.isPublished
+                                  ? AppColors.warning
+                                  : AppColors.success,
+                              size: 18,
+                            ),
+                            const SizedBox(width: AppSpacing.s8),
+                            Text(
+                              chapter.isPublished
+                                  ? l10n.hideChapterAction
+                                  : l10n.publishChapterAction,
+                            ),
+                          ],
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 'edit',
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.edit_note_rounded,
+                              color: AppColors.primary,
+                              size: 18,
+                            ),
+                            const SizedBox(width: AppSpacing.s8),
+                            Text(l10n.editChapterTitle),
+                          ],
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.delete_outline_rounded,
+                              color: AppColors.error,
+                              size: 18,
+                            ),
+                            const SizedBox(width: AppSpacing.s8),
+                            Text(
+                              l10n.deleteChapterTitle,
+                              style: const TextStyle(color: AppColors.error),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.s8),
-
-                // Actions: Toggle Visibility
-                IconButton(
-                  icon: Icon(
-                    chapter.isPublished
-                        ? Icons.visibility_rounded
-                        : Icons.visibility_off_rounded,
-                    size: 18,
-                    color: chapter.isPublished
-                        ? AppColors.success
-                        : AppColors.warning,
-                  ),
-                  tooltip: chapter.isPublished
-                      ? l10n.hideChapterTooltip
-                      : l10n.publishChapterTooltip,
-                  onPressed: () async {
-                    final messenger = ScaffoldMessenger.of(context);
-                    final success = await context
-                        .read<ContentCubit>()
-                        .toggleChapterVisibility(
-                          chapterId: chapter.id,
-                          isPublished: !chapter.isPublished,
-                        );
-                    if (success) {
-                      messenger.showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            !chapter.isPublished
-                                ? l10n.chapterPublishedToast
-                                : l10n.chapterHiddenToast,
-                          ),
-                          backgroundColor: !chapter.isPublished
-                              ? AppColors.success
-                              : AppColors.warning,
-                          duration: const Duration(seconds: 2),
-                        ),
-                      );
-                    }
-                  },
-                ),
-                const SizedBox(width: AppSpacing.s4),
-
-                // Actions: Add lecture to chapter
-                if (MediaQuery.of(context).size.width < 500)
-                  IconButton(
-                    onPressed: () => _handleAddLesson(chapterId: chapter.id),
-                    tooltip: l10n.addLectureToChapter,
-                    icon: const Icon(Icons.add_rounded, size: 20),
-                    visualDensity: VisualDensity.compact,
-                    style: IconButton.styleFrom(
-                      foregroundColor: AppColors.primary,
-                      backgroundColor: AppColors.primary.withValues(alpha: 0.08),
-                    ),
-                  )
-                else
-                  OutlinedButton.icon(
-                    onPressed: () => _handleAddLesson(chapterId: chapter.id),
-                    icon: const Icon(Icons.add_rounded, size: 16),
-                    label: Text(
-                      l10n.addLectureToChapter,
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 6,
-                      ),
-                      visualDensity: VisualDensity.compact,
-                      side: BorderSide(
-                        color: AppColors.primary.withValues(alpha: 0.4),
-                      ),
-                    ),
-                  ),
-                const SizedBox(width: AppSpacing.s4),
-
-                // Chapter Options Menu
-                PopupMenuButton<String>(
-                  tooltip: l10n.more,
-                  icon: const Icon(
-                    Icons.more_vert_rounded,
-                    color: AppColors.textSecondary,
-                    size: 20,
-                  ),
-                  itemBuilder: (ctx) => [
-                    PopupMenuItem(
-                      value: 'toggle_visibility',
-                      child: Row(
-                        children: [
-                          Icon(
-                            chapter.isPublished
-                                ? Icons.visibility_off_rounded
-                                : Icons.visibility_rounded,
-                            color: chapter.isPublished
-                                ? AppColors.warning
-                                : AppColors.success,
-                            size: 18,
-                          ),
-                          const SizedBox(width: AppSpacing.s8),
-                          Text(
-                            chapter.isPublished
-                                ? l10n.hideChapterAction
-                                : l10n.publishChapterAction,
-                          ),
-                        ],
-                      ),
-                    ),
-                    PopupMenuItem(
-                      value: 'edit',
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.edit_note_rounded,
-                            color: AppColors.primary,
-                            size: 18,
-                          ),
-                          const SizedBox(width: AppSpacing.s8),
-                          Text(l10n.editChapterTitle),
-                        ],
-                      ),
-                    ),
-                    PopupMenuItem(
-                      value: 'delete',
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.delete_outline_rounded,
-                            color: AppColors.error,
-                            size: 18,
-                          ),
-                          const SizedBox(width: AppSpacing.s8),
-                          Text(
-                            l10n.deleteChapterTitle,
-                            style: const TextStyle(color: AppColors.error),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                  onSelected: (val) {
-                    if (val == 'toggle_visibility') {
-                      final messenger = ScaffoldMessenger.of(context);
-                      unawaited(() async {
-                        final success = await context
-                            .read<ContentCubit>()
-                            .toggleChapterVisibility(
-                              chapterId: chapter.id,
-                              isPublished: !chapter.isPublished,
-                            );
-                        if (success) {
-                          messenger.showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                !chapter.isPublished
-                                    ? l10n.chapterPublishedToast
-                                    : l10n.chapterHiddenToast,
+                    onSelected: (val) {
+                      if (val == 'toggle_visibility') {
+                        final messenger = ScaffoldMessenger.of(context);
+                        unawaited(() async {
+                          final success = await context
+                              .read<ContentCubit>()
+                              .toggleChapterVisibility(
+                                chapterId: chapter.id,
+                                isPublished: !chapter.isPublished,
+                              );
+                          if (success) {
+                            messenger.showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  !chapter.isPublished
+                                      ? l10n.chapterPublishedToast
+                                      : l10n.chapterHiddenToast,
+                                ),
+                                backgroundColor: !chapter.isPublished
+                                    ? AppColors.success
+                                    : AppColors.warning,
+                                duration: const Duration(seconds: 2),
                               ),
-                              backgroundColor: !chapter.isPublished
-                                  ? AppColors.success
-                                  : AppColors.warning,
-                              duration: const Duration(seconds: 2),
-                            ),
-                          );
-                        }
-                      }());
-                    } else if (val == 'edit') {
-                      _handleEditChapter(chapter);
-                    } else if (val == 'delete') {
-                      _handleDeleteChapter(chapter);
-                    }
-                  },
-                ),
-              ],
+                            );
+                          }
+                        }());
+                      } else if (val == 'edit') {
+                        _handleEditChapter(chapter);
+                      } else if (val == 'delete') {
+                        _handleDeleteChapter(chapter);
+                      }
+                    },
+                  ),
+
+                  // Expand/Collapse Chevron Indicator
+                  IconButton(
+                    icon: Icon(
+                      isCollapsed
+                          ? Icons.keyboard_arrow_down_rounded
+                          : Icons.keyboard_arrow_up_rounded,
+                      color: AppColors.textSecondary,
+                      size: 22,
+                    ),
+                    tooltip: isCollapsed
+                        ? l10n.expandAllChapters
+                        : l10n.collapseAllChapters,
+                    onPressed: () => _toggleChapterCollapse(chapter.id),
+                  ),
+                ],
+              ),
             ),
           ),
 
-          // Chapter Body: Lessons List or Empty state
-          if (chapterLessons.isEmpty)
-            Padding(
-              padding: const EdgeInsets.all(AppSpacing.s24),
-              child: Center(
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.folder_open_rounded,
-                      size: 36,
-                      color: AppColors.textMuted.withValues(alpha: 0.6),
-                    ),
-                    const SizedBox(height: AppSpacing.s8),
-                    Text(
-                      l10n.emptyChapterPlaceholder,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondary,
-                        fontWeight: FontWeight.w500,
+          // Chapter Body with Animated CrossFade Accordion
+          AnimatedCrossFade(
+            firstChild: const SizedBox.shrink(),
+            secondChild: chapterLessons.isEmpty
+                ? Padding(
+                    padding: const EdgeInsets.all(AppSpacing.s24),
+                    child: Center(
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.folder_open_rounded,
+                            size: 36,
+                            color: AppColors.textMuted.withValues(alpha: 0.6),
+                          ),
+                          const SizedBox(height: AppSpacing.s8),
+                          Text(
+                            l10n.emptyChapterPlaceholder,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: AppColors.textSecondary,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.s8),
+                          TextButton.icon(
+                            onPressed: () =>
+                                _handleAddLesson(chapterId: chapter.id),
+                            icon: const Icon(Icons.add_rounded, size: 16),
+                            label: Text(l10n.emptyChapterTeacherAction),
+                            style: TextButton.styleFrom(
+                              foregroundColor: AppColors.primary,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: AppSpacing.s8),
-                    TextButton.icon(
-                      onPressed: _handleAddLesson,
-                      icon: const Icon(Icons.add_rounded, size: 16),
-                      label: Text(l10n.emptyChapterTeacherAction),
-                      style: TextButton.styleFrom(
-                        foregroundColor: AppColors.primary,
-                      ),
+                  )
+                : ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.s8,
+                      horizontal: AppSpacing.s8,
                     ),
-                  ],
-                ),
-              ),
-            )
-          else
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              padding: const EdgeInsets.symmetric(
-                vertical: AppSpacing.s8,
-                horizontal: AppSpacing.s8,
-              ),
-              itemCount: chapterLessons.length,
-              itemBuilder: (context, idx) {
-                final lesson = chapterLessons[idx];
-                return CourseLessonTile(
-                  key: ValueKey('chap_lesson_${lesson.id}'),
-                  content: lesson,
-                  index: idx,
-                  isSelected: false,
-                  onTap: () => _openEditLessonPage(lesson),
-                  lessonTitle: lesson.title,
-                  hasPdf: lesson.file != null,
-                  quizTitle: lesson.associatedExamTitle,
-                  canMoveUp: idx > 0,
-                  canMoveDown: idx < chapterLessons.length - 1,
-                  onMoveUp: () => _handleReorderLessonsInChapter(
-                    chapterLessons,
-                    idx,
-                    idx - 1,
+                    itemCount: chapterLessons.length,
+                    itemBuilder: (context, idx) {
+                      final lesson = chapterLessons[idx];
+                      return CourseLessonTile(
+                        key: ValueKey('chap_lesson_${lesson.id}'),
+                        content: lesson,
+                        index: idx,
+                        isSelected: false,
+                        onTap: () => _openEditLessonPage(lesson),
+                        lessonTitle: lesson.title,
+                        hasPdf: lesson.file != null,
+                        quizTitle: lesson.associatedExamTitle,
+                        canMoveUp: idx > 0,
+                        canMoveDown: idx < chapterLessons.length - 1,
+                        onMoveUp: () => _handleReorderLessonsInChapter(
+                          chapterLessons,
+                          idx,
+                          idx - 1,
+                        ),
+                        onMoveDown: () => _handleReorderLessonsInChapter(
+                          chapterLessons,
+                          idx,
+                          idx + 2,
+                        ),
+                        onMoveToChapter: () =>
+                            _handleMoveLessonToChapter(lesson, allChapters),
+                        onViewAnalytics: () => _openLessonAnalytics(lesson),
+                        onEdit: () => _openEditLessonPage(lesson),
+                        onDelete: () => _confirmDelete(lesson),
+                        onToggleVisibility: () =>
+                            _handleToggleVisibility(lesson),
+                      );
+                    },
                   ),
-                  onMoveDown: () => _handleReorderLessonsInChapter(
-                    chapterLessons,
-                    idx,
-                    idx + 2,
-                  ),
-                  onMoveToChapter: () =>
-                      _handleMoveLessonToChapter(lesson, allChapters),
-                  onViewAnalytics: () => _openLessonAnalytics(lesson),
-                  onEdit: () => _openEditLessonPage(lesson),
-                  onDelete: () => _confirmDelete(lesson),
-                  onToggleVisibility: () => _handleToggleVisibility(lesson),
-                );
-              },
-            ),
+            crossFadeState: isCollapsed
+                ? CrossFadeState.showFirst
+                : CrossFadeState.showSecond,
+            duration: const Duration(milliseconds: 250),
+          ),
         ],
       ),
     );

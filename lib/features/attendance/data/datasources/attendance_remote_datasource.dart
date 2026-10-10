@@ -118,7 +118,7 @@ class AttendanceRemoteDataSourceImpl implements AttendanceRemoteDataSource {
       }
     }
 
-    // 3. Resolve active lecture
+    // 3. Resolve active lecture (remains null if lectureContentId is null, representing all lectures overview)
     LectureItem? activeLecture;
     if (lectureContentId != null) {
       activeLecture = lectures.cast<LectureItem?>().firstWhere(
@@ -126,7 +126,6 @@ class AttendanceRemoteDataSourceImpl implements AttendanceRemoteDataSource {
         orElse: () => null,
       );
     }
-    activeLecture ??= lectures.isNotEmpty ? lectures.first : null;
 
     // 4. Fetch all video progress for group's videos
     // studentId -> { videoId -> progressMap }
@@ -180,25 +179,47 @@ class AttendanceRemoteDataSourceImpl implements AttendanceRemoteDataSource {
       final studentVideos = studentProgressMap[studentId] ?? {};
       int startedCount = 0;
       int completedCount = 0;
+      double totalCoverageSum = 0.0;
+      int totalWatchSecAll = 0;
+      int totalDurationAll = 0;
+      DateTime? latestWatchAll;
 
       for (final l in lectures) {
+        if (l.durationSeconds != null && l.durationSeconds! > 0) {
+          totalDurationAll += l.durationSeconds!;
+        }
         if (l.videoId != null && studentVideos.containsKey(l.videoId)) {
           final vp = studentVideos[l.videoId]!;
           final cov = _parseCoverage(vp['watched_coverage_percentage'], vp['percentage']);
+          totalCoverageSum += cov;
+          final sec = (vp['actual_watch_seconds'] as num?)?.toInt() ??
+              (vp['progress_seconds'] as num?)?.toInt() ??
+              0;
+          totalWatchSecAll += sec;
+
           final isComp = vp['completed'] == true || cov >= 80.0;
-          if (cov > 0.0 || (vp['actual_watch_seconds'] as num? ?? 0) > 0) {
+          if (cov > 0.0 || sec > 0) {
             startedCount++;
           }
           if (isComp) {
             completedCount++;
           }
+          final lwStr = vp['last_watched_at'] as String?;
+          if (lwStr != null) {
+            final parsedDt = DateTime.tryParse(lwStr);
+            if (parsedDt != null) {
+              if (latestWatchAll == null || parsedDt.isAfter(latestWatchAll)) {
+                latestWatchAll = parsedDt;
+              }
+            }
+          }
         }
       }
 
-      // Calculate progress for active lecture
+      // Calculate progress for active lecture or all lectures overview
       double watchPercent = 0.0;
       int watchSec = 0;
-      int totalDur = activeLecture?.durationSeconds ?? 0;
+      int totalDur = 0;
       bool isComp = false;
       bool isSkip = false;
       DateTime? lastWatch;
@@ -216,12 +237,24 @@ class AttendanceRemoteDataSourceImpl implements AttendanceRemoteDataSource {
           final durSec = (activeVp['duration_seconds'] as num?)?.toInt();
           if (durSec != null && durSec > 0) {
             totalDur = durSec;
+          } else {
+            totalDur = activeLecture.durationSeconds ?? 0;
           }
           isComp = activeVp['completed'] == true || watchPercent >= 80.0;
           isSkip = activeVp['is_skipped'] == true;
           final lwStr = activeVp['last_watched_at'] as String?;
           lastWatch = lwStr != null ? DateTime.tryParse(lwStr) : null;
+        } else {
+          totalDur = activeLecture.durationSeconds ?? 0;
         }
+      } else {
+        // Overview across all lectures in the group
+        final count = lectures.isNotEmpty ? lectures.length : 1;
+        watchPercent = (totalCoverageSum / count).clamp(0.0, 100.0);
+        watchSec = totalWatchSecAll;
+        totalDur = totalDurationAll;
+        isComp = lectures.isNotEmpty && completedCount == lectures.length;
+        lastWatch = latestWatchAll;
       }
 
       // Determine attendance status:
@@ -234,7 +267,7 @@ class AttendanceRemoteDataSourceImpl implements AttendanceRemoteDataSource {
       } else {
         if (isComp || watchPercent >= 80.0) {
           status = AttendanceStatus.present; // أتم المشاهدة (حاضر)
-        } else if (watchPercent > 0.0) {
+        } else if (watchPercent > 0.0 || startedCount > 0) {
           status = AttendanceStatus.late; // قيد المشاهدة (مشاهدة جزئية)
         } else {
           status = AttendanceStatus.absent; // لم يبدأ المشاهدة بعد (غائب)

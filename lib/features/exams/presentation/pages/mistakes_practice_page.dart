@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -47,16 +48,20 @@ class _MistakesPracticePageState extends State<MistakesPracticePage> {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-              child: Image.network(
-                imageUrl,
+              child: CachedNetworkImage(
+                imageUrl: imageUrl,
+                memCacheWidth: 800,
+                memCacheHeight: 800,
+                maxWidthDiskCache: 1200,
                 fit: BoxFit.contain,
-                loadingBuilder: (_, child, progress) {
-                  if (progress == null) return child;
-                  return const SizedBox(
-                    height: 250,
-                    child: Center(child: CircularProgressIndicator()),
-                  );
-                },
+                placeholder: (_, __) => const SizedBox(
+                  height: 250,
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+                errorWidget: (_, __, ___) => const SizedBox(
+                  height: 250,
+                  child: Center(child: Icon(Icons.broken_image, color: Colors.white, size: 40)),
+                ),
               ),
             ),
             IconButton(
@@ -224,21 +229,21 @@ class _MistakesPracticePageState extends State<MistakesPracticePage> {
                                       const BoxConstraints(maxHeight: 260),
                                   width: double.infinity,
                                   color: Colors.black.withValues(alpha: 0.04),
-                                  child: Image.network(
-                                    currentQuestion.imageUrl!,
+                                  child: CachedNetworkImage(
+                                    imageUrl: currentQuestion.imageUrl!,
+                                    memCacheWidth: 800,
+                                    memCacheHeight: 800,
+                                    maxWidthDiskCache: 1200,
                                     fit: BoxFit.contain,
-                                    loadingBuilder: (_, child, progress) {
-                                      if (progress == null) return child;
-                                      return const Center(
-                                        child: Padding(
-                                          padding: EdgeInsets.all(
-                                            AppSpacing.s24,
-                                          ),
-                                          child: CircularProgressIndicator(),
+                                    placeholder: (_, __) => const Center(
+                                      child: Padding(
+                                        padding: EdgeInsets.all(
+                                          AppSpacing.s24,
                                         ),
-                                      );
-                                    },
-                                    errorBuilder: (_, __, ___) => const Padding(
+                                        child: CircularProgressIndicator(),
+                                      ),
+                                    ),
+                                    errorWidget: (_, __, ___) => const Padding(
                                       padding: EdgeInsets.all(AppSpacing.s16),
                                       child: Icon(
                                         Icons.broken_image,

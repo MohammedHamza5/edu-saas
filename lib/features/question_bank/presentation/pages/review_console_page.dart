@@ -593,6 +593,9 @@ class _ReviewConsolePageState extends State<ReviewConsolePage> {
                           ),
                           child: CachedNetworkImage(
                             imageUrl: cropUrl,
+                            memCacheWidth: 800,
+                            memCacheHeight: 800,
+                            maxWidthDiskCache: 1200,
                             fit: BoxFit.contain,
                             placeholder: (_, __) => const Center(
                               child: Padding(

@@ -1,5 +1,6 @@
 import '../../../../core/errors/result.dart';
 import '../entities/student_360_entity.dart';
+import '../entities/student_academic_report_entity.dart';
 import '../entities/student_entity.dart';
 
 /// Contract: Teacher can read/manage all students in their tenant.
@@ -46,4 +47,10 @@ abstract interface class StudentsRepository {
 
   /// Permanently delete student and purge all associated storage/records.
   Future<Result<void>> deleteStudent(String studentId);
+
+  /// Verified academic progress report for WhatsApp communication.
+  Future<Result<StudentAcademicReportEntity>> getStudentAcademicReport(
+    String studentId, {
+    int? days,
+  });
 }

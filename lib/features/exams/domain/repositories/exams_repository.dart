@@ -1,6 +1,8 @@
 import '../../../../core/errors/result.dart';
 import '../entities/exam_entity.dart';
+import '../entities/exam_parent_dispatch_entity.dart';
 import '../entities/mistake_entities.dart';
+
 
 abstract class ExamsRepository {
   /// Fetches all exams belonging to a specific group (Teacher view).
@@ -35,8 +37,45 @@ abstract class ExamsRepository {
     required List<ExamQuestionEntity> initialQuestions,
   });
 
+  /// Updates an existing exam's title and academic settings.
+  Future<Result<ExamEntity>> updateExam({
+    required String examId,
+    required String title,
+    int? durationMinutes,
+    int? maxScore,
+    int? passingScore,
+    bool? shuffleQuestions,
+    bool? showResult,
+    bool? allowRetake,
+    DateTime? startAt,
+    DateTime? endAt,
+    bool? isPublished,
+  });
+
+  /// Updates a draft exam's metadata and atomic questions.
+  Future<Result<ExamEntity>> updateDraftExamQuestions({
+    required String examId,
+    required String title,
+    int? durationMinutes,
+    int? maxScore,
+    int? passingScore,
+    bool? shuffleQuestions,
+    bool? showResult,
+    bool? allowRetake,
+    DateTime? startAt,
+    DateTime? endAt,
+    bool? isPublished,
+    required List<ExamQuestionEntity> questions,
+  });
+
   /// Freezes an exam version as an immutable snapshot and publishes the exam.
   Future<Result<ExamVersionEntity>> publishExamVersion(String versionId);
+
+  /// Reverts a published exam and its version back to draft, hiding it from students.
+  Future<Result<void>> unpublishExamVersion({
+    required String examId,
+    required String versionId,
+  });
 
   /// Clones existing questions into a new draft version for edits after publish.
   Future<Result<ExamVersionEntity>> createNewExamVersion(String examId);
@@ -70,4 +109,45 @@ abstract class ExamsRepository {
   Future<Result<MistakePracticeResultEntity>> submitMistakesPractice(
     List<Map<String, String>> answers,
   );
+
+  /// Fetches group lessons for linking exams.
+  Future<Result<List<Map<String, dynamic>>>> getGroupLessons(String groupId);
+
+  /// Links an exam to a group lesson as its gatekeeper quiz.
+  Future<Result<void>> linkExamToLesson({
+    required String examId,
+    required String lessonId,
+    required String groupId,
+  });
+
+  /// Unlinks an exam from any lessons in the group, optionally turning it into a general exam.
+  Future<Result<void>> unlinkExamFromLesson({
+    required String examId,
+    required String groupId,
+    bool makeGeneralExam = false,
+  });
+
+  /// Converts an exam between lecture quiz and general exam.
+  Future<Result<void>> convertExamType({
+    required String examId,
+    required String contentId,
+    required bool toLectureExam,
+    required String groupId,
+  });
+
+  /// Deletes or archives an exam with cascade cleanup.
+  Future<Result<bool>> deleteExam({
+    required String examId,
+    bool force = false,
+  });
+
+  /// Fetches complete exam results roster with student attempts and parent phone contacts for WhatsApp dispatch.
+  Future<Result<ExamParentDispatchRosterEntity>> getExamParentDispatchRoster(String examId);
+
+  /// Updates a student's parent phone number (Teacher role).
+  Future<Result<bool>> updateStudentParentPhone({
+    required String studentId,
+    required String parentPhone,
+  });
 }
+

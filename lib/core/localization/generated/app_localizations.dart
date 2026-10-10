@@ -974,10 +974,10 @@ abstract class AppLocalizations {
   /// **'Academic Overview'**
   String get quickStatsTitle;
 
-  /// Active students stat
+  /// No description provided for @activeStudentsCount.
   ///
   /// In en, this message translates to:
-  /// **'Active Students'**
+  /// **'Active Students Count'**
   String get activeStudentsCount;
 
   /// Total groups stat
@@ -1322,7 +1322,7 @@ abstract class AppLocalizations {
   /// **'Create Group'**
   String get createGroupAction;
 
-  /// Group name label
+  /// No description provided for @groupNameLabel.
   ///
   /// In en, this message translates to:
   /// **'Group Name'**
@@ -1334,7 +1334,7 @@ abstract class AppLocalizations {
   /// **'e.g. SAT Basics - Cohort Alpha'**
   String get groupNameHint;
 
-  /// Group description label
+  /// No description provided for @groupDescriptionLabel.
   ///
   /// In en, this message translates to:
   /// **'Description'**
@@ -1376,10 +1376,10 @@ abstract class AppLocalizations {
   /// **'Study group created successfully'**
   String get groupCreatedSuccess;
 
-  /// Group updated toast
+  /// No description provided for @groupUpdatedSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Group details updated'**
+  /// **'Group details updated successfully'**
   String get groupUpdatedSuccess;
 
   /// Group delete title
@@ -1616,7 +1616,7 @@ abstract class AppLocalizations {
   /// **'New Assignment'**
   String get createAssignmentAction;
 
-  /// Assignment title label
+  /// No description provided for @assignmentTitleLabel.
   ///
   /// In en, this message translates to:
   /// **'Assignment Title'**
@@ -1736,16 +1736,16 @@ abstract class AppLocalizations {
   /// **'Create Exam'**
   String get createExamAction;
 
-  /// Exam title label
+  /// No description provided for @examTitleLabel.
   ///
   /// In en, this message translates to:
   /// **'Exam Title'**
   String get examTitleLabel;
 
-  /// Exam duration label
+  /// No description provided for @examDurationLabel.
   ///
   /// In en, this message translates to:
-  /// **'Exam Duration'**
+  /// **'Duration (Minutes)'**
   String get examDurationLabel;
 
   /// Duration in minutes format
@@ -2803,11 +2803,11 @@ abstract class AppLocalizations {
   /// **'Create New Group Now'**
   String get createNewGroupNow;
 
-  /// Group level
+  /// No description provided for @groupLevelLabel.
   ///
   /// In en, this message translates to:
-  /// **'Level: {level}'**
-  String groupLevelLabel(String level);
+  /// **'Track / Level'**
+  String get groupLevelLabel;
 
   /// Button
   ///
@@ -3642,6 +3642,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Monthly Summary 📊'**
   String get whatsappPeriodMonthly;
+
+  /// Period chip
+  ///
+  /// In en, this message translates to:
+  /// **'Last 7 Days (Week)'**
+  String get whatsappPeriod7Days;
+
+  /// Period chip
+  ///
+  /// In en, this message translates to:
+  /// **'Last 14 Days (2 Weeks)'**
+  String get whatsappPeriod14Days;
+
+  /// Period chip
+  ///
+  /// In en, this message translates to:
+  /// **'Last 30 Days (Month)'**
+  String get whatsappPeriod30Days;
+
+  /// Period chip
+  ///
+  /// In en, this message translates to:
+  /// **'All Time (Course-to-Date)'**
+  String get whatsappPeriodAllTime;
+
+  /// Loading message
+  ///
+  /// In en, this message translates to:
+  /// **'Extracting verified academic records...'**
+  String get whatsappFetchingData;
+
+  /// Error message
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to fetch student academic report'**
+  String get whatsappDataFetchError;
+
+  /// Section title
+  ///
+  /// In en, this message translates to:
+  /// **'Academic Directive & Recommendation'**
+  String get whatsappDecisionsTitle;
+
+  /// Decision chip
+  ///
+  /// In en, this message translates to:
+  /// **'🌟 Outstanding commitment and stable performance; urged to maintain this momentum.'**
+  String get whatsappDecisionConsistent;
+
+  /// Decision chip
+  ///
+  /// In en, this message translates to:
+  /// **'📈 Noticeable improvement and strong grasp; keep solving practice tests.'**
+  String get whatsappDecisionImproving;
+
+  /// Decision chip
+  ///
+  /// In en, this message translates to:
+  /// **'⚠️ Needs more focus and reviewing the mistake bank on the latest exam to reach full score.'**
+  String get whatsappDecisionNeedsDrills;
+
+  /// Decision chip
+  ///
+  /// In en, this message translates to:
+  /// **'⏳ Please urge the student to complete overdue assignments and lectures to stay on track.'**
+  String get whatsappDecisionCatchUp;
+
+  /// Decision chip
+  ///
+  /// In en, this message translates to:
+  /// **'📢 Noticeable neglect in attendance and completion; urgent check-in with teacher required.'**
+  String get whatsappDecisionNeglect;
+
+  /// Short chip label
+  ///
+  /// In en, this message translates to:
+  /// **'🌟 Outstanding'**
+  String get whatsappChipConsistent;
+
+  /// Short chip label
+  ///
+  /// In en, this message translates to:
+  /// **'📈 Improving'**
+  String get whatsappChipImproving;
+
+  /// Short chip label
+  ///
+  /// In en, this message translates to:
+  /// **'⚠️ Review Mistakes'**
+  String get whatsappChipNeedsDrills;
+
+  /// Short chip label
+  ///
+  /// In en, this message translates to:
+  /// **'⏳ Overdue Tasks'**
+  String get whatsappChipCatchUp;
+
+  /// Short chip label
+  ///
+  /// In en, this message translates to:
+  /// **'📢 Needs Check-in'**
+  String get whatsappChipNeglect;
+
+  /// Report header title
+  ///
+  /// In en, this message translates to:
+  /// **'Academic Performance & Progress Report'**
+  String get whatsappReportHeaderTitle;
+
+  /// Label
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get whatsappStudentLabel;
+
+  /// Label
+  ///
+  /// In en, this message translates to:
+  /// **'Group'**
+  String get whatsappGroupLabel;
+
+  /// Label
+  ///
+  /// In en, this message translates to:
+  /// **'Period'**
+  String get whatsappPeriodLabel;
+
+  /// Stat label
+  ///
+  /// In en, this message translates to:
+  /// **'Lectures'**
+  String get whatsappLecturesStat;
+
+  /// Stat label
+  ///
+  /// In en, this message translates to:
+  /// **'Drills & Assignments'**
+  String get whatsappAssignmentsStat;
+
+  /// Stat label
+  ///
+  /// In en, this message translates to:
+  /// **'Exams & Quizzes'**
+  String get whatsappExamsStat;
+
+  /// Stat label
+  ///
+  /// In en, this message translates to:
+  /// **'Active Study Time'**
+  String get whatsappStudyTimeStat;
+
+  /// Stat label
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance'**
+  String get whatsappAttendanceStat;
+
+  /// Fallback text
+  ///
+  /// In en, this message translates to:
+  /// **'No activity recorded in this period'**
+  String get whatsappNoDataPeriod;
 
   /// Friendly preset note
   ///
@@ -6619,6 +6781,42 @@ abstract class AppLocalizations {
   /// **'Points'**
   String get pointsField;
 
+  /// Label for default points per question input
+  ///
+  /// In en, this message translates to:
+  /// **'Points per Question'**
+  String get defaultQuestionPointsLabel;
+
+  /// Hint text for default points per question input
+  ///
+  /// In en, this message translates to:
+  /// **'Unified points for all questions'**
+  String get defaultQuestionPointsHint;
+
+  /// Button to apply the default points to all exam questions
+  ///
+  /// In en, this message translates to:
+  /// **'Apply to All'**
+  String get applyPointsToAllAction;
+
+  /// Tooltip explaining the apply points to all action
+  ///
+  /// In en, this message translates to:
+  /// **'Apply this point value to all current and future questions'**
+  String get applyPointsToAllTooltip;
+
+  /// Success message when points are applied to all questions
+  ///
+  /// In en, this message translates to:
+  /// **'Unified ({points}) points for all {count} questions successfully'**
+  String pointsAppliedToAllSuccess(int points, int count);
+
+  /// Error message when entered points value is invalid
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid points value greater than zero'**
+  String get invalidPointsError;
+
   /// Options section prompt
   ///
   /// In en, this message translates to:
@@ -6780,12 +6978,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Submission Required'**
   String get actionRequired;
-
-  /// Attempt number label
-  ///
-  /// In en, this message translates to:
-  /// **'Attempt #{number}'**
-  String attemptNumberLabel(String number);
 
   /// Attached files count
   ///
@@ -7441,10 +7633,10 @@ abstract class AppLocalizations {
   /// **'Watch commitment rate'**
   String get groupCommitmentRateSubtitle;
 
-  /// Search student or phone hint
+  /// No description provided for @searchStudentOrPhoneHint.
   ///
   /// In en, this message translates to:
-  /// **'Quick search by student name or phone...'**
+  /// **'Search by student name, phone, or group...'**
   String get searchStudentOrPhoneHint;
 
   /// No students match filter message
@@ -8794,8 +8986,8 @@ abstract class AppLocalizations {
   /// No description provided for @overallCourseProgress.
   ///
   /// In en, this message translates to:
-  /// **'Overall Progress: {completed} of {total} lectures completed ({percentage}%)'**
-  String overallCourseProgress(int completed, int total, int percentage);
+  /// **'Overall Course Progress'**
+  String get overallCourseProgress;
 
   /// No description provided for @reviewQuizResultAction.
   ///
@@ -11377,6 +11569,84 @@ abstract class AppLocalizations {
   /// **'Unlink Quiz'**
   String get unlinkQuizAction;
 
+  /// No description provided for @attachedQuizzesSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Attached Quizzes & Exams'**
+  String get attachedQuizzesSection;
+
+  /// No description provided for @attachedQuizzesSectionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach one or more quizzes to this lecture. Required quizzes must be passed to unlock subsequent lessons.'**
+  String get attachedQuizzesSectionSubtitle;
+
+  /// No description provided for @addQuizToLessonAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Quiz to Lecture'**
+  String get addQuizToLessonAction;
+
+  /// No description provided for @requiredForProgression.
+  ///
+  /// In en, this message translates to:
+  /// **'Required to pass'**
+  String get requiredForProgression;
+
+  /// No description provided for @optionalPractice.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional practice'**
+  String get optionalPractice;
+
+  /// No description provided for @makeQuizRequiredTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Click to make this quiz required for lesson completion'**
+  String get makeQuizRequiredTooltip;
+
+  /// No description provided for @makeQuizOptionalTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Click to make this quiz optional practice'**
+  String get makeQuizOptionalTooltip;
+
+  /// No description provided for @attachedQuizzesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} quizzes attached'**
+  String attachedQuizzesCount(int count);
+
+  /// No description provided for @noQuizzesAttached.
+  ///
+  /// In en, this message translates to:
+  /// **'No quizzes attached to this lecture yet'**
+  String get noQuizzesAttached;
+
+  /// No description provided for @attachedQuizzesProgressHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Lecture Quizzes & Progress'**
+  String get attachedQuizzesProgressHeader;
+
+  /// No description provided for @requiredQuizzesCompletedProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{passed} of {total} required quizzes passed'**
+  String requiredQuizzesCompletedProgress(int passed, int total);
+
+  /// No description provided for @allRequiredQuizzesPassedCongrats.
+  ///
+  /// In en, this message translates to:
+  /// **'All required quizzes passed! Lecture completed.'**
+  String get allRequiredQuizzesPassedCongrats;
+
+  /// No description provided for @quizScoreBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Score: {score}%'**
+  String quizScoreBadge(int score);
+
   /// No description provided for @studentNavLectures.
   ///
   /// In en, this message translates to:
@@ -12804,6 +13074,1452 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} videos'**
   String folderVideosCount(int count);
+
+  /// No description provided for @collapseAllChapters.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse All Chapters'**
+  String get collapseAllChapters;
+
+  /// No description provided for @expandAllChapters.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand All Chapters'**
+  String get expandAllChapters;
+
+  /// No description provided for @moveChapterUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Move Chapter Up'**
+  String get moveChapterUp;
+
+  /// No description provided for @moveChapterDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Move Chapter Down'**
+  String get moveChapterDown;
+
+  /// No description provided for @chapterAnalytics.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter Analytics'**
+  String get chapterAnalytics;
+
+  /// No description provided for @groupAnalytics.
+  ///
+  /// In en, this message translates to:
+  /// **'Group Analytics'**
+  String get groupAnalytics;
+
+  /// No description provided for @chapterCompletionRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter Completion Rate'**
+  String get chapterCompletionRate;
+
+  /// No description provided for @chapterBreakdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter Progress Breakdown'**
+  String get chapterBreakdown;
+
+  /// No description provided for @studentsNeedingAttention.
+  ///
+  /// In en, this message translates to:
+  /// **'Students Needing Attention'**
+  String get studentsNeedingAttention;
+
+  /// No description provided for @totalChapterViews.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Chapter Views'**
+  String get totalChapterViews;
+
+  /// No description provided for @averageChapterQuizScore.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter Quizzes Average'**
+  String get averageChapterQuizScore;
+
+  /// No description provided for @noStudentsNeedingAttention.
+  ///
+  /// In en, this message translates to:
+  /// **'All students are making great progress'**
+  String get noStudentsNeedingAttention;
+
+  /// No description provided for @completedAllChapterLessons.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed all lessons'**
+  String get completedAllChapterLessons;
+
+  /// No description provided for @inProgressChapterLessons.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get inProgressChapterLessons;
+
+  /// No description provided for @notStartedChapterLessons.
+  ///
+  /// In en, this message translates to:
+  /// **'Not started'**
+  String get notStartedChapterLessons;
+
+  /// No description provided for @studentProgressDistribution.
+  ///
+  /// In en, this message translates to:
+  /// **'Student Progress Distribution'**
+  String get studentProgressDistribution;
+
+  /// No description provided for @chapterAnalyticsDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter Analytics: {title}'**
+  String chapterAnalyticsDialogTitle(String title);
+
+  /// No description provided for @groupAnalyticsDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Group Academic Analytics'**
+  String get groupAnalyticsDialogTitle;
+
+  /// No description provided for @courseWatchEngagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Course Views'**
+  String get courseWatchEngagement;
+
+  /// No description provided for @overallQuizzesAverage.
+  ///
+  /// In en, this message translates to:
+  /// **'Overall Quizzes Average'**
+  String get overallQuizzesAverage;
+
+  /// No description provided for @studentCompletionRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Completion: {rate}%'**
+  String studentCompletionRate(int rate);
+
+  /// No description provided for @chapterLessonsCountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Lessons'**
+  String chapterLessonsCountLabel(int count);
+
+  /// Title for student engagement hub
+  ///
+  /// In en, this message translates to:
+  /// **'Student Engagement & Progress'**
+  String get studentEngagementTitle;
+
+  /// Subtitle for student engagement hub
+  ///
+  /// In en, this message translates to:
+  /// **'Automated real-time tracking of lecture watches, progress, and student activity without manual roll-calls'**
+  String get studentEngagementSubtitle;
+
+  /// Badge for automated engagement tracking
+  ///
+  /// In en, this message translates to:
+  /// **'⚡ 100% Automated Tracking'**
+  String get studentEngagementBadge;
+
+  /// View engagement tab by lecture
+  ///
+  /// In en, this message translates to:
+  /// **'By Lecture'**
+  String get viewByLecture;
+
+  /// View engagement tab by student overview
+  ///
+  /// In en, this message translates to:
+  /// **'Overall Student Progress'**
+  String get viewByStudentOverview;
+
+  /// Badge when student completed lecture
+  ///
+  /// In en, this message translates to:
+  /// **'Completed Lecture'**
+  String get lectureCompletedBadge;
+
+  /// Badge when student is watching lecture
+  ///
+  /// In en, this message translates to:
+  /// **'In Progress'**
+  String get lectureInProgressBadge;
+
+  /// Badge when student has not started lecture
+  ///
+  /// In en, this message translates to:
+  /// **'Not Started'**
+  String get lectureNotStartedBadge;
+
+  /// Overall high commitment status
+  ///
+  /// In en, this message translates to:
+  /// **'Highly Committed'**
+  String get engagementHigh;
+
+  /// Overall moderate commitment status
+  ///
+  /// In en, this message translates to:
+  /// **'Moderate Progress'**
+  String get engagementMedium;
+
+  /// Overall low commitment status requiring attention
+  ///
+  /// In en, this message translates to:
+  /// **'Needs Follow-up'**
+  String get engagementLow;
+
+  /// Average commitment rate for group
+  ///
+  /// In en, this message translates to:
+  /// **'Group Commitment Rate'**
+  String get groupCommitmentRate;
+
+  /// Total enrolled students in group
+  ///
+  /// In en, this message translates to:
+  /// **'Enrolled Students'**
+  String get totalEnrolledStudents;
+
+  /// Count of committed students
+  ///
+  /// In en, this message translates to:
+  /// **'Committed Students'**
+  String get committedStudentsCount;
+
+  /// Count of students needing follow-up
+  ///
+  /// In en, this message translates to:
+  /// **'Needs Follow-up'**
+  String get needsFollowupCount;
+
+  /// Summary of completed lectures
+  ///
+  /// In en, this message translates to:
+  /// **'Completed {completed} of {total} lectures ({percent}%)'**
+  String completedLecturesSummary(int completed, int total, String percent);
+
+  /// Tooltip to send WhatsApp engagement report
+  ///
+  /// In en, this message translates to:
+  /// **'Send WhatsApp Engagement Report'**
+  String get sendParentEngagementReport;
+
+  /// Snackbar when student note is saved
+  ///
+  /// In en, this message translates to:
+  /// **'Student note saved successfully'**
+  String get studentNoteSavedSuccess;
+
+  /// Tooltip to refresh engagement data
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh engagement and watch data'**
+  String get refreshEngagementTooltip;
+
+  /// Empty state when group has no lectures
+  ///
+  /// In en, this message translates to:
+  /// **'No published video lectures in this group yet'**
+  String get noLecturesInGroupYet;
+
+  /// Filter chip for committed students
+  ///
+  /// In en, this message translates to:
+  /// **'Committed ({count})'**
+  String filterCommitted(int count);
+
+  /// Filter chip for students needing follow-up
+  ///
+  /// In en, this message translates to:
+  /// **'Needs Follow-up ({count})'**
+  String filterNeedsFollowup(int count);
+
+  /// Filter chip for moderate students
+  ///
+  /// In en, this message translates to:
+  /// **'Moderate ({count})'**
+  String filterModerate(int count);
+
+  /// No description provided for @editExamTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Exam Details'**
+  String get editExamTitle;
+
+  /// No description provided for @editExamAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Exam'**
+  String get editExamAction;
+
+  /// No description provided for @examUpdatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam details updated successfully'**
+  String get examUpdatedSuccess;
+
+  /// No description provided for @unlimitedDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Untimed (Open)'**
+  String get unlimitedDuration;
+
+  /// No description provided for @passingScorePercentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Passing Score (%)'**
+  String get passingScorePercentLabel;
+
+  /// No description provided for @shuffleQuestionsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Shuffle Questions Order'**
+  String get shuffleQuestionsLabel;
+
+  /// No description provided for @showResultLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Show Results Immediately After Submission'**
+  String get showResultLabel;
+
+  /// No description provided for @allowRetakeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow Retake'**
+  String get allowRetakeLabel;
+
+  /// No description provided for @saveChangesAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Changes'**
+  String get saveChangesAction;
+
+  /// No description provided for @editGroupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Study Group'**
+  String get editGroupTitle;
+
+  /// No description provided for @editGroupAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Group'**
+  String get editGroupAction;
+
+  /// No description provided for @previousContentAccessLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous Content Access for New Students'**
+  String get previousContentAccessLabel;
+
+  /// No description provided for @allowPreviousContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow access to past content'**
+  String get allowPreviousContent;
+
+  /// No description provided for @denyPreviousContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Show only content published after joining'**
+  String get denyPreviousContent;
+
+  /// No description provided for @editAssignmentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Assignment'**
+  String get editAssignmentTitle;
+
+  /// No description provided for @editAssignmentAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Assignment'**
+  String get editAssignmentAction;
+
+  /// No description provided for @assignmentUpdatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Assignment updated successfully'**
+  String get assignmentUpdatedSuccess;
+
+  /// No description provided for @assignmentInstructionsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Instructions'**
+  String get assignmentInstructionsLabel;
+
+  /// No description provided for @dueDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Due Date'**
+  String get dueDateLabel;
+
+  /// No description provided for @allowLateSubmissionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow Late Submissions'**
+  String get allowLateSubmissionLabel;
+
+  /// No description provided for @chapterNameAlreadyExists.
+  ///
+  /// In en, this message translates to:
+  /// **'A chapter with this name already exists in this group'**
+  String get chapterNameAlreadyExists;
+
+  /// No description provided for @chapterUpdateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update chapter. Please try again.'**
+  String get chapterUpdateFailed;
+
+  /// No description provided for @deleteExamAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Exam'**
+  String get deleteExamAction;
+
+  /// No description provided for @deleteExamDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Exam?'**
+  String get deleteExamDialogTitle;
+
+  /// No description provided for @deleteExamDialogBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to permanently delete \'{title}\'? This action cannot be undone.'**
+  String deleteExamDialogBody(String title);
+
+  /// No description provided for @deleteExamConfirmButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, Delete Exam'**
+  String get deleteExamConfirmButton;
+
+  /// No description provided for @archiveOrDeleteExamDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive Exam (Students Have Attempts)'**
+  String get archiveOrDeleteExamDialogTitle;
+
+  /// No description provided for @archiveOrDeleteExamDialogBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The exam \'{title}\' has {count} student attempts. To protect historical grades and student records, it will be safely archived and hidden from all lists instead of permanently destroying data.'**
+  String archiveOrDeleteExamDialogBody(String title, int count);
+
+  /// No description provided for @archiveExamConfirmButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive & Hide Exam'**
+  String get archiveExamConfirmButton;
+
+  /// No description provided for @examDeletedSuccessToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam deleted permanently'**
+  String get examDeletedSuccessToast;
+
+  /// No description provided for @examArchivedSuccessToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam safely archived and hidden from view'**
+  String get examArchivedSuccessToast;
+
+  /// No description provided for @smartApproveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve & Enroll Student'**
+  String get smartApproveTitle;
+
+  /// No description provided for @smartApproveSelectGroupPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Select group(s) to immediately enroll the student:'**
+  String get smartApproveSelectGroupPrompt;
+
+  /// No description provided for @smartApproveEnrollNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Upon approval, the student account will be activated and all lectures for the selected group(s) will be immediately accessible.'**
+  String get smartApproveEnrollNotice;
+
+  /// No description provided for @smartApproveNoGroupsWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'No groups exist yet. The student account will be activated, and you can assign them to a group later.'**
+  String get smartApproveNoGroupsWarning;
+
+  /// No description provided for @smartApproveAndEnrollAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve & Enroll Immediately'**
+  String get smartApproveAndEnrollAction;
+
+  /// No description provided for @smartApproveSuccessWithGroupsToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Student {name} approved and enrolled in {count} group(s) successfully!'**
+  String smartApproveSuccessWithGroupsToast(String name, int count);
+
+  /// No description provided for @smartApproveSuccessNoGroupsToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Student {name} approved successfully!'**
+  String smartApproveSuccessNoGroupsToast(String name);
+
+  /// No description provided for @skipGroupEnrollment.
+  ///
+  /// In en, this message translates to:
+  /// **'Proceed without assigning a group for now'**
+  String get skipGroupEnrollment;
+
+  /// No description provided for @dailyQuickActionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Quick Actions'**
+  String get dailyQuickActionsTitle;
+
+  /// No description provided for @dailyQuickActionsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fast direct access to frequent teaching and management tasks'**
+  String get dailyQuickActionsSubtitle;
+
+  /// No description provided for @quickActionUploadLessonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload New Lesson'**
+  String get quickActionUploadLessonTitle;
+
+  /// No description provided for @quickActionUploadLessonDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Add video lecture, PDF notes, or quiz'**
+  String get quickActionUploadLessonDesc;
+
+  /// No description provided for @quickActionAssessmentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Assignment or Quiz'**
+  String get quickActionAssessmentTitle;
+
+  /// No description provided for @quickActionAssessmentDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Homework, fast quizzes, or full exams'**
+  String get quickActionAssessmentDesc;
+
+  /// No description provided for @quickActionPendingStudentsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New Student Requests'**
+  String get quickActionPendingStudentsTitle;
+
+  /// No description provided for @quickActionPendingStudentsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Review, approve, and enroll students into groups'**
+  String get quickActionPendingStudentsDesc;
+
+  /// No description provided for @pendingStudentsCountBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} students waiting approval'**
+  String pendingStudentsCountBadge(int count);
+
+  /// No description provided for @noPendingStudentsBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'No pending requests'**
+  String get noPendingStudentsBadge;
+
+  /// No description provided for @createAssessmentChoiceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What would you like to create?'**
+  String get createAssessmentChoiceTitle;
+
+  /// No description provided for @createAssessmentChoiceSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose assessment type to jump straight into the builder:'**
+  String get createAssessmentChoiceSubtitle;
+
+  /// No description provided for @createHomeworkAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Create New Assignment'**
+  String get createHomeworkAction;
+
+  /// No description provided for @createHomeworkActionDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Set due date, attachments, and student instructions'**
+  String get createHomeworkActionDesc;
+
+  /// No description provided for @createExamOrQuizAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Exam or Quiz'**
+  String get createExamOrQuizAction;
+
+  /// No description provided for @createExamOrQuizActionDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Multiple choice, timer, and automated grading'**
+  String get createExamOrQuizActionDesc;
+
+  /// No description provided for @examFilterTabAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All ({count})'**
+  String examFilterTabAll(int count);
+
+  /// No description provided for @examFilterTabGeneral.
+  ///
+  /// In en, this message translates to:
+  /// **'General Exams ({count})'**
+  String examFilterTabGeneral(int count);
+
+  /// No description provided for @examFilterTabLectureQuizzes.
+  ///
+  /// In en, this message translates to:
+  /// **'Lecture Quizzes ({count})'**
+  String examFilterTabLectureQuizzes(int count);
+
+  /// No description provided for @examFilterSubAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get examFilterSubAll;
+
+  /// No description provided for @examFilterSubLinked.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked ({count})'**
+  String examFilterSubLinked(int count);
+
+  /// No description provided for @examFilterSubUnlinked.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to Link ({count})'**
+  String examFilterSubUnlinked(int count);
+
+  /// No description provided for @statTotalExamsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Exams'**
+  String get statTotalExamsTitle;
+
+  /// No description provided for @statTotalExamsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'All assessments in this group'**
+  String get statTotalExamsDesc;
+
+  /// No description provided for @statGeneralExamsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'General Exams'**
+  String get statGeneralExamsTitle;
+
+  /// No description provided for @statGeneralExamsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Directly published without lecture requirement'**
+  String get statGeneralExamsDesc;
+
+  /// No description provided for @statLectureQuizzesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Lecture Quizzes'**
+  String get statLectureQuizzesTitle;
+
+  /// No description provided for @statLectureQuizzesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Pass-gates required to unlock subsequent lectures'**
+  String get statLectureQuizzesDesc;
+
+  /// No description provided for @statUnlinkedAlert.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} pending lecture link'**
+  String statUnlinkedAlert(int count);
+
+  /// No description provided for @badgeGeneralExam.
+  ///
+  /// In en, this message translates to:
+  /// **'General Exam'**
+  String get badgeGeneralExam;
+
+  /// No description provided for @badgeLectureQuiz.
+  ///
+  /// In en, this message translates to:
+  /// **'Lecture Quiz'**
+  String get badgeLectureQuiz;
+
+  /// No description provided for @linkedToLecturePill.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked to lecture: {title}'**
+  String linkedToLecturePill(String title);
+
+  /// No description provided for @unlinkedQuizPill.
+  ///
+  /// In en, this message translates to:
+  /// **'Not linked to a lecture yet - Ready to link'**
+  String get unlinkedQuizPill;
+
+  /// No description provided for @linkToLectureNowAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Link to Lecture Now'**
+  String get linkToLectureNowAction;
+
+  /// No description provided for @linkOrChangeLectureAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Link / Change Linked Lecture'**
+  String get linkOrChangeLectureAction;
+
+  /// No description provided for @unlinkFromLectureAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlink (Convert to General Exam)'**
+  String get unlinkFromLectureAction;
+
+  /// No description provided for @convertToLectureQuizAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Convert to Lecture Quiz'**
+  String get convertToLectureQuizAction;
+
+  /// No description provided for @convertToGeneralExamAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Convert to General Exam'**
+  String get convertToGeneralExamAction;
+
+  /// No description provided for @viewExamDetailsAndAttempts.
+  ///
+  /// In en, this message translates to:
+  /// **'Details & Student Attempts'**
+  String get viewExamDetailsAndAttempts;
+
+  /// No description provided for @linkExamToLectureDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Link Exam to Lecture'**
+  String get linkExamToLectureDialogTitle;
+
+  /// No description provided for @linkExamToLectureDialogSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select the lecture that requires passing this quiz to unlock the next:'**
+  String get linkExamToLectureDialogSubtitle;
+
+  /// No description provided for @searchLecturesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search group lectures...'**
+  String get searchLecturesHint;
+
+  /// No description provided for @noLecturesFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No lectures found in this group'**
+  String get noLecturesFound;
+
+  /// No description provided for @currentExamAttachedWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Currently linked to: {title}'**
+  String currentExamAttachedWarning(String title);
+
+  /// No description provided for @lectureFreeForLinking.
+  ///
+  /// In en, this message translates to:
+  /// **'Available to link'**
+  String get lectureFreeForLinking;
+
+  /// No description provided for @confirmLinkExamAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Lecture Link'**
+  String get confirmLinkExamAction;
+
+  /// No description provided for @examLinkedSuccessToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam linked to lecture \'{title}\' successfully'**
+  String examLinkedSuccessToast(String title);
+
+  /// No description provided for @examUnlinkedSuccessToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam unlinked and set as General Exam successfully'**
+  String get examUnlinkedSuccessToast;
+
+  /// No description provided for @examConvertedToLectureSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam converted to Lecture Quiz'**
+  String get examConvertedToLectureSuccess;
+
+  /// No description provided for @confirmUnlinkDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlink Exam?'**
+  String get confirmUnlinkDialogTitle;
+
+  /// No description provided for @confirmUnlinkDialogBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you want to unlink \'{title}\' from its lecture and make it a general exam?'**
+  String confirmUnlinkDialogBody(String title);
+
+  /// No description provided for @confirmUnlinkButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, Unlink'**
+  String get confirmUnlinkButton;
+
+  /// No description provided for @draftVersionNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Current version is a draft. You can edit questions directly without creating a new copy.'**
+  String get draftVersionNotice;
+
+  /// No description provided for @publishCurrentDraftAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish This Version Now'**
+  String get publishCurrentDraftAction;
+
+  /// No description provided for @editDraftQuestionsAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Questions & Content'**
+  String get editDraftQuestionsAction;
+
+  /// No description provided for @versionPublishedPill.
+  ///
+  /// In en, this message translates to:
+  /// **'Published'**
+  String get versionPublishedPill;
+
+  /// No description provided for @versionDraftPill.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft'**
+  String get versionDraftPill;
+
+  /// No description provided for @creatingNewVersionLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating new version...'**
+  String get creatingNewVersionLoading;
+
+  /// No description provided for @publishingVersionLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Publishing version...'**
+  String get publishingVersionLoading;
+
+  /// No description provided for @versionPublishedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Version published successfully and is now active for students'**
+  String get versionPublishedSuccess;
+
+  /// No description provided for @unpublishExamAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpublish (Revert to Draft)'**
+  String get unpublishExamAction;
+
+  /// No description provided for @unpublishingExamLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpublishing exam...'**
+  String get unpublishingExamLoading;
+
+  /// No description provided for @examUnpublishedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam unpublished and reverted to draft successfully (hidden from students)'**
+  String get examUnpublishedSuccess;
+
+  /// No description provided for @confirmUnpublishExamTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpublish and hide exam?'**
+  String get confirmUnpublishExamTitle;
+
+  /// No description provided for @confirmUnpublishExamBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to unpublish \"{title}\"? It will be reverted to draft and hidden from all students.'**
+  String confirmUnpublishExamBody(String title);
+
+  /// No description provided for @confirmUnpublishButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, Unpublish to Draft'**
+  String get confirmUnpublishButton;
+
+  /// No description provided for @noOptionsAvailableForQuestionWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Warning: No answer choices found for this question. Please contact your teacher.'**
+  String get noOptionsAvailableForQuestionWarning;
+
+  /// No description provided for @newVersionFailedError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create new version: {error}'**
+  String newVersionFailedError(String error);
+
+  /// No description provided for @studentAttemptsGroupCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Attempts'**
+  String studentAttemptsGroupCount(int count);
+
+  /// No description provided for @singleStudentAttemptBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'1 Attempt'**
+  String get singleStudentAttemptBadge;
+
+  /// No description provided for @highestScoreBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Best: {score}'**
+  String highestScoreBadge(String score);
+
+  /// No description provided for @attemptNumberLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Attempt #{number}'**
+  String attemptNumberLabel(int number);
+
+  /// No description provided for @allAttemptsHistoryHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'All attempts for this student ({count}):'**
+  String allAttemptsHistoryHeader(int count);
+
+  /// No description provided for @studentsCountSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Students Took Exam'**
+  String studentsCountSummary(int count);
+
+  /// No description provided for @totalAttemptsSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Total Attempts'**
+  String totalAttemptsSummary(int count);
+
+  /// No description provided for @editDraftExamTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Draft Exam'**
+  String get editDraftExamTitle;
+
+  /// No description provided for @editExamSettingsAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Settings'**
+  String get editExamSettingsAction;
+
+  /// No description provided for @saveExamDraftChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Draft Changes'**
+  String get saveExamDraftChanges;
+
+  /// No description provided for @examDraftUpdatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam draft and questions updated successfully'**
+  String get examDraftUpdatedSuccess;
+
+  /// No description provided for @examDraftPublishedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam updated and published to students successfully'**
+  String get examDraftPublishedSuccess;
+
+  /// No description provided for @examUpdateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update exam: {error}'**
+  String examUpdateFailed(String error);
+
+  /// No description provided for @editQuestionsNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Questions Now'**
+  String get editQuestionsNow;
+
+  /// No description provided for @cannotEditPublishedExamWithAttempts.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot edit questions directly because students have already taken this exam. You can create a new version instead.'**
+  String get cannotEditPublishedExamWithAttempts;
+
+  /// No description provided for @collapseAllQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse All'**
+  String get collapseAllQuestions;
+
+  /// No description provided for @expandAllQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand All'**
+  String get expandAllQuestions;
+
+  /// No description provided for @questionSummaryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No question text entered yet'**
+  String get questionSummaryEmpty;
+
+  /// No description provided for @hasAttachedImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Image attached'**
+  String get hasAttachedImage;
+
+  /// No description provided for @clickToEditQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Click to expand & edit question'**
+  String get clickToEditQuestion;
+
+  /// No description provided for @videoSecurityPausedNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Playback paused to protect academic content. Please keep focus inside the player window.'**
+  String get videoSecurityPausedNotice;
+
+  /// No description provided for @resumePlaybackAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume Watching'**
+  String get resumePlaybackAction;
+
+  /// No description provided for @examSecurityAlertTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Security Warning: Tab Switch Detected'**
+  String get examSecurityAlertTitle;
+
+  /// No description provided for @examSecurityAlertMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Leaving the exam window or switching apps (such as screen sharing or search) is strictly prohibited. This attempt has been logged.'**
+  String get examSecurityAlertMessage;
+
+  /// No description provided for @examSecurityViolationsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Violation {current} of {max} permitted'**
+  String examSecurityViolationsCount(int current, int max);
+
+  /// No description provided for @examPrivacyShieldNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam questions hidden while window is out of focus to protect test integrity.'**
+  String get examPrivacyShieldNotice;
+
+  /// No description provided for @returnToExamAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Return to Exam'**
+  String get returnToExamAction;
+
+  /// No description provided for @examAutoSubmittedDueToViolations.
+  ///
+  /// In en, this message translates to:
+  /// **'The exam was submitted automatically due to exceeding the maximum allowed security tab switches.'**
+  String get examAutoSubmittedDueToViolations;
+
+  /// No description provided for @videoFileTooLargeForWeb.
+  ///
+  /// In en, this message translates to:
+  /// **'The video file ({sizeMb} MB) exceeds browser memory capacity (max 2 GB). Please lower the Bitrate in your editor (CapCut) to keep the file under 1.5 GB for faster upload.'**
+  String videoFileTooLargeForWeb(String sizeMb);
+
+  /// No description provided for @videoFileMemoryError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to read video data into browser memory ({sizeMb} MB). The file might be too large for browser RAM. Please export under 1.5 GB.'**
+  String videoFileMemoryError(String sizeMb);
+
+  /// No description provided for @longVideoExportTip.
+  ///
+  /// In en, this message translates to:
+  /// **'💡 Tip for long lectures (> 1 hr): set Bitrate to 2,500 Kbps in video editor to keep file around 1 GB for fast upload and browser stability.'**
+  String get longVideoExportTip;
+
+  /// No description provided for @examParentDispatchHubTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam Results & Parent Dispatch Hub'**
+  String get examParentDispatchHubTitle;
+
+  /// No description provided for @examParentDispatchHeroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Instant Exam Results & Parent WhatsApp Dispatch'**
+  String get examParentDispatchHeroTitle;
+
+  /// No description provided for @examParentDispatchHeroSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notify parents with their student\'s exam score with single-click customized WhatsApp message'**
+  String get examParentDispatchHeroSubtitle;
+
+  /// No description provided for @openParentDispatchHubAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Dispatch Hub'**
+  String get openParentDispatchHubAction;
+
+  /// No description provided for @sendScoreToParentAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Send to Parent'**
+  String get sendScoreToParentAction;
+
+  /// No description provided for @resendToParentAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend'**
+  String get resendToParentAction;
+
+  /// No description provided for @dispatchSentBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent'**
+  String get dispatchSentBadge;
+
+  /// No description provided for @missingParentPhonePrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'No parent phone'**
+  String get missingParentPhonePrompt;
+
+  /// No description provided for @examStatusNotTakenShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Not Taken'**
+  String get examStatusNotTakenShort;
+
+  /// No description provided for @awaitingExamSubmissionNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Awaiting exam submission'**
+  String get awaitingExamSubmissionNotice;
+
+  /// No description provided for @examStudentScoreLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Score: {score}'**
+  String examStudentScoreLabel(String score);
+
+  /// No description provided for @examStudentNotTakenNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Student has not taken the exam yet'**
+  String get examStudentNotTakenNotice;
+
+  /// No description provided for @examStudentNotTakenHint.
+  ///
+  /// In en, this message translates to:
+  /// **'You can send a reminder notification to the parent to encourage the student to take the exam.'**
+  String get examStudentNotTakenHint;
+
+  /// No description provided for @examRatingExcellent.
+  ///
+  /// In en, this message translates to:
+  /// **'Outstanding performance 🌟'**
+  String get examRatingExcellent;
+
+  /// No description provided for @examRatingVeryGood.
+  ///
+  /// In en, this message translates to:
+  /// **'Very good performance and successful pass 👍'**
+  String get examRatingVeryGood;
+
+  /// No description provided for @examRatingNeedsFocus.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs more focus and review ⚠️'**
+  String get examRatingNeedsFocus;
+
+  /// No description provided for @dispatchRecipientPhoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipient phone number for WhatsApp notification:'**
+  String get dispatchRecipientPhoneTitle;
+
+  /// No description provided for @parentPhoneRecipientLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Parent Phone'**
+  String get parentPhoneRecipientLabel;
+
+  /// No description provided for @studentPhoneRecipientLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Student Phone'**
+  String get studentPhoneRecipientLabel;
+
+  /// No description provided for @enterParentPhoneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter parent phone (WhatsApp)...'**
+  String get enterParentPhoneHint;
+
+  /// No description provided for @savePhoneAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Phone'**
+  String get savePhoneAction;
+
+  /// No description provided for @parentPhoneSavedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Parent phone number saved successfully'**
+  String get parentPhoneSavedSuccess;
+
+  /// No description provided for @parentPhoneSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save parent phone number'**
+  String get parentPhoneSaveFailed;
+
+  /// No description provided for @quickTeacherPresetsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Teacher Feedback Presets (1-Tap):'**
+  String get quickTeacherPresetsTitle;
+
+  /// No description provided for @customTeacherNoteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Type custom note or feedback for parent (optional)...'**
+  String get customTeacherNoteHint;
+
+  /// No description provided for @liveWhatsAppPreviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Live WhatsApp Message Preview:'**
+  String get liveWhatsAppPreviewTitle;
+
+  /// No description provided for @copyMessageAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy Message'**
+  String get copyMessageAction;
+
+  /// No description provided for @messageCopiedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Message copied to clipboard'**
+  String get messageCopiedToast;
+
+  /// No description provided for @copyActionShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get copyActionShort;
+
+  /// No description provided for @sendViaWhatsAppNowAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Send via WhatsApp Now'**
+  String get sendViaWhatsAppNowAction;
+
+  /// No description provided for @missingPhoneWarningToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Please provide a valid phone number to send WhatsApp message'**
+  String get missingPhoneWarningToast;
+
+  /// No description provided for @whatsAppLaunchFailedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not launch WhatsApp, you can copy the message instead'**
+  String get whatsAppLaunchFailedToast;
+
+  /// No description provided for @nextStudentInQueueAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Next: {studentName} ➡️'**
+  String nextStudentInQueueAction(String studentName);
+
+  /// No description provided for @copyRosterSummaryTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy complete roster score sheet'**
+  String get copyRosterSummaryTooltip;
+
+  /// No description provided for @sequentialDispatchActionShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Fast Queue Runner ⚡'**
+  String get sequentialDispatchActionShort;
+
+  /// No description provided for @rosterCopiedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete exam roster score sheet copied to clipboard'**
+  String get rosterCopiedToast;
+
+  /// No description provided for @noMatchingStudentsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No students found matching current search or filters'**
+  String get noMatchingStudentsFound;
+
+  /// No description provided for @sortOptionsTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort students'**
+  String get sortOptionsTooltip;
+
+  /// No description provided for @sortHighestScoreFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Highest score first'**
+  String get sortHighestScoreFirst;
+
+  /// No description provided for @sortLowestScoreFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Lowest score first'**
+  String get sortLowestScoreFirst;
+
+  /// No description provided for @sortStudentNameAlphabetical.
+  ///
+  /// In en, this message translates to:
+  /// **'By student name (A-Z)'**
+  String get sortStudentNameAlphabetical;
+
+  /// No description provided for @sortLatestSubmittedFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Most recent submission first'**
+  String get sortLatestSubmittedFirst;
+
+  /// No description provided for @metricSubmissionsRateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Submissions'**
+  String get metricSubmissionsRateTitle;
+
+  /// No description provided for @metricAverageScoreTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Average Score'**
+  String get metricAverageScoreTitle;
+
+  /// No description provided for @metricPassRateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pass Rate'**
+  String get metricPassRateTitle;
+
+  /// No description provided for @metricWhatsAppDispatchedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Parents Notified'**
+  String get metricWhatsAppDispatchedTitle;
+
+  /// No description provided for @notifiedBadgeShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Notified'**
+  String get notifiedBadgeShort;
+
+  /// No description provided for @filterAllRoster.
+  ///
+  /// In en, this message translates to:
+  /// **'All ({count})'**
+  String filterAllRoster(int count);
+
+  /// No description provided for @filterSubmittedRoster.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted ({count})'**
+  String filterSubmittedRoster(int count);
+
+  /// No description provided for @filterPassedRoster.
+  ///
+  /// In en, this message translates to:
+  /// **'Passed ({count})'**
+  String filterPassedRoster(int count);
+
+  /// No description provided for @filterNeedsAttentionRoster.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs Attention ({count})'**
+  String filterNeedsAttentionRoster(int count);
+
+  /// No description provided for @filterNotStartedRoster.
+  ///
+  /// In en, this message translates to:
+  /// **'Not Taken ({count})'**
+  String filterNotStartedRoster(int count);
+
+  /// No description provided for @filterUnnotifiedRoster.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending WhatsApp ({count})'**
+  String filterUnnotifiedRoster(int count);
+
+  /// No description provided for @filterNotifiedRoster.
+  ///
+  /// In en, this message translates to:
+  /// **'Notified ({count})'**
+  String filterNotifiedRoster(int count);
+
+  /// No description provided for @filterMissingPhoneRoster.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing Parent Phone'**
+  String get filterMissingPhoneRoster;
+
+  /// No description provided for @editParentPhoneDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Parent Phone: {studentName}'**
+  String editParentPhoneDialogTitle(String studentName);
+
+  /// No description provided for @editParentPhoneDialogBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the parent WhatsApp phone number to link it to the student profile for academic reports.'**
+  String get editParentPhoneDialogBody;
+
+  /// No description provided for @saveActionShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get saveActionShort;
 }
 
 class _AppLocalizationsDelegate

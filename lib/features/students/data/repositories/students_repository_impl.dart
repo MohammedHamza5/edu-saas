@@ -2,6 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/errors/result.dart';
 import '../../domain/entities/student_360_entity.dart';
+import '../../domain/entities/student_academic_report_entity.dart';
 import '../../domain/entities/student_entity.dart';
 import '../../domain/repositories/students_repository.dart';
 import '../datasources/students_remote_datasource.dart';
@@ -129,6 +130,24 @@ class StudentsRepositoryImpl implements StudentsRepository {
     try {
       await _remoteDataSource.deleteStudent(studentId);
       return const Success(null);
+    } on PostgrestException catch (e) {
+      return FailureResult(ServerFailure(e.message, code: e.code));
+    } catch (e) {
+      return FailureResult(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<StudentAcademicReportEntity>> getStudentAcademicReport(
+    String studentId, {
+    int? days,
+  }) async {
+    try {
+      final report = await _remoteDataSource.getStudentAcademicReport(
+        studentId,
+        days: days,
+      );
+      return Success(report);
     } on PostgrestException catch (e) {
       return FailureResult(ServerFailure(e.message, code: e.code));
     } catch (e) {

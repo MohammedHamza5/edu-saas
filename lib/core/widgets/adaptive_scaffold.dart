@@ -40,13 +40,15 @@ class AdaptiveSidebarSection {
 /// - Desktop (>= 840dp): Permanent categorized mathematical styled Sidebar (260dp)
 /// - Tablet (600 - 839dp): Material 3 [NavigationRail]
 /// - Mobile (< 600dp): Bottom [NavigationBar] with full [Drawer] support for all categorized screens
-class AdaptiveScaffold extends StatelessWidget {
+class AdaptiveScaffold extends StatefulWidget {
   final int currentIndex;
   final List<AdaptiveDestination>? destinations;
   final List<AdaptiveSidebarSection>? sections;
   final ValueChanged<int>? onNavigationIndexChanged;
   final Widget? sidebarHeader;
   final Widget? sidebarFooter;
+  final Widget? collapsedSidebarHeader;
+  final Widget? collapsedSidebarFooter;
   final PreferredSizeWidget? appBar;
   final Widget? floatingActionButton;
   final List<Widget>? actions;
@@ -61,6 +63,8 @@ class AdaptiveScaffold extends StatelessWidget {
     this.onNavigationIndexChanged,
     this.sidebarHeader,
     this.sidebarFooter,
+    this.collapsedSidebarHeader,
+    this.collapsedSidebarFooter,
     this.appBar,
     this.floatingActionButton,
     this.actions,
@@ -69,12 +73,26 @@ class AdaptiveScaffold extends StatelessWidget {
          'Either destinations or sections must be provided',
        );
 
+  @override
+  State<AdaptiveScaffold> createState() => _AdaptiveScaffoldState();
+}
+
+class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
+  /// Session-wide static state so the collapse/expanded preference persists across route changes
+  static bool _isDesktopCollapsed = false;
+
+  void _toggleDesktopSidebar() {
+    setState(() {
+      _isDesktopCollapsed = !_isDesktopCollapsed;
+    });
+  }
+
   /// Flat list of all destinations across all sections.
   List<AdaptiveDestination> get resolvedDestinations {
-    if (sections != null && sections!.isNotEmpty) {
-      return sections!.expand((s) => s.destinations).toList();
+    if (widget.sections != null && widget.sections!.isNotEmpty) {
+      return widget.sections!.expand((s) => s.destinations).toList();
     }
-    return destinations ?? const [];
+    return widget.destinations ?? const [];
   }
 
   static const Color _sidebarBg = Color(0xFF0F172A);
@@ -101,9 +119,9 @@ class AdaptiveScaffold extends StatelessWidget {
 
   Widget _buildMobileScaffold(BuildContext context) {
     return Scaffold(
-      appBar: appBar ?? _buildMobileWebHeader(context),
+      appBar: widget.appBar ?? _buildMobileWebHeader(context),
       body: _buildWorkspaceBody(context),
-      floatingActionButton: floatingActionButton,
+      floatingActionButton: widget.floatingActionButton,
       drawer: _buildMobileDrawer(context),
     );
   }
@@ -123,7 +141,7 @@ class AdaptiveScaffold extends StatelessWidget {
           onPressed: () => Scaffold.of(ctx).openDrawer(),
         ),
       ),
-      title: sidebarHeader != null
+      title: widget.sidebarHeader != null
           ? Padding(
               padding: const EdgeInsetsDirectional.only(end: AppSpacing.s16),
               child: SizedBox(
@@ -133,13 +151,13 @@ class AdaptiveScaffold extends StatelessWidget {
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
                     alignment: AlignmentDirectional.centerStart,
-                    child: sidebarHeader,
+                    child: widget.sidebarHeader,
                   ),
                 ),
               ),
             )
           : null,
-      actions: actions,
+      actions: widget.actions,
     );
   }
 
@@ -161,7 +179,7 @@ class AdaptiveScaffold extends StatelessWidget {
                 children: [
                   Expanded(
                     child:
-                        sidebarHeader ??
+                        widget.sidebarHeader ??
                         Text(
                           AppLocalizations.of(context)?.appTitle ?? 'EduSaaS',
                           style: const TextStyle(
@@ -189,11 +207,11 @@ class AdaptiveScaffold extends StatelessWidget {
             ),
             const Divider(height: 1, color: _sidebarDivider),
             Expanded(child: _buildCategorizedItems(context, isDrawer: true)),
-            if (sidebarFooter != null) ...[
+            if (widget.sidebarFooter != null) ...[
               const Divider(height: 1, color: _sidebarDivider),
               Padding(
                 padding: const EdgeInsets.all(AppSpacing.s16),
-                child: sidebarFooter!,
+                child: widget.sidebarFooter!,
               ),
             ],
           ],
@@ -206,16 +224,16 @@ class AdaptiveScaffold extends StatelessWidget {
     final all = resolvedDestinations;
 
     return Scaffold(
-      appBar: appBar,
-      floatingActionButton: floatingActionButton,
+      appBar: widget.appBar,
+      floatingActionButton: widget.floatingActionButton,
       body: Row(
         children: [
           NavigationRail(
-            selectedIndex: currentIndex.clamp(
+            selectedIndex: widget.currentIndex.clamp(
               0,
               all.isEmpty ? 0 : all.length - 1,
             ),
-            onDestinationSelected: onNavigationIndexChanged,
+            onDestinationSelected: widget.onNavigationIndexChanged,
             labelType: NavigationRailLabelType.all,
             backgroundColor: _sidebarBg,
             unselectedIconTheme: const IconThemeData(color: Color(0xFF94A3B8)),
@@ -230,7 +248,7 @@ class AdaptiveScaffold extends StatelessWidget {
               fontSize: 11,
             ),
             indicatorColor: const Color(0xFF1E293B),
-            leading: sidebarHeader != null
+            leading: widget.sidebarHeader != null
                 ? SizedBox(
                     width: 72,
                     child: Padding(
@@ -241,13 +259,13 @@ class AdaptiveScaffold extends StatelessWidget {
                       child: Center(
                         child: FittedBox(
                           fit: BoxFit.scaleDown,
-                          child: SizedBox(width: 256, child: sidebarHeader),
+                          child: SizedBox(width: 256, child: widget.sidebarHeader),
                         ),
                       ),
                     ),
                   )
                 : null,
-            trailing: sidebarFooter != null
+            trailing: widget.sidebarFooter != null
                 ? Expanded(
                     child: Align(
                       alignment: Alignment.bottomCenter,
@@ -258,7 +276,7 @@ class AdaptiveScaffold extends StatelessWidget {
                           child: Center(
                             child: FittedBox(
                               fit: BoxFit.scaleDown,
-                              child: SizedBox(width: 256, child: sidebarFooter),
+                              child: SizedBox(width: 256, child: widget.sidebarFooter),
                             ),
                           ),
                         ),
@@ -314,14 +332,21 @@ class AdaptiveScaffold extends StatelessWidget {
   }
 
   Widget _buildDesktopScaffold(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final collapseTooltip = l10n?.collapseSidebar ?? 'طي الشريط';
+    final expandTooltip = l10n?.expandSidebar ?? 'إظهار الشريط';
+    final isCollapsed = _isDesktopCollapsed;
+
     return Scaffold(
-      appBar: appBar,
-      floatingActionButton: floatingActionButton,
+      appBar: widget.appBar,
+      floatingActionButton: widget.floatingActionButton,
       body: Row(
         children: [
-          // Permanent Desktop Categorized Sidebar (280dp)
-          Container(
-            width: 280,
+          // Collapsible Desktop Categorized Sidebar (76dp collapsed, 280dp expanded)
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeInOutCubic,
+            width: isCollapsed ? 76.0 : 280.0,
             decoration: BoxDecoration(
               color: _sidebarBg,
               border: Border(
@@ -336,22 +361,16 @@ class AdaptiveScaffold extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                if (sidebarHeader != null)
-                  Padding(
-                    padding: const EdgeInsets.all(AppSpacing.s16),
-                    child: sidebarHeader!,
-                  ),
+                _buildDesktopHeader(context, isCollapsed, collapseTooltip, expandTooltip),
                 const Divider(height: 1, color: _sidebarDivider),
                 Expanded(
-                  child: _buildCategorizedItems(context, isDrawer: false),
-                ),
-                if (sidebarFooter != null) ...[
-                  const Divider(height: 1, color: _sidebarDivider),
-                  Padding(
-                    padding: const EdgeInsets.all(AppSpacing.s16),
-                    child: sidebarFooter!,
+                  child: _buildCategorizedItems(
+                    context,
+                    isDrawer: false,
+                    isCollapsed: isCollapsed,
                   ),
-                ],
+                ),
+                _buildDesktopFooter(context, isCollapsed),
               ],
             ),
           ),
@@ -359,6 +378,114 @@ class AdaptiveScaffold extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Widget _buildDesktopHeader(
+    BuildContext context,
+    bool isCollapsed,
+    String collapseTooltip,
+    String expandTooltip,
+  ) {
+    if (isCollapsed) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.s8,
+          vertical: AppSpacing.s12,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            IconButton(
+              icon: const Icon(
+                Icons.menu_rounded,
+                color: Color(0xFF38BDF8),
+                size: 22,
+              ),
+              tooltip: expandTooltip,
+              hoverColor: const Color(0xFF38BDF8).withValues(alpha: 0.15),
+              onPressed: _toggleDesktopSidebar,
+            ),
+            const SizedBox(height: AppSpacing.s8),
+            if (widget.collapsedSidebarHeader != null)
+              widget.collapsedSidebarHeader!
+            else if (widget.sidebarHeader != null)
+              SizedBox(
+                width: 40,
+                height: 40,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: widget.sidebarHeader,
+                ),
+              ),
+          ],
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.s14,
+        AppSpacing.s14,
+        AppSpacing.s10,
+        AppSpacing.s14,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: widget.sidebarHeader ?? const SizedBox.shrink(),
+          ),
+          const SizedBox(width: AppSpacing.s6),
+          IconButton(
+            icon: const Icon(
+              Icons.menu_open_rounded,
+              color: Color(0xFF94A3B8),
+              size: 20,
+            ),
+            tooltip: collapseTooltip,
+            hoverColor: const Color(0xFF38BDF8).withValues(alpha: 0.15),
+            onPressed: _toggleDesktopSidebar,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDesktopFooter(BuildContext context, bool isCollapsed) {
+    if (isCollapsed) {
+      if (widget.collapsedSidebarFooter != null) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Divider(height: 1, color: _sidebarDivider),
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                vertical: AppSpacing.s12,
+                horizontal: AppSpacing.s8,
+              ),
+              child: widget.collapsedSidebarFooter!,
+            ),
+          ],
+        );
+      }
+      return const SizedBox.shrink();
+    }
+
+    if (widget.sidebarFooter != null) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Divider(height: 1, color: _sidebarDivider),
+          Padding(
+            padding: const EdgeInsets.all(AppSpacing.s16),
+            child: widget.sidebarFooter!,
+          ),
+        ],
+      );
+    }
+
+    return const SizedBox.shrink();
   }
 
   Widget _buildWorkspaceBody(BuildContext context) {
@@ -375,7 +502,7 @@ class AdaptiveScaffold extends StatelessWidget {
           data: Theme.of(
             context,
           ).copyWith(scaffoldBackgroundColor: Colors.transparent),
-          child: body,
+          child: widget.body,
         ),
       ),
     );
@@ -384,16 +511,30 @@ class AdaptiveScaffold extends StatelessWidget {
   Widget _buildCategorizedItems(
     BuildContext context, {
     required bool isDrawer,
+    bool isCollapsed = false,
   }) {
-    if (sections != null && sections!.isNotEmpty) {
+    if (widget.sections != null && widget.sections!.isNotEmpty) {
       int globalIndex = 0;
       final List<Widget> widgets = [];
 
-      for (int sIdx = 0; sIdx < sections!.length; sIdx++) {
-        final section = sections![sIdx];
+      for (int sIdx = 0; sIdx < widget.sections!.length; sIdx++) {
+        final section = widget.sections![sIdx];
 
-        // Section Title Header
-        if (section.title != null && section.title!.isNotEmpty) {
+        // Section Title Header / Divider
+        if (isCollapsed) {
+          if (sIdx > 0) {
+            widgets.add(
+              Container(
+                height: 1,
+                margin: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.s16,
+                  vertical: AppSpacing.s8,
+                ),
+                color: _sidebarDivider.withValues(alpha: 0.7),
+              ),
+            );
+          }
+        } else if (section.title != null && section.title!.isNotEmpty) {
           widgets.add(
             Padding(
               padding: EdgeInsets.fromLTRB(
@@ -418,22 +559,23 @@ class AdaptiveScaffold extends StatelessWidget {
         // Section Navigation Items
         for (final item in section.destinations) {
           final itemIndex = globalIndex++;
-          final isSelected = itemIndex == currentIndex;
+          final isSelected = itemIndex == widget.currentIndex;
 
           widgets.add(
             Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.s10,
+              padding: EdgeInsets.symmetric(
+                horizontal: isCollapsed ? AppSpacing.s6 : AppSpacing.s10,
                 vertical: AppSpacing.s4,
               ),
               child: _DesktopNavTile(
                 item: item,
                 isSelected: isSelected,
+                isCollapsed: isCollapsed,
                 onTap: () {
                   if (isDrawer) {
                     Navigator.of(context).pop(); // Close drawer on mobile
                   }
-                  onNavigationIndexChanged?.call(itemIndex);
+                  widget.onNavigationIndexChanged?.call(itemIndex);
                 },
               ),
             ),
@@ -448,26 +590,27 @@ class AdaptiveScaffold extends StatelessWidget {
     }
 
     // Fallback flat destinations
-    final all = destinations ?? const [];
+    final all = widget.destinations ?? const [];
     return ListView.separated(
-      padding: const EdgeInsets.symmetric(
+      padding: EdgeInsets.symmetric(
         vertical: AppSpacing.s14,
-        horizontal: AppSpacing.s10,
+        horizontal: isCollapsed ? AppSpacing.s6 : AppSpacing.s10,
       ),
       itemCount: all.length,
       separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.s8),
       itemBuilder: (context, index) {
         final item = all[index];
-        final isSelected = index == currentIndex;
+        final isSelected = index == widget.currentIndex;
 
         return _DesktopNavTile(
           item: item,
           isSelected: isSelected,
+          isCollapsed: isCollapsed,
           onTap: () {
             if (isDrawer) {
               Navigator.of(context).pop();
             }
-            onNavigationIndexChanged?.call(index);
+            widget.onNavigationIndexChanged?.call(index);
           },
         );
       },
@@ -479,21 +622,116 @@ class _DesktopNavTile extends StatelessWidget {
   final AdaptiveDestination item;
   final bool isSelected;
   final VoidCallback? onTap;
+  final bool isCollapsed;
 
   const _DesktopNavTile({
     required this.item,
     required this.isSelected,
     this.onTap,
+    this.isCollapsed = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    final bgColor = isSelected ? const Color(0xFF1E293B) : Colors.transparent;
     final fgColor = isSelected
         ? const Color(0xFF38BDF8)
         : const Color(0xFFCBD5E1);
     const textColor = Colors.white;
     const inactiveTextColor = Color(0xFFE2E8F0);
+
+    Widget iconBox = Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        color: isSelected
+            ? const Color(0xFF38BDF8).withValues(alpha: 0.16)
+            : const Color(0xFF1E293B).withValues(alpha: 0.6),
+        borderRadius: BorderRadius.circular(9),
+        border: Border.all(
+          color: isSelected
+              ? const Color(0xFF38BDF8).withValues(alpha: 0.45)
+              : const Color(0xFF334155).withValues(alpha: 0.4),
+          width: 1,
+        ),
+      ),
+      child: Center(
+        child: Icon(
+          isSelected ? (item.selectedIcon ?? item.icon) : item.icon,
+          color: fgColor,
+          size: 20,
+        ),
+      ),
+    );
+
+    if (item.badge != null) {
+      iconBox = Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.center,
+        children: [
+          iconBox,
+          PositionedDirectional(top: -4, end: -4, child: item.badge!),
+        ],
+      );
+    } else if (item.badgeCount != null && item.badgeCount! > 0) {
+      iconBox = Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.center,
+        children: [
+          iconBox,
+          PositionedDirectional(
+            top: -4,
+            end: -4,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: AppColors.error,
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x66EF4444),
+                    blurRadius: 4,
+                  ),
+                ],
+              ),
+              child: Text(
+                '${item.badgeCount}',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    if (isCollapsed) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 2),
+        child: Center(
+          child: Tooltip(
+            message: item.label,
+            preferBelow: false,
+            waitDuration: const Duration(milliseconds: 200),
+            child: Material(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(10),
+              child: InkWell(
+                onTap: onTap,
+                mouseCursor: SystemMouseCursors.click,
+                borderRadius: BorderRadius.circular(10),
+                hoverColor: const Color(0xFF38BDF8).withValues(alpha: 0.12),
+                child: iconBox,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    final bgColor = isSelected ? const Color(0xFF1E293B) : Colors.transparent;
 
     return Material(
       color: Colors.transparent,
@@ -512,7 +750,7 @@ class _DesktopNavTile extends StatelessWidget {
           duration: const Duration(milliseconds: 150),
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.s12,
-            vertical: AppSpacing.s12,
+            vertical: AppSpacing.s10,
           ),
           decoration: BoxDecoration(
             color: bgColor,
@@ -535,29 +773,7 @@ class _DesktopNavTile extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Container(
-                width: 38,
-                height: 38,
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? const Color(0xFF38BDF8).withValues(alpha: 0.16)
-                      : const Color(0xFF1E293B).withValues(alpha: 0.6),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: isSelected
-                        ? const Color(0xFF38BDF8).withValues(alpha: 0.4)
-                        : const Color(0xFF334155).withValues(alpha: 0.4),
-                    width: 1,
-                  ),
-                ),
-                child: Center(
-                  child: Icon(
-                    isSelected ? (item.selectedIcon ?? item.icon) : item.icon,
-                    color: fgColor,
-                    size: 20,
-                  ),
-                ),
-              ),
+              iconBox,
               const SizedBox(width: AppSpacing.s12),
               Expanded(
                 child: Column(
@@ -571,7 +787,8 @@ class _DesktopNavTile extends StatelessWidget {
                         fontWeight: isSelected
                             ? FontWeight.w800
                             : FontWeight.w600,
-                        fontSize: 14.5,
+                        fontSize: 14,
+                        height: 1.25,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,

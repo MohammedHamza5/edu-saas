@@ -599,10 +599,8 @@
   "@quickStatsTitle": {
     "description": "Quick stats title"
   },
-  "activeStudentsCount": "Active Students",
-  "@activeStudentsCount": {
-    "description": "Active students stat"
-  },
+  "activeStudentsCount": "Active Students Count",
+  "@activeStudentsCount": {},
   "totalGroupsCount": "Active Study Groups",
   "@totalGroupsCount": {
     "description": "Total groups stat"
@@ -2585,6 +2583,114 @@
   "whatsappPeriodMonthly": "Monthly Summary 📊",
   "@whatsappPeriodMonthly": {
     "description": "Monthly report tab"
+  },
+  "whatsappPeriod7Days": "Last 7 Days (Week)",
+  "@whatsappPeriod7Days": {
+    "description": "Period chip"
+  },
+  "whatsappPeriod14Days": "Last 14 Days (2 Weeks)",
+  "@whatsappPeriod14Days": {
+    "description": "Period chip"
+  },
+  "whatsappPeriod30Days": "Last 30 Days (Month)",
+  "@whatsappPeriod30Days": {
+    "description": "Period chip"
+  },
+  "whatsappPeriodAllTime": "All Time (Course-to-Date)",
+  "@whatsappPeriodAllTime": {
+    "description": "Period chip"
+  },
+  "whatsappFetchingData": "Extracting verified academic records...",
+  "@whatsappFetchingData": {
+    "description": "Loading message"
+  },
+  "whatsappDataFetchError": "Failed to fetch student academic report",
+  "@whatsappDataFetchError": {
+    "description": "Error message"
+  },
+  "whatsappDecisionsTitle": "Academic Directive & Recommendation",
+  "@whatsappDecisionsTitle": {
+    "description": "Section title"
+  },
+  "whatsappDecisionConsistent": "🌟 Outstanding commitment and stable performance; urged to maintain this momentum.",
+  "@whatsappDecisionConsistent": {
+    "description": "Decision chip"
+  },
+  "whatsappDecisionImproving": "📈 Noticeable improvement and strong grasp; keep solving practice tests.",
+  "@whatsappDecisionImproving": {
+    "description": "Decision chip"
+  },
+  "whatsappDecisionNeedsDrills": "⚠️ Needs more focus and reviewing the mistake bank on the latest exam to reach full score.",
+  "@whatsappDecisionNeedsDrills": {
+    "description": "Decision chip"
+  },
+  "whatsappDecisionCatchUp": "⏳ Please urge the student to complete overdue assignments and lectures to stay on track.",
+  "@whatsappDecisionCatchUp": {
+    "description": "Decision chip"
+  },
+  "whatsappDecisionNeglect": "📢 Noticeable neglect in attendance and completion; urgent check-in with teacher required.",
+  "@whatsappDecisionNeglect": {
+    "description": "Decision chip"
+  },
+  "whatsappChipConsistent": "🌟 Outstanding",
+  "@whatsappChipConsistent": {
+    "description": "Short chip label"
+  },
+  "whatsappChipImproving": "📈 Improving",
+  "@whatsappChipImproving": {
+    "description": "Short chip label"
+  },
+  "whatsappChipNeedsDrills": "⚠️ Review Mistakes",
+  "@whatsappChipNeedsDrills": {
+    "description": "Short chip label"
+  },
+  "whatsappChipCatchUp": "⏳ Overdue Tasks",
+  "@whatsappChipCatchUp": {
+    "description": "Short chip label"
+  },
+  "whatsappChipNeglect": "📢 Needs Check-in",
+  "@whatsappChipNeglect": {
+    "description": "Short chip label"
+  },
+  "whatsappReportHeaderTitle": "Academic Performance & Progress Report",
+  "@whatsappReportHeaderTitle": {
+    "description": "Report header title"
+  },
+  "whatsappStudentLabel": "Student",
+  "@whatsappStudentLabel": {
+    "description": "Label"
+  },
+  "whatsappGroupLabel": "Group",
+  "@whatsappGroupLabel": {
+    "description": "Label"
+  },
+  "whatsappPeriodLabel": "Period",
+  "@whatsappPeriodLabel": {
+    "description": "Label"
+  },
+  "whatsappLecturesStat": "Lectures",
+  "@whatsappLecturesStat": {
+    "description": "Stat label"
+  },
+  "whatsappAssignmentsStat": "Drills & Assignments",
+  "@whatsappAssignmentsStat": {
+    "description": "Stat label"
+  },
+  "whatsappExamsStat": "Exams & Quizzes",
+  "@whatsappExamsStat": {
+    "description": "Stat label"
+  },
+  "whatsappStudyTimeStat": "Active Study Time",
+  "@whatsappStudyTimeStat": {
+    "description": "Stat label"
+  },
+  "whatsappAttendanceStat": "Attendance",
+  "@whatsappAttendanceStat": {
+    "description": "Stat label"
+  },
+  "whatsappNoDataPeriod": "No activity recorded in this period",
+  "@whatsappNoDataPeriod": {
+    "description": "Fallback text"
   },
   "whatsappPresetFriendlyKeepUp": "Great commitment and continuous improvement 🌟",
   "@whatsappPresetFriendlyKeepUp": {
@@ -4633,13 +4739,37 @@
     "description": "Retake exam button label"
   },
   "examLateBanner": "You are late: the deadline passed {duration} ago. You can still take the exam.",
-  "@examLateBanner": {"placeholders": {"duration": {"type": "String"}}},
+  "@examLateBanner": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
   "examLateDays": "{count, plural, =1{1 day} other{{count} days}}",
-  "@examLateDays": {"placeholders": {"count": {"type": "int"}}},
+  "@examLateDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "examLateHours": "{count, plural, =1{1 hour} other{{count} hours}}",
-  "@examLateHours": {"placeholders": {"count": {"type": "int"}}},
+  "@examLateHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "examLateMinutes": "{count, plural, =1{1 minute} other{{count} minutes}}",
-  "@examLateMinutes": {"placeholders": {"count": {"type": "int"}}},
+  "@examLateMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "examLateJoiner": " and ",
   "@examCannotBeTaken": {
     "description": "Cannot take exam notice"
@@ -4884,6 +5014,38 @@
   "@pointsField": {
     "description": "Points field label"
   },
+  "defaultQuestionPointsLabel": "Points per Question",
+  "@defaultQuestionPointsLabel": {
+    "description": "Label for default points per question input"
+  },
+  "defaultQuestionPointsHint": "Unified points for all questions",
+  "@defaultQuestionPointsHint": {
+    "description": "Hint text for default points per question input"
+  },
+  "applyPointsToAllAction": "Apply to All",
+  "@applyPointsToAllAction": {
+    "description": "Button to apply the default points to all exam questions"
+  },
+  "applyPointsToAllTooltip": "Apply this point value to all current and future questions",
+  "@applyPointsToAllTooltip": {
+    "description": "Tooltip explaining the apply points to all action"
+  },
+  "pointsAppliedToAllSuccess": "Unified ({points}) points for all {count} questions successfully",
+  "@pointsAppliedToAllSuccess": {
+    "description": "Success message when points are applied to all questions",
+    "placeholders": {
+      "points": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "invalidPointsError": "Please enter a valid points value greater than zero",
+  "@invalidPointsError": {
+    "description": "Error message when entered points value is invalid"
+  },
   "optionsSelectCorrectPrompt": "Options (select the correct choice):",
   "@optionsSelectCorrectPrompt": {
     "description": "Options section prompt"
@@ -5034,15 +5196,6 @@
   "actionRequired": "Submission Required",
   "@actionRequired": {
     "description": "Action required status"
-  },
-  "attemptNumberLabel": "Attempt #{number}",
-  "@attemptNumberLabel": {
-    "description": "Attempt number label",
-    "placeholders": {
-      "number": {
-        "type": "String"
-      }
-    }
   },
   "attachedFilesCount": "{count} attached files",
   "@attachedFilesCount": {
@@ -5360,21 +5513,13 @@
     "description": "Default initial for student avatar"
   },
   "attendanceStatusPresent": "Present",
-  "@attendanceStatusPresent": {
-    "description": "Present status label"
-  },
+  "@attendanceStatusPresent": {},
   "attendanceStatusAbsent": "Absent",
-  "@attendanceStatusAbsent": {
-    "description": "Absent status label"
-  },
+  "@attendanceStatusAbsent": {},
   "attendanceStatusLate": "Late",
-  "@attendanceStatusLate": {
-    "description": "Late status label"
-  },
+  "@attendanceStatusLate": {},
   "attendanceStatusExcused": "Excused",
-  "@attendanceStatusExcused": {
-    "description": "Excused status label"
-  },
+  "@attendanceStatusExcused": {},
   "attendanceRateFull": "Completed lecture watch (100% • Present)",
   "@attendanceRateFull": {
     "description": "Completed lecture watch label"
@@ -6127,20 +6272,8 @@
   "falseOptionLabel": "False (Incorrect)",
   "completedBadge": "Completed",
   "currentActiveLectureBadge": "Current Lecture",
-  "overallCourseProgress": "Overall Progress: {completed} of {total} lectures completed ({percentage}%)",
-  "@overallCourseProgress": {
-    "placeholders": {
-      "completed": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      },
-      "percentage": {
-        "type": "int"
-      }
-    }
-  },
+  "overallCourseProgress": "Overall Course Progress",
+  "@overallCourseProgress": {},
   "reviewQuizResultAction": "Review Quiz Score",
   "rewatchLectureAction": "Rewatch Lecture",
   "startLectureAction": "Watch Lecture",
@@ -6278,7 +6411,7 @@
       }
     }
   },
-  "customPassingScore": "Custom",
+  "customPassingScore": "Custom passing score (%)",
   "lessonAddedToCourse": "Lecture added to {course}.",
   "@lessonAddedToCourse": {
     "placeholders": {
@@ -7249,6 +7382,53 @@
   "@selectExistingQuizAction": {},
   "unlinkQuizAction": "Unlink Quiz",
   "@unlinkQuizAction": {},
+  "attachedQuizzesSection": "Attached Quizzes & Exams",
+  "@attachedQuizzesSection": {},
+  "attachedQuizzesSectionSubtitle": "Attach one or more quizzes to this lecture. Required quizzes must be passed to unlock subsequent lessons.",
+  "@attachedQuizzesSectionSubtitle": {},
+  "addQuizToLessonAction": "Add Quiz to Lecture",
+  "@addQuizToLessonAction": {},
+  "requiredForProgression": "Required to pass",
+  "@requiredForProgression": {},
+  "optionalPractice": "Optional practice",
+  "@optionalPractice": {},
+  "makeQuizRequiredTooltip": "Click to make this quiz required for lesson completion",
+  "@makeQuizRequiredTooltip": {},
+  "makeQuizOptionalTooltip": "Click to make this quiz optional practice",
+  "@makeQuizOptionalTooltip": {},
+  "attachedQuizzesCount": "{count} quizzes attached",
+  "@attachedQuizzesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noQuizzesAttached": "No quizzes attached to this lecture yet",
+  "@noQuizzesAttached": {},
+  "attachedQuizzesProgressHeader": "Lecture Quizzes & Progress",
+  "@attachedQuizzesProgressHeader": {},
+  "requiredQuizzesCompletedProgress": "{passed} of {total} required quizzes passed",
+  "@requiredQuizzesCompletedProgress": {
+    "placeholders": {
+      "passed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "allRequiredQuizzesPassedCongrats": "All required quizzes passed! Lecture completed.",
+  "@allRequiredQuizzesPassedCongrats": {},
+  "quizScoreBadge": "Score: {score}%",
+  "@quizScoreBadge": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
   "studentNavLectures": "Lectures",
   "@studentNavLectures": {},
   "studentNavLecturesSubtitle": "Video lectures & course materials",
@@ -7324,14 +7504,6 @@
   },
   "noLecturesInGroup": "No video lectures published in this group yet",
   "@noLecturesInGroup": {},
-  "attendanceStatusPresent": "Present",
-  "@attendanceStatusPresent": {},
-  "attendanceStatusLate": "Late",
-  "@attendanceStatusLate": {},
-  "attendanceStatusAbsent": "Absent",
-  "@attendanceStatusAbsent": {},
-  "attendanceStatusExcused": "Excused",
-  "@attendanceStatusExcused": {},
   "syncAttendanceSuccessMessage": "Attendance statuses synced with video watch coverage",
   "@syncAttendanceSuccessMessage": {},
   "mistakesBankTitle": "Mistakes Bank",
@@ -7461,12 +7633,8 @@
   "@videoProcessingInfo": {},
   "statusReady": "Ready",
   "@statusReady": {},
-  "statusProcessing": "Processing",
-  "@statusProcessing": {},
   "statusUploading": "Uploading",
   "@statusUploading": {},
-  "statusFailed": "Failed",
-  "@statusFailed": {},
   "selectFromBank": "Choose from Video Bank",
   "@selectFromBank": {},
   "selectFromBankSubtitle": "Select an already uploaded video from your bank without re-uploading.",
@@ -7639,7 +7807,7 @@
   "@selectTargetCourse": {},
   "chapterTitleLabel": "Chapter Title",
   "@chapterTitleLabel": {},
-  "chapterTitleHint": "e.g., Chapter 1: Basics of Algebra",
+  "chapterTitleHint": "e.g., Chapter 1: Functions & Graphs",
   "@chapterTitleHint": {},
   "assignFolderAsChapterConfirm": "Confirm & Add Chapter",
   "@assignFolderAsChapterConfirm": {},
@@ -7763,10 +7931,6 @@
   "@addNewChapter": {},
   "newChapterDialogTitle": "Add New Chapter",
   "@newChapterDialogTitle": {},
-  "chapterTitleLabel": "Chapter Title",
-  "@chapterTitleLabel": {},
-  "chapterTitleHint": "e.g., Chapter 1: Functions & Graphs",
-  "@chapterTitleHint": {},
   "editChapterTitle": "Edit Chapter Title",
   "@editChapterTitle": {},
   "deleteChapterTitle": "Delete Chapter",
@@ -7854,7 +8018,9 @@
   "batchModeTitle": "Batch Setup ({count} Selected)",
   "@batchModeTitle": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "batchModeSubtitle": "Apply settings to all selected videos at once, or customize each individually",
@@ -7868,20 +8034,28 @@
   "addBatchLecturesButton": "Add {count} Lectures to Course",
   "@addBatchLecturesButton": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "addingBatchProgress": "Adding lecture {current} of {total}...",
   "@addingBatchProgress": {
     "placeholders": {
-      "current": { "type": "int" },
-      "total": { "type": "int" }
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "batchAddSuccessToast": "{count} lectures added to course successfully!",
   "@batchAddSuccessToast": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "singleLectureSetup": "Lecture Configuration",
@@ -7909,10 +8083,11 @@
   "useDefaultGroupScore": "Use default group passing score ({score}%)",
   "@useDefaultGroupScore": {
     "placeholders": {
-      "score": { "type": "int" }
+      "score": {
+        "type": "int"
+      }
     }
   },
-  "customPassingScore": "Custom passing score (%)",
   "@customPassingScore": {},
   "lecturePublishStatus": "Publish to Students",
   "@lecturePublishStatus": {},
@@ -7927,7 +8102,776 @@
   "folderVideosCount": "{count} videos",
   "@folderVideosCount": {
     "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "collapseAllChapters": "Collapse All Chapters",
+  "@collapseAllChapters": {},
+  "expandAllChapters": "Expand All Chapters",
+  "@expandAllChapters": {},
+  "moveChapterUp": "Move Chapter Up",
+  "@moveChapterUp": {},
+  "moveChapterDown": "Move Chapter Down",
+  "@moveChapterDown": {},
+  "chapterAnalytics": "Chapter Analytics",
+  "@chapterAnalytics": {},
+  "groupAnalytics": "Group Analytics",
+  "@groupAnalytics": {},
+  "chapterCompletionRate": "Chapter Completion Rate",
+  "@chapterCompletionRate": {},
+  "chapterBreakdown": "Chapter Progress Breakdown",
+  "@chapterBreakdown": {},
+  "studentsNeedingAttention": "Students Needing Attention",
+  "@studentsNeedingAttention": {},
+  "totalChapterViews": "Total Chapter Views",
+  "@totalChapterViews": {},
+  "averageChapterQuizScore": "Chapter Quizzes Average",
+  "@averageChapterQuizScore": {},
+  "noStudentsNeedingAttention": "All students are making great progress",
+  "@noStudentsNeedingAttention": {},
+  "completedAllChapterLessons": "Completed all lessons",
+  "@completedAllChapterLessons": {},
+  "inProgressChapterLessons": "In progress",
+  "@inProgressChapterLessons": {},
+  "notStartedChapterLessons": "Not started",
+  "@notStartedChapterLessons": {},
+  "studentProgressDistribution": "Student Progress Distribution",
+  "@studentProgressDistribution": {},
+  "chapterAnalyticsDialogTitle": "Chapter Analytics: {title}",
+  "@chapterAnalyticsDialogTitle": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "groupAnalyticsDialogTitle": "Group Academic Analytics",
+  "@groupAnalyticsDialogTitle": {},
+  "courseWatchEngagement": "Total Course Views",
+  "@courseWatchEngagement": {},
+  "overallQuizzesAverage": "Overall Quizzes Average",
+  "@overallQuizzesAverage": {},
+  "studentCompletionRate": "Completion: {rate}%",
+  "@studentCompletionRate": {
+    "placeholders": {
+      "rate": {
+        "type": "int"
+      }
+    }
+  },
+  "chapterLessonsCountLabel": "{count} Lessons",
+  "@chapterLessonsCountLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "studentEngagementTitle": "Student Engagement & Progress",
+  "@studentEngagementTitle": {
+    "description": "Title for student engagement hub"
+  },
+  "studentEngagementSubtitle": "Automated real-time tracking of lecture watches, progress, and student activity without manual roll-calls",
+  "@studentEngagementSubtitle": {
+    "description": "Subtitle for student engagement hub"
+  },
+  "studentEngagementBadge": "⚡ 100% Automated Tracking",
+  "@studentEngagementBadge": {
+    "description": "Badge for automated engagement tracking"
+  },
+  "viewByLecture": "By Lecture",
+  "@viewByLecture": {
+    "description": "View engagement tab by lecture"
+  },
+  "viewByStudentOverview": "Overall Student Progress",
+  "@viewByStudentOverview": {
+    "description": "View engagement tab by student overview"
+  },
+  "lectureCompletedBadge": "Completed Lecture",
+  "@lectureCompletedBadge": {
+    "description": "Badge when student completed lecture"
+  },
+  "lectureInProgressBadge": "In Progress",
+  "@lectureInProgressBadge": {
+    "description": "Badge when student is watching lecture"
+  },
+  "lectureNotStartedBadge": "Not Started",
+  "@lectureNotStartedBadge": {
+    "description": "Badge when student has not started lecture"
+  },
+  "engagementHigh": "Highly Committed",
+  "@engagementHigh": {
+    "description": "Overall high commitment status"
+  },
+  "engagementMedium": "Moderate Progress",
+  "@engagementMedium": {
+    "description": "Overall moderate commitment status"
+  },
+  "engagementLow": "Needs Follow-up",
+  "@engagementLow": {
+    "description": "Overall low commitment status requiring attention"
+  },
+  "groupCommitmentRate": "Group Commitment Rate",
+  "@groupCommitmentRate": {
+    "description": "Average commitment rate for group"
+  },
+  "totalEnrolledStudents": "Enrolled Students",
+  "@totalEnrolledStudents": {
+    "description": "Total enrolled students in group"
+  },
+  "committedStudentsCount": "Committed Students",
+  "@committedStudentsCount": {
+    "description": "Count of committed students"
+  },
+  "needsFollowupCount": "Needs Follow-up",
+  "@needsFollowupCount": {
+    "description": "Count of students needing follow-up"
+  },
+  "completedLecturesSummary": "Completed {completed} of {total} lectures ({percent}%)",
+  "@completedLecturesSummary": {
+    "description": "Summary of completed lectures",
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "sendParentEngagementReport": "Send WhatsApp Engagement Report",
+  "@sendParentEngagementReport": {
+    "description": "Tooltip to send WhatsApp engagement report"
+  },
+  "studentNoteSavedSuccess": "Student note saved successfully",
+  "@studentNoteSavedSuccess": {
+    "description": "Snackbar when student note is saved"
+  },
+  "refreshEngagementTooltip": "Refresh engagement and watch data",
+  "@refreshEngagementTooltip": {
+    "description": "Tooltip to refresh engagement data"
+  },
+  "noLecturesInGroupYet": "No published video lectures in this group yet",
+  "@noLecturesInGroupYet": {
+    "description": "Empty state when group has no lectures"
+  },
+  "filterCommitted": "Committed ({count})",
+  "@filterCommitted": {
+    "description": "Filter chip for committed students",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "filterNeedsFollowup": "Needs Follow-up ({count})",
+  "@filterNeedsFollowup": {
+    "description": "Filter chip for students needing follow-up",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "filterModerate": "Moderate ({count})",
+  "@filterModerate": {
+    "description": "Filter chip for moderate students",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "editExamTitle": "Edit Exam Details",
+  "@editExamTitle": {},
+  "editExamAction": "Edit Exam",
+  "@editExamAction": {},
+  "examUpdatedSuccess": "Exam details updated successfully",
+  "@examUpdatedSuccess": {},
+  "examTitleLabel": "Exam Title",
+  "@examTitleLabel": {},
+  "examDurationLabel": "Duration (Minutes)",
+  "@examDurationLabel": {},
+  "unlimitedDuration": "Untimed (Open)",
+  "@unlimitedDuration": {},
+  "passingScorePercentLabel": "Passing Score (%)",
+  "@passingScorePercentLabel": {},
+  "shuffleQuestionsLabel": "Shuffle Questions Order",
+  "@shuffleQuestionsLabel": {},
+  "showResultLabel": "Show Results Immediately After Submission",
+  "@showResultLabel": {},
+  "allowRetakeLabel": "Allow Retake",
+  "@allowRetakeLabel": {},
+  "saveChangesAction": "Save Changes",
+  "@saveChangesAction": {},
+  "editGroupTitle": "Edit Study Group",
+  "@editGroupTitle": {},
+  "editGroupAction": "Edit Group",
+  "@editGroupAction": {},
+  "groupUpdatedSuccess": "Group details updated successfully",
+  "@groupUpdatedSuccess": {},
+  "groupNameLabel": "Group Name",
+  "@groupNameLabel": {},
+  "groupLevelLabel": "Track / Level",
+  "@groupLevelLabel": {},
+  "groupDescriptionLabel": "Description",
+  "@groupDescriptionLabel": {},
+  "previousContentAccessLabel": "Previous Content Access for New Students",
+  "@previousContentAccessLabel": {},
+  "allowPreviousContent": "Allow access to past content",
+  "@allowPreviousContent": {},
+  "denyPreviousContent": "Show only content published after joining",
+  "@denyPreviousContent": {},
+  "editAssignmentTitle": "Edit Assignment",
+  "@editAssignmentTitle": {},
+  "editAssignmentAction": "Edit Assignment",
+  "@editAssignmentAction": {},
+  "assignmentUpdatedSuccess": "Assignment updated successfully",
+  "@assignmentUpdatedSuccess": {},
+  "assignmentTitleLabel": "Assignment Title",
+  "@assignmentTitleLabel": {},
+  "assignmentInstructionsLabel": "Instructions",
+  "@assignmentInstructionsLabel": {},
+  "dueDateLabel": "Due Date",
+  "@dueDateLabel": {},
+  "allowLateSubmissionLabel": "Allow Late Submissions",
+  "@allowLateSubmissionLabel": {},
+  "chapterNameAlreadyExists": "A chapter with this name already exists in this group",
+  "@chapterNameAlreadyExists": {},
+  "chapterUpdateFailed": "Failed to update chapter. Please try again.",
+  "@chapterUpdateFailed": {},
+  "deleteExamAction": "Delete Exam",
+  "@deleteExamAction": {},
+  "deleteExamDialogTitle": "Delete Exam Permanently?",
+  "@deleteExamDialogTitle": {},
+  "deleteExamDialogBody": "Are you sure you want to delete '{title}'? All questions and options will be permanently removed.",
+  "@deleteExamDialogBody": {
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "deleteExamConfirmButton": "Yes, Delete Exam",
+  "@deleteExamConfirmButton": {},
+  "archiveOrDeleteExamDialogTitle": "Archive / Hide Exam",
+  "@archiveOrDeleteExamDialogTitle": {},
+  "archiveOrDeleteExamDialogBody": "This exam has {count} student attempt(s). To protect their academic records, the exam will be archived and hidden from students.",
+  "@archiveOrDeleteExamDialogBody": {
+    "placeholders": {
       "count": { "type": "int" }
     }
-  }
+  },
+  "archiveExamConfirmButton": "Archive & Hide Exam",
+  "@archiveExamConfirmButton": {},
+  "examDeletedSuccessToast": "Exam deleted successfully",
+  "@examDeletedSuccessToast": {},
+  "examArchivedSuccessToast": "Exam archived and hidden successfully",
+  "@examArchivedSuccessToast": {},
+  "smartApproveTitle": "Approve & Enroll Student",
+  "@smartApproveTitle": {},
+  "smartApproveSelectGroupPrompt": "Select group(s) to immediately enroll the student:",
+  "@smartApproveSelectGroupPrompt": {},
+  "smartApproveEnrollNotice": "Upon approval, the student account will be activated and all lectures for the selected group(s) will be immediately accessible.",
+  "@smartApproveEnrollNotice": {},
+  "smartApproveNoGroupsWarning": "No groups exist yet. The student account will be activated, and you can assign them to a group later.",
+  "@smartApproveNoGroupsWarning": {},
+  "smartApproveAndEnrollAction": "Approve & Enroll Immediately",
+  "@smartApproveAndEnrollAction": {},
+  "smartApproveSuccessWithGroupsToast": "Student {name} approved and enrolled in {count} group(s) successfully!",
+  "@smartApproveSuccessWithGroupsToast": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "count": { "type": "int" }
+    }
+  },
+  "smartApproveSuccessNoGroupsToast": "Student {name} approved successfully!",
+  "@smartApproveSuccessNoGroupsToast": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "skipGroupEnrollment": "Proceed without assigning a group for now",
+  "@skipGroupEnrollment": {},
+  "dailyQuickActionsTitle": "Daily Quick Actions",
+  "@dailyQuickActionsTitle": {},
+  "dailyQuickActionsSubtitle": "Fast direct access to frequent teaching and management tasks",
+  "@dailyQuickActionsSubtitle": {},
+  "quickActionUploadLessonTitle": "Upload New Lesson",
+  "@quickActionUploadLessonTitle": {},
+  "quickActionUploadLessonDesc": "Add video lecture, PDF notes, or quiz",
+  "@quickActionUploadLessonDesc": {},
+  "quickActionAssessmentTitle": "Create Assignment or Quiz",
+  "@quickActionAssessmentTitle": {},
+  "quickActionAssessmentDesc": "Homework, fast quizzes, or full exams",
+  "@quickActionAssessmentDesc": {},
+  "quickActionPendingStudentsTitle": "New Student Requests",
+  "@quickActionPendingStudentsTitle": {},
+  "quickActionPendingStudentsDesc": "Review, approve, and enroll students into groups",
+  "@quickActionPendingStudentsDesc": {},
+  "pendingStudentsCountBadge": "{count} students waiting approval",
+  "@pendingStudentsCountBadge": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "noPendingStudentsBadge": "No pending requests",
+  "@noPendingStudentsBadge": {},
+  "createAssessmentChoiceTitle": "What would you like to create?",
+  "@createAssessmentChoiceTitle": {},
+  "createAssessmentChoiceSubtitle": "Choose assessment type to jump straight into the builder:",
+  "@createAssessmentChoiceSubtitle": {},
+  "createHomeworkAction": "Create New Assignment",
+  "@createHomeworkAction": {},
+  "createHomeworkActionDesc": "Set due date, attachments, and student instructions",
+  "@createHomeworkActionDesc": {},
+  "createExamOrQuizAction": "Create Exam or Quiz",
+  "@createExamOrQuizAction": {},
+  "createExamOrQuizActionDesc": "Multiple choice, timer, and automated grading",
+  "@createExamOrQuizActionDesc": {},
+  "examFilterTabAll": "All ({count})",
+  "@examFilterTabAll": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "examFilterTabGeneral": "General Exams ({count})",
+  "@examFilterTabGeneral": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "examFilterTabLectureQuizzes": "Lecture Quizzes ({count})",
+  "@examFilterTabLectureQuizzes": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "examFilterSubAll": "All",
+  "@examFilterSubAll": {},
+  "examFilterSubLinked": "Linked ({count})",
+  "@examFilterSubLinked": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "examFilterSubUnlinked": "Ready to Link ({count})",
+  "@examFilterSubUnlinked": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "statTotalExamsTitle": "Total Exams",
+  "@statTotalExamsTitle": {},
+  "statTotalExamsDesc": "All assessments in this group",
+  "@statTotalExamsDesc": {},
+  "statGeneralExamsTitle": "General Exams",
+  "@statGeneralExamsTitle": {},
+  "statGeneralExamsDesc": "Directly published without lecture requirement",
+  "@statGeneralExamsDesc": {},
+  "statLectureQuizzesTitle": "Lecture Quizzes",
+  "@statLectureQuizzesTitle": {},
+  "statLectureQuizzesDesc": "Pass-gates required to unlock subsequent lectures",
+  "@statLectureQuizzesDesc": {},
+  "statUnlinkedAlert": "{count} pending lecture link",
+  "@statUnlinkedAlert": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "badgeGeneralExam": "General Exam",
+  "@badgeGeneralExam": {},
+  "badgeLectureQuiz": "Lecture Quiz",
+  "@badgeLectureQuiz": {},
+  "linkedToLecturePill": "Linked to lecture: {title}",
+  "@linkedToLecturePill": {
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "unlinkedQuizPill": "Not linked to a lecture yet - Ready to link",
+  "@unlinkedQuizPill": {},
+  "linkToLectureNowAction": "Link to Lecture Now",
+  "@linkToLectureNowAction": {},
+  "linkOrChangeLectureAction": "Link / Change Linked Lecture",
+  "@linkOrChangeLectureAction": {},
+  "unlinkFromLectureAction": "Unlink (Convert to General Exam)",
+  "@unlinkFromLectureAction": {},
+  "convertToLectureQuizAction": "Convert to Lecture Quiz",
+  "@convertToLectureQuizAction": {},
+  "convertToGeneralExamAction": "Convert to General Exam",
+  "@convertToGeneralExamAction": {},
+  "viewExamDetailsAndAttempts": "Details & Student Attempts",
+  "@viewExamDetailsAndAttempts": {},
+  "linkExamToLectureDialogTitle": "Link Exam to Lecture",
+  "@linkExamToLectureDialogTitle": {},
+  "linkExamToLectureDialogSubtitle": "Select the lecture that requires passing this quiz to unlock the next:",
+  "@linkExamToLectureDialogSubtitle": {},
+  "searchLecturesHint": "Search group lectures...",
+  "@searchLecturesHint": {},
+  "noLecturesFound": "No lectures found in this group",
+  "@noLecturesFound": {},
+  "currentExamAttachedWarning": "Currently linked to: {title}",
+  "@currentExamAttachedWarning": {
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "lectureFreeForLinking": "Available to link",
+  "@lectureFreeForLinking": {},
+  "confirmLinkExamAction": "Confirm Lecture Link",
+  "@confirmLinkExamAction": {},
+  "examLinkedSuccessToast": "Exam linked to lecture '{title}' successfully",
+  "@examLinkedSuccessToast": {
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "examUnlinkedSuccessToast": "Exam unlinked and set as General Exam successfully",
+  "@examUnlinkedSuccessToast": {},
+  "examConvertedToLectureSuccess": "Exam converted to Lecture Quiz",
+  "@examConvertedToLectureSuccess": {},
+  "confirmUnlinkDialogTitle": "Unlink Exam?",
+  "@confirmUnlinkDialogTitle": {},
+  "confirmUnlinkDialogBody": "Do you want to unlink '{title}' from its lecture and make it a general exam?",
+  "@confirmUnlinkDialogBody": {
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "confirmUnlinkButton": "Yes, Unlink",
+  "@confirmUnlinkButton": {},
+  "draftVersionNotice": "Current version is a draft. You can edit questions directly without creating a new copy.",
+  "@draftVersionNotice": {},
+  "publishCurrentDraftAction": "Publish This Version Now",
+  "@publishCurrentDraftAction": {},
+  "editDraftQuestionsAction": "Edit Questions & Settings",
+  "@editDraftQuestionsAction": {},
+  "versionPublishedPill": "Published",
+  "@versionPublishedPill": {},
+  "versionDraftPill": "Draft",
+  "@versionDraftPill": {},
+  "creatingNewVersionLoading": "Creating new version...",
+  "@creatingNewVersionLoading": {},
+  "publishingVersionLoading": "Publishing version...",
+  "@publishingVersionLoading": {},
+  "versionPublishedSuccess": "Version published successfully and is now active for students",
+  "@versionPublishedSuccess": {},
+  "unpublishExamAction": "Unpublish (Revert to Draft)",
+  "@unpublishExamAction": {},
+  "unpublishingExamLoading": "Unpublishing exam...",
+  "@unpublishingExamLoading": {},
+  "examUnpublishedSuccess": "Exam unpublished and reverted to draft successfully (hidden from students)",
+  "@examUnpublishedSuccess": {},
+  "confirmUnpublishExamTitle": "Unpublish and hide exam?",
+  "@confirmUnpublishExamTitle": {},
+  "confirmUnpublishExamBody": "Are you sure you want to unpublish \"{title}\"? It will be reverted to draft and hidden from all students.",
+  "@confirmUnpublishExamBody": {
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "confirmUnpublishButton": "Yes, Unpublish to Draft",
+  "@confirmUnpublishButton": {},
+  "noOptionsAvailableForQuestionWarning": "Warning: No answer choices found for this question. Please contact your teacher.",
+  "@noOptionsAvailableForQuestionWarning": {},
+  "newVersionFailedError": "Failed to create new version: {error}",
+  "@newVersionFailedError": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "deleteExamAction": "Delete Exam",
+  "@deleteExamAction": {},
+  "deleteExamDialogTitle": "Delete Exam?",
+  "@deleteExamDialogTitle": {},
+  "deleteExamDialogBody": "Are you sure you want to permanently delete '{title}'? This action cannot be undone.",
+  "@deleteExamDialogBody": {
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "deleteExamConfirmButton": "Yes, Delete Exam",
+  "@deleteExamConfirmButton": {},
+  "archiveOrDeleteExamDialogTitle": "Archive Exam (Students Have Attempts)",
+  "@archiveOrDeleteExamDialogTitle": {},
+  "archiveOrDeleteExamDialogBody": "The exam '{title}' has {count} student attempts. To protect historical grades and student records, it will be safely archived and hidden from all lists instead of permanently destroying data.",
+  "@archiveOrDeleteExamDialogBody": {
+    "placeholders": {
+      "title": { "type": "String" },
+      "count": { "type": "int" }
+    }
+  },
+  "archiveExamConfirmButton": "Archive & Hide Exam",
+  "@archiveExamConfirmButton": {},
+  "examDeletedSuccessToast": "Exam deleted permanently",
+  "@examDeletedSuccessToast": {},
+  "examArchivedSuccessToast": "Exam safely archived and hidden from view",
+  "@examArchivedSuccessToast": {},
+  "studentAttemptsGroupCount": "{count} Attempts",
+  "@studentAttemptsGroupCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "singleStudentAttemptBadge": "1 Attempt",
+  "@singleStudentAttemptBadge": {},
+  "highestScoreBadge": "Best: {score}",
+  "@highestScoreBadge": {
+    "placeholders": {
+      "score": { "type": "String" }
+    }
+  },
+  "attemptNumberLabel": "Attempt #{number}",
+  "@attemptNumberLabel": {
+    "placeholders": {
+      "number": { "type": "int" }
+    }
+  },
+  "allAttemptsHistoryHeader": "All attempts for this student ({count}):",
+  "@allAttemptsHistoryHeader": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "studentsCountSummary": "{count} Students Took Exam",
+  "@studentsCountSummary": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "totalAttemptsSummary": "{count} Total Attempts",
+  "@totalAttemptsSummary": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "editDraftExamTitle": "Edit Draft Exam",
+  "@editDraftExamTitle": {},
+  "editDraftQuestionsAction": "Edit Questions & Content",
+  "@editDraftQuestionsAction": {},
+  "editExamSettingsAction": "Quick Settings",
+  "@editExamSettingsAction": {},
+  "saveExamDraftChanges": "Save Draft Changes",
+  "@saveExamDraftChanges": {},
+  "examDraftUpdatedSuccess": "Exam draft and questions updated successfully",
+  "@examDraftUpdatedSuccess": {},
+  "examDraftPublishedSuccess": "Exam updated and published to students successfully",
+  "@examDraftPublishedSuccess": {},
+  "examUpdateFailed": "Failed to update exam: {error}",
+  "@examUpdateFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "editQuestionsNow": "Edit Questions Now",
+  "@editQuestionsNow": {},
+  "cannotEditPublishedExamWithAttempts": "Cannot edit questions directly because students have already taken this exam. You can create a new version instead.",
+  "@cannotEditPublishedExamWithAttempts": {},
+  "collapseAllQuestions": "Collapse All",
+  "@collapseAllQuestions": {},
+  "expandAllQuestions": "Expand All",
+  "@expandAllQuestions": {},
+  "questionSummaryEmpty": "No question text entered yet",
+  "@questionSummaryEmpty": {},
+  "hasAttachedImage": "Image attached",
+  "@hasAttachedImage": {},
+  "clickToEditQuestion": "Click to expand & edit question",
+  "@clickToEditQuestion": {},
+  "videoSecurityPausedNotice": "Playback paused to protect academic content. Please keep focus inside the player window.",
+  "@videoSecurityPausedNotice": {},
+  "resumePlaybackAction": "Resume Watching",
+  "@resumePlaybackAction": {},
+  "examSecurityAlertTitle": "Security Warning: Tab Switch Detected",
+  "@examSecurityAlertTitle": {},
+  "examSecurityAlertMessage": "Leaving the exam window or switching apps (such as screen sharing or search) is strictly prohibited. This attempt has been logged.",
+  "@examSecurityAlertMessage": {},
+  "examSecurityViolationsCount": "Violation {current} of {max} permitted",
+  "@examSecurityViolationsCount": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "max": { "type": "int" }
+    }
+  },
+  "examPrivacyShieldNotice": "Exam questions hidden while window is out of focus to protect test integrity.",
+  "@examPrivacyShieldNotice": {},
+  "returnToExamAction": "Return to Exam",
+  "@returnToExamAction": {},
+  "examAutoSubmittedDueToViolations": "The exam was submitted automatically due to exceeding the maximum allowed security tab switches.",
+  "@examAutoSubmittedDueToViolations": {},
+  "videoFileTooLargeForWeb": "The video file ({sizeMb} MB) exceeds browser memory capacity (max 2 GB). Please lower the Bitrate in your editor (CapCut) to keep the file under 1.5 GB for faster upload.",
+  "@videoFileTooLargeForWeb": {
+    "placeholders": {
+      "sizeMb": { "type": "String" }
+    }
+  },
+  "videoFileMemoryError": "Failed to read video data into browser memory ({sizeMb} MB). The file might be too large for browser RAM. Please export under 1.5 GB.",
+  "@videoFileMemoryError": {
+    "placeholders": {
+      "sizeMb": { "type": "String" }
+    }
+  },
+  "longVideoExportTip": "💡 Tip for long lectures (> 1 hr): set Bitrate to 2,500 Kbps in video editor to keep file around 1 GB for fast upload and browser stability.",
+  "@longVideoExportTip": {},
+  "examParentDispatchHubTitle": "Exam Results & Parent Dispatch Hub",
+  "@examParentDispatchHubTitle": {},
+  "examParentDispatchHeroTitle": "Instant Exam Results & Parent WhatsApp Dispatch",
+  "@examParentDispatchHeroTitle": {},
+  "examParentDispatchHeroSubtitle": "Notify parents with their student's exam score with single-click customized WhatsApp message",
+  "@examParentDispatchHeroSubtitle": {},
+  "openParentDispatchHubAction": "Open Dispatch Hub",
+  "@openParentDispatchHubAction": {},
+  "sendScoreToParentAction": "Send to Parent",
+  "@sendScoreToParentAction": {},
+  "resendToParentAction": "Resend",
+  "@resendToParentAction": {},
+  "dispatchSentBadge": "Sent",
+  "@dispatchSentBadge": {},
+  "missingParentPhonePrompt": "No parent phone",
+  "@missingParentPhonePrompt": {},
+  "examStatusNotTakenShort": "Not Taken",
+  "@examStatusNotTakenShort": {},
+  "awaitingExamSubmissionNotice": "Awaiting exam submission",
+  "@awaitingExamSubmissionNotice": {},
+  "examStudentScoreLabel": "Score: {score}",
+  "@examStudentScoreLabel": {
+    "placeholders": {
+      "score": { "type": "String" }
+    }
+  },
+  "examStudentNotTakenNotice": "Student has not taken the exam yet",
+  "@examStudentNotTakenNotice": {},
+  "examStudentNotTakenHint": "You can send a reminder notification to the parent to encourage the student to take the exam.",
+  "@examStudentNotTakenHint": {},
+  "examRatingExcellent": "Outstanding performance 🌟",
+  "@examRatingExcellent": {},
+  "examRatingVeryGood": "Very good performance and successful pass 👍",
+  "@examRatingVeryGood": {},
+  "examRatingNeedsFocus": "Needs more focus and review ⚠️",
+  "@examRatingNeedsFocus": {},
+  "dispatchRecipientPhoneTitle": "Recipient phone number for WhatsApp notification:",
+  "@dispatchRecipientPhoneTitle": {},
+  "parentPhoneRecipientLabel": "Parent Phone",
+  "@parentPhoneRecipientLabel": {},
+  "studentPhoneRecipientLabel": "Student Phone",
+  "@studentPhoneRecipientLabel": {},
+  "enterParentPhoneHint": "Enter parent phone (WhatsApp)...",
+  "@enterParentPhoneHint": {},
+  "savePhoneAction": "Save Phone",
+  "@savePhoneAction": {},
+  "parentPhoneSavedSuccess": "Parent phone number saved successfully",
+  "@parentPhoneSavedSuccess": {},
+  "parentPhoneSaveFailed": "Failed to save parent phone number",
+  "@parentPhoneSaveFailed": {},
+  "quickTeacherPresetsTitle": "Quick Teacher Feedback Presets (1-Tap):",
+  "@quickTeacherPresetsTitle": {},
+  "customTeacherNoteHint": "Type custom note or feedback for parent (optional)...",
+  "@customTeacherNoteHint": {},
+  "liveWhatsAppPreviewTitle": "Live WhatsApp Message Preview:",
+  "@liveWhatsAppPreviewTitle": {},
+  "copyMessageAction": "Copy Message",
+  "@copyMessageAction": {},
+  "messageCopiedToast": "Message copied to clipboard",
+  "@messageCopiedToast": {},
+  "copyActionShort": "Copy",
+  "@copyActionShort": {},
+  "sendViaWhatsAppNowAction": "Send via WhatsApp Now",
+  "@sendViaWhatsAppNowAction": {},
+  "missingPhoneWarningToast": "Please provide a valid phone number to send WhatsApp message",
+  "@missingPhoneWarningToast": {},
+  "whatsAppLaunchFailedToast": "Could not launch WhatsApp, you can copy the message instead",
+  "@whatsAppLaunchFailedToast": {},
+  "nextStudentInQueueAction": "Next: {studentName} ➡️",
+  "@nextStudentInQueueAction": {
+    "placeholders": {
+      "studentName": { "type": "String" }
+    }
+  },
+  "copyRosterSummaryTooltip": "Copy complete roster score sheet",
+  "@copyRosterSummaryTooltip": {},
+  "sequentialDispatchActionShort": "Fast Queue Runner ⚡",
+  "@sequentialDispatchActionShort": {},
+  "rosterCopiedToast": "Complete exam roster score sheet copied to clipboard",
+  "@rosterCopiedToast": {},
+  "noMatchingStudentsFound": "No students found matching current search or filters",
+  "@noMatchingStudentsFound": {},
+  "sortOptionsTooltip": "Sort students",
+  "@sortOptionsTooltip": {},
+  "sortHighestScoreFirst": "Highest score first",
+  "@sortHighestScoreFirst": {},
+  "sortLowestScoreFirst": "Lowest score first",
+  "@sortLowestScoreFirst": {},
+  "sortStudentNameAlphabetical": "By student name (A-Z)",
+  "@sortStudentNameAlphabetical": {},
+  "sortLatestSubmittedFirst": "Most recent submission first",
+  "@sortLatestSubmittedFirst": {},
+  "metricSubmissionsRateTitle": "Submissions",
+  "@metricSubmissionsRateTitle": {},
+  "metricAverageScoreTitle": "Average Score",
+  "@metricAverageScoreTitle": {},
+  "metricPassRateTitle": "Pass Rate",
+  "@metricPassRateTitle": {},
+  "metricWhatsAppDispatchedTitle": "Parents Notified",
+  "@metricWhatsAppDispatchedTitle": {},
+  "notifiedBadgeShort": "Notified",
+  "@notifiedBadgeShort": {},
+  "searchStudentOrPhoneHint": "Search by student name, phone, or group...",
+  "@searchStudentOrPhoneHint": {},
+  "filterAllRoster": "All ({count})",
+  "@filterAllRoster": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "filterSubmittedRoster": "Submitted ({count})",
+  "@filterSubmittedRoster": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "filterPassedRoster": "Passed ({count})",
+  "@filterPassedRoster": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "filterNeedsAttentionRoster": "Needs Attention ({count})",
+  "@filterNeedsAttentionRoster": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "filterNotStartedRoster": "Not Taken ({count})",
+  "@filterNotStartedRoster": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "filterUnnotifiedRoster": "Pending WhatsApp ({count})",
+  "@filterUnnotifiedRoster": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "filterNotifiedRoster": "Notified ({count})",
+  "@filterNotifiedRoster": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "filterMissingPhoneRoster": "Missing Parent Phone",
+  "@filterMissingPhoneRoster": {},
+  "editParentPhoneDialogTitle": "Edit Parent Phone: {studentName}",
+  "@editParentPhoneDialogTitle": {
+    "placeholders": {
+      "studentName": { "type": "String" }
+    }
+  },
+  "editParentPhoneDialogBody": "Enter the parent WhatsApp phone number to link it to the student profile for academic reports.",
+  "@editParentPhoneDialogBody": {},
+  "saveActionShort": "Save",
+  "@saveActionShort": {}
 }

@@ -39,6 +39,16 @@ abstract class AssignmentsRepository {
     int maxScore = 100,
   });
 
+  /// Updates an assignment's title, instructions, due date, and settings.
+  Future<Result<AssignmentEntity>> updateAssignment({
+    required String assignmentId,
+    required String title,
+    String? instructions,
+    DateTime? dueAt,
+    bool? allowLateSubmission,
+    int? maxScore,
+  });
+
   /// Submits an assignment with uploaded files.
   Future<Result<AssignmentSubmissionEntity>> submitAssignment({
     required String assignmentId,

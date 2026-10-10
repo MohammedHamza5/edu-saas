@@ -253,6 +253,8 @@ class _CourseLessonTileState extends State<CourseLessonTile> {
                           style: theme.textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w700,
                             color: AppColors.textPrimary,
+                            fontSize: 14.5,
+                            height: 1.3,
                           ),
                         ),
                         // Show original video title if lesson has an override
@@ -270,7 +272,7 @@ class _CourseLessonTileState extends State<CourseLessonTile> {
                             ),
                           ),
                         ],
-                        const SizedBox(height: AppSpacing.s4),
+                        const SizedBox(height: AppSpacing.s6),
                         // Chips row
                         Wrap(
                           spacing: AppSpacing.s6,
@@ -467,25 +469,25 @@ class _CourseLessonTileState extends State<CourseLessonTile> {
     required Color color,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
+        color: color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(5),
+        border: Border.all(color: color.withValues(alpha: 0.32)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 10, color: color),
-          const SizedBox(width: 3),
+          Icon(icon, size: 11, color: color),
+          const SizedBox(width: 4),
           Flexible(
             child: Text(
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
+                fontSize: 10.5,
+                fontWeight: FontWeight.w700,
                 color: color,
               ),
             ),
@@ -508,15 +510,15 @@ class _CourseLessonTileState extends State<CourseLessonTile> {
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(6),
-          hoverColor: color.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(8),
+          hoverColor: color.withValues(alpha: 0.20),
           child: Container(
-            padding: EdgeInsets.all(isCompact ? 5 : 7),
+            padding: EdgeInsets.all(isCompact ? 5.5 : 7.5),
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(6),
+              color: color.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: color.withValues(alpha: 0.25),
+                color: color.withValues(alpha: 0.30),
                 width: 1,
               ),
             ),

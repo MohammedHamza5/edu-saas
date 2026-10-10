@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
@@ -346,19 +347,19 @@ class _ExamReviewPageState extends State<ExamReviewPage> {
                                 AppSpacing.radiusMedium,
                               ),
                             ),
-                            child: Image.network(
-                              question.imageUrl!,
+                            child: CachedNetworkImage(
+                              imageUrl: question.imageUrl!,
+                              memCacheWidth: 800,
+                              memCacheHeight: 800,
+                              maxWidthDiskCache: 1200,
                               fit: BoxFit.contain,
-                              loadingBuilder: (ctx, child, progress) {
-                                if (progress == null) return child;
-                                return const SizedBox(
-                                  height: 160,
-                                  child: Center(
-                                    child: AppLoadingView.signature(),
-                                  ),
-                                );
-                              },
-                              errorBuilder: (_, __, ___) => const Padding(
+                              placeholder: (ctx, _) => const SizedBox(
+                                height: 160,
+                                child: Center(
+                                  child: AppLoadingView.signature(),
+                                ),
+                              ),
+                              errorWidget: (_, __, ___) => const Padding(
                                 padding: EdgeInsets.all(AppSpacing.s16),
                                 child: Center(
                                   child: Icon(
@@ -512,10 +513,25 @@ class _ExamReviewPageState extends State<ExamReviewPage> {
                             borderRadius: BorderRadius.circular(
                               AppSpacing.radiusSmall,
                             ),
-                            child: Image.network(
-                              opt.imageUrl!,
+                            child: CachedNetworkImage(
+                              imageUrl: opt.imageUrl!,
                               height: 120,
+                              memCacheWidth: 400,
+                              memCacheHeight: 250,
+                              maxWidthDiskCache: 600,
                               fit: BoxFit.contain,
+                              placeholder: (ctx, _) => Container(
+                                height: 120,
+                                color: AppColors.surfaceVariant.withValues(alpha: 0.3),
+                                child: const Center(
+                                  child: SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                  ),
+                                ),
+                              ),
+                              errorWidget: (_, __, ___) => const SizedBox.shrink(),
                             ),
                           ),
                         ],

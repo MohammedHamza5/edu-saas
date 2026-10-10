@@ -278,6 +278,9 @@ class _ExamImageAttachmentBoxState extends State<ExamImageAttachmentBox> {
                       width: displayW,
                       child: CachedNetworkImage(
                         imageUrl: _imageUrl!,
+                        memCacheWidth: 600,
+                        memCacheHeight: 600,
+                        maxWidthDiskCache: 800,
                         fit: BoxFit.contain,
                         placeholder: (ctx, _) => Container(
                           height: 140,

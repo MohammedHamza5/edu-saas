@@ -49,9 +49,7 @@ class ExamsCubit extends Cubit<ExamsState> {
           hasMore: cached.length >= _pageSize,
         ),
       );
-      if (!forceRefresh && AppCache.exams.has(cacheKey)) {
-        return; // Fresh cache, skip network
-      }
+      // Stale cache displayed immediately, then continue to network fetch to guarantee fresh updates
     } else {
       emit(const ExamsLoading());
     }
@@ -211,6 +209,191 @@ class ExamsCubit extends Cubit<ExamsState> {
     );
   }
 
+  /// Updates an exam's title and settings (Teacher flow)
+  Future<bool> updateExam({
+    required String examId,
+    required String title,
+    int? durationMinutes,
+    int? maxScore,
+    int? passingScore,
+    bool? shuffleQuestions,
+    bool? showResult,
+    bool? allowRetake,
+    DateTime? startAt,
+    DateTime? endAt,
+    bool? isPublished,
+  }) async {
+    final result = await _repository.updateExam(
+      examId: examId,
+      title: title,
+      durationMinutes: durationMinutes,
+      maxScore: maxScore,
+      passingScore: passingScore,
+      shuffleQuestions: shuffleQuestions,
+      showResult: showResult,
+      allowRetake: allowRetake,
+      startAt: startAt,
+      endAt: endAt,
+      isPublished: isPublished,
+    );
+
+    return result.when(
+      onSuccess: (updatedExam) {
+        final currentState = state;
+        if (currentState is TeacherExamsLoaded) {
+          if (currentState.groupId != null) {
+            AppCache.exams.invalidate('teacher_exams_${currentState.groupId}');
+          }
+          final index = currentState.exams.indexWhere((e) => e.id == updatedExam.id);
+          final updatedList = List<ExamEntity>.from(currentState.exams);
+          if (index != -1) {
+            updatedList[index] = updatedExam;
+          }
+          emit(
+            currentState.copyWith(
+              exams: updatedList,
+              selectedExam: currentState.selectedExam?.id == updatedExam.id
+                  ? updatedExam
+                  : currentState.selectedExam,
+            ),
+          );
+        }
+        return true;
+      },
+      onFailure: (failure) {
+        final currentState = state;
+        if (currentState is TeacherExamsLoaded) {
+          emit(currentState.copyWith(message: failure.message));
+        } else {
+          emit(ExamsError(failure.message));
+        }
+        return false;
+      },
+    );
+  }
+
+  /// Updates an existing draft exam's metadata and atomic questions (Teacher flow)
+  Future<ExamEntity?> updateDraftExamQuestions({
+    required String examId,
+    required String title,
+    int? durationMinutes,
+    int? maxScore,
+    int? passingScore,
+    bool? shuffleQuestions,
+    bool? showResult,
+    bool? allowRetake,
+    DateTime? startAt,
+    DateTime? endAt,
+    bool? isPublished,
+    required List<ExamQuestionEntity> questions,
+  }) async {
+    final currentState = state;
+    if (currentState is TeacherExamsLoaded) {
+      emit(currentState.copyWith(isCreating: true));
+    }
+
+    final result = await _repository.updateDraftExamQuestions(
+      examId: examId,
+      title: title,
+      durationMinutes: durationMinutes,
+      maxScore: maxScore,
+      passingScore: passingScore,
+      shuffleQuestions: shuffleQuestions,
+      showResult: showResult,
+      allowRetake: allowRetake,
+      startAt: startAt,
+      endAt: endAt,
+      isPublished: isPublished,
+      questions: questions,
+    );
+
+    return result.when(
+      onSuccess: (updatedExam) {
+        if (currentState is TeacherExamsLoaded) {
+          if (currentState.groupId != null) {
+            AppCache.exams.invalidate('teacher_exams_${currentState.groupId}');
+          }
+          final index =
+              currentState.exams.indexWhere((e) => e.id == updatedExam.id);
+          final updatedList = List<ExamEntity>.from(currentState.exams);
+          if (index != -1) {
+            updatedList[index] = updatedExam;
+          }
+          emit(
+            currentState.copyWith(
+              isCreating: false,
+              exams: updatedList,
+              selectedExam: currentState.selectedExam?.id == updatedExam.id
+                  ? updatedExam
+                  : currentState.selectedExam,
+            ),
+          );
+        }
+        return updatedExam;
+      },
+      onFailure: (failure) {
+        if (currentState is TeacherExamsLoaded) {
+          emit(
+            currentState.copyWith(isCreating: false, message: failure.message),
+          );
+        } else {
+          emit(ExamsError(failure.message));
+        }
+        return null;
+      },
+    );
+  }
+
+  /// Fetches complete details of an exam including questions and options
+  Future<ExamEntity?> getExamDetails(String examId) async {
+    final result = await _repository.getExamDetails(examId);
+    return result.when(
+      onSuccess: (exam) => exam,
+      onFailure: (failure) {
+        AppLogger.w(
+          'ExamsCubit',
+          'Could not get exam details: ${failure.message}',
+        );
+        return null;
+      },
+    );
+  }
+
+  /// Deletes or archives an exam with cascade cleanup (Teacher flow)
+  Future<bool> deleteExam({
+    required String examId,
+    bool force = false,
+  }) async {
+    final currentState = state;
+    if (currentState is! TeacherExamsLoaded) return false;
+
+    final result = await _repository.deleteExam(
+      examId: examId,
+      force: force,
+    );
+
+    return result.when(
+      onSuccess: (success) {
+        if (!success) return false;
+        if (currentState.groupId != null) {
+          AppCache.exams.invalidate('teacher_exams_${currentState.groupId}');
+        }
+        final updatedList = currentState.exams.where((e) => e.id != examId).toList();
+        emit(
+          currentState.copyWith(
+            exams: updatedList,
+            selectedExam: currentState.selectedExam?.id == examId ? null : currentState.selectedExam,
+          ),
+        );
+        return true;
+      },
+      onFailure: (failure) {
+        emit(currentState.copyWith(message: failure.message));
+        return false;
+      },
+    );
+  }
+
   /// Creates a new draft version for an existing exam (Teacher flow)
   Future<bool> createNewVersion(String examId) async {
     final currentState = state;
@@ -219,10 +402,16 @@ class ExamsCubit extends Cubit<ExamsState> {
     final result = await _repository.createNewExamVersion(examId);
 
     return result.when(
-      onSuccess: (_) {
+      onSuccess: (newVersion) {
         if (currentState.groupId != null) {
           AppCache.exams.invalidate('teacher_exams_${currentState.groupId}');
           loadGroupExams(currentState.groupId!, forceRefresh: true);
+        }
+        if (currentState.selectedExam?.id == examId) {
+          final updatedSelected = currentState.selectedExam!.copyWith(
+            activeVersion: newVersion,
+          );
+          emit(currentState.copyWith(selectedExam: updatedSelected));
         }
         return true;
       },
@@ -246,6 +435,148 @@ class ExamsCubit extends Cubit<ExamsState> {
           AppCache.exams.invalidate('teacher_exams_${currentState.groupId}');
           loadGroupExams(currentState.groupId!, forceRefresh: true);
         }
+        if (currentState.selectedExam?.id == examId &&
+            currentState.selectedExam?.activeVersion != null) {
+          final updatedSelected = currentState.selectedExam!.copyWith(
+            activeVersion: currentState.selectedExam!.activeVersion!.copyWith(
+              status: ExamStatus.published,
+              publishedAt: DateTime.now(),
+            ),
+          );
+          emit(currentState.copyWith(selectedExam: updatedSelected));
+        }
+        return true;
+      },
+      onFailure: (failure) {
+        emit(currentState.copyWith(message: failure.message));
+        return false;
+      },
+    );
+  }
+
+  /// Reverts a published exam version back to draft, hiding it from students (Teacher flow)
+  Future<bool> unpublishVersion({
+    required String examId,
+    required String versionId,
+  }) async {
+    final currentState = state;
+    if (currentState is! TeacherExamsLoaded) return false;
+
+    final result = await _repository.unpublishExamVersion(
+      examId: examId,
+      versionId: versionId,
+    );
+
+    return result.when(
+      onSuccess: (_) {
+        if (currentState.groupId != null) {
+          AppCache.exams.invalidate('teacher_exams_${currentState.groupId}');
+          loadGroupExams(currentState.groupId!, forceRefresh: true);
+        }
+        if (currentState.selectedExam?.id == examId &&
+            currentState.selectedExam?.activeVersion != null) {
+          final updatedSelected = currentState.selectedExam!.copyWith(
+            activeVersion: currentState.selectedExam!.activeVersion!.copyWith(
+              status: ExamStatus.draft,
+            ),
+          );
+          emit(currentState.copyWith(selectedExam: updatedSelected));
+        }
+        return true;
+      },
+      onFailure: (failure) {
+        emit(currentState.copyWith(message: failure.message));
+        return false;
+      },
+    );
+  }
+
+  /// Fetches lessons in the group for linking exams (Teacher flow)
+  Future<List<Map<String, dynamic>>> getGroupLessons(String groupId) async {
+    final result = await _repository.getGroupLessons(groupId);
+    return result.when(
+      onSuccess: (lessons) => lessons,
+      onFailure: (_) => <Map<String, dynamic>>[],
+    );
+  }
+
+  /// Links an exam to a lesson as its gatekeeper quiz (Teacher flow)
+  Future<bool> linkExamToLesson({
+    required String examId,
+    required String lessonId,
+    required String groupId,
+  }) async {
+    final currentState = state;
+    if (currentState is! TeacherExamsLoaded) return false;
+
+    final result = await _repository.linkExamToLesson(
+      examId: examId,
+      lessonId: lessonId,
+      groupId: groupId,
+    );
+
+    return result.when(
+      onSuccess: (_) {
+        AppCache.exams.invalidate('teacher_exams_$groupId');
+        loadGroupExams(groupId, forceRefresh: true);
+        return true;
+      },
+      onFailure: (failure) {
+        emit(currentState.copyWith(message: failure.message));
+        return false;
+      },
+    );
+  }
+
+  /// Unlinks an exam from lessons in the group (Teacher flow)
+  Future<bool> unlinkExamFromLesson({
+    required String examId,
+    required String groupId,
+    bool makeGeneralExam = false,
+  }) async {
+    final currentState = state;
+    if (currentState is! TeacherExamsLoaded) return false;
+
+    final result = await _repository.unlinkExamFromLesson(
+      examId: examId,
+      groupId: groupId,
+      makeGeneralExam: makeGeneralExam,
+    );
+
+    return result.when(
+      onSuccess: (_) {
+        AppCache.exams.invalidate('teacher_exams_$groupId');
+        loadGroupExams(groupId, forceRefresh: true);
+        return true;
+      },
+      onFailure: (failure) {
+        emit(currentState.copyWith(message: failure.message));
+        return false;
+      },
+    );
+  }
+
+  /// Converts exam type between lecture quiz and general exam (Teacher flow)
+  Future<bool> convertExamType({
+    required String examId,
+    required String contentId,
+    required bool toLectureExam,
+    required String groupId,
+  }) async {
+    final currentState = state;
+    if (currentState is! TeacherExamsLoaded) return false;
+
+    final result = await _repository.convertExamType(
+      examId: examId,
+      contentId: contentId,
+      toLectureExam: toLectureExam,
+      groupId: groupId,
+    );
+
+    return result.when(
+      onSuccess: (_) {
+        AppCache.exams.invalidate('teacher_exams_$groupId');
+        loadGroupExams(groupId, forceRefresh: true);
         return true;
       },
       onFailure: (failure) {
@@ -287,9 +618,7 @@ class ExamsCubit extends Cubit<ExamsState> {
           ),
         );
       }
-      if (!forceRefresh && AppCache.exams.has(cacheKey)) {
-        return; // Fresh cache, skip network
-      }
+      // Stale cache displayed immediately, then continue to network fetch to guarantee fresh updates
     } else {
       emit(const ExamsLoading());
     }

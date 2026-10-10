@@ -311,6 +311,9 @@ class _AssetBlock extends StatelessWidget {
                 child: isNetwork
                     ? CachedNetworkImage(
                         imageUrl: url!,
+                        memCacheWidth: 800,
+                        memCacheHeight: 800,
+                        maxWidthDiskCache: 1200,
                         fit: BoxFit.contain,
                         placeholder: (_, __) => const Center(
                           child: Padding(
@@ -371,6 +374,8 @@ class _AssetBlock extends StatelessWidget {
               maxScale: 5.0,
               child: CachedNetworkImage(
                 imageUrl: url,
+                memCacheWidth: 1200,
+                maxWidthDiskCache: 1600,
                 fit: BoxFit.contain,
               ),
             ),
@@ -588,6 +593,9 @@ class OptionCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
             child: CachedNetworkImage(
               imageUrl: assetUrl!,
+              memCacheWidth: 400,
+              memCacheHeight: 200,
+              maxWidthDiskCache: 600,
               fit: BoxFit.contain,
               height: 80,
               placeholder: (_, __) =>

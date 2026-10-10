@@ -377,16 +377,12 @@ class _StudentsListPageState extends State<StudentsListPage> {
                           onWhatsApp: (student.parentPhone?.isNotEmpty == true ||
                                   student.phone?.isNotEmpty == true)
                               ? () {
-                                  final report =
-                                      WhatsAppReportGenerator.generateNaturalWeeklyReport(
-                                    studentName: student.fullName,
-                                  );
-                                  WhatsAppReportGenerator.showReportPreviewDialog(
+                                  WhatsAppReportGenerator.showAcademicReportDialog(
                                     context,
+                                    studentId: student.id,
                                     studentName: student.fullName,
-                                    reportText: report,
-                                    phone: student.parentPhone,
-                                    alternatePhone: student.phone,
+                                    parentPhone: student.parentPhone,
+                                    studentPhone: student.phone,
                                   );
                                 }
                               : null,

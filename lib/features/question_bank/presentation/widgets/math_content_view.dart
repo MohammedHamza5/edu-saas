@@ -204,6 +204,9 @@ class MathContentView extends StatelessWidget {
             if (url.startsWith('http://') || url.startsWith('https://'))
               CachedNetworkImage(
                 imageUrl: url,
+                memCacheWidth: 800,
+                memCacheHeight: 800,
+                maxWidthDiskCache: 1200,
                 fit: BoxFit.contain,
                 placeholder: (context, _) => const Center(
                   child: Padding(
@@ -270,7 +273,12 @@ class MathContentView extends StatelessWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
                 child: url.startsWith('http')
-                    ? CachedNetworkImage(imageUrl: url, fit: BoxFit.contain)
+                    ? CachedNetworkImage(
+                        imageUrl: url,
+                        memCacheWidth: 1600,
+                        maxWidthDiskCache: 2048,
+                        fit: BoxFit.contain,
+                      )
                     : Container(
                         padding: const EdgeInsets.all(32),
                         color: Colors.white,

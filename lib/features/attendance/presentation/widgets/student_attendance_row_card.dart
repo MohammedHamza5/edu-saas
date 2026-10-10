@@ -7,6 +7,7 @@ import '../../domain/entities/attendance_entity.dart';
 
 class StudentAttendanceRowCard extends StatefulWidget {
   final StudentAttendanceItem student;
+  final bool isOverallView;
   final ValueChanged<AttendanceStatus>? onStatusChanged;
   final VoidCallback onNoteTap;
   final VoidCallback? onWhatsAppTap;
@@ -14,6 +15,7 @@ class StudentAttendanceRowCard extends StatefulWidget {
   const StudentAttendanceRowCard({
     super.key,
     required this.student,
+    this.isOverallView = false,
     this.onStatusChanged,
     required this.onNoteTap,
     this.onWhatsAppTap,
@@ -31,43 +33,61 @@ class _StudentAttendanceRowCardState extends State<StudentAttendanceRowCard> {
   Widget build(BuildContext context) {
     final student = widget.student;
     final hasNote = student.note != null && student.note!.trim().isNotEmpty;
+    final isOverall = widget.isOverallView;
 
-    // Status-specific accent border tint
-    final statusColor = switch (student.status) {
-      AttendanceStatus.present => AppColors.success,
-      AttendanceStatus.absent => AppColors.error,
-      AttendanceStatus.late => AppColors.warning,
-      AttendanceStatus.excused => AppColors.info,
-    };
+    // Resolve Status and Colors automatically based on engagement
+    final (Color statusColor, String statusLabel, IconData statusIcon) = () {
+      if (isOverall) {
+        final total = student.totalLecturesCount > 0 ? student.totalLecturesCount : 1;
+        final ratio = student.completedLecturesCount / total;
+        if (ratio >= 0.75) {
+          return (
+            AppColors.success,
+            context.l10n.engagementHigh,
+            Icons.verified_rounded,
+          );
+        } else if (ratio >= 0.35) {
+          return (
+            AppColors.warning,
+            context.l10n.engagementMedium,
+            Icons.schedule_rounded,
+          );
+        } else {
+          return (
+            AppColors.error,
+            context.l10n.engagementLow,
+            Icons.error_outline_rounded,
+          );
+        }
+      } else {
+        if (student.isCompleted || student.watchProgressPercent >= 80.0) {
+          return (
+            AppColors.success,
+            context.l10n.lectureCompletedBadge,
+            Icons.check_circle_rounded,
+          );
+        } else if (student.watchProgressPercent > 0.0) {
+          final pct = student.watchProgressPercent.toStringAsFixed(0);
+          return (
+            AppColors.warning,
+            '${context.l10n.lectureInProgressBadge} ($pct%)',
+            Icons.play_circle_filled_rounded,
+          );
+        } else {
+          return (
+            AppColors.error,
+            context.l10n.lectureNotStartedBadge,
+            Icons.cancel_outlined,
+          );
+        }
+      }
+    }();
 
-    // Formatted real watch percentage
+    // Formatted real watch percentage for single lecture
     final realPercentage = student.watchProgressPercent;
     final pctString = realPercentage.toStringAsFixed(
       realPercentage > 0 && realPercentage < 10 ? 1 : 0,
     );
-
-    // Watch status label & icon
-    final (watchLabel, watchIcon, watchColor) = () {
-      if (student.isCompleted || realPercentage >= 80.0) {
-        return (
-          context.l10n.attendanceRateFull,
-          Icons.check_circle_rounded,
-          AppColors.success,
-        );
-      } else if (realPercentage > 0.0) {
-        return (
-          context.l10n.attendanceRatePartial,
-          Icons.play_circle_filled_rounded,
-          AppColors.warning,
-        );
-      } else {
-        return (
-          context.l10n.attendanceRateNone,
-          Icons.cancel_outlined,
-          AppColors.error,
-        );
-      }
-    }();
 
     return RepaintBoundary(
       child: MouseRegion(
@@ -101,7 +121,7 @@ class _StudentAttendanceRowCardState extends State<StudentAttendanceRowCard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Top Row: Avatar, Student Info, Actions (WhatsApp & Note)
+                // Top Row: Avatar, Student Info, Automatic Status Badge, & Actions
                 Row(
                   children: [
                     // Student Academic Avatar
@@ -144,14 +164,51 @@ class _StudentAttendanceRowCardState extends State<StudentAttendanceRowCard> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            student.studentName,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 14,
-                              color: AppColors.textPrimary,
-                              letterSpacing: -0.2,
-                            ),
+                          Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  student.studentName,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 14,
+                                    color: AppColors.textPrimary,
+                                    letterSpacing: -0.2,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              const SizedBox(width: AppSpacing.s8),
+                              // Automated Status Badge
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: AppSpacing.s8,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: statusColor.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: statusColor.withValues(alpha: 0.25),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(statusIcon, size: 12, color: statusColor),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      statusLabel,
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w700,
+                                        color: statusColor,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
                           if (student.phone != null &&
                               student.phone!.isNotEmpty) ...[
@@ -172,7 +229,9 @@ class _StudentAttendanceRowCardState extends State<StudentAttendanceRowCard> {
                     // WhatsApp Instant Report Action
                     if (widget.onWhatsAppTap != null) ...[
                       Tooltip(
-                        message: context.l10n.sendLectureWhatsAppNotice,
+                        message: isOverall
+                            ? context.l10n.sendParentEngagementReport
+                            : context.l10n.sendLectureWhatsAppNotice,
                         child: Material(
                           color: Colors.transparent,
                           child: InkWell(
@@ -241,250 +300,62 @@ class _StudentAttendanceRowCardState extends State<StudentAttendanceRowCard> {
                 ),
                 const SizedBox(height: AppSpacing.s10),
 
-                // Real Video Lecture Watch Progress Tracker
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.s12,
-                    vertical: AppSpacing.s10,
+                // Engagement & Watch Progress Display
+                if (isOverall)
+                  _buildOverallProgressContainer(context, statusColor)
+                else
+                  _buildLectureProgressContainer(
+                    context,
+                    statusColor,
+                    pctString,
+                    realPercentage,
                   ),
-                  decoration: BoxDecoration(
-                    color: watchColor.withValues(alpha: 0.05),
-                    borderRadius: BorderRadius.circular(
-                      AppSpacing.radiusMedium,
-                    ),
-                    border: Border.all(
-                      color: watchColor.withValues(alpha: 0.18),
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(watchIcon, size: 16, color: watchColor),
-                          const SizedBox(width: AppSpacing.s8),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  student.currentLectureTitle != null
-                                      ? student.currentLectureTitle!
-                                      : (student.totalLecturesCount > 1
-                                          ? context.l10n.completedLecturesRatio(
-                                              student.completedLecturesCount,
-                                              student.totalLecturesCount,
-                                            )
-                                          : watchLabel),
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                    color: watchColor,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                if (student.currentLectureTitle != null)
-                                  Text(
-                                    watchLabel,
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w600,
-                                      color: watchColor.withValues(alpha: 0.85),
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppSpacing.s8,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: watchColor.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Text(
-                              '$pctString%',
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
-                                color: watchColor,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: AppSpacing.s8),
-                      // Real Progress Bar
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(3),
-                        child: LinearProgressIndicator(
-                          value: (realPercentage / 100.0).clamp(0.0, 1.0),
-                          backgroundColor: AppColors.border.withValues(
-                            alpha: 0.5,
-                          ),
-                          valueColor: AlwaysStoppedAnimation<Color>(watchColor),
-                          minHeight: 6,
-                        ),
-                      ),
-                      // Watch Details Footer
-                      if (student.formattedWatchDuration.isNotEmpty ||
-                          student.isSkipped ||
-                          student.lastWatchedAt != null) ...[
-                        const SizedBox(height: AppSpacing.s6),
-                        Row(
-                          children: [
-                            if (student.formattedWatchDuration.isNotEmpty) ...[
-                              const Icon(
-                                Icons.timer_outlined,
-                                size: 12,
-                                color: AppColors.textSecondary,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                student.formattedWatchDuration,
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  color: AppColors.textSecondary,
-                                  fontWeight: FontWeight.w600,
-                                  fontFamily: 'monospace',
-                                ),
-                              ),
-                            ],
-                            if (student.isSkipped) ...[
-                              const SizedBox(width: AppSpacing.s8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 1,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.error.withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(4),
-                                  border: Border.all(
-                                    color: AppColors.error.withValues(
-                                      alpha: 0.3,
-                                    ),
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(
-                                      Icons.speed_rounded,
-                                      size: 11,
-                                      color: AppColors.error,
-                                    ),
-                                    const SizedBox(width: 3),
-                                    Text(
-                                      context.l10n.fastSkippingDetected,
-                                      style: const TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.error,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                            const Spacer(),
-                            if (student.lastWatchedAt != null) ...[
-                              Text(
-                                DateFormat(
-                                  'MM/dd HH:mm',
-                                ).format(student.lastWatchedAt!.toLocal()),
-                                style: const TextStyle(
-                                  fontSize: 10,
-                                  color: AppColors.textMuted,
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.s10),
-
-                // Quick Status Segmented Selector
-                Row(
-                  children: [
-                    _buildStatusChip(
-                      context,
-                      status: AttendanceStatus.present,
-                      label: context.l10n.attendanceStatusPresent,
-                      activeColor: AppColors.success,
-                      icon: Icons.check_circle_rounded,
-                    ),
-                    const SizedBox(width: AppSpacing.s6),
-                    _buildStatusChip(
-                      context,
-                      status: AttendanceStatus.late,
-                      label: context.l10n.attendanceStatusLate,
-                      activeColor: AppColors.warning,
-                      icon: Icons.schedule_rounded,
-                    ),
-                    const SizedBox(width: AppSpacing.s6),
-                    _buildStatusChip(
-                      context,
-                      status: AttendanceStatus.absent,
-                      label: context.l10n.attendanceStatusAbsent,
-                      activeColor: AppColors.error,
-                      icon: Icons.cancel_outlined,
-                    ),
-                    const SizedBox(width: AppSpacing.s6),
-                    _buildStatusChip(
-                      context,
-                      status: AttendanceStatus.excused,
-                      label: context.l10n.attendanceStatusExcused,
-                      activeColor: AppColors.info,
-                      icon: Icons.info_outline_rounded,
-                    ),
-                  ],
-                ),
 
                 // Note Preview Section (if student has note)
                 if (hasNote) ...[
                   const SizedBox(height: AppSpacing.s8),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.s12,
-                      vertical: AppSpacing.s6,
+                  InkWell(
+                    onTap: widget.onNoteTap,
+                    borderRadius: BorderRadius.circular(
+                      AppSpacing.radiusSmall,
                     ),
-                    decoration: BoxDecoration(
-                      color: AppColors.surfaceVariant,
-                      borderRadius: BorderRadius.circular(
-                        AppSpacing.radiusSmall,
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.s12,
+                        vertical: AppSpacing.s6,
                       ),
-                      border: Border.all(
-                        color: AppColors.border.withValues(alpha: 0.6),
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.sticky_note_2_rounded,
-                          size: 13,
-                          color: AppColors.primary,
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceVariant,
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusSmall,
                         ),
-                        const SizedBox(width: AppSpacing.s6),
-                        Expanded(
-                          child: Text(
-                            student.note!,
-                            style: const TextStyle(
-                              fontSize: 11,
-                              color: AppColors.textSecondary,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
+                        border: Border.all(
+                          color: AppColors.border.withValues(alpha: 0.6),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.sticky_note_2_rounded,
+                            size: 14,
+                            color: AppColors.primary,
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: AppSpacing.s6),
+                          Expanded(
+                            child: Text(
+                              student.note!,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: AppColors.textSecondary,
+                                fontStyle: FontStyle.italic,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -496,56 +367,246 @@ class _StudentAttendanceRowCardState extends State<StudentAttendanceRowCard> {
     );
   }
 
-  Widget _buildStatusChip(
-    BuildContext context, {
-    required AttendanceStatus status,
-    required String label,
-    required Color activeColor,
-    required IconData icon,
-  }) {
-    final isSelected = widget.student.status == status;
-
-    return Expanded(
-      child: InkWell(
-        onTap: widget.onStatusChanged != null
-            ? () => widget.onStatusChanged!(status)
-            : null,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          padding: const EdgeInsets.symmetric(vertical: 6),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? activeColor.withValues(alpha: 0.16)
-                : AppColors.surfaceVariant.withValues(alpha: 0.5),
-            borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-            border: Border.all(
-              color: isSelected
-                  ? activeColor.withValues(alpha: 0.6)
-                  : AppColors.border.withValues(alpha: 0.6),
-              width: isSelected ? 1.3 : 1.0,
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+  /// Builds progress tracker for a specific lecture
+  Widget _buildLectureProgressContainer(
+    BuildContext context,
+    Color statusColor,
+    String pctString,
+    double realPercentage,
+  ) {
+    final student = widget.student;
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.s12,
+        vertical: AppSpacing.s10,
+      ),
+      decoration: BoxDecoration(
+        color: statusColor.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+        border: Border.all(color: statusColor.withValues(alpha: 0.18)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
               Icon(
-                icon,
-                size: 12,
-                color: isSelected ? activeColor : AppColors.textMuted,
+                Icons.play_circle_outline_rounded,
+                size: 16,
+                color: statusColor,
               ),
-              const SizedBox(width: 4),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                  color: isSelected ? activeColor : AppColors.textSecondary,
+              const SizedBox(width: AppSpacing.s8),
+              Expanded(
+                child: Text(
+                  student.currentLectureTitle ?? context.l10n.allLecturesOverview,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: statusColor,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.s8,
+                  vertical: 2,
+                ),
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  '$pctString%',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: statusColor,
+                  ),
                 ),
               ),
             ],
           ),
-        ),
+          const SizedBox(height: AppSpacing.s8),
+          // Progress Bar
+          ClipRRect(
+            borderRadius: BorderRadius.circular(3),
+            child: LinearProgressIndicator(
+              value: (realPercentage / 100.0).clamp(0.0, 1.0),
+              backgroundColor: AppColors.border.withValues(alpha: 0.5),
+              valueColor: AlwaysStoppedAnimation<Color>(statusColor),
+              minHeight: 6,
+            ),
+          ),
+          // Watch Details Footer
+          if (student.formattedWatchDuration.isNotEmpty ||
+              student.isSkipped ||
+              student.lastWatchedAt != null) ...[
+            const SizedBox(height: AppSpacing.s6),
+            Row(
+              children: [
+                if (student.formattedWatchDuration.isNotEmpty) ...[
+                  const Icon(
+                    Icons.timer_outlined,
+                    size: 12,
+                    color: AppColors.textSecondary,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    student.formattedWatchDuration,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'monospace',
+                    ),
+                  ),
+                ],
+                if (student.isSkipped) ...[
+                  const SizedBox(width: AppSpacing.s8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 1,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.error.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(
+                        color: AppColors.error.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.speed_rounded,
+                          size: 11,
+                          color: AppColors.error,
+                        ),
+                        const SizedBox(width: 3),
+                        Text(
+                          context.l10n.fastSkippingDetected,
+                          style: const TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.error,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                const Spacer(),
+                if (student.lastWatchedAt != null) ...[
+                  Text(
+                    DateFormat('MM/dd HH:mm').format(
+                      student.lastWatchedAt!.toLocal(),
+                    ),
+                    style: const TextStyle(
+                      fontSize: 10,
+                      color: AppColors.textMuted,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// Builds progress tracker for overall group lectures
+  Widget _buildOverallProgressContainer(
+    BuildContext context,
+    Color statusColor,
+  ) {
+    final student = widget.student;
+    final total = student.totalLecturesCount > 0 ? student.totalLecturesCount : 1;
+    final completed = student.completedLecturesCount;
+    final ratio = (completed / total).clamp(0.0, 1.0);
+    final pct = (ratio * 100).round();
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.s12,
+        vertical: AppSpacing.s10,
+      ),
+      decoration: BoxDecoration(
+        color: statusColor.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+        border: Border.all(color: statusColor.withValues(alpha: 0.18)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.auto_stories_rounded, size: 16, color: statusColor),
+              const SizedBox(width: AppSpacing.s8),
+              Expanded(
+                child: Text(
+                  context.l10n.completedLecturesSummary(completed, total, '$pct'),
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: statusColor,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.s8,
+                  vertical: 2,
+                ),
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  '$pct%',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: statusColor,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.s8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(3),
+            child: LinearProgressIndicator(
+              value: ratio,
+              backgroundColor: AppColors.border.withValues(alpha: 0.5),
+              valueColor: AlwaysStoppedAnimation<Color>(statusColor),
+              minHeight: 6,
+            ),
+          ),
+          if (student.lastWatchedAt != null) ...[
+            const SizedBox(height: AppSpacing.s6),
+            Row(
+              children: [
+                const Icon(
+                  Icons.history_rounded,
+                  size: 12,
+                  color: AppColors.textSecondary,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  'آخر نشاط: ${DateFormat('yyyy/MM/dd HH:mm').format(student.lastWatchedAt!.toLocal())}',
+                  style: const TextStyle(
+                    fontSize: 10,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
       ),
     );
   }

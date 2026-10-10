@@ -30,11 +30,11 @@ class ResponsiveBreakpoints {
   static const double tabletThreshold = 840.0;
   static const double desktopThreshold = 1200.0;
 
-  // Maximum content boundaries (to prevent awkward horizontal stretching on large screens)
-  static const double maxContentWidth = 1200.0;
+  // Maximum content boundaries (allows full fluid width on dashboards/tables while keeping forms focused)
+  static const double maxContentWidth = double.infinity;
   static const double maxFormWidth = 480.0;
   static const double maxReadingWidth = 760.0;
-  static const double maxWideContentWidth = 1440.0;
+  static const double maxWideContentWidth = double.infinity;
 
   /// Determines the [DeviceScreenType] given the screen or container width.
   static DeviceScreenType getScreenType(double width) {

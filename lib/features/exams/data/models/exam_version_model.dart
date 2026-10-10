@@ -18,14 +18,16 @@ class ExamVersionModel extends ExamVersionEntity {
     final rawQuestions = json['questions'] ?? json['exam_questions'];
     final questionsList =
         (rawQuestions as List<dynamic>?)
-            ?.map((q) => ExamQuestionModel.fromJson(q as Map<String, dynamic>))
+            ?.whereType<Map<dynamic, dynamic>>()
+            .map((q) => ExamQuestionModel.fromJson(Map<String, dynamic>.from(q)))
             .toList() ??
         <ExamQuestionModel>[];
 
     final rawContexts = json['contexts'] ?? json['exam_contexts'];
     final contextsList =
         (rawContexts as List<dynamic>?)
-            ?.map((c) => ExamContextModel.fromJson(c as Map<String, dynamic>))
+            ?.whereType<Map<dynamic, dynamic>>()
+            .map((c) => ExamContextModel.fromJson(Map<String, dynamic>.from(c)))
             .toList() ??
         <ExamContextModel>[];
 

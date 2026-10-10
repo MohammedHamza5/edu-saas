@@ -7,6 +7,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/math_tokens.dart';
 import '../../../../core/widgets/app_badge.dart';
 import '../../domain/entities/group_entity.dart';
+import 'edit_group_dialog.dart';
 
 /// High-performance, tactile mathematical SaaS Group Card
 /// Conforms to [docs/UI_UX_INTERACTION_MASTER_PLAYBOOK.md]:
@@ -253,28 +254,61 @@ class _InteractiveGroupCardState extends State<InteractiveGroupCard> {
                                 ],
                               ),
 
-                              // Quick One-Click Attendance Action Button
-                              Tooltip(
-                                message: context.l10n.quickAttendanceTooltip,
-                                waitDuration: const Duration(milliseconds: 400),
-                                child: IconButton.filledTonal(
-                                  style: IconButton.styleFrom(
-                                    backgroundColor: AppColors.primaryLight
-                                        .withValues(alpha: 0.15),
-                                    foregroundColor: AppColors.primary,
-                                    minimumSize: const Size(36, 36),
-                                    padding: EdgeInsets.zero,
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  // Quick Edit Group Action Button
+                                  Tooltip(
+                                    message: context.l10n.editGroupAction,
+                                    waitDuration: const Duration(
+                                      milliseconds: 400,
+                                    ),
+                                    child: IconButton.filledTonal(
+                                      style: IconButton.styleFrom(
+                                        backgroundColor:
+                                            AppColors.surfaceVariant,
+                                        foregroundColor: AppColors.textPrimary,
+                                        minimumSize: const Size(36, 36),
+                                        padding: EdgeInsets.zero,
+                                      ),
+                                      icon: const Icon(
+                                        Icons.edit_outlined,
+                                        size: 16,
+                                      ),
+                                      onPressed: () {
+                                        EditGroupDialog.show(context, group);
+                                      },
+                                    ),
                                   ),
-                                  icon: const Icon(
-                                    Icons.fact_check_outlined,
-                                    size: 18,
+                                  const SizedBox(width: AppSpacing.s8),
+
+                                  // Quick One-Click Attendance Action Button
+                                  Tooltip(
+                                    message:
+                                        context.l10n.quickAttendanceTooltip,
+                                    waitDuration: const Duration(
+                                      milliseconds: 400,
+                                    ),
+                                    child: IconButton.filledTonal(
+                                      style: IconButton.styleFrom(
+                                        backgroundColor: AppColors.primaryLight
+                                            .withValues(alpha: 0.15),
+                                        foregroundColor: AppColors.primary,
+                                        minimumSize: const Size(36, 36),
+                                        padding: EdgeInsets.zero,
+                                      ),
+                                      icon: const Icon(
+                                        Icons.fact_check_outlined,
+                                        size: 18,
+                                      ),
+                                      onPressed: () {
+                                        context.go(
+                                          '${AppRoutes.teacherAttendance}?groupId=${group.id}',
+                                        );
+                                      },
+                                    ),
                                   ),
-                                  onPressed: () {
-                                    context.go(
-                                      '${AppRoutes.teacherAttendance}?groupId=${group.id}',
-                                    );
-                                  },
-                                ),
+                                ],
                               ),
                             ],
                           ),

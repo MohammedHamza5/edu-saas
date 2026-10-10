@@ -41,6 +41,7 @@ import '../../features/question_bank/presentation/pages/question_bank_page.dart'
 import '../../features/question_bank/presentation/pages/document_questions_page.dart';
 import '../../features/question_bank/presentation/pages/manual_question_entry_page.dart';
 import '../../features/question_bank/presentation/pages/review_console_page.dart';
+import '../../features/exams/presentation/pages/exam_parent_dispatch_page.dart';
 
 import '../network/supabase_service.dart';
 import '../utils/group_slug_resolver.dart';
@@ -101,6 +102,7 @@ class AppRouter {
   // Feature: Exams routes
   static const String teacherExams = AppRoutes.teacherExams;
   static const String teacherGroupExams = AppRoutes.teacherGroupExams;
+  static const String teacherExamParentDispatch = AppRoutes.teacherExamParentDispatch;
   static const String studentExams = AppRoutes.studentExams;
   static const String studentMistakes = AppRoutes.studentMistakes;
   static const String mistakesPractice = AppRoutes.mistakesPractice;
@@ -531,6 +533,22 @@ class AppRouter {
                   child: TeacherExamsPage(
                     groupId: groupId,
                     groupName: groupName,
+                  ),
+                ),
+              );
+            },
+          ),
+          GoRoute(
+            path: teacherExamParentDispatch,
+            pageBuilder: (BuildContext context, GoRouterState state) {
+              final examId = state.pathParameters['examId'] ?? '';
+              final title = state.uri.queryParameters['title'];
+              return MaterialPage(
+                child: BlocProvider(
+                  create: (_) => InjectionContainer.createExamDispatchCubit(),
+                  child: ExamParentDispatchPage(
+                    examId: examId,
+                    initialExamTitle: title,
                   ),
                 ),
               );

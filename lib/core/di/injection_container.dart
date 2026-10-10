@@ -53,6 +53,7 @@ import '../../features/assignments/presentation/cubit/assignments_cubit.dart';
 import '../../features/exams/data/datasources/exams_remote_datasource.dart';
 import '../../features/exams/data/repositories/exams_repository_impl.dart';
 import '../../features/exams/domain/repositories/exams_repository.dart';
+import '../../features/exams/presentation/cubit/exam_dispatch_cubit.dart';
 import '../../features/exams/presentation/cubit/exams_cubit.dart';
 import '../../features/exams/presentation/cubit/mistakes_cubit.dart';
 import '../../features/dashboard/data/datasources/student_dashboard_remote_datasource.dart';
@@ -165,6 +166,8 @@ class InjectionContainer {
       AssignmentsCubit(repository: assignmentsRepository);
   static ExamsCubit createExamsCubit() =>
       ExamsCubit(repository: examsRepository);
+  static ExamDispatchCubit createExamDispatchCubit() =>
+      ExamDispatchCubit(repository: examsRepository);
   static MistakesCubit createMistakesCubit() =>
       MistakesCubit(repository: examsRepository);
   static StudentDashboardCubit createStudentDashboardCubit() =>

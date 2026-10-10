@@ -42,10 +42,10 @@ final class TeacherAttendanceLoaded extends AttendanceState {
     if (selectedLectureContentId != null) {
       return availableLectures.cast<LectureItem?>().firstWhere(
         (l) => l?.contentId == selectedLectureContentId,
-        orElse: () => availableLectures.first,
+        orElse: () => null,
       );
     }
-    return availableLectures.first;
+    return null;
   }
 
   AttendanceStats get currentStats {

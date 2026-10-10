@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'attached_lesson_exam_entity.dart';
 import 'content_entity.dart';
 import 'file_attachment_entity.dart';
 
@@ -46,9 +47,12 @@ class LessonAssignmentEntity extends Equatable {
   final String? pdfFileName;
   final String? pdfStoragePath;
 
-  /// الاختبار المرتبط بهذا الدرس
+  /// الاختبار المرتبط بهذا الدرس (الأساسي)
   final String? lessonExamId;
   final String? lessonExamTitle;
+
+  /// كافة الاختبارات المرتبطة بهذا الدرس
+  final List<AttachedLessonExamEntity> attachedExams;
 
   /// درجة النجاح الفعالة (إما override أو default)
   final int effectivePassingScore;
@@ -109,6 +113,7 @@ class LessonAssignmentEntity extends Equatable {
     this.pdfStoragePath,
     this.lessonExamId,
     this.lessonExamTitle,
+    this.attachedExams = const [],
     this.effectivePassingScore = 60,
     this.prerequisiteExamId,
     this.chapterId,
@@ -170,6 +175,7 @@ class LessonAssignmentEntity extends Equatable {
       videoId: type == ContentType.video ? contentId : null,
       associatedExamId: lessonExamId,
       associatedExamTitle: lessonExamTitle,
+      attachedExams: attachedExams,
       prerequisiteExamId: prerequisiteExamId,
       isLocked: isLocked,
       isVideoCompleted: isEffectivelyCompleted || videoCompleted,
@@ -203,6 +209,7 @@ class LessonAssignmentEntity extends Equatable {
     String? pdfStoragePath,
     String? lessonExamId,
     String? lessonExamTitle,
+    List<AttachedLessonExamEntity>? attachedExams,
     int? effectivePassingScore,
     String? prerequisiteExamId,
     String? chapterId,
@@ -234,6 +241,7 @@ class LessonAssignmentEntity extends Equatable {
       pdfStoragePath: pdfStoragePath ?? this.pdfStoragePath,
       lessonExamId: lessonExamId ?? this.lessonExamId,
       lessonExamTitle: lessonExamTitle ?? this.lessonExamTitle,
+      attachedExams: attachedExams ?? this.attachedExams,
       effectivePassingScore:
           effectivePassingScore ?? this.effectivePassingScore,
       prerequisiteExamId: prerequisiteExamId ?? this.prerequisiteExamId,
@@ -259,6 +267,14 @@ class LessonAssignmentEntity extends Equatable {
   }
 
   factory LessonAssignmentEntity.fromJson(Map<String, dynamic> json) {
+    final attachedExamsRaw = json['attached_exams'] as List<dynamic>?;
+    final parsedAttachedExams = attachedExamsRaw != null
+        ? attachedExamsRaw
+            .whereType<Map<String, dynamic>>()
+            .map(AttachedLessonExamEntity.fromJson)
+            .toList()
+        : const <AttachedLessonExamEntity>[];
+
     return LessonAssignmentEntity(
       contentGroupId: json['content_group_id'] as String? ?? '',
       contentId: json['content_id'] as String? ?? '',
@@ -275,6 +291,7 @@ class LessonAssignmentEntity extends Equatable {
       pdfStoragePath: json['pdf_storage_path'] as String?,
       lessonExamId: json['lesson_exam_id'] as String?,
       lessonExamTitle: json['lesson_exam_title'] as String?,
+      attachedExams: parsedAttachedExams,
       effectivePassingScore:
           (json['effective_passing_score'] as num?)?.toInt() ?? 60,
       prerequisiteExamId: json['prerequisite_exam_id'] as String?,
@@ -350,6 +367,7 @@ class LessonAssignmentEntity extends Equatable {
     pdfStoragePath,
     lessonExamId,
     lessonExamTitle,
+    attachedExams,
     effectivePassingScore,
     prerequisiteExamId,
     chapterId,

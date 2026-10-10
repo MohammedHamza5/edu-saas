@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/utils/cache_manager.dart';
+import '../../../../core/utils/group_slug_resolver.dart';
 import '../../domain/entities/group_entity.dart';
 import '../../domain/repositories/groups_repository.dart';
 import 'groups_state.dart';
@@ -305,6 +306,63 @@ class GroupsCubit extends Cubit<GroupsState> {
                 ),
               );
             }
+          }
+        }
+        return true;
+      },
+      onFailure: (failure) {
+        if (!isClosed) emit(GroupsError(failure.message));
+        return false;
+      },
+    );
+  }
+
+  /// Updates full group details (name, level, description, access policy) safely
+  Future<bool> updateGroupDetails({
+    required String groupId,
+    required String name,
+    String? level,
+    String? description,
+    String? previousContentAccess,
+    bool? enforceSequentialLearning,
+    int? defaultPassingScore,
+  }) async {
+    final result = await _repository.updateGroup(
+      id: groupId,
+      name: name,
+      level: level,
+      description: description,
+      previousContentAccess: previousContentAccess,
+      enforceSequentialLearning: enforceSequentialLearning,
+      defaultPassingScore: defaultPassingScore,
+    );
+
+    if (isClosed) return false;
+
+    return result.when(
+      onSuccess: (updated) {
+        // Register updated name in GroupSlugResolver immediately
+        GroupSlugResolver.registerGroup(updated.id, updated.name);
+
+        AppCache.groups.invalidate(_cacheKeyGroups);
+        AppCache.groups.invalidate('groups_all');
+        if (state is GroupsLoaded) {
+          final current = state as GroupsLoaded;
+          if (!isClosed) {
+            final idx = current.groups.indexWhere((g) => g.id == updated.id);
+            final newGroups = List<GroupEntity>.from(current.groups);
+            if (idx != -1) {
+              newGroups[idx] = updated;
+            }
+            AppCache.groups.put(_cacheKeyGroups, newGroups);
+            emit(
+              current.copyWith(
+                groups: newGroups,
+                selectedGroup: current.selectedGroup?.id == updated.id
+                    ? updated
+                    : current.selectedGroup,
+              ),
+            );
           }
         }
         return true;

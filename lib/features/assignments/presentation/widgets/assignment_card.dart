@@ -10,12 +10,14 @@ class AssignmentCard extends StatelessWidget {
   final AssignmentEntity assignment;
   final VoidCallback onTap;
   final bool isTeacher;
+  final VoidCallback? onEdit;
 
   const AssignmentCard({
     super.key,
     required this.assignment,
     required this.onTap,
     this.isTeacher = false,
+    this.onEdit,
   });
 
   @override
@@ -79,7 +81,26 @@ class AssignmentCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.s8),
-              _buildStatusBadge(context),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildStatusBadge(context),
+                  if (isTeacher && onEdit != null) ...[
+                    const SizedBox(width: 4),
+                    IconButton(
+                      icon: const Icon(Icons.edit_outlined, size: 16),
+                      tooltip: context.l10n.editAssignmentAction,
+                      style: IconButton.styleFrom(
+                        padding: const EdgeInsets.all(4),
+                        minimumSize: const Size(28, 28),
+                        visualDensity: VisualDensity.compact,
+                        foregroundColor: AppColors.primary,
+                      ),
+                      onPressed: onEdit,
+                    ),
+                  ],
+                ],
+              ),
             ],
           ),
 

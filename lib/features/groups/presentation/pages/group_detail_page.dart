@@ -19,6 +19,7 @@ import '../cubit/groups_cubit.dart';
 import '../cubit/groups_state.dart';
 import '../widgets/add_member_dialog.dart';
 import '../widgets/course_settings_dialog.dart';
+import '../widgets/edit_group_dialog.dart';
 import '../../../content/presentation/widgets/student_course_progress_sheet.dart';
 
 class GroupDetailPage extends StatefulWidget {
@@ -177,6 +178,11 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
                 tooltip: context.l10n.refresh,
                 onPressed: () =>
                     context.read<GroupsCubit>().loadGroupDetail(widget.groupId),
+              ),
+              IconButton(
+                icon: const Icon(Icons.edit_outlined),
+                tooltip: context.l10n.editGroupAction,
+                onPressed: () => EditGroupDialog.show(context, group!),
               ),
               IconButton(
                 icon: const Icon(Icons.settings_rounded),

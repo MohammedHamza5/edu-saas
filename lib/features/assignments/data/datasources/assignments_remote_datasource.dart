@@ -27,6 +27,14 @@ abstract interface class AssignmentsRemoteDataSource {
     bool allowLateSubmission = false,
     int maxScore = 100,
   });
+  Future<AssignmentModel> updateAssignment({
+    required String assignmentId,
+    required String title,
+    String? instructions,
+    DateTime? dueAt,
+    bool? allowLateSubmission,
+    int? maxScore,
+  });
   Future<AssignmentSubmissionModel> submitAssignment({
     required String assignmentId,
     required List<({String fileName, List<int> bytes, String mimeType})> files,
@@ -407,6 +415,51 @@ class AssignmentsRemoteDataSourceImpl implements AssignmentsRemoteDataSource {
     );
 
     return AssignmentModel.fromJson(map);
+  }
+
+  @override
+  Future<AssignmentModel> updateAssignment({
+    required String assignmentId,
+    required String title,
+    String? instructions,
+    DateTime? dueAt,
+    bool? allowLateSubmission,
+    int? maxScore,
+  }) async {
+    final currentUserId = _safeClient.auth.currentUser?.id;
+    if (currentUserId == null) {
+      throw const AuthException('User not authenticated');
+    }
+
+    final assignRes = await _safeClient
+        .from('assignments')
+        .select('id, content_id')
+        .eq('id', assignmentId)
+        .single();
+    final contentId = assignRes['content_id'] as String;
+
+    await _safeClient
+        .from('content')
+        .update({
+          'title': title.trim(),
+          'updated_at': DateTime.now().toUtc().toIso8601String(),
+        })
+        .eq('id', contentId);
+
+    final updates = <String, dynamic>{
+      'updated_at': DateTime.now().toUtc().toIso8601String(),
+    };
+    if (instructions != null) updates['instructions'] = instructions;
+    if (dueAt != null) updates['due_at'] = dueAt.toUtc().toIso8601String();
+    if (allowLateSubmission != null) updates['allow_late_submission'] = allowLateSubmission;
+    if (maxScore != null) updates['max_score'] = maxScore;
+
+    await _safeClient
+        .from('assignments')
+        .update(updates)
+        .eq('id', assignmentId);
+
+    return getAssignmentDetails(assignmentId);
   }
 
   @override

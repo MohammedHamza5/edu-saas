@@ -55,7 +55,8 @@ class AppVideoPlayer extends StatefulWidget {
   State<AppVideoPlayer> createState() => _AppVideoPlayerState();
 }
 
-class _AppVideoPlayerState extends State<AppVideoPlayer> {
+class _AppVideoPlayerState extends State<AppVideoPlayer>
+    with WidgetsBindingObserver {
   VideoPlayerController? _controller;
   bool _isInitialized = false;
   bool _hasError = false;
@@ -70,6 +71,7 @@ class _AppVideoPlayerState extends State<AppVideoPlayer> {
   double _aspectRatio = 16 / 9;
   double _volume = 1.0;
   bool _isMuted = false;
+  bool _isSecurityPaused = false;
 
   // ── Smart Tracking Telemetry ──
   int _actualWatchSeconds = 0;
@@ -89,6 +91,7 @@ class _AppVideoPlayerState extends State<AppVideoPlayer> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     if (!_isEmbedPlayer) {
       _initializePlayer();
     }
@@ -364,12 +367,38 @@ class _AppVideoPlayerState extends State<AppVideoPlayer> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _watchHeartbeatTimer?.cancel();
     _seekFeedbackTimer?.cancel();
     _hideControlsTimer?.cancel();
     _controller?.removeListener(_playerListener);
     _controller?.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden) {
+      if (_controller != null && _controller!.value.isPlaying) {
+        _controller!.pause();
+        if (mounted) {
+          setState(() {
+            _isSecurityPaused = true;
+          });
+        }
+      }
+    }
+  }
+
+  void _resumeFromSecurityPause() {
+    if (mounted) {
+      setState(() {
+        _isSecurityPaused = false;
+      });
+      _controller?.play();
+    }
   }
 
   @override
@@ -1041,11 +1070,70 @@ class _AppVideoPlayerState extends State<AppVideoPlayer> {
                           ),
                         ),
                       ),
+                      if (_isSecurityPaused)
+                        _buildSecurityPauseOverlay(),
                     ],
                   ),
                 ),
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSecurityPauseOverlay() {
+    return Positioned.fill(
+      child: Container(
+        color: Colors.black.withValues(alpha: 0.94),
+        padding: const EdgeInsets.all(AppSpacing.s20),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.s12),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.shield_outlined,
+                  color: AppColors.primary,
+                  size: 36,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.s14),
+              Text(
+                context.l10n.videoSecurityPausedNotice,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.s16),
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.s20,
+                    vertical: AppSpacing.s12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.circular(AppSpacing.radiusMedium),
+                  ),
+                ),
+                icon: const Icon(Icons.play_arrow_rounded, size: 20),
+                label: Text(context.l10n.resumePlaybackAction),
+                onPressed: _resumeFromSecurityPause,
+              ),
+            ],
           ),
         ),
       ),

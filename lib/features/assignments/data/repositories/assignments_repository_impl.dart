@@ -132,6 +132,34 @@ class AssignmentsRepositoryImpl implements AssignmentsRepository {
   }
 
   @override
+  Future<Result<AssignmentEntity>> updateAssignment({
+    required String assignmentId,
+    required String title,
+    String? instructions,
+    DateTime? dueAt,
+    bool? allowLateSubmission,
+    int? maxScore,
+  }) async {
+    try {
+      final updated = await _remoteDataSource.updateAssignment(
+        assignmentId: assignmentId,
+        title: title,
+        instructions: instructions,
+        dueAt: dueAt,
+        allowLateSubmission: allowLateSubmission,
+        maxScore: maxScore,
+      );
+      return Success(updated);
+    } on PostgrestException catch (e) {
+      return FailureResult(ServerFailure(e.message, code: e.code));
+    } on AuthException catch (e) {
+      return FailureResult(AuthFailure(e.message, code: e.statusCode));
+    } catch (e) {
+      return FailureResult(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
   Future<Result<AssignmentSubmissionEntity>> submitAssignment({
     required String assignmentId,
     required List<({String fileName, List<int> bytes, String mimeType})> files,

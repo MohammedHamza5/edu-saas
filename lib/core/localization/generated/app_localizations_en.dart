@@ -465,7 +465,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get quickStatsTitle => 'Academic Overview';
 
   @override
-  String get activeStudentsCount => 'Active Students';
+  String get activeStudentsCount => 'Active Students Count';
 
   @override
   String get totalGroupsCount => 'Active Study Groups';
@@ -677,7 +677,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get groupCreatedSuccess => 'Study group created successfully';
 
   @override
-  String get groupUpdatedSuccess => 'Group details updated';
+  String get groupUpdatedSuccess => 'Group details updated successfully';
 
   @override
   String get groupDeleteConfirmTitle => 'Delete Study Group';
@@ -866,7 +866,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get examTitleLabel => 'Exam Title';
 
   @override
-  String get examDurationLabel => 'Exam Duration';
+  String get examDurationLabel => 'Duration (Minutes)';
 
   @override
   String examDurationMinutes(int minutes) {
@@ -1445,9 +1445,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get createNewGroupNow => 'Create New Group Now';
 
   @override
-  String groupLevelLabel(String level) {
-    return 'Level: $level';
-  }
+  String get groupLevelLabel => 'Track / Level';
 
   @override
   String get enterAction => 'Enter â†’';
@@ -1945,6 +1943,94 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get whatsappPeriodMonthly => 'Monthly Summary 📊';
+
+  @override
+  String get whatsappPeriod7Days => 'Last 7 Days (Week)';
+
+  @override
+  String get whatsappPeriod14Days => 'Last 14 Days (2 Weeks)';
+
+  @override
+  String get whatsappPeriod30Days => 'Last 30 Days (Month)';
+
+  @override
+  String get whatsappPeriodAllTime => 'All Time (Course-to-Date)';
+
+  @override
+  String get whatsappFetchingData => 'Extracting verified academic records...';
+
+  @override
+  String get whatsappDataFetchError =>
+      'Failed to fetch student academic report';
+
+  @override
+  String get whatsappDecisionsTitle => 'Academic Directive & Recommendation';
+
+  @override
+  String get whatsappDecisionConsistent =>
+      '🌟 Outstanding commitment and stable performance; urged to maintain this momentum.';
+
+  @override
+  String get whatsappDecisionImproving =>
+      '📈 Noticeable improvement and strong grasp; keep solving practice tests.';
+
+  @override
+  String get whatsappDecisionNeedsDrills =>
+      '⚠️ Needs more focus and reviewing the mistake bank on the latest exam to reach full score.';
+
+  @override
+  String get whatsappDecisionCatchUp =>
+      '⏳ Please urge the student to complete overdue assignments and lectures to stay on track.';
+
+  @override
+  String get whatsappDecisionNeglect =>
+      '📢 Noticeable neglect in attendance and completion; urgent check-in with teacher required.';
+
+  @override
+  String get whatsappChipConsistent => '🌟 Outstanding';
+
+  @override
+  String get whatsappChipImproving => '📈 Improving';
+
+  @override
+  String get whatsappChipNeedsDrills => '⚠️ Review Mistakes';
+
+  @override
+  String get whatsappChipCatchUp => '⏳ Overdue Tasks';
+
+  @override
+  String get whatsappChipNeglect => '📢 Needs Check-in';
+
+  @override
+  String get whatsappReportHeaderTitle =>
+      'Academic Performance & Progress Report';
+
+  @override
+  String get whatsappStudentLabel => 'Student';
+
+  @override
+  String get whatsappGroupLabel => 'Group';
+
+  @override
+  String get whatsappPeriodLabel => 'Period';
+
+  @override
+  String get whatsappLecturesStat => 'Lectures';
+
+  @override
+  String get whatsappAssignmentsStat => 'Drills & Assignments';
+
+  @override
+  String get whatsappExamsStat => 'Exams & Quizzes';
+
+  @override
+  String get whatsappStudyTimeStat => 'Active Study Time';
+
+  @override
+  String get whatsappAttendanceStat => 'Attendance';
+
+  @override
+  String get whatsappNoDataPeriod => 'No activity recorded in this period';
 
   @override
   String get whatsappPresetFriendlyKeepUp =>
@@ -3688,6 +3774,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pointsField => 'Points';
 
   @override
+  String get defaultQuestionPointsLabel => 'Points per Question';
+
+  @override
+  String get defaultQuestionPointsHint => 'Unified points for all questions';
+
+  @override
+  String get applyPointsToAllAction => 'Apply to All';
+
+  @override
+  String get applyPointsToAllTooltip =>
+      'Apply this point value to all current and future questions';
+
+  @override
+  String pointsAppliedToAllSuccess(int points, int count) {
+    return 'Unified ($points) points for all $count questions successfully';
+  }
+
+  @override
+  String get invalidPointsError =>
+      'Please enter a valid points value greater than zero';
+
+  @override
   String get optionsSelectCorrectPrompt =>
       'Options (select the correct choice):';
 
@@ -3785,11 +3893,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get actionRequired => 'Submission Required';
-
-  @override
-  String attemptNumberLabel(String number) {
-    return 'Attempt #$number';
-  }
 
   @override
   String attachedFilesCount(String count) {
@@ -4170,7 +4273,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get searchStudentOrPhoneHint =>
-      'Quick search by student name or phone...';
+      'Search by student name, phone, or group...';
 
   @override
   String get noStudentsMatchFilterMessage =>
@@ -4939,9 +5042,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get currentActiveLectureBadge => 'Current Lecture';
 
   @override
-  String overallCourseProgress(int completed, int total, int percentage) {
-    return 'Overall Progress: $completed of $total lectures completed ($percentage%)';
-  }
+  String get overallCourseProgress => 'Overall Course Progress';
 
   @override
   String get reviewQuizResultAction => 'Review Quiz Score';
@@ -6398,6 +6499,55 @@ class AppLocalizationsEn extends AppLocalizations {
   String get unlinkQuizAction => 'Unlink Quiz';
 
   @override
+  String get attachedQuizzesSection => 'Attached Quizzes & Exams';
+
+  @override
+  String get attachedQuizzesSectionSubtitle =>
+      'Attach one or more quizzes to this lecture. Required quizzes must be passed to unlock subsequent lessons.';
+
+  @override
+  String get addQuizToLessonAction => 'Add Quiz to Lecture';
+
+  @override
+  String get requiredForProgression => 'Required to pass';
+
+  @override
+  String get optionalPractice => 'Optional practice';
+
+  @override
+  String get makeQuizRequiredTooltip =>
+      'Click to make this quiz required for lesson completion';
+
+  @override
+  String get makeQuizOptionalTooltip =>
+      'Click to make this quiz optional practice';
+
+  @override
+  String attachedQuizzesCount(int count) {
+    return '$count quizzes attached';
+  }
+
+  @override
+  String get noQuizzesAttached => 'No quizzes attached to this lecture yet';
+
+  @override
+  String get attachedQuizzesProgressHeader => 'Lecture Quizzes & Progress';
+
+  @override
+  String requiredQuizzesCompletedProgress(int passed, int total) {
+    return '$passed of $total required quizzes passed';
+  }
+
+  @override
+  String get allRequiredQuizzesPassedCongrats =>
+      'All required quizzes passed! Lecture completed.';
+
+  @override
+  String quizScoreBadge(int score) {
+    return 'Score: $score%';
+  }
+
+  @override
   String get studentNavLectures => 'Lectures';
 
   @override
@@ -7228,4 +7378,862 @@ class AppLocalizationsEn extends AppLocalizations {
   String folderVideosCount(int count) {
     return '$count videos';
   }
+
+  @override
+  String get collapseAllChapters => 'Collapse All Chapters';
+
+  @override
+  String get expandAllChapters => 'Expand All Chapters';
+
+  @override
+  String get moveChapterUp => 'Move Chapter Up';
+
+  @override
+  String get moveChapterDown => 'Move Chapter Down';
+
+  @override
+  String get chapterAnalytics => 'Chapter Analytics';
+
+  @override
+  String get groupAnalytics => 'Group Analytics';
+
+  @override
+  String get chapterCompletionRate => 'Chapter Completion Rate';
+
+  @override
+  String get chapterBreakdown => 'Chapter Progress Breakdown';
+
+  @override
+  String get studentsNeedingAttention => 'Students Needing Attention';
+
+  @override
+  String get totalChapterViews => 'Total Chapter Views';
+
+  @override
+  String get averageChapterQuizScore => 'Chapter Quizzes Average';
+
+  @override
+  String get noStudentsNeedingAttention =>
+      'All students are making great progress';
+
+  @override
+  String get completedAllChapterLessons => 'Completed all lessons';
+
+  @override
+  String get inProgressChapterLessons => 'In progress';
+
+  @override
+  String get notStartedChapterLessons => 'Not started';
+
+  @override
+  String get studentProgressDistribution => 'Student Progress Distribution';
+
+  @override
+  String chapterAnalyticsDialogTitle(String title) {
+    return 'Chapter Analytics: $title';
+  }
+
+  @override
+  String get groupAnalyticsDialogTitle => 'Group Academic Analytics';
+
+  @override
+  String get courseWatchEngagement => 'Total Course Views';
+
+  @override
+  String get overallQuizzesAverage => 'Overall Quizzes Average';
+
+  @override
+  String studentCompletionRate(int rate) {
+    return 'Completion: $rate%';
+  }
+
+  @override
+  String chapterLessonsCountLabel(int count) {
+    return '$count Lessons';
+  }
+
+  @override
+  String get studentEngagementTitle => 'Student Engagement & Progress';
+
+  @override
+  String get studentEngagementSubtitle =>
+      'Automated real-time tracking of lecture watches, progress, and student activity without manual roll-calls';
+
+  @override
+  String get studentEngagementBadge => '⚡ 100% Automated Tracking';
+
+  @override
+  String get viewByLecture => 'By Lecture';
+
+  @override
+  String get viewByStudentOverview => 'Overall Student Progress';
+
+  @override
+  String get lectureCompletedBadge => 'Completed Lecture';
+
+  @override
+  String get lectureInProgressBadge => 'In Progress';
+
+  @override
+  String get lectureNotStartedBadge => 'Not Started';
+
+  @override
+  String get engagementHigh => 'Highly Committed';
+
+  @override
+  String get engagementMedium => 'Moderate Progress';
+
+  @override
+  String get engagementLow => 'Needs Follow-up';
+
+  @override
+  String get groupCommitmentRate => 'Group Commitment Rate';
+
+  @override
+  String get totalEnrolledStudents => 'Enrolled Students';
+
+  @override
+  String get committedStudentsCount => 'Committed Students';
+
+  @override
+  String get needsFollowupCount => 'Needs Follow-up';
+
+  @override
+  String completedLecturesSummary(int completed, int total, String percent) {
+    return 'Completed $completed of $total lectures ($percent%)';
+  }
+
+  @override
+  String get sendParentEngagementReport => 'Send WhatsApp Engagement Report';
+
+  @override
+  String get studentNoteSavedSuccess => 'Student note saved successfully';
+
+  @override
+  String get refreshEngagementTooltip => 'Refresh engagement and watch data';
+
+  @override
+  String get noLecturesInGroupYet =>
+      'No published video lectures in this group yet';
+
+  @override
+  String filterCommitted(int count) {
+    return 'Committed ($count)';
+  }
+
+  @override
+  String filterNeedsFollowup(int count) {
+    return 'Needs Follow-up ($count)';
+  }
+
+  @override
+  String filterModerate(int count) {
+    return 'Moderate ($count)';
+  }
+
+  @override
+  String get editExamTitle => 'Edit Exam Details';
+
+  @override
+  String get editExamAction => 'Edit Exam';
+
+  @override
+  String get examUpdatedSuccess => 'Exam details updated successfully';
+
+  @override
+  String get unlimitedDuration => 'Untimed (Open)';
+
+  @override
+  String get passingScorePercentLabel => 'Passing Score (%)';
+
+  @override
+  String get shuffleQuestionsLabel => 'Shuffle Questions Order';
+
+  @override
+  String get showResultLabel => 'Show Results Immediately After Submission';
+
+  @override
+  String get allowRetakeLabel => 'Allow Retake';
+
+  @override
+  String get saveChangesAction => 'Save Changes';
+
+  @override
+  String get editGroupTitle => 'Edit Study Group';
+
+  @override
+  String get editGroupAction => 'Edit Group';
+
+  @override
+  String get previousContentAccessLabel =>
+      'Previous Content Access for New Students';
+
+  @override
+  String get allowPreviousContent => 'Allow access to past content';
+
+  @override
+  String get denyPreviousContent => 'Show only content published after joining';
+
+  @override
+  String get editAssignmentTitle => 'Edit Assignment';
+
+  @override
+  String get editAssignmentAction => 'Edit Assignment';
+
+  @override
+  String get assignmentUpdatedSuccess => 'Assignment updated successfully';
+
+  @override
+  String get assignmentInstructionsLabel => 'Instructions';
+
+  @override
+  String get dueDateLabel => 'Due Date';
+
+  @override
+  String get allowLateSubmissionLabel => 'Allow Late Submissions';
+
+  @override
+  String get chapterNameAlreadyExists =>
+      'A chapter with this name already exists in this group';
+
+  @override
+  String get chapterUpdateFailed =>
+      'Failed to update chapter. Please try again.';
+
+  @override
+  String get deleteExamAction => 'Delete Exam';
+
+  @override
+  String get deleteExamDialogTitle => 'Delete Exam?';
+
+  @override
+  String deleteExamDialogBody(String title) {
+    return 'Are you sure you want to permanently delete \'$title\'? This action cannot be undone.';
+  }
+
+  @override
+  String get deleteExamConfirmButton => 'Yes, Delete Exam';
+
+  @override
+  String get archiveOrDeleteExamDialogTitle =>
+      'Archive Exam (Students Have Attempts)';
+
+  @override
+  String archiveOrDeleteExamDialogBody(String title, int count) {
+    return 'The exam \'$title\' has $count student attempts. To protect historical grades and student records, it will be safely archived and hidden from all lists instead of permanently destroying data.';
+  }
+
+  @override
+  String get archiveExamConfirmButton => 'Archive & Hide Exam';
+
+  @override
+  String get examDeletedSuccessToast => 'Exam deleted permanently';
+
+  @override
+  String get examArchivedSuccessToast =>
+      'Exam safely archived and hidden from view';
+
+  @override
+  String get smartApproveTitle => 'Approve & Enroll Student';
+
+  @override
+  String get smartApproveSelectGroupPrompt =>
+      'Select group(s) to immediately enroll the student:';
+
+  @override
+  String get smartApproveEnrollNotice =>
+      'Upon approval, the student account will be activated and all lectures for the selected group(s) will be immediately accessible.';
+
+  @override
+  String get smartApproveNoGroupsWarning =>
+      'No groups exist yet. The student account will be activated, and you can assign them to a group later.';
+
+  @override
+  String get smartApproveAndEnrollAction => 'Approve & Enroll Immediately';
+
+  @override
+  String smartApproveSuccessWithGroupsToast(String name, int count) {
+    return 'Student $name approved and enrolled in $count group(s) successfully!';
+  }
+
+  @override
+  String smartApproveSuccessNoGroupsToast(String name) {
+    return 'Student $name approved successfully!';
+  }
+
+  @override
+  String get skipGroupEnrollment => 'Proceed without assigning a group for now';
+
+  @override
+  String get dailyQuickActionsTitle => 'Daily Quick Actions';
+
+  @override
+  String get dailyQuickActionsSubtitle =>
+      'Fast direct access to frequent teaching and management tasks';
+
+  @override
+  String get quickActionUploadLessonTitle => 'Upload New Lesson';
+
+  @override
+  String get quickActionUploadLessonDesc =>
+      'Add video lecture, PDF notes, or quiz';
+
+  @override
+  String get quickActionAssessmentTitle => 'Create Assignment or Quiz';
+
+  @override
+  String get quickActionAssessmentDesc =>
+      'Homework, fast quizzes, or full exams';
+
+  @override
+  String get quickActionPendingStudentsTitle => 'New Student Requests';
+
+  @override
+  String get quickActionPendingStudentsDesc =>
+      'Review, approve, and enroll students into groups';
+
+  @override
+  String pendingStudentsCountBadge(int count) {
+    return '$count students waiting approval';
+  }
+
+  @override
+  String get noPendingStudentsBadge => 'No pending requests';
+
+  @override
+  String get createAssessmentChoiceTitle => 'What would you like to create?';
+
+  @override
+  String get createAssessmentChoiceSubtitle =>
+      'Choose assessment type to jump straight into the builder:';
+
+  @override
+  String get createHomeworkAction => 'Create New Assignment';
+
+  @override
+  String get createHomeworkActionDesc =>
+      'Set due date, attachments, and student instructions';
+
+  @override
+  String get createExamOrQuizAction => 'Create Exam or Quiz';
+
+  @override
+  String get createExamOrQuizActionDesc =>
+      'Multiple choice, timer, and automated grading';
+
+  @override
+  String examFilterTabAll(int count) {
+    return 'All ($count)';
+  }
+
+  @override
+  String examFilterTabGeneral(int count) {
+    return 'General Exams ($count)';
+  }
+
+  @override
+  String examFilterTabLectureQuizzes(int count) {
+    return 'Lecture Quizzes ($count)';
+  }
+
+  @override
+  String get examFilterSubAll => 'All';
+
+  @override
+  String examFilterSubLinked(int count) {
+    return 'Linked ($count)';
+  }
+
+  @override
+  String examFilterSubUnlinked(int count) {
+    return 'Ready to Link ($count)';
+  }
+
+  @override
+  String get statTotalExamsTitle => 'Total Exams';
+
+  @override
+  String get statTotalExamsDesc => 'All assessments in this group';
+
+  @override
+  String get statGeneralExamsTitle => 'General Exams';
+
+  @override
+  String get statGeneralExamsDesc =>
+      'Directly published without lecture requirement';
+
+  @override
+  String get statLectureQuizzesTitle => 'Lecture Quizzes';
+
+  @override
+  String get statLectureQuizzesDesc =>
+      'Pass-gates required to unlock subsequent lectures';
+
+  @override
+  String statUnlinkedAlert(int count) {
+    return '$count pending lecture link';
+  }
+
+  @override
+  String get badgeGeneralExam => 'General Exam';
+
+  @override
+  String get badgeLectureQuiz => 'Lecture Quiz';
+
+  @override
+  String linkedToLecturePill(String title) {
+    return 'Linked to lecture: $title';
+  }
+
+  @override
+  String get unlinkedQuizPill => 'Not linked to a lecture yet - Ready to link';
+
+  @override
+  String get linkToLectureNowAction => 'Link to Lecture Now';
+
+  @override
+  String get linkOrChangeLectureAction => 'Link / Change Linked Lecture';
+
+  @override
+  String get unlinkFromLectureAction => 'Unlink (Convert to General Exam)';
+
+  @override
+  String get convertToLectureQuizAction => 'Convert to Lecture Quiz';
+
+  @override
+  String get convertToGeneralExamAction => 'Convert to General Exam';
+
+  @override
+  String get viewExamDetailsAndAttempts => 'Details & Student Attempts';
+
+  @override
+  String get linkExamToLectureDialogTitle => 'Link Exam to Lecture';
+
+  @override
+  String get linkExamToLectureDialogSubtitle =>
+      'Select the lecture that requires passing this quiz to unlock the next:';
+
+  @override
+  String get searchLecturesHint => 'Search group lectures...';
+
+  @override
+  String get noLecturesFound => 'No lectures found in this group';
+
+  @override
+  String currentExamAttachedWarning(String title) {
+    return 'Currently linked to: $title';
+  }
+
+  @override
+  String get lectureFreeForLinking => 'Available to link';
+
+  @override
+  String get confirmLinkExamAction => 'Confirm Lecture Link';
+
+  @override
+  String examLinkedSuccessToast(String title) {
+    return 'Exam linked to lecture \'$title\' successfully';
+  }
+
+  @override
+  String get examUnlinkedSuccessToast =>
+      'Exam unlinked and set as General Exam successfully';
+
+  @override
+  String get examConvertedToLectureSuccess => 'Exam converted to Lecture Quiz';
+
+  @override
+  String get confirmUnlinkDialogTitle => 'Unlink Exam?';
+
+  @override
+  String confirmUnlinkDialogBody(String title) {
+    return 'Do you want to unlink \'$title\' from its lecture and make it a general exam?';
+  }
+
+  @override
+  String get confirmUnlinkButton => 'Yes, Unlink';
+
+  @override
+  String get draftVersionNotice =>
+      'Current version is a draft. You can edit questions directly without creating a new copy.';
+
+  @override
+  String get publishCurrentDraftAction => 'Publish This Version Now';
+
+  @override
+  String get editDraftQuestionsAction => 'Edit Questions & Content';
+
+  @override
+  String get versionPublishedPill => 'Published';
+
+  @override
+  String get versionDraftPill => 'Draft';
+
+  @override
+  String get creatingNewVersionLoading => 'Creating new version...';
+
+  @override
+  String get publishingVersionLoading => 'Publishing version...';
+
+  @override
+  String get versionPublishedSuccess =>
+      'Version published successfully and is now active for students';
+
+  @override
+  String get unpublishExamAction => 'Unpublish (Revert to Draft)';
+
+  @override
+  String get unpublishingExamLoading => 'Unpublishing exam...';
+
+  @override
+  String get examUnpublishedSuccess =>
+      'Exam unpublished and reverted to draft successfully (hidden from students)';
+
+  @override
+  String get confirmUnpublishExamTitle => 'Unpublish and hide exam?';
+
+  @override
+  String confirmUnpublishExamBody(String title) {
+    return 'Are you sure you want to unpublish \"$title\"? It will be reverted to draft and hidden from all students.';
+  }
+
+  @override
+  String get confirmUnpublishButton => 'Yes, Unpublish to Draft';
+
+  @override
+  String get noOptionsAvailableForQuestionWarning =>
+      'Warning: No answer choices found for this question. Please contact your teacher.';
+
+  @override
+  String newVersionFailedError(String error) {
+    return 'Failed to create new version: $error';
+  }
+
+  @override
+  String studentAttemptsGroupCount(int count) {
+    return '$count Attempts';
+  }
+
+  @override
+  String get singleStudentAttemptBadge => '1 Attempt';
+
+  @override
+  String highestScoreBadge(String score) {
+    return 'Best: $score';
+  }
+
+  @override
+  String attemptNumberLabel(int number) {
+    return 'Attempt #$number';
+  }
+
+  @override
+  String allAttemptsHistoryHeader(int count) {
+    return 'All attempts for this student ($count):';
+  }
+
+  @override
+  String studentsCountSummary(int count) {
+    return '$count Students Took Exam';
+  }
+
+  @override
+  String totalAttemptsSummary(int count) {
+    return '$count Total Attempts';
+  }
+
+  @override
+  String get editDraftExamTitle => 'Edit Draft Exam';
+
+  @override
+  String get editExamSettingsAction => 'Quick Settings';
+
+  @override
+  String get saveExamDraftChanges => 'Save Draft Changes';
+
+  @override
+  String get examDraftUpdatedSuccess =>
+      'Exam draft and questions updated successfully';
+
+  @override
+  String get examDraftPublishedSuccess =>
+      'Exam updated and published to students successfully';
+
+  @override
+  String examUpdateFailed(String error) {
+    return 'Failed to update exam: $error';
+  }
+
+  @override
+  String get editQuestionsNow => 'Edit Questions Now';
+
+  @override
+  String get cannotEditPublishedExamWithAttempts =>
+      'Cannot edit questions directly because students have already taken this exam. You can create a new version instead.';
+
+  @override
+  String get collapseAllQuestions => 'Collapse All';
+
+  @override
+  String get expandAllQuestions => 'Expand All';
+
+  @override
+  String get questionSummaryEmpty => 'No question text entered yet';
+
+  @override
+  String get hasAttachedImage => 'Image attached';
+
+  @override
+  String get clickToEditQuestion => 'Click to expand & edit question';
+
+  @override
+  String get videoSecurityPausedNotice =>
+      'Playback paused to protect academic content. Please keep focus inside the player window.';
+
+  @override
+  String get resumePlaybackAction => 'Resume Watching';
+
+  @override
+  String get examSecurityAlertTitle => 'Security Warning: Tab Switch Detected';
+
+  @override
+  String get examSecurityAlertMessage =>
+      'Leaving the exam window or switching apps (such as screen sharing or search) is strictly prohibited. This attempt has been logged.';
+
+  @override
+  String examSecurityViolationsCount(int current, int max) {
+    return 'Violation $current of $max permitted';
+  }
+
+  @override
+  String get examPrivacyShieldNotice =>
+      'Exam questions hidden while window is out of focus to protect test integrity.';
+
+  @override
+  String get returnToExamAction => 'Return to Exam';
+
+  @override
+  String get examAutoSubmittedDueToViolations =>
+      'The exam was submitted automatically due to exceeding the maximum allowed security tab switches.';
+
+  @override
+  String videoFileTooLargeForWeb(String sizeMb) {
+    return 'The video file ($sizeMb MB) exceeds browser memory capacity (max 2 GB). Please lower the Bitrate in your editor (CapCut) to keep the file under 1.5 GB for faster upload.';
+  }
+
+  @override
+  String videoFileMemoryError(String sizeMb) {
+    return 'Failed to read video data into browser memory ($sizeMb MB). The file might be too large for browser RAM. Please export under 1.5 GB.';
+  }
+
+  @override
+  String get longVideoExportTip =>
+      '💡 Tip for long lectures (> 1 hr): set Bitrate to 2,500 Kbps in video editor to keep file around 1 GB for fast upload and browser stability.';
+
+  @override
+  String get examParentDispatchHubTitle => 'Exam Results & Parent Dispatch Hub';
+
+  @override
+  String get examParentDispatchHeroTitle =>
+      'Instant Exam Results & Parent WhatsApp Dispatch';
+
+  @override
+  String get examParentDispatchHeroSubtitle =>
+      'Notify parents with their student\'s exam score with single-click customized WhatsApp message';
+
+  @override
+  String get openParentDispatchHubAction => 'Open Dispatch Hub';
+
+  @override
+  String get sendScoreToParentAction => 'Send to Parent';
+
+  @override
+  String get resendToParentAction => 'Resend';
+
+  @override
+  String get dispatchSentBadge => 'Sent';
+
+  @override
+  String get missingParentPhonePrompt => 'No parent phone';
+
+  @override
+  String get examStatusNotTakenShort => 'Not Taken';
+
+  @override
+  String get awaitingExamSubmissionNotice => 'Awaiting exam submission';
+
+  @override
+  String examStudentScoreLabel(String score) {
+    return 'Score: $score';
+  }
+
+  @override
+  String get examStudentNotTakenNotice => 'Student has not taken the exam yet';
+
+  @override
+  String get examStudentNotTakenHint =>
+      'You can send a reminder notification to the parent to encourage the student to take the exam.';
+
+  @override
+  String get examRatingExcellent => 'Outstanding performance 🌟';
+
+  @override
+  String get examRatingVeryGood =>
+      'Very good performance and successful pass 👍';
+
+  @override
+  String get examRatingNeedsFocus => 'Needs more focus and review ⚠️';
+
+  @override
+  String get dispatchRecipientPhoneTitle =>
+      'Recipient phone number for WhatsApp notification:';
+
+  @override
+  String get parentPhoneRecipientLabel => 'Parent Phone';
+
+  @override
+  String get studentPhoneRecipientLabel => 'Student Phone';
+
+  @override
+  String get enterParentPhoneHint => 'Enter parent phone (WhatsApp)...';
+
+  @override
+  String get savePhoneAction => 'Save Phone';
+
+  @override
+  String get parentPhoneSavedSuccess =>
+      'Parent phone number saved successfully';
+
+  @override
+  String get parentPhoneSaveFailed => 'Failed to save parent phone number';
+
+  @override
+  String get quickTeacherPresetsTitle =>
+      'Quick Teacher Feedback Presets (1-Tap):';
+
+  @override
+  String get customTeacherNoteHint =>
+      'Type custom note or feedback for parent (optional)...';
+
+  @override
+  String get liveWhatsAppPreviewTitle => 'Live WhatsApp Message Preview:';
+
+  @override
+  String get copyMessageAction => 'Copy Message';
+
+  @override
+  String get messageCopiedToast => 'Message copied to clipboard';
+
+  @override
+  String get copyActionShort => 'Copy';
+
+  @override
+  String get sendViaWhatsAppNowAction => 'Send via WhatsApp Now';
+
+  @override
+  String get missingPhoneWarningToast =>
+      'Please provide a valid phone number to send WhatsApp message';
+
+  @override
+  String get whatsAppLaunchFailedToast =>
+      'Could not launch WhatsApp, you can copy the message instead';
+
+  @override
+  String nextStudentInQueueAction(String studentName) {
+    return 'Next: $studentName ➡️';
+  }
+
+  @override
+  String get copyRosterSummaryTooltip => 'Copy complete roster score sheet';
+
+  @override
+  String get sequentialDispatchActionShort => 'Fast Queue Runner ⚡';
+
+  @override
+  String get rosterCopiedToast =>
+      'Complete exam roster score sheet copied to clipboard';
+
+  @override
+  String get noMatchingStudentsFound =>
+      'No students found matching current search or filters';
+
+  @override
+  String get sortOptionsTooltip => 'Sort students';
+
+  @override
+  String get sortHighestScoreFirst => 'Highest score first';
+
+  @override
+  String get sortLowestScoreFirst => 'Lowest score first';
+
+  @override
+  String get sortStudentNameAlphabetical => 'By student name (A-Z)';
+
+  @override
+  String get sortLatestSubmittedFirst => 'Most recent submission first';
+
+  @override
+  String get metricSubmissionsRateTitle => 'Submissions';
+
+  @override
+  String get metricAverageScoreTitle => 'Average Score';
+
+  @override
+  String get metricPassRateTitle => 'Pass Rate';
+
+  @override
+  String get metricWhatsAppDispatchedTitle => 'Parents Notified';
+
+  @override
+  String get notifiedBadgeShort => 'Notified';
+
+  @override
+  String filterAllRoster(int count) {
+    return 'All ($count)';
+  }
+
+  @override
+  String filterSubmittedRoster(int count) {
+    return 'Submitted ($count)';
+  }
+
+  @override
+  String filterPassedRoster(int count) {
+    return 'Passed ($count)';
+  }
+
+  @override
+  String filterNeedsAttentionRoster(int count) {
+    return 'Needs Attention ($count)';
+  }
+
+  @override
+  String filterNotStartedRoster(int count) {
+    return 'Not Taken ($count)';
+  }
+
+  @override
+  String filterUnnotifiedRoster(int count) {
+    return 'Pending WhatsApp ($count)';
+  }
+
+  @override
+  String filterNotifiedRoster(int count) {
+    return 'Notified ($count)';
+  }
+
+  @override
+  String get filterMissingPhoneRoster => 'Missing Parent Phone';
+
+  @override
+  String editParentPhoneDialogTitle(String studentName) {
+    return 'Edit Parent Phone: $studentName';
+  }
+
+  @override
+  String get editParentPhoneDialogBody =>
+      'Enter the parent WhatsApp phone number to link it to the student profile for academic reports.';
+
+  @override
+  String get saveActionShort => 'Save';
 }

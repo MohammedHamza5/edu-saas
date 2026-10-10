@@ -116,13 +116,35 @@ class _Student360PageState extends State<Student360Page> {
           BlocBuilder<StudentsCubit, StudentsState>(
             builder: (context, state) {
               if (state is Student360Loaded) {
-                return IconButton(
-                  icon: const Icon(
-                    Icons.delete_outline_rounded,
-                    color: AppColors.error,
-                  ),
-                  tooltip: context.l10n.deleteStudentAction,
-                  onPressed: () => _confirmDeleteStudent(context, state.student),
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(
+                        Icons.mark_chat_read_rounded,
+                        color: Color(0xFF25D366),
+                      ),
+                      tooltip: context.l10n.whatsappQuickActionTooltip,
+                      onPressed: () {
+                        final student = state.student;
+                        WhatsAppReportGenerator.showAcademicReportDialog(
+                          context,
+                          studentId: student.id,
+                          studentName: student.fullName,
+                          parentPhone: student.parentPhone,
+                          studentPhone: student.phone,
+                        );
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(
+                        Icons.delete_outline_rounded,
+                        color: AppColors.error,
+                      ),
+                      tooltip: context.l10n.deleteStudentAction,
+                      onPressed: () => _confirmDeleteStudent(context, state.student),
+                    ),
+                  ],
                 );
               }
               return const SizedBox.shrink();

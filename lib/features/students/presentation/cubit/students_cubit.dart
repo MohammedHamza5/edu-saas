@@ -4,6 +4,7 @@ import '../../../../core/errors/result.dart';
 import '../../../../core/utils/app_logger.dart';
 import '../../../../core/utils/cache_manager.dart';
 import '../../domain/entities/student_360_entity.dart';
+import '../../domain/entities/student_academic_report_entity.dart';
 import '../../domain/entities/student_entity.dart';
 import '../../domain/repositories/students_repository.dart';
 import 'students_state.dart';
@@ -270,6 +271,51 @@ class StudentsCubit extends Cubit<StudentsState> {
     );
   }
 
+  /// Approves a pending student and simultaneously enrolls them into the chosen groups.
+  /// Eliminates the friction where approved students see an empty screen.
+  Future<bool> approveAndAssignGroups({
+    required String studentId,
+    required List<String> groupIds,
+  }) async {
+    final prev = state;
+    emit(StudentActionInProgress(studentId: studentId, action: 'approve'));
+
+    // 1. Approve student status
+    final statusResult = await _repository.changeStudentStatus(
+      studentId: studentId,
+      action: 'approve',
+    );
+
+    if (isClosed) return false;
+
+    if (statusResult.isFailure || statusResult.dataOrNull == null) {
+      final failure = statusResult.failureOrNull;
+      if (!isClosed) {
+        emit(prev);
+        emit(StudentsError(failure?.message ?? 'Failed to approve student'));
+      }
+      return false;
+    }
+
+    // 2. Assign to groups if any selected
+    for (final gId in groupIds) {
+      await _repository.assignStudentToGroup(
+        studentId: studentId,
+        groupId: gId,
+        add: true,
+      );
+    }
+
+    if (!isClosed) {
+      AppCache.students.clear();
+      AppCache.groups.clear();
+      final updated = statusResult.dataOrNull!;
+      emit(StudentActionSuccess(updatedStudent: updated, action: 'approve'));
+      await loadPendingStudents(refresh: true);
+    }
+    return true;
+  }
+
   /// Permanently deletes student account and all related records to preserve storage quota.
   Future<bool> deleteStudent(String studentId) async {
     final result = await _repository.deleteStudent(studentId);
@@ -453,6 +499,19 @@ class StudentsCubit extends Cubit<StudentsState> {
         return false;
       },
     );
+  }
+
+  // ── Student Academic Report (Parent WhatsApp) ───────────────────────────
+
+  Future<StudentAcademicReportEntity?> loadStudentAcademicReport(
+    String studentId, {
+    int? days,
+  }) async {
+    final result = await _repository.getStudentAcademicReport(
+      studentId,
+      days: days,
+    );
+    return result.dataOrNull;
   }
 
   // ── Helpers ────────────────────────────────────────────────────────────────

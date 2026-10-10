@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../theme/app_colors.dart';
 
 class AppTextField extends StatefulWidget {
@@ -11,6 +12,7 @@ class AppTextField extends StatefulWidget {
   final Widget? suffixIcon;
   final bool isPassword;
   final TextInputType keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
   final ValueChanged<String>? onChanged;
   final FormFieldValidator<String>? validator;
   final bool enabled;
@@ -32,6 +34,7 @@ class AppTextField extends StatefulWidget {
     this.suffixIcon,
     this.isPassword = false,
     this.keyboardType = TextInputType.text,
+    this.inputFormatters,
     this.onChanged,
     this.validator,
     this.enabled = true,
@@ -88,6 +91,7 @@ class _AppTextFieldState extends State<AppTextField> {
       controller: widget.controller,
       obscureText: _obscureText,
       keyboardType: widget.keyboardType,
+      inputFormatters: widget.inputFormatters,
       textInputAction: widget.textInputAction,
       onFieldSubmitted: widget.onFieldSubmitted,
       autofocus: widget.autofocus,

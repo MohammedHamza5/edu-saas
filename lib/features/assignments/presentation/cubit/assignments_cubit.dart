@@ -193,6 +193,59 @@ class AssignmentsCubit extends Cubit<AssignmentsState> {
     );
   }
 
+  /// Updates an assignment's title and details (Teacher flow)
+  Future<bool> updateAssignment({
+    required String assignmentId,
+    required String title,
+    String? instructions,
+    DateTime? dueAt,
+    bool? allowLateSubmission,
+    int? maxScore,
+  }) async {
+    final result = await _repository.updateAssignment(
+      assignmentId: assignmentId,
+      title: title,
+      instructions: instructions,
+      dueAt: dueAt,
+      allowLateSubmission: allowLateSubmission,
+      maxScore: maxScore,
+    );
+
+    return result.when(
+      onSuccess: (updatedAssignment) {
+        final currentState = state;
+        if (currentState is TeacherAssignmentsLoaded) {
+          if (currentState.groupId != null) {
+            AppCache.assignments.invalidate('teacher_group_${currentState.groupId}');
+          }
+          final index = currentState.assignments.indexWhere((a) => a.id == updatedAssignment.id);
+          final updatedList = List<AssignmentEntity>.from(currentState.assignments);
+          if (index != -1) {
+            updatedList[index] = updatedAssignment;
+          }
+          emit(
+            currentState.copyWith(
+              assignments: updatedList,
+              selectedAssignment: currentState.selectedAssignment?.id == updatedAssignment.id
+                  ? updatedAssignment
+                  : currentState.selectedAssignment,
+            ),
+          );
+        }
+        return true;
+      },
+      onFailure: (failure) {
+        final currentState = state;
+        if (currentState is TeacherAssignmentsLoaded) {
+          emit(currentState.copyWith(message: failure.message));
+        } else {
+          emit(AssignmentsError(failure.message));
+        }
+        return false;
+      },
+    );
+  }
+
   /// Grades a student submission (Teacher flow)
   Future<bool> gradeSubmission({
     required String submissionId,

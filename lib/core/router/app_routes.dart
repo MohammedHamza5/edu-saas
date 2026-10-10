@@ -52,6 +52,7 @@ class AppRoutes {
   // Feature: Exams routes
   static const String teacherExams = '/teacher/exams';
   static const String teacherGroupExams = '/teacher/groups/:groupId/exams';
+  static const String teacherExamParentDispatch = '/teacher/exams/:examId/parent-dispatch';
   static const String studentExams = '/student/exams';
   static const String studentMistakes = '/student/mistakes';
   static const String mistakesPractice = '/student/mistakes/practice';

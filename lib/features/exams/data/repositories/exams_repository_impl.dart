@@ -2,6 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/errors/result.dart';
 import '../../domain/entities/exam_entity.dart';
+import '../../domain/entities/exam_parent_dispatch_entity.dart';
 import '../../domain/entities/mistake_entities.dart';
 import '../../domain/repositories/exams_repository.dart';
 import '../datasources/exams_remote_datasource.dart';
@@ -125,10 +126,123 @@ class ExamsRepositoryImpl implements ExamsRepository {
   }
 
   @override
+  Future<Result<ExamEntity>> updateExam({
+    required String examId,
+    required String title,
+    int? durationMinutes,
+    int? maxScore,
+    int? passingScore,
+    bool? shuffleQuestions,
+    bool? showResult,
+    bool? allowRetake,
+    DateTime? startAt,
+    DateTime? endAt,
+    bool? isPublished,
+  }) async {
+    try {
+      final updated = await _remoteDataSource.updateExam(
+        examId: examId,
+        title: title,
+        durationMinutes: durationMinutes,
+        maxScore: maxScore,
+        passingScore: passingScore,
+        shuffleQuestions: shuffleQuestions,
+        showResult: showResult,
+        allowRetake: allowRetake,
+        startAt: startAt,
+        endAt: endAt,
+        isPublished: isPublished,
+      );
+      return Success(updated);
+    } on PostgrestException catch (e) {
+      return FailureResult(ServerFailure(e.message, code: e.code));
+    } on AuthException catch (e) {
+      return FailureResult(AuthFailure(e.message, code: e.statusCode));
+    } catch (e) {
+      return FailureResult(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<ExamEntity>> updateDraftExamQuestions({
+    required String examId,
+    required String title,
+    int? durationMinutes,
+    int? maxScore,
+    int? passingScore,
+    bool? shuffleQuestions,
+    bool? showResult,
+    bool? allowRetake,
+    DateTime? startAt,
+    DateTime? endAt,
+    bool? isPublished,
+    required List<ExamQuestionEntity> questions,
+  }) async {
+    try {
+      final questionsModels = questions.map((q) {
+        return ExamQuestionModel(
+          id: q.id,
+          examVersionId: q.examVersionId,
+          questionText: q.questionText,
+          questionType: q.questionType,
+          points: q.points,
+          sortOrder: q.sortOrder,
+          options: q.options,
+          imageUrl: q.imageUrl,
+          imageMeta: q.imageMeta,
+          contextId: q.contextId,
+        );
+      }).toList();
+
+      final updated = await _remoteDataSource.updateDraftExamQuestions(
+        examId: examId,
+        title: title,
+        durationMinutes: durationMinutes,
+        maxScore: maxScore,
+        passingScore: passingScore,
+        shuffleQuestions: shuffleQuestions,
+        showResult: showResult,
+        allowRetake: allowRetake,
+        startAt: startAt,
+        endAt: endAt,
+        isPublished: isPublished,
+        questions: questionsModels,
+      );
+      return Success(updated);
+    } on PostgrestException catch (e) {
+      return FailureResult(ServerFailure(e.message, code: e.code));
+    } on AuthException catch (e) {
+      return FailureResult(AuthFailure(e.message, code: e.statusCode));
+    } catch (e) {
+      return FailureResult(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
   Future<Result<ExamVersionEntity>> publishExamVersion(String versionId) async {
     try {
       final version = await _remoteDataSource.publishExamVersion(versionId);
       return Success(version);
+    } on PostgrestException catch (e) {
+      return FailureResult(ServerFailure(e.message, code: e.code));
+    } on AuthException catch (e) {
+      return FailureResult(AuthFailure(e.message, code: e.statusCode));
+    } catch (e) {
+      return FailureResult(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<void>> unpublishExamVersion({
+    required String examId,
+    required String versionId,
+  }) async {
+    try {
+      await _remoteDataSource.unpublishExamVersion(
+        examId: examId,
+        versionId: versionId,
+      );
+      return const Success(null);
     } on PostgrestException catch (e) {
       return FailureResult(ServerFailure(e.message, code: e.code));
     } on AuthException catch (e) {
@@ -265,4 +379,144 @@ class ExamsRepositoryImpl implements ExamsRepository {
       return FailureResult(ServerFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Result<List<Map<String, dynamic>>>> getGroupLessons(String groupId) async {
+    try {
+      final lessons = await _remoteDataSource.getGroupLessons(groupId);
+      return Success(lessons);
+    } on PostgrestException catch (e) {
+      return FailureResult(ServerFailure(e.message, code: e.code));
+    } on AuthException catch (e) {
+      return FailureResult(AuthFailure(e.message, code: e.statusCode));
+    } catch (e) {
+      return FailureResult(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<void>> linkExamToLesson({
+    required String examId,
+    required String lessonId,
+    required String groupId,
+  }) async {
+    try {
+      await _remoteDataSource.linkExamToLesson(
+        examId: examId,
+        lessonId: lessonId,
+        groupId: groupId,
+      );
+      return const Success(null);
+    } on PostgrestException catch (e) {
+      return FailureResult(ServerFailure(e.message, code: e.code));
+    } on AuthException catch (e) {
+      return FailureResult(AuthFailure(e.message, code: e.statusCode));
+    } catch (e) {
+      return FailureResult(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<void>> unlinkExamFromLesson({
+    required String examId,
+    required String groupId,
+    bool makeGeneralExam = false,
+  }) async {
+    try {
+      await _remoteDataSource.unlinkExamFromLesson(
+        examId: examId,
+        groupId: groupId,
+        makeGeneralExam: makeGeneralExam,
+      );
+      return const Success(null);
+    } on PostgrestException catch (e) {
+      return FailureResult(ServerFailure(e.message, code: e.code));
+    } on AuthException catch (e) {
+      return FailureResult(AuthFailure(e.message, code: e.statusCode));
+    } catch (e) {
+      return FailureResult(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<void>> convertExamType({
+    required String examId,
+    required String contentId,
+    required bool toLectureExam,
+    required String groupId,
+  }) async {
+    try {
+      await _remoteDataSource.convertExamType(
+        examId: examId,
+        contentId: contentId,
+        toLectureExam: toLectureExam,
+        groupId: groupId,
+      );
+      return const Success(null);
+    } on PostgrestException catch (e) {
+      return FailureResult(ServerFailure(e.message, code: e.code));
+    } on AuthException catch (e) {
+      return FailureResult(AuthFailure(e.message, code: e.statusCode));
+    } catch (e) {
+      return FailureResult(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<bool>> deleteExam({
+    required String examId,
+    bool force = false,
+  }) async {
+    try {
+      final res = await _remoteDataSource.deleteExam(
+        examId: examId,
+        force: force,
+      );
+      final success = res['success'] == true;
+      return Success(success);
+    } on PostgrestException catch (e) {
+      return FailureResult(ServerFailure(e.message, code: e.code));
+    } on AuthException catch (e) {
+      return FailureResult(AuthFailure(e.message, code: e.statusCode));
+    } catch (e) {
+      return FailureResult(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<ExamParentDispatchRosterEntity>> getExamParentDispatchRoster(
+    String examId,
+  ) async {
+    try {
+      final roster = await _remoteDataSource.getExamParentDispatchRoster(examId);
+      return Success(roster);
+    } on PostgrestException catch (e) {
+      return FailureResult(ServerFailure(e.message, code: e.code));
+    } on AuthException catch (e) {
+      return FailureResult(AuthFailure(e.message, code: e.statusCode));
+    } catch (e) {
+      return FailureResult(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<bool>> updateStudentParentPhone({
+    required String studentId,
+    required String parentPhone,
+  }) async {
+    try {
+      final success = await _remoteDataSource.updateStudentParentPhone(
+        studentId: studentId,
+        parentPhone: parentPhone,
+      );
+      return Success(success);
+    } on PostgrestException catch (e) {
+      return FailureResult(ServerFailure(e.message, code: e.code));
+    } on AuthException catch (e) {
+      return FailureResult(AuthFailure(e.message, code: e.statusCode));
+    } catch (e) {
+      return FailureResult(ServerFailure(e.toString()));
+    }
+  }
 }
+

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -116,11 +117,26 @@ class QuestionOptionTile extends StatelessWidget {
                     if (option.optionText.isNotEmpty) const SizedBox(height: 6),
                     ClipRRect(
                       borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                      child: Image.network(
-                        option.imageUrl!,
+                      child: CachedNetworkImage(
+                        imageUrl: option.imageUrl!,
                         height: 90,
+                        memCacheWidth: 400,
+                        memCacheHeight: 200,
+                        maxWidthDiskCache: 600,
                         fit: BoxFit.contain,
-                        errorBuilder: (ctx, _, __) => const SizedBox.shrink(),
+                        placeholder: (ctx, _) => Container(
+                          height: 90,
+                          width: 90,
+                          color: AppColors.surfaceVariant.withValues(alpha: 0.3),
+                          child: const Center(
+                            child: SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          ),
+                        ),
+                        errorWidget: (ctx, _, __) => const SizedBox.shrink(),
                       ),
                     ),
                   ],

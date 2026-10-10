@@ -24,6 +24,9 @@ class ExamModel extends ExamEntity {
     super.attemptsCount,
     super.myLatestAttempt,
     super.myBestScore,
+    super.isLectureExam,
+    super.linkedLessonId,
+    super.linkedLessonTitle,
   });
 
   factory ExamModel.fromJson(Map<String, dynamic> json) {
@@ -46,7 +49,7 @@ class ExamModel extends ExamEntity {
       groupName = json['group_name'] as String?;
     }
 
-    // Active version parsing
+    // Active version parsing - sort by version_number descending so latest version is picked
     ExamVersionModel? activeVersion;
     if (json['active_version'] is Map) {
       activeVersion = ExamVersionModel.fromJson(
@@ -56,19 +59,15 @@ class ExamModel extends ExamEntity {
         (json['exam_versions'] as List).isNotEmpty) {
       final versions = (json['exam_versions'] as List)
           .whereType<Map<dynamic, dynamic>>()
+          .map((v) => Map<String, dynamic>.from(v))
           .toList();
-      Map<dynamic, dynamic>? published;
-      for (final v in versions) {
-        if (v['status'] == 'published') {
-          published = v;
-          break;
-        }
-      }
-      published ??= versions.firstOrNull;
-      if (published != null) {
-        activeVersion = ExamVersionModel.fromJson(
-          Map<String, dynamic>.from(published),
-        );
+      versions.sort((a, b) {
+        final vA = (a['version_number'] as num?)?.toInt() ?? 0;
+        final vB = (b['version_number'] as num?)?.toInt() ?? 0;
+        return vB.compareTo(vA);
+      });
+      if (versions.isNotEmpty) {
+        activeVersion = ExamVersionModel.fromJson(versions.first);
       }
     }
 
@@ -132,6 +131,11 @@ class ExamModel extends ExamEntity {
           DateTime.tryParse(json['updated_at'].toString()) ?? DateTime.now();
     }
 
+    final isLectureExam = json['is_lecture_exam'] as bool? ??
+        (json['linked_lesson_id'] != null);
+    final linkedLessonId = json['linked_lesson_id'] as String?;
+    final linkedLessonTitle = json['linked_lesson_title'] as String?;
+
     return ExamModel(
       id: json['id'] as String? ?? '',
       contentId: json['content_id'] as String? ?? '',
@@ -157,6 +161,9 @@ class ExamModel extends ExamEntity {
       attemptsCount: attemptsCount,
       myLatestAttempt: myLatestAttempt,
       myBestScore: myBestScore,
+      isLectureExam: isLectureExam,
+      linkedLessonId: linkedLessonId,
+      linkedLessonTitle: linkedLessonTitle,
     );
   }
 

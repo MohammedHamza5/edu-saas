@@ -1,3 +1,4 @@
+import '../../domain/entities/attached_lesson_exam_entity.dart';
 import '../../domain/entities/content_entity.dart';
 import '../../domain/entities/file_attachment_entity.dart';
 import 'file_attachment_model.dart';
@@ -24,6 +25,7 @@ class ContentModel extends ContentEntity {
     super.assignedGroupNames = const [],
     super.associatedExamId,
     super.associatedExamTitle,
+    super.attachedExams = const [],
     super.prerequisiteExamId,
     super.prerequisiteExamTitle,
     super.prerequisitePassingScore,
@@ -122,6 +124,14 @@ class ContentModel extends ContentEntity {
 
     final isLocked = json['is_locked'] == true;
 
+    final attachedExamsRaw = json['attached_exams'] as List<dynamic>?;
+    final parsedAttachedExams = attachedExamsRaw != null
+        ? attachedExamsRaw
+            .whereType<Map<String, dynamic>>()
+            .map(AttachedLessonExamEntity.fromJson)
+            .toList()
+        : const <AttachedLessonExamEntity>[];
+
     return ContentModel(
       id: json['id'] as String? ?? '',
       tenantId: json['tenant_id'] as String? ?? '',
@@ -149,6 +159,7 @@ class ContentModel extends ContentEntity {
       assignedGroupNames: assignedGroupNames,
       associatedExamId: json['associated_exam_id'] as String?,
       associatedExamTitle: associatedExamTitle,
+      attachedExams: parsedAttachedExams,
       prerequisiteExamId: json['prerequisite_exam_id'] as String?,
       prerequisiteExamTitle: prerequisiteExamTitle,
       prerequisitePassingScore: prerequisitePassingScore,
@@ -186,6 +197,7 @@ class ContentModel extends ContentEntity {
       assignedGroupNames: entity.assignedGroupNames,
       associatedExamId: entity.associatedExamId,
       associatedExamTitle: entity.associatedExamTitle,
+      attachedExams: entity.attachedExams,
       prerequisiteExamId: entity.prerequisiteExamId,
       prerequisiteExamTitle: entity.prerequisiteExamTitle,
       prerequisitePassingScore: entity.prerequisitePassingScore,
@@ -222,6 +234,7 @@ class ContentModel extends ContentEntity {
     List<String>? assignedGroupNames,
     Object? associatedExamId = _sentinel,
     Object? associatedExamTitle = _sentinel,
+    List<AttachedLessonExamEntity>? attachedExams,
     Object? prerequisiteExamId = _sentinel,
     Object? prerequisiteExamTitle = _sentinel,
     Object? prerequisitePassingScore = _sentinel,
@@ -255,6 +268,7 @@ class ContentModel extends ContentEntity {
       assignedGroupNames: assignedGroupNames,
       associatedExamId: associatedExamId,
       associatedExamTitle: associatedExamTitle,
+      attachedExams: attachedExams,
       prerequisiteExamId: prerequisiteExamId,
       prerequisiteExamTitle: prerequisiteExamTitle,
       prerequisitePassingScore: prerequisitePassingScore,

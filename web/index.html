@@ -13,6 +13,28 @@
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta name="referrer" content="strict-origin-when-cross-origin">
 
+  <!-- Guaranteed Instant Updates: Unregisters Service Workers & flushes stale CacheStorage -->
+  <script>
+    (function() {
+      try {
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            for (var i = 0; i < registrations.length; i++) {
+              registrations[i].unregister();
+            }
+          }).catch(function() {});
+        }
+        if ('caches' in window) {
+          caches.keys().then(function(keys) {
+            for (var i = 0; i < keys.length; i++) {
+              caches.delete(keys[i]);
+            }
+          }).catch(function() {});
+        }
+      } catch (e) {}
+    })();
+  </script>
+
   <!-- Production Security Hardening: Anti-Inspect, DevTools Protection & Console Sanitization -->
   <script>
     (function() {
@@ -94,9 +116,98 @@
           e.stopPropagation();
           return false;
         }
+
+        // PrintScreen Key / Snipping Tool Detection
+        if (key === 'PRINTSCREEN' || keyCode === 44) {
+          triggerSecurityBlackout('تم حظر تصوير الشاشة لحماية حقوق الملكية');
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            try { navigator.clipboard.writeText(''); } catch(err) {}
+          }
+          return false;
+        }
+
+        // Mac Screenshot Shortcuts (Cmd+Shift+3, Cmd+Shift+4, Cmd+Shift+5)
+        if (isCtrlOrCmd && isShift && (key === '3' || key === '4' || key === '5')) {
+          triggerSecurityBlackout('تم حظر تصوير الشاشة لحماية حقوق الملكية');
+          e.preventDefault();
+          e.stopPropagation();
+          return false;
+        }
       }, { capture: true, passive: false });
+
+      // 4. Intercept Screen Share API inside page / extensions
+      if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
+        try {
+          var originalGetDisplayMedia = navigator.mediaDevices.getDisplayMedia.bind(navigator.mediaDevices);
+          navigator.mediaDevices.getDisplayMedia = function(constraints) {
+            triggerSecurityBlackout('مشاركة الشاشة غير مسموح بها لحماية المحتوى');
+            return Promise.reject(new DOMException('Screen sharing is restricted by security policy', 'NotAllowedError'));
+          };
+        } catch (e) {}
+      }
+
+      // 5. Temporary Security Blackout Shield Generator
+      function triggerSecurityBlackout(msg) {
+        var shield = document.getElementById('edu-security-shield');
+        if (!shield) {
+          shield = document.createElement('div');
+          shield.id = 'edu-security-shield';
+          shield.style.position = 'fixed';
+          shield.style.top = '0';
+          shield.style.left = '0';
+          shield.style.width = '100vw';
+          shield.style.height = '100vh';
+          shield.style.backgroundColor = '#0a0d14';
+          shield.style.color = '#ffffff';
+          shield.style.zIndex = '2147483647';
+          shield.style.display = 'flex';
+          shield.style.flexDirection = 'column';
+          shield.style.justifyContent = 'center';
+          shield.style.alignItems = 'center';
+          shield.style.fontFamily = 'Cairo, sans-serif';
+          shield.style.direction = 'rtl';
+          shield.innerHTML = '<div style="font-size: 32px; margin-bottom: 12px;">🛡️</div>' +
+                             '<div style="font-size: 18px; font-weight: bold; margin-bottom: 6px;" id="edu-shield-msg"></div>' +
+                             '<div style="font-size: 13px; color: #94a3b8;">EduSaaS Content Protection System</div>';
+          document.body.appendChild(shield);
+        }
+        var msgEl = document.getElementById('edu-shield-msg');
+        if (msgEl) msgEl.innerText = msg || 'محتوى تعليمي محمي';
+        shield.style.display = 'flex';
+        setTimeout(function() {
+          if (shield) shield.style.display = 'none';
+        }, 1200);
+      }
+
+      // 6. Focus Loss / Window Blur Protection for Embedded Players
+      function pauseActivePlayersOnBlur() {
+        if (window._bunnyPlayers) {
+          for (var id in window._bunnyPlayers) {
+            try {
+              if (window._bunnyPlayers[id] && typeof window._bunnyPlayers[id].pause === 'function') {
+                window._bunnyPlayers[id].pause();
+              }
+            } catch(err) {}
+          }
+        }
+      }
+      window.addEventListener('blur', pauseActivePlayersOnBlur);
+      document.addEventListener('visibilitychange', function() {
+        if (document.hidden) pauseActivePlayersOnBlur();
+      });
     })();
   </script>
+
+  <!-- Global Content Protection Styles: Disable Printing & Text Dragging -->
+  <style>
+    @media print {
+      html, body, #flutter-view, flt-glass-pane {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+      }
+    }
+  </style>
 
   <!-- Execute ServiceWorker & CacheStorage exterminator immediately before any resource is requested -->
   <script>
@@ -676,7 +787,36 @@
 
         var iframe = document.createElement('iframe');
         iframe.id = 'bunny_frame_' + viewId;
-        iframe.src = src;
+
+        // ── SECURITY: Blob-redirect technique ──────────────────────────────────
+        // Instead of setting iframe.src = signedUrl directly (which exposes the
+        // full signed Bunny token in DevTools → Elements panel), we:
+        //  1. Build a tiny HTML redirect page as a Blob URL (blob:// scheme).
+        //  2. Set iframe.src to the opaque blob URL (no token visible in DOM).
+        //  3. The blob page immediately issues window.location = signedUrl so the
+        //     player loads normally inside the iframe.
+        //  4. Revoke the blob URL right after load — it vanishes from memory.
+        // Result: DevTools Elements shows `src="blob:https://…/uuid"` only.
+        // The token is never stored as a DOM attribute.
+        // ──────────────────────────────────────────────────────────────────────
+        try {
+          var escapedSrc = src.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+          var redirectHtml = '<!DOCTYPE html><html><head>'
+            + '<meta http-equiv="refresh" content="0;url=' + escapedSrc + '">'
+            + '</head><body></body></html>';
+          var blob = new Blob([redirectHtml], { type: 'text/html' });
+          var blobUrl = URL.createObjectURL(blob);
+          iframe.src = blobUrl;
+          // Revoke blob URL after iframe loads — cleans up memory, keeps DOM opaque
+          iframe.addEventListener('load', function onFirstLoad() {
+            iframe.removeEventListener('load', onFirstLoad);
+            try { URL.revokeObjectURL(blobUrl); } catch (_) {}
+          }, { once: true });
+        } catch (blobErr) {
+          // Fallback: set src directly if Blob API is unavailable (very old browsers)
+          iframe.src = src;
+        }
+
         // Bunny Stream security requirement
         iframe.referrerPolicy = 'strict-origin-when-cross-origin';
         iframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');

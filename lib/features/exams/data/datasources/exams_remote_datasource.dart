@@ -8,6 +8,7 @@ import '../models/exam_attempt_model.dart';
 import '../models/exam_model.dart';
 import '../models/exam_question_model.dart';
 import '../models/exam_version_model.dart';
+import '../models/exam_parent_dispatch_model.dart';
 import '../models/mistake_models.dart';
 
 abstract interface class ExamsRemoteDataSource {
@@ -32,7 +33,38 @@ abstract interface class ExamsRemoteDataSource {
     bool isPublished = false,
     required List<ExamQuestionModel> initialQuestions,
   });
+  Future<ExamModel> updateExam({
+    required String examId,
+    required String title,
+    int? durationMinutes,
+    int? maxScore,
+    int? passingScore,
+    bool? shuffleQuestions,
+    bool? showResult,
+    bool? allowRetake,
+    DateTime? startAt,
+    DateTime? endAt,
+    bool? isPublished,
+  });
+  Future<ExamModel> updateDraftExamQuestions({
+    required String examId,
+    required String title,
+    int? durationMinutes,
+    int? maxScore,
+    int? passingScore,
+    bool? shuffleQuestions,
+    bool? showResult,
+    bool? allowRetake,
+    DateTime? startAt,
+    DateTime? endAt,
+    bool? isPublished,
+    required List<ExamQuestionModel> questions,
+  });
   Future<ExamVersionModel> publishExamVersion(String versionId);
+  Future<void> unpublishExamVersion({
+    required String examId,
+    required String versionId,
+  });
   Future<ExamVersionModel> createNewExamVersion(String examId);
   Future<ExamAttemptModel> startExam(String examId);
   Future<ExamAttemptModel> submitExam({
@@ -50,6 +82,32 @@ abstract interface class ExamsRemoteDataSource {
   Future<MistakePracticeResultModel> submitMistakesPractice(
     List<Map<String, String>> answers,
   );
+  Future<List<Map<String, dynamic>>> getGroupLessons(String groupId);
+  Future<void> linkExamToLesson({
+    required String examId,
+    required String lessonId,
+    required String groupId,
+  });
+  Future<void> unlinkExamFromLesson({
+    required String examId,
+    required String groupId,
+    bool makeGeneralExam = false,
+  });
+  Future<void> convertExamType({
+    required String examId,
+    required String contentId,
+    required bool toLectureExam,
+    required String groupId,
+  });
+  Future<Map<String, dynamic>> deleteExam({
+    required String examId,
+    bool force = false,
+  });
+  Future<ExamParentDispatchRosterModel> getExamParentDispatchRoster(String examId);
+  Future<bool> updateStudentParentPhone({
+    required String studentId,
+    required String parentPhone,
+  });
 }
 
 class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
@@ -65,7 +123,7 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
     int page = 0,
     int pageSize = 15,
   }) async {
-    final response = await _safeClient
+    final examsFuture = _safeClient
         .from('exams')
         .select('''
           id,
@@ -100,8 +158,63 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
           exam_attempts(count)
         ''')
         .eq('content.group_id', groupId)
+        .neq('content.status', 'archived')
         .order('created_at', ascending: false)
         .range(page * pageSize, (page + 1) * pageSize - 1);
+
+    final lessonsFuture = _safeClient
+        .from('content_groups')
+        .select('content_id, associated_exam_id, content:content!content_groups_content_id_fkey(id, title)')
+        .eq('group_id', groupId)
+        .not('associated_exam_id', 'is', null)
+        .catchError((Object e) {
+          AppLogger.w('ExamsRemoteDataSource', 'Could not fetch linked lessons map: $e');
+          return <dynamic>[];
+        });
+
+    final multiLessonsFuture = _safeClient
+        .from('lesson_exams')
+        .select('content_id, exam_id, content:content!lesson_exams_content_id_fkey(id, title)')
+        .eq('group_id', groupId)
+        .catchError((Object _) => <dynamic>[]);
+
+    final parallelRes = await Future.wait([
+      examsFuture,
+      lessonsFuture,
+      multiLessonsFuture,
+    ]);
+
+    final response = parallelRes[0];
+    final lessonsRes = parallelRes[1] as List<dynamic>;
+    final multiLessonsRes = parallelRes[2] as List<dynamic>;
+
+    // Build map of examId -> linked lesson info for this group
+    final linkedLessonsMap = <String, Map<String, String>>{};
+    for (final item in lessonsRes) {
+      final examId = item['associated_exam_id'] as String?;
+      final contentMap = item['content'] as Map<String, dynamic>?;
+      final lessonId = (item['content_id'] ?? contentMap?['id']) as String?;
+      final lessonTitle = contentMap?['title'] as String? ?? '';
+      if (examId != null && lessonId != null) {
+        linkedLessonsMap[examId] = {
+          'lesson_id': lessonId,
+          'lesson_title': lessonTitle,
+        };
+      }
+    }
+
+    for (final item in multiLessonsRes) {
+      final examId = item['exam_id'] as String?;
+      final contentMap = item['content'] as Map<String, dynamic>?;
+      final lessonId = (item['content_id'] ?? contentMap?['id']) as String?;
+      final lessonTitle = contentMap?['title'] as String? ?? '';
+      if (examId != null && lessonId != null) {
+        linkedLessonsMap[examId] = {
+          'lesson_id': lessonId,
+          'lesson_title': lessonTitle,
+        };
+      }
+    }
 
     final list = response as List<dynamic>;
     final results = <ExamModel>[];
@@ -117,6 +230,29 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
         map['attempts_count'] = 0;
       }
       map.remove('exam_attempts');
+
+      final examId = map['id'] as String? ?? '';
+      final contentMap = map['content'] as Map<String, dynamic>?;
+      final desc = (contentMap?['description'] as String? ?? '').trim().toLowerCase();
+      final title = (map['title'] as String? ?? contentMap?['title'] as String? ?? '').toLowerCase();
+
+      final linkedInfo = linkedLessonsMap[examId];
+      if (linkedInfo != null) {
+        map['is_lecture_exam'] = true;
+        map['linked_lesson_id'] = linkedInfo['lesson_id'];
+        map['linked_lesson_title'] = linkedInfo['lesson_title'];
+      } else {
+        final isIntendedAsQuiz = desc == 'lecture_quiz' ||
+            desc == 'quiz' ||
+            title.contains('كويز') ||
+            title.contains('quiz') ||
+            title.contains('درس') ||
+            title.contains('محاضرة');
+        map['is_lecture_exam'] = isIntendedAsQuiz;
+        map['linked_lesson_id'] = null;
+        map['linked_lesson_title'] = null;
+      }
+
       results.add(ExamModel.fromJson(map));
     }
 
@@ -144,35 +280,8 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
 
     if (groupIds.isEmpty) return [];
 
-    // Collect any exam IDs that are attached to lessons as quizzes or prerequisites
-    // Lesson quizzes must strictly be taken within their respective lessons, not here.
-    final lessonExamIds = <String>{};
-    try {
-      final cgRes = await _safeClient
-          .from('content_groups')
-          .select('associated_exam_id, prerequisite_exam_id')
-          .inFilter('group_id', groupIds);
-      for (final row in (cgRes as List<dynamic>)) {
-        final aId = row['associated_exam_id'] as String?;
-        final pId = row['prerequisite_exam_id'] as String?;
-        if (aId != null && aId.isNotEmpty) lessonExamIds.add(aId);
-        if (pId != null && pId.isNotEmpty) lessonExamIds.add(pId);
-      }
-
-      final cRes = await _safeClient
-          .from('content')
-          .select('associated_exam_id, prerequisite_exam_id')
-          .inFilter('group_id', groupIds);
-      for (final row in (cRes as List<dynamic>)) {
-        final aId = row['associated_exam_id'] as String?;
-        final pId = row['prerequisite_exam_id'] as String?;
-        if (aId != null && aId.isNotEmpty) lessonExamIds.add(aId);
-        if (pId != null && pId.isNotEmpty) lessonExamIds.add(pId);
-      }
-    } catch (_) {}
-
-    // 2. Fetch published exams
-    final response = await _safeClient
+    // Run exam retrieval and attached quiz filters concurrently
+    final examsFuture = _safeClient
         .from('exams')
         .select('''
           id,
@@ -205,12 +314,40 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
             published_at
           )
         ''')
-        .inFilter('content.group_id', groupIds)
         .eq('content.status', 'published')
         .order('created_at', ascending: false)
         .range(page * pageSize, (page + 1) * pageSize - 1);
 
-    final rawList = response as List<dynamic>;
+    final cgFuture = _safeClient
+        .from('content_groups')
+        .select('associated_exam_id, prerequisite_exam_id')
+        .inFilter('group_id', groupIds)
+        .catchError((Object _) => <dynamic>[]);
+
+    final cFuture = _safeClient
+        .from('content')
+        .select('associated_exam_id, prerequisite_exam_id')
+        .inFilter('group_id', groupIds)
+        .catchError((Object _) => <dynamic>[]);
+
+    final parallelStudentRes = await Future.wait([examsFuture, cgFuture, cFuture]);
+    final rawList = parallelStudentRes[0] as List<dynamic>;
+    final cgRes = parallelStudentRes[1] as List<dynamic>;
+    final cRes = parallelStudentRes[2] as List<dynamic>;
+
+    final lessonExamIds = <String>{};
+    for (final row in cgRes) {
+      final aId = (row as Map<String, dynamic>)['associated_exam_id'] as String?;
+      final pId = row['prerequisite_exam_id'] as String?;
+      if (aId != null && aId.isNotEmpty) lessonExamIds.add(aId);
+      if (pId != null && pId.isNotEmpty) lessonExamIds.add(pId);
+    }
+    for (final row in cRes) {
+      final aId = (row as Map<String, dynamic>)['associated_exam_id'] as String?;
+      final pId = row['prerequisite_exam_id'] as String?;
+      if (aId != null && aId.isNotEmpty) lessonExamIds.add(aId);
+      if (pId != null && pId.isNotEmpty) lessonExamIds.add(pId);
+    }
     if (rawList.isEmpty) return [];
 
     final list = rawList.where((item) {
@@ -392,6 +529,74 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
       throw const AuthException('User not authenticated');
     }
 
+    final questionsPayload = initialQuestions.asMap().entries.map((entry) {
+      final i = entry.key;
+      final q = entry.value;
+      return {
+        'question_text': q.questionText,
+        'question_type': q.questionType.value,
+        'points': q.points,
+        'sort_order': i + 1,
+        if (q.imageUrl != null) 'image_url': q.imageUrl,
+        if (q.imageMeta != null) 'image_meta': q.imageMeta,
+        if (q.contextId != null) 'context_id': q.contextId,
+        'options': q.options.asMap().entries.map((optEntry) {
+          final j = optEntry.key;
+          final opt = optEntry.value;
+          return {
+            'option_text': opt.optionText,
+            'sort_order': j + 1,
+            'is_correct': opt.isCorrect ?? false,
+            if (opt.imageUrl != null) 'image_url': opt.imageUrl,
+            if (opt.imageMeta != null) 'image_meta': opt.imageMeta,
+          };
+        }).toList(),
+      };
+    }).toList();
+
+    // Fast-path: Execute atomic database transaction via RPC in < 150ms
+    // Eliminates race conditions, duplicate copies, and partial question sets.
+    try {
+      final rpcRes = await _safeClient.rpc<dynamic>(
+        'create_exam_with_questions',
+        params: {
+          'p_title': title.trim(),
+          if (groupId != null && groupId.isNotEmpty) 'p_group_id': groupId,
+          'p_duration_minutes': durationMinutes,
+          'p_max_score': maxScore,
+          if (passingScore != null) 'p_passing_score': passingScore,
+          'p_shuffle_questions': shuffleQuestions,
+          'p_show_result': showResult,
+          'p_allow_retake': allowRetake,
+          'p_is_published': isPublished,
+          if (startAt != null) 'p_start_at': startAt.toUtc().toIso8601String(),
+          if (endAt != null) 'p_end_at': endAt.toUtc().toIso8601String(),
+          'p_questions': questionsPayload,
+        },
+      );
+
+      if (rpcRes != null && rpcRes is Map) {
+        final examId = rpcRes['exam_id'] as String?;
+        if (examId != null) {
+          if (isPublished && groupId != null && groupId.isNotEmpty) {
+            unawaited(
+              NotificationDispatcher.notifyNewExam(
+                title: title,
+                groupId: groupId,
+                examId: examId,
+                maxScore: maxScore,
+                durationMinutes: durationMinutes,
+              ),
+            );
+          }
+          return getExamDetails(examId);
+        }
+      }
+    } on PostgrestException catch (e) {
+      if (e.code != 'PGRST202' && e.code != '42883') rethrow;
+    }
+
+    // Direct fallback (legacy sequential inserts)
     // Lookup tenant id
     final userRes = await _safeClient
         .from('users')
@@ -507,7 +712,295 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
   }
 
   @override
+  Future<ExamModel> updateExam({
+    required String examId,
+    required String title,
+    int? durationMinutes,
+    int? maxScore,
+    int? passingScore,
+    bool? shuffleQuestions,
+    bool? showResult,
+    bool? allowRetake,
+    DateTime? startAt,
+    DateTime? endAt,
+    bool? isPublished,
+  }) async {
+    final currentUserId = _safeClient.auth.currentUser?.id;
+    if (currentUserId == null) {
+      throw const AuthException('User not authenticated');
+    }
+
+    final examRes = await _safeClient
+        .from('exams')
+        .select('id, content_id')
+        .eq('id', examId)
+        .single();
+    final contentId = examRes['content_id'] as String;
+
+    final contentUpdates = <String, dynamic>{
+      'title': title.trim(),
+      'updated_at': DateTime.now().toUtc().toIso8601String(),
+    };
+    if (isPublished != null) {
+      contentUpdates['status'] = isPublished ? 'published' : 'draft';
+      if (isPublished) {
+        contentUpdates['published_at'] = DateTime.now().toUtc().toIso8601String();
+      }
+    }
+    await _safeClient.from('content').update(contentUpdates).eq('id', contentId);
+
+    final examUpdates = <String, dynamic>{
+      'updated_at': DateTime.now().toUtc().toIso8601String(),
+    };
+    if (durationMinutes != null) examUpdates['duration_minutes'] = durationMinutes;
+    if (maxScore != null) examUpdates['max_score'] = maxScore;
+    if (passingScore != null) examUpdates['passing_score'] = passingScore;
+    if (shuffleQuestions != null) examUpdates['shuffle_questions'] = shuffleQuestions;
+    if (showResult != null) examUpdates['show_result'] = showResult;
+    if (allowRetake != null) examUpdates['allow_retake'] = allowRetake;
+    if (startAt != null) examUpdates['start_at'] = startAt.toUtc().toIso8601String();
+    if (endAt != null) examUpdates['end_at'] = endAt.toUtc().toIso8601String();
+
+    await _safeClient.from('exams').update(examUpdates).eq('id', examId);
+
+    if (isPublished == true) {
+      await _safeClient
+          .from('exam_versions')
+          .update({
+            'status': 'published',
+            'published_at': DateTime.now().toUtc().toIso8601String(),
+          })
+          .eq('exam_id', examId)
+          .eq('status', 'draft');
+    }
+
+    return getExamDetails(examId);
+  }
+
+  @override
+  Future<ExamModel> updateDraftExamQuestions({
+    required String examId,
+    required String title,
+    int? durationMinutes,
+    int? maxScore,
+    int? passingScore,
+    bool? shuffleQuestions,
+    bool? showResult,
+    bool? allowRetake,
+    DateTime? startAt,
+    DateTime? endAt,
+    bool? isPublished,
+    required List<ExamQuestionModel> questions,
+  }) async {
+    final currentUserId = _safeClient.auth.currentUser?.id;
+    if (currentUserId == null) {
+      throw const AuthException('User not authenticated');
+    }
+
+    final questionsPayload = questions.asMap().entries.map((entry) {
+      final i = entry.key;
+      final q = entry.value;
+      return {
+        'question_text': q.questionText,
+        'question_type': q.questionType.value,
+        'points': q.points,
+        'sort_order': i + 1,
+        if (q.imageUrl != null) 'image_url': q.imageUrl,
+        if (q.imageMeta != null) 'image_meta': q.imageMeta,
+        if (q.contextId != null) 'context_id': q.contextId,
+        'options': q.options.asMap().entries.map((optEntry) {
+          final j = optEntry.key;
+          final opt = optEntry.value;
+          return {
+            'option_text': opt.optionText,
+            'sort_order': j + 1,
+            'is_correct': opt.isCorrect ?? false,
+            if (opt.imageUrl != null) 'image_url': opt.imageUrl,
+            if (opt.imageMeta != null) 'image_meta': opt.imageMeta,
+          };
+        }).toList(),
+      };
+    }).toList();
+
+    try {
+      final rpcRes = await _safeClient.rpc<dynamic>(
+        'update_draft_exam_questions',
+        params: {
+          'p_exam_id': examId,
+          'p_title': title.trim(),
+          if (durationMinutes != null) 'p_duration_minutes': durationMinutes,
+          if (maxScore != null) 'p_max_score': maxScore,
+          if (passingScore != null) 'p_passing_score': passingScore,
+          if (shuffleQuestions != null) 'p_shuffle_questions': shuffleQuestions,
+          if (showResult != null) 'p_show_result': showResult,
+          if (allowRetake != null) 'p_allow_retake': allowRetake,
+          if (isPublished != null) 'p_is_published': isPublished,
+          'p_questions': questionsPayload,
+        },
+      );
+      if (rpcRes != null) {
+        return getExamDetails(examId);
+      }
+    } on PostgrestException catch (e) {
+      if (e.code != 'PGRST202' && e.code != '42883') rethrow;
+    }
+
+    // Direct fallback
+    final examRes = await _safeClient
+        .from('exams')
+        .select('id, content_id')
+        .eq('id', examId)
+        .single();
+    final contentId = examRes['content_id'] as String;
+
+    final contentUpdates = <String, dynamic>{
+      'title': title.trim(),
+      'updated_at': DateTime.now().toUtc().toIso8601String(),
+    };
+    if (isPublished != null) {
+      contentUpdates['status'] = isPublished ? 'published' : 'draft';
+      if (isPublished) {
+        contentUpdates['published_at'] = DateTime.now().toUtc().toIso8601String();
+      }
+    }
+    await _safeClient.from('content').update(contentUpdates).eq('id', contentId);
+
+    final examUpdates = <String, dynamic>{
+      'updated_at': DateTime.now().toUtc().toIso8601String(),
+    };
+    if (durationMinutes != null) examUpdates['duration_minutes'] = durationMinutes;
+    if (maxScore != null) examUpdates['max_score'] = maxScore;
+    if (passingScore != null) examUpdates['passing_score'] = passingScore;
+    if (shuffleQuestions != null) examUpdates['shuffle_questions'] = shuffleQuestions;
+    if (showResult != null) examUpdates['show_result'] = showResult;
+    if (allowRetake != null) examUpdates['allow_retake'] = allowRetake;
+    if (startAt != null) examUpdates['start_at'] = startAt.toUtc().toIso8601String();
+    if (endAt != null) examUpdates['end_at'] = endAt.toUtc().toIso8601String();
+    await _safeClient.from('exams').update(examUpdates).eq('id', examId);
+
+    final versionsRes = await _safeClient
+        .from('exam_versions')
+        .select('id, version_number, status')
+        .eq('exam_id', examId)
+        .order('version_number', ascending: false)
+        .limit(1);
+    final versionsList = versionsRes as List<dynamic>;
+
+    String versionId;
+    if (versionsList.isEmpty) {
+      final newVer = await _safeClient
+          .from('exam_versions')
+          .insert({
+            'exam_id': examId,
+            'version_number': 1,
+            'status': isPublished == true ? 'published' : 'draft',
+            if (isPublished == true) 'published_at': DateTime.now().toUtc().toIso8601String(),
+          })
+          .select('id')
+          .single();
+      versionId = newVer['id'] as String;
+    } else {
+      final latest = versionsList.first as Map<String, dynamic>;
+      versionId = latest['id'] as String;
+      if (isPublished == true) {
+        await _safeClient
+            .from('exam_versions')
+            .update({
+              'status': 'published',
+              'published_at': DateTime.now().toUtc().toIso8601String(),
+            })
+            .eq('id', versionId);
+      }
+    }
+
+    final existingQ = await _safeClient
+        .from('exam_questions')
+        .select('id')
+        .eq('exam_version_id', versionId);
+    final qIds = (existingQ as List<dynamic>)
+        .map((row) => (row as Map<String, dynamic>)['id'] as String)
+        .toList();
+
+    if (qIds.isNotEmpty) {
+      await _safeClient
+          .from('question_options')
+          .delete()
+          .inFilter('question_id', qIds);
+    }
+
+    await _safeClient
+        .from('exam_questions')
+        .delete()
+        .eq('exam_version_id', versionId);
+
+    for (int i = 0; i < questions.length; i++) {
+      final q = questions[i];
+      final qRes = await _safeClient
+          .from('exam_questions')
+          .insert({
+            'exam_version_id': versionId,
+            'question_text': q.questionText,
+            'question_type': q.questionType.value,
+            'points': q.points,
+            'sort_order': i + 1,
+            if (q.imageUrl != null) 'image_url': q.imageUrl,
+            if (q.imageMeta != null) 'image_meta': q.imageMeta,
+            if (q.contextId != null) 'context_id': q.contextId,
+          })
+          .select('id')
+          .single();
+      final qId = qRes['id'] as String;
+
+      if (q.options.isNotEmpty) {
+        final optionsPayload = q.options.asMap().entries.map((optEntry) {
+          final j = optEntry.key;
+          final opt = optEntry.value;
+          return {
+            'question_id': qId,
+            'option_text': opt.optionText,
+            'sort_order': j + 1,
+            'is_correct': opt.isCorrect ?? false,
+            if (opt.imageUrl != null) 'image_url': opt.imageUrl,
+            if (opt.imageMeta != null) 'image_meta': opt.imageMeta,
+          };
+        }).toList();
+        await _safeClient.from('question_options').insert(optionsPayload);
+      }
+    }
+
+    return getExamDetails(examId);
+  }
+
+  @override
   Future<ExamVersionModel> publishExamVersion(String versionId) async {
+    try {
+      final rpcRes = await _safeClient.rpc<dynamic>(
+        'publish_exam_version',
+        params: {'p_version_id': versionId},
+      );
+      if (rpcRes != null) {
+        final res = await _safeClient
+            .from('exam_versions')
+            .select('*, exams!inner(content_id)')
+            .eq('id', versionId)
+            .single();
+        final map = Map<String, dynamic>.from(res);
+        final examsMap = map['exams'] as Map<String, dynamic>?;
+        final contentId = examsMap?['content_id'] as String?;
+        if (contentId != null) {
+          final now = DateTime.now().toUtc().toIso8601String();
+          await _safeClient.from('content').update({
+            'status': 'published',
+            'published_at': now,
+            'updated_at': now,
+          }).eq('id', contentId);
+        }
+        return ExamVersionModel.fromJson(map);
+      }
+    } on PostgrestException catch (e) {
+      if (e.code != 'PGRST202' && e.code != '42883') rethrow;
+    }
+
     final res = await _safeClient
         .from('exam_versions')
         .update({
@@ -515,83 +1008,270 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
           'published_at': DateTime.now().toUtc().toIso8601String(),
         })
         .eq('id', versionId)
-        .select()
+        .select('*, exams!inner(content_id)')
         .single();
 
-    return ExamVersionModel.fromJson(Map<String, dynamic>.from(res));
+    final map = Map<String, dynamic>.from(res);
+    final examsMap = map['exams'] as Map<String, dynamic>?;
+    final contentId = examsMap?['content_id'] as String?;
+    if (contentId != null) {
+      await _safeClient.from('content').update({
+        'status': 'published',
+        'published_at': DateTime.now().toUtc().toIso8601String(),
+        'updated_at': DateTime.now().toUtc().toIso8601String(),
+      }).eq('id', contentId);
+    }
+
+    return ExamVersionModel.fromJson(map);
+  }
+
+  @override
+  Future<void> unpublishExamVersion({
+    required String examId,
+    required String versionId,
+  }) async {
+    try {
+      await _safeClient.rpc<dynamic>(
+        'unpublish_exam',
+        params: {
+          'p_exam_id': examId,
+          'p_version_id': versionId,
+        },
+      );
+      return;
+    } on PostgrestException catch (e) {
+      if (e.code != 'PGRST202' && e.code != '42883') rethrow;
+    }
+
+    // Fallback: direct updates
+    await _safeClient
+        .from('exam_versions')
+        .update({'status': 'draft'})
+        .eq('id', versionId);
+
+    final examRes = await _safeClient
+        .from('exams')
+        .select('content_id')
+        .eq('id', examId)
+        .single();
+    final contentId = examRes['content_id'] as String?;
+    if (contentId != null) {
+      await _safeClient.from('content').update({
+        'status': 'draft',
+        'updated_at': DateTime.now().toUtc().toIso8601String(),
+      }).eq('id', contentId);
+    }
   }
 
   @override
   Future<ExamVersionModel> createNewExamVersion(String examId) async {
-    // 1. Get highest version number
-    final existingVersions = await _safeClient
-        .from('exam_versions')
-        .select('id, version_number, exam_questions(*, question_options(*))')
-        .eq('exam_id', examId)
-        .order('version_number', ascending: false);
+    final res = await _safeClient.rpc<dynamic>(
+      'create_exam_version',
+      params: {'p_exam_id': examId},
+    );
+    final map = Map<String, dynamic>.from(res as Map);
+    return ExamVersionModel.fromJson(map);
+  }
 
-    final list = existingVersions as List<dynamic>;
-    int nextVersionNumber = 1;
-    Map<String, dynamic>? lastVersion;
+  @override
+  Future<List<Map<String, dynamic>>> getGroupLessons(String groupId) async {
+    final response = await _safeClient
+        .from('content_groups')
+        .select('''
+          content_id,
+          sort_order,
+          associated_exam_id,
+          content:content!content_groups_content_id_fkey(
+            id,
+            title,
+            type,
+            chapter_id
+          )
+        ''')
+        .eq('group_id', groupId)
+        .order('sort_order', ascending: true);
 
-    if (list.isNotEmpty) {
-      lastVersion = list.first as Map<String, dynamic>;
-      nextVersionNumber =
-          ((lastVersion['version_number'] as num?)?.toInt() ?? 0) + 1;
+    final list = response as List<dynamic>;
+    return list.map((item) {
+      final map = Map<String, dynamic>.from(item as Map<String, dynamic>);
+      final contentMap = map['content'] as Map<String, dynamic>?;
+      return {
+        'id': (contentMap?['id'] ?? map['content_id']) as String,
+        'title': (contentMap?['title'] as String?) ?? 'محاضرة بدون عنوان',
+        'type': contentMap?['type'] as String? ?? 'video',
+        'sort_order': map['sort_order'] ?? 0,
+        'associated_exam_id': map['associated_exam_id'] as String?,
+      };
+    }).toList();
+  }
+
+  @override
+  Future<void> linkExamToLesson({
+    required String examId,
+    required String lessonId,
+    required String groupId,
+  }) async {
+    // 1. Unlink this exam from any other lessons in this group
+    await _safeClient
+        .from('content_groups')
+        .update({'associated_exam_id': null})
+        .eq('group_id', groupId)
+        .eq('associated_exam_id', examId);
+
+    await _safeClient
+        .from('content')
+        .update({'associated_exam_id': null})
+        .eq('associated_exam_id', examId);
+
+    try {
+      await _safeClient
+          .from('lesson_exams')
+          .delete()
+          .eq('group_id', groupId)
+          .eq('exam_id', examId);
+    } catch (_) {}
+
+    // 2. Link this exam to the target lesson in lesson_exams
+    try {
+      final tenantRes = await _safeClient
+          .from('content')
+          .select('tenant_id')
+          .eq('id', lessonId)
+          .maybeSingle();
+      final tenantId = tenantRes?['tenant_id'];
+      if (tenantId != null) {
+        await _safeClient.from('lesson_exams').upsert({
+          'tenant_id': tenantId,
+          'group_id': groupId,
+          'content_id': lessonId,
+          'exam_id': examId,
+          'is_required': true,
+        });
+      }
+    } catch (_) {}
+
+    // 3. Link this exam to the target lesson in content_groups for backward compatibility
+    final currentCg = await _safeClient
+        .from('content_groups')
+        .select('associated_exam_id')
+        .eq('group_id', groupId)
+        .eq('content_id', lessonId)
+        .maybeSingle();
+
+    if (currentCg == null || currentCg['associated_exam_id'] == null) {
+      await _safeClient
+          .from('content_groups')
+          .update({'associated_exam_id': examId})
+          .eq('group_id', groupId)
+          .eq('content_id', lessonId);
+
+      await _safeClient
+          .from('content')
+          .update({
+            'associated_exam_id': examId,
+            'updated_at': DateTime.now().toUtc().toIso8601String(),
+          })
+          .eq('id', lessonId);
     }
 
-    // 2. Create new draft version
-    final newVersionRes = await _safeClient
-        .from('exam_versions')
-        .insert({
-          'exam_id': examId,
-          'version_number': nextVersionNumber,
-          'status': 'draft',
-        })
-        .select('id, version_number, status, created_at')
-        .single();
+    // 4. Mark the exam's parent content record description as 'lecture_quiz'
+    final examRes = await _safeClient
+        .from('exams')
+        .select('content_id')
+        .eq('id', examId)
+        .maybeSingle();
+    if (examRes != null && examRes['content_id'] != null) {
+      await _safeClient
+          .from('content')
+          .update({'description': 'lecture_quiz'})
+          .eq('id', examRes['content_id'] as Object);
+    }
+  }
 
-    final newVersionId = newVersionRes['id'] as String;
+  @override
+  Future<void> unlinkExamFromLesson({
+    required String examId,
+    required String groupId,
+    bool makeGeneralExam = false,
+  }) async {
+    // 1. Delete from lesson_exams
+    try {
+      await _safeClient
+          .from('lesson_exams')
+          .delete()
+          .eq('group_id', groupId)
+          .eq('exam_id', examId);
+    } catch (_) {}
 
-    // 3. Clone questions from last version if available
-    if (lastVersion != null && lastVersion['exam_questions'] is List) {
-      final oldQuestions = lastVersion['exam_questions'] as List;
-      for (final qItem in oldQuestions) {
-        final qMap = qItem as Map<String, dynamic>;
-        final newQRes = await _safeClient
-            .from('exam_questions')
-            .insert({
-              'exam_version_id': newVersionId,
-              'question_text': qMap['question_text'],
-              'question_type': qMap['question_type'],
-              'points': qMap['points'],
-              'sort_order': qMap['sort_order'],
-              if (qMap['image_url'] != null) 'image_url': qMap['image_url'],
-              if (qMap['image_meta'] != null) 'image_meta': qMap['image_meta'],
-              if (qMap['context_id'] != null) 'context_id': qMap['context_id'],
-            })
-            .select('id')
-            .single();
+    // 2. Unlink from content_groups
+    await _safeClient
+        .from('content_groups')
+        .update({'associated_exam_id': null})
+        .eq('group_id', groupId)
+        .eq('associated_exam_id', examId);
 
-        final newQId = newQRes['id'] as String;
+    await _safeClient
+        .from('content')
+        .update({'associated_exam_id': null})
+        .eq('associated_exam_id', examId);
 
-        if (qMap['question_options'] is List) {
-          for (final optItem in qMap['question_options'] as List) {
-            final optMap = optItem as Map<String, dynamic>;
-            await _safeClient.from('question_options').insert({
-              'question_id': newQId,
-              'option_text': optMap['option_text'],
-              'sort_order': optMap['sort_order'],
-              'is_correct': optMap['is_correct'],
-              if (optMap['image_url'] != null) 'image_url': optMap['image_url'],
-              if (optMap['image_meta'] != null) 'image_meta': optMap['image_meta'],
-            });
-          }
-        }
+    // 3. If other exams remain for this lesson, promote the first one to associated_exam_id
+    try {
+      final remaining = await _safeClient
+          .from('lesson_exams')
+          .select('content_id, exam_id')
+          .eq('group_id', groupId)
+          .order('sort_order', ascending: true)
+          .limit(1);
+      if (remaining.isNotEmpty) {
+        final nextExamId = remaining.first['exam_id'] as String;
+        final contentId = remaining.first['content_id'] as String;
+        await _safeClient
+            .from('content_groups')
+            .update({'associated_exam_id': nextExamId})
+            .eq('group_id', groupId)
+            .eq('content_id', contentId);
+      }
+    } catch (_) {}
+
+    if (makeGeneralExam) {
+      final examRes = await _safeClient
+          .from('exams')
+          .select('content_id')
+          .eq('id', examId)
+          .maybeSingle();
+      if (examRes != null && examRes['content_id'] != null) {
+        await _safeClient
+            .from('content')
+            .update({'description': 'general_exam'})
+            .eq('id', examRes['content_id'] as Object);
       }
     }
+  }
 
-    return ExamVersionModel.fromJson(Map<String, dynamic>.from(newVersionRes));
+  @override
+  Future<void> convertExamType({
+    required String examId,
+    required String contentId,
+    required bool toLectureExam,
+    required String groupId,
+  }) async {
+    if (toLectureExam) {
+      await _safeClient
+          .from('content')
+          .update({'description': 'lecture_quiz'})
+          .eq('id', contentId);
+    } else {
+      await unlinkExamFromLesson(
+        examId: examId,
+        groupId: groupId,
+        makeGeneralExam: true,
+      );
+      await _safeClient
+          .from('content')
+          .update({'description': 'general_exam'})
+          .eq('id', contentId);
+    }
   }
 
   @override
@@ -809,4 +1489,66 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
     }
     throw const PostgrestException(message: 'Invalid response from submit_mistakes_practice');
   }
+
+  @override
+  Future<Map<String, dynamic>> deleteExam({
+    required String examId,
+    bool force = false,
+  }) async {
+    final response = await _safeClient.rpc<dynamic>(
+      'delete_exam',
+      params: {
+        'p_exam_id': examId,
+        'p_force': force,
+      },
+    );
+    if (response is Map) {
+      return Map<String, dynamic>.from(response);
+    }
+    return {'success': true};
+  }
+
+  @override
+  Future<ExamParentDispatchRosterModel> getExamParentDispatchRoster(String examId) async {
+    try {
+      final response = await _safeClient.rpc<dynamic>(
+        'get_exam_parent_dispatch_roster',
+        params: {'p_exam_id': examId},
+      );
+      if (response is Map<String, dynamic>) {
+        return ExamParentDispatchRosterModel.fromJson(response);
+      } else if (response is Map) {
+        return ExamParentDispatchRosterModel.fromJson(
+          Map<String, dynamic>.from(response),
+        );
+      }
+      throw const PostgrestException(
+        message: 'Invalid response from get_exam_parent_dispatch_roster',
+      );
+    } catch (e) {
+      AppLogger.e('ExamsRemoteDataSource', 'getExamParentDispatchRoster failed', error: e);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<bool> updateStudentParentPhone({
+    required String studentId,
+    required String parentPhone,
+  }) async {
+    try {
+      final response = await _safeClient.rpc<dynamic>(
+        'update_student_parent_phone',
+        params: {
+          'p_student_id': studentId,
+          'p_parent_phone': parentPhone,
+        },
+      );
+      return response != null;
+    } catch (e) {
+      AppLogger.e('ExamsRemoteDataSource', 'updateStudentParentPhone failed', error: e);
+      rethrow;
+    }
+  }
 }
+

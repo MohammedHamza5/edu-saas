@@ -3,8 +3,10 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart' as dio;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/network/supabase_service.dart';
+import '../../../../core/utils/app_logger.dart';
 import '../../../../core/utils/group_slug_resolver.dart';
 import '../../../notifications/domain/services/notification_dispatcher.dart';
+import '../../domain/entities/attached_lesson_exam_entity.dart';
 import '../../domain/entities/chapter_entity.dart';
 import '../../domain/entities/content_entity.dart';
 import '../models/content_model.dart';
@@ -250,6 +252,33 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
         .order('created_at', ascending: true)
         .range(page * pageSize, (page + 1) * pageSize - 1);
 
+    // Fetch attached exams from lesson_exams junction
+    final Map<String, List<AttachedLessonExamEntity>> lessonExamsMap = {};
+    try {
+      final lessonExamsRes = await _safeClient
+          .from('lesson_exams')
+          .select('content_id, exam_id, sort_order, is_required, exams(id, title, passing_score)')
+          .eq('group_id', resolvedGroupId)
+          .order('sort_order', ascending: true);
+
+      for (final row in (lessonExamsRes as List<dynamic>)) {
+        final cId = row['content_id'] as String?;
+        final examObj = row['exams'] as Map<String, dynamic>?;
+        if (cId != null && examObj != null) {
+          final item = AttachedLessonExamEntity(
+            examId: row['exam_id'] as String? ?? examObj['id'] as String? ?? '',
+            examTitle: examObj['title'] as String? ?? '',
+            sortOrder: (row['sort_order'] as num?)?.toInt() ?? 0,
+            isRequired: row['is_required'] as bool? ?? true,
+            passingScore: (examObj['passing_score'] as num?)?.toInt() ?? 60,
+          );
+          lessonExamsMap.putIfAbsent(cId, () => []).add(item);
+        }
+      }
+    } catch (e) {
+      AppLogger.w('ContentRemoteDataSource', 'Could not fetch lesson_exams: $e');
+    }
+
     final list = response as List<dynamic>;
     final models = list
         .map((json) => ContentModel.fromJson(json as Map<String, dynamic>))
@@ -328,11 +357,24 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
           }
         }
 
+        List<AttachedLessonExamEntity> attached = lessonExamsMap[m.id] ?? const [];
+        if (attached.isEmpty && assocExamId != null) {
+          attached = [
+            AttachedLessonExamEntity(
+              examId: assocExamId,
+              examTitle: assocExamTitle ?? '',
+              sortOrder: 0,
+              isRequired: true,
+            ),
+          ];
+        }
+
         models[i] = m.copyWith(
           title: title,
           file: customFile,
           associatedExamId: assocExamId,
           associatedExamTitle: assocExamTitle,
+          attachedExams: attached,
           prerequisiteExamId: prereqExamId,
           prerequisiteExamTitle: prereqExamTitle,
           prerequisitePassingScore: prereqPassingScore,
@@ -342,6 +384,8 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
           chapterTitle: chapterTitle,
           chapterSortOrder: chapterSortOrder,
         );
+      } else if (lessonExamsMap.containsKey(m.id)) {
+        models[i] = m.copyWith(attachedExams: lessonExamsMap[m.id]);
       }
     }
 

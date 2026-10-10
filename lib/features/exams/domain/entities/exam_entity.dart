@@ -506,6 +506,9 @@ class ExamEntity extends Equatable {
   final int attemptsCount;
   final ExamAttemptEntity? myLatestAttempt;
   final int? myBestScore;
+  final bool isLectureExam;
+  final String? linkedLessonId;
+  final String? linkedLessonTitle;
 
   const ExamEntity({
     required this.id,
@@ -528,6 +531,9 @@ class ExamEntity extends Equatable {
     this.attemptsCount = 0,
     this.myLatestAttempt,
     this.myBestScore,
+    this.isLectureExam = false,
+    this.linkedLessonId,
+    this.linkedLessonTitle,
   });
 
   bool get hasAttempted => myLatestAttempt != null;
@@ -551,6 +557,10 @@ class ExamEntity extends Equatable {
   }
 
   bool get isPublished => activeVersion?.isPublished ?? (activeVersion != null);
+  bool get isDraft => !isPublished;
+  bool get canEditQuestions => isDraft && attemptsCount == 0;
+  bool get isLinkedToLesson => linkedLessonId != null && linkedLessonId!.isNotEmpty;
+  bool get isGeneralExam => !isLectureExam;
   String? get description => null;
 
   ExamEntity copyWith({
@@ -574,6 +584,9 @@ class ExamEntity extends Equatable {
     int? attemptsCount,
     ExamAttemptEntity? myLatestAttempt,
     int? myBestScore,
+    bool? isLectureExam,
+    String? linkedLessonId,
+    String? linkedLessonTitle,
   }) {
     return ExamEntity(
       id: id ?? this.id,
@@ -596,6 +609,9 @@ class ExamEntity extends Equatable {
       attemptsCount: attemptsCount ?? this.attemptsCount,
       myLatestAttempt: myLatestAttempt ?? this.myLatestAttempt,
       myBestScore: myBestScore ?? this.myBestScore,
+      isLectureExam: isLectureExam ?? this.isLectureExam,
+      linkedLessonId: linkedLessonId ?? this.linkedLessonId,
+      linkedLessonTitle: linkedLessonTitle ?? this.linkedLessonTitle,
     );
   }
 
@@ -621,5 +637,8 @@ class ExamEntity extends Equatable {
     attemptsCount,
     myLatestAttempt,
     myBestScore,
+    isLectureExam,
+    linkedLessonId,
+    linkedLessonTitle,
   ];
 }

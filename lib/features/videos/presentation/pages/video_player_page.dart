@@ -18,6 +18,7 @@ import '../../../../core/widgets/app_loading_view.dart';
 import '../../../../core/widgets/responsive_container.dart';
 import '../../../auth/presentation/cubit/auth_cubit.dart';
 import '../../../auth/presentation/cubit/auth_state.dart';
+import '../../../content/domain/entities/attached_lesson_exam_entity.dart';
 import '../../../content/domain/entities/content_entity.dart';
 import '../../../content/domain/entities/file_attachment_entity.dart';
 import '../../../content/domain/entities/lesson_assignment_entity.dart';
@@ -85,13 +86,39 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   /// حالة ما بعد اكتمال الفيديو
   bool _videoCompletedLocally = false;
 
-  /// بيانات الدرس الخاصة بالمجموعة (PDF + Exam من content_groups)
+  /// بيانات الدرس الخاصة بالمجموعة (PDF + Exam من content_groups / lesson_exams)
   String? _groupPdfStoragePath;
   String? _groupPdfFileName;
   String? _groupExamId;
   String? _groupExamTitle;
   ExamEntity? _lessonExam;
   List<LessonAssignmentEntity> _courseLessons = [];
+  List<AttachedLessonExamEntity> _attachedExams = [];
+  final Map<String, ExamEntity> _attachedExamDetails = {};
+
+  List<AttachedLessonExamEntity> get _effectiveAttachedExams {
+    if (_attachedExams.isNotEmpty) return _attachedExams;
+    final legacyId = _groupExamId ?? widget.associatedExamId;
+    if (legacyId != null && legacyId.isNotEmpty) {
+      return [
+        AttachedLessonExamEntity(
+          examId: legacyId,
+          examTitle: _lessonExam?.title ??
+              _groupExamTitle ??
+              widget.associatedExamTitle ??
+              '',
+          isRequired: true,
+          sortOrder: 0,
+          isPassed: _lessonExam?.myLatestAttempt
+                  ?.isPassed(_lessonExam?.passingScore ?? 60) ??
+              false,
+          bestScore: _lessonExam?.myLatestAttempt?.score?.toDouble(),
+          passingScore: _lessonExam?.passingScore ?? 60,
+        ),
+      ];
+    }
+    return const [];
+  }
 
   @override
   void initState() {
@@ -126,9 +153,18 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
         if (lessonsResult.isSuccess &&
             lessonsResult.dataOrNull != null &&
             mounted) {
+          final loadedLessons = lessonsResult.dataOrNull!;
           setState(() {
-            _courseLessons = lessonsResult.dataOrNull!;
+            _courseLessons = loadedLessons;
           });
+          final current = loadedLessons
+              .where((l) => l.contentId == widget.videoId)
+              .firstOrNull;
+          if (current != null && current.attachedExams.isNotEmpty) {
+            setState(() {
+              _attachedExams = current.attachedExams;
+            });
+          }
         }
       }
 
@@ -146,21 +182,41 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
               final examTitle =
                   ctx['lesson_exam_title'] as String? ??
                   widget.associatedExamTitle;
+              final rawAttached = ctx['attached_exams'] as List<dynamic>?;
+              final parsedAttached = rawAttached != null
+                  ? rawAttached
+                      .map((e) => AttachedLessonExamEntity.fromJson(
+                            e as Map<String, dynamic>,
+                          ))
+                      .toList()
+                  : <AttachedLessonExamEntity>[];
+
               setState(() {
                 _groupPdfStoragePath = ctx['pdf_storage_path'] as String?;
                 _groupPdfFileName = ctx['pdf_file_name'] as String?;
                 _groupExamId = examId;
                 _groupExamTitle = examTitle;
+                if (parsedAttached.isNotEmpty) {
+                  _attachedExams = parsedAttached;
+                }
               });
-              if (examId != null && examId.isNotEmpty) {
-                InjectionContainer.examsRepository.getExamDetails(examId).then((
+
+              final examsToFetch = _effectiveAttachedExams.isNotEmpty
+                  ? _effectiveAttachedExams.map((e) => e.examId).toList()
+                  : (examId != null && examId.isNotEmpty ? [examId] : <String>[]);
+
+              for (final eId in examsToFetch) {
+                InjectionContainer.examsRepository.getExamDetails(eId).then((
                   examResult,
                 ) {
                   if (examResult.isSuccess &&
                       examResult.dataOrNull != null &&
                       mounted) {
                     setState(() {
-                      _lessonExam = examResult.dataOrNull;
+                      _attachedExamDetails[eId] = examResult.dataOrNull!;
+                      if (eId == examId || _lessonExam == null) {
+                        _lessonExam = examResult.dataOrNull!;
+                      }
                     });
                   }
                 });
@@ -173,8 +229,10 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
         final examResult = await InjectionContainer.examsRepository
             .getExamDetails(widget.associatedExamId!);
         if (examResult.isSuccess && examResult.dataOrNull != null && mounted) {
+          final ex = examResult.dataOrNull!;
           setState(() {
-            _lessonExam = examResult.dataOrNull;
+            _lessonExam = ex;
+            _attachedExamDetails[ex.id] = ex;
           });
         }
       }
@@ -987,8 +1045,10 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                       contentId: video.contentId,
                     );
                     // عرض قسم الاختبار مباشرة في الصفحة
-                    final examId = _groupExamId ?? widget.associatedExamId;
-                    if (examId != null && mounted) {
+                    if ((_groupExamId != null ||
+                            widget.associatedExamId != null ||
+                            _effectiveAttachedExams.isNotEmpty) &&
+                        mounted) {
                       setState(() => _videoCompletedLocally = true);
                     }
                   }
@@ -1045,10 +1105,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                                       isCompleted,
                                     ),
                                     const SizedBox(height: AppSpacing.s16),
-                                    if ((_groupExamId ??
-                                            widget.associatedExamId) !=
-                                        null) ...[
-                                      _buildAssociatedExamCard(
+                                    if (_effectiveAttachedExams.isNotEmpty) ...[
+                                      _buildAssociatedExamsSection(
                                         theme,
                                         isCompleted,
                                       ),
@@ -1081,9 +1139,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                               isCompleted,
                             ),
                             const SizedBox(height: AppSpacing.s16),
-                            if ((_groupExamId ?? widget.associatedExamId) !=
-                                null) ...[
-                              _buildAssociatedExamCard(theme, isCompleted),
+                            if (_effectiveAttachedExams.isNotEmpty) ...[
+                              _buildAssociatedExamsSection(theme, isCompleted),
                               const SizedBox(height: AppSpacing.s16),
                             ],
                             _buildAttachedMaterialCard(theme, video),
@@ -1902,7 +1959,10 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     }
   }
 
-  Widget _buildAssociatedExamCard(ThemeData theme, bool isInitiallyCompleted) {
+  Widget _buildAssociatedExamsSection(
+    ThemeData theme,
+    bool isInitiallyCompleted,
+  ) {
     return AnimatedBuilder(
       animation: Listenable.merge([_livePositionSecs, _liveDurationSecs]),
       builder: (context, _) {
@@ -1918,26 +1978,27 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
             isInitiallyCompleted ||
             _videoCompletedLocally ||
             pct >= 90.0;
-        final exam = _lessonExam;
-        final actualExamTitle =
-            exam?.title ??
-            _groupExamTitle ??
-            widget.associatedExamTitle ??
-            context.l10n.associatedExamBadge;
-        final examId = exam?.id ?? _groupExamId ?? widget.associatedExamId;
 
-        // Determine quiz attempt state
-        final latestAttempt = exam?.myLatestAttempt;
-        final passingScore = exam?.passingScore ?? 60;
-        final isSubmitted = latestAttempt != null && latestAttempt.isSubmitted;
-        final isPassed = isSubmitted && latestAttempt.isPassed(passingScore);
-        final isFailed = isSubmitted && !isPassed;
-        final scorePct =
-            latestAttempt?.percentage?.toInt() ??
-            (latestAttempt?.score != null && (exam?.maxScore ?? 100) > 0
-                ? ((latestAttempt!.score! / (exam?.maxScore ?? 100)) * 100)
-                      .toInt()
-                : null);
+        final attachedList = _effectiveAttachedExams;
+        if (attachedList.isEmpty) return const SizedBox.shrink();
+
+        // Helper to check whether an attached exam is passed
+        bool checkIsPassed(AttachedLessonExamEntity e) {
+          final details = _attachedExamDetails[e.examId];
+          final passingScore = e.passingScore;
+          final attempt = details?.myLatestAttempt;
+          if (attempt != null && attempt.isSubmitted) {
+            return attempt.isPassed(passingScore);
+          }
+          return e.isPassed;
+        }
+
+        final requiredExams = attachedList.where((e) => e.isRequired).toList();
+        final totalRequired = requiredExams.length;
+        final passedRequiredCount =
+            requiredExams.where(checkIsPassed).length;
+        final allRequiredPassed =
+            totalRequired == 0 || passedRequiredCount == totalRequired;
 
         // Find next lesson if available
         LessonAssignmentEntity? nextLesson;
@@ -1952,16 +2013,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
           }
         }
 
-        Color themeColor;
-        if (isPassed) {
-          themeColor = AppColors.success;
-        } else if (isFailed) {
-          themeColor = AppColors.error;
-        } else if (isVideoCompleted) {
-          themeColor = AppColors.primary;
-        } else {
-          themeColor = AppColors.warning;
-        }
+        final Color headerColor = allRequiredPassed
+            ? AppColors.success
+            : (isVideoCompleted ? AppColors.primary : AppColors.warning);
 
         return AppCard(
           variant: AppCardVariant.elevated,
@@ -1969,26 +2023,44 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Header: Tag & Status Pill
+              // Header: Title & Overall Progress Pill
               Row(
                 children: [
                   Container(
                     width: 3,
-                    height: 18,
+                    height: 20,
                     decoration: BoxDecoration(
-                      color: themeColor,
+                      color: headerColor,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
                   const SizedBox(width: AppSpacing.s8),
                   Expanded(
-                    child: Text(
-                      context.l10n.lessonMaterialTitle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          context.l10n.attachedQuizzesSection,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        if (totalRequired > 1) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            context.l10n.requiredQuizzesCompletedProgress(
+                              passedRequiredCount,
+                              totalRequired,
+                            ),
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ),
                   Container(
@@ -1997,39 +2069,37 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                       vertical: 3,
                     ),
                     decoration: BoxDecoration(
-                      color: themeColor.withAlpha(20),
+                      color: headerColor.withAlpha(20),
                       borderRadius: BorderRadius.circular(
                         AppSpacing.radiusFull,
                       ),
-                      border: Border.all(color: themeColor.withAlpha(60)),
+                      border: Border.all(color: headerColor.withAlpha(60)),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          isPassed
+                          allRequiredPassed
                               ? Icons.check_circle_rounded
-                              : isFailed
-                              ? Icons.cancel_rounded
-                              : isVideoCompleted
-                              ? Icons.quiz_rounded
-                              : Icons.lock_outline_rounded,
+                              : (isVideoCompleted
+                                  ? Icons.quiz_rounded
+                                  : Icons.lock_outline_rounded),
                           size: 11,
-                          color: themeColor,
+                          color: headerColor,
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          isPassed
-                              ? 'COMPLETED'
-                              : isFailed
-                              ? 'FAILED'
-                              : isVideoCompleted
-                              ? 'QUIZ'
-                              : 'LOCKED',
+                          totalRequired > 1
+                              ? '$passedRequiredCount / $totalRequired'
+                              : (allRequiredPassed
+                                  ? 'COMPLETED'
+                                  : isVideoCompleted
+                                  ? 'QUIZ'
+                                  : 'LOCKED'),
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
-                            color: themeColor,
+                            color: headerColor,
                           ),
                         ),
                       ],
@@ -2039,57 +2109,19 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
               ),
               const SizedBox(height: 8),
 
-              // Title and Description based on state
-              if (isPassed) ...[
+              // Subtitle Banner
+              if (allRequiredPassed) ...[
                 Text(
-                  '🎉 ${context.l10n.lessonCompletedCongrats}',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.success,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  scorePct != null
-                      ? '${context.l10n.passedQuizNotice} (${context.l10n.examScoreLabel}: $scorePct% · ${context.l10n.passingScoreTitle}: $passingScore%)'
-                      : context.l10n.passedQuizNotice,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ] else if (isFailed) ...[
-                Text(
-                  context.l10n.quizNotPassedTitle,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.error,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  scorePct != null
-                      ? '${context.l10n.quizNotPassedDesc} (${context.l10n.examScoreLabel}: $scorePct% · ${context.l10n.passingScoreTitle}: $passingScore%)'
-                      : context.l10n.quizNotPassedDesc,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ] else if (isVideoCompleted) ...[
-                Text(
-                  '✓ ${context.l10n.videoCompletedTitle}',
+                  '🎉 ${context.l10n.allRequiredQuizzesPassedCongrats}',
                   style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
                     color: AppColors.success,
                   ),
                 ),
-                const SizedBox(height: 2),
+              ] else if (isVideoCompleted) ...[
                 Text(
-                  context.l10n.lessonQuizReadyDesc,
+                  context.l10n.attachedQuizzesSectionSubtitle,
                   style: const TextStyle(
                     fontSize: 11,
                     color: AppColors.textSecondary,
@@ -2107,103 +2139,287 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
 
               const SizedBox(height: AppSpacing.s12),
 
-              // Quiz detail box
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.s12),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceVariant.withAlpha(25),
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                  border: Border.all(color: themeColor.withAlpha(70)),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: themeColor.withAlpha(20),
-                        borderRadius: BorderRadius.circular(
-                          AppSpacing.radiusSmall,
-                        ),
-                      ),
-                      child: Icon(
-                        isPassed
-                            ? Icons.verified_rounded
-                            : isVideoCompleted
-                            ? Icons.quiz_rounded
-                            : Icons.lock_rounded,
-                        size: 22,
-                        color: themeColor,
-                      ),
+              // Vertical list of Quiz Cards
+              ...attachedList.map((attached) {
+                final examDetails = _attachedExamDetails[attached.examId];
+                final latestAttempt = examDetails?.myLatestAttempt;
+                final passingScore = attached.passingScore;
+                final isSubmitted =
+                    latestAttempt != null && latestAttempt.isSubmitted;
+                final isPassed =
+                    (isSubmitted && latestAttempt.isPassed(passingScore)) ||
+                    attached.isPassed;
+                final isFailed = isSubmitted && !isPassed;
+                final scorePct =
+                    latestAttempt?.percentage?.toInt() ??
+                    attached.bestScore?.toInt();
+                final questionsCount =
+                    examDetails?.activeVersion?.questions.length ?? 10;
+                final quizTitle = (examDetails?.title.isNotEmpty == true)
+                    ? examDetails!.title
+                    : (attached.examTitle.isNotEmpty
+                        ? attached.examTitle
+                        : context.l10n.associatedExamBadge);
+
+                Color itemColor;
+                if (isPassed) {
+                  itemColor = AppColors.success;
+                } else if (isFailed) {
+                  itemColor = AppColors.error;
+                } else if (isVideoCompleted) {
+                  itemColor = AppColors.primary;
+                } else {
+                  itemColor = AppColors.textMuted;
+                }
+
+                return Container(
+                  margin: const EdgeInsets.only(bottom: AppSpacing.s10),
+                  padding: const EdgeInsets.all(AppSpacing.s12),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceVariant.withAlpha(25),
+                    borderRadius: BorderRadius.circular(
+                      AppSpacing.radiusMedium,
                     ),
-                    const SizedBox(width: AppSpacing.s12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                    border: Border.all(color: itemColor.withAlpha(70)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
                         children: [
-                          Text(
-                            actualExamTitle,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimary,
+                          Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: itemColor.withAlpha(20),
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.radiusSmall,
+                              ),
+                            ),
+                            child: Icon(
+                              isPassed
+                                  ? Icons.verified_rounded
+                                  : isFailed
+                                  ? Icons.cancel_rounded
+                                  : isVideoCompleted
+                                  ? Icons.quiz_rounded
+                                  : Icons.lock_rounded,
+                              size: 20,
+                              color: itemColor,
                             ),
                           ),
-                          const SizedBox(height: 2),
-                          Text(
-                            '${exam?.activeVersion?.questions.length ?? 10} Questions · Passing Score: $passingScore%',
-                            style: const TextStyle(
-                              fontSize: 11,
-                              color: AppColors.textSecondary,
+                          const SizedBox(width: AppSpacing.s10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        quizTitle,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.textPrimary,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: attached.isRequired
+                                            ? AppColors.error.withAlpha(20)
+                                            : AppColors.primary.withAlpha(20),
+                                        borderRadius: BorderRadius.circular(
+                                          AppSpacing.radiusFull,
+                                        ),
+                                        border: Border.all(
+                                          color: attached.isRequired
+                                              ? AppColors.error.withAlpha(50)
+                                              : AppColors.primary.withAlpha(50),
+                                        ),
+                                      ),
+                                      child: Text(
+                                        attached.isRequired
+                                            ? context.l10n.requiredForProgression
+                                            : context.l10n.optionalPractice,
+                                        style: TextStyle(
+                                          fontSize: 9,
+                                          fontWeight: FontWeight.bold,
+                                          color: attached.isRequired
+                                              ? AppColors.error
+                                              : AppColors.primary,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 3),
+                                Row(
+                                  children: [
+                                    Text(
+                                      '$questionsCount ${context.l10n.questions} · ${context.l10n.passingScoreTitle}: $passingScore%',
+                                      style: const TextStyle(
+                                        fontSize: 10,
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                    if (scorePct != null) ...[
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        '· ${context.l10n.quizScoreBadge(scorePct)}',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w600,
+                                          color: isPassed
+                                              ? AppColors.success
+                                              : AppColors.error,
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ],
                             ),
                           ),
                         ],
                       ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: AppSpacing.s12),
-
-              // Action Buttons
-              if (isPassed) ...[
-                if (nextLesson != null) ...[
-                  Text(
-                    context.l10n.nextLessonLabel(nextLesson.title),
-                    style: const TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  ElevatedButton.icon(
-                    icon: const Icon(Icons.arrow_forward_rounded, size: 16),
-                    label: Text(context.l10n.continueToNextLessonAction),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        vertical: AppSpacing.s12,
-                        horizontal: AppSpacing.s16,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppSpacing.radiusMedium,
+                      const SizedBox(height: AppSpacing.s10),
+                      // Action button per quiz
+                      if (isPassed) ...[
+                        OutlinedButton.icon(
+                          icon: const Icon(Icons.refresh_rounded, size: 14),
+                          label: Text(
+                            context.l10n.retryLessonQuizAction,
+                            style: const TextStyle(fontSize: 11),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 6,
+                              horizontal: 12,
+                            ),
+                            minimumSize: const Size.fromHeight(32),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.radiusSmall,
+                              ),
+                            ),
+                          ),
+                          onPressed: () => _startLessonQuiz(attached.examId),
                         ),
+                      ] else if (isFailed) ...[
+                        ElevatedButton.icon(
+                          icon: const Icon(Icons.refresh_rounded, size: 14),
+                          label: Text(
+                            context.l10n.retryLessonQuizAction,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 6,
+                              horizontal: 12,
+                            ),
+                            minimumSize: const Size.fromHeight(32),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.radiusSmall,
+                              ),
+                            ),
+                          ),
+                          onPressed: () => _startLessonQuiz(attached.examId),
+                        ),
+                      ] else ...[
+                        ElevatedButton.icon(
+                          icon: Icon(
+                            isVideoCompleted
+                                ? Icons.play_arrow_rounded
+                                : Icons.lock_outline_rounded,
+                            size: 14,
+                          ),
+                          label: Text(
+                            isVideoCompleted
+                                ? context.l10n.takeLessonQuizAction
+                                : context.l10n.completeVideoToUnlockQuiz,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: isVideoCompleted
+                                ? AppColors.primary
+                                : AppColors.surfaceVariant,
+                            foregroundColor: isVideoCompleted
+                                ? Colors.white
+                                : AppColors.textMuted,
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 6,
+                              horizontal: 12,
+                            ),
+                            minimumSize: const Size.fromHeight(32),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.radiusSmall,
+                              ),
+                            ),
+                          ),
+                          onPressed: isVideoCompleted
+                              ? () => _startLessonQuiz(attached.examId)
+                              : null,
+                        ),
+                      ],
+                    ],
+                  ),
+                );
+              }),
+
+              // Sequential Next Lesson Navigation
+              if (allRequiredPassed && nextLesson != null) ...[
+                const SizedBox(height: AppSpacing.s6),
+                Text(
+                  context.l10n.nextLessonLabel(nextLesson.title),
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.arrow_forward_rounded, size: 16),
+                  label: Text(context.l10n.continueToNextLessonAction),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.s12,
+                      horizontal: AppSpacing.s16,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.radiusMedium,
                       ),
                     ),
-                    onPressed: () => _openLesson(
-                      nextLesson!,
-                      nextLessonIndex ?? 2,
-                      _courseLessons.length,
-                    ),
                   ),
-                  const SizedBox(height: 8),
-                ],
+                  onPressed: () => _openLesson(
+                    nextLesson!,
+                    nextLessonIndex ?? 2,
+                    _courseLessons.length,
+                  ),
+                ),
+                const SizedBox(height: 8),
                 OutlinedButton.icon(
                   icon: const Icon(Icons.replay_rounded, size: 16),
                   label: Text(context.l10n.reviewLessonAction),
@@ -2219,83 +2435,6 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                     ),
                   ),
                   onPressed: () => _seekTo?.call(0),
-                ),
-              ] else if (isFailed) ...[
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        icon: const Icon(
-                          Icons.play_circle_outline_rounded,
-                          size: 16,
-                        ),
-                        label: Text(
-                          context.l10n.reviewLessonAction,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        onPressed: () => _seekTo?.call(0),
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.s8),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        icon: const Icon(Icons.refresh_rounded, size: 16),
-                        label: Text(
-                          context.l10n.retryLessonQuizAction,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
-                        ),
-                        onPressed: examId != null
-                            ? () => _startLessonQuiz(examId)
-                            : null,
-                      ),
-                    ),
-                  ],
-                ),
-              ] else ...[
-                ElevatedButton.icon(
-                  icon: Icon(
-                    isVideoCompleted
-                        ? Icons.arrow_forward_rounded
-                        : Icons.lock_outline_rounded,
-                    size: 16,
-                  ),
-                  label: Text(
-                    isVideoCompleted
-                        ? context.l10n.takeLessonQuizAction
-                        : context.l10n.completeVideoToUnlockQuiz,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: isVideoCompleted
-                        ? AppColors.primary
-                        : AppColors.surfaceVariant,
-                    foregroundColor: isVideoCompleted
-                        ? Colors.white
-                        : AppColors.textMuted,
-                    padding: const EdgeInsets.symmetric(
-                      vertical: AppSpacing.s12,
-                      horizontal: AppSpacing.s16,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                        AppSpacing.radiusMedium,
-                      ),
-                    ),
-                  ),
-                  onPressed: (isVideoCompleted && examId != null)
-                      ? () => _startLessonQuiz(examId)
-                      : null,
                 ),
               ],
             ],

@@ -24,7 +24,10 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 //   SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY — auto-set by Supabase
 // ============================================================================
 
-const TOKEN_TTL_SECONDS = 4 * 60 * 60; // 4 hours
+// Short-lived token: 2 minutes only.
+// Even if a student extracts the signed URL from DevTools, it expires within
+// 120 seconds and cannot be replayed or shared externally.
+const TOKEN_TTL_SECONDS = 2 * 60; // 2 minutes
 
 // Allow requests from client apps and web origins
 function corsHeaders(origin: string | null): Record<string, string> {

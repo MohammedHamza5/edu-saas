@@ -30,7 +30,20 @@ import '../../../exams/presentation/cubit/exams_cubit.dart';
 /// 4. PDF Handout Attachment Card (view, upload, replace, remove).
 /// 5. Gatekeeper Quiz Card (linked exam, quick instant quiz creator, passing score).
 /// 6. Lecture Visibility Card (published vs draft switch).
-/// 7. Bottom action buttons (Save changes with loading state, Cancel).
+class _AttachedExamItem {
+  final String examId;
+  String examTitle;
+  bool isRequired;
+  int? passingScore;
+
+  _AttachedExamItem({
+    required this.examId,
+    required this.examTitle,
+    this.isRequired = true,
+    this.passingScore,
+  });
+}
+
 class LessonEditorPane extends StatefulWidget {
   final ContentEntity? editingLesson;
   final String groupId;
@@ -77,7 +90,26 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
   bool _removePdf = false;
 
   // Quiz / Exam State
-  String? _selectedExamId;
+  List<_AttachedExamItem> _attachedExams = [];
+  String? get _selectedExamId =>
+      _attachedExams.isNotEmpty ? _attachedExams.first.examId : null;
+  set _selectedExamId(String? id) {
+    if (id == null) {
+      _attachedExams.clear();
+    } else {
+      final match = _availableExams.firstWhere(
+        (e) => e['id'] == id,
+        orElse: () => {'title': ''},
+      );
+      _attachedExams = [
+        _AttachedExamItem(
+          examId: id,
+          examTitle: (match['title'] as String?) ?? '',
+          isRequired: true,
+        ),
+      ];
+    }
+  }
   List<Map<String, dynamic>> _availableExams = [];
   bool _isLoadingExams = true;
 
@@ -108,7 +140,29 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
     _selectedChapterId = widget.editingLesson?.chapterId;
     _currentFileId = widget.editingLesson?.file?.id;
     _currentFileName = widget.editingLesson?.file?.fileName;
-    _selectedExamId = widget.editingLesson?.associatedExamId;
+    if (widget.editingLesson?.attachedExams != null &&
+        widget.editingLesson!.attachedExams.isNotEmpty) {
+      _attachedExams = widget.editingLesson!.attachedExams
+          .map(
+            (e) => _AttachedExamItem(
+              examId: e.examId,
+              examTitle: e.examTitle,
+              isRequired: e.isRequired,
+              passingScore: e.passingScore,
+            ),
+          )
+          .toList();
+    } else if (widget.editingLesson?.associatedExamId != null) {
+      _attachedExams = [
+        _AttachedExamItem(
+          examId: widget.editingLesson!.associatedExamId!,
+          examTitle: widget.editingLesson!.associatedExamTitle ?? '',
+          isRequired: true,
+        ),
+      ];
+    } else {
+      _attachedExams = [];
+    }
     _isPublished = widget.editingLesson?.isPublishedInGroup ?? true;
 
     _pickedFile = null;
@@ -901,20 +955,52 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        l10n.gatekeeperQuizTitle,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        l10n.gatekeeperQuizSubtitle,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: AppColors.textSecondary,
-                        ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  l10n.attachedQuizzesSection,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  l10n.attachedQuizzesSectionSubtitle,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (_attachedExams.isNotEmpty)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(
+                                  AppSpacing.radiusFull,
+                                ),
+                              ),
+                              child: Text(
+                                l10n.attachedQuizzesCount(_attachedExams.length),
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                       const SizedBox(height: AppSpacing.s12),
                       if (_isLoadingExams)
@@ -924,63 +1010,65 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
                             child: CircularProgressIndicator(strokeWidth: 2),
                           ),
                         )
-                      else if (_selectedExamId != null) ...[
-                        Builder(
-                          builder: (ctx) {
-                            final selectedMap = _availableExams.firstWhere(
-                              (e) => e['id'] == _selectedExamId,
-                              orElse: () => {
-                                'title': l10n.lessonEditorLessonQuiz,
-                              },
-                            );
+                      else ...[
+                        if (_attachedExams.isNotEmpty) ...[
+                          ..._attachedExams.asMap().entries.map((entry) {
+                            final idx = entry.key;
+                            final examItem = entry.value;
                             return Container(
-                              padding: const EdgeInsets.all(AppSpacing.s16),
+                              margin: const EdgeInsets.only(bottom: AppSpacing.s10),
+                              padding: const EdgeInsets.all(AppSpacing.s12),
                               decoration: BoxDecoration(
-                                color: AppColors.primary.withValues(alpha: 0.05),
+                                color: examItem.isRequired
+                                    ? AppColors.primary.withValues(alpha: 0.04)
+                                    : AppColors.surfaceVariant.withValues(alpha: 0.3),
                                 borderRadius: BorderRadius.circular(
                                   AppSpacing.radiusMedium,
                                 ),
                                 border: Border.all(
-                                  color: AppColors.primary.withValues(
-                                    alpha: 0.35,
-                                  ),
+                                  color: examItem.isRequired
+                                      ? AppColors.primary.withValues(alpha: 0.25)
+                                      : AppColors.border,
                                 ),
                               ),
                               child: Row(
                                 children: [
                                   Container(
-                                    padding: const EdgeInsets.all(10),
+                                    padding: const EdgeInsets.all(8),
                                     decoration: BoxDecoration(
-                                      color: AppColors.primary.withValues(
-                                        alpha: 0.12,
-                                      ),
+                                      color: examItem.isRequired
+                                          ? AppColors.primary.withValues(alpha: 0.12)
+                                          : AppColors.textMuted.withValues(alpha: 0.12),
                                       borderRadius: BorderRadius.circular(
                                         AppSpacing.radiusSmall,
                                       ),
                                     ),
-                                    child: const Icon(
+                                    child: Icon(
                                       Icons.quiz_rounded,
-                                      color: AppColors.primary,
-                                      size: 24,
+                                      color: examItem.isRequired
+                                          ? AppColors.primary
+                                          : AppColors.textMuted,
+                                      size: 20,
                                     ),
                                   ),
                                   const SizedBox(width: AppSpacing.s12),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          selectedMap['title'] as String? ?? '',
+                                          examItem.examTitle.isNotEmpty
+                                              ? examItem.examTitle
+                                              : l10n.lessonEditorLessonQuiz,
                                           style: const TextStyle(
                                             fontWeight: FontWeight.bold,
-                                            fontSize: 14,
+                                            fontSize: 13,
                                             color: AppColors.textPrimary,
                                           ),
                                         ),
                                         const SizedBox(height: 2),
                                         Text(
-                                          l10n.lessonEditorLessonQuiz,
+                                          'اختبار #${idx + 1}',
                                           style: const TextStyle(
                                             fontSize: 11,
                                             color: AppColors.textMuted,
@@ -989,22 +1077,85 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
                                       ],
                                     ),
                                   ),
+                                  // Toggle isRequired chip
+                                  InkWell(
+                                    onTap: () {
+                                      setState(() {
+                                        examItem.isRequired = !examItem.isRequired;
+                                      });
+                                    },
+                                    borderRadius: BorderRadius.circular(
+                                      AppSpacing.radiusFull,
+                                    ),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: examItem.isRequired
+                                            ? AppColors.primary.withValues(alpha: 0.15)
+                                            : AppColors.surfaceVariant,
+                                        borderRadius: BorderRadius.circular(
+                                          AppSpacing.radiusFull,
+                                        ),
+                                        border: Border.all(
+                                          color: examItem.isRequired
+                                              ? AppColors.primary.withValues(alpha: 0.4)
+                                              : AppColors.border,
+                                        ),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            examItem.isRequired
+                                                ? Icons.lock_rounded
+                                                : Icons.check_circle_outline_rounded,
+                                            size: 13,
+                                            color: examItem.isRequired
+                                                ? AppColors.primary
+                                                : AppColors.textMuted,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            examItem.isRequired
+                                                ? l10n.requiredForProgression
+                                                : l10n.optionalPractice,
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.bold,
+                                              color: examItem.isRequired
+                                                  ? AppColors.primary
+                                                  : AppColors.textMuted,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: AppSpacing.s8),
                                   IconButton(
                                     icon: const Icon(
-                                      Icons.link_off_rounded,
+                                      Icons.close_rounded,
                                       color: AppColors.error,
-                                      size: 20,
+                                      size: 18,
                                     ),
                                     tooltip: l10n.unlinkQuizAction,
-                                    onPressed: () =>
-                                        setState(() => _selectedExamId = null),
+                                    onPressed: () {
+                                      setState(() {
+                                        _attachedExams.removeAt(idx);
+                                      });
+                                    },
                                   ),
                                 ],
                               ),
                             );
-                          },
-                        ),
-                      ] else ...[
+                          }),
+                          const SizedBox(height: AppSpacing.s8),
+                        ],
+
+                        // Add Quiz Action Row
                         Row(
                           children: [
                             Expanded(
@@ -1012,64 +1163,81 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
                                 text: l10n.createInstantQuizAction,
                                 icon: Icons.add_task_rounded,
                                 onPressed: _openCreateQuiz,
-                                variant: AppButtonVariant.primary,
+                                variant: _attachedExams.isEmpty
+                                    ? AppButtonVariant.primary
+                                    : AppButtonVariant.outlined,
                               ),
                             ),
                           ],
                         ),
-                        if (_availableExams.isNotEmpty) ...[
-                          const SizedBox(height: AppSpacing.s12),
-                          Row(
-                            children: [
-                              const Expanded(child: Divider()),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 8),
-                                child: Text(
-                                  l10n.selectExistingQuizAction,
-                                  style: const TextStyle(
-                                    fontSize: 11,
-                                    color: AppColors.textMuted,
+
+                        // Dropdown to pick from existing available exams not already attached
+                        Builder(
+                          builder: (ctx) {
+                            final unattached = _availableExams.where(
+                              (e) => !_attachedExams.any((a) => a.examId == e['id']),
+                            ).toList();
+                            if (unattached.isEmpty) return const SizedBox.shrink();
+
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                const SizedBox(height: AppSpacing.s10),
+                                DropdownButtonFormField<String?>(
+                                  value: null,
+                                  decoration: InputDecoration(
+                                    filled: true,
+                                    fillColor: AppColors.background,
+                                    hintText: l10n.selectExistingQuizAction,
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 10,
+                                    ),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                      borderSide: BorderSide.none,
+                                    ),
                                   ),
+                                  items: [
+                                    DropdownMenuItem(
+                                      value: null,
+                                      child: Text(
+                                        '+ ${l10n.selectExistingQuizAction}',
+                                        style: const TextStyle(
+                                          color: AppColors.primary,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                    ...unattached.map(
+                                      (e) => DropdownMenuItem(
+                                        value: e['id'] as String,
+                                        child: Text(e['title'] as String),
+                                      ),
+                                    ),
+                                  ],
+                                  onChanged: (val) {
+                                    if (val != null) {
+                                      final selected = _availableExams.firstWhere(
+                                        (e) => e['id'] == val,
+                                      );
+                                      setState(() {
+                                        _attachedExams.add(
+                                          _AttachedExamItem(
+                                            examId: val,
+                                            examTitle: selected['title'] as String,
+                                            isRequired: true,
+                                          ),
+                                        );
+                                        _useCustomScore = true;
+                                      });
+                                    }
+                                  },
                                 ),
-                              ),
-                              const Expanded(child: Divider()),
-                            ],
-                          ),
-                          const SizedBox(height: AppSpacing.s8),
-                          DropdownButtonFormField<String?>(
-                            value: _selectedExamId,
-                            decoration: InputDecoration(
-                              filled: true,
-                              fillColor: AppColors.background,
-                              hintText: l10n.selectExistingQuizAction,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide.none,
-                              ),
-                            ),
-                            items: [
-                              DropdownMenuItem(
-                                value: null,
-                                child: Text(l10n.lessonEditorNoQuiz),
-                              ),
-                              ..._availableExams.map(
-                                (e) => DropdownMenuItem(
-                                  value: e['id'] as String,
-                                  child: Text(e['title'] as String),
-                                ),
-                              ),
-                            ],
-                            onChanged: (val) {
-                              setState(() {
-                                _selectedExamId = val;
-                                if (val != null) {
-                                  _useCustomScore = true;
-                                }
-                              });
-                            },
-                          ),
-                        ],
+                              ],
+                            );
+                          },
+                        ),
                       ],
                       const SizedBox(height: AppSpacing.s16),
 
@@ -1218,3 +1386,4 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
     );
   }
 }
+

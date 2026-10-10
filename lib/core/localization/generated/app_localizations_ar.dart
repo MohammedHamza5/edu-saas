@@ -464,7 +464,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get quickStatsTitle => 'نظرة عامة على الأداء الأكاديمي';
 
   @override
-  String get activeStudentsCount => 'الطلاب النشطون';
+  String get activeStudentsCount => 'عدد الطلاب النشطين';
 
   @override
   String get totalGroupsCount => 'المجموعات الدراسية النشطة';
@@ -655,7 +655,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get groupNameHint => 'مثال: أساسيات SAT - المجموعة الأولى';
 
   @override
-  String get groupDescriptionLabel => 'الوصف';
+  String get groupDescriptionLabel => 'وصف المجموعة';
 
   @override
   String get groupGradeLevelLabel => 'المستوى الأكاديمي';
@@ -861,10 +861,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get createExamAction => 'إنشاء امتحان';
 
   @override
-  String get examTitleLabel => 'عنوان الامتحان';
+  String get examTitleLabel => 'عنوان الاختبار';
 
   @override
-  String get examDurationLabel => 'مدة الامتحان';
+  String get examDurationLabel => 'المدة (بالدقائق)';
 
   @override
   String examDurationMinutes(int minutes) {
@@ -1439,9 +1439,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get createNewGroupNow => 'إنشاء مجموعة جديدة الآن';
 
   @override
-  String groupLevelLabel(String level) {
-    return 'المستوى: $level';
-  }
+  String get groupLevelLabel => 'المسار الأكاديمي / المستوى';
 
   @override
   String get enterAction => 'دخول ←';
@@ -1935,6 +1933,93 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get whatsappPeriodMonthly => 'ملخص شهري 📊';
+
+  @override
+  String get whatsappPeriod7Days => 'آخر أسبوع (7 أيام)';
+
+  @override
+  String get whatsappPeriod14Days => 'آخر أسبوعين (14 يوماً)';
+
+  @override
+  String get whatsappPeriod30Days => 'آخر شهر (30 يوماً)';
+
+  @override
+  String get whatsappPeriodAllTime => 'المدة كاملة (تراكمي)';
+
+  @override
+  String get whatsappFetchingData =>
+      'جاري استخراج السجلات الأكاديمية الحقيقية...';
+
+  @override
+  String get whatsappDataFetchError => 'تعذر جلب بيانات التقرير الأكاديمي';
+
+  @override
+  String get whatsappDecisionsTitle => 'القرار والتوجيه الأكاديمي';
+
+  @override
+  String get whatsappDecisionConsistent =>
+      '🌟 أداء متميز والتزام مستقر، ونؤكد على استمرار نفس وتيرة المذاكرة والتطبيق.';
+
+  @override
+  String get whatsappDecisionImproving =>
+      '📈 تحسن ملحوظ واستيعاب قوي للمفاهيم، ومطلوب الاستمرار في حل الاختبارات.';
+
+  @override
+  String get whatsappDecisionNeedsDrills =>
+      '⚠️ يحتاج لمزيد من التركيز ومراجعة بنك الأخطاء في الاختبار الأخير لتقفيل الدرجة.';
+
+  @override
+  String get whatsappDecisionCatchUp =>
+      '⏳ يرجى حث الطالب على إنهاء الواجبات والمحاضرات المتأخرة لتجنب تراكم المنهج.';
+
+  @override
+  String get whatsappDecisionNeglect =>
+      '📢 يوجد تقصير ملحوظ في الحضور والمتابعة؛ مطلوب تواصل عاجل مع المدرس لضبط الخطة.';
+
+  @override
+  String get whatsappChipConsistent => '🌟 أداء متميز';
+
+  @override
+  String get whatsappChipImproving => '📈 تحسن ملحوظ';
+
+  @override
+  String get whatsappChipNeedsDrills => '⚠️ مراجعة الأخطاء';
+
+  @override
+  String get whatsappChipCatchUp => '⏳ مهام متأخرة';
+
+  @override
+  String get whatsappChipNeglect => '📢 تقصير ومتابعة';
+
+  @override
+  String get whatsappReportHeaderTitle => 'تقرير متابعة الأداء الأكاديمي';
+
+  @override
+  String get whatsappStudentLabel => 'الطالب';
+
+  @override
+  String get whatsappGroupLabel => 'المجموعة';
+
+  @override
+  String get whatsappPeriodLabel => 'الفترة';
+
+  @override
+  String get whatsappLecturesStat => 'المحاضرات';
+
+  @override
+  String get whatsappAssignmentsStat => 'التدريبات والواجبات';
+
+  @override
+  String get whatsappExamsStat => 'الاختبارات والتقييمات';
+
+  @override
+  String get whatsappStudyTimeStat => 'وقت المذاكرة النشط';
+
+  @override
+  String get whatsappAttendanceStat => 'نسبة الحضور';
+
+  @override
+  String get whatsappNoDataPeriod => 'لا توجد أنشطة مسجلة في هذه الفترة';
 
   @override
   String get whatsappPresetFriendlyKeepUp =>
@@ -3674,6 +3759,27 @@ class AppLocalizationsAr extends AppLocalizations {
   String get pointsField => 'الدرجات';
 
   @override
+  String get defaultQuestionPointsLabel => 'درجة كل سؤال';
+
+  @override
+  String get defaultQuestionPointsHint => 'الدرجة الموحدة لجميع الأسئلة';
+
+  @override
+  String get applyPointsToAllAction => 'تطبيق على الكل';
+
+  @override
+  String get applyPointsToAllTooltip =>
+      'توحيد درجة جميع الأسئلة الحالية والجديدة دفعة واحدة';
+
+  @override
+  String pointsAppliedToAllSuccess(int points, int count) {
+    return 'تم توحيد الدرجة ($points) لجميع الأسئلة بنجاح ($count سؤال)';
+  }
+
+  @override
+  String get invalidPointsError => 'يرجى إدخال درجة صحيحة أكبر من صفر';
+
+  @override
   String get optionsSelectCorrectPrompt => 'الخيارات (حدد الخيار الصحيح):';
 
   @override
@@ -3770,11 +3876,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get actionRequired => 'مطلوب التسليم';
-
-  @override
-  String attemptNumberLabel(String number) {
-    return 'محاولة $number';
-  }
 
   @override
   String attachedFilesCount(String count) {
@@ -4148,7 +4249,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get searchStudentOrPhoneHint =>
-      'بحث سريع باسم الطالب أو رقم الهاتف...';
+      'ابحث باسم الطالب أو رقم الهاتف أو المجموعة...';
 
   @override
   String get noStudentsMatchFilterMessage =>
@@ -4915,9 +5016,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get currentActiveLectureBadge => 'المحاضرة الحالية';
 
   @override
-  String overallCourseProgress(int completed, int total, int percentage) {
-    return 'التقدم العام: $completed من $total مكتملة ($percentage%)';
-  }
+  String get overallCourseProgress => 'نسبة إنجاز المنهج الكلي';
 
   @override
   String get reviewQuizResultAction => 'مراجعة نتيجة الكويز';
@@ -6365,6 +6464,56 @@ class AppLocalizationsAr extends AppLocalizations {
   String get unlinkQuizAction => 'إلغاء ربط الاختبار';
 
   @override
+  String get attachedQuizzesSection => 'الاختبارات والكويزات المرفقة';
+
+  @override
+  String get attachedQuizzesSectionSubtitle =>
+      'يمكنك ربط اختبار أو أكثر بهذه المحاضرة. الاختبارات الإلزامية يجب اجتيازها لفتح المحاضرات التالية.';
+
+  @override
+  String get addQuizToLessonAction => 'إضافة اختبار للمحاضرة';
+
+  @override
+  String get requiredForProgression => 'إلزامي للاجتياز';
+
+  @override
+  String get optionalPractice => 'تدريبي / اختياري';
+
+  @override
+  String get makeQuizRequiredTooltip =>
+      'اضغط لجعله اختباراً إلزامياً لفتح ما بعده';
+
+  @override
+  String get makeQuizOptionalTooltip =>
+      'اضغط لجعله اختباراً اختيارياً/تدريبياً';
+
+  @override
+  String attachedQuizzesCount(int count) {
+    return 'تم إرفاق $count اختبارات';
+  }
+
+  @override
+  String get noQuizzesAttached =>
+      'لم يتم إرفاق أي اختبارات بهذه المحاضرة حتى الآن';
+
+  @override
+  String get attachedQuizzesProgressHeader => 'اختبارات المحاضرة والتقدم';
+
+  @override
+  String requiredQuizzesCompletedProgress(int passed, int total) {
+    return 'تم اجتياز $passed من $total اختبارات مطلوبة';
+  }
+
+  @override
+  String get allRequiredQuizzesPassedCongrats =>
+      'تم اجتياز جميع الاختبارات الإلزامية بنجاح! اكتملت المحاضرة.';
+
+  @override
+  String quizScoreBadge(int score) {
+    return 'الدرجة: $score%';
+  }
+
+  @override
   String get studentNavLectures => 'المحاضرات';
 
   @override
@@ -7190,4 +7339,858 @@ class AppLocalizationsAr extends AppLocalizations {
   String folderVideosCount(int count) {
     return '$count فيديو';
   }
+
+  @override
+  String get collapseAllChapters => 'طي كافة الشباتر';
+
+  @override
+  String get expandAllChapters => 'فرد كافة الشباتر';
+
+  @override
+  String get moveChapterUp => 'نقل الشبتر لأعلى';
+
+  @override
+  String get moveChapterDown => 'نقل الشبتر لأسفل';
+
+  @override
+  String get chapterAnalytics => 'تحليلات الشبتر';
+
+  @override
+  String get groupAnalytics => 'تحليلات المجموعة';
+
+  @override
+  String get chapterCompletionRate => 'نسبة إكمال الشبتر';
+
+  @override
+  String get chapterBreakdown => 'أداء الطلاب حسب الشباتر';
+
+  @override
+  String get studentsNeedingAttention => 'طلاب بحاجة لمتابعة';
+
+  @override
+  String get totalChapterViews => 'إجمالي مشاهدات الشبتر';
+
+  @override
+  String get averageChapterQuizScore => 'متوسط كويزات الشبتر';
+
+  @override
+  String get noStudentsNeedingAttention =>
+      'جميع الطلاب يحققون تقدماً ممتازاً ومستمراً';
+
+  @override
+  String get completedAllChapterLessons => 'أكملوا جميع محاضرات الشبتر';
+
+  @override
+  String get inProgressChapterLessons => 'قيد المتابعة والدراسة';
+
+  @override
+  String get notStartedChapterLessons => 'لم يبدأوا هذا الشبتر بعد';
+
+  @override
+  String get studentProgressDistribution => 'توزيع تقدم الطلاب في الشبتر';
+
+  @override
+  String chapterAnalyticsDialogTitle(String title) {
+    return 'تحليلات شبتر: $title';
+  }
+
+  @override
+  String get groupAnalyticsDialogTitle => 'التحليلات الأكاديمية للمجموعة';
+
+  @override
+  String get courseWatchEngagement => 'إجمالي مشاهدات المنهج';
+
+  @override
+  String get overallQuizzesAverage => 'متوسط كويزات واختبارات المنهج';
+
+  @override
+  String studentCompletionRate(int rate) {
+    return 'نسبة الإنجاز: $rate%';
+  }
+
+  @override
+  String chapterLessonsCountLabel(int count) {
+    return '$count محاضرات';
+  }
+
+  @override
+  String get studentEngagementTitle => 'التزام وإنجاز الطلاب';
+
+  @override
+  String get studentEngagementSubtitle =>
+      'متابعة تلقائية فورية لمشاهدات الطلاب، تقدم المحاضرات، ونشاطهم على المنصة دون أي رصد يدوي';
+
+  @override
+  String get studentEngagementBadge => '⚡ رصد آلي 100%';
+
+  @override
+  String get viewByLecture => 'حسب المحاضرة';
+
+  @override
+  String get viewByStudentOverview => 'مجمل إنجاز الطلاب';
+
+  @override
+  String get lectureCompletedBadge => 'أتم المحاضرة';
+
+  @override
+  String get lectureInProgressBadge => 'قيد المتابعة';
+
+  @override
+  String get lectureNotStartedBadge => 'لم يبدأ بعد';
+
+  @override
+  String get engagementHigh => 'ملتزم ممتاز';
+
+  @override
+  String get engagementMedium => 'مستوى متوسط';
+
+  @override
+  String get engagementLow => 'بحاجة لمتابعة';
+
+  @override
+  String get groupCommitmentRate => 'معدل التزام المجموعة';
+
+  @override
+  String get totalEnrolledStudents => 'إجمالي طلاب المجموعة';
+
+  @override
+  String get committedStudentsCount => 'طلاب ملتزمون';
+
+  @override
+  String get needsFollowupCount => 'بحاجة لمتابعة';
+
+  @override
+  String completedLecturesSummary(int completed, int total, String percent) {
+    return 'أنجز $completed من أصل $total محاضرات ($percent%)';
+  }
+
+  @override
+  String get sendParentEngagementReport => 'إرسال تقرير الالتزام عبر واتساب';
+
+  @override
+  String get studentNoteSavedSuccess => 'تم حفظ ملاحظة الطالب بنجاح';
+
+  @override
+  String get refreshEngagementTooltip =>
+      'تحديث فوري لبيانات المشاهدات والالتزام';
+
+  @override
+  String get noLecturesInGroupYet =>
+      'لا توجد محاضرات فيديو منشورة في هذه المجموعة بعد';
+
+  @override
+  String filterCommitted(int count) {
+    return 'ملتزمون ($count)';
+  }
+
+  @override
+  String filterNeedsFollowup(int count) {
+    return 'بحاجة لمتابعة ($count)';
+  }
+
+  @override
+  String filterModerate(int count) {
+    return 'متوسطون ($count)';
+  }
+
+  @override
+  String get editExamTitle => 'تعديل بيانات الاختبار';
+
+  @override
+  String get editExamAction => 'تعديل الاختبار';
+
+  @override
+  String get examUpdatedSuccess => 'تم تحديث بيانات الاختبار بنجاح';
+
+  @override
+  String get unlimitedDuration => 'غير محدد (مفتوح)';
+
+  @override
+  String get passingScorePercentLabel => 'درجة النجاح (%)';
+
+  @override
+  String get shuffleQuestionsLabel => 'خلط ترتيب الأسئلة عشوائياً';
+
+  @override
+  String get showResultLabel => 'إظهار النتيجة فوراً بعد التسليم';
+
+  @override
+  String get allowRetakeLabel => 'السماح بإعادة المحاولة';
+
+  @override
+  String get saveChangesAction => 'حفظ التغييرات';
+
+  @override
+  String get editGroupTitle => 'تعديل بيانات المجموعة';
+
+  @override
+  String get editGroupAction => 'تعديل المجموعة';
+
+  @override
+  String get previousContentAccessLabel => 'سياسة المحتوى القديم للطلاب الجدد';
+
+  @override
+  String get allowPreviousContent => 'إتاحة المحتوى السابق لتاريخ الانضمام';
+
+  @override
+  String get denyPreviousContent =>
+      'إتاحة المحتوى الجديد فقط من تاريخ الانضمام';
+
+  @override
+  String get editAssignmentTitle => 'تعديل بيانات الواجب';
+
+  @override
+  String get editAssignmentAction => 'تعديل الواجب';
+
+  @override
+  String get assignmentUpdatedSuccess => 'تم تحديث بيانات الواجب بنجاح';
+
+  @override
+  String get assignmentInstructionsLabel => 'تعليمات وإرشادات الواجب';
+
+  @override
+  String get dueDateLabel => 'آخر موعد للتسليم';
+
+  @override
+  String get allowLateSubmissionLabel => 'السماح بالتسليم بعد انتهاء الموعد';
+
+  @override
+  String get chapterNameAlreadyExists =>
+      'يوجد شابتر بنفس هذا الاسم بالفعل في هذه المجموعة';
+
+  @override
+  String get chapterUpdateFailed =>
+      'فشل تحديث الشابتر، يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get deleteExamAction => 'حذف الاختبار';
+
+  @override
+  String get deleteExamDialogTitle => 'حذف الاختبار نهائياً؟';
+
+  @override
+  String deleteExamDialogBody(String title) {
+    return 'هل أنت متأكد من رغبتك في حذف اختبار «$title» نهائياً؟ لا يمكن التراجع عن هذا الإجراء.';
+  }
+
+  @override
+  String get deleteExamConfirmButton => 'نعم، احذف الاختبار';
+
+  @override
+  String get archiveOrDeleteExamDialogTitle =>
+      'أرشفة الاختبار (يوجد محاولات للطلاب)';
+
+  @override
+  String archiveOrDeleteExamDialogBody(String title, int count) {
+    return 'الاختبار «$title» يحتوي على $count محاولة مكتملة من الطلاب. لحماية سجلات ودرجات الطلاب، سيتم أرشفته وإخفاؤه تماماً من قوائم المدرس والطلاب بدلاً من تدمير بياناتهم.';
+  }
+
+  @override
+  String get archiveExamConfirmButton => 'أرشفة وإخفاء الاختبار';
+
+  @override
+  String get examDeletedSuccessToast => 'تم حذف الاختبار نهائياً بنجاح';
+
+  @override
+  String get examArchivedSuccessToast =>
+      'تم أرشفة الاختبار وإخفاؤه بنجاح مع الحفاظ على درجات الطلاب';
+
+  @override
+  String get smartApproveTitle => 'قبول وتسكين الطالب';
+
+  @override
+  String get smartApproveSelectGroupPrompt =>
+      'اختر المجموعة أو المجموعات الدراسية لتسكين الطالب فوراً:';
+
+  @override
+  String get smartApproveEnrollNotice =>
+      'بمجرد القبول، سيتم تفعيل حساب الطالب وإتاحة كافة المحاضرات والمحتوى المصرح به للمجموعات المختارة.';
+
+  @override
+  String get smartApproveNoGroupsWarning =>
+      'لا توجد مجموعات دراسية حالياً. سيتم تفعيل حساب الطالب ويمكنك إسناده لمجموعة لاحقاً.';
+
+  @override
+  String get smartApproveAndEnrollAction => 'قبول وتسكين الطالب فوراً';
+
+  @override
+  String smartApproveSuccessWithGroupsToast(String name, int count) {
+    return 'تم قبول الطالب $name وتسكينه في $count مجموعة بنجاح!';
+  }
+
+  @override
+  String smartApproveSuccessNoGroupsToast(String name) {
+    return 'تم قبول الطالب $name بنجاح!';
+  }
+
+  @override
+  String get skipGroupEnrollment => 'المتابعة بدون تسكين في مجموعة حالياً';
+
+  @override
+  String get dailyQuickActionsTitle => 'الإجراءات اليومية السريعة';
+
+  @override
+  String get dailyQuickActionsSubtitle =>
+      'الوصول المباشر للمهام التعليمية الأكثر تكراراً';
+
+  @override
+  String get quickActionUploadLessonTitle => 'رفع حصة جديدة';
+
+  @override
+  String get quickActionUploadLessonDesc =>
+      'إضافة محاضرة فيديو، مذكرة PDF، أو كويز';
+
+  @override
+  String get quickActionAssessmentTitle => 'إنشاء واجب أو كويز';
+
+  @override
+  String get quickActionAssessmentDesc =>
+      'واجبات منزلية، كويزات سريعة، أو اختبارات';
+
+  @override
+  String get quickActionPendingStudentsTitle => 'طلبات الطلاب الجدد';
+
+  @override
+  String get quickActionPendingStudentsDesc =>
+      'مراجعة واعتماد وتسكين الطلاب في المجموعات';
+
+  @override
+  String pendingStudentsCountBadge(int count) {
+    return '$count طلاب بانتظار الموافقة';
+  }
+
+  @override
+  String get noPendingStudentsBadge => 'لا توجد طلبات معلقة';
+
+  @override
+  String get createAssessmentChoiceTitle => 'ماذا تريد أن تنشئ اليوم؟';
+
+  @override
+  String get createAssessmentChoiceSubtitle =>
+      'اختر نوع التقييم الأكاديمي للانتقال مباشرة إلى منشئ المحتوى:';
+
+  @override
+  String get createHomeworkAction => 'إنشاء واجب منزلي جديد';
+
+  @override
+  String get createHomeworkActionDesc =>
+      'تحديد موعد تسليم، ملفات مرفقة، وتعليمات للطلاب';
+
+  @override
+  String get createExamOrQuizAction => 'إنشاء امتحان أو كويز';
+
+  @override
+  String get createExamOrQuizActionDesc =>
+      'اختيار من متعدد، مؤقت زمني، وتصحيح تلقائي';
+
+  @override
+  String examFilterTabAll(int count) {
+    return 'الكل ($count)';
+  }
+
+  @override
+  String examFilterTabGeneral(int count) {
+    return 'اختبارات عامة ($count)';
+  }
+
+  @override
+  String examFilterTabLectureQuizzes(int count) {
+    return 'اختبارات المحاضرات ($count)';
+  }
+
+  @override
+  String get examFilterSubAll => 'الكل';
+
+  @override
+  String examFilterSubLinked(int count) {
+    return 'مرتبطة بمحاضرة ($count)';
+  }
+
+  @override
+  String examFilterSubUnlinked(int count) {
+    return 'بانتظار الربط ($count)';
+  }
+
+  @override
+  String get statTotalExamsTitle => 'إجمالي الاختبارات';
+
+  @override
+  String get statTotalExamsDesc => 'جميع التقييمات في المجموعة';
+
+  @override
+  String get statGeneralExamsTitle => 'اختبارات عامة وشاملة';
+
+  @override
+  String get statGeneralExamsDesc => 'منشورة مباشرة للطلاب وغير مرتبطة بمحاضرة';
+
+  @override
+  String get statLectureQuizzesTitle => 'اختبارات المحاضرات';
+
+  @override
+  String get statLectureQuizzesDesc => 'كويزات اجتياز مشروطة لفتح المحاضرات';
+
+  @override
+  String statUnlinkedAlert(int count) {
+    return '$count بانتظار الربط بمحاضرة';
+  }
+
+  @override
+  String get badgeGeneralExam => 'اختبار عام';
+
+  @override
+  String get badgeLectureQuiz => 'اختبار محاضرة';
+
+  @override
+  String linkedToLecturePill(String title) {
+    return 'مرتبط بمحاضرة: $title';
+  }
+
+  @override
+  String get unlinkedQuizPill => 'غير مرتبط بمحاضرة بعد - جاهز للربط';
+
+  @override
+  String get linkToLectureNowAction => 'ربط بمحاضرة الآن';
+
+  @override
+  String get linkOrChangeLectureAction => 'ربط / تغيير المحاضرة المرتبطة';
+
+  @override
+  String get unlinkFromLectureAction => 'فك الارتباط (تحويل لاختبار عام)';
+
+  @override
+  String get convertToLectureQuizAction => 'تحويل لاختبار محاضرة';
+
+  @override
+  String get convertToGeneralExamAction => 'تحويل لاختبار عام';
+
+  @override
+  String get viewExamDetailsAndAttempts => 'التفاصيل ومحاولات الطلاب';
+
+  @override
+  String get linkExamToLectureDialogTitle => 'ربط الاختبار بمحاضرة';
+
+  @override
+  String get linkExamToLectureDialogSubtitle =>
+      'اختر المحاضرة التي سيلزم الطالب باجتياز هذا الاختبار لفتح المحاضرة التالية:';
+
+  @override
+  String get searchLecturesHint => 'ابحث في محاضرات المجموعة...';
+
+  @override
+  String get noLecturesFound => 'لا توجد محاضرات في هذه المجموعة';
+
+  @override
+  String currentExamAttachedWarning(String title) {
+    return 'مرتبطة حالياً باختبار: $title';
+  }
+
+  @override
+  String get lectureFreeForLinking => 'متاحة للربط';
+
+  @override
+  String get confirmLinkExamAction => 'تأكيد الربط بالمحاضرة';
+
+  @override
+  String examLinkedSuccessToast(String title) {
+    return 'تم ربط الاختبار بمحاضرة «$title» بنجاح';
+  }
+
+  @override
+  String get examUnlinkedSuccessToast =>
+      'تم فك ارتباط الاختبار وأصبح اختباراً عاماً بنجاح';
+
+  @override
+  String get examConvertedToLectureSuccess =>
+      'تم تحويل الاختبار إلى اختبار محاضرة';
+
+  @override
+  String get confirmUnlinkDialogTitle => 'فك ارتباط الاختبار؟';
+
+  @override
+  String confirmUnlinkDialogBody(String title) {
+    return 'هل تريد فك ارتباط «$title» بالمحاضرة وجعله اختباراً عاماً للطلاب؟';
+  }
+
+  @override
+  String get confirmUnlinkButton => 'نعم، فك الارتباط';
+
+  @override
+  String get draftVersionNotice =>
+      'النسخة الحالية مسودة قابلة للتعديل مباشرة دون حاجة لإنشاء نسخ جديدة.';
+
+  @override
+  String get publishCurrentDraftAction => 'نشر هذه النسخة الآن';
+
+  @override
+  String get editDraftQuestionsAction => 'تعديل الأسئلة والمحتوى';
+
+  @override
+  String get versionPublishedPill => 'منشورة';
+
+  @override
+  String get versionDraftPill => 'مسودة';
+
+  @override
+  String get creatingNewVersionLoading => 'جارٍ إنشاء النسخة الجديدة...';
+
+  @override
+  String get publishingVersionLoading => 'جارٍ نشر النسخة...';
+
+  @override
+  String get versionPublishedSuccess =>
+      'تم نشر النسخة بنجاح وأصبحت متاحة للطلاب';
+
+  @override
+  String get unpublishExamAction => 'إلغاء النشر (تحويل لمسودة)';
+
+  @override
+  String get unpublishingExamLoading => 'جارٍ إلغاء النشر...';
+
+  @override
+  String get examUnpublishedSuccess =>
+      'تم إلغاء نشر الاختبار وإعادته كمسودة وإخفاؤه عن الطلاب بنجاح';
+
+  @override
+  String get confirmUnpublishExamTitle => 'إلغاء نشر الاختبار وإخفاؤه؟';
+
+  @override
+  String confirmUnpublishExamBody(String title) {
+    return 'هل أنت متأكد من رغبتك في إلغاء نشر اختبار «$title»؟ سيتم تحويله إلى مسودة وإخفاؤه تماماً عن الطلاب.';
+  }
+
+  @override
+  String get confirmUnpublishButton => 'نعم، ألغِ النشر وحوّله لمسودة';
+
+  @override
+  String get noOptionsAvailableForQuestionWarning =>
+      'تنبيه: لم يتم العثور على خيارات إجابة مسجلة لهذا السؤال. يرجى التواصل مع المعلم.';
+
+  @override
+  String newVersionFailedError(String error) {
+    return 'تعذر إنشاء نسخة جديدة: $error';
+  }
+
+  @override
+  String studentAttemptsGroupCount(int count) {
+    return '$count محاولات';
+  }
+
+  @override
+  String get singleStudentAttemptBadge => 'محاولة واحدة';
+
+  @override
+  String highestScoreBadge(String score) {
+    return 'الأعلى: $score';
+  }
+
+  @override
+  String attemptNumberLabel(int number) {
+    return 'محاولة $number';
+  }
+
+  @override
+  String allAttemptsHistoryHeader(int count) {
+    return 'سجل محاولات الطالب ($count):';
+  }
+
+  @override
+  String studentsCountSummary(int count) {
+    return '$count طالب خاضوا الاختبار';
+  }
+
+  @override
+  String totalAttemptsSummary(int count) {
+    return '$count محاولة مسجلة';
+  }
+
+  @override
+  String get editDraftExamTitle => 'تعديل مسودة الاختبار';
+
+  @override
+  String get editExamSettingsAction => 'الإعدادات السريعة';
+
+  @override
+  String get saveExamDraftChanges => 'حفظ تعديلات المسودة';
+
+  @override
+  String get examDraftUpdatedSuccess => 'تم تحديث مسودة الاختبار وأسئلته بنجاح';
+
+  @override
+  String get examDraftPublishedSuccess =>
+      'تم تحديث الاختبار ونشره للطلاب بنجاح';
+
+  @override
+  String examUpdateFailed(String error) {
+    return 'فشل تحديث الاختبار: $error';
+  }
+
+  @override
+  String get editQuestionsNow => 'تعديل الأسئلة الآن';
+
+  @override
+  String get cannotEditPublishedExamWithAttempts =>
+      'لا يمكن تعديل أسئلة اختبار تم أداؤه من قِبل الطلاب حفاظاً على نزاهة الدرجات. يمكنك إنشاء نسخة جديدة (v2) بدلاً من ذلك.';
+
+  @override
+  String get collapseAllQuestions => 'طي كافة الأسئلة';
+
+  @override
+  String get expandAllQuestions => 'توسيع كافة الأسئلة';
+
+  @override
+  String get questionSummaryEmpty => 'لم يتم كتابة نص للسؤال بعد';
+
+  @override
+  String get hasAttachedImage => 'مرفق صورة';
+
+  @override
+  String get clickToEditQuestion => 'انقر لتوسيع وتعديل السؤال';
+
+  @override
+  String get videoSecurityPausedNotice =>
+      'تم إيقاف التشغيل مؤقتاً لحماية المحتوى التعليمي. يُرجى البقاء داخل نافذة المشغل وعدم مشاركة الشاشة.';
+
+  @override
+  String get resumePlaybackAction => 'استئناف المشاهدة';
+
+  @override
+  String get examSecurityAlertTitle => 'تنبيه أمني: رصد مغادرة نافذة الامتحان';
+
+  @override
+  String get examSecurityAlertMessage =>
+      'يُمنع منعاً باتاً مغادرة نافذة الامتحان أو التبديل بين التطبيقات أو مشاركة الشاشة. تم تسجيل هذه المحاولة في سجل النشاط الأكاديمي.';
+
+  @override
+  String examSecurityViolationsCount(int current, int max) {
+    return 'مخالفة رقم $current من أصل $max محاولات مسموحة';
+  }
+
+  @override
+  String get examPrivacyShieldNotice =>
+      'تم حجب أسئلة الامتحان أثناء عدم التركيز على النافذة لحماية النزاهة ومنع التسريب.';
+
+  @override
+  String get returnToExamAction => 'العودة للاختبار ومتابعة الحل';
+
+  @override
+  String get examAutoSubmittedDueToViolations =>
+      'تم تسليم الامتحان تلقائياً لتجاوز الحد الأقصى لمخالفات مغادرة النافذة.';
+
+  @override
+  String videoFileTooLargeForWeb(String sizeMb) {
+    return 'حجم الفيديو ($sizeMb ميجابايت) يتجاوز الحد الأقصى لذاكرة المتصفح (2 جيجابايت). يُرجى تقليل الـ Bitrate في برنامج المونتاج (CapCut) ليكون حجم الملف أقل من 1.5 جيجابايت وتسريع الرفع.';
+  }
+
+  @override
+  String videoFileMemoryError(String sizeMb) {
+    return 'تعذر قراءة بيانات الفيديو داخل المتصفح ($sizeMb ميجابايت). قد يكون حجم الملف كبيراً جداً على ذاكرة المتصفح. يُرجى تصدير الفيديو بحجم أصغر من 1.5 جيجابايت.';
+  }
+
+  @override
+  String get longVideoExportTip =>
+      '💡 للمحاضرات الطويلة (أكثر من ساعة): اضبط Bitrate في برنامج المونتاج على 2,500 Kbps ليكون حجم الملف في حدود 1 جيجابايت لتفادي قيود ذاكرة المتصفح وضمان رفع سريع وسلس.';
+
+  @override
+  String get examParentDispatchHubTitle =>
+      'نتائج الاختبار وإرسال درجات أولياء الأمور';
+
+  @override
+  String get examParentDispatchHeroTitle =>
+      'إرسال النتائج لأولياء الأمور عبر واتساب';
+
+  @override
+  String get examParentDispatchHeroSubtitle =>
+      'أخطر أولياء الأمور بنتائج أبنائهم فوراً بضغطة زر واحدة ورسائل مخصصة';
+
+  @override
+  String get openParentDispatchHubAction => 'فتح لوحة الإرسال';
+
+  @override
+  String get sendScoreToParentAction => 'إرسال لولي الأمر';
+
+  @override
+  String get resendToParentAction => 'إعادة الإرسال';
+
+  @override
+  String get dispatchSentBadge => 'تم الإرسال';
+
+  @override
+  String get missingParentPhonePrompt => 'لا يوجد رقم ولي أمر';
+
+  @override
+  String get examStatusNotTakenShort => 'لم يؤدِ الاختبار';
+
+  @override
+  String get awaitingExamSubmissionNotice => 'بانتظار أداء الاختبار';
+
+  @override
+  String examStudentScoreLabel(String score) {
+    return 'النتيجة: $score';
+  }
+
+  @override
+  String get examStudentNotTakenNotice => 'الطالب لم يؤدِ الاختبار بعد';
+
+  @override
+  String get examStudentNotTakenHint =>
+      'يمكنك إرسال تنبيه ودي لولي الأمر لمتابعة الطالب وحثه على أداء الاختبار.';
+
+  @override
+  String get examRatingExcellent => 'أداء ممتاز ومستوى استثنائي 🌟';
+
+  @override
+  String get examRatingVeryGood => 'مستوى جيد جداً واجتياز ناجح 👍';
+
+  @override
+  String get examRatingNeedsFocus => 'يحتاج إلى مضاعفة التركيز والمراجعة ⚠️';
+
+  @override
+  String get dispatchRecipientPhoneTitle => 'الرقم المستهدف لإرسال الإشعار:';
+
+  @override
+  String get parentPhoneRecipientLabel => 'رقم ولي الأمر';
+
+  @override
+  String get studentPhoneRecipientLabel => 'رقم الطالب';
+
+  @override
+  String get enterParentPhoneHint => 'أدخل رقم هاتف ولي الأمر (واتساب)...';
+
+  @override
+  String get savePhoneAction => 'حفظ الرقم';
+
+  @override
+  String get parentPhoneSavedSuccess => 'تم حفظ رقم هاتف ولي الأمر بنجاح';
+
+  @override
+  String get parentPhoneSaveFailed => 'فشل حفظ رقم هاتف ولي الأمر';
+
+  @override
+  String get quickTeacherPresetsTitle =>
+      'الملاحظات والتوجيهات السريعة للمدرس (نقرة واحدة):';
+
+  @override
+  String get customTeacherNoteHint =>
+      'اكتب ملاحظة أو توجيه خاص لولي الأمر (اختياري)...';
+
+  @override
+  String get liveWhatsAppPreviewTitle => 'معاينة نص رسالة الواتساب:';
+
+  @override
+  String get copyMessageAction => 'نسخ نص الرسالة';
+
+  @override
+  String get messageCopiedToast => 'تم نسخ نص الرسالة إلى الحافظة';
+
+  @override
+  String get copyActionShort => 'نسخ';
+
+  @override
+  String get sendViaWhatsAppNowAction => 'إرسال عبر واتساب الآن';
+
+  @override
+  String get missingPhoneWarningToast =>
+      'يرجى إدخال رقم الهاتف أولاً لإرسال الرسالة';
+
+  @override
+  String get whatsAppLaunchFailedToast =>
+      'تعذر فتح تطبيق واتساب، يمكنك نسخ الرسالة يدوياً';
+
+  @override
+  String nextStudentInQueueAction(String studentName) {
+    return 'التالي: $studentName ➡️';
+  }
+
+  @override
+  String get copyRosterSummaryTooltip => 'نسخ ملخص كشف الدرجات';
+
+  @override
+  String get sequentialDispatchActionShort => 'الإرسال المتتابع ⚡';
+
+  @override
+  String get rosterCopiedToast =>
+      'تم نسخ كشف درجات الاختبار بالكامل إلى الحافظة';
+
+  @override
+  String get noMatchingStudentsFound => 'لا يوجد طلاب مطابقين للبحث أو الفلتر';
+
+  @override
+  String get sortOptionsTooltip => 'خيارات الترتيب';
+
+  @override
+  String get sortHighestScoreFirst => 'الأعلى درجة أولاً';
+
+  @override
+  String get sortLowestScoreFirst => 'الأقل درجة أولاً';
+
+  @override
+  String get sortStudentNameAlphabetical => 'حسب اسم الطالب (أبجدياً)';
+
+  @override
+  String get sortLatestSubmittedFirst => 'تاريخ التسليم الأحدث';
+
+  @override
+  String get metricSubmissionsRateTitle => 'نسبة التسليم';
+
+  @override
+  String get metricAverageScoreTitle => 'متوسط الدرجات';
+
+  @override
+  String get metricPassRateTitle => 'نسبة النجاح';
+
+  @override
+  String get metricWhatsAppDispatchedTitle => 'إشعارات أولياء الأمور';
+
+  @override
+  String get notifiedBadgeShort => 'تم إخطارهم';
+
+  @override
+  String filterAllRoster(int count) {
+    return 'الكل ($count)';
+  }
+
+  @override
+  String filterSubmittedRoster(int count) {
+    return 'تم التسليم ($count)';
+  }
+
+  @override
+  String filterPassedRoster(int count) {
+    return 'اجتاز بنجاح ($count)';
+  }
+
+  @override
+  String filterNeedsAttentionRoster(int count) {
+    return 'يحتاج متابعة ($count)';
+  }
+
+  @override
+  String filterNotStartedRoster(int count) {
+    return 'لم يؤدِ الاختبار ($count)';
+  }
+
+  @override
+  String filterUnnotifiedRoster(int count) {
+    return 'بانتظار الإرسال ($count)';
+  }
+
+  @override
+  String filterNotifiedRoster(int count) {
+    return 'تم الإرسال ($count)';
+  }
+
+  @override
+  String get filterMissingPhoneRoster => 'بدون رقم ولي أمر';
+
+  @override
+  String editParentPhoneDialogTitle(String studentName) {
+    return 'تعديل رقم ولي أمر الطالب: $studentName';
+  }
+
+  @override
+  String get editParentPhoneDialogBody =>
+      'أدخل رقم هاتف ولي الأمر (واتساب) لربطه بحساب الطالب وإرسال التقارير.';
+
+  @override
+  String get saveActionShort => 'حفظ';
 }

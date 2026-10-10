@@ -17,10 +17,7 @@ class UploadVideoToBankDialog extends StatefulWidget {
 
   const UploadVideoToBankDialog({super.key, this.currentFolderName});
 
-  static Future<bool?> show(
-    BuildContext context, {
-    String? currentFolderName,
-  }) {
+  static Future<bool?> show(BuildContext context, {String? currentFolderName}) {
     final cubit = context.read<VideoBankCubit>();
     return showDialog<bool>(
       context: context,
@@ -64,11 +61,37 @@ class _UploadVideoToBankDialogState extends State<UploadVideoToBankDialog> {
 
       if (result != null && result.files.isNotEmpty) {
         final file = result.files.first;
+        final sizeMb = (file.size / (1024 * 1024)).toStringAsFixed(1);
+
+        // Web browsers have a hard memory buffer limit (~1.5GB to 2GB)
+        if (kIsWeb && file.size > 2000 * 1024 * 1024) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(context.l10n.videoFileTooLargeForWeb(sizeMb)),
+                backgroundColor: AppColors.error,
+                duration: const Duration(seconds: 8),
+              ),
+            );
+          }
+          return;
+        }
+
         Uint8List? bytes = file.bytes;
 
         // If bytes are null on desktop/mobile, read from path
-        if (bytes == null && file.path != null && !kIsWeb) {
+        if (!kIsWeb && bytes == null && file.path != null) {
           bytes = await File(file.path!).readAsBytes();
+        } else if (bytes == null && file.readStream != null) {
+          final chunks = await file.readStream!.toList();
+          final total = chunks.fold<int>(0, (sum, c) => sum + c.length);
+          final buffer = Uint8List(total);
+          int offset = 0;
+          for (final c in chunks) {
+            buffer.setRange(offset, offset + c.length, c);
+            offset += c.length;
+          }
+          bytes = buffer;
         }
 
         if (bytes != null) {
@@ -79,9 +102,21 @@ class _UploadVideoToBankDialogState extends State<UploadVideoToBankDialog> {
               // Auto-fill title from file name without extension
               final name = file.name;
               final dotIndex = name.lastIndexOf('.');
-              _titleController.text = dotIndex > 0 ? name.substring(0, dotIndex) : name;
+              _titleController.text = dotIndex > 0
+                  ? name.substring(0, dotIndex)
+                  : name;
             }
           });
+        } else {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(context.l10n.videoFileMemoryError(sizeMb)),
+                backgroundColor: AppColors.error,
+                duration: const Duration(seconds: 8),
+              ),
+            );
+          }
         }
       }
     } catch (e) {
@@ -183,7 +218,9 @@ class _UploadVideoToBankDialogState extends State<UploadVideoToBankDialog> {
       },
       builder: (context, state) {
         final isUploading = state is VideoBankLoaded && state.isUploading;
-        final progress = (state is VideoBankLoaded) ? state.uploadProgress : null;
+        final progress = (state is VideoBankLoaded)
+            ? state.uploadProgress
+            : null;
 
         return Dialog(
           shape: RoundedRectangleBorder(
@@ -250,7 +287,9 @@ class _UploadVideoToBankDialogState extends State<UploadVideoToBankDialog> {
                     // File picker area
                     if (_pickedFile == null) ...[
                       InkWell(
-                        onTap: isUploading || _isPicking ? null : _pickVideoFile,
+                        onTap: isUploading || _isPicking
+                            ? null
+                            : _pickVideoFile,
                         borderRadius: BorderRadius.circular(12),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
@@ -264,7 +303,9 @@ class _UploadVideoToBankDialogState extends State<UploadVideoToBankDialog> {
                               width: 1.5,
                             ),
                             borderRadius: BorderRadius.circular(12),
-                            color: AppColors.surfaceVariant.withValues(alpha: 0.3),
+                            color: AppColors.surfaceVariant.withValues(
+                              alpha: 0.3,
+                            ),
                           ),
                           child: Column(
                             children: [
@@ -344,6 +385,40 @@ class _UploadVideoToBankDialogState extends State<UploadVideoToBankDialog> {
                       ),
                     ],
 
+                    // Tip banner for long lectures
+                    Container(
+                      margin: const EdgeInsets.only(top: AppSpacing.s10),
+                      padding: const EdgeInsets.all(AppSpacing.s10),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.05),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: AppColors.primary.withValues(alpha: 0.15),
+                        ),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.lightbulb_outline_rounded,
+                            size: 16,
+                            color: theme.colorScheme.primary,
+                          ),
+                          const SizedBox(width: AppSpacing.s8),
+                          Expanded(
+                            child: Text(
+                              l10n.longVideoExportTip,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: AppColors.textSecondary,
+                                fontSize: 11,
+                                height: 1.35,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
                     const SizedBox(height: AppSpacing.s16),
 
                     // Title
@@ -352,8 +427,9 @@ class _UploadVideoToBankDialogState extends State<UploadVideoToBankDialog> {
                       label: l10n.videoTitleHint,
                       hintText: l10n.videoTitleHint,
                       enabled: !isUploading,
-                      validator: (v) =>
-                          v == null || v.trim().isEmpty ? l10n.fieldRequired : null,
+                      validator: (v) => v == null || v.trim().isEmpty
+                          ? l10n.fieldRequired
+                          : null,
                     ),
 
                     const SizedBox(height: AppSpacing.s12),
@@ -417,7 +493,9 @@ class _UploadVideoToBankDialogState extends State<UploadVideoToBankDialog> {
                           ),
                         const SizedBox(width: AppSpacing.s8),
                         AppButton(
-                          text: isUploading ? l10n.uploadingVideo : l10n.uploadToBank,
+                          text: isUploading
+                              ? l10n.uploadingVideo
+                              : l10n.uploadToBank,
                           icon: isUploading
                               ? null
                               : Icons.cloud_upload_outlined,

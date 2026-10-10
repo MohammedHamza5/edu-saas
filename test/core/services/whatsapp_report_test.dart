@@ -28,6 +28,21 @@ void main() {
       );
     });
 
+    test('cleanPhoneNumber handles Kuwait mobile formats correctly', () {
+      expect(
+        WhatsAppReportGenerator.cleanPhoneNumber('51234567'),
+        equals('96551234567'),
+      );
+      expect(
+        WhatsAppReportGenerator.cleanPhoneNumber('+965 61234567'),
+        equals('96561234567'),
+      );
+      expect(
+        WhatsAppReportGenerator.cleanPhoneNumber('00965 91234567'),
+        equals('96591234567'),
+      );
+    });
+
     test('generateAbsenceNotice formats notice correctly', () {
       final notice = WhatsAppReportGenerator.generateAbsenceNotice(
         studentName: 'أحمد محمود',
