@@ -9032,5 +9032,31 @@
   "examRemovedFromFolderSuccess": "Exam removed from folder successfully",
   "@examRemovedFromFolderSuccess": {},
   "emptyFolderTitle": "Empty Folder",
-  "@emptyFolderTitle": {}
+  "@emptyFolderTitle": {},
+  "bulkFillOptionsAction": "Auto-Fill Choices",
+  "@bulkFillOptionsAction": {},
+  "bulkFillOptionsTitle": "Quick Auto-Fill Options",
+  "@bulkFillOptionsTitle": {},
+  "bulkFillOptionsSubtitle": "Quickly populate options across questions with standard exam letters.",
+  "@bulkFillOptionsSubtitle": {},
+  "fillAllQuestionsAbcd": "Fill all questions with (A, B, C, D)",
+  "@fillAllQuestionsAbcd": {},
+  "fillEmptyQuestionsAbcd": "Fill only empty questions with (A, B, C, D)",
+  "@fillEmptyQuestionsAbcd": {},
+  "fillActAlternatingPattern": "ACT alternating pattern (A,B,C,D & F,G,H,J)",
+  "@fillActAlternatingPattern": {},
+  "fillArabicLettersPattern": "Fill with Arabic letters (أ ، ب ، ج ، د)",
+  "@fillArabicLettersPattern": {},
+  "quickFillAbcdChip": "A, B, C, D",
+  "@quickFillAbcdChip": {},
+  "quickFillFghjChip": "F, G, H, J",
+  "@quickFillFghjChip": {},
+  "clearOptionsAction": "Clear",
+  "@clearOptionsAction": {},
+  "optionsAutoFilledSuccess": "Choices auto-filled across {count} questions",
+  "@optionsAutoFilledSuccess": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  }
 }

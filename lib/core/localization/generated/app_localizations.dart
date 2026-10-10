@@ -14838,6 +14838,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Empty Folder'**
   String get emptyFolderTitle;
+
+  /// No description provided for @bulkFillOptionsAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-Fill Choices'**
+  String get bulkFillOptionsAction;
+
+  /// No description provided for @bulkFillOptionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Auto-Fill Options'**
+  String get bulkFillOptionsTitle;
+
+  /// No description provided for @bulkFillOptionsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quickly populate options across questions with standard exam letters.'**
+  String get bulkFillOptionsSubtitle;
+
+  /// No description provided for @fillAllQuestionsAbcd.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill all questions with (A, B, C, D)'**
+  String get fillAllQuestionsAbcd;
+
+  /// No description provided for @fillEmptyQuestionsAbcd.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill only empty questions with (A, B, C, D)'**
+  String get fillEmptyQuestionsAbcd;
+
+  /// No description provided for @fillActAlternatingPattern.
+  ///
+  /// In en, this message translates to:
+  /// **'ACT alternating pattern (A,B,C,D & F,G,H,J)'**
+  String get fillActAlternatingPattern;
+
+  /// No description provided for @fillArabicLettersPattern.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill with Arabic letters (أ ، ب ، ج ، د)'**
+  String get fillArabicLettersPattern;
+
+  /// No description provided for @quickFillAbcdChip.
+  ///
+  /// In en, this message translates to:
+  /// **'A, B, C, D'**
+  String get quickFillAbcdChip;
+
+  /// No description provided for @quickFillFghjChip.
+  ///
+  /// In en, this message translates to:
+  /// **'F, G, H, J'**
+  String get quickFillFghjChip;
+
+  /// No description provided for @clearOptionsAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get clearOptionsAction;
+
+  /// No description provided for @optionsAutoFilledSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Choices auto-filled across {count} questions'**
+  String optionsAutoFilledSuccess(int count);
 }
 
 class _AppLocalizationsDelegate

@@ -8422,4 +8422,43 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get emptyFolderTitle => 'Empty Folder';
+
+  @override
+  String get bulkFillOptionsAction => 'Auto-Fill Choices';
+
+  @override
+  String get bulkFillOptionsTitle => 'Quick Auto-Fill Options';
+
+  @override
+  String get bulkFillOptionsSubtitle =>
+      'Quickly populate options across questions with standard exam letters.';
+
+  @override
+  String get fillAllQuestionsAbcd => 'Fill all questions with (A, B, C, D)';
+
+  @override
+  String get fillEmptyQuestionsAbcd =>
+      'Fill only empty questions with (A, B, C, D)';
+
+  @override
+  String get fillActAlternatingPattern =>
+      'ACT alternating pattern (A,B,C,D & F,G,H,J)';
+
+  @override
+  String get fillArabicLettersPattern =>
+      'Fill with Arabic letters (أ ، ب ، ج ، د)';
+
+  @override
+  String get quickFillAbcdChip => 'A, B, C, D';
+
+  @override
+  String get quickFillFghjChip => 'F, G, H, J';
+
+  @override
+  String get clearOptionsAction => 'Clear';
+
+  @override
+  String optionsAutoFilledSuccess(int count) {
+    return 'Choices auto-filled across $count questions';
+  }
 }

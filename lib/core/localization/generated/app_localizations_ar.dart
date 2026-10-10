@@ -8379,4 +8379,42 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get emptyFolderTitle => 'مجلد فارغ';
+
+  @override
+  String get bulkFillOptionsAction => 'تعبئة الخيارات تلقائياً';
+
+  @override
+  String get bulkFillOptionsTitle => 'تعبئة الخيارات السريعة';
+
+  @override
+  String get bulkFillOptionsSubtitle =>
+      'ملء خيارات الأسئلة تلقائياً بالحروف القياسية للامتحانات.';
+
+  @override
+  String get fillAllQuestionsAbcd => 'ملء كل الأسئلة بـ (A, B, C, D)';
+
+  @override
+  String get fillEmptyQuestionsAbcd =>
+      'ملء الأسئلة الفارغة فقط بـ (A, B, C, D)';
+
+  @override
+  String get fillActAlternatingPattern =>
+      'نمط ACT التبادلي (A,B,C,D و F,G,H,J)';
+
+  @override
+  String get fillArabicLettersPattern => 'ملء بالحروف العربية (أ ، ب ، ج ، د)';
+
+  @override
+  String get quickFillAbcdChip => 'A, B, C, D';
+
+  @override
+  String get quickFillFghjChip => 'F, G, H, J';
+
+  @override
+  String get clearOptionsAction => 'مسح';
+
+  @override
+  String optionsAutoFilledSuccess(int count) {
+    return 'تمت تعبئة الخيارات تلقائياً لـ $count سؤال';
+  }
 }

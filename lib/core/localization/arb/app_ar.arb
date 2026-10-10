@@ -3079,5 +3079,31 @@
   "examRemovedFromFolderSuccess": "تمت إزالة الاختبار من المجلد بنجاح",
   "@examRemovedFromFolderSuccess": {},
   "emptyFolderTitle": "مجلد فارغ",
-  "@emptyFolderTitle": {}
+  "@emptyFolderTitle": {},
+  "bulkFillOptionsAction": "تعبئة الخيارات تلقائياً",
+  "@bulkFillOptionsAction": {},
+  "bulkFillOptionsTitle": "تعبئة الخيارات السريعة",
+  "@bulkFillOptionsTitle": {},
+  "bulkFillOptionsSubtitle": "ملء خيارات الأسئلة تلقائياً بالحروف القياسية للامتحانات.",
+  "@bulkFillOptionsSubtitle": {},
+  "fillAllQuestionsAbcd": "ملء كل الأسئلة بـ (A, B, C, D)",
+  "@fillAllQuestionsAbcd": {},
+  "fillEmptyQuestionsAbcd": "ملء الأسئلة الفارغة فقط بـ (A, B, C, D)",
+  "@fillEmptyQuestionsAbcd": {},
+  "fillActAlternatingPattern": "نمط ACT التبادلي (A,B,C,D و F,G,H,J)",
+  "@fillActAlternatingPattern": {},
+  "fillArabicLettersPattern": "ملء بالحروف العربية (أ ، ب ، ج ، د)",
+  "@fillArabicLettersPattern": {},
+  "quickFillAbcdChip": "A, B, C, D",
+  "@quickFillAbcdChip": {},
+  "quickFillFghjChip": "F, G, H, J",
+  "@quickFillFghjChip": {},
+  "clearOptionsAction": "مسح",
+  "@clearOptionsAction": {},
+  "optionsAutoFilledSuccess": "تمت تعبئة الخيارات تلقائياً لـ {count} سؤال",
+  "@optionsAutoFilledSuccess": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  }
 }
