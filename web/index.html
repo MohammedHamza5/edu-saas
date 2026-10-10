@@ -132,6 +132,31 @@
           e.preventDefault();
           e.stopPropagation();
           return false;
+        // Exam Mode Anti-Cheat Shortcut Locks
+        if (window.__edu_exam_in_progress) {
+          // Block F5, Ctrl+R, Cmd+R (Page Refresh)
+          if (key === 'F5' || keyCode === 116 || (isCtrlOrCmd && (key === 'R' || keyCode === 82))) {
+            triggerSecurityBlackout('ممنوع إعادة تحميل الصفحة أثناء الامتحان');
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+          }
+
+          // Block Ctrl+W / Cmd+W (Close Tab)
+          if (isCtrlOrCmd && (key === 'W' || keyCode === 87)) {
+            triggerSecurityBlackout('ممنوع إغلاق تبويب الامتحان');
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+          }
+
+          // Block Ctrl+T / Cmd+T (New Tab), Ctrl+N / Cmd+N (New Window)
+          if (isCtrlOrCmd && (key === 'T' || key === 'N' || keyCode === 84 || keyCode === 78)) {
+            triggerSecurityBlackout('ممنوع فتح نوافذ أو تبويبات جديدة أثناء الامتحان');
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+          }
         }
       }, { capture: true, passive: false });
 
@@ -192,8 +217,18 @@
         }
       }
       window.addEventListener('blur', pauseActivePlayersOnBlur);
-      document.addEventListener('visibilitychange', function() {
-        if (document.hidden) pauseActivePlayersOnBlur();
+      // 7. Exam Session Protection Guard
+      window.__edu_exam_in_progress = false;
+      window.setExamInProgress = function(inProgress) {
+        window.__edu_exam_in_progress = !!inProgress;
+      };
+
+      window.addEventListener('beforeunload', function(e) {
+        if (window.__edu_exam_in_progress) {
+          e.preventDefault();
+          e.returnValue = '';
+          return '';
+        }
       });
     })();
   </script>
@@ -787,35 +822,7 @@
 
         var iframe = document.createElement('iframe');
         iframe.id = 'bunny_frame_' + viewId;
-
-        // ── SECURITY: Blob-redirect technique ──────────────────────────────────
-        // Instead of setting iframe.src = signedUrl directly (which exposes the
-        // full signed Bunny token in DevTools → Elements panel), we:
-        //  1. Build a tiny HTML redirect page as a Blob URL (blob:// scheme).
-        //  2. Set iframe.src to the opaque blob URL (no token visible in DOM).
-        //  3. The blob page immediately issues window.location = signedUrl so the
-        //     player loads normally inside the iframe.
-        //  4. Revoke the blob URL right after load — it vanishes from memory.
-        // Result: DevTools Elements shows `src="blob:https://…/uuid"` only.
-        // The token is never stored as a DOM attribute.
-        // ──────────────────────────────────────────────────────────────────────
-        try {
-          var escapedSrc = src.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
-          var redirectHtml = '<!DOCTYPE html><html><head>'
-            + '<meta http-equiv="refresh" content="0;url=' + escapedSrc + '">'
-            + '</head><body></body></html>';
-          var blob = new Blob([redirectHtml], { type: 'text/html' });
-          var blobUrl = URL.createObjectURL(blob);
-          iframe.src = blobUrl;
-          // Revoke blob URL after iframe loads — cleans up memory, keeps DOM opaque
-          iframe.addEventListener('load', function onFirstLoad() {
-            iframe.removeEventListener('load', onFirstLoad);
-            try { URL.revokeObjectURL(blobUrl); } catch (_) {}
-          }, { once: true });
-        } catch (blobErr) {
-          // Fallback: set src directly if Blob API is unavailable (very old browsers)
-          iframe.src = src;
-        }
+        iframe.src = src;
 
         // Bunny Stream security requirement
         iframe.referrerPolicy = 'strict-origin-when-cross-origin';
@@ -830,6 +837,23 @@
         iframe.setAttribute('webkitallowfullscreen', 'true');
         iframe.setAttribute('mozallowfullscreen', 'true');
         iframe.allowFullscreen = true;
+
+        function subscribeBunnyEvents() {
+          try {
+            var el = document.getElementById('bunny_frame_' + viewId);
+            if (el && el.contentWindow) {
+              var events = ['ready', 'play', 'pause', 'ended', 'timeupdate'];
+              for (var i = 0; i < events.length; i++) {
+                el.contentWindow.postMessage(JSON.stringify({
+                  context: 'player.js',
+                  version: '0.0.11',
+                  method: 'addEventListener',
+                  value: events[i]
+                }), '*');
+              }
+            }
+          } catch(e) {}
+        }
 
         function initPlayerJs() {
           if (typeof window.playerjs !== 'undefined' && window.playerjs.Player) {
@@ -895,9 +919,15 @@
           }
         }
 
+        initPlayerJs();
         setTimeout(initPlayerJs, 100);
+        setTimeout(initPlayerJs, 500);
+
         iframe.addEventListener('load', function() {
-          setTimeout(initPlayerJs, 150);
+          initPlayerJs();
+          subscribeBunnyEvents();
+          setTimeout(subscribeBunnyEvents, 400);
+          setTimeout(subscribeBunnyEvents, 1200);
         });
 
         return iframe;
@@ -906,16 +936,20 @@
       window.bunnyPostMessage = function(viewId, method, value) {
         var player = window._bunnyPlayers && window._bunnyPlayers[viewId];
         if (player && typeof player[method] === 'function') {
-          player[method](value);
-          return;
+          try {
+            player[method](value);
+          } catch(e) {}
         }
         var iframe = document.getElementById('bunny_frame_' + viewId);
         if (iframe && iframe.contentWindow) {
-          iframe.contentWindow.postMessage(JSON.stringify({
-            context: 'player.js',
-            method: method,
-            value: value
-          }), '*');
+          try {
+            iframe.contentWindow.postMessage(JSON.stringify({
+              context: 'player.js',
+              version: '0.0.11',
+              method: method,
+              value: value
+            }), '*');
+          } catch(e) {}
         }
       };
 
@@ -926,7 +960,21 @@
           try {
             var data = event.data;
             if (typeof data === 'string') data = JSON.parse(data);
-            if (data) notifyBunnyFlutter(data);
+            if (data && (data.context === 'player.js' || data.event)) {
+              var evt = data.event;
+              if (evt === 'timeupdate') {
+                var val = data.value || {};
+                var sec = (val.seconds !== undefined) ? Math.floor(val.seconds) :
+                          (val.currentTime !== undefined) ? Math.floor(val.currentTime) : 0;
+                var dur = (val.duration !== undefined) ? Math.floor(val.duration) : 0;
+                notifyBunnyFlutter({
+                  event: 'timeupdate',
+                  value: { seconds: sec, duration: dur }
+                });
+              } else if (evt === 'play' || evt === 'pause' || evt === 'ended' || evt === 'ready') {
+                notifyBunnyFlutter({ event: evt });
+              }
+            }
           } catch(e) {}
         }
       });

@@ -29,12 +29,16 @@ class AttachedLessonExamEntity extends Equatable {
   /// حالة آخر محاولة ('in_progress' | 'submitted' | 'completed' | 'expired')
   final String? latestAttemptStatus;
 
+  /// عدد الأسئلة في الاختبار
+  final int questionsCount;
+
   const AttachedLessonExamEntity({
     required this.examId,
     required this.examTitle,
     this.sortOrder = 0,
     this.isRequired = true,
     this.passingScore = 60,
+    this.questionsCount = 0,
     this.bestScore,
     this.isPassed = false,
     this.attemptCount = 0,
@@ -48,6 +52,7 @@ class AttachedLessonExamEntity extends Equatable {
       sortOrder: (json['sort_order'] as num?)?.toInt() ?? 0,
       isRequired: json['is_required'] as bool? ?? true,
       passingScore: (json['passing_score'] as num?)?.toInt() ?? 60,
+      questionsCount: (json['questions_count'] as num?)?.toInt() ?? 0,
       bestScore: (json['best_score'] as num?)?.toDouble(),
       isPassed: json['is_passed'] as bool? ?? false,
       attemptCount: (json['attempt_count'] as num?)?.toInt() ?? 0,
@@ -62,6 +67,7 @@ class AttachedLessonExamEntity extends Equatable {
       'sort_order': sortOrder,
       'is_required': isRequired,
       'passing_score': passingScore,
+      'questions_count': questionsCount,
       if (bestScore != null) 'best_score': bestScore,
       'is_passed': isPassed,
       'attempt_count': attemptCount,
@@ -76,6 +82,7 @@ class AttachedLessonExamEntity extends Equatable {
     int? sortOrder,
     bool? isRequired,
     int? passingScore,
+    int? questionsCount,
     double? bestScore,
     bool? isPassed,
     int? attemptCount,
@@ -87,6 +94,7 @@ class AttachedLessonExamEntity extends Equatable {
       sortOrder: sortOrder ?? this.sortOrder,
       isRequired: isRequired ?? this.isRequired,
       passingScore: passingScore ?? this.passingScore,
+      questionsCount: questionsCount ?? this.questionsCount,
       bestScore: bestScore ?? this.bestScore,
       isPassed: isPassed ?? this.isPassed,
       attemptCount: attemptCount ?? this.attemptCount,
@@ -101,6 +109,7 @@ class AttachedLessonExamEntity extends Equatable {
     sortOrder,
     isRequired,
     passingScore,
+    questionsCount,
     bestScore,
     isPassed,
     attemptCount,

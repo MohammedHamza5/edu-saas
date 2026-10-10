@@ -22,11 +22,15 @@ class ExamModel extends ExamEntity {
     required super.updatedAt,
     super.activeVersion,
     super.attemptsCount,
+    super.questionsCount,
     super.myLatestAttempt,
     super.myBestScore,
     super.isLectureExam,
     super.linkedLessonId,
     super.linkedLessonTitle,
+    super.folderId,
+    super.folderName,
+    super.folderColor,
   });
 
   factory ExamModel.fromJson(Map<String, dynamic> json) {
@@ -119,6 +123,26 @@ class ExamModel extends ExamEntity {
       }
     }
 
+    int questionsCount = 0;
+    if (json['questions_count'] != null) {
+      questionsCount = (json['questions_count'] as num).toInt();
+    } else if (activeVersion != null && activeVersion.questions.isNotEmpty) {
+      questionsCount = activeVersion.questions.length;
+    } else if (json['exam_versions'] is List &&
+        (json['exam_versions'] as List).isNotEmpty) {
+      for (final v in (json['exam_versions'] as List)) {
+        if (v is Map &&
+            v['exam_questions'] is List &&
+            (v['exam_questions'] as List).isNotEmpty) {
+          final first = (v['exam_questions'] as List).first;
+          if (first is Map && first.containsKey('count')) {
+            questionsCount = (first['count'] as num?)?.toInt() ?? 0;
+            break;
+          }
+        }
+      }
+    }
+
     DateTime parsedCreatedAt = DateTime.now();
     if (json['created_at'] != null) {
       parsedCreatedAt =
@@ -135,6 +159,21 @@ class ExamModel extends ExamEntity {
         (json['linked_lesson_id'] != null);
     final linkedLessonId = json['linked_lesson_id'] as String?;
     final linkedLessonTitle = json['linked_lesson_title'] as String?;
+
+    String? folderId = json['folder_id'] as String?;
+    String? folderName;
+    String? folderColor;
+    if (json['folder'] is Map) {
+      final f = json['folder'] as Map;
+      folderId ??= f['id'] as String?;
+      folderName = f['name'] as String?;
+      folderColor = f['color'] as String?;
+    } else if (json['exam_folders'] is Map) {
+      final f = json['exam_folders'] as Map;
+      folderId ??= f['id'] as String?;
+      folderName = f['name'] as String?;
+      folderColor = f['color'] as String?;
+    }
 
     return ExamModel(
       id: json['id'] as String? ?? '',
@@ -159,11 +198,15 @@ class ExamModel extends ExamEntity {
       updatedAt: parsedUpdatedAt,
       activeVersion: activeVersion,
       attemptsCount: attemptsCount,
+      questionsCount: questionsCount,
       myLatestAttempt: myLatestAttempt,
       myBestScore: myBestScore,
       isLectureExam: isLectureExam,
       linkedLessonId: linkedLessonId,
       linkedLessonTitle: linkedLessonTitle,
+      folderId: folderId,
+      folderName: folderName,
+      folderColor: folderColor,
     );
   }
 

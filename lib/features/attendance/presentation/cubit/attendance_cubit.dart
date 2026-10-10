@@ -216,7 +216,7 @@ class AttendanceCubit extends Cubit<AttendanceState> {
   String? _lastStudentId;
   String? _lastGroupId;
 
-  /// Loads student attendance history and computed stats
+  /// Loads student attendance history, computed stats, and online lecture watch engagement
   Future<void> loadStudentAttendance({
     required String studentId,
     String? groupId,
@@ -236,22 +236,30 @@ class AttendanceCubit extends Cubit<AttendanceState> {
       studentId: studentId,
       groupId: groupId,
     );
+    final engagementFuture = _repository.getStudentEngagementSummary(
+      studentId: studentId,
+      groupId: groupId,
+    );
 
-    final results = await Future.wait([historyFuture, statsFuture]);
+    final results = await Future.wait([historyFuture, statsFuture, engagementFuture]);
 
     if (isClosed) return;
 
     final historyResult = results[0] as Result<List<AttendanceEntity>>;
     final statsResult = results[1] as Result<AttendanceStats>;
+    final engagementResult = results[2] as Result<StudentEngagementSummary>;
 
-    if (historyResult.isSuccess) {
-      final records = historyResult.dataOrNull ?? [];
-      final stats =
-          statsResult.dataOrNull ?? AttendanceStats.fromRecords(records);
+    final engagementSummary = engagementResult.dataOrNull;
+    final records = historyResult.dataOrNull ?? [];
+    final stats =
+        statsResult.dataOrNull ?? AttendanceStats.fromRecords(records);
+
+    if (historyResult.isSuccess || engagementResult.isSuccess) {
       emit(
         StudentAttendanceLoaded(
           records: records,
           stats: stats,
+          engagementSummary: engagementSummary,
           selectedGroupId: groupId,
           hasMore: records.length == _pageSize,
           isLoadingMore: false,
@@ -259,10 +267,22 @@ class AttendanceCubit extends Cubit<AttendanceState> {
       );
     } else {
       final error =
-          historyResult.failureOrNull?.message ?? 'Failed to load attendance';
+          historyResult.failureOrNull?.message ??
+          engagementResult.failureOrNull?.message ??
+          'Failed to load attendance';
       emit(AttendanceError(error));
     }
   }
+
+  /// Filters student engagement by group
+  Future<void> filterStudentByGroup(String? groupId) async {
+    if (_lastStudentId == null) return;
+    await loadStudentAttendance(
+      studentId: _lastStudentId!,
+      groupId: groupId,
+    );
+  }
+
 
   /// Loads more attendance history for the student (Infinite Scroll / Pagination)
   Future<void> loadMoreStudentAttendance() async {

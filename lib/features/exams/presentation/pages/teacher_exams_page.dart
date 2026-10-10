@@ -19,10 +19,13 @@ import '../../../groups/domain/entities/group_entity.dart';
 import '../../../groups/presentation/cubit/groups_cubit.dart';
 import '../../../groups/presentation/cubit/groups_state.dart';
 import '../../domain/entities/exam_entity.dart';
+import '../../domain/entities/exam_folder_entity.dart';
 import '../cubit/exams_cubit.dart';
 import '../cubit/exams_state.dart';
 import '../widgets/edit_exam_dialog.dart';
 import '../widgets/exam_card.dart';
+import '../widgets/exam_folder_dialogs.dart';
+import '../widgets/exam_folders_bar.dart';
 import 'create_exam_page.dart';
 
 class TeacherExamsPage extends StatefulWidget {
@@ -375,16 +378,6 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
   }
 
   Future<void> _openEditDraftExam(ExamEntity exam) async {
-    if (exam.attemptsCount > 0 && exam.isPublished) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.cannotEditPublishedExamWithAttempts),
-          backgroundColor: AppColors.warning,
-        ),
-      );
-      return;
-    }
-
     final cubit = context.read<ExamsCubit>();
 
     ExamEntity examToEdit = exam;
@@ -416,6 +409,131 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
     if (mounted && updated != null) {
       await _loadExams(forceRefresh: true);
     }
+  }
+
+  Future<void> _showCreateFolderDialog() async {
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = context.l10n;
+    final cubit = context.read<ExamsCubit>();
+    await CreateOrEditExamFolderDialog.show(
+      context,
+      onSave: ({required name, color, description}) async {
+        final success = await cubit.createFolder(
+          name: name,
+          color: color ?? '#5B4FE0',
+          description: description,
+        );
+        if (mounted && success) {
+          messenger.showSnackBar(
+            SnackBar(
+              content: Text(l10n.folderCreatedSuccess),
+              backgroundColor: AppColors.success,
+            ),
+          );
+        }
+        return success;
+      },
+    );
+  }
+
+  Future<void> _showEditFolderDialog(ExamFolderEntity folder) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = context.l10n;
+    final cubit = context.read<ExamsCubit>();
+    await CreateOrEditExamFolderDialog.show(
+      context,
+      initialFolder: folder,
+      onSave: ({required name, color, description}) async {
+        final success = await cubit.updateFolder(
+          folderId: folder.id,
+          name: name,
+          color: color,
+          description: description,
+        );
+        if (mounted && success) {
+          messenger.showSnackBar(
+            SnackBar(
+              content: Text(l10n.folderUpdatedSuccess),
+              backgroundColor: AppColors.success,
+            ),
+          );
+        }
+        return success;
+      },
+    );
+  }
+
+  Future<void> _confirmDeleteFolder(ExamFolderEntity folder) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = context.l10n;
+    final cubit = context.read<ExamsCubit>();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.deleteFolderDialogTitle),
+        content: Text(l10n.deleteFolderDialogBody(folder.name)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.cancelAction),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.error,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l10n.confirmDeleteButton),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      final success = await cubit.deleteFolder(folder.id);
+      if (mounted && success) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(l10n.folderDeletedSuccess),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _showMoveExamFolderDialog(ExamEntity exam) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = context.l10n;
+    final cubit = context.read<ExamsCubit>();
+    final state = cubit.state;
+    final folders =
+        state is TeacherExamsLoaded ? state.folders : <ExamFolderEntity>[];
+
+    await MoveExamFolderDialog.show(
+      context,
+      examTitle: exam.title,
+      currentFolderId: exam.folderId,
+      folders: folders,
+      onSelectFolder: (newFolderId) async {
+        final success = await cubit.moveExamToFolder(
+          examId: exam.id,
+          folderId: newFolderId,
+        );
+        if (mounted && success) {
+          messenger.showSnackBar(
+            SnackBar(
+              content: Text(
+                newFolderId == null
+                    ? l10n.examRemovedFromFolderSuccess
+                    : l10n.examMovedToFolderSuccess,
+              ),
+              backgroundColor: AppColors.success,
+            ),
+          );
+        }
+      },
+    );
   }
 
   void _openParentDispatch(ExamEntity exam) {
@@ -589,7 +707,7 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
           final draftCount = allExams.where((e) => !e.isPublished).length;
 
           // Multi-dimensional Filtering
-          var filteredExams = allExams;
+          var filteredExams = state.filteredExams;
 
           // 1. Type filter
           if (_activeTypeFilter == 'general') {
@@ -628,7 +746,8 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
           final hasActiveFilters = _searchQuery.isNotEmpty ||
               _activeStatusFilter != 'all' ||
               _activeTypeFilter != 'all' ||
-              _activeLectureSubFilter != 'all';
+              _activeLectureSubFilter != 'all' ||
+              state.selectedFolderId != null;
 
           if (allExams.isEmpty) {
             return Column(
@@ -688,7 +807,23 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
                     lectureCount: lectureCount,
                     unlinkedLectureCount: unlinkedLectureCount,
                   ),
-                  const SizedBox(height: AppSpacing.s16),
+                  const SizedBox(height: AppSpacing.s12),
+
+                  // ── 1.5. Exam Folders Bar ────────────────────────────────
+                  ExamFoldersBar(
+                    folders: state.folders,
+                    selectedFolderId: state.selectedFolderId,
+                    totalExamsCount: allExams.length,
+                    uncategorizedCount: allExams
+                        .where((e) => e.folderId == null || e.folderId!.isEmpty)
+                        .length,
+                    onSelectFolder: (fId) =>
+                        context.read<ExamsCubit>().selectFolder(fId),
+                    onCreateFolder: _showCreateFolderDialog,
+                    onEditFolder: _showEditFolderDialog,
+                    onDeleteFolder: _confirmDeleteFolder,
+                  ),
+                  const SizedBox(height: AppSpacing.s12),
 
                   // ── 2. Primary Type Filter Tabs ──────────────────────────
                   _buildTypeFilterTabs(
@@ -727,9 +862,15 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
                       child: Center(
                         child: AppEmptyView(
                           icon: Icons.search_off_rounded,
-                          message: context.l10n.noMatchingExamsFound,
+                          message: state.selectedFolderId != null
+                              ? context.l10n.emptyFolderTitle
+                              : context.l10n.noMatchingExamsFound,
+                          subtitle: state.selectedFolderId != null
+                              ? context.l10n.emptyFolderSubtitle
+                              : null,
                           actionText: context.l10n.clearSearchAction,
                           onAction: () {
+                            context.read<ExamsCubit>().selectFolder(null);
                             setState(() {
                               _searchController.clear();
                               _searchQuery = '';
@@ -763,6 +904,8 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
                           onUnpublish: () => _confirmUnpublish(context, exam),
                           onDelete: () => _handleDeleteExam(exam),
                           onDispatchResults: () => _openParentDispatch(exam),
+                          onMoveToFolder: () =>
+                              _showMoveExamFolderDialog(exam),
                         );
                       }).toList(),
                     ),
@@ -1868,7 +2011,6 @@ class _ExamDetailsSheetContent extends StatefulWidget {
 }
 
 class _ExamDetailsSheetContentState extends State<_ExamDetailsSheetContent> {
-  bool _isCreatingVersion = false;
   bool _isPublishing = false;
   bool _isUnpublishing = false;
   final DateFormat _dateFormat = DateFormat('yyyy/MM/dd - hh:mm a');
@@ -2192,8 +2334,8 @@ class _ExamDetailsSheetContentState extends State<_ExamDetailsSheetContent> {
                         spacing: AppSpacing.s8,
                         runSpacing: AppSpacing.s8,
                         children: [
-                          // If draft: Prominent Edit Questions button
-                          if (!isPublished && widget.onEditQuestions != null)
+                          // Prominent Edit Questions button (always available)
+                          if (widget.onEditQuestions != null)
                             ElevatedButton.icon(
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.primary,
@@ -2204,7 +2346,10 @@ class _ExamDetailsSheetContentState extends State<_ExamDetailsSheetContent> {
                                 size: 16,
                               ),
                               label: Text(context.l10n.editDraftQuestionsAction),
-                              onPressed: widget.onEditQuestions,
+                              onPressed: () {
+                                Navigator.of(ctx).pop();
+                                widget.onEditQuestions!();
+                              },
                             ),
 
                           // Edit basic settings
@@ -2237,68 +2382,6 @@ class _ExamDetailsSheetContentState extends State<_ExamDetailsSheetContent> {
                               );
                             },
                           ),
-
-                          // If published: Create new version v{N+1}
-                          if (isPublished) ...[
-                            ElevatedButton.icon(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.primary,
-                                foregroundColor: Colors.white,
-                              ),
-                              icon: _isCreatingVersion
-                                  ? const SizedBox(
-                                      width: 14,
-                                      height: 14,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: Colors.white,
-                                      ),
-                                    )
-                                  : const Icon(Icons.copy_outlined, size: 15),
-                              label: Text(
-                                _isCreatingVersion
-                                    ? context.l10n.creatingNewVersionLoading
-                                    : context.l10n.createNewVersionButton(
-                                        activeVersionNumber + 1,
-                                      ),
-                              ),
-                              onPressed: _isCreatingVersion
-                                  ? null
-                                  : () async {
-                                      setState(() => _isCreatingVersion = true);
-                                      final messenger =
-                                          ScaffoldMessenger.of(context);
-                                      final nav = Navigator.of(ctx);
-                                      final successMsg = context
-                                          .l10n
-                                          .newVersionCreatedSuccess;
-                                      final errorMsg = context.l10n
-                                          .newVersionFailedError('');
-                                      final success = await widget.cubit
-                                          .createNewVersion(exam.id);
-                                      if (mounted && ctx.mounted) {
-                                        setState(
-                                          () => _isCreatingVersion = false,
-                                        );
-                                        if (success) {
-                                          nav.pop();
-                                          messenger.showSnackBar(
-                                            SnackBar(
-                                              content: Text(successMsg),
-                                              backgroundColor: AppColors.success,
-                                            ),
-                                          );
-                                        } else {
-                                          messenger.showSnackBar(
-                                            SnackBar(
-                                              content: Text(errorMsg),
-                                              backgroundColor: AppColors.error,
-                                            ),
-                                          );
-                                        }
-                                      }
-                                    },
-                            ),
 
                             // Unpublish button to revert back to draft and hide from students
                             if (exam.activeVersion != null)
@@ -2387,7 +2470,6 @@ class _ExamDetailsSheetContentState extends State<_ExamDetailsSheetContent> {
                                         }
                                       },
                               ),
-                          ],
 
                           // If draft: Publish version button
                           if (!isPublished && exam.activeVersion != null) ...[

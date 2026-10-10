@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'package:edu_saas/core/errors/result.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/utils/app_logger.dart';
 import '../../../../core/utils/cache_manager.dart';
 import '../../domain/entities/exam_entity.dart';
 import '../../domain/repositories/exams_repository.dart';
+import '../../domain/entities/exam_folder_entity.dart';
 import 'exams_state.dart';
 
 class ExamsCubit extends Cubit<ExamsState> {
@@ -54,11 +56,17 @@ class ExamsCubit extends Cubit<ExamsState> {
       emit(const ExamsLoading());
     }
 
-    final result = await _repository.getGroupExams(
+    final foldersFuture = _repository.getExamFolders();
+    final examsFuture = _repository.getGroupExams(
       groupId,
       page: 0,
       pageSize: _pageSize,
     );
+
+    final results = await Future.wait([examsFuture, foldersFuture]);
+    final result = results[0] as Result<List<ExamEntity>>;
+    final foldersResult = results[1] as Result<List<ExamFolderEntity>>;
+    final folders = foldersResult.dataOrNull ?? [];
 
     result.when(
       onSuccess: (exams) {
@@ -67,6 +75,10 @@ class ExamsCubit extends Cubit<ExamsState> {
           TeacherExamsLoaded(
             groupId: groupId,
             exams: exams,
+            folders: folders,
+            selectedFolderId: (state is TeacherExamsLoaded)
+                ? (state as TeacherExamsLoaded).selectedFolderId
+                : null,
             hasMore: exams.length == _pageSize,
             isLoadingMore: false,
           ),
@@ -244,7 +256,9 @@ class ExamsCubit extends Cubit<ExamsState> {
           if (currentState.groupId != null) {
             AppCache.exams.invalidate('teacher_exams_${currentState.groupId}');
           }
-          final index = currentState.exams.indexWhere((e) => e.id == updatedExam.id);
+          final index = currentState.exams.indexWhere(
+            (e) => e.id == updatedExam.id,
+          );
           final updatedList = List<ExamEntity>.from(currentState.exams);
           if (index != -1) {
             updatedList[index] = updatedExam;
@@ -313,8 +327,9 @@ class ExamsCubit extends Cubit<ExamsState> {
           if (currentState.groupId != null) {
             AppCache.exams.invalidate('teacher_exams_${currentState.groupId}');
           }
-          final index =
-              currentState.exams.indexWhere((e) => e.id == updatedExam.id);
+          final index = currentState.exams.indexWhere(
+            (e) => e.id == updatedExam.id,
+          );
           final updatedList = List<ExamEntity>.from(currentState.exams);
           if (index != -1) {
             updatedList[index] = updatedExam;
@@ -360,17 +375,11 @@ class ExamsCubit extends Cubit<ExamsState> {
   }
 
   /// Deletes or archives an exam with cascade cleanup (Teacher flow)
-  Future<bool> deleteExam({
-    required String examId,
-    bool force = false,
-  }) async {
+  Future<bool> deleteExam({required String examId, bool force = false}) async {
     final currentState = state;
     if (currentState is! TeacherExamsLoaded) return false;
 
-    final result = await _repository.deleteExam(
-      examId: examId,
-      force: force,
-    );
+    final result = await _repository.deleteExam(examId: examId, force: force);
 
     return result.when(
       onSuccess: (success) {
@@ -378,11 +387,15 @@ class ExamsCubit extends Cubit<ExamsState> {
         if (currentState.groupId != null) {
           AppCache.exams.invalidate('teacher_exams_${currentState.groupId}');
         }
-        final updatedList = currentState.exams.where((e) => e.id != examId).toList();
+        final updatedList = currentState.exams
+            .where((e) => e.id != examId)
+            .toList();
         emit(
           currentState.copyWith(
             exams: updatedList,
-            selectedExam: currentState.selectedExam?.id == examId ? null : currentState.selectedExam,
+            selectedExam: currentState.selectedExam?.id == examId
+                ? null
+                : currentState.selectedExam,
           ),
         );
         return true;
@@ -407,12 +420,24 @@ class ExamsCubit extends Cubit<ExamsState> {
           AppCache.exams.invalidate('teacher_exams_${currentState.groupId}');
           loadGroupExams(currentState.groupId!, forceRefresh: true);
         }
-        if (currentState.selectedExam?.id == examId) {
-          final updatedSelected = currentState.selectedExam!.copyWith(
-            activeVersion: newVersion,
-          );
-          emit(currentState.copyWith(selectedExam: updatedSelected));
-        }
+
+        final updatedExams = currentState.exams.map((e) {
+          if (e.id == examId) {
+            return e.copyWith(activeVersion: newVersion);
+          }
+          return e;
+        }).toList();
+
+        final updatedSelected = currentState.selectedExam?.id == examId
+            ? currentState.selectedExam!.copyWith(activeVersion: newVersion)
+            : currentState.selectedExam;
+
+        emit(
+          currentState.copyWith(
+            exams: updatedExams,
+            selectedExam: updatedSelected,
+          ),
+        );
         return true;
       },
       onFailure: (failure) {
@@ -717,7 +742,8 @@ class ExamsCubit extends Cubit<ExamsState> {
           return false;
         }
 
-        final isUntimed = isLectureExam ||
+        final isUntimed =
+            isLectureExam ||
             fullExam.durationMinutes <= 0 ||
             exam.durationMinutes <= 0;
         int remaining = 0;
@@ -838,6 +864,171 @@ class ExamsCubit extends Cubit<ExamsState> {
             errorMessage: failure.message,
           ),
         );
+        return false;
+      },
+    );
+  }
+
+  void selectFolder(String? folderId) {
+    final currentState = state;
+    if (currentState is! TeacherExamsLoaded) return;
+    if (folderId == null) {
+      emit(currentState.copyWith(clearSelectedFolder: true));
+    } else {
+      emit(currentState.copyWith(selectedFolderId: folderId));
+    }
+  }
+
+  Future<void> loadFolders() async {
+    final currentState = state;
+    if (currentState is! TeacherExamsLoaded) return;
+    final res = await _repository.getExamFolders();
+    res.when(
+      onSuccess: (folders) {
+        emit(currentState.copyWith(folders: folders));
+      },
+      onFailure: (_) {},
+    );
+  }
+
+  Future<bool> createFolder({
+    required String name,
+    String? color,
+    String? icon,
+    String? description,
+  }) async {
+    final currentState = state;
+    if (currentState is! TeacherExamsLoaded) return false;
+    final res = await _repository.createExamFolder(
+      name: name,
+      color: color,
+      icon: icon,
+      description: description,
+    );
+    return res.when(
+      onSuccess: (newFolder) {
+        final updatedFolders = [...currentState.folders, newFolder];
+        emit(currentState.copyWith(folders: updatedFolders));
+        return true;
+      },
+      onFailure: (failure) {
+        emit(currentState.copyWith(message: failure.message));
+        return false;
+      },
+    );
+  }
+
+  Future<bool> updateFolder({
+    required String folderId,
+    required String name,
+    String? color,
+    String? icon,
+    String? description,
+  }) async {
+    final currentState = state;
+    if (currentState is! TeacherExamsLoaded) return false;
+    final res = await _repository.updateExamFolder(
+      folderId: folderId,
+      name: name,
+      color: color,
+      icon: icon,
+      description: description,
+    );
+    return res.when(
+      onSuccess: (updatedFolder) {
+        final updatedFolders = currentState.folders
+            .map((f) => f.id == folderId ? updatedFolder : f)
+            .toList();
+        emit(currentState.copyWith(folders: updatedFolders));
+        return true;
+      },
+      onFailure: (failure) {
+        emit(currentState.copyWith(message: failure.message));
+        return false;
+      },
+    );
+  }
+
+  Future<bool> deleteFolder(String folderId) async {
+    final currentState = state;
+    if (currentState is! TeacherExamsLoaded) return false;
+    final res = await _repository.deleteExamFolder(folderId);
+    return res.when(
+      onSuccess: (_) {
+        final updatedFolders = currentState.folders
+            .where((f) => f.id != folderId)
+            .toList();
+        final shouldClearSelected = currentState.selectedFolderId == folderId;
+        final updatedExams = currentState.exams.map((e) {
+          if (e.folderId == folderId) {
+            return e.copyWith(
+              folderId: null,
+              folderName: null,
+              folderColor: null,
+            );
+          }
+          return e;
+        }).toList();
+        emit(
+          currentState.copyWith(
+            folders: updatedFolders,
+            exams: updatedExams,
+            clearSelectedFolder: shouldClearSelected,
+          ),
+        );
+        return true;
+      },
+      onFailure: (failure) {
+        emit(currentState.copyWith(message: failure.message));
+        return false;
+      },
+    );
+  }
+
+  Future<bool> moveExamToFolder({
+    required String examId,
+    String? folderId,
+  }) async {
+    final currentState = state;
+    if (currentState is! TeacherExamsLoaded) return false;
+    final res = await _repository.moveExamToFolder(
+      examId: examId,
+      folderId: folderId,
+    );
+    return res.when(
+      onSuccess: (_) {
+        final targetFolder = folderId != null
+            ? currentState.folders.where((f) => f.id == folderId).firstOrNull
+            : null;
+        final updatedExams = currentState.exams.map((e) {
+          if (e.id == examId) {
+            return e.copyWith(
+              folderId: folderId,
+              folderName: targetFolder?.name,
+              folderColor: targetFolder?.color,
+            );
+          }
+          return e;
+        }).toList();
+
+        // Refresh folders to update counts
+        _repository.getExamFolders().then((fRes) {
+          if (!isClosed && state is TeacherExamsLoaded) {
+            final latestFolders = fRes.dataOrNull ?? currentState.folders;
+            emit(
+              (state as TeacherExamsLoaded).copyWith(
+                exams: updatedExams,
+                folders: latestFolders,
+              ),
+            );
+          }
+        });
+
+        emit(currentState.copyWith(exams: updatedExams));
+        return true;
+      },
+      onFailure: (failure) {
+        emit(currentState.copyWith(message: failure.message));
         return false;
       },
     );

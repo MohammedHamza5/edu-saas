@@ -21,6 +21,7 @@ class ExamCard extends StatelessWidget {
   final VoidCallback? onUnpublish;
   final VoidCallback? onDelete;
   final VoidCallback? onDispatchResults;
+  final VoidCallback? onMoveToFolder;
 
   const ExamCard({
     super.key,
@@ -39,6 +40,7 @@ class ExamCard extends StatelessWidget {
     this.onUnpublish,
     this.onDelete,
     this.onDispatchResults,
+    this.onMoveToFolder,
   });
 
   @override
@@ -178,6 +180,8 @@ class ExamCard extends StatelessWidget {
                               onDelete!();
                             } else if (val == 'dispatch_results' && onDispatchResults != null) {
                               onDispatchResults!();
+                            } else if (val == 'move_folder' && onMoveToFolder != null) {
+                              onMoveToFolder!();
                             }
                           },
                           itemBuilder: (ctx) => [
@@ -278,6 +282,21 @@ class ExamCard extends StatelessWidget {
                                     const Icon(Icons.tune_rounded, size: 18, color: AppColors.textSecondary),
                                     const SizedBox(width: 8),
                                     Text(ctx.l10n.editExamSettingsAction),
+                                  ],
+                                ),
+                              ),
+                            if (onMoveToFolder != null)
+                              PopupMenuItem(
+                                value: 'move_folder',
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.drive_file_move_outlined,
+                                      size: 18,
+                                      color: Color(0xFF5B4FE0),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(ctx.l10n.moveExamToFolderAction),
                                   ],
                                 ),
                               ),
@@ -516,6 +535,17 @@ class ExamCard extends StatelessWidget {
             spacing: AppSpacing.s8,
             runSpacing: AppSpacing.s6,
             children: [
+              if (exam.folderName != null && exam.folderName!.trim().isNotEmpty)
+                _buildMetaTag(
+                  Icons.folder_rounded,
+                  exam.folderName!,
+                  customColor: _parseFolderColor(exam.folderColor) ?? const Color(0xFF5B4FE0),
+                ),
+              if (exam.totalQuestions > 0)
+                _buildMetaTag(
+                  Icons.quiz_outlined,
+                  context.l10n.questionsCountLabel(exam.totalQuestions),
+                ),
               _buildMetaTag(
                 Icons.timer_outlined,
                 exam.isUntimed
@@ -631,36 +661,56 @@ class ExamCard extends StatelessWidget {
     );
   }
 
-  Widget _buildMetaTag(IconData icon, String text) {
+  Widget _buildMetaTag(IconData icon, String text, {Color? customColor}) {
+    final color = customColor ?? AppColors.textSecondary;
+    final bgColor = customColor != null
+        ? customColor.withValues(alpha: 0.08)
+        : AppColors.surfaceVariant;
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.s8,
         vertical: AppSpacing.s4,
       ),
       decoration: BoxDecoration(
-        color: AppColors.surfaceVariant,
+        color: bgColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+        border: customColor != null
+            ? Border.all(color: customColor.withValues(alpha: 0.2))
+            : null,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 13, color: AppColors.textSecondary),
+          Icon(icon, size: 13, color: color),
           const SizedBox(width: 4),
           Flexible(
             child: Text(
               text,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
+                color: customColor ?? AppColors.textPrimary,
               ),
             ),
           ),
         ],
       ),
     );
+  }
+
+  Color? _parseFolderColor(String? colorStr) {
+    if (colorStr == null || colorStr.isEmpty) return null;
+    try {
+      final hex = colorStr.replaceAll('#', '');
+      if (hex.length == 6) {
+        return Color(int.parse('0xFF$hex'));
+      } else if (hex.length == 8) {
+        return Color(int.parse('0x$hex'));
+      }
+    } catch (_) {}
+    return null;
   }
 
   Widget _buildStatusBadge(BuildContext context) {

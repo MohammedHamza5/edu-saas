@@ -127,6 +127,27 @@ class FakeAttendanceRepository implements AttendanceRepository {
       ),
     );
   }
+
+  @override
+  Future<Result<StudentEngagementSummary>> getStudentEngagementSummary({
+    required String studentId,
+    String? groupId,
+  }) async {
+    if (shouldFail) {
+      return const FailureResult(ServerFailure('Engagement error'));
+    }
+    return const Success(
+      StudentEngagementSummary(
+        totalWatchSeconds: 3600,
+        totalDurationSeconds: 7200,
+        totalLecturesCount: 2,
+        completedLecturesCount: 1,
+        inProgressLecturesCount: 1,
+        notStartedLecturesCount: 0,
+        overallCommitmentPercentage: 50.0,
+      ),
+    );
+  }
 }
 
 class FakeGroupsRepository implements GroupsRepository {

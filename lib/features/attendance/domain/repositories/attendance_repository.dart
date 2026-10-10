@@ -29,4 +29,11 @@ abstract interface class AttendanceRepository {
     required String studentId,
     String? groupId,
   });
+
+  /// Fetches real online lecture watch engagement and commitment metrics for a student
+  Future<Result<StudentEngagementSummary>> getStudentEngagementSummary({
+    required String studentId,
+    String? groupId,
+  });
 }
+

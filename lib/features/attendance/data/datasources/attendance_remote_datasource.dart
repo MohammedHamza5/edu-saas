@@ -29,7 +29,13 @@ abstract interface class AttendanceRemoteDataSource {
     required String studentId,
     String? groupId,
   });
+
+  Future<StudentEngagementSummary> getStudentEngagementSummary({
+    required String studentId,
+    String? groupId,
+  });
 }
+
 
 class AttendanceRemoteDataSourceImpl implements AttendanceRemoteDataSource {
   final SupabaseClient? _client;
@@ -456,4 +462,229 @@ class AttendanceRemoteDataSourceImpl implements AttendanceRemoteDataSource {
       excusedCount: excused,
     );
   }
+
+  @override
+  Future<StudentEngagementSummary> getStudentEngagementSummary({
+    required String studentId,
+    String? groupId,
+  }) async {
+    // 1. Fetch active group memberships for this student
+    final membersRes = await _safeClient
+        .from('group_members')
+        .select('group_id, groups(id, name, level)')
+        .eq('student_id', studentId)
+        .eq('status', 'active');
+
+    final membersList = membersRes as List<dynamic>;
+
+    final enrolledGroups = <StudentGroupInfo>[];
+    final enrolledGroupIds = <String>[];
+
+    for (final m in membersList) {
+      final mMap = m as Map<String, dynamic>;
+      final gRaw = mMap['groups'];
+      Map<String, dynamic>? gMap;
+      if (gRaw is Map<String, dynamic>) {
+        gMap = gRaw;
+      } else if (gRaw is List && gRaw.isNotEmpty) {
+        gMap = gRaw.first as Map<String, dynamic>?;
+      }
+      final gId = mMap['group_id'] as String;
+      final gName = gMap?['name'] as String? ?? 'المجموعة الدراسية';
+      final gLevel = gMap?['level'] as String? ?? '';
+
+      enrolledGroups.add(StudentGroupInfo(id: gId, name: gName, level: gLevel));
+      enrolledGroupIds.add(gId);
+    }
+
+    if (enrolledGroupIds.isEmpty) {
+      return const StudentEngagementSummary.empty();
+    }
+
+    // Determine target group IDs to query
+    final targetGroupIds = (groupId != null && groupId.isNotEmpty)
+        ? enrolledGroupIds.where((id) => id == groupId).toList()
+        : enrolledGroupIds;
+
+    if (targetGroupIds.isEmpty) {
+      return StudentEngagementSummary(enrolledGroups: enrolledGroups);
+    }
+
+    // 2. Fetch published video lectures in target groups
+    final contentRes = await _safeClient
+        .from('content')
+        .select(
+          'id, title, group_id, sort_order, published_at, created_at, groups(name), videos(id, duration, provider, provider_video_id)',
+        )
+        .inFilter('group_id', targetGroupIds)
+        .eq('type', 'video')
+        .eq('status', 'published')
+        .order('sort_order', ascending: true)
+        .order('created_at', ascending: true);
+
+    final contentList = contentRes as List<dynamic>;
+    if (contentList.isEmpty) {
+      return StudentEngagementSummary(enrolledGroups: enrolledGroups);
+    }
+
+    // 3. Extract video IDs
+    final videoIds = <String>[];
+    for (final cJson in contentList) {
+      final cMap = cJson as Map<String, dynamic>;
+      final videosRaw = cMap['videos'];
+      Map<String, dynamic>? vMap;
+      if (videosRaw is List && videosRaw.isNotEmpty) {
+        vMap = videosRaw.first as Map<String, dynamic>?;
+      } else if (videosRaw is Map<String, dynamic>) {
+        vMap = videosRaw;
+      }
+      final vId = vMap?['id'] as String?;
+      if (vId != null && vId.isNotEmpty) {
+        videoIds.add(vId);
+      }
+    }
+
+    // 4. Fetch video_progress and latest activity event
+    final List<dynamic> progressList;
+    if (videoIds.isNotEmpty) {
+      final progressRes = await _safeClient
+          .from('video_progress')
+          .select(
+            'video_id, progress_seconds, duration_seconds, percentage, watched_coverage_percentage, actual_watch_seconds, completed, is_skipped, last_watched_at',
+          )
+          .eq('student_id', studentId)
+          .inFilter('video_id', videoIds);
+      progressList = progressRes as List<dynamic>;
+    } else {
+      progressList = <dynamic>[];
+    }
+
+    final latestActivityMap = await _safeClient
+        .from('activity_events')
+        .select('created_at')
+        .eq('user_id', studentId)
+        .order('created_at', ascending: false)
+        .limit(1)
+        .maybeSingle();
+
+    final progressByVideoId = <String, Map<String, dynamic>>{};
+    for (final p in progressList) {
+      final pMap = p as Map<String, dynamic>;
+      final vId = pMap['video_id'] as String?;
+      if (vId != null) {
+        progressByVideoId[vId] = pMap;
+      }
+    }
+
+    DateTime? latestEventAt;
+    if (latestActivityMap != null && latestActivityMap['created_at'] != null) {
+      latestEventAt = DateTime.tryParse(latestActivityMap['created_at'].toString());
+    }
+
+    // 5. Construct items
+    final items = <StudentLectureEngagementItem>[];
+    int totalWatchSeconds = 0;
+    int totalDurationSeconds = 0;
+    int completedCount = 0;
+    int inProgressCount = 0;
+    int notStartedCount = 0;
+    DateTime? mostRecentWatchedAt = latestEventAt;
+
+    for (final cJson in contentList) {
+      final cMap = cJson as Map<String, dynamic>;
+      final contentId = cMap['id'] as String;
+      final title = cMap['title'] as String? ?? 'محاضرة';
+      final gId = cMap['group_id'] as String? ?? '';
+      final sortOrder = (cMap['sort_order'] as num?)?.toInt() ?? 0;
+
+      final groupsRaw = cMap['groups'];
+      String groupName = '';
+      if (groupsRaw is Map<String, dynamic>) {
+        groupName = groupsRaw['name'] as String? ?? '';
+      } else if (groupsRaw is List && groupsRaw.isNotEmpty) {
+        groupName = (groupsRaw.first as Map<String, dynamic>)['name'] as String? ?? '';
+      }
+      if (groupName.isEmpty) {
+        final match = enrolledGroups.where((g) => g.id == gId);
+        if (match.isNotEmpty) groupName = match.first.name;
+      }
+
+      final videosRaw = cMap['videos'];
+      Map<String, dynamic>? vMap;
+      if (videosRaw is List && videosRaw.isNotEmpty) {
+        vMap = videosRaw.first as Map<String, dynamic>?;
+      } else if (videosRaw is Map<String, dynamic>) {
+        vMap = videosRaw;
+      }
+
+      final vId = vMap?['id'] as String?;
+      final duration = (vMap?['duration'] as num?)?.toInt() ?? 0;
+
+      final pMap = vId != null ? progressByVideoId[vId] : null;
+      final rawProgressSec = (pMap?['progress_seconds'] as num?)?.toInt() ?? 0;
+      final rawActualSec = (pMap?['actual_watch_seconds'] as num?)?.toInt() ?? 0;
+      final watchSec = rawActualSec > 0 ? rawActualSec : rawProgressSec;
+
+      final coverage = _parseCoverage(
+        pMap?['watched_coverage_percentage'],
+        pMap?['percentage'],
+      );
+      final isCompleted = (pMap?['completed'] as bool? ?? false) || coverage >= 80.0;
+
+      final lastWatchedStr = pMap?['last_watched_at'] as String?;
+      final lastWatched = lastWatchedStr != null ? DateTime.tryParse(lastWatchedStr) : null;
+
+      if (lastWatched != null) {
+        if (mostRecentWatchedAt == null || lastWatched.isAfter(mostRecentWatchedAt)) {
+          mostRecentWatchedAt = lastWatched;
+        }
+      }
+
+      totalWatchSeconds += watchSec;
+      totalDurationSeconds += duration;
+
+      if (isCompleted) {
+        completedCount++;
+      } else if (coverage > 0) {
+        inProgressCount++;
+      } else {
+        notStartedCount++;
+      }
+
+      items.add(
+        StudentLectureEngagementItem(
+          contentId: contentId,
+          lectureTitle: title,
+          groupId: gId,
+          groupName: groupName,
+          videoId: vId,
+          durationSeconds: duration,
+          watchSeconds: watchSec,
+          watchProgressPercent: coverage,
+          isCompleted: isCompleted,
+          lastWatchedAt: lastWatched,
+          sortOrder: sortOrder,
+        ),
+      );
+    }
+
+    final totalLectures = items.length;
+    final commitmentPercentage = totalDurationSeconds > 0
+        ? ((totalWatchSeconds / totalDurationSeconds) * 100.0)
+        : (totalLectures > 0 ? (completedCount / totalLectures) * 100.0 : 0.0);
+
+    return StudentEngagementSummary(
+      totalWatchSeconds: totalWatchSeconds,
+      totalDurationSeconds: totalDurationSeconds,
+      totalLecturesCount: totalLectures,
+      completedLecturesCount: completedCount,
+      inProgressLecturesCount: inProgressCount,
+      notStartedLecturesCount: notStartedCount,
+      overallCommitmentPercentage: commitmentPercentage.clamp(0.0, 100.0),
+      lastActiveAt: mostRecentWatchedAt,
+      items: items,
+      enrolledGroups: enrolledGroups,
+    );
+  }
 }
+

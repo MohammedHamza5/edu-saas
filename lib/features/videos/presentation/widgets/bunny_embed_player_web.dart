@@ -28,6 +28,12 @@ Widget buildBunnyEmbedPlayer({
   onMetricsProgress,
   VoidCallback? onCompleted,
   void Function(void Function(int seconds) seekTo)? onSeekReady,
+  void Function(
+    VoidCallback play,
+    VoidCallback pause,
+    VoidCallback togglePlayPause,
+  )?
+  onPlaybackControlsReady,
   ValueChanged<bool>? onFullscreenChanged,
 }) {
   return _BunnyEmbedPlayerWeb(
@@ -37,6 +43,7 @@ Widget buildBunnyEmbedPlayer({
     onMetricsProgress: onMetricsProgress,
     onCompleted: onCompleted,
     onSeekReady: onSeekReady,
+    onPlaybackControlsReady: onPlaybackControlsReady,
     onFullscreenChanged: onFullscreenChanged,
   );
 }
@@ -54,6 +61,12 @@ class _BunnyEmbedPlayerWeb extends StatefulWidget {
   onMetricsProgress;
   final VoidCallback? onCompleted;
   final void Function(void Function(int seconds) seekTo)? onSeekReady;
+  final void Function(
+    VoidCallback play,
+    VoidCallback pause,
+    VoidCallback togglePlayPause,
+  )?
+  onPlaybackControlsReady;
   final ValueChanged<bool>? onFullscreenChanged;
 
   const _BunnyEmbedPlayerWeb({
@@ -63,6 +76,7 @@ class _BunnyEmbedPlayerWeb extends StatefulWidget {
     this.onMetricsProgress,
     this.onCompleted,
     this.onSeekReady,
+    this.onPlaybackControlsReady,
     this.onFullscreenChanged,
   });
 
@@ -125,6 +139,8 @@ class _BunnyEmbedPlayerWebState extends State<_BunnyEmbedPlayerWeb>
     widget.onSeekReady?.call((seconds) {
       seekTo(seconds);
     });
+
+    widget.onPlaybackControlsReady?.call(play, pause, togglePlayPause);
   }
 
   void _setupMessageBridge() {
@@ -209,10 +225,24 @@ class _BunnyEmbedPlayerWebState extends State<_BunnyEmbedPlayerWeb>
     } catch (_) {}
   }
 
+  void play() {
+    try {
+      _bunnyPostMessage(_viewId.toJS, 'play'.toJS, null);
+    } catch (_) {}
+  }
+
   void pause() {
     try {
       _bunnyPostMessage(_viewId.toJS, 'pause'.toJS, null);
     } catch (_) {}
+  }
+
+  void togglePlayPause() {
+    if (_isPlaying) {
+      pause();
+    } else {
+      play();
+    }
   }
 
   @override

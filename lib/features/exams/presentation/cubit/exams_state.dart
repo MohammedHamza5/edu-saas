@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/exam_entity.dart';
+import '../../domain/entities/exam_folder_entity.dart';
 
 sealed class ExamsState extends Equatable {
   const ExamsState();
@@ -36,6 +37,8 @@ final class TeacherExamsLoaded extends ExamsState {
   final bool hasMore;
   final bool isLoadingMore;
   final String? message;
+  final List<ExamFolderEntity> folders;
+  final String? selectedFolderId;
 
   const TeacherExamsLoaded({
     this.groupId,
@@ -49,7 +52,19 @@ final class TeacherExamsLoaded extends ExamsState {
     this.hasMore = true,
     this.isLoadingMore = false,
     this.message,
+    this.folders = const [],
+    this.selectedFolderId,
   });
+
+  List<ExamEntity> get filteredExams {
+    if (selectedFolderId == null) {
+      return exams;
+    }
+    if (selectedFolderId == 'uncategorized') {
+      return exams.where((e) => e.folderId == null || e.folderId!.isEmpty).toList();
+    }
+    return exams.where((e) => e.folderId == selectedFolderId).toList();
+  }
 
   TeacherExamsLoaded copyWith({
     String? groupId,
@@ -63,6 +78,9 @@ final class TeacherExamsLoaded extends ExamsState {
     bool? hasMore,
     bool? isLoadingMore,
     String? message,
+    List<ExamFolderEntity>? folders,
+    String? selectedFolderId,
+    bool clearSelectedFolder = false,
   }) {
     return TeacherExamsLoaded(
       groupId: groupId ?? this.groupId,
@@ -76,6 +94,10 @@ final class TeacherExamsLoaded extends ExamsState {
       hasMore: hasMore ?? this.hasMore,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
       message: message,
+      folders: folders ?? this.folders,
+      selectedFolderId: clearSelectedFolder
+          ? null
+          : (selectedFolderId ?? this.selectedFolderId),
     );
   }
 
@@ -92,6 +114,8 @@ final class TeacherExamsLoaded extends ExamsState {
     hasMore,
     isLoadingMore,
     message,
+    folders,
+    selectedFolderId,
   ];
 }
 

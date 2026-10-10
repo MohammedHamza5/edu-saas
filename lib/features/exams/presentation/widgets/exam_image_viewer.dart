@@ -18,19 +18,17 @@ class ExamImageViewer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final alignmentStr = imageMeta?['alignment'] as String? ?? 'center';
     final widthPercent = (imageMeta?['width_percent'] as num?)?.toInt() ?? 50;
     final enableZoom = imageMeta?['enable_zoom'] as bool? ?? true;
 
-    Alignment align = Alignment.center;
-    if (alignmentStr == 'right') align = Alignment.centerRight;
-    if (alignmentStr == 'left') align = Alignment.centerLeft;
+    // Question diagrams and problem images remain strictly centered for optimal academic readability
+    const Alignment align = Alignment.center;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.s12),
       child: LayoutBuilder(
         builder: (ctx, constraints) {
-          // On mobile screens (< 600px), always scale gracefully to at least 90%
+          // On mobile screens (< 500px), always scale gracefully to 100%
           final screenW = constraints.maxWidth;
           final effectivePercent = screenW < 500 ? 100 : widthPercent;
           final targetWidth = screenW * (effectivePercent / 100);
@@ -53,6 +51,7 @@ class ExamImageViewer extends StatelessWidget {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
                       child: Container(
+                        alignment: Alignment.center,
                         decoration: BoxDecoration(
                           border: Border.all(color: AppColors.border),
                           borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),

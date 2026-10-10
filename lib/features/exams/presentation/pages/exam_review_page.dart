@@ -9,7 +9,9 @@ import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_empty_view.dart';
 import '../../../../core/widgets/app_error_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
+import '../../../question_bank/presentation/widgets/question_display_widgets.dart';
 import '../../domain/entities/exam_entity.dart';
+import '../widgets/interactive_lightbox_dialog.dart';
 
 class ExamReviewPage extends StatefulWidget {
   final String attemptId;
@@ -320,59 +322,113 @@ class _ExamReviewPageState extends State<ExamReviewPage> {
                           ),
                         ],
                       ),
-                      if (question.questionText.trim().isNotEmpty) ...[
-                        const SizedBox(height: AppSpacing.s12),
-                        Text(
-                          question.questionText,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                      ],
-                      if (question.imageUrl != null &&
-                          question.imageUrl!.isNotEmpty) ...[
-                        const SizedBox(height: AppSpacing.s16),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(
-                            AppSpacing.radiusMedium,
-                          ),
-                          child: Container(
-                            constraints: const BoxConstraints(maxHeight: 380),
-                            decoration: BoxDecoration(
-                              color: AppColors.surfaceVariant,
-                              border: Border.all(color: AppColors.border),
-                              borderRadius: BorderRadius.circular(
-                                AppSpacing.radiusMedium,
-                              ),
-                            ),
-                            child: CachedNetworkImage(
-                              imageUrl: question.imageUrl!,
-                              memCacheWidth: 800,
-                              memCacheHeight: 800,
-                              maxWidthDiskCache: 1200,
-                              fit: BoxFit.contain,
-                              placeholder: (ctx, _) => const SizedBox(
-                                height: 160,
-                                child: Center(
-                                  child: AppLoadingView.signature(),
-                                ),
-                              ),
-                              errorWidget: (_, __, ___) => const Padding(
-                                padding: EdgeInsets.all(AppSpacing.s16),
-                                child: Center(
-                                  child: Icon(
-                                    Icons.broken_image_rounded,
-                                    size: 40,
-                                    color: AppColors.textMuted,
+                      Builder(
+                        builder: (context) {
+                          final hasExplicitImage = question.imageUrl != null &&
+                              question.imageUrl!.trim().isNotEmpty;
+                          final isTextAnImageUrl = QuestionStemView.isImageUrl(
+                            question.questionText.trim(),
+                          );
+                          final effectiveImageUrl = hasExplicitImage
+                              ? question.imageUrl!
+                              : (isTextAnImageUrl
+                                    ? question.questionText.trim()
+                                    : null);
+                          final shouldShowText =
+                              question.questionText.trim().isNotEmpty &&
+                              !isTextAnImageUrl;
+
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (shouldShowText) ...[
+                                const SizedBox(height: AppSpacing.s12),
+                                Text(
+                                  question.questionText,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.textPrimary,
                                   ),
                                 ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                              ],
+                              if (effectiveImageUrl != null &&
+                                  effectiveImageUrl.isNotEmpty) ...[
+                                const SizedBox(height: AppSpacing.s16),
+                                Center(
+                                  child: InkWell(
+                                    onTap: () =>
+                                        InteractiveLightboxDialog.show(
+                                          context,
+                                          imageUrl: effectiveImageUrl,
+                                          title: context.l10n
+                                              .reviewQuestionIndex(
+                                                currentIndex + 1,
+                                                questions.length,
+                                              ),
+                                        ),
+                                    borderRadius: BorderRadius.circular(
+                                      AppSpacing.radiusMedium,
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(
+                                        AppSpacing.radiusMedium,
+                                      ),
+                                      child: Container(
+                                        alignment: Alignment.center,
+                                        constraints: const BoxConstraints(
+                                          maxHeight: 380,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.surfaceVariant,
+                                          border: Border.all(
+                                            color: AppColors.border,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(
+                                                AppSpacing.radiusMedium,
+                                              ),
+                                        ),
+                                        child: CachedNetworkImage(
+                                          imageUrl: effectiveImageUrl,
+                                          memCacheWidth: 800,
+                                          memCacheHeight: 800,
+                                          maxWidthDiskCache: 1200,
+                                          fit: BoxFit.contain,
+                                          placeholder: (ctx, _) =>
+                                              const SizedBox(
+                                                height: 160,
+                                                child: Center(
+                                                  child:
+                                                      AppLoadingView.signature(),
+                                                ),
+                                              ),
+                                          errorWidget: (_, __, ___) =>
+                                              const Padding(
+                                                padding: EdgeInsets.all(
+                                                  AppSpacing.s16,
+                                                ),
+                                                child: Center(
+                                                  child: Icon(
+                                                    Icons
+                                                        .broken_image_rounded,
+                                                    size: 40,
+                                                    color:
+                                                        AppColors.textMuted,
+                                                  ),
+                                                ),
+                                              ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          );
+                        },
+                      ),
                     ],
                   ),
                 ),

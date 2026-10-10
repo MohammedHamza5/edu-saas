@@ -9004,7 +9004,7 @@ abstract class AppLocalizations {
   /// No description provided for @startLectureAction.
   ///
   /// In en, this message translates to:
-  /// **'Watch Lecture'**
+  /// **'Start Lecture'**
   String get startLectureAction;
 
   /// No description provided for @quizPrefix.
@@ -11992,7 +11992,7 @@ abstract class AppLocalizations {
   /// No description provided for @folderNameHint.
   ///
   /// In en, this message translates to:
-  /// **'e.g. Algebra Basics'**
+  /// **'e.g. Unit 1: Algebra, SAT Practice'**
   String get folderNameHint;
 
   /// No description provided for @folderCreatedSuccess.
@@ -14155,6 +14155,12 @@ abstract class AppLocalizations {
   /// **'The exam was submitted automatically due to exceeding the maximum allowed security tab switches.'**
   String get examAutoSubmittedDueToViolations;
 
+  /// No description provided for @examSecurityWarningSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This is your final warning! If you leave the exam window or open another tab again, your exam will be automatically submitted and scored immediately without further warning.'**
+  String get examSecurityWarningSubtitle;
+
   /// No description provided for @videoFileTooLargeForWeb.
   ///
   /// In en, this message translates to:
@@ -14520,6 +14526,318 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Save'**
   String get saveActionShort;
+
+  /// No description provided for @studentEngagementNavTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Engagement & Progress'**
+  String get studentEngagementNavTitle;
+
+  /// No description provided for @studentEngagementNavSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch & Activity Stats'**
+  String get studentEngagementNavSubtitle;
+
+  /// No description provided for @studentEngagementPageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch Commitment & Progress'**
+  String get studentEngagementPageTitle;
+
+  /// No description provided for @studentEngagementPageSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Detailed tracking of your real watch hours, completed lectures, and learning activity.'**
+  String get studentEngagementPageSubtitle;
+
+  /// No description provided for @totalWatchTimeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Watch Time'**
+  String get totalWatchTimeTitle;
+
+  /// No description provided for @totalCourseDurationSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Out of {total} total content'**
+  String totalCourseDurationSubtitle(String total);
+
+  /// No description provided for @completedLecturesStatTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed Lectures'**
+  String get completedLecturesStatTitle;
+
+  /// No description provided for @remainingLecturesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} lectures remaining'**
+  String remainingLecturesSubtitle(int count);
+
+  /// No description provided for @watchCommitmentRateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch Commitment Rate'**
+  String get watchCommitmentRateTitle;
+
+  /// No description provided for @lastPlatformActivityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Platform Activity'**
+  String get lastPlatformActivityTitle;
+
+  /// No description provided for @noActivityRecordedYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No activity recorded yet'**
+  String get noActivityRecordedYet;
+
+  /// No description provided for @recentWatchSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Recorded watch session'**
+  String get recentWatchSession;
+
+  /// No description provided for @filterAllLecturesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'All ({count})'**
+  String filterAllLecturesCount(int count);
+
+  /// No description provided for @filterCompletedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed ({count})'**
+  String filterCompletedCount(int count);
+
+  /// No description provided for @filterInProgressCount.
+  ///
+  /// In en, this message translates to:
+  /// **'In Progress ({count})'**
+  String filterInProgressCount(int count);
+
+  /// No description provided for @filterNotStartedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Not Started ({count})'**
+  String filterNotStartedCount(int count);
+
+  /// No description provided for @filterAllGroups.
+  ///
+  /// In en, this message translates to:
+  /// **'All Groups'**
+  String get filterAllGroups;
+
+  /// No description provided for @lectureWatchTimelineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Lectures & Engagement History'**
+  String get lectureWatchTimelineTitle;
+
+  /// No description provided for @watchedTimeOutOfTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Watched {watched} of {total}'**
+  String watchedTimeOutOfTotal(String watched, String total);
+
+  /// No description provided for @lastWatchedAtLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Last watched: {date}'**
+  String lastWatchedAtLabel(String date);
+
+  /// No description provided for @notWatchedYetLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Not started yet'**
+  String get notWatchedYetLabel;
+
+  /// No description provided for @resumeLectureAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue Watching'**
+  String get resumeLectureAction;
+
+  /// No description provided for @noEngagementLecturesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No video lectures published in your enrolled groups yet.'**
+  String get noEngagementLecturesEmpty;
+
+  /// No description provided for @noEngagementLecturesFilterEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No lectures match the selected filter.'**
+  String get noEngagementLecturesFilterEmpty;
+
+  /// No description provided for @goToStudyMaterialsAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to My Lectures'**
+  String get goToStudyMaterialsAction;
+
+  /// No description provided for @excellentCommitment.
+  ///
+  /// In en, this message translates to:
+  /// **'Excellent Commitment'**
+  String get excellentCommitment;
+
+  /// No description provided for @goodCommitment.
+  ///
+  /// In en, this message translates to:
+  /// **'Good Engagement'**
+  String get goodCommitment;
+
+  /// No description provided for @needsFollowupCommitment.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs Follow-up'**
+  String get needsFollowupCommitment;
+
+  /// No description provided for @examFoldersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam Folders'**
+  String get examFoldersTitle;
+
+  /// No description provided for @allExamsTab.
+  ///
+  /// In en, this message translates to:
+  /// **'All Exams'**
+  String get allExamsTab;
+
+  /// No description provided for @uncategorizedFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Uncategorized'**
+  String get uncategorizedFolder;
+
+  /// No description provided for @newFolderAction.
+  ///
+  /// In en, this message translates to:
+  /// **'New Folder'**
+  String get newFolderAction;
+
+  /// No description provided for @editFolderAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Folder'**
+  String get editFolderAction;
+
+  /// No description provided for @deleteFolderAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Folder'**
+  String get deleteFolderAction;
+
+  /// No description provided for @confirmDeleteFolderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Folder?'**
+  String get confirmDeleteFolderTitle;
+
+  /// No description provided for @confirmDeleteFolderBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete folder \"{name}\"? Exams inside will remain available as uncategorized.'**
+  String confirmDeleteFolderBody(String name);
+
+  /// No description provided for @folderNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder Name'**
+  String get folderNameLabel;
+
+  /// No description provided for @folderNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a folder name'**
+  String get folderNameRequired;
+
+  /// No description provided for @folderColorLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder Color'**
+  String get folderColorLabel;
+
+  /// No description provided for @folderUpdatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder updated successfully'**
+  String get folderUpdatedSuccess;
+
+  /// No description provided for @folderDeletedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder deleted successfully'**
+  String get folderDeletedSuccess;
+
+  /// No description provided for @moveExamToFolderAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to Folder'**
+  String get moveExamToFolderAction;
+
+  /// No description provided for @moveExamDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Move Exam to Folder'**
+  String get moveExamDialogTitle;
+
+  /// No description provided for @removeFromFolderOption.
+  ///
+  /// In en, this message translates to:
+  /// **'No Folder (Uncategorized)'**
+  String get removeFromFolderOption;
+
+  /// No description provided for @examMovedToFolderSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam moved to folder successfully'**
+  String get examMovedToFolderSuccess;
+
+  /// No description provided for @emptyFolderSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No exams in this folder yet'**
+  String get emptyFolderSubtitle;
+
+  /// No description provided for @folderExamCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Exams'**
+  String folderExamCount(int count);
+
+  /// No description provided for @deleteFolderDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Folder?'**
+  String get deleteFolderDialogTitle;
+
+  /// No description provided for @deleteFolderDialogBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete folder \"{name}\"? Exams inside will remain available as uncategorized.'**
+  String deleteFolderDialogBody(String name);
+
+  /// No description provided for @confirmDeleteButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Folder'**
+  String get confirmDeleteButton;
+
+  /// No description provided for @examRemovedFromFolderSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam removed from folder successfully'**
+  String get examRemovedFromFolderSuccess;
+
+  /// No description provided for @emptyFolderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Empty Folder'**
+  String get emptyFolderTitle;
 }
 
 class _AppLocalizationsDelegate

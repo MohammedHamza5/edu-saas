@@ -11,6 +11,8 @@ import '../models/exam_version_model.dart';
 import '../models/exam_parent_dispatch_model.dart';
 import '../models/mistake_models.dart';
 
+import '../models/exam_folder_model.dart';
+
 abstract interface class ExamsRemoteDataSource {
   Future<List<ExamModel>> getGroupExams(
     String groupId, {
@@ -108,6 +110,25 @@ abstract interface class ExamsRemoteDataSource {
     required String studentId,
     required String parentPhone,
   });
+  Future<List<ExamFolderModel>> getExamFolders();
+  Future<ExamFolderModel> createExamFolder({
+    required String name,
+    String? color,
+    String? icon,
+    String? description,
+  });
+  Future<ExamFolderModel> updateExamFolder({
+    required String folderId,
+    required String name,
+    String? color,
+    String? icon,
+    String? description,
+  });
+  Future<bool> deleteExamFolder(String folderId);
+  Future<bool> moveExamToFolder({
+    required String examId,
+    String? folderId,
+  });
 }
 
 class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
@@ -139,6 +160,8 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
           end_at,
           created_at,
           updated_at,
+          folder_id,
+          folder:exam_folders(id, name, color, icon),
           content:content!exams_content_id_fkey!inner(
             id,
             group_id,
@@ -153,7 +176,8 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
             version_number,
             status,
             created_at,
-            published_at
+            published_at,
+            exam_questions(count)
           ),
           exam_attempts(count)
         ''')
@@ -297,6 +321,8 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
           end_at,
           created_at,
           updated_at,
+          folder_id,
+          folder:exam_folders(id, name, color, icon),
           content:content!exams_content_id_fkey!inner(
             id,
             group_id,
@@ -311,7 +337,8 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
             version_number,
             status,
             created_at,
-            published_at
+            published_at,
+            exam_questions(count)
           )
         ''')
         .eq('content.status', 'published')
@@ -436,6 +463,8 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
           end_at,
           created_at,
           updated_at,
+          folder_id,
+          folder:exam_folders(id, name, color, icon),
           content:content!exams_content_id_fkey!inner(
             id,
             group_id,
@@ -1547,6 +1576,140 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
       return response != null;
     } catch (e) {
       AppLogger.e('ExamsRemoteDataSource', 'updateStudentParentPhone failed', error: e);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<ExamFolderModel>> getExamFolders() async {
+    try {
+      final response = await _safeClient
+          .from('exam_folders')
+          .select('*, exams(count)')
+          .order('sort_order', ascending: true)
+          .order('created_at', ascending: true);
+
+      return (response as List<dynamic>)
+          .map((j) => ExamFolderModel.fromJson(j as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      AppLogger.e('ExamsRemoteDataSource', 'getExamFolders failed', error: e);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<ExamFolderModel> createExamFolder({
+    required String name,
+    String? color,
+    String? icon,
+    String? description,
+  }) async {
+    try {
+      final currentUserId = _safeClient.auth.currentUser?.id;
+      if (currentUserId == null) {
+        throw const AuthException('User not authenticated');
+      }
+
+      final userRes = await _safeClient
+          .from('users')
+          .select('tenant_id')
+          .eq('id', currentUserId)
+          .single();
+      final tenantId = userRes['tenant_id'] as String;
+
+      final insertPayload = {
+        'tenant_id': tenantId,
+        'name': name.trim(),
+        if (color != null) 'color': color,
+        if (icon != null) 'icon': icon,
+        if (description != null) 'description': description.trim(),
+      };
+
+      final response = await _safeClient
+          .from('exam_folders')
+          .insert(insertPayload)
+          .select('*, exams(count)')
+          .single();
+
+      return ExamFolderModel.fromJson(response);
+    } catch (e) {
+      AppLogger.e('ExamsRemoteDataSource', 'createExamFolder failed', error: e);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<ExamFolderModel> updateExamFolder({
+    required String folderId,
+    required String name,
+    String? color,
+    String? icon,
+    String? description,
+  }) async {
+    try {
+      final updatePayload = {
+        'name': name.trim(),
+        if (color != null) 'color': color,
+        if (icon != null) 'icon': icon,
+        if (description != null) 'description': description.trim(),
+        'updated_at': DateTime.now().toIso8601String(),
+      };
+
+      final response = await _safeClient
+          .from('exam_folders')
+          .update(updatePayload)
+          .eq('id', folderId)
+          .select('*, exams(count)')
+          .single();
+
+      return ExamFolderModel.fromJson(response);
+    } catch (e) {
+      AppLogger.e('ExamsRemoteDataSource', 'updateExamFolder failed', error: e);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<bool> deleteExamFolder(String folderId) async {
+    try {
+      await _safeClient
+          .from('exam_folders')
+          .delete()
+          .eq('id', folderId);
+      return true;
+    } catch (e) {
+      AppLogger.e('ExamsRemoteDataSource', 'deleteExamFolder failed', error: e);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<bool> moveExamToFolder({
+    required String examId,
+    String? folderId,
+  }) async {
+    try {
+      final res = await _safeClient.rpc<dynamic>(
+        'move_exam_to_folder',
+        params: {
+          'p_exam_id': examId,
+          'p_folder_id': folderId,
+        },
+      );
+      if (res is Map && res['success'] == true) {
+        return true;
+      }
+      await _safeClient
+          .from('exams')
+          .update({
+            'folder_id': folderId,
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', examId);
+      return true;
+    } catch (e) {
+      AppLogger.e('ExamsRemoteDataSource', 'moveExamToFolder failed', error: e);
       rethrow;
     }
   }

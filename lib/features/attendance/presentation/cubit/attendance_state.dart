@@ -122,6 +122,7 @@ final class TeacherAttendanceLoaded extends AttendanceState {
 final class StudentAttendanceLoaded extends AttendanceState {
   final List<AttendanceEntity> records;
   final AttendanceStats stats;
+  final StudentEngagementSummary? engagementSummary;
   final String? selectedGroupId;
   final bool isRefreshing;
   final bool hasMore;
@@ -130,6 +131,7 @@ final class StudentAttendanceLoaded extends AttendanceState {
   const StudentAttendanceLoaded({
     required this.records,
     required this.stats,
+    this.engagementSummary,
     this.selectedGroupId,
     this.isRefreshing = false,
     this.hasMore = true,
@@ -139,6 +141,7 @@ final class StudentAttendanceLoaded extends AttendanceState {
   StudentAttendanceLoaded copyWith({
     List<AttendanceEntity>? records,
     AttendanceStats? stats,
+    StudentEngagementSummary? engagementSummary,
     String? selectedGroupId,
     bool? isRefreshing,
     bool? hasMore,
@@ -147,6 +150,7 @@ final class StudentAttendanceLoaded extends AttendanceState {
     return StudentAttendanceLoaded(
       records: records ?? this.records,
       stats: stats ?? this.stats,
+      engagementSummary: engagementSummary ?? this.engagementSummary,
       selectedGroupId: selectedGroupId ?? this.selectedGroupId,
       isRefreshing: isRefreshing ?? this.isRefreshing,
       hasMore: hasMore ?? this.hasMore,
@@ -158,6 +162,7 @@ final class StudentAttendanceLoaded extends AttendanceState {
   List<Object?> get props => [
     records,
     stats,
+    engagementSummary,
     selectedGroupId,
     isRefreshing,
     hasMore,

@@ -8702,6 +8702,8 @@
   "@returnToExamAction": {},
   "examAutoSubmittedDueToViolations": "The exam was submitted automatically due to exceeding the maximum allowed security tab switches.",
   "@examAutoSubmittedDueToViolations": {},
+  "examSecurityWarningSubtitle": "This is your final warning! If you leave the exam window or open another tab again, your exam will be automatically submitted and scored immediately without further warning.",
+  "@examSecurityWarningSubtitle": {},
   "videoFileTooLargeForWeb": "The video file ({sizeMb} MB) exceeds browser memory capacity (max 2 GB). Please lower the Bitrate in your editor (CapCut) to keep the file under 1.5 GB for faster upload.",
   "@videoFileTooLargeForWeb": {
     "placeholders": {
@@ -8873,5 +8875,162 @@
   "editParentPhoneDialogBody": "Enter the parent WhatsApp phone number to link it to the student profile for academic reports.",
   "@editParentPhoneDialogBody": {},
   "saveActionShort": "Save",
-  "@saveActionShort": {}
+  "@saveActionShort": {},
+  "studentEngagementNavTitle": "Engagement & Progress",
+  "@studentEngagementNavTitle": {},
+  "studentEngagementNavSubtitle": "Watch & Activity Stats",
+  "@studentEngagementNavSubtitle": {},
+  "studentEngagementPageTitle": "Watch Commitment & Progress",
+  "@studentEngagementPageTitle": {},
+  "studentEngagementPageSubtitle": "Detailed tracking of your real watch hours, completed lectures, and learning activity.",
+  "@studentEngagementPageSubtitle": {},
+  "totalWatchTimeTitle": "Total Watch Time",
+  "@totalWatchTimeTitle": {},
+  "totalCourseDurationSubtitle": "Out of {total} total content",
+  "@totalCourseDurationSubtitle": {
+    "placeholders": {
+      "total": { "type": "String" }
+    }
+  },
+  "completedLecturesStatTitle": "Completed Lectures",
+  "@completedLecturesStatTitle": {},
+  "remainingLecturesSubtitle": "{count} lectures remaining",
+  "@remainingLecturesSubtitle": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "watchCommitmentRateTitle": "Watch Commitment Rate",
+  "@watchCommitmentRateTitle": {},
+  "lastPlatformActivityTitle": "Last Platform Activity",
+  "@lastPlatformActivityTitle": {},
+  "noActivityRecordedYet": "No activity recorded yet",
+  "@noActivityRecordedYet": {},
+  "recentWatchSession": "Recorded watch session",
+  "@recentWatchSession": {},
+  "filterAllLecturesCount": "All ({count})",
+  "@filterAllLecturesCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "filterCompletedCount": "Completed ({count})",
+  "@filterCompletedCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "filterInProgressCount": "In Progress ({count})",
+  "@filterInProgressCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "filterNotStartedCount": "Not Started ({count})",
+  "@filterNotStartedCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "filterAllGroups": "All Groups",
+  "@filterAllGroups": {},
+  "lectureWatchTimelineTitle": "Lectures & Engagement History",
+  "@lectureWatchTimelineTitle": {},
+  "watchedTimeOutOfTotal": "Watched {watched} of {total}",
+  "@watchedTimeOutOfTotal": {
+    "placeholders": {
+      "watched": { "type": "String" },
+      "total": { "type": "String" }
+    }
+  },
+  "lastWatchedAtLabel": "Last watched: {date}",
+  "@lastWatchedAtLabel": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "notWatchedYetLabel": "Not started yet",
+  "@notWatchedYetLabel": {},
+  "resumeLectureAction": "Continue Watching",
+  "@resumeLectureAction": {},
+  "startLectureAction": "Start Lecture",
+  "@startLectureAction": {},
+  "rewatchLectureAction": "Rewatch Lecture",
+  "@rewatchLectureAction": {},
+  "noEngagementLecturesEmpty": "No video lectures published in your enrolled groups yet.",
+  "@noEngagementLecturesEmpty": {},
+  "noEngagementLecturesFilterEmpty": "No lectures match the selected filter.",
+  "@noEngagementLecturesFilterEmpty": {},
+  "goToStudyMaterialsAction": "Go to My Lectures",
+  "@goToStudyMaterialsAction": {},
+  "excellentCommitment": "Excellent Commitment",
+  "@excellentCommitment": {},
+  "goodCommitment": "Good Engagement",
+  "@goodCommitment": {},
+  "needsFollowupCommitment": "Needs Follow-up",
+  "@needsFollowupCommitment": {},
+  "examFoldersTitle": "Exam Folders",
+  "@examFoldersTitle": {},
+  "allExamsTab": "All Exams",
+  "@allExamsTab": {},
+  "uncategorizedFolder": "Uncategorized",
+  "@uncategorizedFolder": {},
+  "newFolderAction": "New Folder",
+  "@newFolderAction": {},
+  "editFolderAction": "Edit Folder",
+  "@editFolderAction": {},
+  "deleteFolderAction": "Delete Folder",
+  "@deleteFolderAction": {},
+  "confirmDeleteFolderTitle": "Delete Folder?",
+  "@confirmDeleteFolderTitle": {},
+  "confirmDeleteFolderBody": "Are you sure you want to delete folder \"{name}\"? Exams inside will remain available as uncategorized.",
+  "@confirmDeleteFolderBody": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "folderNameLabel": "Folder Name",
+  "@folderNameLabel": {},
+  "folderNameHint": "e.g. Unit 1: Algebra, SAT Practice",
+  "@folderNameHint": {},
+  "folderNameRequired": "Please enter a folder name",
+  "@folderNameRequired": {},
+  "folderColorLabel": "Folder Color",
+  "@folderColorLabel": {},
+  "folderCreatedSuccess": "Folder created successfully",
+  "@folderCreatedSuccess": {},
+  "folderUpdatedSuccess": "Folder updated successfully",
+  "@folderUpdatedSuccess": {},
+  "folderDeletedSuccess": "Folder deleted successfully",
+  "@folderDeletedSuccess": {},
+  "moveExamToFolderAction": "Move to Folder",
+  "@moveExamToFolderAction": {},
+  "moveExamDialogTitle": "Move Exam to Folder",
+  "@moveExamDialogTitle": {},
+  "removeFromFolderOption": "No Folder (Uncategorized)",
+  "@removeFromFolderOption": {},
+  "examMovedToFolderSuccess": "Exam moved to folder successfully",
+  "@examMovedToFolderSuccess": {},
+  "emptyFolderSubtitle": "No exams in this folder yet",
+  "@emptyFolderSubtitle": {},
+  "folderExamCount": "{count} Exams",
+  "@folderExamCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "deleteFolderDialogTitle": "Delete Folder?",
+  "@deleteFolderDialogTitle": {},
+  "deleteFolderDialogBody": "Are you sure you want to delete folder \"{name}\"? Exams inside will remain available as uncategorized.",
+  "@deleteFolderDialogBody": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "confirmDeleteButton": "Delete Folder",
+  "@confirmDeleteButton": {},
+  "examRemovedFromFolderSuccess": "Exam removed from folder successfully",
+  "@examRemovedFromFolderSuccess": {},
+  "emptyFolderTitle": "Empty Folder",
+  "@emptyFolderTitle": {}
 }

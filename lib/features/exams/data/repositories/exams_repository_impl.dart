@@ -4,6 +4,7 @@ import '../../../../core/errors/result.dart';
 import '../../domain/entities/exam_entity.dart';
 import '../../domain/entities/exam_parent_dispatch_entity.dart';
 import '../../domain/entities/mistake_entities.dart';
+import '../../domain/entities/exam_folder_entity.dart';
 import '../../domain/repositories/exams_repository.dart';
 import '../datasources/exams_remote_datasource.dart';
 import '../models/exam_question_model.dart';
@@ -508,6 +509,104 @@ class ExamsRepositoryImpl implements ExamsRepository {
       final success = await _remoteDataSource.updateStudentParentPhone(
         studentId: studentId,
         parentPhone: parentPhone,
+      );
+      return Success(success);
+    } on PostgrestException catch (e) {
+      return FailureResult(ServerFailure(e.message, code: e.code));
+    } on AuthException catch (e) {
+      return FailureResult(AuthFailure(e.message, code: e.statusCode));
+    } catch (e) {
+      return FailureResult(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<List<ExamFolderEntity>>> getExamFolders() async {
+    try {
+      final folders = await _remoteDataSource.getExamFolders();
+      return Success(folders);
+    } on PostgrestException catch (e) {
+      return FailureResult(ServerFailure(e.message, code: e.code));
+    } on AuthException catch (e) {
+      return FailureResult(AuthFailure(e.message, code: e.statusCode));
+    } catch (e) {
+      return FailureResult(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<ExamFolderEntity>> createExamFolder({
+    required String name,
+    String? color,
+    String? icon,
+    String? description,
+  }) async {
+    try {
+      final folder = await _remoteDataSource.createExamFolder(
+        name: name,
+        color: color,
+        icon: icon,
+        description: description,
+      );
+      return Success(folder);
+    } on PostgrestException catch (e) {
+      return FailureResult(ServerFailure(e.message, code: e.code));
+    } on AuthException catch (e) {
+      return FailureResult(AuthFailure(e.message, code: e.statusCode));
+    } catch (e) {
+      return FailureResult(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<ExamFolderEntity>> updateExamFolder({
+    required String folderId,
+    required String name,
+    String? color,
+    String? icon,
+    String? description,
+  }) async {
+    try {
+      final folder = await _remoteDataSource.updateExamFolder(
+        folderId: folderId,
+        name: name,
+        color: color,
+        icon: icon,
+        description: description,
+      );
+      return Success(folder);
+    } on PostgrestException catch (e) {
+      return FailureResult(ServerFailure(e.message, code: e.code));
+    } on AuthException catch (e) {
+      return FailureResult(AuthFailure(e.message, code: e.statusCode));
+    } catch (e) {
+      return FailureResult(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<bool>> deleteExamFolder(String folderId) async {
+    try {
+      final success = await _remoteDataSource.deleteExamFolder(folderId);
+      return Success(success);
+    } on PostgrestException catch (e) {
+      return FailureResult(ServerFailure(e.message, code: e.code));
+    } on AuthException catch (e) {
+      return FailureResult(AuthFailure(e.message, code: e.statusCode));
+    } catch (e) {
+      return FailureResult(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<bool>> moveExamToFolder({
+    required String examId,
+    String? folderId,
+  }) async {
+    try {
+      final success = await _remoteDataSource.moveExamToFolder(
+        examId: examId,
+        folderId: folderId,
       );
       return Success(success);
     } on PostgrestException catch (e) {

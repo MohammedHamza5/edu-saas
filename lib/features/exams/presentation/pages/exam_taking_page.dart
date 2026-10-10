@@ -14,6 +14,7 @@ import '../widgets/sat_exam_tools_sheet.dart';
 import 'exam_result_page.dart';
 import 'package:edu_saas/features/question_bank/presentation/widgets/question_display_widgets.dart';
 import '../../../../core/widgets/forensic_watermark_overlay.dart';
+import '../../../../core/utils/exam_security_util.dart';
 
 class ExamTakingPage extends StatefulWidget {
   const ExamTakingPage({super.key});
@@ -26,16 +27,19 @@ class _ExamTakingPageState extends State<ExamTakingPage>
     with WidgetsBindingObserver {
   int _securityViolationsCount = 0;
   bool _isPrivacyShieldActive = false;
-  static const int _maxAllowedViolations = 3;
+  bool _isAutoSubmitting = false;
+  static const int _maxAllowedViolations = 2;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    setExamSecurityActive(true);
   }
 
   @override
   void dispose() {
+    setExamSecurityActive(false);
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -45,20 +49,41 @@ class _ExamTakingPageState extends State<ExamTakingPage>
     if (state == AppLifecycleState.inactive ||
         state == AppLifecycleState.paused ||
         state == AppLifecycleState.hidden) {
-      if (!_isPrivacyShieldActive && mounted) {
-        setState(() {
-          _isPrivacyShieldActive = true;
-          _securityViolationsCount++;
-        });
+      if (!_isAutoSubmitting && mounted) {
+        final cubit = context.read<ExamsCubit>();
+        final currentState = cubit.state;
+        if (currentState is ExamTakingState &&
+            !currentState.isSubmitting &&
+            !currentState.submitSuccess) {
+          if (!_isPrivacyShieldActive) {
+            setState(() {
+              _isPrivacyShieldActive = true;
+              _securityViolationsCount++;
+            });
 
-        if (_securityViolationsCount >= _maxAllowedViolations && mounted) {
-          context.read<ExamsCubit>().submitExam();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(context.l10n.examAutoSubmittedDueToViolations),
-              backgroundColor: AppColors.error,
-            ),
-          );
+            if (_securityViolationsCount >= _maxAllowedViolations) {
+              // Final Violation: Immediate auto-submission
+              _isAutoSubmitting = true;
+              cubit.submitExam();
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(context.l10n.examAutoSubmittedDueToViolations),
+                  backgroundColor: AppColors.error,
+                  duration: const Duration(seconds: 5),
+                ),
+              );
+            } else {
+              // First Violation: Strict warning notice
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(context.l10n.examSecurityWarningSubtitle),
+                  backgroundColor: AppColors.warning,
+                  duration: const Duration(seconds: 5),
+                ),
+              );
+            }
+          }
         }
       }
     }
@@ -670,12 +695,15 @@ class _ExamTakingPageState extends State<ExamTakingPage>
                   Container(
                     padding: const EdgeInsets.all(AppSpacing.s12),
                     decoration: BoxDecoration(
-                      color: AppColors.error.withValues(alpha: 0.12),
+                      color: (_isAutoSubmitting ? AppColors.error : AppColors.warning)
+                          .withValues(alpha: 0.12),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
-                      Icons.warning_amber_rounded,
-                      color: AppColors.error,
+                    child: Icon(
+                      _isAutoSubmitting
+                          ? Icons.lock_outline_rounded
+                          : Icons.warning_amber_rounded,
+                      color: _isAutoSubmitting ? AppColors.error : AppColors.warning,
                       size: 40,
                     ),
                   ),
@@ -683,15 +711,17 @@ class _ExamTakingPageState extends State<ExamTakingPage>
                   Text(
                     context.l10n.examSecurityAlertTitle,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.error,
+                      color: _isAutoSubmitting ? AppColors.error : AppColors.warning,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.s8),
                   Text(
-                    context.l10n.examSecurityAlertMessage,
+                    _isAutoSubmitting
+                        ? context.l10n.examAutoSubmittedDueToViolations
+                        : context.l10n.examSecurityWarningSubtitle,
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       fontSize: 13,
@@ -699,56 +729,61 @@ class _ExamTakingPageState extends State<ExamTakingPage>
                       height: 1.5,
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.s12),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.warning.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(
-                        AppSpacing.radiusSmall,
-                      ),
-                      border: Border.all(
-                        color: AppColors.warning.withValues(alpha: 0.35),
-                      ),
-                    ),
-                    child: Text(
-                      context.l10n.examSecurityViolationsCount(
-                        _securityViolationsCount,
-                        _maxAllowedViolations,
-                      ),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.warning,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.s20),
-                  ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
+                  if (!_isAutoSubmitting) ...[
+                    const SizedBox(height: AppSpacing.s12),
+                    Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.s24,
-                        vertical: AppSpacing.s12,
+                        horizontal: 12,
+                        vertical: 6,
                       ),
-                      shape: RoundedRectangleBorder(
+                      decoration: BoxDecoration(
+                        color: AppColors.warning.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(
-                          AppSpacing.radiusMedium,
+                          AppSpacing.radiusSmall,
+                        ),
+                        border: Border.all(
+                          color: AppColors.warning.withValues(alpha: 0.35),
+                        ),
+                      ),
+                      child: Text(
+                        context.l10n.examSecurityViolationsCount(
+                          _securityViolationsCount,
+                          _maxAllowedViolations,
+                        ),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.warning,
                         ),
                       ),
                     ),
-                    icon: const Icon(Icons.arrow_back_rounded, size: 18),
-                    label: Text(context.l10n.returnToExamAction),
-                    onPressed: () {
-                      setState(() {
-                        _isPrivacyShieldActive = false;
-                      });
-                    },
-                  ),
+                    const SizedBox(height: AppSpacing.s20),
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.s24,
+                          vertical: AppSpacing.s12,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.radiusMedium,
+                          ),
+                        ),
+                      ),
+                      icon: const Icon(Icons.arrow_back_rounded, size: 18),
+                      label: Text(context.l10n.returnToExamAction),
+                      onPressed: () {
+                        setState(() {
+                          _isPrivacyShieldActive = false;
+                        });
+                      },
+                    ),
+                  ] else ...[
+                    const SizedBox(height: AppSpacing.s20),
+                    const Center(child: AppLoadingView.signature()),
+                  ],
                 ],
               ),
             ),

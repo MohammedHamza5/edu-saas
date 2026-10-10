@@ -427,6 +427,7 @@ class _AppVideoPlayerState extends State<AppVideoPlayer>
           onMetricsProgress: widget.onMetricsProgress,
           onCompleted: widget.onCompleted,
           onSeekReady: widget.onSeekReady,
+          onPlaybackControlsReady: widget.onPlaybackControlsReady,
           onFullscreenChanged: widget.onFullscreenChanged,
         ),
       );

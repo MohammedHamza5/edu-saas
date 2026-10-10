@@ -5051,7 +5051,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rewatchLectureAction => 'Rewatch Lecture';
 
   @override
-  String get startLectureAction => 'Watch Lecture';
+  String get startLectureAction => 'Start Lecture';
 
   @override
   String get quizPrefix => 'Lecture Quiz';
@@ -6747,7 +6747,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get folderName => 'Folder Name';
 
   @override
-  String get folderNameHint => 'e.g. Algebra Basics';
+  String get folderNameHint => 'e.g. Unit 1: Algebra, SAT Practice';
 
   @override
   String get folderCreatedSuccess => 'Folder created successfully';
@@ -8017,6 +8017,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'The exam was submitted automatically due to exceeding the maximum allowed security tab switches.';
 
   @override
+  String get examSecurityWarningSubtitle =>
+      'This is your final warning! If you leave the exam window or open another tab again, your exam will be automatically submitted and scored immediately without further warning.';
+
+  @override
   String videoFileTooLargeForWeb(String sizeMb) {
     return 'The video file ($sizeMb MB) exceeds browser memory capacity (max 2 GB). Please lower the Bitrate in your editor (CapCut) to keep the file under 1.5 GB for faster upload.';
   }
@@ -8236,4 +8240,186 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get saveActionShort => 'Save';
+
+  @override
+  String get studentEngagementNavTitle => 'Engagement & Progress';
+
+  @override
+  String get studentEngagementNavSubtitle => 'Watch & Activity Stats';
+
+  @override
+  String get studentEngagementPageTitle => 'Watch Commitment & Progress';
+
+  @override
+  String get studentEngagementPageSubtitle =>
+      'Detailed tracking of your real watch hours, completed lectures, and learning activity.';
+
+  @override
+  String get totalWatchTimeTitle => 'Total Watch Time';
+
+  @override
+  String totalCourseDurationSubtitle(String total) {
+    return 'Out of $total total content';
+  }
+
+  @override
+  String get completedLecturesStatTitle => 'Completed Lectures';
+
+  @override
+  String remainingLecturesSubtitle(int count) {
+    return '$count lectures remaining';
+  }
+
+  @override
+  String get watchCommitmentRateTitle => 'Watch Commitment Rate';
+
+  @override
+  String get lastPlatformActivityTitle => 'Last Platform Activity';
+
+  @override
+  String get noActivityRecordedYet => 'No activity recorded yet';
+
+  @override
+  String get recentWatchSession => 'Recorded watch session';
+
+  @override
+  String filterAllLecturesCount(int count) {
+    return 'All ($count)';
+  }
+
+  @override
+  String filterCompletedCount(int count) {
+    return 'Completed ($count)';
+  }
+
+  @override
+  String filterInProgressCount(int count) {
+    return 'In Progress ($count)';
+  }
+
+  @override
+  String filterNotStartedCount(int count) {
+    return 'Not Started ($count)';
+  }
+
+  @override
+  String get filterAllGroups => 'All Groups';
+
+  @override
+  String get lectureWatchTimelineTitle => 'Lectures & Engagement History';
+
+  @override
+  String watchedTimeOutOfTotal(String watched, String total) {
+    return 'Watched $watched of $total';
+  }
+
+  @override
+  String lastWatchedAtLabel(String date) {
+    return 'Last watched: $date';
+  }
+
+  @override
+  String get notWatchedYetLabel => 'Not started yet';
+
+  @override
+  String get resumeLectureAction => 'Continue Watching';
+
+  @override
+  String get noEngagementLecturesEmpty =>
+      'No video lectures published in your enrolled groups yet.';
+
+  @override
+  String get noEngagementLecturesFilterEmpty =>
+      'No lectures match the selected filter.';
+
+  @override
+  String get goToStudyMaterialsAction => 'Go to My Lectures';
+
+  @override
+  String get excellentCommitment => 'Excellent Commitment';
+
+  @override
+  String get goodCommitment => 'Good Engagement';
+
+  @override
+  String get needsFollowupCommitment => 'Needs Follow-up';
+
+  @override
+  String get examFoldersTitle => 'Exam Folders';
+
+  @override
+  String get allExamsTab => 'All Exams';
+
+  @override
+  String get uncategorizedFolder => 'Uncategorized';
+
+  @override
+  String get newFolderAction => 'New Folder';
+
+  @override
+  String get editFolderAction => 'Edit Folder';
+
+  @override
+  String get deleteFolderAction => 'Delete Folder';
+
+  @override
+  String get confirmDeleteFolderTitle => 'Delete Folder?';
+
+  @override
+  String confirmDeleteFolderBody(String name) {
+    return 'Are you sure you want to delete folder \"$name\"? Exams inside will remain available as uncategorized.';
+  }
+
+  @override
+  String get folderNameLabel => 'Folder Name';
+
+  @override
+  String get folderNameRequired => 'Please enter a folder name';
+
+  @override
+  String get folderColorLabel => 'Folder Color';
+
+  @override
+  String get folderUpdatedSuccess => 'Folder updated successfully';
+
+  @override
+  String get folderDeletedSuccess => 'Folder deleted successfully';
+
+  @override
+  String get moveExamToFolderAction => 'Move to Folder';
+
+  @override
+  String get moveExamDialogTitle => 'Move Exam to Folder';
+
+  @override
+  String get removeFromFolderOption => 'No Folder (Uncategorized)';
+
+  @override
+  String get examMovedToFolderSuccess => 'Exam moved to folder successfully';
+
+  @override
+  String get emptyFolderSubtitle => 'No exams in this folder yet';
+
+  @override
+  String folderExamCount(int count) {
+    return '$count Exams';
+  }
+
+  @override
+  String get deleteFolderDialogTitle => 'Delete Folder?';
+
+  @override
+  String deleteFolderDialogBody(String name) {
+    return 'Are you sure you want to delete folder \"$name\"? Exams inside will remain available as uncategorized.';
+  }
+
+  @override
+  String get confirmDeleteButton => 'Delete Folder';
+
+  @override
+  String get examRemovedFromFolderSuccess =>
+      'Exam removed from folder successfully';
+
+  @override
+  String get emptyFolderTitle => 'Empty Folder';
 }

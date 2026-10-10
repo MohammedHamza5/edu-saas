@@ -5022,10 +5022,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get reviewQuizResultAction => 'مراجعة نتيجة الكويز';
 
   @override
-  String get rewatchLectureAction => 'إعادة مشاهدة المحاضرة';
+  String get rewatchLectureAction => 'إعادة المشاهدة';
 
   @override
-  String get startLectureAction => 'مشاهدة المحاضرة';
+  String get startLectureAction => 'بدء المشاهدة';
 
   @override
   String get quizPrefix => 'كويز محاضرة';
@@ -6711,7 +6711,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get folderName => 'اسم المجلد';
 
   @override
-  String get folderNameHint => 'مثال: أساسيات الجبر وحل المعادلات';
+  String get folderNameHint => 'مثال: الوحدة الأولى: الجبر، نماذج SAT';
 
   @override
   String get folderCreatedSuccess => 'تم إنشاء المجلد بنجاح';
@@ -7977,6 +7977,10 @@ class AppLocalizationsAr extends AppLocalizations {
       'تم تسليم الامتحان تلقائياً لتجاوز الحد الأقصى لمخالفات مغادرة النافذة.';
 
   @override
+  String get examSecurityWarningSubtitle =>
+      'هذا هو تحذيرك الأخير! في حال مغادرة شاشة الامتحان أو فتح تبويب آخر مرة أخرى، سيتم إنهاء وتسليم الامتحان فوراً واعتماد درجتك الحالية دون إنذار آخر.';
+
+  @override
   String videoFileTooLargeForWeb(String sizeMb) {
     return 'حجم الفيديو ($sizeMb ميجابايت) يتجاوز الحد الأقصى لذاكرة المتصفح (2 جيجابايت). يُرجى تقليل الـ Bitrate في برنامج المونتاج (CapCut) ليكون حجم الملف أقل من 1.5 جيجابايت وتسريع الرفع.';
   }
@@ -8193,4 +8197,186 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get saveActionShort => 'حفظ';
+
+  @override
+  String get studentEngagementNavTitle => 'الالتزام والإنجاز';
+
+  @override
+  String get studentEngagementNavSubtitle => 'إحصائيات المشاهدة والنشاط';
+
+  @override
+  String get studentEngagementPageTitle => 'سجل الالتزام وإنجاز المشاهدة';
+
+  @override
+  String get studentEngagementPageSubtitle =>
+      'متابعة تفصيلية لساعات المشاهدة الحقيقية، المحاضرات المكتملة، ومستوى تفاعلك الأكاديمي';
+
+  @override
+  String get totalWatchTimeTitle => 'إجمالي وقت المشاهدة';
+
+  @override
+  String totalCourseDurationSubtitle(String total) {
+    return 'من أصل $total إجمالي المحتوى';
+  }
+
+  @override
+  String get completedLecturesStatTitle => 'المحاضرات المكتملة';
+
+  @override
+  String remainingLecturesSubtitle(int count) {
+    return 'متبقي $count للمشاهدة';
+  }
+
+  @override
+  String get watchCommitmentRateTitle => 'معدل الالتزام بالمشاهدة';
+
+  @override
+  String get lastPlatformActivityTitle => 'آخر نشاط على المنصة';
+
+  @override
+  String get noActivityRecordedYet => 'لم يُسجل نشاط بعد';
+
+  @override
+  String get recentWatchSession => 'جلسة مشاهدة مسجلة';
+
+  @override
+  String filterAllLecturesCount(int count) {
+    return 'الكل ($count)';
+  }
+
+  @override
+  String filterCompletedCount(int count) {
+    return 'المكتملة ($count)';
+  }
+
+  @override
+  String filterInProgressCount(int count) {
+    return 'قيد المتابعة ($count)';
+  }
+
+  @override
+  String filterNotStartedCount(int count) {
+    return 'لم تبدأ بعد ($count)';
+  }
+
+  @override
+  String get filterAllGroups => 'جميع المجموعات';
+
+  @override
+  String get lectureWatchTimelineTitle => 'مسار وسجل مشاهدة المحاضرات';
+
+  @override
+  String watchedTimeOutOfTotal(String watched, String total) {
+    return 'شاهدت $watched من $total';
+  }
+
+  @override
+  String lastWatchedAtLabel(String date) {
+    return 'آخر مشاهدة: $date';
+  }
+
+  @override
+  String get notWatchedYetLabel => 'لم تبدأ المشاهدة بعد';
+
+  @override
+  String get resumeLectureAction => 'استكمال المشاهدة';
+
+  @override
+  String get noEngagementLecturesEmpty =>
+      'لم يتم نشر أي محاضرات فيديو في مجموعاتك حتى الآن.';
+
+  @override
+  String get noEngagementLecturesFilterEmpty =>
+      'لا توجد محاضرات تطابق التصفية المحددة.';
+
+  @override
+  String get goToStudyMaterialsAction => 'الانتقال للمحاضرات';
+
+  @override
+  String get excellentCommitment => 'التزام ممتاز';
+
+  @override
+  String get goodCommitment => 'مستوى جيد';
+
+  @override
+  String get needsFollowupCommitment => 'بحاجة لمزيد من المتابعة';
+
+  @override
+  String get examFoldersTitle => 'مجلدات وتصنيفات الاختبارات';
+
+  @override
+  String get allExamsTab => 'جميع الاختبارات';
+
+  @override
+  String get uncategorizedFolder => 'بدون مجلد';
+
+  @override
+  String get newFolderAction => 'مجلد جديد';
+
+  @override
+  String get editFolderAction => 'تعديل المجلد';
+
+  @override
+  String get deleteFolderAction => 'حذف المجلد';
+
+  @override
+  String get confirmDeleteFolderTitle => 'حذف المجلد؟';
+
+  @override
+  String confirmDeleteFolderBody(String name) {
+    return 'هل أنت متأكد من حذف مجلد «$name»؟ لن تُحذف الاختبارات بل ستصبح بدون مجلد.';
+  }
+
+  @override
+  String get folderNameLabel => 'اسم المجلد';
+
+  @override
+  String get folderNameRequired => 'يرجى إدخال اسم المجلد';
+
+  @override
+  String get folderColorLabel => 'لون المجلد';
+
+  @override
+  String get folderUpdatedSuccess => 'تم تحديث المجلد بنجاح';
+
+  @override
+  String get folderDeletedSuccess => 'تم حذف المجلد بنجاح';
+
+  @override
+  String get moveExamToFolderAction => 'نقل إلى مجلد';
+
+  @override
+  String get moveExamDialogTitle => 'نقل الاختبار إلى مجلد';
+
+  @override
+  String get removeFromFolderOption => 'بدون مجلد (غير مصنف)';
+
+  @override
+  String get examMovedToFolderSuccess => 'تم نقل الاختبار إلى المجلد بنجاح';
+
+  @override
+  String get emptyFolderSubtitle => 'لا توجد اختبارات في هذا المجلد بعد';
+
+  @override
+  String folderExamCount(int count) {
+    return '$count اختبار';
+  }
+
+  @override
+  String get deleteFolderDialogTitle => 'حذف المجلد؟';
+
+  @override
+  String deleteFolderDialogBody(String name) {
+    return 'هل أنت متأكد من حذف مجلد «$name»؟ لن تُحذف الاختبارات بل ستصبح بدون مجلد.';
+  }
+
+  @override
+  String get confirmDeleteButton => 'حذف المجلد';
+
+  @override
+  String get examRemovedFromFolderSuccess =>
+      'تمت إزالة الاختبار من المجلد بنجاح';
+
+  @override
+  String get emptyFolderTitle => 'مجلد فارغ';
 }

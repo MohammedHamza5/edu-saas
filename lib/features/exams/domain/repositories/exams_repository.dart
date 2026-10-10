@@ -2,6 +2,7 @@ import '../../../../core/errors/result.dart';
 import '../entities/exam_entity.dart';
 import '../entities/exam_parent_dispatch_entity.dart';
 import '../entities/mistake_entities.dart';
+import '../entities/exam_folder_entity.dart';
 
 
 abstract class ExamsRepository {
@@ -148,6 +149,35 @@ abstract class ExamsRepository {
   Future<Result<bool>> updateStudentParentPhone({
     required String studentId,
     required String parentPhone,
+  });
+
+  /// Fetches exam folders with exam count for the current tenant.
+  Future<Result<List<ExamFolderEntity>>> getExamFolders();
+
+  /// Creates a new exam folder.
+  Future<Result<ExamFolderEntity>> createExamFolder({
+    required String name,
+    String? color,
+    String? icon,
+    String? description,
+  });
+
+  /// Updates an existing exam folder.
+  Future<Result<ExamFolderEntity>> updateExamFolder({
+    required String folderId,
+    required String name,
+    String? color,
+    String? icon,
+    String? description,
+  });
+
+  /// Deletes an exam folder (exams inside it are kept, their folder_id is set to null).
+  Future<Result<bool>> deleteExamFolder(String folderId);
+
+  /// Moves or assigns an exam to a folder (or unassigns if folderId is null).
+  Future<Result<bool>> moveExamToFolder({
+    required String examId,
+    String? folderId,
   });
 }
 

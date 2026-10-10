@@ -2143,7 +2143,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
               ...attachedList.map((attached) {
                 final examDetails = _attachedExamDetails[attached.examId];
                 final latestAttempt = examDetails?.myLatestAttempt;
-                final passingScore = attached.passingScore;
+                final passingScore = (examDetails?.passingScore != null && examDetails!.passingScore! > 0)
+                    ? examDetails.passingScore!
+                    : attached.passingScore;
                 final isSubmitted =
                     latestAttempt != null && latestAttempt.isSubmitted;
                 final isPassed =
@@ -2153,8 +2155,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                 final scorePct =
                     latestAttempt?.percentage?.toInt() ??
                     attached.bestScore?.toInt();
-                final questionsCount =
-                    examDetails?.activeVersion?.questions.length ?? 10;
+                final resolvedQuestionsCount = (examDetails != null && examDetails.totalQuestions > 0)
+                    ? examDetails.totalQuestions
+                    : attached.questionsCount;
                 final quizTitle = (examDetails?.title.isNotEmpty == true)
                     ? examDetails!.title
                     : (attached.examTitle.isNotEmpty
@@ -2265,7 +2268,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                                 Row(
                                   children: [
                                     Text(
-                                      '$questionsCount ${context.l10n.questions} · ${context.l10n.passingScoreTitle}: $passingScore%',
+                                      resolvedQuestionsCount > 0
+                                          ? '$resolvedQuestionsCount ${context.l10n.questions} · ${context.l10n.passingScoreTitle}: $passingScore%'
+                                          : '${context.l10n.passingScoreTitle}: $passingScore%',
                                       style: const TextStyle(
                                         fontSize: 10,
                                         color: AppColors.textSecondary,

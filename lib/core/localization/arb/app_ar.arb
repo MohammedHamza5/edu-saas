@@ -2749,6 +2749,8 @@
   "examPrivacyShieldNotice": "تم حجب أسئلة الامتحان أثناء عدم التركيز على النافذة لحماية النزاهة ومنع التسريب.",
   "returnToExamAction": "العودة للاختبار ومتابعة الحل",
   "examAutoSubmittedDueToViolations": "تم تسليم الامتحان تلقائياً لتجاوز الحد الأقصى لمخالفات مغادرة النافذة.",
+  "examSecurityWarningSubtitle": "هذا هو تحذيرك الأخير! في حال مغادرة شاشة الامتحان أو فتح تبويب آخر مرة أخرى، سيتم إنهاء وتسليم الامتحان فوراً واعتماد درجتك الحالية دون إنذار آخر.",
+  "@examSecurityWarningSubtitle": {},
   "videoFileTooLargeForWeb": "حجم الفيديو ({sizeMb} ميجابايت) يتجاوز الحد الأقصى لذاكرة المتصفح (2 جيجابايت). يُرجى تقليل الـ Bitrate في برنامج المونتاج (CapCut) ليكون حجم الملف أقل من 1.5 جيجابايت وتسريع الرفع.",
   "@videoFileTooLargeForWeb": {
     "placeholders": {
@@ -2920,5 +2922,162 @@
   "editParentPhoneDialogBody": "أدخل رقم هاتف ولي الأمر (واتساب) لربطه بحساب الطالب وإرسال التقارير.",
   "@editParentPhoneDialogBody": {},
   "saveActionShort": "حفظ",
-  "@saveActionShort": {}
+  "@saveActionShort": {},
+  "studentEngagementNavTitle": "الالتزام والإنجاز",
+  "@studentEngagementNavTitle": {},
+  "studentEngagementNavSubtitle": "إحصائيات المشاهدة والنشاط",
+  "@studentEngagementNavSubtitle": {},
+  "studentEngagementPageTitle": "سجل الالتزام وإنجاز المشاهدة",
+  "@studentEngagementPageTitle": {},
+  "studentEngagementPageSubtitle": "متابعة تفصيلية لساعات المشاهدة الحقيقية، المحاضرات المكتملة، ومستوى تفاعلك الأكاديمي",
+  "@studentEngagementPageSubtitle": {},
+  "totalWatchTimeTitle": "إجمالي وقت المشاهدة",
+  "@totalWatchTimeTitle": {},
+  "totalCourseDurationSubtitle": "من أصل {total} إجمالي المحتوى",
+  "@totalCourseDurationSubtitle": {
+    "placeholders": {
+      "total": { "type": "String" }
+    }
+  },
+  "completedLecturesStatTitle": "المحاضرات المكتملة",
+  "@completedLecturesStatTitle": {},
+  "remainingLecturesSubtitle": "متبقي {count} للمشاهدة",
+  "@remainingLecturesSubtitle": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "watchCommitmentRateTitle": "معدل الالتزام بالمشاهدة",
+  "@watchCommitmentRateTitle": {},
+  "lastPlatformActivityTitle": "آخر نشاط على المنصة",
+  "@lastPlatformActivityTitle": {},
+  "noActivityRecordedYet": "لم يُسجل نشاط بعد",
+  "@noActivityRecordedYet": {},
+  "recentWatchSession": "جلسة مشاهدة مسجلة",
+  "@recentWatchSession": {},
+  "filterAllLecturesCount": "الكل ({count})",
+  "@filterAllLecturesCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "filterCompletedCount": "المكتملة ({count})",
+  "@filterCompletedCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "filterInProgressCount": "قيد المتابعة ({count})",
+  "@filterInProgressCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "filterNotStartedCount": "لم تبدأ بعد ({count})",
+  "@filterNotStartedCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "filterAllGroups": "جميع المجموعات",
+  "@filterAllGroups": {},
+  "lectureWatchTimelineTitle": "مسار وسجل مشاهدة المحاضرات",
+  "@lectureWatchTimelineTitle": {},
+  "watchedTimeOutOfTotal": "شاهدت {watched} من {total}",
+  "@watchedTimeOutOfTotal": {
+    "placeholders": {
+      "watched": { "type": "String" },
+      "total": { "type": "String" }
+    }
+  },
+  "lastWatchedAtLabel": "آخر مشاهدة: {date}",
+  "@lastWatchedAtLabel": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "notWatchedYetLabel": "لم تبدأ المشاهدة بعد",
+  "@notWatchedYetLabel": {},
+  "resumeLectureAction": "استكمال المشاهدة",
+  "@resumeLectureAction": {},
+  "startLectureAction": "بدء المشاهدة",
+  "@startLectureAction": {},
+  "rewatchLectureAction": "إعادة المشاهدة",
+  "@rewatchLectureAction": {},
+  "noEngagementLecturesEmpty": "لم يتم نشر أي محاضرات فيديو في مجموعاتك حتى الآن.",
+  "@noEngagementLecturesEmpty": {},
+  "noEngagementLecturesFilterEmpty": "لا توجد محاضرات تطابق التصفية المحددة.",
+  "@noEngagementLecturesFilterEmpty": {},
+  "goToStudyMaterialsAction": "الانتقال للمحاضرات",
+  "@goToStudyMaterialsAction": {},
+  "excellentCommitment": "التزام ممتاز",
+  "@excellentCommitment": {},
+  "goodCommitment": "مستوى جيد",
+  "@goodCommitment": {},
+  "needsFollowupCommitment": "بحاجة لمزيد من المتابعة",
+  "@needsFollowupCommitment": {},
+  "examFoldersTitle": "مجلدات وتصنيفات الاختبارات",
+  "@examFoldersTitle": {},
+  "allExamsTab": "جميع الاختبارات",
+  "@allExamsTab": {},
+  "uncategorizedFolder": "بدون مجلد",
+  "@uncategorizedFolder": {},
+  "newFolderAction": "مجلد جديد",
+  "@newFolderAction": {},
+  "editFolderAction": "تعديل المجلد",
+  "@editFolderAction": {},
+  "deleteFolderAction": "حذف المجلد",
+  "@deleteFolderAction": {},
+  "confirmDeleteFolderTitle": "حذف المجلد؟",
+  "@confirmDeleteFolderTitle": {},
+  "confirmDeleteFolderBody": "هل أنت متأكد من حذف مجلد «{name}»؟ لن تُحذف الاختبارات بل ستصبح بدون مجلد.",
+  "@confirmDeleteFolderBody": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "folderNameLabel": "اسم المجلد",
+  "@folderNameLabel": {},
+  "folderNameHint": "مثال: الوحدة الأولى: الجبر، نماذج SAT",
+  "@folderNameHint": {},
+  "folderNameRequired": "يرجى إدخال اسم المجلد",
+  "@folderNameRequired": {},
+  "folderColorLabel": "لون المجلد",
+  "@folderColorLabel": {},
+  "folderCreatedSuccess": "تم إنشاء المجلد بنجاح",
+  "@folderCreatedSuccess": {},
+  "folderUpdatedSuccess": "تم تحديث المجلد بنجاح",
+  "@folderUpdatedSuccess": {},
+  "folderDeletedSuccess": "تم حذف المجلد بنجاح",
+  "@folderDeletedSuccess": {},
+  "moveExamToFolderAction": "نقل إلى مجلد",
+  "@moveExamToFolderAction": {},
+  "moveExamDialogTitle": "نقل الاختبار إلى مجلد",
+  "@moveExamDialogTitle": {},
+  "removeFromFolderOption": "بدون مجلد (غير مصنف)",
+  "@removeFromFolderOption": {},
+  "examMovedToFolderSuccess": "تم نقل الاختبار إلى المجلد بنجاح",
+  "@examMovedToFolderSuccess": {},
+  "emptyFolderSubtitle": "لا توجد اختبارات في هذا المجلد بعد",
+  "@emptyFolderSubtitle": {},
+  "folderExamCount": "{count} اختبار",
+  "@folderExamCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "deleteFolderDialogTitle": "حذف المجلد؟",
+  "@deleteFolderDialogTitle": {},
+  "deleteFolderDialogBody": "هل أنت متأكد من حذف مجلد «{name}»؟ لن تُحذف الاختبارات بل ستصبح بدون مجلد.",
+  "@deleteFolderDialogBody": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "confirmDeleteButton": "حذف المجلد",
+  "@confirmDeleteButton": {},
+  "examRemovedFromFolderSuccess": "تمت إزالة الاختبار من المجلد بنجاح",
+  "@examRemovedFromFolderSuccess": {},
+  "emptyFolderTitle": "مجلد فارغ",
+  "@emptyFolderTitle": {}
 }

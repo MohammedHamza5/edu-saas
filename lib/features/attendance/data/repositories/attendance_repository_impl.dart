@@ -94,4 +94,22 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
       return FailureResult(ServerFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Result<StudentEngagementSummary>> getStudentEngagementSummary({
+    required String studentId,
+    String? groupId,
+  }) async {
+    try {
+      final summary = await _remoteDataSource.getStudentEngagementSummary(
+        studentId: studentId,
+        groupId: groupId,
+      );
+      return Success(summary);
+    } on PostgrestException catch (e) {
+      return FailureResult(ServerFailure(e.message, code: e.code));
+    } catch (e) {
+      return FailureResult(ServerFailure(e.toString()));
+    }
+  }
 }

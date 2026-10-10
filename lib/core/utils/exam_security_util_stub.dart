@@ -1,0 +1,1 @@
+void setWebExamSecurityActive(bool active) {}

@@ -504,11 +504,15 @@ class ExamEntity extends Equatable {
   final DateTime updatedAt;
   final ExamVersionEntity? activeVersion;
   final int attemptsCount;
+  final int questionsCount;
   final ExamAttemptEntity? myLatestAttempt;
   final int? myBestScore;
   final bool isLectureExam;
   final String? linkedLessonId;
   final String? linkedLessonTitle;
+  final String? folderId;
+  final String? folderName;
+  final String? folderColor;
 
   const ExamEntity({
     required this.id,
@@ -529,12 +533,20 @@ class ExamEntity extends Equatable {
     required this.updatedAt,
     this.activeVersion,
     this.attemptsCount = 0,
+    this.questionsCount = 0,
     this.myLatestAttempt,
     this.myBestScore,
     this.isLectureExam = false,
     this.linkedLessonId,
     this.linkedLessonTitle,
+    this.folderId,
+    this.folderName,
+    this.folderColor,
   });
+
+  int get totalQuestions => questionsCount > 0
+      ? questionsCount
+      : (activeVersion?.questions.length ?? 0);
 
   bool get hasAttempted => myLatestAttempt != null;
   bool get isUntimed => durationMinutes <= 0;
@@ -558,7 +570,7 @@ class ExamEntity extends Equatable {
 
   bool get isPublished => activeVersion?.isPublished ?? (activeVersion != null);
   bool get isDraft => !isPublished;
-  bool get canEditQuestions => isDraft && attemptsCount == 0;
+  bool get canEditQuestions => true;
   bool get isLinkedToLesson => linkedLessonId != null && linkedLessonId!.isNotEmpty;
   bool get isGeneralExam => !isLectureExam;
   String? get description => null;
@@ -582,11 +594,15 @@ class ExamEntity extends Equatable {
     DateTime? updatedAt,
     ExamVersionEntity? activeVersion,
     int? attemptsCount,
+    int? questionsCount,
     ExamAttemptEntity? myLatestAttempt,
     int? myBestScore,
     bool? isLectureExam,
     String? linkedLessonId,
     String? linkedLessonTitle,
+    String? folderId,
+    String? folderName,
+    String? folderColor,
   }) {
     return ExamEntity(
       id: id ?? this.id,
@@ -607,11 +623,15 @@ class ExamEntity extends Equatable {
       updatedAt: updatedAt ?? this.updatedAt,
       activeVersion: activeVersion ?? this.activeVersion,
       attemptsCount: attemptsCount ?? this.attemptsCount,
+      questionsCount: questionsCount ?? this.questionsCount,
       myLatestAttempt: myLatestAttempt ?? this.myLatestAttempt,
       myBestScore: myBestScore ?? this.myBestScore,
       isLectureExam: isLectureExam ?? this.isLectureExam,
       linkedLessonId: linkedLessonId ?? this.linkedLessonId,
       linkedLessonTitle: linkedLessonTitle ?? this.linkedLessonTitle,
+      folderId: folderId ?? this.folderId,
+      folderName: folderName ?? this.folderName,
+      folderColor: folderColor ?? this.folderColor,
     );
   }
 
@@ -635,10 +655,14 @@ class ExamEntity extends Equatable {
     updatedAt,
     activeVersion,
     attemptsCount,
+    questionsCount,
     myLatestAttempt,
     myBestScore,
     isLectureExam,
     linkedLessonId,
     linkedLessonTitle,
+    folderId,
+    folderName,
+    folderColor,
   ];
 }

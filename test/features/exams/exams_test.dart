@@ -4,6 +4,7 @@ import 'package:edu_saas/core/localization/generated/app_localizations.dart';
 import 'package:edu_saas/core/theme/app_theme.dart';
 import 'package:edu_saas/core/utils/cache_manager.dart';
 import 'package:edu_saas/features/exams/domain/entities/exam_entity.dart';
+import 'package:edu_saas/features/exams/domain/entities/exam_folder_entity.dart';
 import 'package:edu_saas/features/exams/domain/entities/exam_parent_dispatch_entity.dart';
 import 'package:edu_saas/features/exams/domain/entities/mistake_entities.dart';
 import 'package:edu_saas/features/exams/domain/repositories/exams_repository.dart';
@@ -381,6 +382,64 @@ class FakeExamsRepository implements ExamsRepository {
   Future<Result<bool>> updateStudentParentPhone({
     required String studentId,
     required String parentPhone,
+  }) async {
+    if (shouldFail) return FailureResult(ServerFailure(failureMessage));
+    return const Success(true);
+  }
+
+  @override
+  Future<Result<List<ExamFolderEntity>>> getExamFolders() async {
+    if (shouldFail) return FailureResult(ServerFailure(failureMessage));
+    return const Success([]);
+  }
+
+  @override
+  Future<Result<ExamFolderEntity>> createExamFolder({
+    required String name,
+    String? color,
+    String? icon,
+    String? description,
+  }) async {
+    if (shouldFail) return FailureResult(ServerFailure(failureMessage));
+    return Success(ExamFolderEntity(
+      id: 'folder-1',
+      tenantId: 'tenant-1',
+      name: name,
+      color: color ?? '#5B4FE0',
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    ));
+  }
+
+  @override
+  Future<Result<ExamFolderEntity>> updateExamFolder({
+    required String folderId,
+    required String name,
+    String? color,
+    String? icon,
+    String? description,
+  }) async {
+    if (shouldFail) return FailureResult(ServerFailure(failureMessage));
+    return Success(ExamFolderEntity(
+      id: folderId,
+      tenantId: 'tenant-1',
+      name: name,
+      color: color ?? '#5B4FE0',
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    ));
+  }
+
+  @override
+  Future<Result<bool>> deleteExamFolder(String folderId) async {
+    if (shouldFail) return FailureResult(ServerFailure(failureMessage));
+    return const Success(true);
+  }
+
+  @override
+  Future<Result<bool>> moveExamToFolder({
+    required String examId,
+    String? folderId,
   }) async {
     if (shouldFail) return FailureResult(ServerFailure(failureMessage));
     return const Success(true);

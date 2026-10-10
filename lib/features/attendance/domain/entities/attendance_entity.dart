@@ -351,3 +351,166 @@ class AttendanceStats extends Equatable {
     averageWatchPercentage,
   ];
 }
+
+/// Represents a single video lecture engagement item for a student
+class StudentLectureEngagementItem extends Equatable {
+  final String contentId;
+  final String lectureTitle;
+  final String groupId;
+  final String groupName;
+  final String? videoId;
+  final int durationSeconds;
+  final int watchSeconds;
+  final double watchProgressPercent;
+  final bool isCompleted;
+  final DateTime? lastWatchedAt;
+  final int sortOrder;
+
+  const StudentLectureEngagementItem({
+    required this.contentId,
+    required this.lectureTitle,
+    required this.groupId,
+    required this.groupName,
+    this.videoId,
+    this.durationSeconds = 0,
+    this.watchSeconds = 0,
+    this.watchProgressPercent = 0.0,
+    this.isCompleted = false,
+    this.lastWatchedAt,
+    this.sortOrder = 0,
+  });
+
+  bool get hasWatchedAny => watchProgressPercent > 0;
+  bool get isFullyWatched => isCompleted || watchProgressPercent >= 80.0;
+
+  String get formattedDuration {
+    if (durationSeconds <= 0) return '';
+    final d = Duration(seconds: durationSeconds);
+    final h = d.inHours;
+    final m = d.inMinutes.remainder(60);
+    final s = d.inSeconds.remainder(60);
+    if (h > 0) {
+      return '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
+    }
+    return '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
+  }
+
+  String get formattedWatchTime {
+    if (watchSeconds <= 0) return '00:00';
+    final d = Duration(seconds: watchSeconds);
+    final h = d.inHours;
+    final m = d.inMinutes.remainder(60);
+    final s = d.inSeconds.remainder(60);
+    if (h > 0) {
+      return '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
+    }
+    return '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
+  }
+
+  @override
+  List<Object?> get props => [
+    contentId,
+    lectureTitle,
+    groupId,
+    groupName,
+    videoId,
+    durationSeconds,
+    watchSeconds,
+    watchProgressPercent,
+    isCompleted,
+    lastWatchedAt,
+    sortOrder,
+  ];
+}
+
+/// Represents student group membership metadata for filtering
+class StudentGroupInfo extends Equatable {
+  final String id;
+  final String name;
+  final String level;
+
+  const StudentGroupInfo({
+    required this.id,
+    required this.name,
+    required this.level,
+  });
+
+  @override
+  List<Object?> get props => [id, name, level];
+}
+
+/// Consolidated student engagement summary across enrolled groups
+class StudentEngagementSummary extends Equatable {
+  final int totalWatchSeconds;
+  final int totalDurationSeconds;
+  final int totalLecturesCount;
+  final int completedLecturesCount;
+  final int inProgressLecturesCount;
+  final int notStartedLecturesCount;
+  final double overallCommitmentPercentage;
+  final DateTime? lastActiveAt;
+  final List<StudentLectureEngagementItem> items;
+  final List<StudentGroupInfo> enrolledGroups;
+
+  const StudentEngagementSummary({
+    this.totalWatchSeconds = 0,
+    this.totalDurationSeconds = 0,
+    this.totalLecturesCount = 0,
+    this.completedLecturesCount = 0,
+    this.inProgressLecturesCount = 0,
+    this.notStartedLecturesCount = 0,
+    this.overallCommitmentPercentage = 0.0,
+    this.lastActiveAt,
+    this.items = const [],
+    this.enrolledGroups = const [],
+  });
+
+  const StudentEngagementSummary.empty()
+    : totalWatchSeconds = 0,
+      totalDurationSeconds = 0,
+      totalLecturesCount = 0,
+      completedLecturesCount = 0,
+      inProgressLecturesCount = 0,
+      notStartedLecturesCount = 0,
+      overallCommitmentPercentage = 0.0,
+      lastActiveAt = null,
+      items = const [],
+      enrolledGroups = const [];
+
+  String get formattedTotalWatchHours {
+    if (totalWatchSeconds <= 0) return '0 د';
+    final d = Duration(seconds: totalWatchSeconds);
+    final h = d.inHours;
+    final m = d.inMinutes.remainder(60);
+    if (h > 0) {
+      return '$h س $m د';
+    }
+    return '$m د';
+  }
+
+  String get formattedTotalDurationHours {
+    if (totalDurationSeconds <= 0) return '0 د';
+    final d = Duration(seconds: totalDurationSeconds);
+    final h = d.inHours;
+    final m = d.inMinutes.remainder(60);
+    if (h > 0) {
+      return '$h س $m د';
+    }
+    return '$m د';
+  }
+
+  @override
+  List<Object?> get props => [
+    totalWatchSeconds,
+    totalDurationSeconds,
+    totalLecturesCount,
+    completedLecturesCount,
+    inProgressLecturesCount,
+    notStartedLecturesCount,
+    overallCommitmentPercentage,
+    lastActiveAt,
+    items,
+    enrolledGroups,
+  ];
+}
+

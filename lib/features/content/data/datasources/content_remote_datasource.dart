@@ -257,7 +257,7 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     try {
       final lessonExamsRes = await _safeClient
           .from('lesson_exams')
-          .select('content_id, exam_id, sort_order, is_required, exams(id, title, passing_score)')
+          .select('content_id, exam_id, sort_order, is_required, exams(id, title, passing_score, exam_versions(exam_questions(count)))')
           .eq('group_id', resolvedGroupId)
           .order('sort_order', ascending: true);
 
@@ -265,12 +265,23 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
         final cId = row['content_id'] as String?;
         final examObj = row['exams'] as Map<String, dynamic>?;
         if (cId != null && examObj != null) {
+          int qCount = 0;
+          final versionsList = examObj['exam_versions'] as List<dynamic>?;
+          if (versionsList != null && versionsList.isNotEmpty) {
+            final firstVer = versionsList.first as Map<String, dynamic>;
+            final eqList = firstVer['exam_questions'] as List<dynamic>?;
+            if (eqList != null && eqList.isNotEmpty) {
+              qCount = (eqList.first as Map<String, dynamic>)['count'] as int? ?? 0;
+            }
+          }
+
           final item = AttachedLessonExamEntity(
             examId: row['exam_id'] as String? ?? examObj['id'] as String? ?? '',
             examTitle: examObj['title'] as String? ?? '',
             sortOrder: (row['sort_order'] as num?)?.toInt() ?? 0,
             isRequired: row['is_required'] as bool? ?? true,
             passingScore: (examObj['passing_score'] as num?)?.toInt() ?? 60,
+            questionsCount: qCount,
           );
           lessonExamsMap.putIfAbsent(cId, () => []).add(item);
         }

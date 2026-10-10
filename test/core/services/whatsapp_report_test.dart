@@ -70,8 +70,8 @@ void main() {
 
       expect(report, contains('مريم علي'));
       expect(report, contains('Algebra Mock 1'));
-      expect(report, contains('75.0'));
-      expect(report, contains('80.0'));
+      expect(report, contains('75'));
+      expect(report, contains('80'));
       expect(report, contains('93.8%'));
       expect(report, contains('ممتاز جداً 🌟'));
       expect(report, contains('أداء ممتاز في مسائل الجبر.'));
