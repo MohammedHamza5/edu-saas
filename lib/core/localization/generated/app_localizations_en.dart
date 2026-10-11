@@ -8333,6 +8333,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'No lectures match the selected filter.';
 
   @override
+  String get noWatchedLecturesYet => 'No watched lectures recorded yet';
+
+  @override
+  String get noWatchedLecturesSubtitle =>
+      'Lectures you start watching will automatically appear here with progress details.';
+
+  @override
   String get goToStudyMaterialsAction => 'Go to My Lectures';
 
   @override

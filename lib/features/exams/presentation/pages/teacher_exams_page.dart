@@ -1728,13 +1728,13 @@ class _LinkExamToLectureSheetState extends State<_LinkExamToLectureSheet> {
                               const SizedBox(height: AppSpacing.s8),
                           itemBuilder: (context, idx) {
                             final lesson = filtered[idx];
-                            final id = lesson['id'] as String;
-                            final title = lesson['title'] as String? ?? '';
+                            final id = lesson['id']?.toString() ?? '';
+                            final title = lesson['title']?.toString() ?? '';
                             final sortOrder = lesson['sort_order'];
                             final attachedExamId =
-                                lesson['associated_exam_id'] as String?;
+                                lesson['associated_exam_id']?.toString();
                             final attachedExamTitle =
-                                lesson['exam_title'] as String? ?? '';
+                                lesson['exam_title']?.toString() ?? '';
                             final isCurrentExamAttached =
                                 attachedExamId == widget.exam.id;
                             final isSelected = _selectedLessonId == id;
@@ -1951,7 +1951,7 @@ class _LinkExamToLectureSheetState extends State<_LinkExamToLectureSheet> {
                           orElse: () => <String, dynamic>{},
                         );
                         final lessonTitle =
-                            selectedLesson['title'] as String? ?? '';
+                            selectedLesson['title']?.toString() ?? '';
                         final messenger = ScaffoldMessenger.of(context);
                         final successToast =
                             context.l10n.examLinkedSuccessToast(lessonTitle);

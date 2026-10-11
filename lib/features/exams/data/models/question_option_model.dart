@@ -13,13 +13,13 @@ class QuestionOptionModel extends QuestionOptionEntity {
 
   factory QuestionOptionModel.fromJson(Map<String, dynamic> json) {
     return QuestionOptionModel(
-      id: json['id'] as String,
-      questionId: json['question_id'] as String? ?? '',
-      optionText: json['option_text'] as String? ?? '',
+      id: json['id']?.toString() ?? '',
+      questionId: json['question_id']?.toString() ?? '',
+      optionText: json['option_text']?.toString() ?? '',
       sortOrder: (json['sort_order'] as num?)?.toInt() ?? 0,
       isCorrect: json['is_correct'] as bool?,
-      imageUrl: json['image_url'] as String?,
-      imageMeta: json['image_meta'] as Map<String, dynamic>?,
+      imageUrl: json['image_url']?.toString(),
+      imageMeta: json['image_meta'] is Map ? Map<String, dynamic>.from(json['image_meta'] as Map) : null,
     );
   }
 

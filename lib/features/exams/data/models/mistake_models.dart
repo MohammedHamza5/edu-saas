@@ -99,7 +99,7 @@ class MistakeQuestionModel extends MistakeQuestionEntity {
       isResolved: json['is_resolved'] as bool? ?? false,
       failureCount: (json['failure_count'] as num?)?.toInt() ?? 1,
       lastFailedAt: json['last_failed_at'] != null
-          ? DateTime.tryParse(json['last_failed_at'] as String)
+          ? DateTime.tryParse(json['last_failed_at'].toString())
           : null,
       sourceExamId: (json['source_exam_id'] as String?) ?? '',
       sourceExamTitle: (json['source_exam_title'] as String?) ?? 'اختبار',

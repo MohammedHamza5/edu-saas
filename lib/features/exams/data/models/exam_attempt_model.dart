@@ -19,49 +19,56 @@ class ExamAttemptModel extends ExamAttemptEntity {
 
   factory ExamAttemptModel.fromJson(Map<String, dynamic> json) {
     String? studentName;
-    if (json['users'] is Map<String, dynamic>) {
+    if (json['users'] is Map) {
       studentName =
-          (json['users'] as Map<String, dynamic>)['full_name'] as String?;
+          (json['users'] as Map)['full_name']?.toString();
     } else if (json['student_name'] != null) {
-      studentName = json['student_name'] as String?;
+      studentName = json['student_name']?.toString();
     }
 
     final rawAnswers = json['answers'] ?? json['exam_answers'];
     final answersList =
-        (rawAnswers as List<dynamic>?)?.map((a) {
-          final aMap = a as Map<String, dynamic>;
-          return ExamAnswerEntity(
-            id: aMap['id'] as String? ?? '',
-            attemptId: aMap['attempt_id'] as String? ?? '',
-            questionId: aMap['question_id'] as String? ?? '',
-            selectedOptionId: aMap['selected_option_id'] as String?,
-            isCorrect: aMap['is_correct'] as bool?,
-            pointsEarned: (aMap['points_earned'] as num?)?.toDouble(),
-            answeredAt: aMap['answered_at'] != null
-                ? DateTime.parse(aMap['answered_at'] as String)
-                : DateTime.now(),
-          );
-        }).toList() ??
+        (rawAnswers as List<dynamic>?)
+            ?.whereType<Map<dynamic, dynamic>>()
+            .map((a) {
+              final aMap = Map<String, dynamic>.from(a);
+              return ExamAnswerEntity(
+                id: aMap['id']?.toString() ?? '',
+                attemptId: aMap['attempt_id']?.toString() ?? '',
+                questionId: aMap['question_id']?.toString() ?? '',
+                selectedOptionId: aMap['selected_option_id']?.toString(),
+                isCorrect: aMap['is_correct'] as bool?,
+                pointsEarned: (aMap['points_earned'] as num?)?.toDouble(),
+                answeredAt: aMap['answered_at'] != null
+                    ? DateTime.tryParse(aMap['answered_at'].toString()) ?? DateTime.now()
+                    : DateTime.now(),
+              );
+            }).toList() ??
         <ExamAnswerEntity>[];
 
     final rawQuestions = json['questions'] as List<dynamic>?;
     final questionsList =
-        rawQuestions?.map((q) {
-          return ExamQuestionModel.fromJson(
-            Map<String, dynamic>.from(q as Map),
-          );
-        }).toList() ??
+        rawQuestions
+            ?.whereType<Map<dynamic, dynamic>>()
+            .where((q) => q['id'] != null)
+            .map((q) {
+              return ExamQuestionModel.fromJson(
+                Map<String, dynamic>.from(q),
+              );
+            }).toList() ??
         <ExamQuestionEntity>[];
 
     return ExamAttemptModel(
-      id: json['id'] as String,
-      examId: json['exam_id'] as String,
-      examVersionId: json['exam_version_id'] as String? ?? '',
-      studentId: json['student_id'] as String,
+      id: json['id']?.toString() ?? '',
+      examId: json['exam_id']?.toString() ?? '',
+      examVersionId: json['exam_version_id']?.toString() ?? '',
+      studentId: json['student_id']?.toString() ?? '',
       studentName: studentName,
-      startedAt: DateTime.parse(json['started_at'] as String),
+      startedAt: json['started_at'] != null
+          ? DateTime.tryParse(json['started_at'].toString()) ?? DateTime.now()
+          : DateTime.now(),
       submittedAt: json['submitted_at'] != null
-          ? DateTime.parse(json['submitted_at'] as String)
+          ? DateTime.tryParse(json['submitted_at'].toString())
           : null,
       status: AttemptStatus.fromString(
         json['status'] as String? ?? 'in_progress',

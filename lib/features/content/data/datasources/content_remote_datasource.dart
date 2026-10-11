@@ -197,6 +197,12 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
 
   SupabaseClient get _safeClient => _client ?? SupabaseService.client;
 
+  Future<String> _resolveGroupId(String groupId) async {
+    final cached = GroupSlugResolver.toId(groupId);
+    if (GroupSlugResolver.isUuid(cached)) return cached;
+    return await GroupSlugResolver.toIdAsync(cached, _safeClient);
+  }
+
   @override
   Future<List<ContentModel>> getGroupContent({
     required String groupId,
@@ -204,7 +210,7 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     int page = 0,
     int pageSize = 20,
   }) async {
-    final resolvedGroupId = GroupSlugResolver.toId(groupId);
+    final resolvedGroupId = await _resolveGroupId(groupId);
     // Fetch any content linked to this group via the junction table content_groups with group overrides
     final junctionRes = await _safeClient
         .from('content_groups')
@@ -1343,7 +1349,14 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     required String groupId,
     String? studentId,
   }) async {
-    final resolvedGroupId = GroupSlugResolver.toId(groupId);
+    final resolvedGroupId = await _resolveGroupId(groupId);
+    if (!GroupSlugResolver.isUuid(resolvedGroupId)) {
+      AppLogger.w(
+        'ContentRemoteDataSource',
+        'Cannot getGroupCourseProgress: group "$groupId" could not be resolved to a valid UUID',
+      );
+      return [];
+    }
     final response = await _safeClient.rpc<dynamic>(
       'get_group_course_progress',
       params: {
@@ -1375,7 +1388,8 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     required String contentId,
     String? reason,
   }) async {
-    final resolvedGroupId = GroupSlugResolver.toId(groupId);
+    final resolvedGroupId = await _resolveGroupId(groupId);
+    if (!GroupSlugResolver.isUuid(resolvedGroupId)) return;
     await _safeClient.rpc<void>(
       'manual_unlock_lesson',
       params: {
@@ -1393,7 +1407,8 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     required String groupId,
     required bool isPublished,
   }) async {
-    final resolvedGroupId = GroupSlugResolver.toId(groupId);
+    final resolvedGroupId = await _resolveGroupId(groupId);
+    if (!GroupSlugResolver.isUuid(resolvedGroupId)) return;
     await _safeClient.rpc<void>(
       'toggle_lesson_group_visibility',
       params: {
@@ -1409,7 +1424,8 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     required String groupId,
     required bool isPublished,
   }) async {
-    final resolvedGroupId = GroupSlugResolver.toId(groupId);
+    final resolvedGroupId = await _resolveGroupId(groupId);
+    if (!GroupSlugResolver.isUuid(resolvedGroupId)) return;
     await _safeClient.rpc<void>(
       'toggle_group_all_content_visibility',
       params: {'p_group_id': resolvedGroupId, 'p_is_published': isPublished},
@@ -1418,7 +1434,10 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
 
   @override
   Future<List<ChapterEntity>> getGroupChapters(String groupId) async {
-    final resolvedGroupId = GroupSlugResolver.toId(groupId);
+    final resolvedGroupId = await _resolveGroupId(groupId);
+    if (!GroupSlugResolver.isUuid(resolvedGroupId)) {
+      return [];
+    }
     final response = await _safeClient
         .from('chapters')
         .select()
@@ -1437,7 +1456,7 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     required String title,
     bool isPublished = true,
   }) async {
-    final resolvedGroupId = GroupSlugResolver.toId(groupId);
+    final resolvedGroupId = await _resolveGroupId(groupId);
     final res = await _safeClient.rpc<dynamic>(
       'create_chapter',
       params: {
@@ -1502,7 +1521,7 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     required String groupId,
     String? chapterId,
   }) async {
-    final resolvedGroupId = GroupSlugResolver.toId(groupId);
+    final resolvedGroupId = await _resolveGroupId(groupId);
     await _safeClient.rpc<void>(
       'set_lesson_chapter',
       params: {
@@ -1519,7 +1538,7 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     required String groupId,
     required List<String> contentIdsInOrder,
   }) async {
-    final resolvedGroupId = GroupSlugResolver.toId(groupId);
+    final resolvedGroupId = await _resolveGroupId(groupId);
     await _safeClient.rpc<void>(
       'reorder_chapter_lessons',
       params: {
@@ -1534,7 +1553,7 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     required String groupId,
     required List<String> chapterIdsInOrder,
   }) async {
-    final resolvedGroupId = GroupSlugResolver.toId(groupId);
+    final resolvedGroupId = await _resolveGroupId(groupId);
     await _safeClient.rpc<void>(
       'reorder_course_chapters',
       params: {
@@ -1549,7 +1568,7 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     required String contentId,
     required String groupId,
   }) async {
-    final resolvedGroupId = GroupSlugResolver.toId(groupId);
+    final resolvedGroupId = await _resolveGroupId(groupId);
     await _safeClient.rpc<void>(
       'remove_lesson_from_group',
       params: {

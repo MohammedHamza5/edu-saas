@@ -14671,6 +14671,18 @@ abstract class AppLocalizations {
   /// **'No lectures match the selected filter.'**
   String get noEngagementLecturesFilterEmpty;
 
+  /// No description provided for @noWatchedLecturesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No watched lectures recorded yet'**
+  String get noWatchedLecturesYet;
+
+  /// No description provided for @noWatchedLecturesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Lectures you start watching will automatically appear here with progress details.'**
+  String get noWatchedLecturesSubtitle;
+
   /// No description provided for @goToStudyMaterialsAction.
   ///
   /// In en, this message translates to:

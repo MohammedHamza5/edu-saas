@@ -10,8 +10,6 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/theme/responsive_breakpoints.dart';
-import '../../../../core/utils/group_slug_resolver.dart';
-import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_empty_view.dart';
 import '../../../../core/widgets/app_error_view.dart';
@@ -164,15 +162,14 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
     StudentAttendanceLoaded state,
     StudentEngagementSummary summary,
   ) {
-    final hasLectures = summary.totalLecturesCount > 0;
+    // Filter items to ONLY show lectures that have actually been watched!
+    final watchedItems =
+        summary.items.where((item) => item.hasWatchedAny).toList();
 
-    // Filter items based on active status filter
-    final filteredItems = summary.items.where((item) {
+    // Filter items based on active status filter (all watched, completed, in_progress)
+    final filteredItems = watchedItems.where((item) {
       if (_statusFilter == 'completed') return item.isFullyWatched;
-      if (_statusFilter == 'in_progress') {
-        return !item.isFullyWatched && item.hasWatchedAny;
-      }
-      if (_statusFilter == 'not_started') return !item.hasWatchedAny;
+      if (_statusFilter == 'in_progress') return !item.isFullyWatched;
       return true;
     }).toList();
 
@@ -199,9 +196,15 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
                 const SizedBox(height: AppSpacing.s16),
               ],
 
-              // Status Filter Chips Bar
-              _buildStatusFilterBar(context, summary),
-              const SizedBox(height: AppSpacing.s16),
+              // Status Filter Chips Bar (only when there are watched lectures)
+              if (watchedItems.isNotEmpty) ...[
+                _buildStatusFilterBar(
+                  context,
+                  summary,
+                  watchedCount: watchedItems.length,
+                ),
+                const SizedBox(height: AppSpacing.s16),
+              ],
 
               // Section Header
               Row(
@@ -225,37 +228,37 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
                       ),
                     ],
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.s10,
-                      vertical: 3,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryLight.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      '${filteredItems.length} / ${summary.totalLecturesCount}',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
+                  if (watchedItems.isNotEmpty)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.s10,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryLight.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '${filteredItems.length} / ${watchedItems.length}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primary,
+                        ),
                       ),
                     ),
-                  ),
                 ],
               ),
               const SizedBox(height: AppSpacing.s12),
 
               // Lecture Items List or Empty View
-              if (!hasLectures)
+              if (watchedItems.isEmpty)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: AppSpacing.s24),
                   child: AppEmptyView(
-                    message: context.l10n.noEngagementLecturesEmpty,
-                    icon: Icons.video_library_outlined,
-                    actionText: context.l10n.goToStudyMaterialsAction,
-                    onAction: () => context.go(AppRoutes.studentDashboard),
+                    message: context.l10n.noWatchedLecturesYet,
+                    subtitle: context.l10n.noWatchedLecturesSubtitle,
+                    icon: Icons.history_toggle_off_rounded,
                   ),
                 )
               else if (filteredItems.isEmpty)
@@ -264,8 +267,6 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
                   child: AppEmptyView(
                     message: context.l10n.noEngagementLecturesFilterEmpty,
                     icon: Icons.filter_list_off_rounded,
-                    actionText: context.l10n.viewAllSessionsAction,
-                    onAction: () => setState(() => _statusFilter = null),
                   ),
                 )
               else
@@ -513,8 +514,9 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
   /// Status Filter Chips Bar
   Widget _buildStatusFilterBar(
     BuildContext context,
-    StudentEngagementSummary summary,
-  ) {
+    StudentEngagementSummary summary, {
+    required int watchedCount,
+  }) {
     return SizedBox(
       height: 38,
       child: ListView(
@@ -522,7 +524,7 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
         children: [
           FilterChip(
             label: Text(
-              context.l10n.filterAllLecturesCount(summary.totalLecturesCount),
+              context.l10n.filterAllLecturesCount(watchedCount),
             ),
             selected: _statusFilter == null || _statusFilter == 'all',
             selectedColor: AppColors.primaryLight.withValues(alpha: 0.25),
@@ -580,28 +582,6 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
             onSelected: (_) => setState(
               () => _statusFilter =
                   _statusFilter == 'in_progress' ? null : 'in_progress',
-            ),
-          ),
-          const SizedBox(width: AppSpacing.s8),
-          FilterChip(
-            label: Text(
-              context.l10n.filterNotStartedCount(summary.notStartedLecturesCount),
-            ),
-            selected: _statusFilter == 'not_started',
-            selectedColor: AppColors.border.withValues(alpha: 0.4),
-            checkmarkColor: AppColors.textSecondary,
-            labelStyle: TextStyle(
-              color: _statusFilter == 'not_started'
-                  ? AppColors.textPrimary
-                  : AppColors.textSecondary,
-              fontWeight: _statusFilter == 'not_started'
-                  ? FontWeight.bold
-                  : FontWeight.normal,
-              fontSize: 12,
-            ),
-            onSelected: (_) => setState(
-              () => _statusFilter =
-                  _statusFilter == 'not_started' ? null : 'not_started',
             ),
           ),
         ],
@@ -793,35 +773,14 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
   }
 }
 
-/// Single Lecture Engagement Card with Watch Progress Telemetry
-class _StudentLectureEngagementCard extends StatefulWidget {
+/// Single Lecture Engagement Visual Card with Watch Progress Telemetry (Read-only, Zero Buttons)
+class _StudentLectureEngagementCard extends StatelessWidget {
   final StudentLectureEngagementItem item;
 
   const _StudentLectureEngagementCard({required this.item});
 
   @override
-  State<_StudentLectureEngagementCard> createState() =>
-      _StudentLectureEngagementCardState();
-}
-
-class _StudentLectureEngagementCardState
-    extends State<_StudentLectureEngagementCard> {
-  bool _isHovered = false;
-
-  void _navigateToLecture(BuildContext context) {
-    final slug = GroupSlugResolver.toSlug(
-      widget.item.groupId,
-      widget.item.groupName,
-    );
-    context.go(
-      AppRoutes.studentGroupContent.replaceAll(':groupId', slug),
-      extra: widget.item.lectureTitle,
-    );
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final item = widget.item;
     final isCompleted = item.isFullyWatched;
     final hasStarted = item.hasWatchedAny;
 
@@ -837,16 +796,6 @@ class _StudentLectureEngagementCardState
         ? context.l10n.lectureInProgressBadge
         : context.l10n.lectureNotStartedBadge;
 
-    final actionLabel = isCompleted
-        ? context.l10n.rewatchLectureAction
-        : hasStarted
-        ? context.l10n.resumeLectureAction
-        : context.l10n.startLectureAction;
-
-    final actionIcon = isCompleted
-        ? Icons.replay_rounded
-        : Icons.play_arrow_rounded;
-
     final lastWatchedText = item.lastWatchedAt != null
         ? context.l10n.lastWatchedAtLabel(
             DateFormat(
@@ -856,205 +805,176 @@ class _StudentLectureEngagementCardState
           )
         : context.l10n.notWatchedYetLabel;
 
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        curve: Curves.easeOutCubic,
-        transform: Matrix4.translationValues(0, _isHovered ? -2.0 : 0.0, 0),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-          border: Border.all(
-            color: _isHovered
-                ? statusColor.withValues(alpha: 0.35)
-                : AppColors.border,
-            width: 1,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: _isHovered ? 0.05 : 0.02),
-              blurRadius: _isHovered ? 10 : 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+        border: Border.all(
+          color: AppColors.border,
+          width: 1,
         ),
-        padding: const EdgeInsets.all(AppSpacing.s16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Top Row: Title, Group Badge & Status Badge
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 38,
-                  height: 38,
-                  decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.12),
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: statusColor.withValues(alpha: 0.25),
-                    ),
-                  ),
-                  child: Icon(
-                    isCompleted
-                        ? Icons.verified_rounded
-                        : hasStarted
-                        ? Icons.play_arrow_rounded
-                        : Icons.play_circle_outline_rounded,
-                    color: statusColor,
-                    size: 20,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(AppSpacing.s16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Top Row: Title, Group Badge & Status Badge
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: statusColor.withValues(alpha: 0.25),
                   ),
                 ),
-                const SizedBox(width: AppSpacing.s12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              item.lectureTitle,
-                              style: const TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.textPrimary,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
+                child: Icon(
+                  isCompleted
+                      ? Icons.verified_rounded
+                      : hasStarted
+                      ? Icons.play_arrow_rounded
+                      : Icons.play_circle_outline_rounded,
+                  color: statusColor,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.s12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            item.lectureTitle,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textPrimary,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.s8,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: statusColor.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.radiusSmall,
+                            ),
+                            border: Border.all(
+                              color: statusColor.withValues(alpha: 0.25),
                             ),
                           ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppSpacing.s8,
-                              vertical: 3,
+                          child: Text(
+                            statusBadge,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: statusColor,
                             ),
-                            decoration: BoxDecoration(
-                              color: statusColor.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(
-                                AppSpacing.radiusSmall,
-                              ),
-                              border: Border.all(
-                                color: statusColor.withValues(alpha: 0.25),
-                              ),
-                            ),
-                            child: Text(
-                              statusBadge,
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: statusColor,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (item.groupName.isNotEmpty) ...[
-                        const SizedBox(height: 3),
-                        Text(
-                          item.groupName,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: AppColors.textSecondary,
-                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ],
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.s12),
-
-            // Middle: Watch Progress & Stats
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  item.formattedDuration.isNotEmpty
-                      ? context.l10n.watchedTimeOutOfTotal(
-                          item.formattedWatchTime,
-                          item.formattedDuration,
-                        )
-                      : item.formattedWatchTime,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                Text(
-                  '${item.watchProgressPercent.toStringAsFixed(0)}%',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
-                    color: statusColor,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.s6),
-
-            // Progress Bar
-            ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: LinearProgressIndicator(
-                value: (item.watchProgressPercent / 100.0).clamp(0.0, 1.0),
-                minHeight: 6,
-                backgroundColor: statusColor.withValues(alpha: 0.12),
-                valueColor: AlwaysStoppedAnimation<Color>(statusColor),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.s12),
-
-            // Bottom Row: Last Watched Date & Action Button
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.access_time_rounded,
-                        size: 13,
-                        color: AppColors.textSecondary.withValues(alpha: 0.8),
-                      ),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          lastWatchedText,
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: AppColors.textSecondary.withValues(alpha: 0.8),
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                    ),
+                    if (item.groupName.isNotEmpty) ...[
+                      const SizedBox(height: 3),
+                      Text(
+                        item.groupName,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ],
-                  ),
+                  ],
                 ),
-                const SizedBox(width: AppSpacing.s8),
-                AppButton(
-                  text: actionLabel,
-                  icon: actionIcon,
-                  variant: isCompleted
-                      ? AppButtonVariant.outlined
-                      : AppButtonVariant.primary,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.s12,
-                    vertical: AppSpacing.s8,
-                  ),
-                  onPressed: () => _navigateToLecture(context),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.s12),
+
+          // Middle: Watch Progress & Stats
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                item.formattedDuration.isNotEmpty
+                    ? context.l10n.watchedTimeOutOfTotal(
+                        item.formattedWatchTime,
+                        item.formattedDuration,
+                      )
+                    : item.formattedWatchTime,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textSecondary,
                 ),
-              ],
+              ),
+              Text(
+                '${item.watchProgressPercent.toStringAsFixed(0)}%',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  color: statusColor,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.s6),
+
+          // Progress Bar
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: (item.watchProgressPercent / 100.0).clamp(0.0, 1.0),
+              minHeight: 6,
+              backgroundColor: statusColor.withValues(alpha: 0.12),
+              valueColor: AlwaysStoppedAnimation<Color>(statusColor),
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: AppSpacing.s12),
+
+          // Bottom Row: Last Watched Date (Read-only, Zero Buttons)
+          Row(
+            children: [
+              Icon(
+                Icons.access_time_rounded,
+                size: 13,
+                color: AppColors.textSecondary.withValues(alpha: 0.8),
+              ),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Text(
+                  lastWatchedText,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: AppColors.textSecondary.withValues(alpha: 0.8),
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

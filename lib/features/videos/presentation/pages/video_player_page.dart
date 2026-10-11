@@ -73,7 +73,6 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   final ValueNotifier<int> _liveDurationSecs = ValueNotifier<int>(0);
   final ValueNotifier<bool> _isPlayingNotifier = ValueNotifier<bool>(false);
   void Function(int seconds)? _seekTo;
-  VoidCallback? _togglePlayPauseFn;
   bool _hasRecordedStarted = false;
 
   /// أبعد نقطة مشاهدة لإرسالها مع كل update
@@ -904,7 +903,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
           buildWhen: (previous, current) {
             if (previous is VideosLoaded && current is VideosLoaded) {
               return previous.playbackUrl != current.playbackUrl ||
-                  previous.currentVideo?.id != current.currentVideo?.id;
+                  previous.currentVideo?.id != current.currentVideo?.id ||
+                  previous.progress?.completed != current.progress?.completed;
             }
             return previous != current;
           },
@@ -951,12 +951,6 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                 },
                 onSeekReady: (seekFn) {
                   _seekTo = seekFn;
-                },
-                onPlaybackControlsReady: (play, pause, toggle) {
-                  _togglePlayPauseFn = () {
-                    toggle();
-                    _isPlayingNotifier.value = !_isPlayingNotifier.value;
-                  };
                 },
                 onFullscreenChanged: _handleFullscreenChanged,
                 onMetricsProgress:
@@ -1431,7 +1425,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
         final pct = liveDur > 0
             ? ((effectivePos / liveDur) * 100).clamp(0.0, 100.0)
             : (progress?.percentage ?? 0.0);
-        final completed = isCompleted || pct >= 95.0;
+        final completed =
+            isCompleted || pct >= 90.0 || _videoCompletedLocally;
         final remainingSecs = liveDur > 0
             ? (liveDur - effectivePos).clamp(0, liveDur)
             : 0;
@@ -1732,77 +1727,6 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                           ),
                         );
                       },
-                    ),
-
-                    const SizedBox(height: AppSpacing.s12),
-
-                    // Quick Academic Playback Control Bar
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          // -10s
-                          IconButton.filledTonal(
-                            tooltip: context.l10n.seek10Seconds,
-                            icon: const Icon(Icons.replay_10_rounded, size: 20),
-                            onPressed: () {
-                              final target = (livePos - 10).clamp(0, liveDur);
-                              _seekTo?.call(target);
-                            },
-                          ),
-                          const SizedBox(width: AppSpacing.s10),
-                          // Play / Pause Toggle
-                          ValueListenableBuilder<bool>(
-                            valueListenable: _isPlayingNotifier,
-                            builder: (context, isPlaying, _) {
-                              return FilledButton.icon(
-                                style: FilledButton.styleFrom(
-                                  backgroundColor: AppColors.primary,
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 14,
-                                    vertical: 8,
-                                  ),
-                                ),
-                                onPressed: () {
-                                  if (_togglePlayPauseFn != null) {
-                                    _togglePlayPauseFn!();
-                                  } else if (_seekTo != null) {
-                                    _seekTo!(livePos);
-                                  }
-                                },
-                                icon: Icon(
-                                  isPlaying
-                                      ? Icons.pause_rounded
-                                      : Icons.play_arrow_rounded,
-                                  size: 18,
-                                ),
-                                label: Text(
-                                  context.l10n.playPauseAction,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                          const SizedBox(width: AppSpacing.s10),
-                          // +10s
-                          IconButton.filledTonal(
-                            tooltip: context.l10n.seek10Seconds,
-                            icon: const Icon(
-                              Icons.forward_10_rounded,
-                              size: 20,
-                            ),
-                            onPressed: () {
-                              final target = (livePos + 10).clamp(0, liveDur);
-                              _seekTo?.call(target);
-                            },
-                          ),
-                        ],
-                      ),
                     ),
                   ],
                 ),

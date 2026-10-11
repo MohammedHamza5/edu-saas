@@ -557,8 +557,6 @@
       100% { left: 100%; width: 40%; }
     }
   </style>
-  <!-- In-App Canvas-Based PDF Engine (Zero-tab, cross-platform tablet & mobile support) -->
-  <script src="pdf.min.js"></script>
 </head>
 <body>
   <!-- Crawler & Search Engine Semantic Indexing (Googlebot, Bingbot, etc.) -->
@@ -801,10 +799,12 @@
       });
 
       // ═══════════════════════════════════════════════════════════════
-      // 3A. Bunny Stream Player Bridge (PURE — no YouTube code)
+      // 3A. Bunny Stream Player Bridge (NATIVE Player.js wire protocol)
       // ═══════════════════════════════════════════════════════════════
       window._bunnyPlayers = window._bunnyPlayers || {};
       window._bunnyPollTimers = window._bunnyPollTimers || {};
+      window._bunnyWindows = window._bunnyWindows || {};
+      window._bunnyLastGlobalDuration = 0;
 
       function notifyBunnyFlutter(msg) {
         if (typeof window.onBunnyPlayerMessage === 'function') {
@@ -814,7 +814,40 @@
         }
       }
 
+      function sendBunnyMessage(win, method, value) {
+        if (!win) return;
+        try {
+          var payload = {
+            context: 'player.js',
+            version: '0.0.11',
+            method: method
+          };
+          if (value !== undefined && value !== null) {
+            payload.value = value;
+          }
+          if (method === 'addEventListener') {
+            payload.listener = 'listener_' + value;
+          }
+          win.postMessage(JSON.stringify(payload), '*');
+        } catch (e) {}
+      }
+
+      function subscribeBunny(win) {
+        if (!win) return;
+        var events = ['ready', 'play', 'pause', 'ended', 'timeupdate', 'error'];
+        for (var i = 0; i < events.length; i++) {
+          sendBunnyMessage(win, 'addEventListener', events[i]);
+        }
+        sendBunnyMessage(win, 'getCurrentTime');
+        sendBunnyMessage(win, 'getDuration');
+      }
+
       window.createBunnyPlayer = function(src, viewId) {
+        // Direct embed domain normalization: avoid redirect from player. to iframe.
+        if (src.indexOf('player.mediadelivery.net') !== -1) {
+          src = src.replace('player.mediadelivery.net', 'iframe.mediadelivery.net');
+        }
+
         // Ensure playerjs=true query parameter for Bunny Stream postMessage bridge
         if (src.indexOf('playerjs=true') === -1) {
           src += (src.indexOf('?') === -1 ? '?' : '&') + 'playerjs=true';
@@ -822,11 +855,14 @@
 
         var iframe = document.createElement('iframe');
         iframe.id = 'bunny_frame_' + viewId;
-        iframe.src = src;
 
-        // Bunny Stream security requirement
+        // CRITICAL SECURITY & COMPATIBILITY: strict-origin-when-cross-origin sends the
+        // origin (e.g. https://antounios.web.app) in document.referrer, allowing Bunny's
+        // Player.js Receiver to verify the parent origin and accept postMessage commands.
+        // DO NOT use no-referrer here as it drops the Referer header and breaks Player.js.
         iframe.referrerPolicy = 'strict-origin-when-cross-origin';
         iframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+        iframe.src = src;
         iframe.style.width = '100%';
         iframe.style.height = '100%';
         iframe.style.border = '0';
@@ -838,144 +874,182 @@
         iframe.setAttribute('mozallowfullscreen', 'true');
         iframe.allowFullscreen = true;
 
-        function subscribeBunnyEvents() {
-          try {
-            var el = document.getElementById('bunny_frame_' + viewId);
-            if (el && el.contentWindow) {
-              var events = ['ready', 'play', 'pause', 'ended', 'timeupdate'];
-              for (var i = 0; i < events.length; i++) {
-                el.contentWindow.postMessage(JSON.stringify({
-                  context: 'player.js',
-                  version: '0.0.11',
-                  method: 'addEventListener',
-                  value: events[i]
-                }), '*');
-              }
-            }
-          } catch(e) {}
-        }
+        var playerState = {
+          viewId: viewId,
+          duration: 0,
+          currentTime: 0
+        };
+        window._bunnyPlayers[viewId] = playerState;
 
-        function initPlayerJs() {
-          if (typeof window.playerjs !== 'undefined' && window.playerjs.Player) {
-            try {
-              if (window._bunnyPlayers[viewId]) return;
-              var player = new window.playerjs.Player(iframe);
-              window._bunnyPlayers[viewId] = player;
-
-              player.on('ready', function() {
-                notifyBunnyFlutter({ event: 'ready' });
-              });
-              player.on('play', function() {
-                notifyBunnyFlutter({ event: 'play' });
-              });
-              player.on('pause', function() {
-                notifyBunnyFlutter({ event: 'pause' });
-              });
-              player.on('ended', function() {
-                notifyBunnyFlutter({ event: 'ended' });
-              });
-              player.on('timeupdate', function(data) {
-                if (typeof data === 'string') {
-                  try { data = JSON.parse(data); } catch (e) {}
-                }
-                var sec = (data && data.seconds !== undefined) ? Math.floor(data.seconds) :
-                          (data && data.currentTime !== undefined) ? Math.floor(data.currentTime) : 0;
-                var dur = (data && data.duration !== undefined) ? Math.floor(data.duration) : 0;
-                notifyBunnyFlutter({
-                  event: 'timeupdate',
-                  value: { seconds: sec, duration: dur }
-                });
-              });
-
-              // Continuous heartbeat poll every 1s
-              if (window._bunnyPollTimers[viewId]) {
-                clearInterval(window._bunnyPollTimers[viewId]);
-              }
-              window._bunnyPollTimers[viewId] = setInterval(function() {
-                var el = document.getElementById('bunny_frame_' + viewId);
-                if (!el) {
-                  clearInterval(window._bunnyPollTimers[viewId]);
-                  delete window._bunnyPollTimers[viewId];
-                  delete window._bunnyPlayers[viewId];
-                  return;
-                }
-                if (player && player.isReady) {
-                  player.getCurrentTime(function(t) {
-                    if (typeof t === 'number' && t >= 0) {
-                      player.getDuration(function(d) {
-                        var dur = (typeof d === 'number' && d > 0) ? Math.floor(d) : 0;
-                        notifyBunnyFlutter({
-                          event: 'timeupdate',
-                          value: { seconds: Math.floor(t), duration: dur }
-                        });
-                      });
-                    }
-                  });
-                }
-              }, 1000);
-            } catch (err) {
-              console.warn('[BunnyBridge] playerjs init:', err);
-            }
+        function doSubscribe() {
+          var el = document.getElementById('bunny_frame_' + viewId) || iframe;
+          if (el && el.contentWindow) {
+            window._bunnyWindows[viewId] = el.contentWindow;
+            subscribeBunny(el.contentWindow);
           }
         }
 
-        initPlayerJs();
-        setTimeout(initPlayerJs, 100);
-        setTimeout(initPlayerJs, 500);
-
         iframe.addEventListener('load', function() {
-          initPlayerJs();
-          subscribeBunnyEvents();
-          setTimeout(subscribeBunnyEvents, 400);
-          setTimeout(subscribeBunnyEvents, 1200);
+          doSubscribe();
+          setTimeout(doSubscribe, 200);
+          setTimeout(doSubscribe, 500);
+          setTimeout(doSubscribe, 1000);
+          setTimeout(doSubscribe, 2500);
         });
+
+        // Continuous heartbeat polling: queries currentTime and duration every 1s
+        if (window._bunnyPollTimers[viewId]) {
+          clearInterval(window._bunnyPollTimers[viewId]);
+        }
+        window._bunnyPollTimers[viewId] = setInterval(function() {
+          var el = document.getElementById('bunny_frame_' + viewId) || iframe;
+          var targetWin = window._bunnyWindows[viewId] || (el && el.contentWindow);
+          if (targetWin) {
+            sendBunnyMessage(targetWin, 'getCurrentTime');
+            sendBunnyMessage(targetWin, 'getDuration');
+          }
+        }, 1000);
 
         return iframe;
       };
 
       window.bunnyPostMessage = function(viewId, method, value) {
-        var player = window._bunnyPlayers && window._bunnyPlayers[viewId];
-        if (player && typeof player[method] === 'function') {
-          try {
-            player[method](value);
-          } catch(e) {}
+        var targetWin = window._bunnyWindows && window._bunnyWindows[viewId];
+        if (!targetWin) {
+          var el = document.getElementById('bunny_frame_' + viewId);
+          if (el && el.contentWindow) {
+            targetWin = el.contentWindow;
+            window._bunnyWindows[viewId] = targetWin;
+          }
         }
-        var iframe = document.getElementById('bunny_frame_' + viewId);
-        if (iframe && iframe.contentWindow) {
-          try {
-            iframe.contentWindow.postMessage(JSON.stringify({
-              context: 'player.js',
-              version: '0.0.11',
-              method: method,
-              value: value
-            }), '*');
-          } catch(e) {}
+        if (targetWin) {
+          sendBunnyMessage(targetWin, method, value);
         }
       };
 
-      // Bunny-only message listener
+      // Global Bunny Player.js Message Listener
       window.addEventListener('message', function(event) {
-        if (!event.origin) return;
-        if (event.origin.indexOf('mediadelivery.net') !== -1) {
-          try {
-            var data = event.data;
-            if (typeof data === 'string') data = JSON.parse(data);
-            if (data && (data.context === 'player.js' || data.event)) {
-              var evt = data.event;
-              if (evt === 'timeupdate') {
-                var val = data.value || {};
-                var sec = (val.seconds !== undefined) ? Math.floor(val.seconds) :
-                          (val.currentTime !== undefined) ? Math.floor(val.currentTime) : 0;
-                var dur = (val.duration !== undefined) ? Math.floor(val.duration) : 0;
+        if (!event.data) return;
+        var data = event.data;
+        if (typeof data === 'string') {
+          try { data = JSON.parse(data); } catch (e) { return; }
+        }
+        if (!data || typeof data !== 'object') return;
+
+        var origin = (event.origin || '').toLowerCase();
+        var isBunnyOrigin = origin.indexOf('mediadelivery.net') !== -1 ||
+                            origin.indexOf('b-cdn.net') !== -1 ||
+                            origin.indexOf('bunnycdn.com') !== -1 ||
+                            origin.indexOf('bunny') !== -1;
+        var isPlayerJs = data.context === 'player.js' || isBunnyOrigin;
+        if (!isPlayerJs) return;
+
+        // Remember event.source for active players
+        if (event.source) {
+          for (var vid in window._bunnyPlayers) {
+            var frameEl = document.getElementById('bunny_frame_' + vid);
+            if (frameEl && (frameEl.contentWindow === event.source || !window._bunnyWindows[vid])) {
+              window._bunnyWindows[vid] = event.source;
+              break;
+            }
+          }
+        }
+
+        var evt = data.event;
+        var method = data.method;
+
+        // 1. Handshake Ready: immediately reply with addEventListener for all events!
+        if (evt === 'ready') {
+          if (event.source) {
+            subscribeBunny(event.source);
+          }
+          notifyBunnyFlutter({ event: 'ready' });
+          return;
+        }
+
+        // 2. Playback state events
+        if (evt === 'play' || evt === 'pause' || evt === 'ended') {
+          notifyBunnyFlutter({ event: evt });
+          if (evt === 'ended') {
+            for (var vid in window._bunnyPlayers) {
+              var p = window._bunnyPlayers[vid];
+              var dur = (p && p.duration > 0) ? p.duration : (window._bunnyLastGlobalDuration || 0);
+              if (dur > 0) {
                 notifyBunnyFlutter({
                   event: 'timeupdate',
-                  value: { seconds: sec, duration: dur }
+                  value: { seconds: dur, duration: dur }
                 });
-              } else if (evt === 'play' || evt === 'pause' || evt === 'ended' || evt === 'ready') {
-                notifyBunnyFlutter({ event: evt });
               }
             }
-          } catch(e) {}
+          }
+          return;
+        }
+
+        // 3. timeupdate events (push from player)
+        if (evt === 'timeupdate') {
+          var sec = 0;
+          var dur = 0;
+          var val = data.value;
+          if (typeof val === 'number') {
+            sec = Math.floor(val);
+          } else if (val && typeof val === 'object') {
+            if (val.seconds !== undefined) sec = Math.floor(Number(val.seconds));
+            else if (val.currentTime !== undefined) sec = Math.floor(Number(val.currentTime));
+            if (val.duration !== undefined) dur = Math.floor(Number(val.duration));
+          }
+
+          if (dur > 0) {
+            window._bunnyLastGlobalDuration = dur;
+          } else if (window._bunnyLastGlobalDuration > 0) {
+            dur = window._bunnyLastGlobalDuration;
+          }
+
+          for (var vid in window._bunnyPlayers) {
+            var p = window._bunnyPlayers[vid];
+            if (p) {
+              p.currentTime = sec;
+              if (dur > 0) p.duration = dur;
+            }
+          }
+
+          notifyBunnyFlutter({
+            event: 'timeupdate',
+            value: { seconds: sec, duration: dur }
+          });
+          return;
+        }
+
+        // 4. Polling responses: getCurrentTime (Player.js returns event: 'getCurrentTime')
+        if (evt === 'getCurrentTime' || method === 'getCurrentTime') {
+          var sec = typeof data.value === 'number' ? Math.floor(data.value) : 0;
+          var dur = window._bunnyLastGlobalDuration || 0;
+          for (var vid in window._bunnyPlayers) {
+            var p = window._bunnyPlayers[vid];
+            if (p) {
+              p.currentTime = sec;
+              if (p.duration > 0) dur = p.duration;
+            }
+          }
+          notifyBunnyFlutter({
+            event: 'timeupdate',
+            value: { seconds: sec, duration: dur }
+          });
+          return;
+        }
+
+        // 5. Polling responses: getDuration (Player.js returns event: 'getDuration')
+        if (evt === 'getDuration' || method === 'getDuration') {
+          var dur = typeof data.value === 'number' ? Math.floor(data.value) : 0;
+          if (dur > 0) {
+            window._bunnyLastGlobalDuration = dur;
+            for (var vid in window._bunnyPlayers) {
+              var p = window._bunnyPlayers[vid];
+              if (p) {
+                p.duration = dur;
+              }
+            }
+          }
+          return;
         }
       });
 
@@ -1186,219 +1260,55 @@
         }
       };
 
-      // Modern High-Performance In-App PDF Viewer (Multi-device, Zero external tabs, Full touch support)
-      window.createPdfViewer = function(src, viewId) {
-        var container = document.createElement('div');
-        container.id = 'pdf_container_' + viewId;
-        container.style.width = '100%';
-        container.style.height = '100%';
-        container.style.display = 'flex';
-        container.style.flexDirection = 'column';
-        container.style.backgroundColor = '#0F172A';
-        container.style.borderRadius = '8px';
-        container.style.overflow = 'hidden';
-        container.style.position = 'relative';
-        container.style.userSelect = 'none';
-        container.style.webkitUserSelect = 'none';
+      // Secure High-Performance In-App PDF Viewer (Custom Academic Canvas Engine - Zero Downloads)
+      // Secure High-Performance In-App PDF Viewer (Custom Academic Canvas Engine - Zero Downloads)
+      window.createPdfViewer = function(src, viewId, watermarkText, docTitle) {
+        var iframe = document.createElement('iframe');
+        iframe.id = 'pdf_frame_' + viewId;
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = '0';
+        iframe.style.borderRadius = '8px';
+        iframe.style.backgroundColor = '#0B0F19';
+        iframe.style.pointerEvents = 'auto';
+        iframe.setAttribute('allowfullscreen', 'true');
+        iframe.setAttribute('scrolling', 'auto');
 
-        // 1. Sleek Navigation & Zoom Toolbar
-        var toolbar = document.createElement('div');
-        toolbar.style.display = 'flex';
-        toolbar.style.alignItems = 'center';
-        toolbar.style.justifyContent = 'space-between';
-        toolbar.style.padding = '8px 12px';
-        toolbar.style.backgroundColor = '#1E293B';
-        toolbar.style.borderBottom = '1px solid #334155';
-        toolbar.style.color = '#F8FAFC';
-        toolbar.style.fontSize = '13px';
-        toolbar.style.fontWeight = '500';
-        toolbar.style.flexShrink = '0';
-        toolbar.style.direction = 'rtl';
+        var viewerUrl = 'pdf_viewer.html?v=' + Date.now();
+        iframe.src = viewerUrl;
 
-        // Page info
-        var pageInfo = document.createElement('span');
-        pageInfo.id = 'pdf_page_info_' + viewId;
-        pageInfo.textContent = 'جاري التحميل...';
-        pageInfo.style.color = '#94A3B8';
-
-        // Controls container
-        var controls = document.createElement('div');
-        controls.style.display = 'flex';
-        controls.style.alignItems = 'center';
-        controls.style.gap = '8px';
-        controls.style.direction = 'ltr';
-
-        function createBtn(text, title, onClick) {
-          var btn = document.createElement('button');
-          btn.textContent = text;
-          btn.title = title;
-          btn.style.background = '#334155';
-          btn.style.color = '#F8FAFC';
-          btn.style.border = 'none';
-          btn.style.borderRadius = '4px';
-          btn.style.padding = '4px 10px';
-          btn.style.fontSize = '14px';
-          btn.style.fontWeight = 'bold';
-          btn.style.cursor = 'pointer';
-          btn.style.transition = 'background 0.2s';
-          btn.onmouseover = function() { btn.style.background = '#475569'; };
-          btn.onmouseout = function() { btn.style.background = '#334155'; };
-          btn.onclick = onClick;
-          return btn;
-        }
-
-        var currentZoom = 1.0;
-        var baseScale = 1.0;
-        var zoomLabel = document.createElement('span');
-        zoomLabel.textContent = '100%';
-        zoomLabel.style.minWidth = '42px';
-        zoomLabel.style.textAlign = 'center';
-        zoomLabel.style.color = '#38BDF8';
-        zoomLabel.style.fontSize = '12px';
-
-        // 2. Viewport for Canvas Pages
-        var viewport = document.createElement('div');
-        viewport.id = 'pdf_viewport_' + viewId;
-        viewport.style.flex = '1';
-        viewport.style.overflowY = 'auto';
-        viewport.style.overflowX = 'auto';
-        viewport.style.webkitOverflowScrolling = 'touch';
-        viewport.style.padding = '12px 6px';
-        viewport.style.display = 'flex';
-        viewport.style.flexDirection = 'column';
-        viewport.style.alignItems = 'center';
-        viewport.style.gap = '14px';
-        viewport.style.background = '#090D16';
-
-        // 3. Loading Indicator
-        var loadingBox = document.createElement('div');
-        loadingBox.style.display = 'flex';
-        loadingBox.style.flexDirection = 'column';
-        loadingBox.style.alignItems = 'center';
-        loadingBox.style.justifyContent = 'center';
-        loadingBox.style.height = '100%';
-        loadingBox.style.color = '#94A3B8';
-        loadingBox.style.gap = '12px';
-        loadingBox.innerHTML = '<div style="width:36px;height:36px;border:3px solid #334155;border-top-color:#38BDF8;border-radius:50%;animation:pdfSpin 0.8s linear infinite;"></div><span style="font-size:13px;">جاري تجهيز المستند بدقة عالية...</span><style>@keyframes pdfSpin{to{transform:rotate(360deg)}}</style>';
-        viewport.appendChild(loadingBox);
-
-        toolbar.appendChild(pageInfo);
-        toolbar.appendChild(controls);
-        container.appendChild(toolbar);
-        container.appendChild(viewport);
-
-        // Security: disable right-click inspect / save
-        container.addEventListener('contextmenu', function(e) { e.preventDefault(); return false; });
-
-        // PDF.js Engine Execution
-        if (window.pdfjsLib) {
-          window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.min.js';
-
-          var loadingTask = window.pdfjsLib.getDocument({
-            url: src,
-            withCredentials: false
-          });
-
-          var pdfDoc = null;
-          var totalPages = 0;
-
-          function renderAllPages() {
-            if (!pdfDoc) return;
-            viewport.innerHTML = '';
-
-            var viewWidth = (viewport.clientWidth || container.clientWidth || window.innerWidth) - 24;
-            if (viewWidth < 200) viewWidth = 600;
-
-            pdfDoc.getPage(1).then(function(firstPage) {
-              var unscaledVp = firstPage.getViewport({ scale: 1.0 });
-              baseScale = viewWidth / unscaledVp.width;
-              var effectiveScale = baseScale * currentZoom;
-              zoomLabel.textContent = Math.round(currentZoom * 100) + '%';
-              pageInfo.textContent = 'عدد الصفحات: ' + totalPages;
-
-              for (var i = 1; i <= totalPages; i++) {
-                (function(pageNum) {
-                  var pageWrapper = document.createElement('div');
-                  pageWrapper.style.position = 'relative';
-                  pageWrapper.style.boxShadow = '0 6px 20px rgba(0,0,0,0.5)';
-                  pageWrapper.style.borderRadius = '4px';
-                  pageWrapper.style.overflow = 'hidden';
-                  pageWrapper.style.background = '#FFFFFF';
-
-                  var canvas = document.createElement('canvas');
-                  pageWrapper.appendChild(canvas);
-                  viewport.appendChild(pageWrapper);
-
-                  pdfDoc.getPage(pageNum).then(function(page) {
-                    var vp = page.getViewport({ scale: effectiveScale });
-                    var dpr = window.devicePixelRatio || 1;
-                    canvas.width = Math.floor(vp.width * dpr);
-                    canvas.height = Math.floor(vp.height * dpr);
-                    canvas.style.width = Math.floor(vp.width) + 'px';
-                    canvas.style.height = Math.floor(vp.height) + 'px';
-
-                    var ctx = canvas.getContext('2d');
-                    ctx.scale(dpr, dpr);
-                    page.render({
-                      canvasContext: ctx,
-                      viewport: vp
-                    });
-                  });
-                })(i);
-              }
-            });
+        var hasSent = false;
+        function sendData() {
+          try {
+            if (iframe && iframe.contentWindow) {
+              iframe.contentWindow.postMessage({
+                type: 'LOAD_PDF',
+                url: src,
+                watermark: watermarkText || '',
+                title: docTitle || ''
+              }, '*');
+              hasSent = true;
+            }
+          } catch (e) {
+            console.warn('[PDFViewer] postMessage error:', e);
           }
-
-          var zoomInBtn = createBtn('+', 'تكبير', function() {
-            if (currentZoom < 2.5) {
-              currentZoom += 0.25;
-              renderAllPages();
-            }
-          });
-
-          var zoomOutBtn = createBtn('−', 'تصغير', function() {
-            if (currentZoom > 0.5) {
-              currentZoom -= 0.25;
-              renderAllPages();
-            }
-          });
-
-          var fitBtn = createBtn('⤢', 'ملائمة العرض', function() {
-            currentZoom = 1.0;
-            renderAllPages();
-          });
-
-          controls.appendChild(zoomOutBtn);
-          controls.appendChild(zoomLabel);
-          controls.appendChild(zoomInBtn);
-          controls.appendChild(fitBtn);
-
-          loadingTask.promise.then(function(doc) {
-            pdfDoc = doc;
-            totalPages = doc.numPages;
-            renderAllPages();
-          }).catch(function(err) {
-            console.warn('[PDF.js] Render error, falling back to iframe:', err);
-            viewport.innerHTML = '';
-            var fallbackFrame = document.createElement('iframe');
-            fallbackFrame.src = src;
-            fallbackFrame.style.width = '100%';
-            fallbackFrame.style.height = '100%';
-            fallbackFrame.style.border = '0';
-            viewport.appendChild(fallbackFrame);
-          });
-        } else {
-          // Fallback if pdf.js script didn't load
-          viewport.innerHTML = '';
-          var fallbackFrame = document.createElement('iframe');
-          fallbackFrame.src = src;
-          fallbackFrame.style.width = '100%';
-          fallbackFrame.style.height = '100%';
-          fallbackFrame.style.border = '0';
-          viewport.appendChild(fallbackFrame);
         }
 
-        return container;
+        iframe.onload = function() {
+          sendData();
+          setTimeout(function() {
+            if (!hasSent) sendData();
+          }, 350);
+        };
+
+        var handleViewerReady = function(e) {
+          if (e.data && e.data.type === 'PDF_VIEWER_READY') {
+            sendData();
+          }
+        };
+        window.addEventListener('message', handleViewerReady);
+
+        return iframe;
       };
     })();
   </script>

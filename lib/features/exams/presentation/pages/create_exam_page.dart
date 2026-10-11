@@ -404,6 +404,172 @@ class _CreateExamPageState extends State<CreateExamPage> {
     }
   }
 
+  void _quickFillQuestionOptions(_DraftQuestion q, List<String> letters) {
+    setState(() {
+      while (q.options.length < letters.length && q.options.length < 6) {
+        q.options.add(_DraftOption(isCorrect: false));
+      }
+      for (int i = 0; i < q.options.length; i++) {
+        if (i < letters.length) {
+          q.options[i].controller.text = letters[i];
+        }
+      }
+      if (!q.options.any((o) => o.isCorrect)) {
+        q.options.first.isCorrect = true;
+      }
+    });
+  }
+
+  void _bulkFillAllQuestions(String pattern, {bool onlyEmpty = false}) {
+    int updatedCount = 0;
+    setState(() {
+      for (int qIdx = 0; qIdx < _questions.length; qIdx++) {
+        final q = _questions[qIdx];
+        if (q.type != QuestionType.multipleChoice) continue;
+
+        if (onlyEmpty) {
+          final isAnyFilled = q.options.any((o) => o.controller.text.trim().isNotEmpty);
+          if (isAnyFilled) continue;
+        }
+
+        List<String> letters;
+        if (pattern == 'act') {
+          letters = (qIdx % 2 == 0) ? ['A', 'B', 'C', 'D'] : ['F', 'G', 'H', 'J'];
+        } else if (pattern == 'ar') {
+          letters = ['أ', 'ب', 'ج', 'د'];
+        } else {
+          letters = ['A', 'B', 'C', 'D'];
+        }
+
+        while (q.options.length < letters.length && q.options.length < 6) {
+          q.options.add(_DraftOption(isCorrect: false));
+        }
+
+        for (int i = 0; i < q.options.length; i++) {
+          if (i < letters.length) {
+            q.options[i].controller.text = letters[i];
+          }
+        }
+        if (!q.options.any((o) => o.isCorrect)) {
+          q.options.first.isCorrect = true;
+        }
+        updatedCount++;
+      }
+    });
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.optionsAutoFilledSuccess(updatedCount)),
+          backgroundColor: AppColors.success,
+        ),
+      );
+    }
+  }
+
+  void _showBulkFillOptionsSheet() {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppSpacing.radiusLarge),
+        ),
+      ),
+      builder: (sheetContext) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.s20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                      ),
+                      child: const Icon(
+                        Icons.auto_fix_high_rounded,
+                        color: AppColors.primary,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.s12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            context.l10n.bulkFillOptionsTitle,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            context.l10n.bulkFillOptionsSubtitle,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.s16),
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.format_list_bulleted_rounded, color: AppColors.primary),
+                  title: Text(context.l10n.fillAllQuestionsAbcd),
+                  subtitle: const Text('A, B, C, D'),
+                  onTap: () {
+                    Navigator.pop(sheetContext);
+                    _bulkFillAllQuestions('abcd', onlyEmpty: false);
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.check_box_outline_blank_rounded, color: Color(0xFF0EA5E9)),
+                  title: Text(context.l10n.fillEmptyQuestionsAbcd),
+                  subtitle: const Text('A, B, C, D'),
+                  onTap: () {
+                    Navigator.pop(sheetContext);
+                    _bulkFillAllQuestions('abcd', onlyEmpty: true);
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.sync_alt_rounded, color: Color(0xFF8B5CF6)),
+                  title: Text(context.l10n.fillActAlternatingPattern),
+                  subtitle: const Text('Q1: A,B,C,D  ·  Q2: F,G,H,J ...'),
+                  onTap: () {
+                    Navigator.pop(sheetContext);
+                    _bulkFillAllQuestions('act', onlyEmpty: false);
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.translate_rounded, color: Color(0xFF10B981)),
+                  title: Text(context.l10n.fillArabicLettersPattern),
+                  subtitle: const Text('أ ، ب ، ج ، د'),
+                  onTap: () {
+                    Navigator.pop(sheetContext);
+                    _bulkFillAllQuestions('ar', onlyEmpty: false);
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Future<void> _submitExam() async {
     if (_isSubmitting) return;
     if (!_formKey.currentState!.validate()) return;
@@ -1355,6 +1521,28 @@ class _CreateExamPageState extends State<CreateExamPage> {
                               ),
                             ),
                           ),
+                          OutlinedButton.icon(
+                            onPressed:
+                                isCreating ? null : _showBulkFillOptionsSheet,
+                            icon: const Icon(
+                              Icons.auto_fix_high_rounded,
+                              size: 18,
+                            ),
+                            label: Text(context.l10n.bulkFillOptionsTitle),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppColors.primary,
+                              side: const BorderSide(color: AppColors.primary),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppSpacing.s12,
+                                vertical: 10,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                  AppSpacing.radiusMedium,
+                                ),
+                              ),
+                            ),
+                          ),
                           ElevatedButton.icon(
                             onPressed: isCreating ? null : _addQuestion,
                             icon: const Icon(Icons.add_rounded, size: 18),
@@ -2004,12 +2192,88 @@ class _CreateExamPageState extends State<CreateExamPage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              context.l10n.optionsSelectCorrectPrompt,
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+            Expanded(
+              child: Wrap(
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 8,
+                runSpacing: 4,
+                children: [
+                  Text(
+                    context.l10n.optionsSelectCorrectPrompt,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  InkWell(
+                    onTap: isCreating
+                        ? null
+                        : () => _quickFillQuestionOptions(q, ['A', 'B', 'C', 'D']),
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusSmall,
+                        ),
+                        border: Border.all(
+                          color: AppColors.primary.withValues(alpha: 0.3),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.auto_fix_high_rounded,
+                            size: 13,
+                            color: AppColors.primary,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            context.l10n.quickFillAbcdChip,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  InkWell(
+                    onTap: isCreating
+                        ? null
+                        : () => _quickFillQuestionOptions(q, ['F', 'G', 'H', 'J']),
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceVariant,
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusSmall,
+                        ),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      child: Text(
+                        context.l10n.quickFillFghjChip,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             if (q.options.length < 6)

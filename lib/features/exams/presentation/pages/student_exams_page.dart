@@ -23,7 +23,7 @@ import '../widgets/exam_card.dart';
 import 'exam_intro_page.dart';
 import 'exam_review_page.dart';
 
-enum StudentExamFilter { all, lectureQuizzes, general, completed }
+enum StudentExamFilter { all, inProgress, completed }
 
 class StudentExamsPage extends StatefulWidget {
   final String? initialExamId;
@@ -94,8 +94,9 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
           .from('content_groups')
           .select('associated_exam_id, prerequisite_exam_id');
       for (final row in (cgRes as List<dynamic>)) {
-        final aId = row['associated_exam_id'] as String?;
-        final pId = row['prerequisite_exam_id'] as String?;
+        if (row is! Map) continue;
+        final aId = row['associated_exam_id']?.toString();
+        final pId = row['prerequisite_exam_id']?.toString();
         if (aId != null && aId.isNotEmpty) ids.add(aId);
         if (pId != null && pId.isNotEmpty) ids.add(pId);
       }
@@ -105,10 +106,21 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
           .from('content')
           .select('associated_exam_id, prerequisite_exam_id');
       for (final row in (cRes as List<dynamic>)) {
-        final aId = row['associated_exam_id'] as String?;
-        final pId = row['prerequisite_exam_id'] as String?;
+        if (row is! Map) continue;
+        final aId = row['associated_exam_id']?.toString();
+        final pId = row['prerequisite_exam_id']?.toString();
         if (aId != null && aId.isNotEmpty) ids.add(aId);
         if (pId != null && pId.isNotEmpty) ids.add(pId);
+      }
+
+      // 3. From lesson_exams
+      final leRes = await InjectionContainer.supabaseClient
+          .from('lesson_exams')
+          .select('exam_id');
+      for (final row in (leRes as List<dynamic>)) {
+        if (row is! Map) continue;
+        final eId = row['exam_id']?.toString();
+        if (eId != null && eId.isNotEmpty) ids.add(eId);
       }
 
       if (mounted) {
@@ -126,6 +138,8 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
   }
 
   bool _isLessonQuiz(ExamEntity exam) {
+    if (exam.isLectureExam) return true;
+    if (exam.linkedLessonId != null && exam.linkedLessonId!.isNotEmpty) return true;
     if (_lessonExamIds.contains(exam.id)) return true;
     final lower = exam.title.toLowerCase();
     return lower.contains('كويز') ||
@@ -139,10 +153,8 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
     switch (_activeFilter) {
       case StudentExamFilter.all:
         return list;
-      case StudentExamFilter.lectureQuizzes:
-        return list.where((e) => _isLessonQuiz(e)).toList();
-      case StudentExamFilter.general:
-        return list.where((e) => !_isLessonQuiz(e)).toList();
+      case StudentExamFilter.inProgress:
+        return list.where((e) => e.hasActiveAttempt).toList();
       case StudentExamFilter.completed:
         return list
             .where((e) => e.hasAttempted && !e.hasActiveAttempt)
@@ -251,7 +263,11 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
                       }
 
                       final List<ExamEntity> allExams =
-                          state is StudentExamsLoaded ? state.exams : [];
+                          state is StudentExamsLoaded
+                              ? state.exams
+                                  .where((e) => !_isLessonQuiz(e))
+                                  .toList()
+                              : [];
 
                       if (state is ExamsEmpty ||
                           (state is StudentExamsLoaded && allExams.isEmpty)) {
@@ -571,8 +587,7 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
   }
 
   Widget _buildFilterChips(BuildContext context, List<ExamEntity> allExams) {
-    final lectureCount = allExams.where((e) => _isLessonQuiz(e)).length;
-    final generalCount = allExams.where((e) => !_isLessonQuiz(e)).length;
+    final inProgressCount = allExams.where((e) => e.hasActiveAttempt).length;
     final completedCount = allExams
         .where((e) => e.hasAttempted && !e.hasActiveAttempt)
         .length;
@@ -593,15 +608,9 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
             ),
             const SizedBox(width: AppSpacing.s8),
             _buildFilterChip(
-              context.l10n.lectureQuizzesFilter,
-              StudentExamFilter.lectureQuizzes,
-              lectureCount,
-            ),
-            const SizedBox(width: AppSpacing.s8),
-            _buildFilterChip(
-              context.l10n.generalExamsFilter,
-              StudentExamFilter.general,
-              generalCount,
+              context.l10n.attemptStatusInProgress,
+              StudentExamFilter.inProgress,
+              inProgressCount,
             ),
             const SizedBox(width: AppSpacing.s8),
             _buildFilterChip(
@@ -644,11 +653,10 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
       spacing: AppSpacing.s16,
       runSpacing: AppSpacing.s16,
       children: exams.map((exam) {
-        final isLesson = _isLessonQuiz(exam);
         return ExamCard(
           exam: exam,
           isTeacher: false,
-          isLessonQuiz: isLesson,
+          isLessonQuiz: false,
           onTap: () => _openExamIntro(exam),
           onReview:
               exam.hasAttempted && exam.myLatestAttempt?.isSubmitted == true

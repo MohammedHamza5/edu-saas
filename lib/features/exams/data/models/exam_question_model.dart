@@ -20,6 +20,7 @@ class ExamQuestionModel extends ExamQuestionEntity {
     final optionsList =
         (rawOptions as List<dynamic>?)
             ?.whereType<Map<dynamic, dynamic>>()
+            .where((o) => o['id'] != null)
             .map(
               (o) => QuestionOptionModel.fromJson(Map<String, dynamic>.from(o)),
             )
@@ -27,18 +28,18 @@ class ExamQuestionModel extends ExamQuestionEntity {
         <QuestionOptionModel>[];
 
     return ExamQuestionModel(
-      id: json['id'] as String,
-      examVersionId: json['exam_version_id'] as String? ?? '',
-      questionText: json['question_text'] as String? ?? '',
+      id: json['id']?.toString() ?? '',
+      examVersionId: json['exam_version_id']?.toString() ?? '',
+      questionText: json['question_text']?.toString() ?? '',
       questionType: QuestionType.fromString(
-        json['question_type'] as String? ?? 'multiple_choice',
+        json['question_type']?.toString() ?? 'multiple_choice',
       ),
       points: (json['points'] as num?)?.toInt() ?? 1,
       sortOrder: (json['sort_order'] as num?)?.toInt() ?? 0,
       options: optionsList,
-      imageUrl: json['image_url'] as String?,
-      imageMeta: json['image_meta'] as Map<String, dynamic>?,
-      contextId: json['context_id'] as String?,
+      imageUrl: json['image_url']?.toString(),
+      imageMeta: json['image_meta'] is Map ? Map<String, dynamic>.from(json['image_meta'] as Map) : null,
+      contextId: json['context_id']?.toString(),
     );
   }
 

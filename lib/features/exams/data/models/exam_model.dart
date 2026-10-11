@@ -34,23 +34,23 @@ class ExamModel extends ExamEntity {
   });
 
   factory ExamModel.fromJson(Map<String, dynamic> json) {
-    String title = json['title'] as String? ?? '';
-    String groupId = json['group_id'] as String? ?? '';
+    String title = json['title']?.toString() ?? '';
+    String groupId = json['group_id']?.toString() ?? '';
     String? groupName;
 
-    if (json['content'] is Map<String, dynamic>) {
-      final contentMap = json['content'] as Map<String, dynamic>;
-      title = contentMap['title'] as String? ?? title;
-      groupId = contentMap['group_id'] as String? ?? groupId;
+    if (json['content'] is Map) {
+      final contentMap = json['content'] as Map;
+      title = contentMap['title']?.toString() ?? title;
+      groupId = contentMap['group_id']?.toString() ?? groupId;
 
-      if (contentMap['groups'] is Map<String, dynamic>) {
-        final groupsMap = contentMap['groups'] as Map<String, dynamic>;
-        groupName = groupsMap['name'] as String?;
+      if (contentMap['groups'] is Map) {
+        final groupsMap = contentMap['groups'] as Map;
+        groupName = groupsMap['name']?.toString();
       }
     }
 
     if (json['group_name'] != null) {
-      groupName = json['group_name'] as String?;
+      groupName = json['group_name']?.toString();
     }
 
     // Active version parsing - sort by version_number descending so latest version is picked
@@ -157,28 +157,28 @@ class ExamModel extends ExamEntity {
 
     final isLectureExam = json['is_lecture_exam'] as bool? ??
         (json['linked_lesson_id'] != null);
-    final linkedLessonId = json['linked_lesson_id'] as String?;
-    final linkedLessonTitle = json['linked_lesson_title'] as String?;
+    final linkedLessonId = json['linked_lesson_id']?.toString();
+    final linkedLessonTitle = json['linked_lesson_title']?.toString();
 
-    String? folderId = json['folder_id'] as String?;
+    String? folderId = json['folder_id']?.toString();
     String? folderName;
     String? folderColor;
     if (json['folder'] is Map) {
       final f = json['folder'] as Map;
-      folderId ??= f['id'] as String?;
-      folderName = f['name'] as String?;
-      folderColor = f['color'] as String?;
+      folderId ??= f['id']?.toString();
+      folderName = f['name']?.toString();
+      folderColor = f['color']?.toString();
     } else if (json['exam_folders'] is Map) {
       final f = json['exam_folders'] as Map;
-      folderId ??= f['id'] as String?;
-      folderName = f['name'] as String?;
-      folderColor = f['color'] as String?;
+      folderId ??= f['id']?.toString();
+      folderName = f['name']?.toString();
+      folderColor = f['color']?.toString();
     }
 
     return ExamModel(
-      id: json['id'] as String? ?? '',
-      contentId: json['content_id'] as String? ?? '',
-      tenantId: json['tenant_id'] as String? ?? '',
+      id: json['id']?.toString() ?? '',
+      contentId: json['content_id']?.toString() ?? '',
+      tenantId: json['tenant_id']?.toString() ?? '',
       groupId: groupId,
       groupName: groupName,
       title: title.isNotEmpty ? title : 'امتحان بدون عنوان',

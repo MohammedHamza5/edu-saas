@@ -113,6 +113,7 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
           GroupSlugResolver.registerGroup(g.id, g.name);
         }
         final hadValidUuidBefore = GroupSlugResolver.isUuid(_activeGroupId);
+        final previousId = _activeGroupId;
         setState(() {
           _studentGroups = groups;
           // Match by id or by slug or by name
@@ -126,12 +127,17 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
           if (match.isNotEmpty) {
             _activeGroupId = match.first.id;
             _activeGroupName = match.first.name;
+          } else if (_studentGroups.isNotEmpty &&
+              !GroupSlugResolver.isUuid(_activeGroupId)) {
+            _activeGroupId = _studentGroups.first.id;
+            _activeGroupName = _studentGroups.first.name;
           }
         });
 
-        // If it wasn't loaded because widget.groupId was an unresolved slug, load now
+        // If it wasn't loaded because widget.groupId was an unresolved slug,
+        // or if active group changed to a valid UUID, load now
         if (mounted &&
-            !hadValidUuidBefore &&
+            (!hadValidUuidBefore || _activeGroupId != previousId) &&
             GroupSlugResolver.isUuid(_activeGroupId)) {
           unawaited(
             context.read<CourseProgressCubit>().loadCourseProgress(
@@ -415,7 +421,8 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
           }
         },
         builder: (context, state) {
-          if (state is CourseProgressLoading) {
+          if (state is CourseProgressInitial ||
+              state is CourseProgressLoading) {
             return const AppLoadingView.cardsGrid(count: 4, columns: 2);
           }
 
@@ -425,13 +432,18 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                 : state.message;
             return AppErrorView(
               message: userFriendlyMessage,
-              onRetry: () {
-                _activeGroupId = GroupSlugResolver.toId(_activeGroupId);
-                context.read<CourseProgressCubit>().loadCourseProgress(
-                  _activeGroupId,
-                  studentId:
-                      InjectionContainer.supabaseClient.auth.currentUser?.id,
-                );
+              onRetry: () async {
+                final cubit = context.read<CourseProgressCubit>();
+                await _fetchStudentGroups();
+                if (!mounted) return;
+                if (GroupSlugResolver.isUuid(_activeGroupId)) {
+                  unawaited(
+                    cubit.loadCourseProgress(
+                      _activeGroupId,
+                      studentId: _currentUserId,
+                    ),
+                  );
+                }
               },
             );
           }
@@ -998,7 +1010,7 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
             );
           }
 
-          return const SizedBox.shrink();
+          return const AppLoadingView.cardsGrid(count: 4, columns: 2);
         },
       ),
     );

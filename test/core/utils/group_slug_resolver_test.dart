@@ -2,6 +2,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:edu_saas/core/utils/group_slug_resolver.dart';
 
 void main() {
+  setUp(() {
+    GroupSlugResolver.clear();
+    GroupSlugResolver.register('22222222-2222-2222-2222-222222222222', 'sat-advanced');
+    GroupSlugResolver.register('33333333-3333-3333-3333-333333333333', 'est-foundation');
+    GroupSlugResolver.register('44444444-4444-4444-4444-444444444444', 'act-intensive');
+    GroupSlugResolver.registerAlias('sat-prep', '22222222-2222-2222-2222-222222222222');
+  });
+
   group('GroupSlugResolver Tests', () {
     test('resolves known group UUIDs to aesthetic slugs', () {
       expect(

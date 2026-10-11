@@ -13,12 +13,12 @@ class ExamContextModel extends ExamContextEntity {
 
   factory ExamContextModel.fromJson(Map<String, dynamic> json) {
     return ExamContextModel(
-      id: json['id'] as String,
-      examVersionId: json['exam_version_id'] as String? ?? '',
-      title: json['title'] as String?,
-      contextText: json['context_text'] as String?,
-      imageUrl: json['image_url'] as String?,
-      imageMeta: json['image_meta'] as Map<String, dynamic>?,
+      id: json['id']?.toString() ?? '',
+      examVersionId: json['exam_version_id']?.toString() ?? '',
+      title: json['title']?.toString(),
+      contextText: json['context_text']?.toString(),
+      imageUrl: json['image_url']?.toString(),
+      imageMeta: json['image_meta'] is Map ? Map<String, dynamic>.from(json['image_meta'] as Map) : null,
       sortOrder: (json['sort_order'] as num?)?.toInt() ?? 0,
     );
   }

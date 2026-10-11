@@ -24,10 +24,8 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 //   SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY — auto-set by Supabase
 // ============================================================================
 
-// Short-lived token: 2 minutes only.
-// Even if a student extracts the signed URL from DevTools, it expires within
-// 120 seconds and cannot be replayed or shared externally.
-const TOKEN_TTL_SECONDS = 2 * 60; // 2 minutes
+// Token TTL: 4 hours to accommodate full lectures and prevent clock skew 403s
+const TOKEN_TTL_SECONDS = 4 * 60 * 60; // 4 hours
 
 // Allow requests from client apps and web origins
 function corsHeaders(origin: string | null): Record<string, string> {
@@ -243,7 +241,7 @@ Deno.serve(async (req: Request) => {
 
     // Bunny Stream Embed URL
     const playbackUrl =
-      `https://player.mediadelivery.net/embed/${libraryId}/${providerVideoId}` +
+      `https://iframe.mediadelivery.net/embed/${libraryId}/${providerVideoId}` +
       `?token=${token}` +
       `&expires=${expires}` +
       `&autoplay=false` +

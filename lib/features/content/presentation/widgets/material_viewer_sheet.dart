@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -36,10 +37,10 @@ class MaterialViewerSheet extends StatefulWidget {
     final isPdf = content.type == ContentType.pdf;
     if (width >= 600) {
       final dialogWidth = isPdf
-          ? (width > 1100 ? 1000.0 : (width * 0.92).clamp(700.0, 1000.0))
+          ? (width > 1200 ? 1100.0 : (width * 0.94).clamp(720.0, 1100.0))
           : 520.0;
       final dialogMaxHeight = isPdf
-          ? (height * 0.92).clamp(550.0, 920.0)
+          ? (height * 0.94).clamp(580.0, 960.0)
           : 640.0;
       await showDialog<void>(
         context: context,
@@ -149,6 +150,23 @@ class _MaterialViewerSheetState extends State<MaterialViewerSheet> {
     }
   }
 
+  String _resolveWatermarkText() {
+    final user = SupabaseService.currentUser;
+    final metadata = user?.userMetadata;
+    final name = (metadata?['full_name'] as String?) ??
+        user?.email?.split('@').first ??
+        '';
+    final phone = (metadata?['phone'] as String?) ?? user?.phone ?? '';
+    final id = user != null && user.id.isNotEmpty
+        ? user.id.substring(0, math.min(8, user.id.length))
+        : '';
+    final parts = <String>[];
+    if (name.isNotEmpty) parts.add(name);
+    if (phone.isNotEmpty) parts.add(phone);
+    if (id.isNotEmpty) parts.add('ID: $id');
+    return parts.isEmpty ? 'EduSaaS Protected' : parts.join(' • ');
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -176,6 +194,7 @@ class _MaterialViewerSheetState extends State<MaterialViewerSheet> {
     final isDesktop = MediaQuery.of(context).size.width >= 600;
 
     return ForensicWatermarkOverlay(
+      enabled: !isPdf,
       child: Container(
         decoration: BoxDecoration(
           color: theme.scaffoldBackgroundColor,
@@ -254,6 +273,13 @@ class _MaterialViewerSheetState extends State<MaterialViewerSheet> {
                     ],
                   ),
                 ),
+                if (isTeacher && isPdf && _signedUrl != null) ...[
+                  IconButton(
+                    icon: const Icon(Icons.copy_rounded, size: 18),
+                    onPressed: _copyUrl,
+                    tooltip: context.l10n.copySecureUrlAction,
+                  ),
+                ],
                 IconButton(
                   icon: const Icon(Icons.close_rounded),
                   onPressed: () => Navigator.of(context).pop(),
@@ -444,19 +470,12 @@ class _MaterialViewerSheetState extends State<MaterialViewerSheet> {
               ],
               if (isPdf) ...[
                 Expanded(
-                  child: Container(
-                    margin: const EdgeInsets.only(bottom: AppSpacing.s12),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(
-                        AppSpacing.radiusMedium,
-                      ),
-                      border: Border.all(color: AppColors.border),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(
-                        AppSpacing.radiusMedium,
-                      ),
-                      child: buildSecurePdfViewer(pdfUrl: _signedUrl!),
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.s12),
+                    child: buildSecurePdfViewer(
+                      pdfUrl: _signedUrl!,
+                      watermarkText: _resolveWatermarkText(),
+                      docTitle: widget.content.title,
                     ),
                   ),
                 ),

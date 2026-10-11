@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../domain/entities/exam_entity.dart';
@@ -23,6 +24,14 @@ class QuestionOptionTile extends StatelessWidget {
   });
 
   String _getOptionLabel(BuildContext context) {
+    final trimmed = option.optionText.trim();
+    if (RegExp(r'^[A-Za-z]$').hasMatch(trimmed)) {
+      return trimmed.toUpperCase();
+    }
+    if (trimmed.length == 1 &&
+        const ['أ', 'ب', 'ج', 'د', 'هـ', 'و'].contains(trimmed)) {
+      return trimmed;
+    }
     final isAr = Localizations.localeOf(context).languageCode == 'ar';
     final labels = isAr
         ? const ['أ', 'ب', 'ج', 'د', 'هـ', 'و']
@@ -109,14 +118,19 @@ class QuestionOptionTile extends StatelessWidget {
                       option.optionText,
                       style: TextStyle(
                         fontSize: 14,
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                        fontWeight: isSelected
+                            ? FontWeight.w600
+                            : FontWeight.normal,
                         color: AppColors.textPrimary,
                       ),
                     ),
-                  if (option.imageUrl != null && option.imageUrl!.isNotEmpty) ...[
+                  if (option.imageUrl != null &&
+                      option.imageUrl!.isNotEmpty) ...[
                     if (option.optionText.isNotEmpty) const SizedBox(height: 6),
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.radiusSmall,
+                      ),
                       child: CachedNetworkImage(
                         imageUrl: option.imageUrl!,
                         height: 90,
@@ -127,7 +141,9 @@ class QuestionOptionTile extends StatelessWidget {
                         placeholder: (ctx, _) => Container(
                           height: 90,
                           width: 90,
-                          color: AppColors.surfaceVariant.withValues(alpha: 0.3),
+                          color: AppColors.surfaceVariant.withValues(
+                            alpha: 0.3,
+                          ),
                           child: const Center(
                             child: SizedBox(
                               width: 16,

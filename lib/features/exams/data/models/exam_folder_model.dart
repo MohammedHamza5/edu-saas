@@ -30,19 +30,19 @@ class ExamFolderModel extends ExamFolderEntity {
     }
 
     return ExamFolderModel(
-      id: json['id'] as String,
-      tenantId: json['tenant_id'] as String? ?? '',
-      name: json['name'] as String? ?? '',
-      description: json['description'] as String?,
-      color: json['color'] as String? ?? '#5B4FE0',
-      icon: json['icon'] as String? ?? 'folder',
+      id: json['id']?.toString() ?? '',
+      tenantId: json['tenant_id']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      description: json['description']?.toString(),
+      color: json['color']?.toString() ?? '#5B4FE0',
+      icon: json['icon']?.toString() ?? 'folder',
       sortOrder: (json['sort_order'] as num?)?.toInt() ?? 0,
       examCount: parsedExamCount,
       createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'] as String)
+          ? DateTime.tryParse(json['created_at'].toString()) ?? DateTime.now()
           : DateTime.now(),
       updatedAt: json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'] as String)
+          ? DateTime.tryParse(json['updated_at'].toString()) ?? DateTime.now()
           : DateTime.now(),
     );
   }

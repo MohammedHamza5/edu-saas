@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 Widget buildBunnyEmbedPlayer({
   required String embedUrl,
   required int initialProgressSeconds,
+  int? totalDurationSeconds,
   void Function(int currentSeconds, int totalSeconds)? onProgress,
   void Function(
     int currentSeconds,

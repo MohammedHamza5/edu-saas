@@ -20,7 +20,7 @@ class ExamDispatchMetaModel extends ExamDispatchMetaEntity {
       durationMinutes: (json['duration_minutes'] as num?)?.toInt() ?? 0,
       primaryGroupName: json['primary_group_name'] as String?,
       createdAt: json['created_at'] != null
-          ? DateTime.tryParse(json['created_at'] as String)
+          ? DateTime.tryParse(json['created_at'].toString())
           : null,
     );
   }
@@ -87,7 +87,7 @@ class ExamDispatchStudentModel extends ExamDispatchStudentEntity {
       bestScore: (json['best_score'] as num?)?.toInt(),
       bestPercentage: (json['best_percentage'] as num?)?.toDouble(),
       latestSubmittedAt: json['latest_submitted_at'] != null
-          ? DateTime.tryParse(json['latest_submitted_at'] as String)
+          ? DateTime.tryParse(json['latest_submitted_at'].toString())
           : null,
       latestAttemptId: json['latest_attempt_id'] as String?,
       isPassed: json['is_passed'] as bool? ?? false,

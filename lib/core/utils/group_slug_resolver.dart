@@ -1,7 +1,9 @@
+import 'package:edu_saas/core/network/supabase_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'cache_manager.dart';
 
 /// Utility class to map group UUIDs to clean, human-readable URL slugs
-/// (e.g. 'sat-advanced' instead of '22222222-2222-2222-2222-222222222222').
+/// (e.g. 'sat' or 'sat-advanced' instead of raw database UUIDs).
 class GroupSlugResolver {
   GroupSlugResolver._();
 
@@ -9,24 +11,9 @@ class GroupSlugResolver {
     r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
   );
 
-  static final Map<String, String> _idToSlug = {
-    '22222222-2222-2222-2222-222222222222': 'sat-advanced',
-    '33333333-3333-3333-3333-333333333333': 'est-foundation',
-    '44444444-4444-4444-4444-444444444444': 'act-intensive',
-  };
-
-  static final Map<String, String> _slugToId = {
-    'sat-advanced': '22222222-2222-2222-2222-222222222222',
-    'est-foundation': '33333333-3333-3333-3333-333333333333',
-    'act-intensive': '44444444-4444-4444-4444-444444444444',
-    // Fallback aliases
-    'sat-prep': '22222222-2222-2222-2222-222222222222',
-    'sat': '22222222-2222-2222-2222-222222222222',
-    'est-prep': '33333333-3333-3333-3333-333333333333',
-    'est': '33333333-3333-3333-3333-333333333333',
-    'act-prep': '44444444-4444-4444-4444-444444444444',
-    'act': '44444444-4444-4444-4444-444444444444',
-  };
+  // Runtime dynamic bidirectional caches
+  static final Map<String, String> _idToSlug = {};
+  static final Map<String, String> _slugToId = {};
 
   /// Checks whether a given string is a valid standard RFC UUID
   static bool isUuid(String value) {
@@ -52,7 +39,7 @@ class GroupSlugResolver {
     return groupId;
   }
 
-  /// Resolves an aesthetic URL slug back to its database UUID
+  /// Resolves an aesthetic URL slug back to its database UUID from in-memory cache
   static String toId(String slugOrId) {
     final trimmed = slugOrId.trim();
     if (_slugToId.containsKey(trimmed)) {
@@ -65,8 +52,8 @@ class GroupSlugResolver {
 
     // Attempt dynamic lookup in AppCache.groups
     try {
-      final cached = AppCache.groups.getStale('groups_all') ??
-          AppCache.groups.get('all');
+      final cached =
+          AppCache.groups.getStale('groups_all') ?? AppCache.groups.get('all');
       if (cached is List) {
         for (final item in cached) {
           final id = (item as dynamic).id as String?;
@@ -76,7 +63,9 @@ class GroupSlugResolver {
                 .toLowerCase()
                 .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
                 .replaceAll(RegExp(r'^-|-$'), '');
-            if (genSlug == lower || name.toLowerCase() == lower || id == trimmed) {
+            if (genSlug == lower ||
+                name.toLowerCase() == lower ||
+                id == trimmed) {
               register(id, genSlug.isNotEmpty ? genSlug : id);
               return id;
             }
@@ -88,9 +77,42 @@ class GroupSlugResolver {
     return trimmed;
   }
 
+  /// Asynchronously resolves a slug to its database UUID by querying Supabase
+  /// if not found in memory, and registers the mapping dynamically.
+  static Future<String> toIdAsync(
+    String slugOrId, [
+    SupabaseClient? client,
+  ]) async {
+    final cached = toId(slugOrId);
+    if (isUuid(cached)) return cached;
+
+    try {
+      final sc = client ?? SupabaseService.client;
+      final row = await sc
+          .from('groups')
+          .select('id, name')
+          .ilike('name', slugOrId.trim())
+          .limit(1)
+          .maybeSingle();
+      if (row != null && row['id'] != null) {
+        final realId = row['id'] as String;
+        final name = row['name'] as String? ?? slugOrId;
+        registerGroup(realId, name);
+        return realId;
+      }
+    } catch (_) {}
+
+    return slugOrId;
+  }
+
   /// Registers a runtime mapping between a UUID and a custom slug
   static void register(String groupId, String slug) {
     _idToSlug[groupId] = slug;
+    _slugToId[slug] = groupId;
+  }
+
+  /// Registers an alternative slug pointing to a UUID without changing its primary canonical slug
+  static void registerAlias(String slug, String groupId) {
     _slugToId[slug] = groupId;
   }
 
@@ -105,5 +127,10 @@ class GroupSlugResolver {
       register(groupId, slug);
     }
   }
-}
 
+  /// Clears in-memory mappings (mainly for unit tests)
+  static void clear() {
+    _idToSlug.clear();
+    _slugToId.clear();
+  }
+}

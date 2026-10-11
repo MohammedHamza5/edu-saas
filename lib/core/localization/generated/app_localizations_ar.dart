@@ -8290,6 +8290,13 @@ class AppLocalizationsAr extends AppLocalizations {
       'لا توجد محاضرات تطابق التصفية المحددة.';
 
   @override
+  String get noWatchedLecturesYet => 'لا توجد محاضرات تمت مشاهدتها بعد';
+
+  @override
+  String get noWatchedLecturesSubtitle =>
+      'ستظهر هنا تلقائياً إحصائيات ونسب إنجاز أي محاضرة تبدأ بمشاهدتها.';
+
+  @override
   String get goToStudyMaterialsAction => 'الانتقال للمحاضرات';
 
   @override

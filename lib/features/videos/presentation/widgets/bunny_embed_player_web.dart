@@ -18,6 +18,7 @@ external set _onBunnyPlayerMessage(JSFunction? callback);
 Widget buildBunnyEmbedPlayer({
   required String embedUrl,
   required int initialProgressSeconds,
+  int? totalDurationSeconds,
   void Function(int currentSeconds, int totalSeconds)? onProgress,
   void Function(
     int currentSeconds,
@@ -39,6 +40,7 @@ Widget buildBunnyEmbedPlayer({
   return _BunnyEmbedPlayerWeb(
     embedUrl: embedUrl,
     initialProgressSeconds: initialProgressSeconds,
+    totalDurationSeconds: totalDurationSeconds,
     onProgress: onProgress,
     onMetricsProgress: onMetricsProgress,
     onCompleted: onCompleted,
@@ -51,6 +53,7 @@ Widget buildBunnyEmbedPlayer({
 class _BunnyEmbedPlayerWeb extends StatefulWidget {
   final String embedUrl;
   final int initialProgressSeconds;
+  final int? totalDurationSeconds;
   final void Function(int currentSeconds, int totalSeconds)? onProgress;
   final void Function(
     int currentSeconds,
@@ -72,6 +75,7 @@ class _BunnyEmbedPlayerWeb extends StatefulWidget {
   const _BunnyEmbedPlayerWeb({
     required this.embedUrl,
     required this.initialProgressSeconds,
+    this.totalDurationSeconds,
     this.onProgress,
     this.onMetricsProgress,
     this.onCompleted,
@@ -104,6 +108,7 @@ class _BunnyEmbedPlayerWebState extends State<_BunnyEmbedPlayerWeb>
     _viewType = 'bunny-player-view-$_viewId';
 
     _lastRecordedPosition = widget.initialProgressSeconds;
+    _lastDuration = widget.totalDurationSeconds ?? 0;
 
     // Register iframe platform view factory
     ui_web.platformViewRegistry.registerViewFactory(_viewType, (int id) {
@@ -181,6 +186,9 @@ class _BunnyEmbedPlayerWebState extends State<_BunnyEmbedPlayerWeb>
             if (currentSeconds - _lastRecordedPosition > 25) {
               _isSkipped = true;
             }
+            if (currentSeconds > _lastRecordedPosition) {
+              _isPlaying = true;
+            }
             _lastRecordedPosition = currentSeconds;
 
             widget.onProgress?.call(currentSeconds, effectiveDuration);
@@ -190,6 +198,13 @@ class _BunnyEmbedPlayerWebState extends State<_BunnyEmbedPlayerWeb>
               _actualWatchSeconds,
               _isSkipped,
             );
+
+            // Safety net: when reaching near completion (within 2s or 98%)
+            if (effectiveDuration > 0 &&
+                (currentSeconds >= effectiveDuration - 2 ||
+                    (currentSeconds / effectiveDuration) >= 0.98)) {
+              widget.onCompleted?.call();
+            }
           } else if (event == 'play') {
             _isPlaying = true;
             if (widget.initialProgressSeconds > 3 && !_hasSeekedInitial) {

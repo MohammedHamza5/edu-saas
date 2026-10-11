@@ -423,6 +423,7 @@ class _AppVideoPlayerState extends State<AppVideoPlayer>
         child: buildBunnyEmbedPlayer(
           embedUrl: widget.streamUrl,
           initialProgressSeconds: widget.initialProgressSeconds,
+          totalDurationSeconds: widget.totalDurationSeconds,
           onProgress: widget.onProgress,
           onMetricsProgress: widget.onMetricsProgress,
           onCompleted: widget.onCompleted,

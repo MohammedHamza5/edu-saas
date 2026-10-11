@@ -19,6 +19,7 @@ class ExamVersionModel extends ExamVersionEntity {
     final questionsList =
         (rawQuestions as List<dynamic>?)
             ?.whereType<Map<dynamic, dynamic>>()
+            .where((q) => q['id'] != null)
             .map((q) => ExamQuestionModel.fromJson(Map<String, dynamic>.from(q)))
             .toList() ??
         <ExamQuestionModel>[];
@@ -27,18 +28,21 @@ class ExamVersionModel extends ExamVersionEntity {
     final contextsList =
         (rawContexts as List<dynamic>?)
             ?.whereType<Map<dynamic, dynamic>>()
+            .where((c) => c['id'] != null)
             .map((c) => ExamContextModel.fromJson(Map<String, dynamic>.from(c)))
             .toList() ??
         <ExamContextModel>[];
 
     return ExamVersionModel(
-      id: json['id'] as String,
-      examId: json['exam_id'] as String? ?? '',
+      id: json['id']?.toString() ?? '',
+      examId: json['exam_id']?.toString() ?? '',
       versionNumber: (json['version_number'] as num?)?.toInt() ?? 1,
-      status: ExamStatus.fromString(json['status'] as String? ?? 'draft'),
-      createdAt: DateTime.parse(json['created_at'] as String),
+      status: ExamStatus.fromString(json['status']?.toString() ?? 'draft'),
+      createdAt: json['created_at'] != null
+          ? DateTime.tryParse(json['created_at'].toString()) ?? DateTime.now()
+          : DateTime.now(),
       publishedAt: json['published_at'] != null
-          ? DateTime.parse(json['published_at'] as String)
+          ? DateTime.tryParse(json['published_at'].toString())
           : null,
       questions: questionsList,
       contexts: contextsList,

@@ -215,10 +215,11 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
     // Build map of examId -> linked lesson info for this group
     final linkedLessonsMap = <String, Map<String, String>>{};
     for (final item in lessonsRes) {
-      final examId = item['associated_exam_id'] as String?;
-      final contentMap = item['content'] as Map<String, dynamic>?;
-      final lessonId = (item['content_id'] ?? contentMap?['id']) as String?;
-      final lessonTitle = contentMap?['title'] as String? ?? '';
+      if (item is! Map) continue;
+      final examId = item['associated_exam_id']?.toString();
+      final contentMap = item['content'] is Map ? item['content'] as Map : null;
+      final lessonId = (item['content_id'] ?? contentMap?['id'])?.toString();
+      final lessonTitle = contentMap?['title']?.toString() ?? '';
       if (examId != null && lessonId != null) {
         linkedLessonsMap[examId] = {
           'lesson_id': lessonId,
@@ -228,10 +229,11 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
     }
 
     for (final item in multiLessonsRes) {
-      final examId = item['exam_id'] as String?;
-      final contentMap = item['content'] as Map<String, dynamic>?;
-      final lessonId = (item['content_id'] ?? contentMap?['id']) as String?;
-      final lessonTitle = contentMap?['title'] as String? ?? '';
+      if (item is! Map) continue;
+      final examId = item['exam_id']?.toString();
+      final contentMap = item['content'] is Map ? item['content'] as Map : null;
+      final lessonId = (item['content_id'] ?? contentMap?['id'])?.toString();
+      final lessonTitle = contentMap?['title']?.toString() ?? '';
       if (examId != null && lessonId != null) {
         linkedLessonsMap[examId] = {
           'lesson_id': lessonId,
@@ -244,21 +246,25 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
     final results = <ExamModel>[];
 
     for (final item in list) {
-      final map = Map<String, dynamic>.from(item as Map<String, dynamic>);
+      if (item is! Map) continue;
+      final map = Map<String, dynamic>.from(item);
       if (map['exam_attempts'] is List &&
           (map['exam_attempts'] as List).isNotEmpty) {
-        final countMap =
-            (map['exam_attempts'] as List).first as Map<String, dynamic>;
-        map['attempts_count'] = countMap['count'] ?? 0;
+        final firstAttempt = (map['exam_attempts'] as List).first;
+        if (firstAttempt is Map && firstAttempt.containsKey('count')) {
+          map['attempts_count'] = (firstAttempt['count'] as num?)?.toInt() ?? 0;
+        } else {
+          map['attempts_count'] = (map['exam_attempts'] as List).length;
+        }
       } else {
         map['attempts_count'] = 0;
       }
       map.remove('exam_attempts');
 
-      final examId = map['id'] as String? ?? '';
-      final contentMap = map['content'] as Map<String, dynamic>?;
-      final desc = (contentMap?['description'] as String? ?? '').trim().toLowerCase();
-      final title = (map['title'] as String? ?? contentMap?['title'] as String? ?? '').toLowerCase();
+      final examId = map['id']?.toString() ?? '';
+      final contentMap = map['content'] is Map ? map['content'] as Map : null;
+      final desc = (contentMap?['description']?.toString() ?? '').trim().toLowerCase();
+      final title = (map['title']?.toString() ?? contentMap?['title']?.toString() ?? '').toLowerCase();
 
       final linkedInfo = linkedLessonsMap[examId];
       if (linkedInfo != null) {
@@ -299,7 +305,9 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
         .eq('status', 'active');
 
     final groupIds = (memberships as List<dynamic>)
-        .map((m) => m['group_id'] as String)
+        .whereType<Map<dynamic, dynamic>>()
+        .map((m) => m['group_id']?.toString() ?? '')
+        .where((id) => id.isNotEmpty)
         .toList();
 
     if (groupIds.isEmpty) return [];
@@ -357,35 +365,50 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
         .inFilter('group_id', groupIds)
         .catchError((Object _) => <dynamic>[]);
 
-    final parallelStudentRes = await Future.wait([examsFuture, cgFuture, cFuture]);
+    final leFuture = _safeClient
+        .from('lesson_exams')
+        .select('exam_id')
+        .catchError((Object _) => <dynamic>[]);
+
+    final parallelStudentRes =
+        await Future.wait([examsFuture, cgFuture, cFuture, leFuture]);
     final rawList = parallelStudentRes[0] as List<dynamic>;
     final cgRes = parallelStudentRes[1] as List<dynamic>;
     final cRes = parallelStudentRes[2] as List<dynamic>;
+    final leRes = parallelStudentRes[3] as List<dynamic>;
 
     final lessonExamIds = <String>{};
     for (final row in cgRes) {
-      final aId = (row as Map<String, dynamic>)['associated_exam_id'] as String?;
-      final pId = row['prerequisite_exam_id'] as String?;
+      if (row is! Map) continue;
+      final aId = row['associated_exam_id']?.toString();
+      final pId = row['prerequisite_exam_id']?.toString();
       if (aId != null && aId.isNotEmpty) lessonExamIds.add(aId);
       if (pId != null && pId.isNotEmpty) lessonExamIds.add(pId);
     }
     for (final row in cRes) {
-      final aId = (row as Map<String, dynamic>)['associated_exam_id'] as String?;
-      final pId = row['prerequisite_exam_id'] as String?;
+      if (row is! Map) continue;
+      final aId = row['associated_exam_id']?.toString();
+      final pId = row['prerequisite_exam_id']?.toString();
       if (aId != null && aId.isNotEmpty) lessonExamIds.add(aId);
       if (pId != null && pId.isNotEmpty) lessonExamIds.add(pId);
     }
+    for (final row in leRes) {
+      if (row is! Map) continue;
+      final eId = row['exam_id']?.toString();
+      if (eId != null && eId.isNotEmpty) lessonExamIds.add(eId);
+    }
     if (rawList.isEmpty) return [];
 
-    final list = rawList.where((item) {
-      final id = (item as Map<String, dynamic>)['id'] as String?;
-      return id != null;
+    final list = rawList.whereType<Map<dynamic, dynamic>>().where((item) {
+      final id = item['id']?.toString();
+      return id != null && id.isNotEmpty;
     }).toList();
 
     if (list.isEmpty) return [];
 
     final examIds = list
-        .map((item) => (item as Map<String, dynamic>)['id'] as String)
+        .map((item) => item['id']?.toString() ?? '')
+        .where((id) => id.isNotEmpty)
         .toList();
 
     // Fetch all student attempts in 1 batch query instead of N sequential loop queries
@@ -408,16 +431,22 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
 
     final attemptsByExam = <String, List<Map<String, dynamic>>>{};
     for (final att in allAttempts as List<dynamic>) {
-      final aMap = att as Map<String, dynamic>;
-      final eId = aMap['exam_id'] as String;
-      attemptsByExam.putIfAbsent(eId, () => []).add(aMap);
+      if (att is! Map) continue;
+      final aMap = Map<String, dynamic>.from(att);
+      final eId = aMap['exam_id']?.toString() ?? '';
+      if (eId.isNotEmpty) {
+        attemptsByExam.putIfAbsent(eId, () => []).add(aMap);
+      }
     }
 
     final results = <ExamModel>[];
     for (final item in list) {
-      final map = Map<String, dynamic>.from(item as Map<String, dynamic>);
-      final examId = map['id'] as String;
+      final map = Map<String, dynamic>.from(item);
+      final examId = map['id']?.toString() ?? '';
       map['exam_attempts'] = attemptsByExam[examId] ?? [];
+      if (lessonExamIds.contains(examId)) {
+        map['is_lecture_exam'] = true;
+      }
       results.add(ExamModel.fromJson(map));
     }
 
@@ -880,7 +909,7 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
         .select('id, content_id')
         .eq('id', examId)
         .single();
-    final contentId = examRes['content_id'] as String;
+    final contentId = examRes['content_id']?.toString() ?? '';
 
     final contentUpdates = <String, dynamic>{
       'title': title.trim(),
@@ -927,10 +956,10 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
           })
           .select('id')
           .single();
-      versionId = newVer['id'] as String;
+      versionId = newVer['id']?.toString() ?? '';
     } else {
-      final latest = versionsList.first as Map<String, dynamic>;
-      versionId = latest['id'] as String;
+      final latest = versionsList.first as Map;
+      versionId = latest['id']?.toString() ?? '';
       if (isPublished == true) {
         await _safeClient
             .from('exam_versions')
@@ -947,7 +976,9 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
         .select('id')
         .eq('exam_version_id', versionId);
     final qIds = (existingQ as List<dynamic>)
-        .map((row) => (row as Map<String, dynamic>)['id'] as String)
+        .whereType<Map<dynamic, dynamic>>()
+        .map((row) => row['id']?.toString() ?? '')
+        .where((id) => id.isNotEmpty)
         .toList();
 
     if (qIds.isNotEmpty) {
@@ -978,7 +1009,7 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
           })
           .select('id')
           .single();
-      final qId = qRes['id'] as String;
+      final qId = qRes['id']?.toString() ?? '';
 
       if (q.options.isNotEmpty) {
         final optionsPayload = q.options.asMap().entries.map((optEntry) {
@@ -1121,15 +1152,15 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
         .order('sort_order', ascending: true);
 
     final list = response as List<dynamic>;
-    return list.map((item) {
-      final map = Map<String, dynamic>.from(item as Map<String, dynamic>);
-      final contentMap = map['content'] as Map<String, dynamic>?;
+    return list.whereType<Map<dynamic, dynamic>>().map((item) {
+      final map = Map<String, dynamic>.from(item);
+      final contentMap = map['content'] is Map ? map['content'] as Map : null;
       return {
-        'id': (contentMap?['id'] ?? map['content_id']) as String,
-        'title': (contentMap?['title'] as String?) ?? 'محاضرة بدون عنوان',
-        'type': contentMap?['type'] as String? ?? 'video',
-        'sort_order': map['sort_order'] ?? 0,
-        'associated_exam_id': map['associated_exam_id'] as String?,
+        'id': (contentMap?['id'] ?? map['content_id'])?.toString() ?? '',
+        'title': contentMap?['title']?.toString() ?? 'محاضرة بدون عنوان',
+        'type': contentMap?['type']?.toString() ?? 'video',
+        'sort_order': (map['sort_order'] as num?)?.toInt() ?? 0,
+        'associated_exam_id': map['associated_exam_id']?.toString(),
       };
     }).toList();
   }
@@ -1253,8 +1284,8 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
           .order('sort_order', ascending: true)
           .limit(1);
       if (remaining.isNotEmpty) {
-        final nextExamId = remaining.first['exam_id'] as String;
-        final contentId = remaining.first['content_id'] as String;
+        final nextExamId = remaining.first['exam_id']?.toString() ?? '';
+        final contentId = remaining.first['content_id']?.toString() ?? '';
         await _safeClient
             .from('content_groups')
             .update({'associated_exam_id': nextExamId})
@@ -1314,28 +1345,32 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
       final map = Map<String, dynamic>.from(rpcRes);
       if (map.containsKey('error')) {
         throw PostgrestException(
-          message: map['message'] as String? ?? (map['error'] as String),
-          code: map['error'] as String?,
+          message: map['message']?.toString() ??
+              (map['error']?.toString() ?? 'Error starting exam'),
+          code: map['error']?.toString(),
         );
       }
 
       final rawQuestions = map['questions'] as List<dynamic>?;
       final parsedQuestions =
           rawQuestions
-              ?.map(
+              ?.whereType<Map<dynamic, dynamic>>()
+              .map(
                 (q) => ExamQuestionModel.fromJson(
-                  Map<String, dynamic>.from(q as Map),
+                  Map<String, dynamic>.from(q),
                 ),
               )
               .toList() ??
           <ExamQuestionModel>[];
 
       return ExamAttemptModel(
-        id: map['attempt_id'] as String,
+        id: map['attempt_id']?.toString() ?? '',
         examId: examId,
-        examVersionId: map['exam_version_id'] as String,
+        examVersionId: map['exam_version_id']?.toString() ?? '',
         studentId: _safeClient.auth.currentUser?.id ?? '',
-        startedAt: DateTime.parse(map['started_at'] as String),
+        startedAt: map['started_at'] != null
+            ? DateTime.tryParse(map['started_at'].toString()) ?? DateTime.now()
+            : DateTime.now(),
         status: AttemptStatus.inProgress,
         questions: parsedQuestions,
       );
@@ -1371,20 +1406,20 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
             maxScore: maxScore,
             percentage: pct,
             attemptId: attemptId,
-            examId: map['exam_id'] as String? ?? '',
+            examId: map['exam_id']?.toString() ?? '',
           ),
         );
       }
 
       return ExamAttemptModel(
-        id: map['attempt_id'] as String,
-        examId: map['exam_id'] as String? ?? '',
+        id: map['attempt_id']?.toString() ?? attemptId,
+        examId: map['exam_id']?.toString() ?? '',
         examVersionId: '',
         studentId: studentId,
         startedAt: DateTime.now(),
         submittedAt: DateTime.now(),
         status: AttemptStatus.fromString(
-          map['status'] as String? ?? 'submitted',
+          map['status']?.toString() ?? 'submitted',
         ),
         score: (map['score'] as num?)?.toInt(),
         percentage: percentage,
@@ -1422,7 +1457,8 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
 
     final list = response as List<dynamic>;
     return list
-        .map((a) => ExamAttemptModel.fromJson(a as Map<String, dynamic>))
+        .whereType<Map<dynamic, dynamic>>()
+        .map((a) => ExamAttemptModel.fromJson(Map<String, dynamic>.from(a)))
         .toList();
   }
 
@@ -1590,7 +1626,8 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
           .order('created_at', ascending: true);
 
       return (response as List<dynamic>)
-          .map((j) => ExamFolderModel.fromJson(j as Map<String, dynamic>))
+          .whereType<Map<dynamic, dynamic>>()
+          .map((j) => ExamFolderModel.fromJson(Map<String, dynamic>.from(j)))
           .toList();
     } catch (e) {
       AppLogger.e('ExamsRemoteDataSource', 'getExamFolders failed', error: e);
@@ -1616,7 +1653,7 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
           .select('tenant_id')
           .eq('id', currentUserId)
           .single();
-      final tenantId = userRes['tenant_id'] as String;
+      final tenantId = userRes['tenant_id']?.toString() ?? '';
 
       final insertPayload = {
         'tenant_id': tenantId,
