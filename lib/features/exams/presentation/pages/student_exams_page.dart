@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/di/injection_container.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -37,7 +36,6 @@ class StudentExamsPage extends StatefulWidget {
 class _StudentExamsPageState extends State<StudentExamsPage> {
   final ScrollController _scrollController = ScrollController();
   StudentExamFilter _activeFilter = StudentExamFilter.all;
-  Set<String> _lessonExamIds = {};
 
   @override
   void initState() {
@@ -86,50 +84,6 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
   }
 
   Future<void> _loadExams({bool forceRefresh = false}) async {
-    try {
-      final ids = <String>{};
-
-      // 1. From content_groups (associated & prerequisite)
-      final cgRes = await InjectionContainer.supabaseClient
-          .from('content_groups')
-          .select('associated_exam_id, prerequisite_exam_id');
-      for (final row in (cgRes as List<dynamic>)) {
-        if (row is! Map) continue;
-        final aId = row['associated_exam_id']?.toString();
-        final pId = row['prerequisite_exam_id']?.toString();
-        if (aId != null && aId.isNotEmpty) ids.add(aId);
-        if (pId != null && pId.isNotEmpty) ids.add(pId);
-      }
-
-      // 2. From content (associated & prerequisite)
-      final cRes = await InjectionContainer.supabaseClient
-          .from('content')
-          .select('associated_exam_id, prerequisite_exam_id');
-      for (final row in (cRes as List<dynamic>)) {
-        if (row is! Map) continue;
-        final aId = row['associated_exam_id']?.toString();
-        final pId = row['prerequisite_exam_id']?.toString();
-        if (aId != null && aId.isNotEmpty) ids.add(aId);
-        if (pId != null && pId.isNotEmpty) ids.add(pId);
-      }
-
-      // 3. From lesson_exams
-      final leRes = await InjectionContainer.supabaseClient
-          .from('lesson_exams')
-          .select('exam_id');
-      for (final row in (leRes as List<dynamic>)) {
-        if (row is! Map) continue;
-        final eId = row['exam_id']?.toString();
-        if (eId != null && eId.isNotEmpty) ids.add(eId);
-      }
-
-      if (mounted) {
-        setState(() {
-          _lessonExamIds = ids;
-        });
-      }
-    } catch (_) {}
-
     if (mounted) {
       await context.read<ExamsCubit>().loadStudentExams(
         forceRefresh: forceRefresh,
@@ -140,7 +94,6 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
   bool _isLessonQuiz(ExamEntity exam) {
     if (exam.isLectureExam) return true;
     if (exam.linkedLessonId != null && exam.linkedLessonId!.isNotEmpty) return true;
-    if (_lessonExamIds.contains(exam.id)) return true;
     final lower = exam.title.toLowerCase();
     return lower.contains('كويز') ||
         lower.contains('quiz') ||

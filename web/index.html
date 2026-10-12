@@ -132,6 +132,8 @@
           e.preventDefault();
           e.stopPropagation();
           return false;
+        }
+
         // Exam Mode Anti-Cheat Shortcut Locks
         if (window.__edu_exam_in_progress) {
           // Block F5, Ctrl+R, Cmd+R (Page Refresh)
@@ -928,6 +930,8 @@
         if (targetWin) {
           sendBunnyMessage(targetWin, method, value);
         }
+      };
+
       window.destroyBunnyPlayer = function(viewId) {
         if (!viewId) return;
         if (window._bunnyPollTimers && window._bunnyPollTimers[viewId]) {

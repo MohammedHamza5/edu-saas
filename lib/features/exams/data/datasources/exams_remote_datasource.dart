@@ -354,6 +354,26 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
     int page = 0,
     int pageSize = 15,
   }) async {
+    // ⚡ Fast path: Use optimized RPC function (avoids recursive RLS planning & statement timeout)
+    try {
+      final rpcRes = await _safeClient.rpc<dynamic>(
+        'get_student_exams',
+        params: {
+          'p_page': page,
+          'p_page_size': pageSize,
+        },
+      );
+      if (rpcRes is List) {
+        final list = rpcRes.whereType<Map<dynamic, dynamic>>().map((item) {
+          final map = Map<String, dynamic>.from(item);
+          return ExamModel.fromJson(map);
+        }).toList();
+        return list;
+      }
+    } catch (e) {
+      AppLogger.w('ExamsRemoteDataSource', 'get_student_exams RPC failed, falling back to query: $e');
+    }
+
     final currentUserId = _safeClient.auth.currentUser?.id;
     if (currentUserId == null) return [];
 

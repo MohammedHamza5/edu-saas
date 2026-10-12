@@ -39,6 +39,7 @@ class StudentDashboardRepositoryImpl implements StudentDashboardRepository {
       _cachedAt = now;
       if (stats.enrolledGroups.isNotEmpty) {
         AppCache.groups.put(AppCache.userKey('groups'), stats.enrolledGroups);
+        AppCache.groups.put('groups_all', stats.enrolledGroups);
       }
       return Result.success(stats);
     } on ServerException catch (e) {
