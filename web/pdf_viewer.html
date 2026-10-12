@@ -416,6 +416,14 @@
           <svg id="fullscreenIcon" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
         </button>
       </div>
+
+      <!-- Native Close Button in PDF Toolbar (Always Accessible) -->
+      <div class="toolbar-group">
+        <button id="btnCloseModal" class="btn" style="background:#EF4444; color:#FFFFFF; font-weight:700; border:none; border-radius:6px; padding:0 12px; gap:6px; display:inline-flex; align-items:center; cursor:pointer;" title="إغلاق المستند (Esc)">
+          <span>إغلاق</span>
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:currentColor;"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </div>
     </header>
 
     <!-- Main Viewport for Pages -->
@@ -616,11 +624,42 @@
             throw new Error('مكتبة PDF.js غير متوفرة محلياً.');
           }
 
-          var loadingTask = pdfjsLib.getDocument({
-            url: url,
-            withCredentials: false,
-            enableXfa: false
-          });
+          var pdfData = null;
+          try {
+            if ('caches' in window) {
+              var cacheKey = url.split('?')[0];
+              var cache = await caches.open('ed_saas_pdf_cache_v1');
+              var cachedResponse = await cache.match(cacheKey);
+              if (cachedResponse) {
+                statusText.textContent = 'جاري الفتح الفوري من الذاكرة...';
+                pdfData = await cachedResponse.arrayBuffer();
+              } else {
+                statusText.textContent = 'جاري التحميل والحفظ السريع...';
+                var fetchResp = await fetch(url);
+                if (fetchResp.ok) {
+                  var cloneResp = fetchResp.clone();
+                  cache.put(cacheKey, cloneResp).catch(function(e) {});
+                  pdfData = await fetchResp.arrayBuffer();
+                }
+              }
+            }
+          } catch (cacheErr) {
+            console.warn('[SecurePdfViewer] Cache API fallback to direct url:', cacheErr);
+          }
+
+          var loadingTask;
+          if (pdfData) {
+            loadingTask = pdfjsLib.getDocument({
+              data: pdfData,
+              enableXfa: false
+            });
+          } else {
+            loadingTask = pdfjsLib.getDocument({
+              url: url,
+              withCredentials: false,
+              enableXfa: false
+            });
+          }
 
           loadingTask.onProgress = function(progress) {
             if (progress && progress.total > 0) {
@@ -1009,6 +1048,30 @@
           window.parent.postMessage({ type: 'PDF_VIEWER_READY' }, '*');
         }
       } catch(e) {}
+
+      // Close Button & Escape Key Listeners
+      function triggerClose() {
+        try {
+          if (window.parent && window.parent !== window) {
+            window.parent.postMessage({ type: 'CLOSE_PDF_SHEET' }, '*');
+          }
+        } catch(e) {}
+      }
+
+      var btnCloseModal = document.getElementById('btnCloseModal');
+      if (btnCloseModal) {
+        btnCloseModal.onclick = function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          triggerClose();
+        };
+      }
+
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' || e.keyCode === 27) {
+          triggerClose();
+        }
+      });
 
     })();
   </script>

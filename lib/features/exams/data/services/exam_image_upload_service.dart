@@ -36,11 +36,11 @@ class ExamImageUploadService {
 
     var cleanName = fileName.replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_');
     if (extension == 'webp') {
-      cleanName = cleanName.replaceAll(
-            RegExp(r'\.(png|jpg|jpeg|gif|webp)$', caseSensitive: false),
-            '',
-          ) +
-          '.webp';
+      final base = cleanName.replaceAll(
+        RegExp(r'\.(png|jpg|jpeg|gif|webp)$', caseSensitive: false),
+        '',
+      );
+      cleanName = '$base.webp';
     }
 
     final timestamp = DateTime.now().millisecondsSinceEpoch;

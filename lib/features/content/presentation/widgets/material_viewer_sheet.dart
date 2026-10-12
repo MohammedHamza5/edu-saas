@@ -13,6 +13,7 @@ import '../../../../core/widgets/app_loading_view.dart';
 import '../../../../core/widgets/forensic_watermark_overlay.dart';
 import '../../domain/entities/content_entity.dart';
 import 'secure_pdf_viewer.dart';
+import 'video_pointer_events_helper.dart';
 
 /// An academic, highly polished modal sheet or dialog to view and download
 /// educational materials, notes, and attachments with secure signed URLs.
@@ -32,54 +33,59 @@ class MaterialViewerSheet extends StatefulWidget {
     required ContentEntity content,
     required Future<String?> Function(String storagePath) onGetSignedUrl,
   }) async {
-    final width = MediaQuery.of(context).size.width;
-    final height = MediaQuery.of(context).size.height;
-    final isPdf = content.type == ContentType.pdf;
-    if (width >= 600) {
-      final dialogWidth = isPdf
-          ? (width > 1200 ? 1100.0 : (width * 0.94).clamp(720.0, 1100.0))
-          : 520.0;
-      final dialogMaxHeight = isPdf
-          ? (height * 0.94).clamp(580.0, 960.0)
-          : 640.0;
-      await showDialog<void>(
-        context: context,
-        builder: (ctx) => Dialog(
-          backgroundColor: Colors.transparent,
-          insetPadding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.s16,
-            vertical: AppSpacing.s20,
+    setVideoPlayerPointerEvents(false);
+    try {
+      final width = MediaQuery.of(context).size.width;
+      final height = MediaQuery.of(context).size.height;
+      final isPdf = content.type == ContentType.pdf;
+      if (width >= 600) {
+        final dialogWidth = isPdf
+            ? (width > 1200 ? 1100.0 : (width * 0.94).clamp(720.0, 1100.0))
+            : 520.0;
+        final dialogMaxHeight = isPdf
+            ? (height * 0.94).clamp(580.0, 960.0)
+            : 640.0;
+        await showDialog<void>(
+          context: context,
+          builder: (ctx) => Dialog(
+            backgroundColor: Colors.transparent,
+            insetPadding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.s16,
+              vertical: AppSpacing.s20,
+            ),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minWidth: dialogWidth,
+                maxWidth: dialogWidth,
+                minHeight: isPdf ? dialogMaxHeight : 0,
+                maxHeight: dialogMaxHeight,
+              ),
+              child: MaterialViewerSheet(
+                content: content,
+                onGetSignedUrl: onGetSignedUrl,
+              ),
+            ),
           ),
-          child: ConstrainedBox(
+        );
+      } else {
+        await showModalBottomSheet<void>(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (ctx) => ConstrainedBox(
             constraints: BoxConstraints(
-              minWidth: dialogWidth,
-              maxWidth: dialogWidth,
-              minHeight: isPdf ? dialogMaxHeight : 0,
-              maxHeight: dialogMaxHeight,
+              minHeight: isPdf ? MediaQuery.of(ctx).size.height * 0.92 : 0,
+              maxHeight: MediaQuery.of(ctx).size.height * 0.92,
             ),
             child: MaterialViewerSheet(
               content: content,
               onGetSignedUrl: onGetSignedUrl,
             ),
           ),
-        ),
-      );
-    } else {
-      await showModalBottomSheet<void>(
-        context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        builder: (ctx) => ConstrainedBox(
-          constraints: BoxConstraints(
-            minHeight: isPdf ? MediaQuery.of(ctx).size.height * 0.92 : 0,
-            maxHeight: MediaQuery.of(ctx).size.height * 0.92,
-          ),
-          child: MaterialViewerSheet(
-            content: content,
-            onGetSignedUrl: onGetSignedUrl,
-          ),
-        ),
-      );
+        );
+      }
+    } finally {
+      setVideoPlayerPointerEvents(true);
     }
   }
 
@@ -88,6 +94,7 @@ class MaterialViewerSheet extends StatefulWidget {
 }
 
 class _MaterialViewerSheetState extends State<MaterialViewerSheet> {
+  static final Map<String, String> _signedUrlCache = {};
   bool _isLoadingUrl = false;
   String? _signedUrl;
   String? _errorMessage;
@@ -95,7 +102,18 @@ class _MaterialViewerSheetState extends State<MaterialViewerSheet> {
   @override
   void initState() {
     super.initState();
+    registerCloseModalListener(() {
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+    });
     _fetchUrl();
+  }
+
+  @override
+  void dispose() {
+    unregisterCloseModalListener();
+    super.dispose();
   }
 
   Future<void> _fetchUrl() async {
@@ -109,6 +127,13 @@ class _MaterialViewerSheetState extends State<MaterialViewerSheet> {
     }
 
     final storagePath = widget.content.file?.storagePath ?? '';
+    if (storagePath.isNotEmpty && _signedUrlCache.containsKey(storagePath)) {
+      setState(() {
+        _signedUrl = _signedUrlCache[storagePath];
+        _isLoadingUrl = false;
+      });
+      return;
+    }
 
     setState(() {
       _isLoadingUrl = true;
@@ -118,6 +143,9 @@ class _MaterialViewerSheetState extends State<MaterialViewerSheet> {
     try {
       final url = await widget.onGetSignedUrl(storagePath);
       if (mounted) {
+        if (url != null && url.isNotEmpty && storagePath.isNotEmpty) {
+          _signedUrlCache[storagePath] = url;
+        }
         setState(() {
           _isLoadingUrl = false;
           _signedUrl = url;
@@ -280,10 +308,21 @@ class _MaterialViewerSheetState extends State<MaterialViewerSheet> {
                     tooltip: context.l10n.copySecureUrlAction,
                   ),
                 ],
-                IconButton(
-                  icon: const Icon(Icons.close_rounded),
-                  onPressed: () => Navigator.of(context).pop(),
-                  tooltip: context.l10n.closeTooltip,
+                Container(
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surfaceContainerHighest.withAlpha(140),
+                    shape: BoxShape.circle,
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.close_rounded),
+                    onPressed: () => Navigator.of(context).pop(),
+                    tooltip: context.l10n.closeTooltip,
+                    padding: const EdgeInsets.all(AppSpacing.s8),
+                    constraints: const BoxConstraints(
+                      minWidth: 44,
+                      minHeight: 44,
+                    ),
+                  ),
                 ),
               ],
             ),

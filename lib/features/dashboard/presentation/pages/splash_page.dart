@@ -13,6 +13,7 @@ import '../../../auth/presentation/cubit/auth_cubit.dart';
 import '../../../auth/presentation/cubit/auth_state.dart';
 import '../../../../core/theme/tenant_theme_cubit.dart';
 import '../../../../core/config/tenant_registry.dart';
+import '../../../../core/network/supabase_service.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});

@@ -31,7 +31,7 @@ class ExamImageViewer extends StatefulWidget {
 
 class _ExamImageViewerState extends State<ExamImageViewer> {
   static const int _maxAutoRetries = 2;
-  static const Duration _watchdogTimeout = Duration(seconds: 7);
+  static const Duration _watchdogTimeout = Duration(seconds: 35);
 
   int _retryCount = 0;
   int _cacheBustKey = 0;
@@ -76,7 +76,7 @@ class _ExamImageViewerState extends State<ExamImageViewer> {
     _watchdogTimer?.cancel();
     if (_retryCount < _maxAutoRetries) {
       _retryCount++;
-      _cacheBustKey = DateTime.now().millisecondsSinceEpoch;
+      // Keep existing URL on auto-retry to leverage browser HTTP caching and avoid breaking signed URLs
       _isLoading = true;
       _hasError = false;
       if (mounted) {
@@ -213,20 +213,6 @@ class _ExamImageViewerState extends State<ExamImageViewer> {
         url,
         key: ValueKey(url),
         fit: BoxFit.contain,
-        frameBuilder: (ctx, child, frame, wasSynchronouslyLoaded) {
-          if (wasSynchronouslyLoaded) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted && _isLoading) _onImageLoaded();
-            });
-            return child;
-          }
-          return AnimatedOpacity(
-            opacity: frame == null ? 0 : 1,
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeOut,
-            child: child,
-          );
-        },
         loadingBuilder: (ctx, child, progress) {
           if (progress == null) {
             WidgetsBinding.instance.addPostFrameCallback((_) {

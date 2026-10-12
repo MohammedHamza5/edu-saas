@@ -260,7 +260,9 @@
       if ('caches' in window) {
         caches.keys().then(function(cacheNames) {
           for (var j = 0; j < cacheNames.length; j++) {
-            caches.delete(cacheNames[j]);
+            if (cacheNames[j] !== 'ed_saas_pdf_cache_v1') {
+              caches.delete(cacheNames[j]);
+            }
           }
         });
       }
@@ -1311,6 +1313,27 @@
 
         return iframe;
       };
+
+      // Controls pointer events for background video players when overlays/modals are active
+      window.setVideoPlayerPointerEvents = function(enabled) {
+        try {
+          var val = enabled ? 'auto' : 'none';
+          var iframes = document.querySelectorAll('iframe');
+          for (var i = 0; i < iframes.length; i++) {
+            var f = iframes[i];
+            if (f.id && (f.id.indexOf('bunny_frame_') === 0 || f.id.indexOf('yt_player_') === 0)) {
+              f.style.pointerEvents = val;
+            }
+          }
+        } catch(e) {}
+      };
+
+      // Listen for CLOSE_PDF_SHEET from inside secure PDF viewer iframe and dispatch custom event
+      window.addEventListener('message', function(e) {
+        if (e.data && e.data.type === 'CLOSE_PDF_SHEET') {
+          window.dispatchEvent(new CustomEvent('close-pdf-modal'));
+        }
+      });
 
       // High-Speed Client-Side Image Compressor & WebP Transcoder (Phase 2 Exam Rocket Speed)
       window.compressImageToWebp = function(base64Data, maxWidth, maxHeight, quality, callback) {

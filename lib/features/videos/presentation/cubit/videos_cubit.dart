@@ -100,9 +100,9 @@ class VideosCubit extends Cubit<VideosState> {
     final now = DateTime.now();
     final elapsedMs = now.difference(_lastReportedTime).inMilliseconds;
 
-    // Only update if forced OR (at least 10 seconds passed AND progress changed by >= 5s)
+    // Only update if forced OR (at least 25 seconds passed AND progress changed by >= 5s)
     if (!force &&
-        (elapsedMs < 10000 ||
+        (elapsedMs < 25000 ||
             (progressSeconds - _lastReportedSecond).abs() < 5)) {
       return;
     }

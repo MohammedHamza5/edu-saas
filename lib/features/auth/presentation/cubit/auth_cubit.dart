@@ -53,12 +53,62 @@ class AuthCubit extends Cubit<AuthState> {
         }
       },
       onFailure: (failure) {
+        if (failure.code == 'TENANT_SUSPENDED') {
+          AppLogger.w(
+            _tag,
+            'Tenant is suspended during checkAuthStatus — emitting AuthTenantSuspended',
+          );
+          emit(const AuthTenantSuspended());
+          return;
+        }
+
+        final authUser = SupabaseService.currentUser;
+        final cachedRoleStr = SupabaseService.cachedRole;
+        final cachedStatusStr = SupabaseService.cachedStatus;
+
+        // If a valid local session exists, do NOT wipe user state or violently log out
+        // on transient network timeouts or slow PostgREST responses.
+        if (authUser != null && cachedRoleStr != null) {
+          final role = UserRole.values.firstWhere(
+            (r) => r.name == cachedRoleStr,
+            orElse: () => UserRole.student,
+          );
+          final status = UserStatus.values.firstWhere(
+            (s) => s.name == cachedStatusStr,
+            orElse: () => UserStatus.active,
+          );
+          final fallbackUser = UserEntity(
+            id: authUser.id,
+            tenantId: SupabaseService.currentTenantId ?? '',
+            role: role,
+            status: status,
+            fullName:
+                (authUser.userMetadata?['full_name'] as String?) ??
+                authUser.email ??
+                '',
+            email: authUser.email ?? '',
+            phone: authUser.phone,
+          );
+          AppCache.setCurrentUser(fallbackUser.id);
+          AppLogger.w(
+            _tag,
+            'Transient failure in checkAuthStatus with active session. Gracefully recovering using cached session.',
+            data: {
+              'userId': fallbackUser.id,
+              'role': role.name,
+              'error': failure.message,
+            },
+          );
+          _routeUserByState(fallbackUser);
+          return;
+        }
+
         AppCache.setCurrentUser(null);
         SupabaseService.currentRole = null;
         SupabaseService.currentStatus = null;
         AppLogger.w(
           _tag,
-          'checkAuthStatus failed — treating as unauthenticated',
+          'checkAuthStatus failed with no active session — treating as unauthenticated',
           data: {'code': failure.code, 'message': failure.message},
         );
         emit(const AuthUnauthenticated());
