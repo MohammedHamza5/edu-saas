@@ -74,7 +74,27 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
     : _client = client,
       _dio = dio ?? Dio();
 
-  final Map<String, String> _resolvedVideoIdCache = {};
+  static final Map<String, String> _resolvedVideoIdCache = {};
+  static final Map<String, Future<String>> _inFlightResolutions = {};
+  static final Map<String, VideoModel> _videoModelCache = {};
+  static final Map<String, Future<VideoModel>> _inFlightVideoById = {};
+
+  static void _cacheVideoModel(VideoModel model, {String? queryId}) {
+    _videoModelCache[model.id] = model;
+    if (model.contentId.isNotEmpty) {
+      _videoModelCache[model.contentId] = model;
+    }
+    if (queryId != null && queryId.isNotEmpty) {
+      _videoModelCache[queryId] = model;
+    }
+    _resolvedVideoIdCache[model.id] = model.id;
+    if (model.contentId.isNotEmpty) {
+      _resolvedVideoIdCache[model.contentId] = model.id;
+    }
+    if (queryId != null && queryId.isNotEmpty) {
+      _resolvedVideoIdCache[queryId] = model.id;
+    }
+  }
 
   SupabaseClient get _c => _client ?? SupabaseService.client;
 
@@ -90,6 +110,7 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
       final List<dynamic> list = response as List<dynamic>;
       return list.map((json) {
         final model = VideoModel.fromJson(json as Map<String, dynamic>);
+        _cacheVideoModel(model);
         if (model.providerVideoId != null && model.status.isReady) {
           final playbackUrl = model.isYouTube
               ? YouTubeUrlParser.getEmbedUrl(model.providerVideoId!)
@@ -105,8 +126,28 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
     }
   }
 
+  static void _clearInFlightVideo(String id) {
+    _inFlightVideoById.remove(id);
+  }
+
   @override
   Future<VideoModel> getVideoById(String videoId) async {
+    final cached = _videoModelCache[videoId];
+    if (cached != null) return cached;
+
+    final inFlight = _inFlightVideoById[videoId];
+    if (inFlight != null) return await inFlight;
+
+    final future = _doGetVideoById(videoId);
+    _inFlightVideoById[videoId] = future;
+    try {
+      return await future;
+    } finally {
+      _clearInFlightVideo(videoId);
+    }
+  }
+
+  Future<VideoModel> _doGetVideoById(String videoId) async {
     try {
       final data = await _c
           .from('videos')
@@ -116,14 +157,15 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
           .maybeSingle();
 
       if (data != null) {
-        final model = VideoModel.fromJson(data);
+        var model = VideoModel.fromJson(data);
         if (model.providerVideoId != null &&
             model.providerVideoId!.isNotEmpty) {
           final playbackUrl = model.isYouTube
               ? YouTubeUrlParser.getEmbedUrl(model.providerVideoId!)
               : null; // Bunny URLs are fetched securely on-demand via Edge Function
-          return model.copyWithPlaybackUrl(playbackUrl);
+          model = model.copyWithPlaybackUrl(playbackUrl);
         }
+        _cacheVideoModel(model, queryId: videoId);
         return model;
       }
 
@@ -135,7 +177,7 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
           .maybeSingle();
 
       if (contentData != null) {
-        return VideoModel(
+        final placeholder = VideoModel(
           id: contentData['id'] as String,
           contentId: contentData['id'] as String,
           title: contentData['title'] as String?,
@@ -154,6 +196,8 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
                     DateTime.now()
               : DateTime.now(),
         );
+        _cacheVideoModel(placeholder, queryId: videoId);
+        return placeholder;
       }
 
       throw const ServerException('Video not found', code: 'VIDEO_NOT_FOUND');
@@ -167,20 +211,22 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
 
   @override
   Future<String> getPlaybackUrl(String videoId) async {
-    final video = await getVideoById(videoId);
-    
-    if (video.providerVideoId == null || video.providerVideoId!.isEmpty) {
-      throw const ServerException(
-        'Video file is not available',
-        code: 'VIDEO_NOT_READY',
-      );
-    }
-    
-    if (video.isYouTube) {
-      return YouTubeUrlParser.getEmbedUrl(video.providerVideoId!);
+    // ⚡ Fast path: Check memory cache to avoid redundant network query
+    final cached = _videoModelCache[videoId];
+    if (cached != null) {
+      if (cached.providerVideoId == null || cached.providerVideoId!.isEmpty) {
+        throw const ServerException(
+          'Video file is not available',
+          code: 'VIDEO_NOT_READY',
+        );
+      }
+      if (cached.isYouTube) {
+        return YouTubeUrlParser.getEmbedUrl(cached.providerVideoId!);
+      }
     }
 
     try {
+      // ⚡ Direct invocation: video-playback Edge Function verifies permissions & signs token
       final res = await _c.functions.invoke(
         'video-playback',
         body: {'video_id': videoId},
@@ -189,7 +235,14 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
       if (res.status == 200 && res.data != null) {
         final data = res.data as Map<String, dynamic>;
         if (data['error'] != null) {
-          throw ServerException(data['error'].toString());
+          final errStr = data['error'].toString();
+          if (errStr.contains('NOT_BUNNY_VIDEO')) {
+            final video = await getVideoById(videoId);
+            if (video.isYouTube && video.providerVideoId != null) {
+              return YouTubeUrlParser.getEmbedUrl(video.providerVideoId!);
+            }
+          }
+          throw ServerException(errStr);
         }
         if (data['playback_url'] != null) {
           return data['playback_url'] as String;
@@ -198,6 +251,14 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
       throw ServerException('Failed to generate playback url: ${res.status}');
     } catch (e) {
       final msg = e.toString();
+      if (msg.contains('NOT_BUNNY_VIDEO')) {
+        try {
+          final video = await getVideoById(videoId);
+          if (video.isYouTube && video.providerVideoId != null) {
+            return YouTubeUrlParser.getEmbedUrl(video.providerVideoId!);
+          }
+        } catch (_) {}
+      }
       if (msg.contains('VIDEO_NOT_READY')) {
         throw const ServerException(
           'Video is currently processing',
@@ -223,11 +284,28 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
     }
   }
 
+  static void _clearInFlight(String id) {
+    _inFlightResolutions.remove(id);
+  }
+
   /// Resolves the actual videos.id whether passed an id or content_id
   Future<String> _resolveVideoId(String idOrContentId) async {
-    if (_resolvedVideoIdCache.containsKey(idOrContentId)) {
-      return _resolvedVideoIdCache[idOrContentId]!;
+    final cached = _resolvedVideoIdCache[idOrContentId];
+    if (cached != null) return cached;
+
+    final inFlight = _inFlightResolutions[idOrContentId];
+    if (inFlight != null) return await inFlight;
+
+    final future = _doResolveVideoId(idOrContentId);
+    _inFlightResolutions[idOrContentId] = future;
+    try {
+      return await future;
+    } finally {
+      _clearInFlight(idOrContentId);
     }
+  }
+
+  Future<String> _doResolveVideoId(String idOrContentId) async {
     try {
       final row = await _c
           .from('videos')
@@ -238,6 +316,7 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
       if (row != null && row['id'] != null) {
         final resolved = row['id'] as String;
         _resolvedVideoIdCache[idOrContentId] = resolved;
+        _resolvedVideoIdCache[resolved] = resolved;
         return resolved;
       }
     } catch (_) {}

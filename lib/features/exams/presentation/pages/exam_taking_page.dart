@@ -104,12 +104,6 @@ class _ExamTakingPageState extends State<ExamTakingPage>
     }
   }
 
-  String _formatDuration(int totalSeconds) {
-    final minutes = totalSeconds ~/ 60;
-    final seconds = totalSeconds % 60;
-    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-  }
-
   void _confirmSubmit(BuildContext context, ExamTakingState state) {
     final unanswered = state.totalQuestions - state.answeredCount;
 
@@ -165,6 +159,15 @@ class _ExamTakingPageState extends State<ExamTakingPage>
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<ExamsCubit, ExamsState>(
+      listenWhen: (previous, current) {
+        if (previous.runtimeType != current.runtimeType) return true;
+        if (previous is ExamTakingState && current is ExamTakingState) {
+          return previous.currentQuestionIndex != current.currentQuestionIndex ||
+              previous.submitSuccess != current.submitSuccess ||
+              previous.errorMessage != current.errorMessage;
+        }
+        return true;
+      },
       listener: (context, state) {
         if (state is ExamTakingState) {
           _assetPreloader.startOrUpdate(
@@ -199,6 +202,17 @@ class _ExamTakingPageState extends State<ExamTakingPage>
             );
           }
         }
+      },
+      buildWhen: (previous, current) {
+        if (previous.runtimeType != current.runtimeType) return true;
+        if (previous is ExamTakingState && current is ExamTakingState) {
+          return previous.currentQuestionIndex != current.currentQuestionIndex ||
+              previous.answers != current.answers ||
+              previous.answeredCount != current.answeredCount ||
+              previous.isSubmitting != current.isSubmitting ||
+              previous.submitSuccess != current.submitSuccess;
+        }
+        return true;
       },
       builder: (context, state) {
         if (state is ExamsError) {
@@ -257,9 +271,6 @@ class _ExamTakingPageState extends State<ExamTakingPage>
 
         final qIndex = state.currentQuestionIndex;
         final question = state.currentQuestion;
-        final isUrgent =
-            !state.isUntimed && state.remainingSeconds < 300; // < 5 minutes
-
         return PopScope(
           canPop: false,
           onPopInvokedWithResult: (didPop, _) {
@@ -286,88 +297,7 @@ class _ExamTakingPageState extends State<ExamTakingPage>
                   onPressed: () => SatExamToolsSheet.showCalculator(context),
                 ),
                 // Timer / Untimed badge
-                if (state.isUntimed)
-                  Container(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.s12,
-                      vertical: AppSpacing.s8,
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.s12,
-                      vertical: AppSpacing.s6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(
-                        AppSpacing.radiusSmall,
-                      ),
-                      border: Border.all(
-                        color: AppColors.primary.withValues(alpha: 0.3),
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.all_inclusive_rounded,
-                          size: 16,
-                          color: AppColors.primary,
-                        ),
-                        const SizedBox(width: AppSpacing.s6),
-                        Text(
-                          context.l10n.untimedExamBadge,
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                else
-                  Container(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.s12,
-                      vertical: AppSpacing.s8,
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.s12,
-                      vertical: AppSpacing.s6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isUrgent
-                          ? AppColors.error.withValues(alpha: 0.15)
-                          : AppColors.surfaceVariant,
-                      borderRadius: BorderRadius.circular(
-                        AppSpacing.radiusSmall,
-                      ),
-                      border: isUrgent
-                          ? Border.all(color: AppColors.error)
-                          : null,
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.timer_outlined,
-                          size: 16,
-                          color: isUrgent
-                              ? AppColors.error
-                              : AppColors.textPrimary,
-                        ),
-                        const SizedBox(width: AppSpacing.s6),
-                        Text(
-                          _formatDuration(state.remainingSeconds),
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                            color: isUrgent
-                                ? AppColors.error
-                                : AppColors.textPrimary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                const _ExamTimerBadge(),
               ],
             ),
             body: Stack(
@@ -822,3 +752,109 @@ class _ExamTakingPageState extends State<ExamTakingPage>
     );
   }
 }
+
+class _ExamTimerBadge extends StatelessWidget {
+  const _ExamTimerBadge();
+
+  String _formatDuration(int totalSeconds) {
+    final minutes = totalSeconds ~/ 60;
+    final seconds = totalSeconds % 60;
+    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocSelector<ExamsCubit, ExamsState, ({int remainingSeconds, bool isUntimed})>(
+      selector: (state) {
+        if (state is ExamTakingState) {
+          return (
+            remainingSeconds: state.remainingSeconds,
+            isUntimed: state.isUntimed,
+          );
+        }
+        return (remainingSeconds: 0, isUntimed: false);
+      },
+      builder: (context, timerData) {
+        if (timerData.isUntimed) {
+          return Container(
+            margin: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.s12,
+              vertical: AppSpacing.s8,
+            ),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.s12,
+              vertical: AppSpacing.s6,
+            ),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(
+                AppSpacing.radiusSmall,
+              ),
+              border: Border.all(
+                color: AppColors.primary.withValues(alpha: 0.3),
+              ),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.all_inclusive_rounded,
+                  size: 16,
+                  color: AppColors.primary,
+                ),
+                const SizedBox(width: AppSpacing.s6),
+                Text(
+                  context.l10n.untimedExamBadge,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        final isUrgent = timerData.remainingSeconds < 300; // < 5 minutes
+        return Container(
+          margin: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.s12,
+            vertical: AppSpacing.s8,
+          ),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.s12,
+            vertical: AppSpacing.s6,
+          ),
+          decoration: BoxDecoration(
+            color: isUrgent
+                ? AppColors.error.withValues(alpha: 0.15)
+                : AppColors.surfaceVariant,
+            borderRadius: BorderRadius.circular(
+              AppSpacing.radiusSmall,
+            ),
+            border: isUrgent ? Border.all(color: AppColors.error) : null,
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.timer_outlined,
+                size: 16,
+                color: isUrgent ? AppColors.error : AppColors.textPrimary,
+              ),
+              const SizedBox(width: AppSpacing.s6),
+              Text(
+                _formatDuration(timerData.remainingSeconds),
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: isUrgent ? AppColors.error : AppColors.textPrimary,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+

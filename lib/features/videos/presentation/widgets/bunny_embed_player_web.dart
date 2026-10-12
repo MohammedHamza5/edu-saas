@@ -4,6 +4,7 @@ import 'dart:js_interop';
 import 'dart:ui_web' as ui_web;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/services/student_activity_tracker.dart';
 
 @JS('createBunnyPlayer')
@@ -11,6 +12,9 @@ external JSObject _createBunnyPlayer(JSString src, JSString viewId);
 
 @JS('destroyBunnyPlayer')
 external void _destroyBunnyPlayer(JSString viewId);
+
+@JS('reloadBunnyPlayer')
+external void _reloadBunnyPlayer(JSString viewId, JSNumber? seekSeconds);
 
 @JS('bunnyPostMessage')
 external void _bunnyPostMessage(JSString viewId, JSString method, JSAny? value);
@@ -298,7 +302,66 @@ class _BunnyEmbedPlayerWebState extends State<_BunnyEmbedPlayerWeb>
   Widget build(BuildContext context) {
     return AspectRatio(
       aspectRatio: 16 / 9,
-      child: HtmlElementView(viewType: _viewType),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          HtmlElementView(viewType: _viewType),
+          PositionedDirectional(
+            top: 8,
+            end: 8,
+            child: Material(
+              type: MaterialType.transparency,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(16),
+                onTap: () {
+                  try {
+                    final seekSecs = _lastRecordedPosition > 0
+                        ? _lastRecordedPosition
+                        : widget.initialProgressSeconds;
+                    _reloadBunnyPlayer(
+                      _viewId.toJS,
+                      seekSecs > 0 ? seekSecs.toJS : null,
+                    );
+                  } catch (_) {}
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.black54,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: Colors.white24,
+                      width: 0.8,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.refresh_rounded,
+                        size: 15,
+                        color: Colors.white70,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        context.l10n.reloadPlayerAction,
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

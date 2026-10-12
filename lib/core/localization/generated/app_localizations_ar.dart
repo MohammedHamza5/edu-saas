@@ -8444,4 +8444,10 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get allLecturesCompletedCongratulations =>
       'تهانينا! لقد أتممت جميع محاضرات الدورة بنجاح 🎉';
+
+  @override
+  String get reloadPlayerTooltip => 'إعادة تحميل المشغل';
+
+  @override
+  String get reloadPlayerAction => 'تحديث المشغل';
 }

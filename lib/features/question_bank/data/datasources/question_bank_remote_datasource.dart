@@ -101,27 +101,20 @@ class QuestionBankRemoteDataSourceImpl implements QuestionBankRemoteDataSource {
 
   @override
   Future<List<DocumentEntity>> getDocuments() async {
-    // Fetch documents with question count via a subquery approach
+    // ⚡ Single batched query with embedded count instead of N+1 individual queries
     final response = await supabaseClient
         .from('qb_documents')
-        .select()
+        .select('*, qb_questions(id)')
         .order('created_at', ascending: false);
 
     final list = response as List<dynamic>;
-    final documents = <DocumentEntity>[];
-
-    for (final json in list) {
-      final doc = _mapDocument(json as Map<String, dynamic>);
-      // Get question count for each document
-      final countResponse = await supabaseClient
-          .from('qb_questions')
-          .select('id')
-          .eq('document_id', doc.id);
-      final questionCount = (countResponse as List<dynamic>).length;
-      documents.add(doc.copyWith(questionCount: questionCount));
-    }
-
-    return documents;
+    return list.map((item) {
+      final json = item as Map<String, dynamic>;
+      final doc = _mapDocument(json);
+      final questionList = json['qb_questions'] as List<dynamic>?;
+      final questionCount = questionList?.length ?? 0;
+      return doc.copyWith(questionCount: questionCount);
+    }).toList();
   }
 
   @override

@@ -13,7 +13,7 @@
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta name="referrer" content="strict-origin-when-cross-origin">
 
-  <!-- Guaranteed Instant Updates: Unregisters Service Workers & flushes stale CacheStorage -->
+  <!-- Guaranteed Instant Updates: Unregisters stale Service Workers -->
   <script>
     (function() {
       try {
@@ -21,13 +21,6 @@
           navigator.serviceWorker.getRegistrations().then(function(registrations) {
             for (var i = 0; i < registrations.length; i++) {
               registrations[i].unregister();
-            }
-          }).catch(function() {});
-        }
-        if ('caches' in window) {
-          caches.keys().then(function(keys) {
-            for (var i = 0; i < keys.length; i++) {
-              caches.delete(keys[i]);
             }
           }).catch(function() {});
         }
@@ -239,8 +232,9 @@
                 // Android Chrome often discards the subframe. Re-assign src to revive it cleanly!
                 if (idleSeconds > 25 && !p.isPlaying) {
                   try {
-                    var s = el.src;
-                    el.src = s;
+                    if (window.reloadBunnyPlayer) {
+                      window.reloadBunnyPlayer(id, p.currentTime);
+                    }
                     p.lastActiveTime = Date.now();
                   } catch(e) {}
                 }
@@ -277,7 +271,7 @@
     }
   </style>
 
-  <!-- Execute ServiceWorker & CacheStorage exterminator immediately before any resource is requested -->
+  <!-- Ensure stale ServiceWorkers are unregistered before resources are requested -->
   <script>
     (function() {
       if ('serviceWorker' in navigator) {
@@ -287,15 +281,6 @@
         navigator.serviceWorker.getRegistrations().then(function(registrations) {
           for (var i = 0; i < registrations.length; i++) {
             registrations[i].unregister();
-          }
-        });
-      }
-      if ('caches' in window) {
-        caches.keys().then(function(cacheNames) {
-          for (var j = 0; j < cacheNames.length; j++) {
-            if (cacheNames[j] !== 'ed_saas_pdf_cache_v1') {
-              caches.delete(cacheNames[j]);
-            }
           }
         });
       }
@@ -884,6 +869,13 @@
           src = src.replace('player.mediadelivery.net', 'iframe.mediadelivery.net');
         }
 
+        // Force preload=false to eliminate mobile/tablet GPU buffer exhaustion and low-memory kills
+        if (src.indexOf('preload=true') !== -1) {
+          src = src.replace('preload=true', 'preload=false');
+        } else if (src.indexOf('preload=') === -1) {
+          src += '&preload=false';
+        }
+
         // Ensure playerjs=true query parameter for Bunny Stream postMessage bridge
         if (src.indexOf('playerjs=true') === -1) {
           src += (src.indexOf('?') === -1 ? '?' : '&') + 'playerjs=true';
@@ -901,6 +893,7 @@
 
         var iframe = document.createElement('iframe');
         iframe.id = 'bunny_frame_' + viewId;
+        iframe.setAttribute('data-src', src);
 
         // CRITICAL SECURITY & COMPATIBILITY: strict-origin-when-cross-origin sends the
         // origin (e.g. https://antounios.web.app) in document.referrer, allowing Bunny's
@@ -908,6 +901,7 @@
         // DO NOT use no-referrer here as it drops the Referer header and breaks Player.js.
         iframe.referrerPolicy = 'strict-origin-when-cross-origin';
         iframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+        iframe.setAttribute('loading', 'eager');
         iframe.src = src;
         iframe.style.width = '100%';
         iframe.style.height = '100%';
@@ -948,26 +942,50 @@
           setTimeout(doSubscribe, 2500);
         });
 
-        // Intelligent heartbeat polling: only queries when visible and active/discovering duration
+        // STRICT: ONLY poll currentTime if native timeupdate is delayed while playing!
+        // When video is paused, stopped, or idle, send ZERO postMessages!
         if (window._bunnyPollTimers[viewId]) {
           clearInterval(window._bunnyPollTimers[viewId]);
         }
         window._bunnyPollTimers[viewId] = setInterval(function() {
-          if (document.hidden) return; // Never spam IPC when tab is backgrounded
+          if (document.hidden) return;
           var p = window._bunnyPlayers[viewId];
-          // If video is paused and duration is already known, do not spam IPC to sleeping iframe
-          if (p && !p.isPlaying && p.duration > 0) return;
+          // Completely silent when paused or not started!
+          if (!p || !p.isPlaying) return;
+          // Native timeupdate events flow continuously while playing.
+          // Only send fallback getCurrentTime if no update received for > 3.5 seconds.
+          var timeSinceLast = Date.now() - (p.lastActiveTime || 0);
+          if (timeSinceLast < 3500) return;
           var el = document.getElementById('bunny_frame_' + viewId) || iframe;
           var targetWin = window._bunnyWindows[viewId] || (el && el.contentWindow);
           if (targetWin) {
             sendBunnyMessage(targetWin, 'getCurrentTime');
-            if (!p || !p.duration || p.duration <= 0) {
-              sendBunnyMessage(targetWin, 'getDuration');
-            }
           }
-        }, 1000);
+        }, 2000);
 
         return iframe;
+      };
+
+      window.reloadBunnyPlayer = function(viewId, seekSeconds) {
+        var el = document.getElementById('bunny_frame_' + viewId);
+        if (el) {
+          var originalSrc = el.getAttribute('data-src') || el.src;
+          var cleanSrc = originalSrc.split('#')[0];
+          // Strip old _revive and t= parameters cleanly
+          cleanSrc = cleanSrc.replace(/[?&]_revive=\d+/g, '');
+          if (seekSeconds && seekSeconds > 0) {
+            cleanSrc = cleanSrc.replace(/[?&]t=\d+/g, '');
+            var sep = cleanSrc.indexOf('?') === -1 ? '?' : '&';
+            cleanSrc += sep + 't=' + Math.floor(seekSeconds);
+          }
+          var separator = cleanSrc.indexOf('?') === -1 ? '?' : '&';
+          el.src = 'about:blank';
+          setTimeout(function() {
+            if (el) {
+              el.src = cleanSrc + separator + '_revive=' + Date.now();
+            }
+          }, 80);
+        }
       };
 
       window.bunnyPostMessage = function(viewId, method, value) {

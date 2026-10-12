@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/di/injection_container.dart';
+import '../../../../core/errors/result.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -33,6 +34,7 @@ import '../cubit/videos_state.dart';
 import '../widgets/app_video_player.dart';
 import '../widgets/video_upload_dialog.dart';
 import '../../../../core/services/student_activity_tracker.dart';
+import '../../../../core/network/supabase_service.dart';
 
 class VideoPlayerPage extends StatefulWidget {
   final String videoId;
@@ -144,21 +146,42 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
 
   Future<void> _loadLessonContext() async {
     try {
-      if (widget.groupId != null && !_isTeacher) {
-        final lessonsResult = await InjectionContainer.contentRepository
-            .getGroupCourseProgress(
+      if (widget.groupId != null) {
+        // Run course progress and lesson context concurrently (parallel round-trip)
+        final progressFuture = !_isTeacher
+            ? InjectionContainer.contentRepository.getGroupCourseProgress(
+                groupId: widget.groupId!,
+                studentId: _activeStudentId,
+              )
+            : null;
+
+        final contextFuture = InjectionContainer.videosRepository
+            .getLessonContext(
+              contentId: widget.videoId, // videoId is content_id
               groupId: widget.groupId!,
-              studentId: _activeStudentId,
             );
-        if (lessonsResult.isSuccess &&
-            lessonsResult.dataOrNull != null &&
-            mounted) {
+
+        final results = await Future.wait<dynamic>([
+          progressFuture ?? Future.value(null),
+          contextFuture,
+        ]);
+
+        if (!mounted) return;
+
+        final lessonsResult =
+            results[0] as Result<List<LessonAssignmentEntity>>?;
+        final contextResult =
+            results[1] as Result<Map<String, dynamic>?>;
+
+        if (lessonsResult != null &&
+            lessonsResult.isSuccess &&
+            lessonsResult.dataOrNull != null) {
           final loadedLessons = lessonsResult.dataOrNull!;
           setState(() {
             _courseLessons = loadedLessons;
           });
           final current = loadedLessons
-              .where((l) => l.contentId == widget.videoId)
+              .where((LessonAssignmentEntity l) => l.contentId == widget.videoId)
               .firstOrNull;
           if (current != null && current.attachedExams.isNotEmpty) {
             setState(() {
@@ -166,16 +189,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
             });
           }
         }
-      }
 
-      if (widget.groupId != null) {
-        final result = await InjectionContainer.videosRepository
-            .getLessonContext(
-              contentId: widget.videoId, // videoId هنا هو content_id
-              groupId: widget.groupId!,
-            );
-        result.when(
-          onSuccess: (ctx) {
+        contextResult.when(
+          onSuccess: (Map<String, dynamic>? ctx) {
             if (ctx != null && mounted) {
               final examId =
                   ctx['lesson_exam_id'] as String? ?? widget.associatedExamId;
@@ -200,27 +216,6 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                   _attachedExams = parsedAttached;
                 }
               });
-
-              final examsToFetch = _effectiveAttachedExams.isNotEmpty
-                  ? _effectiveAttachedExams.map((e) => e.examId).toList()
-                  : (examId != null && examId.isNotEmpty ? [examId] : <String>[]);
-
-              for (final eId in examsToFetch) {
-                InjectionContainer.examsRepository.getExamDetails(eId).then((
-                  examResult,
-                ) {
-                  if (examResult.isSuccess &&
-                      examResult.dataOrNull != null &&
-                      mounted) {
-                    setState(() {
-                      _attachedExamDetails[eId] = examResult.dataOrNull!;
-                      if (eId == examId || _lessonExam == null) {
-                        _lessonExam = examResult.dataOrNull!;
-                      }
-                    });
-                  }
-                });
-              }
             }
           },
           onFailure: (_) {},
@@ -345,7 +340,10 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
           ? [_segmentStart!, _segmentEnd!]
           : null;
 
-      if (pos > 0 && dur > 0) {
+      if (pos > 0 &&
+          dur > 0 &&
+          SupabaseService.isInitialized &&
+          SupabaseService.client.auth.currentUser != null) {
         try {
           await InjectionContainer.videosRepository
               .updateVideoProgress(
@@ -781,7 +779,10 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       final dur = _liveDurationSecs.value > 0
           ? _liveDurationSecs.value
           : _currentVideo!.duration;
-      if (pos > 0 && dur > 0) {
+      if (pos > 0 &&
+          dur > 0 &&
+          SupabaseService.isInitialized &&
+          SupabaseService.client.auth.currentUser != null) {
         unawaited(
           InjectionContainer.videosRepository.updateVideoProgress(
             videoId: _currentVideo!.id,

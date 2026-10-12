@@ -211,14 +211,24 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     int pageSize = 20,
   }) async {
     final resolvedGroupId = await _resolveGroupId(groupId);
+
+    // Launch lesson_exams query concurrently with content queries to eliminate waterfall round-trip
+    final lessonExamsFuture = _safeClient
+        .from('lesson_exams')
+        .select(
+          'content_id, exam_id, sort_order, is_required, exams(id, title, passing_score)',
+        )
+        .eq('group_id', resolvedGroupId)
+        .order('sort_order', ascending: true);
+
     // Fetch any content linked to this group via the junction table content_groups with group overrides
     final junctionRes = await _safeClient
         .from('content_groups')
         .select(
           'content_id, file_id, associated_exam_id, prerequisite_exam_id, sort_order, custom_title, is_published, chapter_id, '
           'file:files!content_groups_file_id_fkey(*), '
-          'associated_exam:exams!content_groups_associated_exam_id_fkey(id, title, content:content!exams_content_id_fkey(title)), '
-          'prerequisite_exam:exams!content_groups_prerequisite_exam_id_fkey(id, title, passing_score, content:content!exams_content_id_fkey(title)), '
+          'associated_exam:exams!content_groups_associated_exam_id_fkey(id, title), '
+          'prerequisite_exam:exams!content_groups_prerequisite_exam_id_fkey(id, title, passing_score), '
           'chapter:chapters!content_groups_chapter_id_fkey(id, title, sort_order)',
         )
         .eq('group_id', resolvedGroupId);
@@ -253,21 +263,33 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
       query = query.eq('status', statusFilter);
     }
 
-    final response = await query
-        .order('sort_order', ascending: true)
-        .order('created_at', ascending: true)
-        .range(page * pageSize, (page + 1) * pageSize - 1);
-
-    // Fetch attached exams from lesson_exams junction
-    final Map<String, List<AttachedLessonExamEntity>> lessonExamsMap = {};
+    // Await content and pre-launched lesson_exams concurrently
+    List<dynamic> response;
+    dynamic lessonExamsRes;
     try {
-      final lessonExamsRes = await _safeClient
-          .from('lesson_exams')
-          .select('content_id, exam_id, sort_order, is_required, exams(id, title, passing_score, exam_versions(exam_questions(count)))')
-          .eq('group_id', resolvedGroupId)
-          .order('sort_order', ascending: true);
+      final results = await Future.wait<dynamic>([
+        query
+            .order('sort_order', ascending: true)
+            .order('created_at', ascending: true)
+            .range(page * pageSize, (page + 1) * pageSize - 1),
+        lessonExamsFuture.catchError((Object e) {
+          AppLogger.w('ContentRemoteDataSource', 'Could not fetch lesson_exams concurrently: $e');
+          return <dynamic>[];
+        }),
+      ]);
+      response = results[0] as List<dynamic>;
+      lessonExamsRes = results[1];
+    } catch (_) {
+      response = await query
+          .order('sort_order', ascending: true)
+          .order('created_at', ascending: true)
+          .range(page * pageSize, (page + 1) * pageSize - 1);
+    }
 
-      for (final row in (lessonExamsRes as List<dynamic>)) {
+    // Parse attached exams from lesson_exams junction
+    final Map<String, List<AttachedLessonExamEntity>> lessonExamsMap = {};
+    if (lessonExamsRes is List<dynamic>) {
+      for (final row in lessonExamsRes) {
         final cId = row['content_id'] as String?;
         final examObj = row['exams'] as Map<String, dynamic>?;
         if (cId != null && examObj != null) {
@@ -292,11 +314,9 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
           lessonExamsMap.putIfAbsent(cId, () => []).add(item);
         }
       }
-    } catch (e) {
-      AppLogger.w('ContentRemoteDataSource', 'Could not fetch lesson_exams: $e');
     }
 
-    final list = response as List<dynamic>;
+    final list = response;
     final models = list
         .map((json) => ContentModel.fromJson(json as Map<String, dynamic>))
         .toList();

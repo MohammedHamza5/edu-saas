@@ -9074,5 +9074,9 @@
   "quizFailedEncouragement": "You haven't reached the passing score yet. You can review the lecture and try again anytime!",
   "@quizFailedEncouragement": {},
   "allLecturesCompletedCongratulations": "Congratulations! You have completed all course lectures 🎉",
-  "@allLecturesCompletedCongratulations": {}
+  "@allLecturesCompletedCongratulations": {},
+  "reloadPlayerTooltip": "Reload player",
+  "@reloadPlayerTooltip": {},
+  "reloadPlayerAction": "Reload Player",
+  "@reloadPlayerAction": {}
 }

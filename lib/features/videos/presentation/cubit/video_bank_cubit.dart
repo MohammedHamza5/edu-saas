@@ -801,9 +801,9 @@ class VideoBankCubit extends Cubit<VideoBankState> {
         return;
       }
 
-      for (final v in processingVideos) {
-        await _repository.syncVideoStatus(v.id);
-      }
+      await Future.wait(
+        processingVideos.map((v) => _repository.syncVideoStatus(v.id)),
+      );
 
       // Refresh list silently
       final refreshedVideosRes = await _repository.getVideos(

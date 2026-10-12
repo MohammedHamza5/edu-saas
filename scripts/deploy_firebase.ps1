@@ -38,7 +38,7 @@ $deploySuccess = ($LASTEXITCODE -eq 0)
 if (-not $deploySuccess) {
     $debugLog = Join-Path $PSScriptRoot "..\firebase-debug.log"
     if (Test-Path $debugLog) {
-        $tail = Get-Content $debugLog -Tail 40 -Raw
+        $tail = (Get-Content $debugLog -Tail 40) -join "`n"
         if ($tail -match "release complete" -or $tail -match "Deploy complete") {
             $deploySuccess = $true
         }

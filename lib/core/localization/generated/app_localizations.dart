@@ -14952,6 +14952,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Congratulations! You have completed all course lectures 🎉'**
   String get allLecturesCompletedCongratulations;
+
+  /// No description provided for @reloadPlayerTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload player'**
+  String get reloadPlayerTooltip;
+
+  /// No description provided for @reloadPlayerAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload Player'**
+  String get reloadPlayerAction;
 }
 
 class _AppLocalizationsDelegate

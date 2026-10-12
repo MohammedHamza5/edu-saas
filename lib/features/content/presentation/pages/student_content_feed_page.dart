@@ -211,7 +211,11 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
         await context.push(AppRoutes.studentAssignments);
         break;
       case ContentType.exam:
-        await context.push(AppRoutes.studentExams);
+        if (item.hasLessonExam || (item.lessonExamId != null && item.lessonExamId!.isNotEmpty)) {
+          await _handleTakeQuiz(item);
+        } else {
+          await context.push(AppRoutes.studentExams);
+        }
         break;
       case ContentType.pdf:
       case ContentType.image:

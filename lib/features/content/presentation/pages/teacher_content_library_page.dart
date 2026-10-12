@@ -886,9 +886,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                         }
 
                         if (state is ContentLoaded) {
-                          final lessons = state.items
-                              .where((i) => i.type == ContentType.video)
-                              .toList();
+                          final lessons = state.items;
                           final isDesktop =
                               MediaQuery.of(context).size.width >= 960;
 

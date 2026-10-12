@@ -8488,4 +8488,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get allLecturesCompletedCongratulations =>
       'Congratulations! You have completed all course lectures 🎉';
+
+  @override
+  String get reloadPlayerTooltip => 'Reload player';
+
+  @override
+  String get reloadPlayerAction => 'Reload Player';
 }

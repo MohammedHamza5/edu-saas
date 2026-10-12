@@ -3121,5 +3121,9 @@
   "quizFailedEncouragement": "لم تصل لدرجة الاجتياز المطلوبة بعد. يمكنك مراجعة المحاضرة وإعادة المحاولة في أي وقت!",
   "@quizFailedEncouragement": {},
   "allLecturesCompletedCongratulations": "تهانينا! لقد أتممت جميع محاضرات الدورة بنجاح 🎉",
-  "@allLecturesCompletedCongratulations": {}
+  "@allLecturesCompletedCongratulations": {},
+  "reloadPlayerTooltip": "إعادة تحميل المشغل",
+  "@reloadPlayerTooltip": {},
+  "reloadPlayerAction": "تحديث المشغل",
+  "@reloadPlayerAction": {}
 }

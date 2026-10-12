@@ -122,17 +122,7 @@ class _TeacherLessonDetailsPageState extends State<TeacherLessonDetailsPage>
     try {
       final client = SupabaseService.client;
 
-      // 1. Total students in this group (active)
-      final countRes = await client
-          .from('group_members')
-          .select('id')
-          .eq('group_id', widget.groupId)
-          .eq('status', 'active');
-      final total = (countRes as List).length;
-
-      // 2. Video views & completions
-      int views = 0;
-      int completed = 0;
+      // 1. Resolve videoId if not already present
       String? vId = _lesson?.videoId;
       if (vId == null) {
         final videoRes = await client
@@ -145,54 +135,74 @@ class _TeacherLessonDetailsPageState extends State<TeacherLessonDetailsPage>
         }
       }
 
-      if (vId != null) {
-        final vpRes = await client
-            .from('video_progress')
-            .select('completed, progress_seconds')
-            .eq('video_id', vId);
-        final list = vpRes as List;
-        views = list
-            .where((r) => (r['progress_seconds'] as int? ?? 0) > 0)
-            .length;
-        completed = list.where((r) => r['completed'] == true).length;
-      }
-
-      // 3. Quiz average percentage
-      double? avgScore;
       final examId = _lesson?.associatedExamId;
-      if (examId != null) {
-        final attemptsRes = await client
-            .from('exam_attempts')
-            .select('percentage')
-            .eq('exam_id', examId)
-            .inFilter('status', ['submitted', 'completed']);
-        final attempts = attemptsRes as List;
-        if (attempts.isNotEmpty) {
-          double sum = 0;
-          int validCount = 0;
-          for (final a in attempts) {
-            final p = a['percentage'];
-            if (p != null) {
-              sum += (p is num
-                  ? p.toDouble()
-                  : double.tryParse(p.toString()) ?? 0);
-              validCount++;
-            }
+
+      // 2. Fetch all 3 metric streams in parallel (single round-trip)
+      final membersFuture = client
+          .from('group_members')
+          .select('id')
+          .eq('group_id', widget.groupId)
+          .eq('status', 'active');
+
+      final videoProgressFuture = vId != null
+          ? client
+              .from('video_progress')
+              .select('completed, progress_seconds')
+              .eq('video_id', vId)
+          : Future.value(<dynamic>[]);
+
+      final attemptsFuture = examId != null
+          ? client
+              .from('exam_attempts')
+              .select('percentage')
+              .eq('exam_id', examId)
+              .inFilter('status', const ['submitted', 'completed'])
+          : Future.value(<dynamic>[]);
+
+      final results = await Future.wait<dynamic>([
+        membersFuture,
+        videoProgressFuture,
+        attemptsFuture,
+      ]);
+
+      if (!mounted) return;
+
+      final countRes = results[0] as List<dynamic>;
+      final total = countRes.length;
+
+      int views = 0;
+      int completed = 0;
+      final vpList = results[1] as List<dynamic>;
+      views = vpList
+          .where((r) => (r['progress_seconds'] as int? ?? 0) > 0)
+          .length;
+      completed = vpList.where((r) => r['completed'] == true).length;
+
+      double? avgScore;
+      final attempts = results[2] as List<dynamic>;
+      if (attempts.isNotEmpty) {
+        double sum = 0;
+        int validCount = 0;
+        for (final a in attempts) {
+          final p = a['percentage'];
+          if (p != null) {
+            sum += (p is num
+                ? p.toDouble()
+                : double.tryParse(p.toString()) ?? 0);
+            validCount++;
           }
-          if (validCount > 0) {
-            avgScore = sum / validCount;
-          }
+        }
+        if (validCount > 0) {
+          avgScore = sum / validCount;
         }
       }
 
-      if (mounted) {
-        setState(() {
-          _totalStudents = total;
-          _totalViews = views;
-          _completedStudents = completed;
-          _averageQuizScore = avgScore;
-        });
-      }
+      setState(() {
+        _totalStudents = total;
+        _totalViews = views;
+        _completedStudents = completed;
+        _averageQuizScore = avgScore;
+      });
     } catch (_) {}
   }
 

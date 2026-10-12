@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/errors/result.dart';
+import '../../../../core/utils/youtube_url_parser.dart';
 import '../../domain/entities/video_entity.dart';
 import '../../domain/entities/video_progress_entity.dart';
 import '../../domain/repositories/videos_repository.dart';
@@ -11,6 +12,7 @@ class VideosCubit extends Cubit<VideosState> {
 
   int _lastReportedSecond = -1;
   DateTime _lastReportedTime = DateTime.fromMillisecondsSinceEpoch(0);
+  bool _isAuthSuspended = false;
 
   VideosCubit({required VideosRepository repository})
     : _repository = repository,
@@ -35,21 +37,25 @@ class VideosCubit extends Cubit<VideosState> {
     required String videoId,
     required String studentId,
   }) async {
+    _isAuthSuspended = false;
     emit(const VideosLoading());
 
-    // 1. Fetch video and progress concurrently in a single parallel round-trip
+    // 1. Fetch video metadata, student progress, and playback URL in parallel (single round-trip)
     final videoFuture = _repository.getVideoById(videoId);
     final progressFuture = studentId.isNotEmpty
         ? _repository.getVideoProgress(videoId: videoId, studentId: studentId)
         : Future.value(const Result<VideoProgressEntity?>.success(null));
+    final playbackFuture = _repository.getPlaybackUrl(videoId);
 
     final results = await Future.wait<dynamic>(<Future<dynamic>>[
       videoFuture,
       progressFuture,
+      playbackFuture,
     ]);
 
     final videoResult = results[0] as Result<VideoEntity>;
     final progressResult = results[1] as Result<VideoProgressEntity?>;
+    final playbackResult = results[2] as Result<String>;
 
     if (videoResult.isFailure) {
       final f = videoResult.failureOrNull!;
@@ -65,11 +71,20 @@ class VideosCubit extends Cubit<VideosState> {
       return;
     }
 
-    // Playback URL is already securely signed inside getVideoById without extra network trip
-    String? playbackUrl = video.playbackUrl;
-    if (playbackUrl == null || playbackUrl.isEmpty) {
-      final urlResult = await _repository.getPlaybackUrl(video.id);
-      playbackUrl = urlResult.dataOrNull;
+    String? playbackUrl;
+    if (video.isYouTube) {
+      playbackUrl = video.playbackUrl ??
+          (video.providerVideoId != null
+              ? YouTubeUrlParser.getEmbedUrl(video.providerVideoId!)
+              : null);
+    } else {
+      if (playbackResult.isSuccess) {
+        playbackUrl = playbackResult.dataOrNull;
+      } else {
+        final f = playbackResult.failureOrNull!;
+        emit(VideosError(f.message, code: f.code));
+        return;
+      }
     }
 
     final progress = progressResult.dataOrNull;
@@ -95,6 +110,7 @@ class VideosCubit extends Cubit<VideosState> {
     bool force = false,
     List<int>? newSegment,
   }) async {
+    if (_isAuthSuspended) return;
     if (durationSeconds <= 0) return;
 
     final now = DateTime.now();
@@ -134,7 +150,14 @@ class VideosCubit extends Cubit<VideosState> {
         }
       },
       onFailure: (failure) {
-        // Silently tolerate minor progress network drops without interrupting playback
+        final err = '${failure.code} ${failure.message}'.toLowerCase();
+        if (err.contains('auth') ||
+            err.contains('401') ||
+            err.contains('jwt') ||
+            err.contains('permission') ||
+            err.contains('42501')) {
+          _isAuthSuspended = true;
+        }
       },
     );
   }

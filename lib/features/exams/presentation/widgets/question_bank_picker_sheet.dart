@@ -100,18 +100,30 @@ class _QuestionBankPickerSheetState extends State<QuestionBankPickerSheet> {
 
   Future<void> _preloadRevisions(List<QuestionEntity> questions) async {
     final repo = InjectionContainer.questionBankRepository;
-    for (final q in questions) {
-      if (!_revisionsCache.containsKey(q.id)) {
+    final missing = questions
+        .where((q) => !_revisionsCache.containsKey(q.id))
+        .toList();
+    if (missing.isEmpty) return;
+
+    final fetched = await Future.wait(
+      missing.map((q) async {
         try {
           final rev = await repo.getLatestRevision(q.id);
-          if (rev != null && mounted) {
-            setState(() {
-              _revisionsCache[q.id] = rev;
-            });
-          }
-        } catch (_) {}
+          return rev != null ? MapEntry(q.id, rev) : null;
+        } catch (_) {
+          return null;
+        }
+      }),
+    );
+
+    if (!mounted) return;
+    setState(() {
+      for (final entry in fetched) {
+        if (entry != null) {
+          _revisionsCache[entry.key] = entry.value;
+        }
       }
-    }
+    });
   }
 
   void _toggleSelectAll() {
@@ -130,15 +142,20 @@ class _QuestionBankPickerSheetState extends State<QuestionBankPickerSheet> {
 
     try {
       final repo = InjectionContainer.questionBankRepository;
-      final List<QuestionRevisionEntity> result = [];
+      final fetched = await Future.wait(
+        _selectedQuestionIds.map((qId) async {
+          final cached = _revisionsCache[qId];
+          if (cached != null) return cached;
+          try {
+            return await repo.getLatestRevision(qId);
+          } catch (_) {
+            return null;
+          }
+        }),
+      );
 
-      for (final qId in _selectedQuestionIds) {
-        QuestionRevisionEntity? rev = _revisionsCache[qId];
-        rev ??= await repo.getLatestRevision(qId);
-        if (rev != null) {
-          result.add(rev);
-        }
-      }
+      final List<QuestionRevisionEntity> result =
+          fetched.whereType<QuestionRevisionEntity>().toList();
 
       if (mounted) {
         Navigator.of(context).pop(result);

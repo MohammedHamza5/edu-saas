@@ -297,12 +297,16 @@ class StudentsCubit extends Cubit<StudentsState> {
       return false;
     }
 
-    // 2. Assign to groups if any selected
-    for (final gId in groupIds) {
-      await _repository.assignStudentToGroup(
-        studentId: studentId,
-        groupId: gId,
-        add: true,
+    // 2. Assign to groups concurrently if any selected
+    if (groupIds.isNotEmpty) {
+      await Future.wait(
+        groupIds.map(
+          (gId) => _repository.assignStudentToGroup(
+            studentId: studentId,
+            groupId: gId,
+            add: true,
+          ),
+        ),
       );
     }
 

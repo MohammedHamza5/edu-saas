@@ -74,13 +74,16 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
   }
 
   Future<void> _loadAll({bool forceRefresh = false}) async {
-    // 1. Refresh mistakes summary & questions
-    try {
-      await context.read<MistakesCubit>().loadMistakes();
-    } catch (_) {}
+    // ⚡ Parallelize loading mistakes and student exams in a single round-trip
+    final mistakesFuture = () async {
+      try {
+        await context.read<MistakesCubit>().loadMistakes();
+      } catch (_) {}
+    }();
 
-    // 2. Refresh exams & lesson exam ids
-    await _loadExams(forceRefresh: forceRefresh);
+    final examsFuture = _loadExams(forceRefresh: forceRefresh);
+
+    await Future.wait<void>([mistakesFuture, examsFuture]);
   }
 
   Future<void> _loadExams({bool forceRefresh = false}) async {
