@@ -10,7 +10,7 @@ import '../datasources/groups_remote_datasource.dart';
 
 class GroupsRepositoryImpl implements GroupsRepository {
   final GroupsRemoteDataSource _remoteDataSource;
-  static const String _cacheKeyGroups = 'groups_all';
+  String get _cacheKeyGroups => AppCache.userKey('groups');
 
   GroupsRepositoryImpl({GroupsRemoteDataSource? remoteDataSource})
     : _remoteDataSource = remoteDataSource ?? GroupsRemoteDataSourceImpl();

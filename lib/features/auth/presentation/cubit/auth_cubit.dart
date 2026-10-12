@@ -38,6 +38,7 @@ class AuthCubit extends Cubit<AuthState> {
           AppLogger.i(_tag, 'No active session — user unauthenticated');
           emit(const AuthUnauthenticated());
         } else {
+          AppCache.setCurrentUser(user.id);
           AppLogger.i(
             _tag,
             'Active session found',
@@ -52,6 +53,7 @@ class AuthCubit extends Cubit<AuthState> {
         }
       },
       onFailure: (failure) {
+        AppCache.setCurrentUser(null);
         SupabaseService.currentRole = null;
         SupabaseService.currentStatus = null;
         AppLogger.w(
@@ -74,6 +76,7 @@ class AuthCubit extends Cubit<AuthState> {
 
     result.when(
       onSuccess: (user) {
+        AppCache.setCurrentUser(user.id);
         AppLogger.s(
           _tag,
           'Login successful',
@@ -134,6 +137,7 @@ class AuthCubit extends Cubit<AuthState> {
 
     result.when(
       onSuccess: (user) {
+        AppCache.setCurrentUser(user.id);
         AppLogger.s(
           _tag,
           'Student registered — awaiting teacher approval',
@@ -159,7 +163,8 @@ class AuthCubit extends Cubit<AuthState> {
     SupabaseService.currentStatus = null;
     // Stop student engagement tracking
     StudentActivityTracker.instance.stop();
-    // Clear all cached data to prevent stale data across sessions
+    // Clear all cached data to prevent stale data across sessions and switch user context to null
+    AppCache.setCurrentUser(null);
     AppCache.clearAll();
     AppLogger.i(_tag, 'User logging out...');
     emit(const AuthLoading());

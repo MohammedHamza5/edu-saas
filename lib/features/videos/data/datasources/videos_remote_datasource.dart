@@ -74,6 +74,8 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
     : _client = client,
       _dio = dio ?? Dio();
 
+  final Map<String, String> _resolvedVideoIdCache = {};
+
   SupabaseClient get _c => _client ?? SupabaseService.client;
 
   @override
@@ -223,6 +225,9 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
 
   /// Resolves the actual videos.id whether passed an id or content_id
   Future<String> _resolveVideoId(String idOrContentId) async {
+    if (_resolvedVideoIdCache.containsKey(idOrContentId)) {
+      return _resolvedVideoIdCache[idOrContentId]!;
+    }
     try {
       final row = await _c
           .from('videos')
@@ -231,9 +236,12 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
           .limit(1)
           .maybeSingle();
       if (row != null && row['id'] != null) {
-        return row['id'] as String;
+        final resolved = row['id'] as String;
+        _resolvedVideoIdCache[idOrContentId] = resolved;
+        return resolved;
       }
     } catch (_) {}
+    _resolvedVideoIdCache[idOrContentId] = idOrContentId;
     return idOrContentId;
   }
 

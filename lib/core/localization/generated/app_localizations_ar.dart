@@ -8424,4 +8424,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String optionsAutoFilledSuccess(int count) {
     return 'تمت تعبئة الخيارات تلقائياً لـ $count سؤال';
   }
+
+  @override
+  String get optimizedWebpBadge => 'WebP فائق السرعة';
 }

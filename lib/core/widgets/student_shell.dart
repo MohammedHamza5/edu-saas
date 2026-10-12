@@ -105,7 +105,7 @@ class _StudentShellState extends State<StudentShell> {
     } catch (_) {}
 
     if (groups.isEmpty) {
-      final cached = AppCache.groups.getStale('groups_all');
+      final cached = AppCache.groups.getStale(AppCache.userKey('groups'));
       if (cached is List<GroupEntity> && cached.isNotEmpty) {
         groups = cached;
       }

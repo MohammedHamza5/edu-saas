@@ -99,6 +99,7 @@ class _BunnyEmbedPlayerWebState extends State<_BunnyEmbedPlayerWeb>
   Timer? _watchHeartbeatTimer;
   int _lastDuration = 0;
   bool _hasSeekedInitial = false;
+  bool _completionFired = false;
 
   @override
   void initState() {
@@ -200,9 +201,11 @@ class _BunnyEmbedPlayerWebState extends State<_BunnyEmbedPlayerWeb>
             );
 
             // Safety net: when reaching near completion (within 2s or 98%)
-            if (effectiveDuration > 0 &&
+            if (!_completionFired &&
+                effectiveDuration > 0 &&
                 (currentSeconds >= effectiveDuration - 2 ||
                     (currentSeconds / effectiveDuration) >= 0.98)) {
+              _completionFired = true;
               widget.onCompleted?.call();
             }
           } else if (event == 'play') {
@@ -215,7 +218,10 @@ class _BunnyEmbedPlayerWebState extends State<_BunnyEmbedPlayerWeb>
             _isPlaying = false;
           } else if (event == 'ended') {
             _isPlaying = false;
-            widget.onCompleted?.call();
+            if (!_completionFired) {
+              _completionFired = true;
+              widget.onCompleted?.call();
+            }
           } else if (event == 'ready' || event == 'loadeddata') {
             if (widget.initialProgressSeconds > 3 && !_hasSeekedInitial) {
               _hasSeekedInitial = true;

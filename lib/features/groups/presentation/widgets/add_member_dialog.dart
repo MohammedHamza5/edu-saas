@@ -4,6 +4,7 @@ import '../../../../core/di/injection_container.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/utils/cache_manager.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_empty_view.dart';
 import '../../../students/domain/entities/student_entity.dart';
@@ -68,10 +69,20 @@ class _AddMemberDialogState extends State<AddMemberDialog> {
   }
 
   Future<void> _loadStudents() async {
-    setState(() {
-      _isLoading = true;
+    final cacheKey = AppCache.userKey('active_students_100');
+    final cached = AppCache.students.getStale(cacheKey);
+
+    if (cached is List<StudentEntity> && cached.isNotEmpty) {
+      final existing = widget.existingMemberIds ?? {};
+      _availableStudents = cached.where((s) => !existing.contains(s.id)).toList();
+      _isLoading = false;
       _errorMessage = null;
-    });
+    } else {
+      setState(() {
+        _isLoading = true;
+        _errorMessage = null;
+      });
+    }
 
     try {
       final repo =
@@ -82,6 +93,7 @@ class _AddMemberDialogState extends State<AddMemberDialog> {
 
       result.when(
         onSuccess: (students) {
+          AppCache.students.put(cacheKey, students);
           final existing = widget.existingMemberIds ?? {};
           final filtered = students
               .where((s) => !existing.contains(s.id))
@@ -92,14 +104,16 @@ class _AddMemberDialogState extends State<AddMemberDialog> {
           });
         },
         onFailure: (failure) {
-          setState(() {
-            _errorMessage = failure.message;
-            _isLoading = false;
-          });
+          if (_availableStudents.isEmpty) {
+            setState(() {
+              _errorMessage = failure.message;
+              _isLoading = false;
+            });
+          }
         },
       );
     } catch (e) {
-      if (mounted) {
+      if (mounted && _availableStudents.isEmpty) {
         setState(() {
           _errorMessage = e.toString();
           _isLoading = false;

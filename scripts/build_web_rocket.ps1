@@ -117,7 +117,8 @@ if ($DeployFirebase) {
     Write-Host "`n=================================================================" -ForegroundColor Cyan
     Write-Host "    Deploying to Firebase Hosting (site: antounios) ...           " -ForegroundColor Cyan
     Write-Host "=================================================================" -ForegroundColor Cyan
-    $env:NODE_OPTIONS = "--dns-result-order=ipv4first"
+    $forceIpv4 = (Join-Path $PSScriptRoot "force_ipv4.cjs").Replace('\', '/')
+    $env:NODE_OPTIONS = "-r `"$forceIpv4`""
     firebase deploy --only hosting:antounios
     $deploySuccess = ($LASTEXITCODE -eq 0)
     if (-not $deploySuccess) {

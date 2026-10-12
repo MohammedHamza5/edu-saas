@@ -7,8 +7,7 @@ import 'notifications_state.dart';
 class NotificationsCubit extends Cubit<NotificationsState> {
   final NotificationsRepository _repository;
 
-  // ── Cache keys & Pagination ─────────────────────────────────────────────
-  static const _cacheKeyNotifs = 'notifications_all';
+  String get _cacheKeyNotifs => AppCache.userKey('notifications');
   static const int _pageSize = 20;
   int _currentOffset = 0;
 

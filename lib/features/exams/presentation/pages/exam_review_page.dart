@@ -11,7 +11,7 @@ import '../../../../core/widgets/app_error_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
 import '../../../question_bank/presentation/widgets/question_display_widgets.dart';
 import '../../domain/entities/exam_entity.dart';
-import '../widgets/interactive_lightbox_dialog.dart';
+import '../widgets/exam_image_viewer.dart';
 
 class ExamReviewPage extends StatefulWidget {
   final String attemptId;
@@ -354,77 +354,18 @@ class _ExamReviewPageState extends State<ExamReviewPage> {
                                 ),
                               ],
                               if (effectiveImageUrl != null &&
-                                  effectiveImageUrl.isNotEmpty) ...[
-                                const SizedBox(height: AppSpacing.s16),
-                                Center(
-                                  child: InkWell(
-                                    onTap: () =>
-                                        InteractiveLightboxDialog.show(
-                                          context,
-                                          imageUrl: effectiveImageUrl,
-                                          title: context.l10n
-                                              .reviewQuestionIndex(
-                                                currentIndex + 1,
-                                                questions.length,
-                                              ),
-                                        ),
-                                    borderRadius: BorderRadius.circular(
-                                      AppSpacing.radiusMedium,
-                                    ),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(
-                                        AppSpacing.radiusMedium,
-                                      ),
-                                      child: Container(
-                                        alignment: Alignment.center,
-                                        constraints: const BoxConstraints(
-                                          maxHeight: 380,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: AppColors.surfaceVariant,
-                                          border: Border.all(
-                                            color: AppColors.border,
-                                          ),
-                                          borderRadius:
-                                              BorderRadius.circular(
-                                                AppSpacing.radiusMedium,
-                                              ),
-                                        ),
-                                        child: CachedNetworkImage(
-                                          imageUrl: effectiveImageUrl,
-                                          memCacheWidth: 800,
-                                          memCacheHeight: 800,
-                                          maxWidthDiskCache: 1200,
-                                          fit: BoxFit.contain,
-                                          placeholder: (ctx, _) =>
-                                              const SizedBox(
-                                                height: 160,
-                                                child: Center(
-                                                  child:
-                                                      AppLoadingView.signature(),
-                                                ),
-                                              ),
-                                          errorWidget: (_, __, ___) =>
-                                              const Padding(
-                                                padding: EdgeInsets.all(
-                                                  AppSpacing.s16,
-                                                ),
-                                                child: Center(
-                                                  child: Icon(
-                                                    Icons
-                                                        .broken_image_rounded,
-                                                    size: 40,
-                                                    color:
-                                                        AppColors.textMuted,
-                                                  ),
-                                                ),
-                                              ),
-                                        ),
-                                      ),
-                                    ),
+                                  effectiveImageUrl.isNotEmpty)
+                                ExamImageViewer(
+                                  key: ValueKey(
+                                    'review_q_${question.id}_$effectiveImageUrl',
+                                  ),
+                                  imageUrl: effectiveImageUrl,
+                                  imageMeta: question.imageMeta,
+                                  caption: context.l10n.reviewQuestionIndex(
+                                    currentIndex + 1,
+                                    questions.length,
                                   ),
                                 ),
-                              ],
                             ],
                           );
                         },

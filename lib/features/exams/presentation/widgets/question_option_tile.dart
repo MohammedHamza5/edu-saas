@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
@@ -131,29 +132,53 @@ class QuestionOptionTile extends StatelessWidget {
                       borderRadius: BorderRadius.circular(
                         AppSpacing.radiusSmall,
                       ),
-                      child: CachedNetworkImage(
-                        imageUrl: option.imageUrl!,
-                        height: 90,
-                        memCacheWidth: 400,
-                        memCacheHeight: 200,
-                        maxWidthDiskCache: 600,
-                        fit: BoxFit.contain,
-                        placeholder: (ctx, _) => Container(
-                          height: 90,
-                          width: 90,
-                          color: AppColors.surfaceVariant.withValues(
-                            alpha: 0.3,
-                          ),
-                          child: const Center(
-                            child: SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
+                      child: kIsWeb
+                          ? Image.network(
+                              option.imageUrl!,
+                              height: 90,
+                              fit: BoxFit.contain,
+                              loadingBuilder: (ctx, child, progress) {
+                                if (progress == null) return child;
+                                return Container(
+                                  height: 90,
+                                  width: 90,
+                                  color: AppColors.surfaceVariant.withValues(
+                                    alpha: 0.3,
+                                  ),
+                                  child: const Center(
+                                    child: SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(strokeWidth: 2),
+                                    ),
+                                  ),
+                                );
+                              },
+                              errorBuilder: (ctx, _, __) => const SizedBox.shrink(),
+                            )
+                          : CachedNetworkImage(
+                              imageUrl: option.imageUrl!,
+                              height: 90,
+                              memCacheWidth: 400,
+                              memCacheHeight: 200,
+                              maxWidthDiskCache: 600,
+                              fit: BoxFit.contain,
+                              placeholder: (ctx, _) => Container(
+                                height: 90,
+                                width: 90,
+                                color: AppColors.surfaceVariant.withValues(
+                                  alpha: 0.3,
+                                ),
+                                child: const Center(
+                                  child: SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                  ),
+                                ),
+                              ),
+                              errorWidget: (ctx, _, __) => const SizedBox.shrink(),
                             ),
-                          ),
-                        ),
-                        errorWidget: (ctx, _, __) => const SizedBox.shrink(),
-                      ),
                     ),
                   ],
                 ],

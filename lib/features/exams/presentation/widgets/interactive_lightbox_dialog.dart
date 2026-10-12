@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class InteractiveLightboxDialog extends StatefulWidget {
@@ -28,6 +29,7 @@ class InteractiveLightboxDialog extends StatefulWidget {
 
 class _InteractiveLightboxDialogState extends State<InteractiveLightboxDialog> {
   final TransformationController _transformationController = TransformationController();
+  int _cacheBustKey = 0;
 
   void _resetZoom() {
     _transformationController.value = Matrix4.identity();
@@ -41,14 +43,84 @@ class _InteractiveLightboxDialogState extends State<InteractiveLightboxDialog> {
     }
   }
 
+  void _retry() {
+    setState(() {
+      _cacheBustKey = DateTime.now().millisecondsSinceEpoch;
+    });
+  }
+
+  String get _effectiveUrl {
+    final base = widget.imageUrl.trim();
+    if (_cacheBustKey == 0) return base;
+    final separator = base.contains('?') ? '&' : '?';
+    return '$base${separator}_rb=$_cacheBustKey';
+  }
+
   @override
   void dispose() {
     _transformationController.dispose();
     super.dispose();
   }
 
+  Widget _buildImage(String url) {
+    if (kIsWeb) {
+      return Image.network(
+        url,
+        key: ValueKey(url),
+        fit: BoxFit.contain,
+        loadingBuilder: (ctx, child, progress) {
+          if (progress == null) return child;
+          return const Center(
+            child: CircularProgressIndicator(color: Colors.white),
+          );
+        },
+        errorBuilder: (ctx, error, stackTrace) => Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.broken_image_rounded, color: Colors.white70, size: 48),
+              const SizedBox(height: 12),
+              IconButton(
+                onPressed: _retry,
+                icon: const Icon(Icons.refresh_rounded, color: Colors.white),
+                tooltip: 'إعادة المحاولة',
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return CachedNetworkImage(
+      key: ValueKey(url),
+      imageUrl: url,
+      memCacheWidth: 1600,
+      maxWidthDiskCache: 2048,
+      fit: BoxFit.contain,
+      placeholder: (ctx, _) => const Center(
+        child: CircularProgressIndicator(color: Colors.white),
+      ),
+      errorWidget: (ctx, _, __) => Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.broken_image_rounded, color: Colors.white70, size: 48),
+            const SizedBox(height: 12),
+            IconButton(
+              onPressed: _retry,
+              icon: const Icon(Icons.refresh_rounded, color: Colors.white),
+              tooltip: 'إعادة المحاولة',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final url = _effectiveUrl;
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Stack(
@@ -61,18 +133,7 @@ class _InteractiveLightboxDialogState extends State<InteractiveLightboxDialog> {
                 transformationController: _transformationController,
                 minScale: 0.8,
                 maxScale: 6.0,
-                child: CachedNetworkImage(
-                  imageUrl: widget.imageUrl,
-                  memCacheWidth: 1600,
-                  maxWidthDiskCache: 2048,
-                  fit: BoxFit.contain,
-                  placeholder: (ctx, _) => const Center(
-                    child: CircularProgressIndicator(color: Colors.white),
-                  ),
-                  errorWidget: (ctx, _, __) => const Center(
-                    child: Icon(Icons.broken_image_rounded, color: Colors.white70, size: 48),
-                  ),
-                ),
+                child: _buildImage(url),
               ),
             ),
           ),

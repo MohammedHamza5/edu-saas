@@ -45,8 +45,8 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
   @override
   void initState() {
     super.initState();
-    // 1. Resolve initial groups from cache immediately (0ms render)
-    final cached = AppCache.groups.getStale('groups_all');
+    // 1. Resolve initial groups from user-scoped cache immediately (0ms render)
+    final cached = AppCache.groups.getStale(AppCache.userKey('groups'));
     if (cached is List<GroupEntity> && cached.isNotEmpty) {
       _enrolledCourses = cached;
       _isLoadingCourses = false;

@@ -259,6 +259,31 @@ abstract final class AppCache {
     label: 'Tenant',
   );
 
+  // ── User Context & Cross-Account Isolation ─────────────────────────────
+
+  static String? _currentUserId;
+
+  /// Sets the currently active user ID.
+  /// If the user ID changes (e.g. logging out or logging in as another student/teacher),
+  /// all domain caches are immediately wiped clean to guarantee zero cross-account data leakage.
+  static void setCurrentUser(String? userId) {
+    if (_currentUserId != userId) {
+      clearAll();
+      _currentUserId = userId;
+      AppLogger.d('AppCache', '🔒 User context switched to "$userId" — all caches wiped clean');
+    }
+  }
+
+  /// Returns the currently active user ID (or null if unauthenticated).
+  static String? get currentUserId => _currentUserId;
+
+  /// Generates a cache key strictly scoped to the active user.
+  /// Example: userKey('groups') -> 'u_fe858a7f_groups'
+  static String userKey(String baseKey) {
+    final uid = _currentUserId ?? 'anon';
+    return 'u_${uid}_$baseKey';
+  }
+
   // ── Bulk Operations ─────────────────────────────────────────────────────
 
   /// Call after any write operation (create/update/delete) to ensure

@@ -6,6 +6,7 @@ import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/app_logger.dart';
+import '../../../../core/widgets/app_badge.dart';
 import '../../data/services/exam_image_upload_service.dart';
 import 'app_image_cropper_dialog.dart';
 
@@ -322,6 +323,14 @@ class _ExamImageAttachmentBoxState extends State<ExamImageAttachmentBox> {
                     runSpacing: 8,
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
+                      if (_imageUrl!.contains('.webp')) ...[
+                        AppBadge(
+                          label: context.l10n.optimizedWebpBadge,
+                          variant: AppBadgeVariant.active,
+                          icon: Icons.bolt_rounded,
+                        ),
+                        const SizedBox(width: 4),
+                      ],
                       Text(
                         context.l10n.imageAlignmentLabel,
                         style: const TextStyle(

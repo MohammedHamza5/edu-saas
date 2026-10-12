@@ -64,8 +64,8 @@
 
 ### الخطوة 2: تفعيل بروتوكول IPv4 ثم الرفع المباشر
 ```powershell
-$env:NODE_OPTIONS = "--dns-result-order=ipv4first"
-firebase deploy --only hosting:antounios
+$env:NODE_OPTIONS = "-r ./scripts/force_ipv4.cjs"
+firebase deploy --only hosting:test   # أو hosting:prod للموقع الحي
 ```
 
 ---
@@ -81,11 +81,16 @@ firebase deploy --only hosting:antounios
 
 ## 🔍 حل المشاكل الشائعة (Troubleshooting)
 
-### 1. ظهور خطأ `Error: Failed to make request to https://firebasehosting...` أو `ETIMEDOUT`
-- **السبب:** مزود الإنترنت (ISP) لديك يعلق عند محاولة اتصال Node بـ IPv6.
-- **الحل:** تأكد دائمًا من كتابة الأمر التالي قبل الرفع (السكريبتات تقوم به تلقائيًا):
+### 1. ظهور خطأ `Error: Failed to make request to https://firebasehosting...` أو `ETIMEDOUT` أو `AggregateError`
+- **السبب:** يقوم راوتر الشبكة المحلية بإرجاع عناوين IPv6 لخوادم Google ولكن مزود الإنترنت (ISP) لا يدعم توجيهها (Unreachable)، مما يجعل Node.js / undici ينتظر مهلة الاتصال ويفشل بعد محاولات متكررة.
+- **الحل:** استخدم سكريبت إجبار IPv4 الصارم الذي أنشأناه تلقائياً:
   ```powershell
-  $env:NODE_OPTIONS = "--dns-result-order=ipv4first"
+  $env:NODE_OPTIONS = "-r ./scripts/force_ipv4.cjs"
+  firebase deploy --only hosting:test
+  ```
+  أو استخدم سكريبت الرفع الجاهز مباشرة:
+  ```powershell
+  .\scripts\deploy_firebase.ps1 -SkipBuild -Target test
   ```
 
 ### 2. ظهور خطأ `FirebaseError: Failed to authenticate` أو طلب تسجيل الدخول

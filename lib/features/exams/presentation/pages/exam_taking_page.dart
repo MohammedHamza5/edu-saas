@@ -12,9 +12,10 @@ import '../widgets/exam_image_viewer.dart';
 import '../widgets/question_option_tile.dart';
 import '../widgets/sat_exam_tools_sheet.dart';
 import 'exam_result_page.dart';
-import 'package:edu_saas/features/question_bank/presentation/widgets/question_display_widgets.dart';
+import '../../../question_bank/presentation/widgets/question_display_widgets.dart';
 import '../../../../core/widgets/forensic_watermark_overlay.dart';
 import '../../../../core/utils/exam_security_util.dart';
+import '../utils/exam_asset_preloader.dart';
 
 class ExamTakingPage extends StatefulWidget {
   const ExamTakingPage({super.key});
@@ -29,6 +30,7 @@ class _ExamTakingPageState extends State<ExamTakingPage>
   bool _isPrivacyShieldActive = false;
   bool _isAutoSubmitting = false;
   static const int _maxAllowedViolations = 2;
+  final ExamAssetPreloader _assetPreloader = ExamAssetPreloader();
 
   @override
   void initState() {
@@ -39,6 +41,7 @@ class _ExamTakingPageState extends State<ExamTakingPage>
 
   @override
   void dispose() {
+    _assetPreloader.dispose();
     setExamSecurityActive(false);
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
@@ -152,6 +155,11 @@ class _ExamTakingPageState extends State<ExamTakingPage>
     return BlocConsumer<ExamsCubit, ExamsState>(
       listener: (context, state) {
         if (state is ExamTakingState) {
+          _assetPreloader.startOrUpdate(
+            context: context,
+            questions: state.questions,
+            currentIndex: state.currentQuestionIndex,
+          );
           if (state.submitSuccess && state.submitResult != null) {
             Navigator.of(context).pushReplacement<void, void>(
               MaterialPageRoute<void>(
@@ -492,6 +500,9 @@ class _ExamTakingPageState extends State<ExamTakingPage>
                                             if (effectiveImageUrl != null &&
                                                 effectiveImageUrl.isNotEmpty)
                                               ExamImageViewer(
+                                                key: ValueKey(
+                                                  'exam_q_${question.id}_$effectiveImageUrl',
+                                                ),
                                                 imageUrl: effectiveImageUrl,
                                                 imageMeta: question.imageMeta,
                                                 caption: context.l10n

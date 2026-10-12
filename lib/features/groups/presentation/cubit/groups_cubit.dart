@@ -8,8 +8,7 @@ import 'groups_state.dart';
 class GroupsCubit extends Cubit<GroupsState> {
   final GroupsRepository _repository;
 
-  // ── Cache keys ──────────────────────────────────────────────────────────
-  static const _cacheKeyGroups = 'groups_all';
+  String get _cacheKeyGroups => AppCache.userKey('groups');
 
   GroupsCubit({required GroupsRepository repository})
     : _repository = repository,
@@ -345,7 +344,6 @@ class GroupsCubit extends Cubit<GroupsState> {
         GroupSlugResolver.registerGroup(updated.id, updated.name);
 
         AppCache.groups.invalidate(_cacheKeyGroups);
-        AppCache.groups.invalidate('groups_all');
         if (state is GroupsLoaded) {
           final current = state as GroupsLoaded;
           if (!isClosed) {

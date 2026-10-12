@@ -25,19 +25,16 @@
   Expires: 0
 
 /main.dart.js
-  Cache-Control: no-cache, no-store, must-revalidate, max-age=0
-  Pragma: no-cache
-  Expires: 0
+  Cache-Control: public, max-age=604800, stale-while-revalidate=86400
 
 /flutter.js
-  Cache-Control: no-cache, no-store, must-revalidate, max-age=0
-  Pragma: no-cache
-  Expires: 0
+  Cache-Control: public, max-age=604800, stale-while-revalidate=86400
 
-/flutter_service_worker.js
-  Cache-Control: no-cache, no-store, must-revalidate, max-age=0
-  Pragma: no-cache
-  Expires: 0
+/hls.min.js
+  Cache-Control: public, max-age=2592000, immutable
+
+/player-0.1.0.min.js
+  Cache-Control: public, max-age=2592000, immutable
 
 # 2. Immutable static assets (safe to cache indefinitely)
 /assets/*

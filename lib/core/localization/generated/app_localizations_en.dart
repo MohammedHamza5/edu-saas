@@ -8468,4 +8468,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String optionsAutoFilledSuccess(int count) {
     return 'Choices auto-filled across $count questions';
   }
+
+  @override
+  String get optimizedWebpBadge => 'WebP Fast Load';
 }

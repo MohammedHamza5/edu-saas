@@ -53,7 +53,9 @@ class GroupSlugResolver {
     // Attempt dynamic lookup in AppCache.groups
     try {
       final cached =
-          AppCache.groups.getStale('groups_all') ?? AppCache.groups.get('all');
+          AppCache.groups.getStale(AppCache.userKey('groups')) ??
+          AppCache.groups.getStale('groups_all') ??
+          AppCache.groups.get('all');
       if (cached is List) {
         for (final item in cached) {
           final id = (item as dynamic).id as String?;

@@ -1,12 +1,17 @@
 param (
     [switch]$SkipBuild,
-    [switch]$Wasm
+    [switch]$Wasm,
+    [ValidateSet("prod", "test")]
+    [string]$Target = "test"
 )
 
 $ErrorActionPreference = "Stop"
 
+$siteName = if ($Target -eq "prod") { "antounios" } else { "antounios-test" }
+$liveUrl = if ($Target -eq "prod") { "https://antounios.web.app" } else { "https://antounios-test.web.app" }
+
 Write-Host "=================================================================" -ForegroundColor Cyan
-Write-Host "    EduSaaS -- Firebase Hosting Deployer (site: antounios)       " -ForegroundColor Cyan
+Write-Host "    EduSaaS -- Firebase Hosting Deployer (site: $siteName)       " -ForegroundColor Cyan
 Write-Host "=================================================================" -ForegroundColor Cyan
 
 $buildWebDir = Join-Path $PSScriptRoot "..\build\web"
@@ -23,9 +28,10 @@ if (-not $SkipBuild) {
     Write-Host "`n[1/2] Skipping rebuild as requested (-SkipBuild). Deploying existing build in build/web..." -ForegroundColor Yellow
 }
 
-Write-Host "`n[2/2] Deploying to Firebase Hosting (site: antounios)..." -ForegroundColor Yellow
-$env:NODE_OPTIONS = "--dns-result-order=ipv4first"
-firebase deploy --only hosting:antounios
+Write-Host "`n[2/2] Deploying to Firebase Hosting (target: $Target -> site: $siteName)..." -ForegroundColor Yellow
+$forceIpv4 = (Join-Path $PSScriptRoot "force_ipv4.cjs").Replace('\', '/')
+$env:NODE_OPTIONS = "-r `"$forceIpv4`""
+firebase deploy --only hosting:$Target
 $deploySuccess = ($LASTEXITCODE -eq 0)
 
 # Check if deploy actually completed despite CLI analytics telemetry timeout
@@ -42,7 +48,7 @@ if (-not $deploySuccess) {
 if ($deploySuccess) {
     Write-Host "`n=================================================================" -ForegroundColor Green
     Write-Host "  [SUCCESS] Deployment complete!" -ForegroundColor Green
-    Write-Host "  Live URL: https://antounios.web.app" -ForegroundColor Cyan
+    Write-Host "  Live URL: $liveUrl" -ForegroundColor Cyan
     Write-Host "=================================================================`n" -ForegroundColor Green
 } else {
     Write-Host "`n[ERROR] Firebase deploy failed!" -ForegroundColor Red

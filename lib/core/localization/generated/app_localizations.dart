@@ -14916,6 +14916,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choices auto-filled across {count} questions'**
   String optionsAutoFilledSuccess(int count);
+
+  /// No description provided for @optimizedWebpBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'WebP Fast Load'**
+  String get optimizedWebpBadge;
 }
 
 class _AppLocalizationsDelegate

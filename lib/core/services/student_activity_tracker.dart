@@ -22,6 +22,7 @@ class StudentActivityTracker with WidgetsBindingObserver {
   Timer? _oneSecondTimer;
   Timer? _heartbeatTimer;
   DateTime _lastInteractionTime = DateTime.now();
+  final Map<String, DateTime> _recentEventsDebounce = {};
 
   bool _isRunning = false;
   bool _isIdle = false;
@@ -204,6 +205,16 @@ class StudentActivityTracker with WidgetsBindingObserver {
       final validGroupId = (groupId != null && groupId.trim().isNotEmpty)
           ? groupId.trim()
           : null;
+
+      // Throttle identical rapid events (within 5 seconds) to protect backend
+      final eventKey =
+          '$eventType:${validContentId ?? ''}:${validGroupId ?? ''}';
+      final lastFired = _recentEventsDebounce[eventKey];
+      final now = DateTime.now();
+      if (lastFired != null && now.difference(lastFired).inSeconds < 5) {
+        return;
+      }
+      _recentEventsDebounce[eventKey] = now;
 
       await client.rpc<void>(
         'record_activity_event',

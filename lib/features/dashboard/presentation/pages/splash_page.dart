@@ -91,10 +91,30 @@ class _SplashPageState extends State<SplashPage>
     });
 
     // Safety fallback timer if auth check is genuinely in-flight
-    _fallbackTimer = Timer(const Duration(milliseconds: 1200), () {
+    // If the client has a local session, give network adequate time (8s) before falling back.
+    // If no session exists at all, wait 2.2s to smoothly complete the intro animation.
+    final hasSession = SupabaseService.currentUser != null;
+    final fallbackDuration = hasSession
+        ? const Duration(seconds: 8)
+        : const Duration(milliseconds: 2200);
+
+    _fallbackTimer = Timer(fallbackDuration, () {
       if (mounted) {
         final state = context.read<AuthCubit>().state;
-        _navigateByState(state);
+        if (state is! AuthInitial && state is! AuthLoading) {
+          _navigateByState(state);
+        } else if (hasSession) {
+          // Fallback to cached role if network timed out without logging user out
+          final role = SupabaseService.cachedRole ?? SupabaseService.currentUserRole;
+          final target = switch (role) {
+            'teacher' => AppRoutes.teacherDashboard,
+            'parent' => AppRoutes.parentDashboard,
+            _ => AppRoutes.studentDashboard,
+          };
+          context.go(target);
+        } else {
+          context.go(AppRoutes.login);
+        }
       }
     });
   }
@@ -118,8 +138,18 @@ class _SplashPageState extends State<SplashPage>
     } else if (state is AuthUnauthenticated || state is AuthError) {
       context.go(AppRoutes.login);
     } else {
-      // If still loading or initial when fallback timer expires, safely redirect to login
-      context.go(AppRoutes.login);
+      // If still loading or initial, do not immediately force login if user has a session
+      if (SupabaseService.currentUser != null) {
+        final role = SupabaseService.cachedRole ?? SupabaseService.currentUserRole;
+        final target = switch (role) {
+          'teacher' => AppRoutes.teacherDashboard,
+          'parent' => AppRoutes.parentDashboard,
+          _ => AppRoutes.studentDashboard,
+        };
+        context.go(target);
+      } else {
+        context.go(AppRoutes.login);
+      }
     }
   }
 

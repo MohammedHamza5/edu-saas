@@ -122,5 +122,29 @@ void main() {
       expect(AppCache.students.has('s1'), isFalse);
       expect(AppCache.tenant.has('t1'), isFalse);
     });
+
+    test('setCurrentUser clears all caches on user switch and scopes keys', () {
+      AppCache.setCurrentUser('user_A');
+      final keyA = AppCache.userKey('groups');
+      expect(keyA, 'u_user_A_groups');
+
+      AppCache.groups.put(keyA, ['group_math_101']);
+      expect(AppCache.groups.get(keyA), ['group_math_101']);
+
+      // Switch to user B (different account/email)
+      AppCache.setCurrentUser('user_B');
+      final keyB = AppCache.userKey('groups');
+      expect(keyB, 'u_user_B_groups');
+
+      // User A's cache must be wiped clean immediately
+      expect(AppCache.groups.has(keyA), isFalse);
+      expect(AppCache.groups.get(keyA), isNull);
+      expect(AppCache.groups.has(keyB), isFalse);
+
+      // Logging out sets user to null and clears cache
+      AppCache.groups.put(keyB, ['group_physics_201']);
+      AppCache.setCurrentUser(null);
+      expect(AppCache.groups.has(keyB), isFalse);
+    });
   });
 }

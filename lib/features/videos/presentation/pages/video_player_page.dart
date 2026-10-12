@@ -74,6 +74,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   final ValueNotifier<bool> _isPlayingNotifier = ValueNotifier<bool>(false);
   void Function(int seconds)? _seekTo;
   bool _hasRecordedStarted = false;
+  bool _hasRecordedCompleted = false;
 
   /// أبعد نقطة مشاهدة لإرسالها مع كل update
   int _furthestPositionSecs = 0;
@@ -981,7 +982,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                         if (_segmentEnd != null &&
                             (currentSeconds - _segmentEnd!).abs() > 2) {
                           isSeek = true;
-                          // Force commit the old segment before starting a new one
+                          // Commit the segment before starting a new one without bypassing debounce
                           context.read<VideosCubit>().updateProgress(
                             videoId: video.id,
                             studentId: _activeStudentId,
@@ -990,7 +991,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                             furthestPositionSeconds: _furthestPositionSecs,
                             actualWatchSeconds: actualWatch,
                             isSkipped: isSkipped,
-                            force: true,
+                            force: false,
                             newSegment: [_segmentStart!, _segmentEnd!],
                           );
                           _segmentStart = currentSeconds;
@@ -1014,13 +1015,16 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                       }
                     },
                 onCompleted: () {
+                  if (_hasRecordedCompleted) return;
+                  _hasRecordedCompleted = true;
+
                   if (!_isTeacher &&
                       _activeStudentId.isNotEmpty &&
                       video != null) {
                     final dur = _liveDurationSecs.value > 0
                         ? _liveDurationSecs.value
                         : video.duration;
-                    // تحديث التقدم بقيمة الإكمال الكاملة
+                    // تحديث التقدم بقيمة الإكمال الكاملة مرة واحدة فقط
                     context.read<VideosCubit>().updateProgress(
                       videoId: video.id,
                       studentId: _activeStudentId,

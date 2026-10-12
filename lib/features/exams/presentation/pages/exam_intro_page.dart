@@ -10,6 +10,7 @@ import '../cubit/exams_cubit.dart';
 import '../cubit/exams_state.dart';
 import 'exam_review_page.dart';
 import 'exam_taking_page.dart';
+import '../utils/exam_asset_preloader.dart';
 
 class ExamIntroPage extends StatelessWidget {
   final ExamEntity exam;
@@ -49,6 +50,18 @@ class ExamIntroPage extends StatelessWidget {
     final canTake = isUntimed
         ? (!isPassed || exam.allowRetake || hasActive)
         : exam.canTakeExam;
+
+    final introQuestions = exam.activeVersion?.questions ?? const [];
+    if (introQuestions.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) {
+          ExamAssetPreloader().startOrUpdate(
+            context: context,
+            questions: introQuestions,
+          );
+        }
+      });
+    }
 
     return Scaffold(
       appBar: AppBar(

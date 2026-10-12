@@ -78,6 +78,7 @@ class _AppVideoPlayerState extends State<AppVideoPlayer>
   int _lastRecordedPosition = 0;
   bool _isSkipped = false;
   Timer? _watchHeartbeatTimer;
+  bool _completionFired = false;
 
   bool get _isYouTubeEmbed =>
       kIsWeb &&
@@ -226,7 +227,8 @@ class _AppVideoPlayerState extends State<AppVideoPlayer>
       _isSkipped,
     );
 
-    if (_controller!.value.isCompleted) {
+    if (_controller!.value.isCompleted && !_completionFired) {
+      _completionFired = true;
       widget.onCompleted?.call();
     }
   }

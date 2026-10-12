@@ -144,7 +144,92 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
     int page = 0,
     int pageSize = 15,
   }) async {
-    final examsFuture = _safeClient
+    // 1. Fetch group metadata first (fast indexed lookups by group_id in ~2ms)
+    final lessonsFuture = _safeClient
+        .from('content_groups')
+        .select('content_id, associated_exam_id, content:content!content_groups_content_id_fkey(id, title)')
+        .eq('group_id', groupId)
+        .not('associated_exam_id', 'is', null)
+        .catchError((Object e) {
+          AppLogger.w('ExamsRemoteDataSource', 'Could not fetch linked lessons map: $e');
+          return <dynamic>[];
+        });
+
+    final multiLessonsFuture = _safeClient
+        .from('lesson_exams')
+        .select('content_id, exam_id, content:content!lesson_exams_content_id_fkey(id, title)')
+        .eq('group_id', groupId)
+        .catchError((Object _) => <dynamic>[]);
+
+    final groupContentFuture = _safeClient
+        .from('content')
+        .select('id')
+        .eq('group_id', groupId)
+        .neq('status', 'archived')
+        .catchError((Object _) => <dynamic>[]);
+
+    final metaRes = await Future.wait([
+      lessonsFuture,
+      multiLessonsFuture,
+      groupContentFuture,
+    ]);
+
+    final lessonsRes = metaRes[0] as List<dynamic>;
+    final multiLessonsRes = metaRes[1] as List<dynamic>;
+    final contentRows = metaRes[2] as List<dynamic>;
+
+    final directContentIds = <String>{};
+    for (final r in contentRows) {
+      if (r is Map && r['id'] != null) {
+        directContentIds.add(r['id'].toString());
+      }
+    }
+
+    final linkedExamIds = <String>{};
+    // Build map of examId -> linked lesson info for this group
+    final linkedLessonsMap = <String, Map<String, String>>{};
+    for (final item in lessonsRes) {
+      if (item is! Map) continue;
+      final examId = item['associated_exam_id']?.toString();
+      final contentMap = item['content'] is Map ? item['content'] as Map : null;
+      final lessonId = (item['content_id'] ?? contentMap?['id'])?.toString();
+      final lessonTitle = contentMap?['title']?.toString() ?? '';
+      if (examId != null && examId.isNotEmpty) {
+        linkedExamIds.add(examId);
+        if (lessonId != null) {
+          linkedLessonsMap[examId] = {
+            'lesson_id': lessonId,
+            'lesson_title': lessonTitle,
+          };
+        }
+      }
+    }
+
+    for (final item in multiLessonsRes) {
+      if (item is! Map) continue;
+      final examId = item['exam_id']?.toString();
+      final contentMap = item['content'] is Map ? item['content'] as Map : null;
+      final lessonId = (item['content_id'] ?? contentMap?['id'])?.toString();
+      final lessonTitle = contentMap?['title']?.toString() ?? '';
+      if (examId != null && examId.isNotEmpty) {
+        linkedExamIds.add(examId);
+        if (lessonId != null) {
+          linkedLessonsMap[examId] = {
+            'lesson_id': lessonId,
+            'lesson_title': lessonTitle,
+          };
+        }
+      }
+    }
+
+    // Fast-path: if this group has neither direct content nor linked exams, it has 0 exams.
+    // Return immediately in 2ms to prevent scanning the entire exams table!
+    if (directContentIds.isEmpty && linkedExamIds.isEmpty) {
+      return [];
+    }
+
+    // 2. Fetch only the exams matching these direct content IDs or linked exam IDs
+    var examsQuery = _safeClient
         .from('exams')
         .select('''
           id,
@@ -162,7 +247,7 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
           updated_at,
           folder_id,
           folder:exam_folders(id, name, color, icon),
-          content:content!exams_content_id_fkey!inner(
+          content:content!exams_content_id_fkey(
             id,
             group_id,
             title,
@@ -180,67 +265,21 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
             exam_questions(count)
           ),
           exam_attempts(count)
-        ''')
-        .eq('content.group_id', groupId)
-        .neq('content.status', 'archived')
+        ''');
+
+    if (linkedExamIds.isEmpty) {
+      examsQuery = examsQuery.inFilter('content_id', directContentIds.toList());
+    } else if (directContentIds.isEmpty) {
+      examsQuery = examsQuery.inFilter('id', linkedExamIds.toList());
+    } else {
+      final cList = directContentIds.join(',');
+      final eList = linkedExamIds.join(',');
+      examsQuery = examsQuery.or('content_id.in.($cList),id.in.($eList)');
+    }
+
+    final response = await examsQuery
         .order('created_at', ascending: false)
         .range(page * pageSize, (page + 1) * pageSize - 1);
-
-    final lessonsFuture = _safeClient
-        .from('content_groups')
-        .select('content_id, associated_exam_id, content:content!content_groups_content_id_fkey(id, title)')
-        .eq('group_id', groupId)
-        .not('associated_exam_id', 'is', null)
-        .catchError((Object e) {
-          AppLogger.w('ExamsRemoteDataSource', 'Could not fetch linked lessons map: $e');
-          return <dynamic>[];
-        });
-
-    final multiLessonsFuture = _safeClient
-        .from('lesson_exams')
-        .select('content_id, exam_id, content:content!lesson_exams_content_id_fkey(id, title)')
-        .eq('group_id', groupId)
-        .catchError((Object _) => <dynamic>[]);
-
-    final parallelRes = await Future.wait([
-      examsFuture,
-      lessonsFuture,
-      multiLessonsFuture,
-    ]);
-
-    final response = parallelRes[0];
-    final lessonsRes = parallelRes[1] as List<dynamic>;
-    final multiLessonsRes = parallelRes[2] as List<dynamic>;
-
-    // Build map of examId -> linked lesson info for this group
-    final linkedLessonsMap = <String, Map<String, String>>{};
-    for (final item in lessonsRes) {
-      if (item is! Map) continue;
-      final examId = item['associated_exam_id']?.toString();
-      final contentMap = item['content'] is Map ? item['content'] as Map : null;
-      final lessonId = (item['content_id'] ?? contentMap?['id'])?.toString();
-      final lessonTitle = contentMap?['title']?.toString() ?? '';
-      if (examId != null && lessonId != null) {
-        linkedLessonsMap[examId] = {
-          'lesson_id': lessonId,
-          'lesson_title': lessonTitle,
-        };
-      }
-    }
-
-    for (final item in multiLessonsRes) {
-      if (item is! Map) continue;
-      final examId = item['exam_id']?.toString();
-      final contentMap = item['content'] is Map ? item['content'] as Map : null;
-      final lessonId = (item['content_id'] ?? contentMap?['id'])?.toString();
-      final lessonTitle = contentMap?['title']?.toString() ?? '';
-      if (examId != null && lessonId != null) {
-        linkedLessonsMap[examId] = {
-          'lesson_id': lessonId,
-          'lesson_title': lessonTitle,
-        };
-      }
-    }
 
     final list = response as List<dynamic>;
     final results = <ExamModel>[];
@@ -1630,8 +1669,8 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
           .map((j) => ExamFolderModel.fromJson(Map<String, dynamic>.from(j)))
           .toList();
     } catch (e) {
-      AppLogger.e('ExamsRemoteDataSource', 'getExamFolders failed', error: e);
-      rethrow;
+      AppLogger.w('ExamsRemoteDataSource', 'getExamFolders fallback: $e');
+      return [];
     }
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/errors/result.dart';
+import '../../../../core/utils/cache_manager.dart';
 import '../../domain/entities/chapter_entity.dart';
 import '../../domain/entities/lesson_assignment_entity.dart';
 import '../../domain/repositories/content_repository.dart';
@@ -16,11 +17,28 @@ class CourseProgressCubit extends Cubit<CourseProgressState> {
     String groupId, {
     String? studentId,
     bool isTeacher = false,
+    bool forceRefresh = false,
   }) async {
-    if (state is CourseProgressLoaded) {
-      emit((state as CourseProgressLoaded).copyWith(isRefreshing: true));
+    final cacheKey = AppCache.userKey('${groupId}_${studentId ?? ""}_progress');
+
+    if (!forceRefresh) {
+      final cached = AppCache.content.getStale(cacheKey);
+      if (cached is ({List<LessonAssignmentEntity> lessons, List<ChapterEntity> chapters})) {
+        emit(CourseProgressLoaded(lessons: cached.lessons, chapters: cached.chapters));
+        if (AppCache.content.has(cacheKey)) {
+          return; // Cache is still fresh, skip redundant network call
+        }
+      } else if (state is CourseProgressLoaded) {
+        emit((state as CourseProgressLoaded).copyWith(isRefreshing: true));
+      } else {
+        emit(const CourseProgressLoading());
+      }
     } else {
-      emit(const CourseProgressLoading());
+      if (state is CourseProgressLoaded) {
+        emit((state as CourseProgressLoaded).copyWith(isRefreshing: true));
+      } else {
+        emit(const CourseProgressLoading());
+      }
     }
 
     final progressFuture = _repository.getGroupCourseProgress(
@@ -30,15 +48,20 @@ class CourseProgressCubit extends Cubit<CourseProgressState> {
     final chaptersFuture = _repository.getGroupChapters(groupId);
 
     final results = await Future.wait([progressFuture, chaptersFuture]);
+    if (isClosed) return;
+
     final progressResult = results[0] as Result<List<LessonAssignmentEntity>>;
     final chaptersResult = results[1] as Result<List<ChapterEntity>>;
 
     switch (progressResult) {
       case Success(:final data):
         final chapters = chaptersResult.dataOrNull ?? [];
+        AppCache.content.put(cacheKey, (lessons: data, chapters: chapters));
         emit(CourseProgressLoaded(lessons: data, chapters: chapters));
       case FailureResult(:final failure):
-        emit(CourseProgressError(failure.message));
+        if (state is! CourseProgressLoaded) {
+          emit(CourseProgressError(failure.message));
+        }
     }
   }
 

@@ -5,6 +5,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/network/supabase_service.dart';
 import '../../../../core/utils/app_logger.dart';
 
+import 'exam_image_compressor.dart';
+
 class ExamImageUploadService {
   final SupabaseClient? _client;
 
@@ -12,14 +14,35 @@ class ExamImageUploadService {
 
   SupabaseClient get _safeClient => _client ?? SupabaseService.client;
 
-  /// Uploads an exam image (crop, screenshot, or picked file)
-  /// Storage: Supabase 'group-content' bucket → 'test/exam_images/' path (RLS-authorized).
+  /// Uploads an exam image (crop, screenshot, or picked file).
+  /// Automatically compresses and transcodes to WebP (Phase 2 optimization)
+  /// before uploading to Supabase 'group-content' bucket → 'test/exam_images/' path.
   Future<String> uploadExamImage({
     required Uint8List bytes,
     required String fileName,
     String mimeType = 'image/png',
   }) async {
-    final cleanName = fileName.replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_');
+    // 1. Compress and convert to WebP
+    final compressionResult = await ExamImageCompressor.compress(
+      bytes: bytes,
+      maxWidth: 1200,
+      maxHeight: 1200,
+      quality: 0.85,
+    );
+
+    final effectiveBytes = compressionResult.bytes;
+    final effectiveMimeType = compressionResult.mimeType;
+    final extension = compressionResult.extension;
+
+    var cleanName = fileName.replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_');
+    if (extension == 'webp') {
+      cleanName = cleanName.replaceAll(
+            RegExp(r'\.(png|jpg|jpeg|gif|webp)$', caseSensitive: false),
+            '',
+          ) +
+          '.webp';
+    }
+
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     final finalFileName = '${timestamp}_$cleanName';
     final storagePath = 'test/exam_images/$finalFileName';
@@ -27,12 +50,16 @@ class ExamImageUploadService {
     final user = _safeClient.auth.currentUser;
     AppLogger.i(
       'UploadService',
-      '🚀 [UploadService] uploadExamImage starting:',
+      '🚀 [UploadService] uploadExamImage starting (${compressionResult.summary}):',
     );
     AppLogger.d('UploadService', '  - FileName: $fileName -> $finalFileName');
     AppLogger.d(
       'UploadService',
-      '  - Bytes count: ${bytes.length} bytes (${(bytes.length / 1024).toStringAsFixed(1)} KB)',
+      '  - Original bytes: ${bytes.length} (${(bytes.length / 1024).toStringAsFixed(1)} KB)',
+    );
+    AppLogger.d(
+      'UploadService',
+      '  - Effective bytes: ${effectiveBytes.length} (${(effectiveBytes.length / 1024).toStringAsFixed(1)} KB, $effectiveMimeType)',
     );
     AppLogger.d('UploadService', '  - Target path: group-content/$storagePath');
     AppLogger.d('UploadService', '  - Current user ID: ${user?.id}');
@@ -44,7 +71,7 @@ class ExamImageUploadService {
 
     try {
       // Ensure a plain Uint8List for web release (JS TypedArray interop safety).
-      final payload = Uint8List.fromList(bytes);
+      final payload = Uint8List.fromList(effectiveBytes);
 
       AppLogger.i(
         'UploadService',
@@ -58,7 +85,7 @@ class ExamImageUploadService {
             storagePath,
             payload,
             fileOptions: FileOptions(
-              contentType: mimeType,
+              contentType: effectiveMimeType,
               upsert: true,
             ),
           );

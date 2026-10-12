@@ -1,5 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/network/supabase_service.dart';
+import '../../../../core/utils/cache_manager.dart';
+import '../../domain/entities/mistake_entities.dart';
 import '../../domain/repositories/exams_repository.dart';
 import 'mistakes_state.dart';
 
@@ -15,6 +17,7 @@ class MistakesCubit extends Cubit<MistakesState> {
   Future<void> loadMistakes({
     String? examId,
     bool onlyUnresolved = true,
+    bool forceRefresh = false,
   }) async {
     final studentId = _currentStudentId;
     if (studentId == null || studentId.isEmpty) {
@@ -22,20 +25,48 @@ class MistakesCubit extends Cubit<MistakesState> {
       return;
     }
 
-    emit(const MistakesLoading());
+    final cacheKey = AppCache.userKey('mistakes_${examId ?? "all"}_$onlyUnresolved');
 
-    final summaryResult = await _repository.getStudentMistakesSummary(studentId);
-    final questionsResult = await _repository.getStudentMistakesQuestions(
+    if (!forceRefresh) {
+      final cached = AppCache.exams.getStale(cacheKey);
+      if (cached is ({MistakeSummaryEntity summary, List<MistakeQuestionEntity> questions})) {
+        emit(
+          MistakesLoaded(
+            summary: cached.summary,
+            questions: cached.questions,
+            selectedExamId: examId,
+            onlyUnresolved: onlyUnresolved,
+          ),
+        );
+        if (AppCache.exams.has(cacheKey)) return;
+      } else {
+        emit(const MistakesLoading());
+      }
+    } else {
+      emit(const MistakesLoading());
+    }
+
+    // Parallel fetch: cuts network round-trip in half
+    final summaryFuture = _repository.getStudentMistakesSummary(studentId);
+    final questionsFuture = _repository.getStudentMistakesQuestions(
       studentId,
       examId: examId,
       onlyUnresolved: onlyUnresolved,
     );
 
+    final summaryResult = await summaryFuture;
+    final questionsResult = await questionsFuture;
+
+    if (isClosed) return;
+
     if (summaryResult.isSuccess && questionsResult.isSuccess) {
+      final summary = summaryResult.dataOrNull!;
+      final questions = questionsResult.dataOrNull ?? [];
+      AppCache.exams.put(cacheKey, (summary: summary, questions: questions));
       emit(
         MistakesLoaded(
-          summary: summaryResult.dataOrNull!,
-          questions: questionsResult.dataOrNull ?? [],
+          summary: summary,
+          questions: questions,
           selectedExamId: examId,
           onlyUnresolved: onlyUnresolved,
         ),
@@ -44,7 +75,9 @@ class MistakesCubit extends Cubit<MistakesState> {
       final msg = summaryResult.failureOrNull?.message ??
           questionsResult.failureOrNull?.message ??
           'failed_to_load_mistakes';
-      emit(MistakesError(msg));
+      if (state is! MistakesLoaded) {
+        emit(MistakesError(msg));
+      }
     }
   }
 

@@ -36,7 +36,7 @@ class ExamsCubit extends Cubit<ExamsState> {
     if (state is ExamTakingState) return;
 
     _teacherPage = 0;
-    final cacheKey = 'teacher_exams_$groupId';
+    final cacheKey = AppCache.userKey('teacher_exams_$groupId');
     if (forceRefresh) {
       AppCache.exams.invalidate(cacheKey);
     }
@@ -117,7 +117,7 @@ class ExamsCubit extends Cubit<ExamsState> {
       onSuccess: (newExams) {
         _teacherPage = nextPage;
         final allExams = [...currentState.exams, ...newExams];
-        AppCache.exams.put('teacher_exams_${currentState.groupId}', allExams);
+        AppCache.exams.put(AppCache.userKey('teacher_exams_${currentState.groupId}'), allExams);
         emit(
           currentState.copyWith(
             exams: allExams,
@@ -202,8 +202,8 @@ class ExamsCubit extends Cubit<ExamsState> {
 
     return result.when(
       onSuccess: (created) {
-        AppCache.exams.invalidate('teacher_exams_$groupId');
         if (groupId != null) {
+          AppCache.exams.invalidate(AppCache.userKey('teacher_exams_$groupId'));
           loadGroupExams(groupId, forceRefresh: true);
         }
         return created;
@@ -254,7 +254,7 @@ class ExamsCubit extends Cubit<ExamsState> {
         final currentState = state;
         if (currentState is TeacherExamsLoaded) {
           if (currentState.groupId != null) {
-            AppCache.exams.invalidate('teacher_exams_${currentState.groupId}');
+            AppCache.exams.invalidate(AppCache.userKey('teacher_exams_${currentState.groupId}'));
           }
           final index = currentState.exams.indexWhere(
             (e) => e.id == updatedExam.id,
@@ -625,7 +625,7 @@ class ExamsCubit extends Cubit<ExamsState> {
     }
 
     _studentPage = 0;
-    const cacheKey = 'student_exams_all';
+    final cacheKey = AppCache.userKey('student_exams');
     if (forceRefresh) {
       AppCache.exams.invalidate(cacheKey);
     }
@@ -699,7 +699,7 @@ class ExamsCubit extends Cubit<ExamsState> {
       onSuccess: (newExams) {
         _studentPage = nextPage;
         final allExams = [...currentState.exams, ...newExams];
-        AppCache.exams.put('student_exams_all', allExams);
+        AppCache.exams.put(AppCache.userKey('student_exams'), allExams);
         emit(
           currentState.copyWith(
             exams: allExams,

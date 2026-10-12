@@ -30,8 +30,8 @@ class ContentCubit extends Cubit<ContentState> {
     _currentGroupId = groupId;
     _currentPage = 0;
     _isStudent = isStudent;
-    final cacheKey = '${groupId}_${statusFilter?.name ?? 'all'}_$isStudent';
-    final chaptersKey = '${groupId}_chapters';
+    final cacheKey = AppCache.userKey('${groupId}_${statusFilter?.name ?? 'all'}_$isStudent');
+    final chaptersKey = AppCache.userKey('${groupId}_chapters');
 
     if (forceRefresh) {
       AppCache.content.invalidatePrefix(groupId);
