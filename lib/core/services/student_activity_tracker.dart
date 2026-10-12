@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/widgets.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../network/supabase_service.dart';
 import '../utils/app_logger.dart';
 
@@ -21,6 +22,7 @@ class StudentActivityTracker with WidgetsBindingObserver {
 
   Timer? _oneSecondTimer;
   Timer? _heartbeatTimer;
+  StreamSubscription<AuthState>? _authSubscription;
   DateTime _lastInteractionTime = DateTime.now();
   final Map<String, DateTime> _recentEventsDebounce = {};
 
@@ -33,6 +35,10 @@ class StudentActivityTracker with WidgetsBindingObserver {
 
   bool get isIdle => _isIdle;
   bool get isRunning => _isRunning;
+
+  DateTime? _lastRegisteredInteraction;
+  DateTime? _lastFlushTime;
+  bool _isFlushing = false;
 
   /// Starts the tracking engine if the current user is an authenticated student
   void start() {
@@ -53,12 +59,26 @@ class StudentActivityTracker with WidgetsBindingObserver {
     _isInForeground = true;
     _isIdle = false;
     _lastInteractionTime = DateTime.now();
+    _lastRegisteredInteraction = null;
+    _lastFlushTime = null;
     _pendingActiveSeconds = 0;
     _pendingIdleSeconds = 0;
 
     WidgetsBinding.instance.addObserver(this);
 
-    // 1-second tick timer
+    // Auto-stop tracker if the student logs out or session is invalidated
+    _authSubscription?.cancel();
+    if (SupabaseService.isInitialized) {
+      _authSubscription = SupabaseService.client.auth.onAuthStateChange.listen(
+        (data) {
+          if (data.event == AuthChangeEvent.signedOut || data.session == null) {
+            stop();
+          }
+        },
+      );
+    }
+
+    // 1-second tick timer for in-memory accounting
     _oneSecondTimer = Timer.periodic(const Duration(seconds: 1), _onSecondTick);
 
     // 60-second periodic heartbeat flush
@@ -82,6 +102,9 @@ class StudentActivityTracker with WidgetsBindingObserver {
   void stop() {
     if (!_isRunning) return;
 
+    _authSubscription?.cancel();
+    _authSubscription = null;
+
     flushHeartbeat();
 
     _oneSecondTimer?.cancel();
@@ -95,9 +118,18 @@ class StudentActivityTracker with WidgetsBindingObserver {
     AppLogger.i('StudentActivityTracker', 'Tracker stopped');
   }
 
-  /// Called whenever a pointer, scroll, or key event is detected
+  /// Called whenever a pointer, scroll, or key event is detected.
+  /// Throttled to at most once per 3 seconds in memory to eliminate high-frequency
+  /// overhead from 60Hz-120Hz pointermove / scroll streams.
   void registerUserInteraction() {
-    _lastInteractionTime = DateTime.now();
+    final now = DateTime.now();
+    if (_lastRegisteredInteraction != null &&
+        now.difference(_lastRegisteredInteraction!).inSeconds < 3 &&
+        !_isIdle) {
+      return;
+    }
+    _lastRegisteredInteraction = now;
+    _lastInteractionTime = now;
     if (_isIdle) {
       _isIdle = false;
       AppLogger.d(
@@ -115,13 +147,16 @@ class StudentActivityTracker with WidgetsBindingObserver {
       _isInForeground = true;
       registerUserInteraction();
     } else if (state == AppLifecycleState.paused ||
-        state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.hidden ||
         state == AppLifecycleState.detached) {
       _isInForeground = false;
       _isIdle = true;
       // Immediately flush current active state before backgrounding
       flushHeartbeat();
     }
+    // Note: AppLifecycleState.inactive is intentionally omitted on Web
+    // because touching iframe embeds (video player) or inputs triggers inactive,
+    // which should NOT trigger premature heartbeat network flushes.
   }
 
   void _onSecondTick(Timer timer) {
@@ -132,24 +167,52 @@ class StudentActivityTracker with WidgetsBindingObserver {
         .inSeconds;
 
     if (secondsSinceInteraction >= _idleThresholdSeconds) {
-      _isIdle = true;
+      if (!_isIdle) {
+        _isIdle = true;
+        // On transition from active to idle: flush remaining active seconds
+        flushHeartbeat();
+      }
     }
 
-    if (_isInForeground) {
-      if (!_isIdle) {
-        _pendingActiveSeconds++;
-      } else {
-        _pendingIdleSeconds++;
-      }
+    if (_isInForeground && !_isIdle) {
+      _pendingActiveSeconds++;
     } else {
-      // In background, count as idle
       _pendingIdleSeconds++;
     }
   }
 
-  /// Sends accumulated active and idle seconds to the backend via RPC
+  bool _isAuthError(Object error) {
+    final str = error.toString().toLowerCase();
+    return str.contains('401') ||
+        str.contains('auth_required') ||
+        str.contains('unauthorized') ||
+        str.contains('jwt') ||
+        str.contains('permission denied') ||
+        str.contains('42501') ||
+        str.contains('not_authorized') ||
+        str.contains('invalid claim');
+  }
+
+  /// Sends accumulated active and idle seconds to the backend via RPC.
+  /// Smartly batched: avoids spamming the database when the user is idle.
   Future<void> flushHeartbeat() async {
+    if (_isFlushing) return;
     if (_pendingActiveSeconds == 0 && _pendingIdleSeconds == 0) return;
+
+    // If completely idle with zero active time, do NOT ping the database every 60s
+    // while the student is away. Accumulate idle time up to 10 minutes locally.
+    if (_isIdle && _pendingActiveSeconds == 0 && _pendingIdleSeconds < 600) {
+      return;
+    }
+
+    final now = DateTime.now();
+    // Guard against rapid duplicate flushes within 10 seconds
+    if (_lastFlushTime != null && now.difference(_lastFlushTime!).inSeconds < 10) {
+      return;
+    }
+
+    _isFlushing = true;
+    _lastFlushTime = now;
 
     final activeToSend = _pendingActiveSeconds;
     final idleToSend = _pendingIdleSeconds;
@@ -161,7 +224,10 @@ class StudentActivityTracker with WidgetsBindingObserver {
     try {
       if (!SupabaseService.isInitialized) return;
       final client = SupabaseService.client;
-      if (client.auth.currentUser == null) return;
+      if (client.auth.currentUser == null) {
+        stop();
+        return;
+      }
 
       await client.rpc<void>(
         'record_student_heartbeat',
@@ -178,10 +244,20 @@ class StudentActivityTracker with WidgetsBindingObserver {
         data: {'active': activeToSend, 'idle': idleToSend},
       );
     } catch (e) {
+      if (_isAuthError(e)) {
+        AppLogger.w(
+          'StudentActivityTracker',
+          'Auth expired during heartbeat; stopping tracker: $e',
+        );
+        stop();
+        return;
+      }
       // On network failure, re-accumulate unsent seconds
       _pendingActiveSeconds += activeToSend;
       _pendingIdleSeconds += idleToSend;
       AppLogger.w('StudentActivityTracker', 'Failed to flush heartbeat: $e');
+    } finally {
+      _isFlushing = false;
     }
   }
 
@@ -195,7 +271,10 @@ class StudentActivityTracker with WidgetsBindingObserver {
     try {
       if (!SupabaseService.isInitialized) return;
       final client = SupabaseService.client;
-      if (client.auth.currentUser == null) return;
+      if (client.auth.currentUser == null) {
+        stop();
+        return;
+      }
 
       registerUserInteraction();
 
@@ -232,6 +311,14 @@ class StudentActivityTracker with WidgetsBindingObserver {
         data: {'event_type': eventType, 'content_id': validContentId},
       );
     } catch (e) {
+      if (_isAuthError(e)) {
+        AppLogger.w(
+          'StudentActivityTracker',
+          'Auth expired during recordActivity; stopping tracker: $e',
+        );
+        stop();
+        return;
+      }
       AppLogger.w(
         'StudentActivityTracker',
         'Failed to record activity $eventType: $e',
