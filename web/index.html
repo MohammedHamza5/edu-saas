@@ -206,7 +206,7 @@
         }, 1200);
       }
 
-      // 6. Tab Switch / Visibility Protection for Embedded Players (Avoid pausing on simple iframe focus blur on touch devices)
+      // 6. Tab Switch / Visibility Protection & Auto-Recovery for Embedded Players
       function pauseActivePlayersOnHide() {
         if (!document.hidden) return;
         if (window._bunnyWindows) {
@@ -215,11 +215,41 @@
               if (window.bunnyPostMessage) {
                 window.bunnyPostMessage(id, 'pause');
               }
+              if (window._bunnyPlayers && window._bunnyPlayers[id]) {
+                window._bunnyPlayers[id].isPlaying = false;
+              }
             } catch(err) {}
           }
         }
       }
-      document.addEventListener('visibilitychange', pauseActivePlayersOnHide);
+
+      function handleTabVisibilityChange() {
+        if (document.hidden) {
+          pauseActivePlayersOnHide();
+        } else {
+          // Tab restored from background or device sleep on tablet/iPad
+          // Check for discarded/crashed iframes and revive them if idle
+          if (window._bunnyPlayers) {
+            for (var id in window._bunnyPlayers) {
+              var p = window._bunnyPlayers[id];
+              var el = document.getElementById('bunny_frame_' + id);
+              if (el && p) {
+                var idleSeconds = (Date.now() - (p.lastActiveTime || 0)) / 1000;
+                // If tab was away for more than 25 seconds while not playing:
+                // Android Chrome often discards the subframe. Re-assign src to revive it cleanly!
+                if (idleSeconds > 25 && !p.isPlaying) {
+                  try {
+                    var s = el.src;
+                    el.src = s;
+                    p.lastActiveTime = Date.now();
+                  } catch(e) {}
+                }
+              }
+            }
+          }
+        }
+      }
+      document.addEventListener('visibilitychange', handleTabVisibilityChange);
       // 7. Exam Session Protection Guard
       window.__edu_exam_in_progress = false;
       window.setExamInProgress = function(inProgress) {
@@ -896,7 +926,9 @@
         var playerState = {
           viewId: viewId,
           duration: 0,
-          currentTime: 0
+          currentTime: 0,
+          isPlaying: false,
+          lastActiveTime: Date.now()
         };
         window._bunnyPlayers[viewId] = playerState;
 
@@ -916,16 +948,22 @@
           setTimeout(doSubscribe, 2500);
         });
 
-        // Continuous heartbeat polling: queries currentTime and duration every 1s
+        // Intelligent heartbeat polling: only queries when visible and active/discovering duration
         if (window._bunnyPollTimers[viewId]) {
           clearInterval(window._bunnyPollTimers[viewId]);
         }
         window._bunnyPollTimers[viewId] = setInterval(function() {
+          if (document.hidden) return; // Never spam IPC when tab is backgrounded
+          var p = window._bunnyPlayers[viewId];
+          // If video is paused and duration is already known, do not spam IPC to sleeping iframe
+          if (p && !p.isPlaying && p.duration > 0) return;
           var el = document.getElementById('bunny_frame_' + viewId) || iframe;
           var targetWin = window._bunnyWindows[viewId] || (el && el.contentWindow);
           if (targetWin) {
             sendBunnyMessage(targetWin, 'getCurrentTime');
-            sendBunnyMessage(targetWin, 'getDuration');
+            if (!p || !p.duration || p.duration <= 0) {
+              sendBunnyMessage(targetWin, 'getDuration');
+            }
           }
         }, 1000);
 
@@ -990,12 +1028,15 @@
         var isPlayerJs = data.context === 'player.js' || isBunnyOrigin;
         if (!isPlayerJs) return;
 
-        // Remember event.source for active players
+        // Remember event.source for active players and update lastActiveTime
         if (event.source) {
           for (var vid in window._bunnyPlayers) {
             var frameEl = document.getElementById('bunny_frame_' + vid);
             if (frameEl && (frameEl.contentWindow === event.source || !window._bunnyWindows[vid])) {
               window._bunnyWindows[vid] = event.source;
+              if (window._bunnyPlayers[vid]) {
+                window._bunnyPlayers[vid].lastActiveTime = Date.now();
+              }
               break;
             }
           }
@@ -1015,6 +1056,12 @@
 
         // 2. Playback state events
         if (evt === 'play' || evt === 'pause' || evt === 'ended') {
+          for (var vid in window._bunnyPlayers) {
+            if (window._bunnyWindows[vid] === event.source) {
+              window._bunnyPlayers[vid].isPlaying = (evt === 'play');
+              window._bunnyPlayers[vid].lastActiveTime = Date.now();
+            }
+          }
           notifyBunnyFlutter({ event: evt });
           if (evt === 'ended') {
             for (var vid in window._bunnyPlayers) {
@@ -1222,6 +1269,7 @@
                       clearInterval(window._ytPollTimers[viewId]);
                     }
                     window._ytPollTimers[viewId] = setInterval(function() {
+                      if (document.hidden) return; // Do not poll while tab is hidden
                       try {
                         if (!player || typeof player.getCurrentTime !== 'function') {
                           clearInterval(window._ytPollTimers[viewId]);
