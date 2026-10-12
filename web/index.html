@@ -206,19 +206,20 @@
         }, 1200);
       }
 
-      // 6. Focus Loss / Window Blur Protection for Embedded Players
-      function pauseActivePlayersOnBlur() {
-        if (window._bunnyPlayers) {
-          for (var id in window._bunnyPlayers) {
+      // 6. Tab Switch / Visibility Protection for Embedded Players (Avoid pausing on simple iframe focus blur on touch devices)
+      function pauseActivePlayersOnHide() {
+        if (!document.hidden) return;
+        if (window._bunnyWindows) {
+          for (var id in window._bunnyWindows) {
             try {
-              if (window._bunnyPlayers[id] && typeof window._bunnyPlayers[id].pause === 'function') {
-                window._bunnyPlayers[id].pause();
+              if (window.bunnyPostMessage) {
+                window.bunnyPostMessage(id, 'pause');
               }
             } catch(err) {}
           }
         }
       }
-      window.addEventListener('blur', pauseActivePlayersOnBlur);
+      document.addEventListener('visibilitychange', pauseActivePlayersOnHide);
       // 7. Exam Session Protection Guard
       window.__edu_exam_in_progress = false;
       window.setExamInProgress = function(inProgress) {
@@ -858,6 +859,16 @@
           src += (src.indexOf('?') === -1 ? '?' : '&') + 'playerjs=true';
         }
 
+        // iPadOS / iOS / Safari native HLS stream compatibility (recommended by Bunny Stream)
+        if (src.indexOf('nativeHls=') === -1) {
+          src += '&nativeHls=safari';
+        }
+
+        // Inline video playback required for iPadOS / iOS mobile Safari
+        if (src.indexOf('playsinline=') === -1) {
+          src += '&playsinline=true';
+        }
+
         var iframe = document.createElement('iframe');
         iframe.id = 'bunny_frame_' + viewId;
 
@@ -873,10 +884,13 @@
         iframe.style.border = '0';
         iframe.style.display = 'block';
         iframe.style.pointerEvents = 'auto';
-        iframe.setAttribute('allow', 'accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen');
+        iframe.style.touchAction = 'auto';
+        iframe.setAttribute('allow', 'accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen; playsinline');
         iframe.setAttribute('allowfullscreen', 'true');
         iframe.setAttribute('webkitallowfullscreen', 'true');
         iframe.setAttribute('mozallowfullscreen', 'true');
+        iframe.setAttribute('playsinline', 'true');
+        iframe.setAttribute('webkit-playsinline', 'true');
         iframe.allowFullscreen = true;
 
         var playerState = {

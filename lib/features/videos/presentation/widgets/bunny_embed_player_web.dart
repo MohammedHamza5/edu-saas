@@ -271,8 +271,9 @@ class _BunnyEmbedPlayerWebState extends State<_BunnyEmbedPlayerWeb>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.inactive ||
-        state == AppLifecycleState.paused ||
+    // In Web, touching or focusing the iframe causes window blur / inactive state.
+    // Only pause if the user actually minimized or hid the tab/app.
+    if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.hidden) {
       if (_isPlaying) {
         pause();

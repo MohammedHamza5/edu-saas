@@ -199,15 +199,39 @@ Deno.serve(async (req: Request) => {
     }
 
     // ── 6. Group membership check (student / parent) ─────────────────────
-    if (caller.role !== "teacher" && groupId) {
+    if (caller.role !== "teacher") {
       let isAllowed = false;
 
-      if (caller.role === "student") {
+      // Collect all authorized group IDs for this content: direct group + content_groups
+      const targetGroupIds: string[] = [];
+      if (groupId) targetGroupIds.push(groupId);
+
+      if (video?.content_id) {
+        const { data: cgRows } = await admin
+          .from("content_groups")
+          .select("group_id")
+          .eq("content_id", video.content_id);
+
+        if (cgRows) {
+          for (const row of cgRows) {
+            if (row.group_id && !targetGroupIds.includes(row.group_id)) {
+              targetGroupIds.push(row.group_id);
+            }
+          }
+        }
+      }
+
+      // If content is global (not bound to any group), all active students in tenant can access
+      if (targetGroupIds.length === 0) {
+        isAllowed = true;
+      } else if (caller.role === "student") {
         const { data: membership } = await admin
           .from("group_members")
           .select("id")
           .eq("student_id", userData.user.id)
-          .eq("group_id", groupId)
+          .in("group_id", targetGroupIds)
+          .eq("status", "active")
+          .limit(1)
           .maybeSingle();
 
         isAllowed = !!membership;
@@ -223,7 +247,8 @@ Deno.serve(async (req: Request) => {
             .from("group_members")
             .select("id")
             .in("student_id", studentIds)
-            .eq("group_id", groupId)
+            .in("group_id", targetGroupIds)
+            .eq("status", "active")
             .limit(1);
 
           isAllowed = !!(memberships && memberships.length > 0);
@@ -247,7 +272,9 @@ Deno.serve(async (req: Request) => {
       `&autoplay=false` +
       `&preload=true` +
       `&responsive=true` +
-      `&captions=false`;
+      `&captions=false` +
+      `&nativeHls=safari` +
+      `&playsinline=true`;
 
     return json({ playback_url: playbackUrl, expires }, 200, origin);
   } catch {

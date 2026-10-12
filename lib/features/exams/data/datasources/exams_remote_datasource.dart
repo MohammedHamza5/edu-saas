@@ -430,6 +430,7 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
           )
         ''')
         .eq('content.status', 'published')
+        .inFilter('content.group_id', groupIds)
         .order('created_at', ascending: false)
         .range(page * pageSize, (page + 1) * pageSize - 1);
 
@@ -445,17 +446,11 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
         .inFilter('group_id', groupIds)
         .catchError((Object _) => <dynamic>[]);
 
-    final leFuture = _safeClient
-        .from('lesson_exams')
-        .select('exam_id')
-        .catchError((Object _) => <dynamic>[]);
-
     final parallelStudentRes =
-        await Future.wait([examsFuture, cgFuture, cFuture, leFuture]);
+        await Future.wait([examsFuture, cgFuture, cFuture]);
     final rawList = parallelStudentRes[0] as List<dynamic>;
     final cgRes = parallelStudentRes[1] as List<dynamic>;
     final cRes = parallelStudentRes[2] as List<dynamic>;
-    final leRes = parallelStudentRes[3] as List<dynamic>;
 
     final lessonExamIds = <String>{};
     for (final row in cgRes) {
@@ -471,11 +466,6 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
       final pId = row['prerequisite_exam_id']?.toString();
       if (aId != null && aId.isNotEmpty) lessonExamIds.add(aId);
       if (pId != null && pId.isNotEmpty) lessonExamIds.add(pId);
-    }
-    for (final row in leRes) {
-      if (row is! Map) continue;
-      final eId = row['exam_id']?.toString();
-      if (eId != null && eId.isNotEmpty) lessonExamIds.add(eId);
     }
     if (rawList.isEmpty) return [];
 
