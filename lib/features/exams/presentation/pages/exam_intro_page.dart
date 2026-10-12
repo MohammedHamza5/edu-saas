@@ -10,6 +10,7 @@ import '../cubit/exams_cubit.dart';
 import '../cubit/exams_state.dart';
 import 'exam_review_page.dart';
 import 'exam_taking_page.dart';
+import '../../../content/domain/entities/lesson_assignment_entity.dart';
 import '../utils/exam_asset_preloader.dart';
 
 class ExamIntroPage extends StatelessWidget {
@@ -17,11 +18,17 @@ class ExamIntroPage extends StatelessWidget {
 
   /// امتحان مرتبط بمحاضرة: لا نافذة زمنية ولا تنبيه تأخير.
   final bool isLectureExam;
+  final LessonAssignmentEntity? nextLesson;
+  final int? nextLessonIndex;
+  final int? totalLessonsCount;
 
   const ExamIntroPage({
     super.key,
     required this.exam,
     this.isLectureExam = false,
+    this.nextLesson,
+    this.nextLessonIndex,
+    this.totalLessonsCount,
   });
 
   String? _lateText(BuildContext context) {
@@ -327,7 +334,14 @@ class ExamIntroPage extends StatelessWidget {
                                     MaterialPageRoute<void>(
                                       builder: (_) => BlocProvider.value(
                                         value: cubit,
-                                        child: const ExamTakingPage(),
+                                        child: ExamTakingPage(
+                                          isLectureExam: isLectureExam ||
+                                              exam.isLectureExam ||
+                                              exam.isLinkedToLesson,
+                                          nextLesson: nextLesson,
+                                          nextLessonIndex: nextLessonIndex,
+                                          totalLessonsCount: totalLessonsCount,
+                                        ),
                                       ),
                                     ),
                                   );

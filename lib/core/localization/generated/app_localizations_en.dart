@@ -8471,4 +8471,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get optimizedWebpBadge => 'WebP Fast Load';
+
+  @override
+  String get goToNextLectureAction => 'Enter Next Lecture';
+
+  @override
+  String get tryAgainExamAction => 'Try Again';
+
+  @override
+  String get backToLecturesList => 'Back to Lectures';
+
+  @override
+  String get quizFailedEncouragement =>
+      'You haven\'t reached the passing score yet. You can review the lecture and try again anytime!';
+
+  @override
+  String get allLecturesCompletedCongratulations =>
+      'Congratulations! You have completed all course lectures 🎉';
 }

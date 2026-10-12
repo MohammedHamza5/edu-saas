@@ -257,11 +257,29 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
         final exam = result.dataOrNull!;
         final examsCubit = InjectionContainer.createExamsCubit();
         if (!mounted) return;
+        LessonAssignmentEntity? nextLesson;
+        int? nextLessonIndex;
+        if (_courseLessons.isNotEmpty) {
+          final cIdx = _courseLessons.indexWhere(
+            (l) => l.contentId == widget.videoId,
+          );
+          if (cIdx >= 0 && cIdx < _courseLessons.length - 1) {
+            nextLesson = _courseLessons[cIdx + 1];
+            nextLessonIndex = cIdx + 2;
+          }
+        }
+
         await Navigator.of(context).push<void>(
           MaterialPageRoute<void>(
             builder: (_) => BlocProvider<ExamsCubit>.value(
               value: examsCubit,
-              child: ExamIntroPage(exam: exam, isLectureExam: true),
+              child: ExamIntroPage(
+                exam: exam,
+                isLectureExam: true,
+                nextLesson: nextLesson,
+                nextLessonIndex: nextLessonIndex,
+                totalLessonsCount: _courseLessons.length,
+              ),
             ),
           ),
         );

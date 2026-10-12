@@ -17,6 +17,8 @@ import 'package:edu_saas/features/exams/presentation/pages/student_exams_page.da
 import 'package:edu_saas/features/exams/presentation/pages/teacher_exams_page.dart';
 import 'package:edu_saas/features/exams/presentation/widgets/exam_card.dart';
 import 'package:edu_saas/features/exams/presentation/widgets/question_option_tile.dart';
+import 'package:edu_saas/features/content/domain/entities/content_entity.dart';
+import 'package:edu_saas/features/content/domain/entities/lesson_assignment_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -1017,6 +1019,94 @@ void main() {
       expect(find.text('تهانينا! لقد اجتزت الامتحان بنجاح'), findsOneWidget);
       expect(find.text('80'), findsOneWidget);
     });
+
+    testWidgets(
+      'ExamResultPage renders Enter Next Lecture button when lecture exam is passed',
+      (tester) async {
+        final exam = FakeExamsRepository._sampleExam().copyWith(
+          isLectureExam: true,
+          groupId: 'grp-1',
+        );
+        final attempt = ExamAttemptEntity(
+          id: 'att-passed',
+          examId: exam.id,
+          examVersionId: 'v-1',
+          studentId: 's-1',
+          startedAt: DateTime.now().subtract(const Duration(minutes: 10)),
+          submittedAt: DateTime.now(),
+          score: 90,
+          percentage: 90.0,
+          status: AttemptStatus.submitted,
+        );
+        const nextLesson = LessonAssignmentEntity(
+          contentGroupId: 'cg-2',
+          contentId: 'c-2',
+          groupId: 'grp-1',
+          title: 'المحاضرة التالية',
+          type: ContentType.video,
+          sortOrder: 2,
+        );
+
+        await tester.pumpWidget(
+          createTestApp(
+            child: BlocProvider<ExamsCubit>.value(
+              value: examsCubit,
+              child: ExamResultPage(
+                exam: exam,
+                attempt: attempt,
+                isLectureExam: true,
+                nextLesson: nextLesson,
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        expect(find.text('الدخول للمحاضرة التالية'), findsOneWidget);
+        expect(find.text('العودة لشاشة المحاضرات'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'ExamResultPage renders Try Again button when lecture exam is not passed',
+      (tester) async {
+        final exam = FakeExamsRepository._sampleExam().copyWith(
+          isLectureExam: true,
+          groupId: 'grp-1',
+          passingScore: 70,
+        );
+        final failedAttempt = ExamAttemptEntity(
+          id: 'att-failed',
+          examId: exam.id,
+          examVersionId: 'v-1',
+          studentId: 's-1',
+          startedAt: DateTime.now().subtract(const Duration(minutes: 10)),
+          submittedAt: DateTime.now(),
+          score: 50,
+          percentage: 50.0,
+          status: AttemptStatus.submitted,
+        );
+
+        await tester.pumpWidget(
+          createTestApp(
+            child: BlocProvider<ExamsCubit>.value(
+              value: examsCubit,
+              child: ExamResultPage(
+                exam: exam,
+                attempt: failedAttempt,
+                isLectureExam: true,
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        expect(find.text('محاولة مرة أخرى'), findsOneWidget);
+        expect(find.text('العودة لشاشة المحاضرات'), findsOneWidget);
+      },
+    );
 
     testWidgets('TeacherExamsPage renders empty state when no exams exist', (
       tester,

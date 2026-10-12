@@ -14,6 +14,9 @@ external JSObject _createYouTubePlayer(
   JSNumber startSeconds,
 );
 
+@JS('destroyYouTubePlayer')
+external void _destroyYouTubePlayer(JSString viewId);
+
 @JS('youtubePostMessage')
 external void _youtubePostMessage(
   JSString viewId,
@@ -299,6 +302,9 @@ class _YouTubeEmbedPlayerWebState extends State<_YouTubeEmbedPlayerWeb> {
   @override
   void dispose() {
     _watchHeartbeatTimer?.cancel();
+    try {
+      _destroyYouTubePlayer(_viewId.toJS);
+    } catch (_) {}
     try {
       _onYouTubePlayerMessage = null;
     } catch (_) {}

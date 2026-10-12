@@ -3111,5 +3111,15 @@
     }
   },
   "optimizedWebpBadge": "WebP فائق السرعة",
-  "@optimizedWebpBadge": {}
+  "@optimizedWebpBadge": {},
+  "goToNextLectureAction": "الدخول للمحاضرة التالية",
+  "@goToNextLectureAction": {},
+  "tryAgainExamAction": "محاولة مرة أخرى",
+  "@tryAgainExamAction": {},
+  "backToLecturesList": "العودة لشاشة المحاضرات",
+  "@backToLecturesList": {},
+  "quizFailedEncouragement": "لم تصل لدرجة الاجتياز المطلوبة بعد. يمكنك مراجعة المحاضرة وإعادة المحاولة في أي وقت!",
+  "@quizFailedEncouragement": {},
+  "allLecturesCompletedCongratulations": "تهانينا! لقد أتممت جميع محاضرات الدورة بنجاح 🎉",
+  "@allLecturesCompletedCongratulations": {}
 }

@@ -28,53 +28,90 @@ BEGIN
 
     -- 2. Fast single-pass execution with zero RLS recursion
     WITH matched_exams AS (
-        SELECT e.*
+        SELECT 
+            e.id,
+            e.content_id,
+            e.tenant_id,
+            e.duration_minutes,
+            e.max_score,
+            e.passing_score,
+            e.shuffle_questions,
+            e.show_result,
+            e.allow_retake,
+            e.start_at,
+            e.end_at,
+            e.created_at,
+            e.updated_at,
+            e.folder_id,
+            c.title AS exam_title,
+            c.group_id AS content_group_id,
+            c.description AS content_description,
+            c.status AS content_status
         FROM public.exams e
         JOIN public.content c ON c.id = e.content_id
         WHERE c.group_id = p_group_id
           AND e.tenant_id = v_tenant_id
           AND c.status != 'archived'
         UNION
-        SELECT e.*
+        SELECT 
+            e.id,
+            e.content_id,
+            e.tenant_id,
+            e.duration_minutes,
+            e.max_score,
+            e.passing_score,
+            e.shuffle_questions,
+            e.show_result,
+            e.allow_retake,
+            e.start_at,
+            e.end_at,
+            e.created_at,
+            e.updated_at,
+            e.folder_id,
+            c.title AS exam_title,
+            c.group_id AS content_group_id,
+            c.description AS content_description,
+            c.status AS content_status
         FROM public.exams e
+        JOIN public.content c ON c.id = e.content_id
         JOIN public.content_groups cg ON cg.associated_exam_id = e.id
         WHERE cg.group_id = p_group_id
           AND e.tenant_id = v_tenant_id
+          AND c.status != 'archived'
         ORDER BY created_at DESC
         LIMIT p_page_size OFFSET (p_page * p_page_size)
     ),
     exam_stats AS (
         SELECT 
             me.id AS exam_id,
-            COALESCE(count(DISTINCT ea.id), 0) AS attempts_count
+            count(ea.id)::int AS attempts_count
         FROM matched_exams me
         LEFT JOIN public.exam_attempts ea ON ea.exam_id = me.id
         GROUP BY me.id
     ),
     exam_versions_agg AS (
         SELECT 
-            me.id AS exam_id,
-            COALESCE(
-                jsonb_agg(
-                    jsonb_build_object(
-                        'id', ev.id,
-                        'exam_id', ev.exam_id,
-                        'version_number', ev.version_number,
-                        'status', ev.status,
-                        'created_at', ev.created_at,
-                        'published_at', ev.published_at,
-                        'exam_questions', (
-                            SELECT jsonb_build_array(jsonb_build_object('count', count(*)))
+            ev.exam_id,
+            jsonb_agg(
+                jsonb_build_object(
+                    'id', ev.id,
+                    'exam_id', ev.exam_id,
+                    'version_number', ev.version_number,
+                    'status', ev.status,
+                    'created_at', ev.created_at,
+                    'published_at', ev.published_at,
+                    'exam_questions', jsonb_build_array(
+                        jsonb_build_object('count', (
+                            SELECT count(*)::int
                             FROM public.exam_questions eq
                             WHERE eq.exam_version_id = ev.id
-                        )
-                    ) ORDER BY ev.version_number DESC
-                ) FILTER (WHERE ev.id IS NOT NULL),
-                '[]'::jsonb
+                        ))
+                    )
+                ) ORDER BY ev.version_number DESC
             ) AS versions_json
-        FROM matched_exams me
-        LEFT JOIN public.exam_versions ev ON ev.exam_id = me.id
-        GROUP BY me.id
+        FROM public.exam_versions ev
+        WHERE ev.exam_id IN (SELECT id FROM matched_exams)
+        GROUP BY ev.exam_id
     )
     SELECT COALESCE(
         jsonb_agg(
@@ -92,24 +129,20 @@ BEGIN
                 'end_at', me.end_at,
                 'created_at', me.created_at,
                 'updated_at', me.updated_at,
-                'title', me.title,
+                'title', me.exam_title,
                 'folder_id', me.folder_id,
                 'folder', (
                     SELECT jsonb_build_object('id', ef.id, 'name', ef.name, 'color', ef.color, 'icon', ef.icon)
                     FROM public.exam_folders ef
                     WHERE ef.id = me.folder_id
                 ),
-                'content', (
-                    SELECT jsonb_build_object(
-                        'id', c.id,
-                        'group_id', c.group_id,
-                        'title', c.title,
-                        'description', c.description,
-                        'status', c.status,
-                        'groups', (SELECT jsonb_build_object('name', g.name) FROM public.groups g WHERE g.id = c.group_id)
-                    )
-                    FROM public.content c
-                    WHERE c.id = me.content_id
+                'content', jsonb_build_object(
+                    'id', me.content_id,
+                    'group_id', me.content_group_id,
+                    'title', me.exam_title,
+                    'description', me.content_description,
+                    'status', me.content_status,
+                    'groups', (SELECT jsonb_build_object('name', g.name) FROM public.groups g WHERE g.id = me.content_group_id)
                 ),
                 'exam_versions', COALESCE(eva.versions_json, '[]'::jsonb),
                 'attempts_count', COALESCE(es.attempts_count, 0),

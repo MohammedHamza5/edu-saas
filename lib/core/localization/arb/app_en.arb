@@ -9064,5 +9064,15 @@
     }
   },
   "optimizedWebpBadge": "WebP Fast Load",
-  "@optimizedWebpBadge": {}
+  "@optimizedWebpBadge": {},
+  "goToNextLectureAction": "Enter Next Lecture",
+  "@goToNextLectureAction": {},
+  "tryAgainExamAction": "Try Again",
+  "@tryAgainExamAction": {},
+  "backToLecturesList": "Back to Lectures",
+  "@backToLecturesList": {},
+  "quizFailedEncouragement": "You haven't reached the passing score yet. You can review the lecture and try again anytime!",
+  "@quizFailedEncouragement": {},
+  "allLecturesCompletedCongratulations": "Congratulations! You have completed all course lectures 🎉",
+  "@allLecturesCompletedCongratulations": {}
 }

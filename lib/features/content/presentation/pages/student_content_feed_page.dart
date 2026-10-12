@@ -22,6 +22,9 @@ import '../../domain/entities/content_entity.dart';
 import '../../domain/entities/file_attachment_entity.dart';
 import '../../domain/entities/lesson_assignment_entity.dart';
 import '../../domain/repositories/content_repository.dart';
+import '../../../../core/utils/cache_manager.dart';
+import '../../../exams/presentation/cubit/exams_cubit.dart';
+import '../../../exams/presentation/pages/exam_intro_page.dart';
 import '../cubit/course_progress_cubit.dart';
 import '../cubit/course_progress_state.dart';
 import '../widgets/material_viewer_sheet.dart';
@@ -287,16 +290,87 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
   }
 
   Future<void> _handleTakeQuiz(LessonAssignmentEntity item) async {
-    if (!item.hasLessonExam) return;
-    final nav = Navigator.of(context);
-    await context.push('${AppRoutes.studentExams}?examId=${item.lessonExamId}');
-    if (mounted && nav.mounted) {
+    if (!item.hasLessonExam || item.lessonExamId == null) return;
+    try {
       unawaited(
-        nav.context.read<CourseProgressCubit>().loadCourseProgress(
-          _activeGroupId,
-          studentId: _currentUserId,
+        showDialog<void>(
+          context: context,
+          barrierDismissible: false,
+          builder: (_) => const Center(child: CircularProgressIndicator()),
         ),
       );
+      final result = await InjectionContainer.examsRepository.getExamDetails(
+        item.lessonExamId!,
+      );
+      if (mounted) Navigator.of(context).pop();
+
+      if (result.isSuccess && result.dataOrNull != null) {
+        final exam = result.dataOrNull!;
+        final examsCubit = InjectionContainer.createExamsCubit();
+        if (!mounted) return;
+
+        LessonAssignmentEntity? nextLesson;
+        int? nextLessonIndex;
+        int? totalLessons;
+
+        final state = context.read<CourseProgressCubit>().state;
+        if (state is CourseProgressLoaded) {
+          final allLessons = state.lessons;
+          totalLessons = allLessons.length;
+          final cIdx =
+              allLessons.indexWhere((l) => l.contentId == item.contentId);
+          if (cIdx >= 0 && cIdx < allLessons.length - 1) {
+            nextLesson = allLessons[cIdx + 1];
+            nextLessonIndex = cIdx + 2;
+          }
+        }
+
+        await Navigator.of(context).push<void>(
+          MaterialPageRoute<void>(
+            builder: (_) => BlocProvider<ExamsCubit>.value(
+              value: examsCubit,
+              child: ExamIntroPage(
+                exam: exam,
+                isLectureExam: true,
+                nextLesson: nextLesson,
+                nextLessonIndex: nextLessonIndex,
+                totalLessonsCount: totalLessons,
+              ),
+            ),
+          ),
+        );
+        if (mounted) {
+          AppCache.content.clear();
+          AppCache.exams.clear();
+          unawaited(
+            context.read<CourseProgressCubit>().loadCourseProgress(
+              _activeGroupId,
+              studentId: _currentUserId,
+              forceRefresh: true,
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: AppColors.error,
+              content: Text(
+                result.failureOrNull?.message ?? context.l10n.errorOccurred,
+              ),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: AppColors.error,
+            content: Text(e.toString()),
+          ),
+        );
+      }
     }
   }
 

@@ -928,6 +928,31 @@
         if (targetWin) {
           sendBunnyMessage(targetWin, method, value);
         }
+      window.destroyBunnyPlayer = function(viewId) {
+        if (!viewId) return;
+        if (window._bunnyPollTimers && window._bunnyPollTimers[viewId]) {
+          clearInterval(window._bunnyPollTimers[viewId]);
+          delete window._bunnyPollTimers[viewId];
+        }
+        var targetWin = window._bunnyWindows && window._bunnyWindows[viewId];
+        if (targetWin) {
+          try {
+            sendBunnyMessage(targetWin, 'pause');
+          } catch (_) {}
+          delete window._bunnyWindows[viewId];
+        }
+        if (window._bunnyPlayers && window._bunnyPlayers[viewId]) {
+          delete window._bunnyPlayers[viewId];
+        }
+        var el = document.getElementById('bunny_frame_' + viewId);
+        if (el) {
+          try {
+            el.src = 'about:blank';
+            if (el.parentNode) {
+              el.parentNode.removeChild(el);
+            }
+          } catch (e) {}
+        }
       };
 
       // Global Bunny Player.js Message Listener
@@ -1260,6 +1285,40 @@
           }
         } catch (e) {
           console.warn('[YouTubeBridge] Direct postMessage error:', e);
+        }
+      };
+
+      window.destroyYouTubePlayer = function(viewId) {
+        if (!viewId) return;
+        if (window._ytPollTimers && window._ytPollTimers[viewId]) {
+          clearInterval(window._ytPollTimers[viewId]);
+          delete window._ytPollTimers[viewId];
+        }
+        var player = window._ytPlayers && window._ytPlayers[viewId];
+        if (player) {
+          try {
+            if (typeof player.destroy === 'function') {
+              player.destroy();
+            } else if (typeof player.stopVideo === 'function') {
+              player.stopVideo();
+            }
+          } catch (e) {}
+          delete window._ytPlayers[viewId];
+        }
+        var iframe = window._ytFrames && window._ytFrames[viewId];
+        if (!iframe) {
+          iframe = document.getElementById('yt_frame_' + viewId);
+        }
+        if (iframe) {
+          try {
+            iframe.src = 'about:blank';
+            if (iframe.parentNode) {
+              iframe.parentNode.removeChild(iframe);
+            }
+          } catch (e) {}
+          if (window._ytFrames) {
+            delete window._ytFrames[viewId];
+          }
         }
       };
 

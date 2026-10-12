@@ -12,13 +12,25 @@ import '../widgets/exam_image_viewer.dart';
 import '../widgets/question_option_tile.dart';
 import '../widgets/sat_exam_tools_sheet.dart';
 import 'exam_result_page.dart';
+import '../../../content/domain/entities/lesson_assignment_entity.dart';
 import '../../../question_bank/presentation/widgets/question_display_widgets.dart';
 import '../../../../core/widgets/forensic_watermark_overlay.dart';
 import '../../../../core/utils/exam_security_util.dart';
 import '../utils/exam_asset_preloader.dart';
 
 class ExamTakingPage extends StatefulWidget {
-  const ExamTakingPage({super.key});
+  final bool isLectureExam;
+  final LessonAssignmentEntity? nextLesson;
+  final int? nextLessonIndex;
+  final int? totalLessonsCount;
+
+  const ExamTakingPage({
+    super.key,
+    this.isLectureExam = false,
+    this.nextLesson,
+    this.nextLessonIndex,
+    this.totalLessonsCount,
+  });
 
   @override
   State<ExamTakingPage> createState() => _ExamTakingPageState();
@@ -168,6 +180,12 @@ class _ExamTakingPageState extends State<ExamTakingPage>
                   child: ExamResultPage(
                     exam: state.exam,
                     attempt: state.submitResult!,
+                    isLectureExam: widget.isLectureExam ||
+                        state.exam.isLectureExam ||
+                        state.exam.isLinkedToLesson,
+                    nextLesson: widget.nextLesson,
+                    nextLessonIndex: widget.nextLessonIndex,
+                    totalLessonsCount: widget.totalLessonsCount,
                   ),
                 ),
               ),

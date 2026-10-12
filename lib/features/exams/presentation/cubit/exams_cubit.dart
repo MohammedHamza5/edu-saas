@@ -723,10 +723,15 @@ class ExamsCubit extends Cubit<ExamsState> {
 
     // 1. Fetch full details to ensure we have questions
     final detailsRes = await _repository.getExamDetails(exam.id);
-    final fullExam = detailsRes.when(
-      onSuccess: (e) => e,
-      onFailure: (_) => exam,
-    );
+    final fullExam = detailsRes
+        .when(
+          onSuccess: (e) => e,
+          onFailure: (_) => exam,
+        )
+        .copyWith(
+          isLectureExam:
+              isLectureExam || exam.isLectureExam || exam.isLinkedToLesson,
+        );
 
     // 2. Start attempt via RPC
     final attemptRes = await _repository.startExam(exam.id);

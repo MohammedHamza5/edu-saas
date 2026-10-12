@@ -9,6 +9,9 @@ import '../../../../core/services/student_activity_tracker.dart';
 @JS('createBunnyPlayer')
 external JSObject _createBunnyPlayer(JSString src, JSString viewId);
 
+@JS('destroyBunnyPlayer')
+external void _destroyBunnyPlayer(JSString viewId);
+
 @JS('bunnyPostMessage')
 external void _bunnyPostMessage(JSString viewId, JSString method, JSAny? value);
 
@@ -281,6 +284,9 @@ class _BunnyEmbedPlayerWebState extends State<_BunnyEmbedPlayerWeb>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _watchHeartbeatTimer?.cancel();
+    try {
+      _destroyBunnyPlayer(_viewId.toJS);
+    } catch (_) {}
     try {
       _onBunnyPlayerMessage = null;
     } catch (_) {}
