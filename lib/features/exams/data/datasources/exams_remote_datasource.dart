@@ -125,9 +125,10 @@ abstract interface class ExamsRemoteDataSource {
     required String studentId,
     required String parentPhone,
   });
-  Future<List<ExamFolderModel>> getExamFolders();
+  Future<List<ExamFolderModel>> getExamFolders({String? groupId});
   Future<ExamFolderModel> createExamFolder({
     required String name,
+    String? groupId,
     String? color,
     String? icon,
     String? description,
@@ -1823,11 +1824,17 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
   }
 
   @override
-  Future<List<ExamFolderModel>> getExamFolders() async {
+  Future<List<ExamFolderModel>> getExamFolders({String? groupId}) async {
     try {
-      final response = await _safeClient
+      var query = _safeClient
           .from('exam_folders')
-          .select('*, exams(count)')
+          .select('*, exams(count)');
+
+      if (groupId != null && groupId.isNotEmpty) {
+        query = query.or('group_id.eq.$groupId,group_id.is.null');
+      }
+
+      final response = await query
           .order('sort_order', ascending: true)
           .order('created_at', ascending: true);
 
@@ -1844,6 +1851,7 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
   @override
   Future<ExamFolderModel> createExamFolder({
     required String name,
+    String? groupId,
     String? color,
     String? icon,
     String? description,
@@ -1863,6 +1871,7 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
 
       final insertPayload = {
         'tenant_id': tenantId,
+        if (groupId != null && groupId.isNotEmpty) 'group_id': groupId,
         'name': name.trim(),
         if (color != null) 'color': color,
         if (icon != null) 'icon': icon,

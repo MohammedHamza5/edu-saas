@@ -420,6 +420,7 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
       onSave: ({required name, color, description}) async {
         final success = await cubit.createFolder(
           name: name,
+          groupId: _selectedGroupId,
           color: color ?? '#5B4FE0',
           description: description,
         );

@@ -11,9 +11,9 @@ class ExamFoldersBar extends StatelessWidget {
   final int totalExamsCount;
   final int uncategorizedCount;
   final ValueChanged<String?> onSelectFolder;
-  final VoidCallback onCreateFolder;
-  final ValueChanged<ExamFolderEntity> onEditFolder;
-  final ValueChanged<ExamFolderEntity> onDeleteFolder;
+  final VoidCallback? onCreateFolder;
+  final ValueChanged<ExamFolderEntity>? onEditFolder;
+  final ValueChanged<ExamFolderEntity>? onDeleteFolder;
 
   const ExamFoldersBar({
     super.key,
@@ -22,9 +22,9 @@ class ExamFoldersBar extends StatelessWidget {
     required this.totalExamsCount,
     required this.uncategorizedCount,
     required this.onSelectFolder,
-    required this.onCreateFolder,
-    required this.onEditFolder,
-    required this.onDeleteFolder,
+    this.onCreateFolder,
+    this.onEditFolder,
+    this.onDeleteFolder,
   });
 
   @override
@@ -118,54 +118,58 @@ class ExamFoldersBar extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       // Folder menu
-                      PopupMenuButton<String>(
-                        icon: Icon(
-                          Icons.more_vert,
-                          size: 14,
-                          color: isSelected ? fColor : AppColors.textSecondary,
+                      if (onEditFolder != null || onDeleteFolder != null) ...[
+                        PopupMenuButton<String>(
+                          icon: Icon(
+                            Icons.more_vert,
+                            size: 14,
+                            color: isSelected ? fColor : AppColors.textSecondary,
+                          ),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                          tooltip: '',
+                          itemBuilder: (ctx) => [
+                            if (onEditFolder != null)
+                              PopupMenuItem(
+                                value: 'edit',
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.edit_outlined, size: 16),
+                                    const SizedBox(width: 8),
+                                    Text(ctx.l10n.editFolderAction),
+                                  ],
+                                ),
+                              ),
+                            if (onDeleteFolder != null)
+                              PopupMenuItem(
+                                value: 'delete',
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.delete_outline,
+                                      size: 16,
+                                      color: AppColors.error,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      ctx.l10n.deleteFolderAction,
+                                      style: const TextStyle(
+                                        color: AppColors.error,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          ],
+                          onSelected: (val) {
+                            if (val == 'edit' && onEditFolder != null) {
+                              onEditFolder!(folder);
+                            } else if (val == 'delete' && onDeleteFolder != null) {
+                              onDeleteFolder!(folder);
+                            }
+                          },
                         ),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                        tooltip: '',
-                        itemBuilder: (ctx) => [
-                          PopupMenuItem(
-                            value: 'edit',
-                            child: Row(
-                              children: [
-                                const Icon(Icons.edit_outlined, size: 16),
-                                const SizedBox(width: 8),
-                                Text(ctx.l10n.editFolderAction),
-                              ],
-                            ),
-                          ),
-                          PopupMenuItem(
-                            value: 'delete',
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  Icons.delete_outline,
-                                  size: 16,
-                                  color: AppColors.error,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  ctx.l10n.deleteFolderAction,
-                                  style: const TextStyle(
-                                    color: AppColors.error,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                        onSelected: (val) {
-                          if (val == 'edit') {
-                            onEditFolder(folder);
-                          } else if (val == 'delete') {
-                            onDeleteFolder(folder);
-                          }
-                        },
-                      ),
+                      ],
                     ],
                   ),
                 ),
@@ -187,29 +191,30 @@ class ExamFoldersBar extends StatelessWidget {
           ],
 
           // 4. "New Folder" action chip
-          ActionChip(
-            avatar: const Icon(
-              Icons.add_rounded,
-              size: 16,
-              color: AppColors.primary,
-            ),
-            label: Text(
-              context.l10n.newFolderAction,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
+          if (onCreateFolder != null)
+            ActionChip(
+              avatar: const Icon(
+                Icons.add_rounded,
+                size: 16,
                 color: AppColors.primary,
               ),
+              label: Text(
+                context.l10n.newFolderAction,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary,
+                ),
+              ),
+              backgroundColor: AppColors.primary.withValues(alpha: 0.08),
+              side: BorderSide(
+                color: AppColors.primary.withValues(alpha: 0.3),
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+              ),
+              onPressed: onCreateFolder,
             ),
-            backgroundColor: AppColors.primary.withValues(alpha: 0.08),
-            side: BorderSide(
-              color: AppColors.primary.withValues(alpha: 0.3),
-            ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-            ),
-            onPressed: onCreateFolder,
-          ),
         ],
       ),
     );

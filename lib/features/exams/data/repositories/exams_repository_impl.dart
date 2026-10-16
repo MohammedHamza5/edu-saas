@@ -575,9 +575,9 @@ class ExamsRepositoryImpl implements ExamsRepository {
   }
 
   @override
-  Future<Result<List<ExamFolderEntity>>> getExamFolders() async {
+  Future<Result<List<ExamFolderEntity>>> getExamFolders({String? groupId}) async {
     try {
-      final folders = await _remoteDataSource.getExamFolders();
+      final folders = await _remoteDataSource.getExamFolders(groupId: groupId);
       return Success(folders);
     } on PostgrestException catch (e) {
       return FailureResult(ServerFailure(e.message, code: e.code));
@@ -591,6 +591,7 @@ class ExamsRepositoryImpl implements ExamsRepository {
   @override
   Future<Result<ExamFolderEntity>> createExamFolder({
     required String name,
+    String? groupId,
     String? color,
     String? icon,
     String? description,
@@ -598,6 +599,7 @@ class ExamsRepositoryImpl implements ExamsRepository {
     try {
       final folder = await _remoteDataSource.createExamFolder(
         name: name,
+        groupId: groupId,
         color: color,
         icon: icon,
         description: description,

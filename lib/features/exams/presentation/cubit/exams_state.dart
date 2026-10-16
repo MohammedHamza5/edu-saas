@@ -136,6 +136,8 @@ final class StudentExamsLoaded extends ExamsState {
   final bool hasMore;
   final bool isLoadingMore;
   final String? message;
+  final List<ExamFolderEntity> folders;
+  final String? selectedFolderId;
 
   const StudentExamsLoaded({
     required this.exams,
@@ -143,7 +145,19 @@ final class StudentExamsLoaded extends ExamsState {
     this.hasMore = true,
     this.isLoadingMore = false,
     this.message,
+    this.folders = const [],
+    this.selectedFolderId,
   });
+
+  List<ExamEntity> get filteredExams {
+    if (selectedFolderId == null) {
+      return exams;
+    }
+    if (selectedFolderId == 'uncategorized') {
+      return exams.where((e) => e.folderId == null || e.folderId!.isEmpty).toList();
+    }
+    return exams.where((e) => e.folderId == selectedFolderId).toList();
+  }
 
   StudentExamsLoaded copyWith({
     List<ExamEntity>? exams,
@@ -151,6 +165,9 @@ final class StudentExamsLoaded extends ExamsState {
     bool? hasMore,
     bool? isLoadingMore,
     String? message,
+    List<ExamFolderEntity>? folders,
+    String? selectedFolderId,
+    bool clearSelectedFolder = false,
   }) {
     return StudentExamsLoaded(
       exams: exams ?? this.exams,
@@ -158,6 +175,10 @@ final class StudentExamsLoaded extends ExamsState {
       hasMore: hasMore ?? this.hasMore,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
       message: message,
+      folders: folders ?? this.folders,
+      selectedFolderId: clearSelectedFolder
+          ? null
+          : (selectedFolderId ?? this.selectedFolderId),
     );
   }
 
@@ -168,6 +189,8 @@ final class StudentExamsLoaded extends ExamsState {
     hasMore,
     isLoadingMore,
     message,
+    folders,
+    selectedFolderId,
   ];
 }
 

@@ -67,7 +67,7 @@ class ExamsCubit extends Cubit<ExamsState> {
       emit(const ExamsLoading());
     }
 
-    final foldersFuture = _repository.getExamFolders();
+    final foldersFuture = _repository.getExamFolders(groupId: groupId);
     final examsFuture = _repository.getGroupExams(
       groupId,
       page: 0,
@@ -720,9 +720,11 @@ class ExamsCubit extends Cubit<ExamsState> {
       if (cached.isEmpty) {
         emit(const ExamsEmpty(message: 'لا توجد امتحانات متاحة حالياً'));
       } else {
+        final cachedFolders = _extractFoldersFromExams(cached);
         emit(
           StudentExamsLoaded(
             exams: cached,
+            folders: cachedFolders,
             hasMore: cached.length >= _pageSize,
           ),
         );
@@ -749,9 +751,14 @@ class ExamsCubit extends Cubit<ExamsState> {
         if (exams.isEmpty) {
           emit(const ExamsEmpty(message: 'لا توجد امتحانات متاحة حالياً'));
         } else {
+          final folders = _extractFoldersFromExams(exams);
           emit(
             StudentExamsLoaded(
               exams: exams,
+              folders: folders,
+              selectedFolderId: (state is StudentExamsLoaded)
+                  ? (state as StudentExamsLoaded).selectedFolderId
+                  : null,
               hasMore: exams.length == _pageSize,
               isLoadingMore: false,
             ),
@@ -765,6 +772,36 @@ class ExamsCubit extends Cubit<ExamsState> {
         }
       },
     );
+  }
+
+  /// Extracts unique exam folders with accurate exam counts from student accessible exams
+  List<ExamFolderEntity> _extractFoldersFromExams(List<ExamEntity> exams) {
+    final Map<String, ExamFolderEntity> folderMap = {};
+    for (final exam in exams) {
+      if (exam.folderId != null && exam.folderId!.trim().isNotEmpty) {
+        final fid = exam.folderId!.trim();
+        if (!folderMap.containsKey(fid)) {
+          folderMap[fid] = ExamFolderEntity(
+            id: fid,
+            tenantId: exam.tenantId,
+            groupId: exam.groupId,
+            name: exam.folderName ?? '',
+            color: exam.folderColor ?? '#5B4FE0',
+            examCount: 1,
+            createdAt: exam.createdAt,
+            updatedAt: exam.updatedAt,
+          );
+        } else {
+          final existing = folderMap[fid]!;
+          folderMap[fid] = existing.copyWith(
+            examCount: existing.examCount + 1,
+          );
+        }
+      }
+    }
+    final list = folderMap.values.toList();
+    list.sort((a, b) => a.name.compareTo(b.name));
+    return list;
   }
 
   /// Loads next page of student exams on scroll (Infinite Scroll)
@@ -787,10 +824,12 @@ class ExamsCubit extends Cubit<ExamsState> {
       onSuccess: (newExams) {
         _studentPage = nextPage;
         final allExams = [...currentState.exams, ...newExams];
+        final folders = _extractFoldersFromExams(allExams);
         AppCache.exams.put(AppCache.userKey('student_exams'), allExams);
         emit(
           currentState.copyWith(
             exams: allExams,
+            folders: folders,
             hasMore: newExams.length == _pageSize,
             isLoadingMore: false,
           ),
@@ -1038,18 +1077,28 @@ class ExamsCubit extends Cubit<ExamsState> {
 
   void selectFolder(String? folderId) {
     final currentState = state;
-    if (currentState is! TeacherExamsLoaded) return;
-    if (folderId == null) {
-      emit(currentState.copyWith(clearSelectedFolder: true));
-    } else {
-      emit(currentState.copyWith(selectedFolderId: folderId));
+    if (currentState is TeacherExamsLoaded) {
+      if (folderId == null) {
+        emit(currentState.copyWith(clearSelectedFolder: true));
+      } else {
+        emit(currentState.copyWith(selectedFolderId: folderId));
+      }
+    } else if (currentState is StudentExamsLoaded) {
+      if (folderId == null) {
+        emit(currentState.copyWith(clearSelectedFolder: true));
+      } else {
+        emit(currentState.copyWith(selectedFolderId: folderId));
+      }
     }
   }
 
-  Future<void> loadFolders() async {
+  void selectStudentFolder(String? folderId) => selectFolder(folderId);
+
+  Future<void> loadFolders({String? groupId}) async {
     final currentState = state;
     if (currentState is! TeacherExamsLoaded) return;
-    final res = await _repository.getExamFolders();
+    final targetGroupId = groupId ?? currentState.groupId;
+    final res = await _repository.getExamFolders(groupId: targetGroupId);
     res.when(
       onSuccess: (folders) {
         emit(currentState.copyWith(folders: folders));
@@ -1060,14 +1109,17 @@ class ExamsCubit extends Cubit<ExamsState> {
 
   Future<bool> createFolder({
     required String name,
+    String? groupId,
     String? color,
     String? icon,
     String? description,
   }) async {
     final currentState = state;
     if (currentState is! TeacherExamsLoaded) return false;
+    final targetGroupId = groupId ?? currentState.groupId;
     final res = await _repository.createExamFolder(
       name: name,
+      groupId: targetGroupId,
       color: color,
       icon: icon,
       description: description,
