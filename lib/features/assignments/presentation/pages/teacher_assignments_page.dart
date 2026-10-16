@@ -5,7 +5,6 @@ import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/responsive_breakpoints.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_empty_view.dart';
 import '../../../../core/widgets/app_error_view.dart';
@@ -391,123 +390,9 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
             maxChildSize: 0.95,
             expand: false,
             builder: (ctx, scrollController) {
-              return BlocBuilder<AssignmentsCubit, AssignmentsState>(
-                builder: (context, state) {
-                  if (state is! TeacherAssignmentsLoaded) {
-                    return const AppLoadingView.list(count: 3);
-                  }
-
-                  final submissions = state.submissions;
-                  final isLoading = state.isLoadingSubmissions;
-
-                  return Column(
-                    children: [
-                      // Header
-                      Padding(
-                        padding: const EdgeInsets.all(AppSpacing.s16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Center(
-                              child: Container(
-                                width: 40,
-                                height: 4,
-                                decoration: BoxDecoration(
-                                  color: AppColors.border,
-                                  borderRadius: BorderRadius.circular(2),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: AppSpacing.s12),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    assignment.title,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.textPrimary,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.edit_outlined, size: 20),
-                                  tooltip: context.l10n.editAssignmentAction,
-                                  onPressed: () {
-                                    Navigator.of(ctx).pop();
-                                    EditAssignmentDialog.show(context, assignment);
-                                  },
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.close),
-                                  onPressed: () => Navigator.of(ctx).pop(),
-                                ),
-                              ],
-                            ),
-                            Text(
-                              context.l10n.submissionsCountWithReviewed(
-                                submissions.length.toString(),
-                                assignment.reviewedCount.toString(),
-                              ),
-                              style: const TextStyle(
-                                fontSize: 13,
-                                color: AppColors.textMuted,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const Divider(height: 1, color: AppColors.border),
-
-                      // Submissions List
-                      Expanded(
-                        child: isLoading
-                            ? const AppLoadingView.list(count: 3)
-                            : submissions.isEmpty
-                            ? Center(
-                                child: AppEmptyView(
-                                  message: context.l10n.noSubmissionsYetTitle,
-                                  subtitle:
-                                      context.l10n.noSubmissionsYetSubtitle,
-                                  icon: Icons.assignment_turned_in_outlined,
-                                ),
-                              )
-                            : ListView.separated(
-                                controller: scrollController,
-                                padding: const EdgeInsets.all(AppSpacing.s16),
-                                itemCount: submissions.length,
-                                separatorBuilder: (_, __) =>
-                                    const SizedBox(height: AppSpacing.s8),
-                                itemBuilder: (context, index) {
-                                  final sub = submissions[index];
-                                  return SubmissionTile(
-                                    submission: sub,
-                                    maxScore: assignment.maxScore,
-                                    onTap: () {
-                                      Navigator.of(ctx).push<void>(
-                                        MaterialPageRoute<void>(
-                                          builder: (_) => BlocProvider.value(
-                                            value: context
-                                                .read<AssignmentsCubit>(),
-                                            child: GradeSubmissionPage(
-                                              assignment: assignment,
-                                              submission: sub,
-                                            ),
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  );
-                                },
-                              ),
-                      ),
-                    ],
-                  );
-                },
+              return _AssignmentSubmissionsSheetContent(
+                assignment: assignment,
+                scrollController: scrollController,
               );
             },
           ),
@@ -555,11 +440,9 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
                 ),
               ),
             ),
-      body: Center(
-        child: ResponsiveContainer(
-          maxWidth: ResponsiveBreakpoints.maxContentWidth,
-          padding: const EdgeInsets.all(AppSpacing.s16),
-          child: Builder(
+      body: ResponsiveContainer(
+        padding: const EdgeInsets.all(AppSpacing.s16),
+        child: Builder(
             builder: (context) {
               GroupsCubit? groupsCubit;
               try {
@@ -1016,7 +899,178 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
             },
           ),
         ),
-      ),
+      );
+  }
+}
+
+class _AssignmentSubmissionsSheetContent extends StatefulWidget {
+  final AssignmentEntity assignment;
+  final ScrollController scrollController;
+
+  const _AssignmentSubmissionsSheetContent({
+    required this.assignment,
+    required this.scrollController,
+  });
+
+  @override
+  State<_AssignmentSubmissionsSheetContent> createState() =>
+      _AssignmentSubmissionsSheetContentState();
+}
+
+class _AssignmentSubmissionsSheetContentState
+    extends State<_AssignmentSubmissionsSheetContent> {
+  @override
+  void initState() {
+    super.initState();
+    widget.scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    widget.scrollController.removeListener(_onScroll);
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (!mounted) return;
+    if (widget.scrollController.hasClients &&
+        widget.scrollController.position.pixels >=
+            widget.scrollController.position.maxScrollExtent - 200) {
+      context.read<AssignmentsCubit>().loadMoreSubmissions();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<AssignmentsCubit, AssignmentsState>(
+      builder: (context, state) {
+        if (state is! TeacherAssignmentsLoaded) {
+          return const AppLoadingView.list(count: 3);
+        }
+
+        final submissions = state.submissions;
+        final isLoading = state.isLoadingSubmissions;
+        final assignment = widget.assignment;
+
+        return Column(
+          children: [
+            // Header
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.s16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: AppColors.border,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.s12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          assignment.title,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.edit_outlined, size: 20),
+                        tooltip: context.l10n.editAssignmentAction,
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          EditAssignmentDialog.show(context, assignment);
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                    ],
+                  ),
+                  Text(
+                    context.l10n.submissionsCountWithReviewed(
+                      submissions.length.toString(),
+                      assignment.reviewedCount.toString(),
+                    ),
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: AppColors.textMuted,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(height: 1, color: AppColors.border),
+
+            // Submissions List
+            Expanded(
+              child: isLoading
+                  ? const AppLoadingView.list(count: 3)
+                  : submissions.isEmpty
+                  ? Center(
+                      child: AppEmptyView(
+                        message: context.l10n.noSubmissionsYetTitle,
+                        subtitle: context.l10n.noSubmissionsYetSubtitle,
+                        icon: Icons.assignment_turned_in_outlined,
+                      ),
+                    )
+                  : ListView.separated(
+                      controller: widget.scrollController,
+                      cacheExtent: 350.0,
+                      padding: const EdgeInsets.all(AppSpacing.s16),
+                      itemCount:
+                          submissions.length +
+                          (state.isLoadingMoreSubmissions ? 1 : 0),
+                      separatorBuilder: (_, __) =>
+                          const SizedBox(height: AppSpacing.s8),
+                      itemBuilder: (context, index) {
+                        if (index == submissions.length) {
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(
+                              vertical: AppSpacing.s16,
+                            ),
+                            child: Center(
+                              child: AppLoadingView.compact(size: 24),
+                            ),
+                          );
+                        }
+                        final sub = submissions[index];
+                        return SubmissionTile(
+                          submission: sub,
+                          maxScore: assignment.maxScore,
+                          onTap: () {
+                            Navigator.of(context).push<void>(
+                              MaterialPageRoute<void>(
+                                builder: (_) => BlocProvider.value(
+                                  value: context.read<AssignmentsCubit>(),
+                                  child: GradeSubmissionPage(
+                                    assignment: assignment,
+                                    submission: sub,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

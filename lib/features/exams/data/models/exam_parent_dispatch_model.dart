@@ -57,6 +57,40 @@ class ExamDispatchStatsModel extends ExamDispatchStatsEntity {
   }
 }
 
+class ExamDispatchAttemptModel extends ExamDispatchAttemptEntity {
+  const ExamDispatchAttemptModel({
+    required super.id,
+    required super.attemptNumber,
+    super.score,
+    required super.maxScore,
+    super.percentage,
+    required super.status,
+    super.submissionReason,
+    required super.startedAt,
+    super.submittedAt,
+    super.isPassed,
+  });
+
+  factory ExamDispatchAttemptModel.fromJson(Map<String, dynamic> json) {
+    return ExamDispatchAttemptModel(
+      id: json['id'] as String? ?? '',
+      attemptNumber: (json['attempt_number'] as num?)?.toInt() ?? 1,
+      score: (json['score'] as num?)?.toInt(),
+      maxScore: (json['max_score'] as num?)?.toInt() ?? 100,
+      percentage: (json['percentage'] as num?)?.toDouble(),
+      status: json['status'] as String? ?? 'submitted',
+      submissionReason: json['submission_reason'] as String? ?? 'student_submitted',
+      startedAt: json['started_at'] != null
+          ? DateTime.tryParse(json['started_at'].toString()) ?? DateTime.now()
+          : DateTime.now(),
+      submittedAt: json['submitted_at'] != null
+          ? DateTime.tryParse(json['submitted_at'].toString())
+          : null,
+      isPassed: json['is_passed'] as bool? ?? false,
+    );
+  }
+}
+
 class ExamDispatchStudentModel extends ExamDispatchStudentEntity {
   const ExamDispatchStudentModel({
     required super.studentId,
@@ -72,9 +106,15 @@ class ExamDispatchStudentModel extends ExamDispatchStudentEntity {
     super.latestSubmittedAt,
     super.latestAttemptId,
     super.isPassed,
+    super.attempts,
   });
 
   factory ExamDispatchStudentModel.fromJson(Map<String, dynamic> json) {
+    final attemptsJson = json['attempts'] as List<dynamic>? ?? [];
+    final attemptsList = attemptsJson
+        .map((a) => ExamDispatchAttemptModel.fromJson(a as Map<String, dynamic>))
+        .toList();
+
     return ExamDispatchStudentModel(
       studentId: json['student_id'] as String? ?? '',
       studentName: json['student_name'] as String? ?? '',
@@ -83,7 +123,7 @@ class ExamDispatchStudentModel extends ExamDispatchStudentEntity {
       avatarUrl: json['avatar_url'] as String?,
       groupName: json['group_name'] as String? ?? 'عام',
       status: json['status'] as String? ?? 'not_started',
-      attemptsCount: (json['attempts_count'] as num?)?.toInt() ?? 0,
+      attemptsCount: (json['attempts_count'] as num?)?.toInt() ?? attemptsList.length,
       bestScore: (json['best_score'] as num?)?.toInt(),
       bestPercentage: (json['best_percentage'] as num?)?.toDouble(),
       latestSubmittedAt: json['latest_submitted_at'] != null
@@ -91,6 +131,7 @@ class ExamDispatchStudentModel extends ExamDispatchStudentEntity {
           : null,
       latestAttemptId: json['latest_attempt_id'] as String?,
       isPassed: json['is_passed'] as bool? ?? false,
+      attempts: attemptsList,
     );
   }
 }

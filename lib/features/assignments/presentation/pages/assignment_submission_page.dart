@@ -30,7 +30,7 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
         allowMultiple: true,
         withData: true,
         type: FileType.custom,
-        allowedExtensions: ['pdf', 'png', 'jpg', 'jpeg', 'doc', 'docx'],
+        allowedExtensions: ['pdf', 'png', 'jpg', 'jpeg', 'doc', 'docx', 'heic', 'heif'],
       );
 
       if (result != null && result.files.isNotEmpty) {
@@ -73,6 +73,8 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
       if (ext == 'pdf') mimeType = 'application/pdf';
       if (ext == 'png') mimeType = 'image/png';
       if (ext == 'jpg' || ext == 'jpeg') mimeType = 'image/jpeg';
+      if (ext == 'heic') mimeType = 'image/heic';
+      if (ext == 'heif') mimeType = 'image/heif';
 
       return (
         fileName: f.name,

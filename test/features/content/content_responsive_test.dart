@@ -179,6 +179,16 @@ class _FakeContentRepository implements ContentRepository {
   }
 
   @override
+  Future<Result<String>> resolveOrCreateLectureContent({
+    required String videoId,
+    required String groupId,
+    required String title,
+    String? tenantId,
+  }) async {
+    return Success(videoId);
+  }
+
+  @override
   Future<Result<void>> linkLessonExam({
     required String contentId,
     required String examId,
@@ -272,7 +282,11 @@ void main() {
   const deviceSizes = <String, Size>{
     '320x640 (Compact Mobile)': Size(320, 640),
     '390x844 (Standard Mobile)': Size(390, 844),
-    '768x1024 (Tablet Portrait)': Size(768, 1024),
+    '500x800 (iPad Split View 1/3)': Size(500, 800),
+    '640x960 (iPad Split View 1/2)': Size(640, 960),
+    '768x1024 (iPad Portrait)': Size(768, 1024),
+    '834x1194 (iPad Pro 11 Portrait)': Size(834, 1194),
+    '1024x768 (iPad Landscape)': Size(1024, 768),
     '1440x900 (Desktop Laptop)': Size(1440, 900),
     '1920x1080 (Large Desktop)': Size(1920, 1080),
   };
@@ -489,4 +503,61 @@ void main() {
       );
     }
   });
+
+  group('MaterialViewerSheet.show Modal Multi-Device Tests', () {
+    setUp(() {
+      SupabaseService.currentRole = 'teacher';
+    });
+
+    tearDown(() {
+      SupabaseService.currentRole = null;
+    });
+
+    for (final entry in deviceSizes.entries) {
+      testWidgets(
+        'Opens MaterialViewerSheet.show modal cleanly on (${entry.key})',
+        (tester) async {
+          tester.view.physicalSize = entry.value;
+          tester.view.devicePixelRatio = 1.0;
+          addTearDown(tester.view.resetPhysicalSize);
+          addTearDown(tester.view.resetDevicePixelRatio);
+
+          await tester.pumpWidget(
+            MaterialApp(
+              theme: AppTheme.lightTheme,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              locale: const Locale('ar'),
+              home: Scaffold(
+                body: Builder(
+                  builder: (context) {
+                    return ElevatedButton(
+                      onPressed: () {
+                        MaterialViewerSheet.show(
+                          context,
+                          content: sampleItems[0],
+                          onGetSignedUrl: (path) async =>
+                              'https://storage.supabase.co/signed/$path',
+                        );
+                      },
+                      child: const Text('Open Material'),
+                    );
+                  },
+                ),
+              ),
+            ),
+          );
+
+          await tester.pumpAndSettle();
+          await tester.tap(find.text('Open Material'));
+          await tester.pumpAndSettle();
+
+          expect(find.byType(MaterialViewerSheet), findsOneWidget);
+          expect(find.text(sampleItems[0].title), findsOneWidget);
+          expect(tester.takeException(), isNull);
+        },
+      );
+    }
+  });
 }
+

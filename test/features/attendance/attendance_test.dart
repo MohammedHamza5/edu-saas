@@ -148,6 +148,38 @@ class FakeAttendanceRepository implements AttendanceRepository {
       ),
     );
   }
+
+  @override
+  Future<Result<StudentAttendanceBundle>> getStudentAttendanceBundle({
+    required String studentId,
+    String? groupId,
+  }) async {
+    if (shouldFail) {
+      return const FailureResult(ServerFailure('Bundle error'));
+    }
+    final summaryRes = await getStudentEngagementSummary(
+      studentId: studentId,
+      groupId: groupId,
+    );
+    final statsRes = await getStudentAttendanceStats(
+      studentId: studentId,
+      groupId: groupId,
+    );
+    final historyRes = await getStudentAttendanceHistory(
+      studentId: studentId,
+      groupId: groupId,
+      page: 0,
+      pageSize: 20,
+    );
+    return Success(
+      StudentAttendanceBundle(
+        engagementSummary:
+            summaryRes.dataOrNull ?? const StudentEngagementSummary.empty(),
+        stats: statsRes.dataOrNull ?? const AttendanceStats.empty(),
+        records: historyRes.dataOrNull ?? [],
+      ),
+    );
+  }
 }
 
 class FakeGroupsRepository implements GroupsRepository {
@@ -187,8 +219,10 @@ class FakeGroupsRepository implements GroupsRepository {
 
   @override
   Future<Result<List<GroupMemberEntity>>> getGroupMembers(
-    String groupId,
-  ) async => const Success([]);
+    String groupId, {
+    int page = 0,
+    int pageSize = 25,
+  }) async => const Success([]);
 
   @override
   Future<Result<GroupMemberEntity>> addMemberToGroup({

@@ -114,11 +114,15 @@ class VideoBankRepositoryImpl implements VideoBankRepository {
   Future<Result<List<LibraryVideoEntity>>> getVideos({
     String? folderId,
     String? search,
+    int page = 0,
+    int pageSize = 24,
   }) async {
     try {
       final videos = await _remoteDataSource.getVideos(
         folderId: folderId,
         search: search,
+        page: page,
+        pageSize: pageSize,
       );
       return Result.success(videos);
     } on ServerException catch (e) {

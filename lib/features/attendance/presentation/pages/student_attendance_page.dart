@@ -9,7 +9,6 @@ import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
-import '../../../../core/theme/responsive_breakpoints.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_empty_view.dart';
 import '../../../../core/widgets/app_error_view.dart';
@@ -41,17 +40,35 @@ class StudentAttendancePage extends StatefulWidget {
 class _StudentAttendancePageState extends State<StudentAttendancePage> {
   final ScrollController _scrollController = ScrollController();
   late final AttendanceCubit _attendanceCubit;
+  bool _isLocallyCreatedCubit = false;
   String? _resolvedStudentId;
   String? _selectedGroupId;
-  String? _statusFilter; // null or 'all', 'completed', 'in_progress', 'not_started'
+  String?
+  _statusFilter; // null or 'all', 'completed', 'in_progress', 'not_started'
   AttendanceStatus? _historyFilter;
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    _attendanceCubit =
-        widget.attendanceCubit ?? InjectionContainer.createAttendanceCubit();
+
+    final fromContext =
+        widget.attendanceCubit ??
+        (() {
+          try {
+            return context.read<AttendanceCubit>();
+          } catch (_) {
+            return null;
+          }
+        })();
+
+    if (fromContext != null) {
+      _attendanceCubit = fromContext;
+      _isLocallyCreatedCubit = false;
+    } else {
+      _attendanceCubit = InjectionContainer.createAttendanceCubit();
+      _isLocallyCreatedCubit = true;
+    }
 
     final authState = context.read<AuthCubit>().state;
     if (widget.studentId != null) {
@@ -75,17 +92,18 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
-    if (widget.attendanceCubit == null) {
+    if (_isLocallyCreatedCubit) {
       _attendanceCubit.close();
     }
     super.dispose();
   }
 
-  void _loadData() {
+  void _loadData({bool forceRefresh = false}) {
     if (_resolvedStudentId != null) {
       _attendanceCubit.loadStudentAttendance(
         studentId: _resolvedStudentId!,
         groupId: _selectedGroupId,
+        forceRefresh: forceRefresh,
       );
     }
   }
@@ -128,6 +146,7 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
           ],
         ),
         body: BlocBuilder<AttendanceCubit, AttendanceState>(
+          buildWhen: (prev, curr) => prev != curr,
           builder: (context, state) {
             if (state is AttendanceLoading || state is AttendanceInitial) {
               return _buildSkeletonLoading();
@@ -163,8 +182,9 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
     StudentEngagementSummary summary,
   ) {
     // Filter items to ONLY show lectures that have actually been watched!
-    final watchedItems =
-        summary.items.where((item) => item.hasWatchedAny).toList();
+    final watchedItems = summary.items
+        .where((item) => item.hasWatchedAny)
+        .toList();
 
     // Filter items based on active status filter (all watched, completed, in_progress)
     final filteredItems = watchedItems.where((item) {
@@ -174,112 +194,109 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
     }).toList();
 
     return RefreshIndicator(
-      onRefresh: () async => _loadData(),
-      child: Center(
-        child: ResponsiveContainer(
-          maxWidth: ResponsiveBreakpoints.maxContentWidth,
-          child: ListView(
-            controller: _scrollController,
-            padding: context.responsivePagePadding,
-            children: [
-              // Hero Header with Telemetry Badge
-              _buildHeroHeader(context),
+      onRefresh: () async => _loadData(forceRefresh: true),
+      child: ResponsiveContainer(
+        child: ListView(
+          controller: _scrollController,
+          padding: context.responsivePagePadding,
+          children: [
+            // Hero Header with Telemetry Badge
+            _buildHeroHeader(context),
+            const SizedBox(height: AppSpacing.s16),
+
+            // Top 4 Academic Engagement Metric Cards (Responsive Grid)
+            _buildMetricCards(context, summary),
+            const SizedBox(height: AppSpacing.s20),
+
+            // Group Selection Bar (if student belongs to multiple groups)
+            if (summary.enrolledGroups.length > 1) ...[
+              _buildGroupSelectorBar(context, summary.enrolledGroups),
               const SizedBox(height: AppSpacing.s16),
+            ],
 
-              // Top 4 Academic Engagement Metric Cards (Responsive Grid)
-              _buildMetricCards(context, summary),
-              const SizedBox(height: AppSpacing.s20),
+            // Status Filter Chips Bar (only when there are watched lectures)
+            if (watchedItems.isNotEmpty) ...[
+              _buildStatusFilterBar(
+                context,
+                summary,
+                watchedCount: watchedItems.length,
+              ),
+              const SizedBox(height: AppSpacing.s16),
+            ],
 
-              // Group Selection Bar (if student belongs to multiple groups)
-              if (summary.enrolledGroups.length > 1) ...[
-                _buildGroupSelectorBar(context, summary.enrolledGroups),
-                const SizedBox(height: AppSpacing.s16),
-              ],
-
-              // Status Filter Chips Bar (only when there are watched lectures)
-              if (watchedItems.isNotEmpty) ...[
-                _buildStatusFilterBar(
-                  context,
-                  summary,
-                  watchedCount: watchedItems.length,
-                ),
-                const SizedBox(height: AppSpacing.s16),
-              ],
-
-              // Section Header
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.video_library_rounded,
-                        size: 18,
-                        color: AppColors.primary,
-                      ),
-                      const SizedBox(width: AppSpacing.s8),
-                      Text(
-                        context.l10n.lectureWatchTimelineTitle,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (watchedItems.isNotEmpty)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.s10,
-                        vertical: 3,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryLight.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        '${filteredItems.length} / ${watchedItems.length}',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
-                        ),
+            // Section Header
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.video_library_rounded,
+                      size: 18,
+                      color: AppColors.primary,
+                    ),
+                    const SizedBox(width: AppSpacing.s8),
+                    Text(
+                      context.l10n.lectureWatchTimelineTitle,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textPrimary,
                       ),
                     ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.s12),
-
-              // Lecture Items List or Empty View
-              if (watchedItems.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.s24),
-                  child: AppEmptyView(
-                    message: context.l10n.noWatchedLecturesYet,
-                    subtitle: context.l10n.noWatchedLecturesSubtitle,
-                    icon: Icons.history_toggle_off_rounded,
+                  ],
+                ),
+                if (watchedItems.isNotEmpty)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.s10,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryLight.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '${filteredItems.length} / ${watchedItems.length}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary,
+                      ),
+                    ),
                   ),
-                )
-              else if (filteredItems.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.s24),
-                  child: AppEmptyView(
-                    message: context.l10n.noEngagementLecturesFilterEmpty,
-                    icon: Icons.filter_list_off_rounded,
-                  ),
-                )
-              else
-                ...filteredItems.map((item) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: AppSpacing.s10),
-                    child: _StudentLectureEngagementCard(item: item),
-                  );
-                }),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.s12),
 
-              const SizedBox(height: AppSpacing.s32),
-            ],
-          ),
+            // Lecture Items List or Empty View
+            if (watchedItems.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.s24),
+                child: AppEmptyView(
+                  message: context.l10n.noWatchedLecturesYet,
+                  subtitle: context.l10n.noWatchedLecturesSubtitle,
+                  icon: Icons.history_toggle_off_rounded,
+                ),
+              )
+            else if (filteredItems.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.s24),
+                child: AppEmptyView(
+                  message: context.l10n.noEngagementLecturesFilterEmpty,
+                  icon: Icons.filter_list_off_rounded,
+                ),
+              )
+            else
+              ...filteredItems.map((item) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.s10),
+                  child: _StudentLectureEngagementCard(item: item),
+                );
+              }),
+
+            const SizedBox(height: AppSpacing.s32),
+          ],
         ),
       ),
     );
@@ -435,7 +452,8 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
         ),
         AttendanceStatCard(
           title: context.l10n.completedLecturesStatTitle,
-          value: '${summary.completedLecturesCount} / ${summary.totalLecturesCount}',
+          value:
+              '${summary.completedLecturesCount} / ${summary.totalLecturesCount}',
           subtitle: context.l10n.remainingLecturesSubtitle(remainingLectures),
           color: AppColors.success,
           icon: Icons.check_circle_rounded,
@@ -475,8 +493,9 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
             checkmarkColor: AppColors.primary,
             labelStyle: TextStyle(
               fontSize: 12,
-              fontWeight:
-                  _selectedGroupId == null ? FontWeight.bold : FontWeight.normal,
+              fontWeight: _selectedGroupId == null
+                  ? FontWeight.bold
+                  : FontWeight.normal,
               color: _selectedGroupId == null
                   ? AppColors.primary
                   : AppColors.textPrimary,
@@ -523,9 +542,7 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
         scrollDirection: Axis.horizontal,
         children: [
           FilterChip(
-            label: Text(
-              context.l10n.filterAllLecturesCount(watchedCount),
-            ),
+            label: Text(context.l10n.filterAllLecturesCount(watchedCount)),
             selected: _statusFilter == null || _statusFilter == 'all',
             selectedColor: AppColors.primaryLight.withValues(alpha: 0.25),
             checkmarkColor: AppColors.primary,
@@ -558,14 +575,17 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
               fontSize: 12,
             ),
             onSelected: (_) => setState(
-              () => _statusFilter =
-                  _statusFilter == 'completed' ? null : 'completed',
+              () => _statusFilter = _statusFilter == 'completed'
+                  ? null
+                  : 'completed',
             ),
           ),
           const SizedBox(width: AppSpacing.s8),
           FilterChip(
             label: Text(
-              context.l10n.filterInProgressCount(summary.inProgressLecturesCount),
+              context.l10n.filterInProgressCount(
+                summary.inProgressLecturesCount,
+              ),
             ),
             selected: _statusFilter == 'in_progress',
             selectedColor: AppColors.warning.withValues(alpha: 0.2),
@@ -580,8 +600,9 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
               fontSize: 12,
             ),
             onSelected: (_) => setState(
-              () => _statusFilter =
-                  _statusFilter == 'in_progress' ? null : 'in_progress',
+              () => _statusFilter = _statusFilter == 'in_progress'
+                  ? null
+                  : 'in_progress',
             ),
           ),
         ],
@@ -599,7 +620,7 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
 
     if (records.isEmpty) {
       return RefreshIndicator(
-        onRefresh: () async => _loadData(),
+        onRefresh: () async => _loadData(forceRefresh: true),
         child: Center(
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.s24),
@@ -620,58 +641,55 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
     }).toList();
 
     return RefreshIndicator(
-      onRefresh: () async => _loadData(),
-      child: Center(
-        child: ResponsiveContainer(
-          maxWidth: ResponsiveBreakpoints.maxContentWidth,
-          child: ListView(
-            controller: _scrollController,
-            padding: context.responsivePagePadding,
-            children: [
-              _buildPercentageCard(stats.attendancePercentage),
-              const SizedBox(height: AppSpacing.s16),
-              ResponsiveGrid(
-                mobileColumns: 2,
-                tabletColumns: 4,
-                desktopColumns: 4,
-                spacing: AppSpacing.s8,
-                runSpacing: AppSpacing.s8,
-                children: [
-                  AttendanceStatCard(
-                    title: context.l10n.attendanceStatusPresent,
-                    value: '${stats.presentCount}',
-                    color: AppColors.success,
-                    icon: Icons.check_circle_rounded,
-                  ),
-                  AttendanceStatCard(
-                    title: context.l10n.attendanceStatusAbsent,
-                    value: '${stats.absentCount}',
-                    color: AppColors.error,
-                    icon: Icons.cancel_rounded,
-                  ),
-                  AttendanceStatCard(
-                    title: context.l10n.attendanceStatusLate,
-                    value: '${stats.lateCount}',
-                    color: AppColors.warning,
-                    icon: Icons.access_time_filled_rounded,
-                  ),
-                  AttendanceStatCard(
-                    title: context.l10n.attendanceStatusExcused,
-                    value: '${stats.excusedCount}',
-                    color: AppColors.info,
-                    icon: Icons.info_rounded,
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.s24),
-              ...displayedRecords.map((record) {
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: AppSpacing.s8),
-                  child: _AttendanceHistoryItemCard(record: record),
-                );
-              }),
-            ],
-          ),
+      onRefresh: () async => _loadData(forceRefresh: true),
+      child: ResponsiveContainer(
+        child: ListView(
+          controller: _scrollController,
+          padding: context.responsivePagePadding,
+          children: [
+            _buildPercentageCard(stats.attendancePercentage),
+            const SizedBox(height: AppSpacing.s16),
+            ResponsiveGrid(
+              mobileColumns: 2,
+              tabletColumns: 4,
+              desktopColumns: 4,
+              spacing: AppSpacing.s8,
+              runSpacing: AppSpacing.s8,
+              children: [
+                AttendanceStatCard(
+                  title: context.l10n.attendanceStatusPresent,
+                  value: '${stats.presentCount}',
+                  color: AppColors.success,
+                  icon: Icons.check_circle_rounded,
+                ),
+                AttendanceStatCard(
+                  title: context.l10n.attendanceStatusAbsent,
+                  value: '${stats.absentCount}',
+                  color: AppColors.error,
+                  icon: Icons.cancel_rounded,
+                ),
+                AttendanceStatCard(
+                  title: context.l10n.attendanceStatusLate,
+                  value: '${stats.lateCount}',
+                  color: AppColors.warning,
+                  icon: Icons.access_time_filled_rounded,
+                ),
+                AttendanceStatCard(
+                  title: context.l10n.attendanceStatusExcused,
+                  value: '${stats.excusedCount}',
+                  color: AppColors.info,
+                  icon: Icons.info_rounded,
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.s24),
+            ...displayedRecords.map((record) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.s8),
+                child: _AttendanceHistoryItemCard(record: record),
+              );
+            }),
+          ],
         ),
       ),
     );
@@ -760,10 +778,7 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
             (_) => AppCard(
               padding: const EdgeInsets.all(AppSpacing.s16),
               child: AcademicShimmer(
-                child: Container(
-                  height: 60,
-                  color: const Color(0xFFE2E8F0),
-                ),
+                child: Container(height: 60, color: const Color(0xFFE2E8F0)),
               ),
             ),
           ),
@@ -809,10 +824,7 @@ class _StudentLectureEngagementCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-        border: Border.all(
-          color: AppColors.border,
-          width: 1,
-        ),
+        border: Border.all(color: AppColors.border, width: 1),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),

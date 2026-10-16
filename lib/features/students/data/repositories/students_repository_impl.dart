@@ -36,9 +36,15 @@ class StudentsRepositoryImpl implements StudentsRepository {
   }
 
   @override
-  Future<Result<List<StudentEntity>>> getPendingStudents() async {
+  Future<Result<List<StudentEntity>>> getPendingStudents({
+    int page = 0,
+    int pageSize = 20,
+  }) async {
     try {
-      final students = await _remoteDataSource.getPendingStudents();
+      final students = await _remoteDataSource.getPendingStudents(
+        page: page,
+        pageSize: pageSize,
+      );
       return Success(students);
     } on PostgrestException catch (e) {
       return FailureResult(ServerFailure(e.message, code: e.code));

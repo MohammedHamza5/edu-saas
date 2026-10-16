@@ -462,7 +462,7 @@ class _GroupAnalyticsSheetState extends State<GroupAnalyticsSheet> {
                               OutlinedButton.icon(
                                 onPressed: _loadGroupAnalytics,
                                 icon: const Icon(Icons.refresh_rounded, size: 16),
-                                label: const Text('Retry'),
+                                label: Text(l10n.retry),
                               ),
                             ],
                           ),

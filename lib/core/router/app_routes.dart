@@ -38,6 +38,7 @@ class AppRoutes {
 
   // Feature: Content routes
   static const String teacherContent = '/teacher/content';
+  static const String teacherMaterialsLibrary = '/teacher/materials-library';
   static const String teacherGroupContent = '/teacher/groups/:groupId/content';
   static const String teacherLessonDetails =
       '/teacher/groups/:groupId/lessons/:lessonId';

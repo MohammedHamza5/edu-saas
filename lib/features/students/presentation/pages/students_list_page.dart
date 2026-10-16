@@ -6,7 +6,6 @@ import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/responsive_breakpoints.dart';
 import '../../../../core/utils/app_feedback.dart';
 import '../../../../core/utils/whatsapp_report_generator.dart';
 import '../../../../core/widgets/app_badge.dart';
@@ -140,7 +139,6 @@ class _StudentsListPageState extends State<StudentsListPage> {
         ],
       ),
       body: ResponsiveContainer(
-        maxWidth: ResponsiveBreakpoints.maxContentWidth,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -287,6 +285,7 @@ class _StudentsListPageState extends State<StudentsListPage> {
                     }
                     return ListView.separated(
                       controller: _scrollController,
+                      cacheExtent: 350.0,
                       padding: const EdgeInsets.all(AppSpacing.s16),
                       itemCount:
                           state.students.length + (state.isLoadingMore ? 1 : 0),

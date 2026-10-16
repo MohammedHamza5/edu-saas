@@ -17,7 +17,10 @@ abstract interface class StudentsRepository {
   });
 
   /// Pending students only — shortcut for T-03 screen.
-  Future<Result<List<StudentEntity>>> getPendingStudents();
+  Future<Result<List<StudentEntity>>> getPendingStudents({
+    int page = 0,
+    int pageSize = 20,
+  });
 
   /// Approve / Reject / Suspend / Activate a student via `approve-student` Edge Function.
   /// [action]: 'approve' | 'reject' | 'suspend' | 'activate'

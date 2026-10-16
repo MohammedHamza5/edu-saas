@@ -514,3 +514,19 @@ class StudentEngagementSummary extends Equatable {
   ];
 }
 
+/// Consolidated bundle holding student engagement, attendance stats, and recent history
+class StudentAttendanceBundle extends Equatable {
+  final StudentEngagementSummary engagementSummary;
+  final AttendanceStats stats;
+  final List<AttendanceEntity> records;
+
+  const StudentAttendanceBundle({
+    required this.engagementSummary,
+    required this.stats,
+    required this.records,
+  });
+
+  @override
+  List<Object?> get props => [engagementSummary, stats, records];
+}
+

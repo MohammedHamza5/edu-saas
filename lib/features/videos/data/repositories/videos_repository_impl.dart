@@ -9,6 +9,15 @@ import '../datasources/videos_remote_datasource.dart';
 class VideosRepositoryImpl implements VideosRepository {
   final VideosRemoteDataSource _remoteDataSource;
 
+  /// In-memory cache for generated signed URLs with expiration tracking.
+  static final Map<String, ({String url, DateTime expiresAt})> _signedUrlCache =
+      {};
+
+  /// Clears the in-memory signed URL cache (useful for testing or cache resets).
+  static void clearSignedUrlCache() {
+    _signedUrlCache.clear();
+  }
+
   const VideosRepositoryImpl({required VideosRemoteDataSource remoteDataSource})
     : _remoteDataSource = remoteDataSource;
 
@@ -134,9 +143,18 @@ class VideosRepositoryImpl implements VideosRepository {
 
   @override
   Future<Result<String>> getSignedFileUrl(String storagePath) async {
+    final cached = _signedUrlCache[storagePath];
+    if (cached != null && cached.expiresAt.isAfter(DateTime.now())) {
+      return Result.success(cached.url);
+    }
+
     try {
       final url = await _remoteDataSource.getSignedFileUrl(
         storagePath: storagePath,
+      );
+      _signedUrlCache[storagePath] = (
+        url: url,
+        expiresAt: DateTime.now().add(const Duration(minutes: 50)),
       );
       return Result.success(url);
     } on ServerException catch (e) {

@@ -37,17 +37,17 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    // 1. Verify R2 credentials
-    const accountId = Deno.env.get("R2_ACCOUNT_ID") || "c325afac18ccd046d3682224f35b37d5";
-    const accessKeyId = Deno.env.get("R2_ACCESS_KEY_ID") || "7fc57c6cbdf9d6bb5f6d99a2dca70c32";
-    const secretAccessKey = Deno.env.get("R2_SECRET_ACCESS_KEY") || "2ab588b36702065e7a1ef3474d981e88e4d6f76f2c5711c38cb3e4b666e7211d";
-    const bucketName = Deno.env.get("R2_BUCKET_NAME") || "edu-saas-token";
+    // 1. Verify R2 credentials (Strictly from Edge Function environment secrets)
+    const accountId = Deno.env.get("R2_ACCOUNT_ID") ?? "";
+    const accessKeyId = Deno.env.get("R2_ACCESS_KEY_ID") ?? "";
+    const secretAccessKey = Deno.env.get("R2_SECRET_ACCESS_KEY") ?? "";
+    const bucketName = Deno.env.get("R2_BUCKET_NAME") ?? "";
 
     if (!accountId || !accessKeyId || !secretAccessKey || !bucketName) {
       return new Response(
         JSON.stringify({
           error: "R2_NOT_CONFIGURED",
-          details: "Cloudflare R2 secrets (R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME) are not configured in Supabase.",
+          details: "Cloudflare R2 secrets (R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME) are not configured in Supabase Secrets.",
         }),
         {
           status: 503,
@@ -64,6 +64,7 @@ Deno.serve(async (req: Request) => {
         accessKeyId,
         secretAccessKey,
       },
+      forcePathStyle: true,
     });
 
     const body = await req.json();

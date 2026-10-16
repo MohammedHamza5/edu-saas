@@ -32,6 +32,8 @@ final class TeacherExamsLoaded extends ExamsState {
   final List<ExamAttemptEntity> attempts;
   final ExamAttemptEntity? selectedAttempt;
   final bool isLoadingAttempts;
+  final bool hasMoreAttempts;
+  final bool isLoadingMoreAttempts;
   final bool isCreating;
   final bool actionSuccess;
   final bool hasMore;
@@ -47,6 +49,8 @@ final class TeacherExamsLoaded extends ExamsState {
     this.attempts = const [],
     this.selectedAttempt,
     this.isLoadingAttempts = false,
+    this.hasMoreAttempts = true,
+    this.isLoadingMoreAttempts = false,
     this.isCreating = false,
     this.actionSuccess = false,
     this.hasMore = true,
@@ -73,6 +77,8 @@ final class TeacherExamsLoaded extends ExamsState {
     List<ExamAttemptEntity>? attempts,
     ExamAttemptEntity? selectedAttempt,
     bool? isLoadingAttempts,
+    bool? hasMoreAttempts,
+    bool? isLoadingMoreAttempts,
     bool? isCreating,
     bool? actionSuccess,
     bool? hasMore,
@@ -89,6 +95,9 @@ final class TeacherExamsLoaded extends ExamsState {
       attempts: attempts ?? this.attempts,
       selectedAttempt: selectedAttempt ?? this.selectedAttempt,
       isLoadingAttempts: isLoadingAttempts ?? this.isLoadingAttempts,
+      hasMoreAttempts: hasMoreAttempts ?? this.hasMoreAttempts,
+      isLoadingMoreAttempts:
+          isLoadingMoreAttempts ?? this.isLoadingMoreAttempts,
       isCreating: isCreating ?? this.isCreating,
       actionSuccess: actionSuccess ?? this.actionSuccess,
       hasMore: hasMore ?? this.hasMore,
@@ -109,6 +118,8 @@ final class TeacherExamsLoaded extends ExamsState {
     attempts,
     selectedAttempt,
     isLoadingAttempts,
+    hasMoreAttempts,
+    isLoadingMoreAttempts,
     isCreating,
     actionSuccess,
     hasMore,

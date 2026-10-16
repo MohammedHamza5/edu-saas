@@ -9,7 +9,6 @@ import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
-import '../../../../core/theme/responsive_breakpoints.dart';
 import '../../../../core/theme/tenant_theme_cubit.dart';
 import '../../../../core/widgets/academic_hero_banner.dart';
 import '../../../../core/widgets/app_card.dart';
@@ -109,14 +108,6 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
     }
   }
 
-  NotificationsState? get _notificationsState {
-    try {
-      return context.watch<NotificationsCubit>().state;
-    } catch (_) {
-      return null;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     // Dynamic Student Stats
@@ -140,12 +131,6 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
         ? groupsState.groups.map((g) => g.level).toSet().join(' • ')
         : '';
 
-    // Dynamic Notifications Stats
-    final notifState = _notificationsState;
-    final unreadNotifs = notifState is NotificationsLoaded
-        ? notifState.unreadCount
-        : 0;
-
     // Dynamic Tenant Branding
     final branding = (() {
       try {
@@ -155,21 +140,11 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
       }
     })();
 
-    // Dynamic Teacher Alerts
-    final alertsState = (() {
-      try {
-        return context.watch<TeacherDashboardCubit>().state;
-      } catch (_) {
-        return null;
-      }
-    })();
-
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: SingleChildScrollView(
         padding: context.responsivePagePadding,
         child: ResponsiveContainer(
-          maxWidth: ResponsiveBreakpoints.maxContentWidth,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -191,9 +166,8 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
 
               const SizedBox(height: AppSpacing.s24),
 
-              // 2. Teacher Action Radar & Early Warning Alerts
-              TeacherActionRadar(
-                alertsState: alertsState,
+              // 2. Teacher Action Radar & Early Warning Alerts (Isolated Rebuild Section)
+              _TeacherActionRadarSection(
                 groupsState: groupsState,
                 pendingCount: pendingStudentsCount,
               ),
@@ -450,80 +424,8 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                     ),
                   ),
 
-                  // Card 4: Notifications Center
-                  AppCard(
-                    variant: AppCardVariant.elevated,
-                    padding: const EdgeInsets.all(AppSpacing.s12),
-                    onTap: () => context.go(AppRoutes.notificationsCenter),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Container(
-                              width: 32,
-                              height: 32,
-                              decoration: BoxDecoration(
-                                color: AppColors.warningLight.withValues(
-                                  alpha: 0.15,
-                                ),
-                                borderRadius: BorderRadius.circular(
-                                  AppSpacing.radiusSmall,
-                                ),
-                              ),
-                              child: const Icon(
-                                Icons.notifications_active_rounded,
-                                color: AppColors.warning,
-                                size: 18,
-                              ),
-                            ),
-                            Flexible(
-                              child: Text(
-                                unreadNotifs > 0
-                                    ? context.l10n.newNotificationsCount(
-                                        unreadNotifs,
-                                      )
-                                    : context.l10n.studentNavNotifications,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.warning,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: AppSpacing.s12),
-                        Text(
-                          context.l10n.notificationsCenter,
-                          style: const TextStyle(
-                            color: AppColors.textSecondary,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.s8),
-                        Text(
-                          unreadNotifs > 0
-                              ? '$unreadNotifs'
-                              : context.l10n.active,
-                          style: AppTypography.statFigureLarge,
-                        ),
-                        const SizedBox(height: AppSpacing.s4),
-                        Text(
-                          context.l10n.studentAnnouncementsAndUpdates,
-                          style: const TextStyle(
-                            color: Color(0xFF38BDF8),
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  // Card 4: Notifications Center (Isolated Rebuild Card)
+                  const _TeacherNotificationsStatCard(),
                 ],
               ),
 
@@ -815,7 +717,9 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF6366F1).withValues(alpha: 0.15),
+                            color: const Color(
+                              0xFF6366F1,
+                            ).withValues(alpha: 0.15),
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
@@ -866,7 +770,9 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF0EA5E9).withValues(alpha: 0.15),
+                            color: const Color(
+                              0xFF0EA5E9,
+                            ).withValues(alpha: 0.15),
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
@@ -1221,7 +1127,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
         const SizedBox(height: AppSpacing.s14),
         LayoutBuilder(
           builder: (context, constraints) {
-            final isDesktop = constraints.maxWidth >= 720;
+            final isWide = constraints.maxWidth >= 720;
 
             final cardLesson = _QuickActionCard(
               title: l10n.quickActionUploadLessonTitle,
@@ -1251,7 +1157,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
               onTap: () => context.go(AppRoutes.pendingStudents),
             );
 
-            if (isDesktop) {
+            if (isWide) {
               return Row(
                 children: [
                   Expanded(child: cardLesson),
@@ -1409,8 +1315,9 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color:
-                              const Color(0xFF6366F1).withValues(alpha: 0.15),
+                          color: const Color(
+                            0xFF6366F1,
+                          ).withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: const Icon(
@@ -1472,8 +1379,9 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color:
-                              const Color(0xFF0284C7).withValues(alpha: 0.15),
+                          color: const Color(
+                            0xFF0284C7,
+                          ).withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: const Icon(
@@ -1595,8 +1503,9 @@ class _QuickActionCardState extends State<_QuickActionCard> {
                     height: 40,
                     decoration: BoxDecoration(
                       color: widget.accentColor.withValues(alpha: 0.12),
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusSmall),
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.radiusSmall,
+                      ),
                       border: Border.all(
                         color: widget.accentColor.withValues(alpha: 0.25),
                         width: 1,
@@ -1619,8 +1528,9 @@ class _QuickActionCardState extends State<_QuickActionCard> {
                           color: widget.isBadgeWarning
                               ? AppColors.warningLight
                               : AppColors.successLight,
-                          borderRadius:
-                              BorderRadius.circular(AppSpacing.radiusSmall),
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.radiusSmall,
+                          ),
                         ),
                         child: Text(
                           widget.badgeText!,
@@ -1670,6 +1580,147 @@ class _QuickActionCardState extends State<_QuickActionCard> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Isolated section for TeacherActionRadar so that radar state updates
+/// do not cause a full rebuild of the entire TeacherDashboardPage.
+class _TeacherActionRadarSection extends StatelessWidget {
+  final GroupsState? groupsState;
+  final int pendingCount;
+
+  const _TeacherActionRadarSection({
+    required this.groupsState,
+    required this.pendingCount,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    TeacherDashboardCubit? cubit;
+    try {
+      cubit = context.read<TeacherDashboardCubit>();
+    } catch (_) {}
+
+    if (cubit == null) {
+      return TeacherActionRadar(
+        alertsState: null,
+        groupsState: groupsState,
+        pendingCount: pendingCount,
+      );
+    }
+
+    return BlocBuilder<TeacherDashboardCubit, TeacherDashboardState>(
+      bloc: cubit,
+      buildWhen: (prev, curr) => prev != curr,
+      builder: (context, alertsState) {
+        return TeacherActionRadar(
+          alertsState: alertsState,
+          groupsState: groupsState,
+          pendingCount: pendingCount,
+        );
+      },
+    );
+  }
+}
+
+/// Isolated stat card for Notifications so that unread badge increments
+/// do not cause a full rebuild of the entire TeacherDashboardPage.
+class _TeacherNotificationsStatCard extends StatelessWidget {
+  const _TeacherNotificationsStatCard();
+
+  @override
+  Widget build(BuildContext context) {
+    NotificationsCubit? notifCubit;
+    try {
+      notifCubit = context.read<NotificationsCubit>();
+    } catch (_) {}
+
+    if (notifCubit == null) {
+      return _buildCard(context, 0);
+    }
+
+    return BlocBuilder<NotificationsCubit, NotificationsState>(
+      bloc: notifCubit,
+      buildWhen: (prev, curr) {
+        final prevCount = prev is NotificationsLoaded ? prev.unreadCount : 0;
+        final currCount = curr is NotificationsLoaded ? curr.unreadCount : 0;
+        return prevCount != currCount;
+      },
+      builder: (context, state) {
+        final unreadCount = state is NotificationsLoaded
+            ? state.unreadCount
+            : 0;
+        return _buildCard(context, unreadCount);
+      },
+    );
+  }
+
+  Widget _buildCard(BuildContext context, int unreadNotifs) {
+    return AppCard(
+      variant: AppCardVariant.elevated,
+      padding: const EdgeInsets.all(AppSpacing.s12),
+      onTap: () => context.go(AppRoutes.notificationsCenter),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: AppColors.warningLight.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                ),
+                child: const Icon(
+                  Icons.notifications_active_rounded,
+                  color: AppColors.warning,
+                  size: 18,
+                ),
+              ),
+              Flexible(
+                child: Text(
+                  unreadNotifs > 0
+                      ? context.l10n.newNotificationsCount(unreadNotifs)
+                      : context.l10n.studentNavNotifications,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.warning,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.s12),
+          Text(
+            context.l10n.notificationsCenter,
+            style: const TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.s8),
+          Text(
+            unreadNotifs > 0 ? '$unreadNotifs' : context.l10n.active,
+            style: AppTypography.statFigureLarge,
+          ),
+          const SizedBox(height: AppSpacing.s4),
+          Text(
+            context.l10n.studentAnnouncementsAndUpdates,
+            style: const TextStyle(
+              color: Color(0xFF38BDF8),
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
       ),
     );
   }

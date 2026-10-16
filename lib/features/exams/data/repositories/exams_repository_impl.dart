@@ -84,6 +84,7 @@ class ExamsRepositoryImpl implements ExamsRepository {
     DateTime? startAt,
     DateTime? endAt,
     bool isPublished = false,
+    String? pdfFileId,
     required List<ExamQuestionEntity> initialQuestions,
   }) async {
     try {
@@ -114,6 +115,7 @@ class ExamsRepositoryImpl implements ExamsRepository {
         startAt: startAt,
         endAt: endAt,
         isPublished: isPublished,
+        pdfFileId: pdfFileId,
         initialQuestions: questionsModels,
       );
       return Success(created);
@@ -139,6 +141,8 @@ class ExamsRepositoryImpl implements ExamsRepository {
     DateTime? startAt,
     DateTime? endAt,
     bool? isPublished,
+    String? pdfFileId,
+    bool clearPdfFile = false,
   }) async {
     try {
       final updated = await _remoteDataSource.updateExam(
@@ -153,6 +157,8 @@ class ExamsRepositoryImpl implements ExamsRepository {
         startAt: startAt,
         endAt: endAt,
         isPublished: isPublished,
+        pdfFileId: pdfFileId,
+        clearPdfFile: clearPdfFile,
       );
       return Success(updated);
     } on PostgrestException catch (e) {
@@ -177,6 +183,8 @@ class ExamsRepositoryImpl implements ExamsRepository {
     DateTime? startAt,
     DateTime? endAt,
     bool? isPublished,
+    String? pdfFileId,
+    bool clearPdfFile = false,
     required List<ExamQuestionEntity> questions,
   }) async {
     try {
@@ -207,9 +215,25 @@ class ExamsRepositoryImpl implements ExamsRepository {
         startAt: startAt,
         endAt: endAt,
         isPublished: isPublished,
+        pdfFileId: pdfFileId,
+        clearPdfFile: clearPdfFile,
         questions: questionsModels,
       );
       return Success(updated);
+    } on PostgrestException catch (e) {
+      return FailureResult(ServerFailure(e.message, code: e.code));
+    } on AuthException catch (e) {
+      return FailureResult(AuthFailure(e.message, code: e.statusCode));
+    } catch (e) {
+      return FailureResult(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<String>> getSignedPdfUrl(String storagePath) async {
+    try {
+      final url = await _remoteDataSource.getSignedPdfUrl(storagePath);
+      return Success(url);
     } on PostgrestException catch (e) {
       return FailureResult(ServerFailure(e.message, code: e.code));
     } on AuthException catch (e) {
@@ -285,11 +309,13 @@ class ExamsRepositoryImpl implements ExamsRepository {
   Future<Result<ExamAttemptEntity>> submitExam({
     required String attemptId,
     required Map<String, String> answers,
+    ExamSubmissionReason reason = ExamSubmissionReason.studentSubmitted,
   }) async {
     try {
       final attempt = await _remoteDataSource.submitExam(
         attemptId: attemptId,
         answers: answers,
+        reason: reason,
       );
       return Success(attempt);
     } on PostgrestException catch (e) {
@@ -302,9 +328,37 @@ class ExamsRepositoryImpl implements ExamsRepository {
   }
 
   @override
-  Future<Result<List<ExamAttemptEntity>>> getExamAttempts(String examId) async {
+  Future<Result<void>> syncExamAnswers({
+    required String attemptId,
+    required Map<String, String> answers,
+  }) async {
     try {
-      final attempts = await _remoteDataSource.getExamAttempts(examId);
+      await _remoteDataSource.syncExamAnswers(
+        attemptId: attemptId,
+        answers: answers,
+      );
+      return const Success(null);
+    } on PostgrestException catch (e) {
+      return FailureResult(ServerFailure(e.message, code: e.code));
+    } on AuthException catch (e) {
+      return FailureResult(AuthFailure(e.message, code: e.statusCode));
+    } catch (e) {
+      return FailureResult(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<List<ExamAttemptEntity>>> getExamAttempts(
+    String examId, {
+    int page = 0,
+    int pageSize = 20,
+  }) async {
+    try {
+      final attempts = await _remoteDataSource.getExamAttempts(
+        examId,
+        page: page,
+        pageSize: pageSize,
+      );
       return Success(attempts);
     } on PostgrestException catch (e) {
       return FailureResult(ServerFailure(e.message, code: e.code));

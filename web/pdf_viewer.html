@@ -415,6 +415,9 @@
         <button id="btnFullscreen" class="btn btn-icon" title="ملء الشاشة">
           <svg id="fullscreenIcon" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
         </button>
+        <button id="btnOpenExternal" class="btn btn-icon" title="فتح في نافذة مستقلة (سريع جداً للآيباد)" style="color:#A5B4FC;">
+          <svg viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+        </button>
       </div>
 
       <!-- Native Close Button in PDF Toolbar (Always Accessible) -->
@@ -511,6 +514,7 @@
       var btnFitWidth = document.getElementById('btnFitWidth');
       var btnRotate = document.getElementById('btnRotate');
       var btnFullscreen = document.getElementById('btnFullscreen');
+      var btnOpenExternal = document.getElementById('btnOpenExternal');
       var statusOverlay = document.getElementById('statusOverlay');
       var statusSpinner = document.getElementById('statusSpinner');
       var statusText = document.getElementById('statusText');
@@ -624,42 +628,15 @@
             throw new Error('مكتبة PDF.js غير متوفرة محلياً.');
           }
 
-          var pdfData = null;
-          try {
-            if ('caches' in window) {
-              var cacheKey = url.split('?')[0];
-              var cache = await caches.open('ed_saas_pdf_cache_v1');
-              var cachedResponse = await cache.match(cacheKey);
-              if (cachedResponse) {
-                statusText.textContent = 'جاري الفتح الفوري من الذاكرة...';
-                pdfData = await cachedResponse.arrayBuffer();
-              } else {
-                statusText.textContent = 'جاري التحميل والحفظ السريع...';
-                var fetchResp = await fetch(url);
-                if (fetchResp.ok) {
-                  var cloneResp = fetchResp.clone();
-                  cache.put(cacheKey, cloneResp).catch(function(e) {});
-                  pdfData = await fetchResp.arrayBuffer();
-                }
-              }
-            }
-          } catch (cacheErr) {
-            console.warn('[SecurePdfViewer] Cache API fallback to direct url:', cacheErr);
-          }
-
-          var loadingTask;
-          if (pdfData) {
-            loadingTask = pdfjsLib.getDocument({
-              data: pdfData,
-              enableXfa: false
-            });
-          } else {
-            loadingTask = pdfjsLib.getDocument({
-              url: url,
-              withCredentials: false,
-              enableXfa: false
-            });
-          }
+          statusText.textContent = 'جاري تحضير الصفحات بسرعة فائقة...';
+          var loadingTask = pdfjsLib.getDocument({
+            url: url,
+            withCredentials: false,
+            enableXfa: false,
+            rangeChunkSize: 65536,
+            disableAutoFetch: true,
+            disableStream: false
+          });
 
           loadingTask.onProgress = function(progress) {
             if (progress && progress.total > 0) {
@@ -779,6 +756,7 @@
         var scrollTop = viewerContainer.scrollTop;
         var containerHeight = viewerContainer.clientHeight;
         var buffer = 900; // 900px buffer above and below viewport
+        var farThreshold = 2500; // Unload canvas texture beyond 2500px to keep iPad Safari VRAM low
 
         for (var i = 0; i < pageContainers.length; i++) {
           var container = pageContainers[i];
@@ -789,7 +767,24 @@
 
           if (bottom >= (scrollTop - buffer) && top <= (scrollTop + containerHeight + buffer)) {
             renderPage(pageNum);
+          } else if (bottom < (scrollTop - farThreshold) || top > (scrollTop + containerHeight + farThreshold)) {
+            unloadPageCanvas(pageNum);
           }
+        }
+      }
+
+      function unloadPageCanvas(pageNum) {
+        var queueItem = pageRenderQueue.get(pageNum);
+        if (queueItem) {
+          if (queueItem.renderTask) {
+            try { queueItem.renderTask.cancel(); } catch(e) {}
+          }
+          pageRenderQueue.delete(pageNum);
+        }
+        var canvas = document.getElementById('canvas-' + pageNum);
+        if (canvas && (canvas.width > 1 || canvas.height > 1)) {
+          canvas.width = 1;
+          canvas.height = 1;
         }
       }
 
@@ -1006,6 +1001,15 @@
           }
         }
       };
+
+      if (btnOpenExternal) {
+        btnOpenExternal.onclick = function(e) {
+          e.preventDefault();
+          if (activePdfUrl) {
+            window.open(activePdfUrl, '_blank');
+          }
+        };
+      }
 
       document.addEventListener('fullscreenchange', function() {
         var isFs = !!document.fullscreenElement;

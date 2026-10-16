@@ -77,8 +77,10 @@ class FakeAssignmentsRepository implements AssignmentsRepository {
 
   @override
   Future<Result<List<AssignmentSubmissionEntity>>> getSubmissions(
-    String assignmentId,
-  ) async {
+    String assignmentId, {
+    int page = 0,
+    int pageSize = 20,
+  }) async {
     if (shouldFail) return FailureResult(ServerFailure(failureMessage));
     return Success(mockSubmissions);
   }

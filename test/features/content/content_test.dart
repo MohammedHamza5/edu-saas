@@ -278,6 +278,16 @@ class _FakeContentRepository implements ContentRepository {
   }
 
   @override
+  Future<Result<String>> resolveOrCreateLectureContent({
+    required String videoId,
+    required String groupId,
+    required String title,
+    String? tenantId,
+  }) async {
+    return Success(videoId);
+  }
+
+  @override
   Future<Result<void>> linkLessonExam({
     required String contentId,
     required String examId,

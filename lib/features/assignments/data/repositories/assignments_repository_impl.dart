@@ -73,10 +73,16 @@ class AssignmentsRepositoryImpl implements AssignmentsRepository {
 
   @override
   Future<Result<List<AssignmentSubmissionEntity>>> getSubmissions(
-    String assignmentId,
-  ) async {
+    String assignmentId, {
+    int page = 0,
+    int pageSize = 20,
+  }) async {
     try {
-      final submissions = await _remoteDataSource.getSubmissions(assignmentId);
+      final submissions = await _remoteDataSource.getSubmissions(
+        assignmentId,
+        page: page,
+        pageSize: pageSize,
+      );
       return Success(submissions);
     } on PostgrestException catch (e) {
       return FailureResult(ServerFailure(e.message, code: e.code));

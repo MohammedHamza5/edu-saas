@@ -130,11 +130,29 @@ final class Student360Loaded extends StudentsState {
 
 final class PendingStudentsLoaded extends StudentsState {
   final List<StudentEntity> pending;
+  final bool hasMore;
+  final bool isLoadingMore;
 
-  const PendingStudentsLoaded({required this.pending});
+  const PendingStudentsLoaded({
+    required this.pending,
+    this.hasMore = false,
+    this.isLoadingMore = false,
+  });
+
+  PendingStudentsLoaded copyWith({
+    List<StudentEntity>? pending,
+    bool? hasMore,
+    bool? isLoadingMore,
+  }) {
+    return PendingStudentsLoaded(
+      pending: pending ?? this.pending,
+      hasMore: hasMore ?? this.hasMore,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+    );
+  }
 
   @override
-  List<Object?> get props => [pending];
+  List<Object?> get props => [pending, hasMore, isLoadingMore];
 }
 
 // ── Groups assignment (T-05) ──────────────────────────────────────────────

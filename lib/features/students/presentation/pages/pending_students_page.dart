@@ -7,7 +7,6 @@ import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/responsive_breakpoints.dart';
 import '../../../../core/widgets/app_badge.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_empty_view.dart';
@@ -31,13 +30,32 @@ class PendingStudentsPage extends StatefulWidget {
 }
 
 class _PendingStudentsPageState extends State<PendingStudentsPage> {
+  final ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
     context.read<StudentsCubit>().loadPendingStudents();
     try {
       context.read<GroupsCubit>().loadGroups();
     } catch (_) {}
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (!mounted) return;
+    if (_scrollController.hasClients &&
+        _scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200) {
+      context.read<StudentsCubit>().loadMorePendingStudents();
+    }
   }
 
   Widget _buildSkeletonLoading() {
@@ -118,15 +136,17 @@ class _PendingStudentsPageState extends State<PendingStudentsPage> {
             }
 
             return ResponsiveContainer(
-              maxWidth: ResponsiveBreakpoints.maxContentWidth,
               child: RefreshIndicator(
                 onRefresh: () => context
                     .read<StudentsCubit>()
                     .loadPendingStudents(refresh: true),
                 child: ListView.separated(
+                  controller: _scrollController,
+                  cacheExtent: 350.0,
                   physics: const AlwaysScrollableScrollPhysics(),
                   padding: const EdgeInsets.all(AppSpacing.s16),
-                  itemCount: state.pending.length + 1,
+                  itemCount:
+                      state.pending.length + 1 + (state.isLoadingMore ? 1 : 0),
                   separatorBuilder: (_, __) =>
                       const SizedBox(height: AppSpacing.s12),
                   itemBuilder: (context, index) {
@@ -183,6 +203,15 @@ class _PendingStudentsPageState extends State<PendingStudentsPage> {
                               ),
                             ),
                           ],
+                        ),
+                      );
+                    }
+
+                    if (index == state.pending.length + 1) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: AppSpacing.s16),
+                        child: Center(
+                          child: AppLoadingView.compact(size: 24),
                         ),
                       );
                     }
@@ -887,22 +916,22 @@ class _PendingCardState extends State<_PendingCard> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
+                          Wrap(
+                            spacing: AppSpacing.s8,
+                            runSpacing: AppSpacing.s4,
+                            crossAxisAlignment: WrapCrossAlignment.center,
                             children: [
-                              Flexible(
-                                child: Text(
-                                  student.fullName,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 17,
-                                    color: AppColors.textPrimary,
-                                    letterSpacing: -0.2,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                              Text(
+                                student.fullName,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 17,
+                                  color: AppColors.textPrimary,
+                                  letterSpacing: -0.2,
                                 ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              const SizedBox(width: AppSpacing.s8),
                               AppBadge(
                                 label: context.l10n.pendingApproval,
                                 variant: AppBadgeVariant.pending,

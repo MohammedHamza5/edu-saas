@@ -28,12 +28,30 @@ class DocumentQuestionsPage extends StatefulWidget {
 }
 
 class _DocumentQuestionsPageState extends State<DocumentQuestionsPage> {
+  final ScrollController _scrollController = ScrollController();
   String _selectedFilter = 'all';
 
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
     _loadQuestions();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (!mounted) return;
+    if (_scrollController.hasClients &&
+        _scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200) {
+      context.read<QuestionBankCubit>().loadMoreDocumentQuestions();
+    }
   }
 
   void _loadQuestions() {
@@ -156,6 +174,7 @@ class _DocumentQuestionsPageState extends State<DocumentQuestionsPage> {
           final dateFormat = DateFormat('yyyy/MM/dd  HH:mm');
 
           return CustomScrollView(
+            controller: _scrollController,
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
               // ── Document Header ───────────────────────────────────────
@@ -171,67 +190,104 @@ class _DocumentQuestionsPageState extends State<DocumentQuestionsPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Back button + Document name
-                      Row(
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.arrow_back_rounded),
-                            onPressed: () {
-                              context.read<QuestionBankCubit>().loadDocuments();
-                              context.pop();
-                            },
-                          ),
-                          const SizedBox(width: AppSpacing.s8),
-                          Expanded(
-                            child: Column(
+                      // Back button + Document name + Action buttons (Responsive)
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          final isNarrow = constraints.maxWidth < 680;
+
+                          final titleWidget = Row(
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.arrow_back_rounded),
+                                onPressed: () {
+                                  context
+                                      .read<QuestionBankCubit>()
+                                      .loadDocuments();
+                                  context.pop();
+                                },
+                              ),
+                              const SizedBox(width: AppSpacing.s8),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      doc.displayName,
+                                      style: theme.textTheme.titleLarge?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.textPrimary,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      '${doc.originalFilename}  •  ${dateFormat.format(doc.createdAt)}'
+                                      '${doc.pageCount != null ? '  •  ${l10n.pageCountBadge(doc.pageCount!)}' : ''}',
+                                      style: theme.textTheme.bodySmall?.copyWith(
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          );
+
+                          final actionsWidget = Wrap(
+                            spacing: AppSpacing.s8,
+                            runSpacing: AppSpacing.s8,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            children: [
+                              if (questions.isNotEmpty)
+                                FilledButton.icon(
+                                  style: FilledButton.styleFrom(
+                                    backgroundColor: AppColors.primary,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: AppSpacing.s12,
+                                      vertical: AppSpacing.s8,
+                                    ),
+                                  ),
+                                  icon: const Icon(Icons.bolt_rounded, size: 18),
+                                  label: Text(l10n.createInstantExamAction),
+                                  onPressed: () => _openDeployExamDialog(
+                                    context,
+                                    doc,
+                                    questions,
+                                  ),
+                                ),
+                              IconButton.filledTonal(
+                                tooltip: l10n.refreshTooltip,
+                                icon: const Icon(Icons.refresh_rounded, size: 20),
+                                onPressed: _loadQuestions,
+                              ),
+                            ],
+                          );
+
+                          if (isNarrow) {
+                            return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  doc.displayName,
-                                  style: theme.textTheme.titleLarge?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.textPrimary,
+                                titleWidget,
+                                const SizedBox(height: AppSpacing.s12),
+                                Padding(
+                                  padding: const EdgeInsetsDirectional.only(
+                                    start: 48,
                                   ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  '${doc.originalFilename}  •  ${dateFormat.format(doc.createdAt)}'
-                                  '${doc.pageCount != null ? '  •  ${l10n.pageCountBadge(doc.pageCount!)}' : ''}',
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: AppColors.textSecondary,
-                                  ),
+                                  child: actionsWidget,
                                 ),
                               ],
-                            ),
-                          ),
-                          if (questions.isNotEmpty) ...[
-                            const SizedBox(width: AppSpacing.s8),
-                            FilledButton.icon(
-                              style: FilledButton.styleFrom(
-                                backgroundColor: AppColors.primary,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: AppSpacing.s12,
-                                  vertical: AppSpacing.s8,
-                                ),
-                              ),
-                              icon: const Icon(Icons.bolt_rounded, size: 18),
-                              label: Text(l10n.createInstantExamAction),
-                              onPressed: () => _openDeployExamDialog(
-                                context,
-                                doc,
-                                questions,
-                              ),
-                            ),
-                          ],
-                          const SizedBox(width: AppSpacing.s8),
-                          IconButton.filledTonal(
-                            tooltip: l10n.refreshTooltip,
-                            icon: const Icon(Icons.refresh_rounded, size: 20),
-                            onPressed: _loadQuestions,
-                          ),
-                        ],
+                            );
+                          }
+
+                          return Row(
+                            children: [
+                              Expanded(child: titleWidget),
+                              const SizedBox(width: AppSpacing.s12),
+                              actionsWidget,
+                            ],
+                          );
+                        },
                       ),
                       const SizedBox(height: AppSpacing.s16),
 
@@ -330,6 +386,16 @@ class _DocumentQuestionsPageState extends State<DocumentQuestionsPage> {
                             _confirmDeleteQuestion(context, question),
                       );
                     }, childCount: questions.length),
+                  ),
+                ),
+
+              if (state.isLoadingMore)
+                const SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: AppSpacing.s16),
+                    child: Center(
+                      child: AppLoadingView.compact(size: 24),
+                    ),
                   ),
                 ),
 

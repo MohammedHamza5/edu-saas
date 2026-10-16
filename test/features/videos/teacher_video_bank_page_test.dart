@@ -83,6 +83,8 @@ class _FakeVideoBankRepository implements VideoBankRepository {
   @override
   Future<Result<List<LibraryVideoEntity>>> getVideos({
     String? folderId,
+    int page = 1,
+    int pageSize = 20,
     String? search,
   }) async => Success(videos);
 
@@ -178,8 +180,10 @@ class _FakeGroupsRepository implements GroupsRepository {
 
   @override
   Future<Result<List<GroupMemberEntity>>> getGroupMembers(
-    String groupId,
-  ) async => const Success([]);
+    String groupId, {
+    int page = 0,
+    int pageSize = 25,
+  }) async => const Success([]);
 
   @override
   Future<Result<GroupMemberEntity>> addMemberToGroup({

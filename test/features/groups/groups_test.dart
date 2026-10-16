@@ -33,7 +33,10 @@ class FakeStudentsRepository implements StudentsRepository {
   }
 
   @override
-  Future<Result<List<StudentEntity>>> getPendingStudents() async =>
+  Future<Result<List<StudentEntity>>> getPendingStudents({
+    int page = 0,
+    int pageSize = 20,
+  }) async =>
       const Success([]);
 
   @override
@@ -145,8 +148,10 @@ class FakeGroupsRepository implements GroupsRepository {
 
   @override
   Future<Result<List<GroupMemberEntity>>> getGroupMembers(
-    String groupId,
-  ) async {
+    String groupId, {
+    int page = 0,
+    int pageSize = 25,
+  }) async {
     return Success(membersByGroup[groupId] ?? []);
   }
 

@@ -31,8 +31,7 @@ class NotificationsCubit extends Cubit<NotificationsState> {
           hasMore: cached.notifications.length >= _pageSize,
         ),
       );
-      if (!forceRefresh && AppCache.notifications.has(_cacheKeyNotifs)) return;
-      // Continue to refresh silently
+      // Continue to refresh silently in background (Stale-While-Revalidate)
     } else {
       emit(const NotificationsLoading());
     }

@@ -239,9 +239,9 @@ Deno.serve(async (req: Request) => {
       if (!valid) {
         return json({ error: "INVALID_SIGNATURE" }, 401);
       }
-    } else if (webhookSecret && authHeader) {
+    } else if (webhookSecret) {
       const token = authHeader.replace(/^Bearer\s+/i, "").trim();
-      if (token !== webhookSecret) {
+      if (!token || token !== webhookSecret) {
         return json({ error: "UNAUTHORIZED_TOKEN" }, 401);
       }
     }

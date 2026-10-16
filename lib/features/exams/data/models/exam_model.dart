@@ -31,6 +31,10 @@ class ExamModel extends ExamEntity {
     super.folderId,
     super.folderName,
     super.folderColor,
+    super.pdfFileId,
+    super.pdfFileName,
+    super.pdfFileSize,
+    super.pdfStoragePath,
   });
 
   factory ExamModel.fromJson(Map<String, dynamic> json) {
@@ -82,6 +86,10 @@ class ExamModel extends ExamEntity {
       myLatestAttempt = ExamAttemptModel.fromJson(
         Map<String, dynamic>.from(json['my_latest_attempt'] as Map),
       );
+    } else if (json['latest_attempt'] is Map) {
+      myLatestAttempt = ExamAttemptModel.fromJson(
+        Map<String, dynamic>.from(json['latest_attempt'] as Map),
+      );
     } else if (json['exam_attempts'] is List &&
         (json['exam_attempts'] as List).isNotEmpty) {
       // Only parse as ExamAttemptModel if the items actually look like attempts (have an 'id' and 'student_id')
@@ -110,6 +118,10 @@ class ExamModel extends ExamEntity {
 
     if (json['my_best_score'] != null) {
       myBestScore = (json['my_best_score'] as num).toInt();
+    } else if (json['best_score'] != null) {
+      myBestScore = (json['best_score'] as num).toInt();
+    } else if (myBestScore == null && myLatestAttempt?.score != null) {
+      myBestScore = myLatestAttempt!.score;
     }
 
     int attemptsCount = 0;
@@ -175,6 +187,11 @@ class ExamModel extends ExamEntity {
       folderColor = f['color']?.toString();
     }
 
+    final pdfFileId = json['pdf_file_id']?.toString();
+    final pdfFileName = json['pdf_file_name']?.toString();
+    final pdfFileSize = (json['pdf_file_size'] as num?)?.toInt();
+    final pdfStoragePath = json['pdf_storage_path']?.toString();
+
     return ExamModel(
       id: json['id']?.toString() ?? '',
       contentId: json['content_id']?.toString() ?? '',
@@ -207,6 +224,10 @@ class ExamModel extends ExamEntity {
       folderId: folderId,
       folderName: folderName,
       folderColor: folderColor,
+      pdfFileId: pdfFileId,
+      pdfFileName: pdfFileName,
+      pdfFileSize: pdfFileSize,
+      pdfStoragePath: pdfStoragePath,
     );
   }
 
@@ -223,6 +244,10 @@ class ExamModel extends ExamEntity {
       'allow_retake': allowRetake,
       if (startAt != null) 'start_at': startAt!.toIso8601String(),
       if (endAt != null) 'end_at': endAt!.toIso8601String(),
+      if (pdfFileId != null) 'pdf_file_id': pdfFileId,
+      if (pdfFileName != null) 'pdf_file_name': pdfFileName,
+      if (pdfFileSize != null) 'pdf_file_size': pdfFileSize,
+      if (pdfStoragePath != null) 'pdf_storage_path': pdfStoragePath,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
     };

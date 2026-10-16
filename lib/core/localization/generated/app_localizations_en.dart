@@ -1007,6 +1007,39 @@ class AppLocalizationsEn extends AppLocalizations {
   String get satDesmosCalculator => 'Desmos Scientific Calculator';
 
   @override
+  String get desmosGraphingCalculator => 'Desmos Graphing Calculator';
+
+  @override
+  String get desmosScientificCalculator => 'Desmos Scientific Calculator';
+
+  @override
+  String get desmosModeGraphing => 'Graphing';
+
+  @override
+  String get desmosModeScientific => 'Scientific';
+
+  @override
+  String get desmosMinimizeTooltip => 'Minimize Calculator';
+
+  @override
+  String get desmosExpandTooltip => 'Expand Calculator';
+
+  @override
+  String get desmosCloseTooltip => 'Close Calculator';
+
+  @override
+  String get desmosDragHandleTooltip => 'Drag to reposition calculator';
+
+  @override
+  String get desmosMaximizeTooltip => 'Maximize Calculator';
+
+  @override
+  String get desmosRestoreTooltip => 'Restore Calculator Size';
+
+  @override
+  String get desmosResizeHandleTooltip => 'Drag corner to resize calculator';
+
+  @override
   String get satReferenceSheet => 'SAT Reference Formulas';
 
   @override
@@ -3545,6 +3578,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get resumeCurrentExam => 'Resume In-Progress Exam';
 
   @override
+  String get examResumeAction => 'Resume Exam';
+
+  @override
   String get startExamNow => 'Start Exam Now';
 
   @override
@@ -4978,6 +5014,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String examNumberBadge(int number) {
+    return 'Exam $number';
+  }
+
+  @override
   String get moveUpAction => 'Move Up';
 
   @override
@@ -6107,6 +6148,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get goToExamsPage => 'Go to Exams Dashboard 📋';
 
   @override
+  String get assignToGroupNowAction => 'Assign to Group Now';
+
+  @override
+  String get returnToQuestionBankAction => 'Return to Question Bank';
+
+  @override
   String get analyzingForensicStep =>
       'Analyzing forensic layers & classifying pages...';
 
@@ -6464,6 +6511,22 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get syncingImageInBackground => 'Syncing image in background...';
+
+  @override
+  String get imageSavedToCloud => 'Saved to cloud';
+
+  @override
+  String get syncingPendingImages => 'Finalizing image uploads to cloud...';
+
+  @override
+  String get retryUpload => 'Retry';
+
+  @override
+  String get imageUploadPendingError =>
+      'Please wait while question images finish uploading.';
+
+  @override
   String get questionTextFieldOptional =>
       'Question Prompt (Optional if image attached)';
 
@@ -6728,6 +6791,61 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get allExamsFilter => 'All Sources';
+
+  @override
+  String get studentNavMistakesBank => 'Mistakes Bank';
+
+  @override
+  String get mistakesBankSidebarSubtitle => 'Review & master concepts';
+
+  @override
+  String get filterWrongAnswersOnly => 'Wrong Answers Only';
+
+  @override
+  String get filterSkippedOnly => 'Skipped Questions Only';
+
+  @override
+  String get wrongAnswerBadge => 'Wrong Answer';
+
+  @override
+  String get skippedQuestionBadge => 'Skipped Question';
+
+  @override
+  String previousWrongChoice(String option) {
+    return 'Your previous choice: $option';
+  }
+
+  @override
+  String get questionWasSkippedNotice =>
+      'No option was selected during this exam (skipped question)';
+
+  @override
+  String get searchMistakesPlaceholder => 'Search questions or topic...';
+
+  @override
+  String get wrongAnswersCountLabel => 'Wrong Answers';
+
+  @override
+  String get skippedQuestionsCountLabel => 'Skipped Questions';
+
+  @override
+  String get practiceThisQuestion => 'Practice This Question';
+
+  @override
+  String practiceFilteredMistakes(int count) {
+    return 'Start Practice ($count)';
+  }
+
+  @override
+  String get mistakesTypeBreakdown => 'Mistakes Breakdown';
+
+  @override
+  String get practiceHeaderWrongNote =>
+      '⚠️ You answered this question incorrectly previously';
+
+  @override
+  String get practiceHeaderSkippedNote =>
+      '⏸️ You left this question unanswered previously';
 
   @override
   String get videoBankCmsTitle => 'Video Bank';
@@ -8494,4 +8612,458 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reloadPlayerAction => 'Reload Player';
+
+  @override
+  String examQuestionsSolvedProgress(int solved, int total) {
+    return '$solved of $total questions solved';
+  }
+
+  @override
+  String examQuestionsAllSolved(int count) {
+    return 'All questions solved ($count/$count)';
+  }
+
+  @override
+  String examNotStartedYet(int total) {
+    return 'Not started yet (0/$total)';
+  }
+
+  @override
+  String get examCompletedCheck => 'Completed';
+
+  @override
+  String get examFullyCompletedBadge => 'Fully Completed';
+
+  @override
+  String get examSearchPlaceholder => 'Search assessments by title or group...';
+
+  @override
+  String get filterNotStarted => 'Available';
+
+  @override
+  String get studentExamsStatsCompleted => 'Completed';
+
+  @override
+  String get studentExamsStatsInProgress => 'In Progress';
+
+  @override
+  String get studentExamsStatsAvailable => 'Available';
+
+  @override
+  String get studentExamsStatsTotal => 'Total Assessments';
+
+  @override
+  String get studentExamsOverallProgress => 'Completion Rate';
+
+  @override
+  String get studentExamsOverviewTitle => 'Assessments Progress Hub';
+
+  @override
+  String examScoreAchieved(int score, int max) {
+    return 'Score: $score/$max';
+  }
+
+  @override
+  String get clearSearchTooltip => 'Clear search';
+
+  @override
+  String get studentExamCardReviewTooltip => 'Review questions and answers';
+
+  @override
+  String get examCompletedStatusCheck => 'Completed Successfully';
+
+  @override
+  String get openPdfInNewTab => 'Open in New Window (Fast for iPad)';
+
+  @override
+  String get openPdfInNewTabTooltip =>
+      'Open with high-performance native browser engine with Apple Pencil & Split View support';
+
+  @override
+  String get openPdfEmbeddedTooltip => 'Preview PDF inside the platform';
+
+  @override
+  String examDraftFoundNotice(int count, String time) {
+    return 'Unsaved draft found ($count questions • $time)';
+  }
+
+  @override
+  String get restoreExamDraftAction => 'Restore Draft';
+
+  @override
+  String get discardExamDraftAction => 'Discard';
+
+  @override
+  String get examDraftRestoredSuccess => 'Draft restored successfully';
+
+  @override
+  String get examDraftDiscardedSuccess => 'Temporary draft discarded';
+
+  @override
+  String get autoSavedDraftBadge => 'Draft Auto-Saved';
+
+  @override
+  String get materialsLibraryTitle => 'Materials Library';
+
+  @override
+  String get materialsLibrarySubtitle =>
+      'Manage handouts, worksheets, and lecture PDFs';
+
+  @override
+  String get selectFromMaterialsLibrary => 'Choose from Materials Library';
+
+  @override
+  String get selectFromMaterialsLibrarySubtitle =>
+      'Select an existing file to link directly without re-uploading';
+
+  @override
+  String get materialsSearchHint => 'Search by file or material name...';
+
+  @override
+  String get noMaterialsFound => 'No materials found in this folder';
+
+  @override
+  String get noMaterialsFoundSubtitle =>
+      'Upload PDF handouts or create folders to organize your resources.';
+
+  @override
+  String get uploadMaterialAction => 'Upload File';
+
+  @override
+  String get createNewFolderAction => 'New Folder';
+
+  @override
+  String get editFolderName => 'Edit Folder';
+
+  @override
+  String get editMaterialAction => 'Rename File';
+
+  @override
+  String get deleteMaterialAction => 'Delete File';
+
+  @override
+  String get moveMaterialAction => 'Move to Folder';
+
+  @override
+  String usedInLecturesCount(int count) {
+    return 'Used in $count lectures';
+  }
+
+  @override
+  String get unusedMaterial => 'Unused';
+
+  @override
+  String get materialDuplicateNotice =>
+      'This file is already in your library! Reusing it directly to save space.';
+
+  @override
+  String get materialSelectedFromLibrary => 'Linked from Library';
+
+  @override
+  String get changeMaterialAction => 'Change File';
+
+  @override
+  String get previewMaterialAction => 'Preview';
+
+  @override
+  String folderFilesCount(int count) {
+    return '$count files';
+  }
+
+  @override
+  String get rootMaterialsTitle => 'Library Root';
+
+  @override
+  String get confirmDeleteFolderMessage =>
+      'Are you sure you want to delete this folder? Files inside it will be moved to root.';
+
+  @override
+  String get confirmDeleteMaterialTitle => 'Delete File?';
+
+  @override
+  String get confirmDeleteMaterialMessage =>
+      'Are you sure you want to delete this file from your library?';
+
+  @override
+  String get selectMaterialAction => 'Select File';
+
+  @override
+  String get uploadingMaterialNotice =>
+      'Uploading and indexing material in library...';
+
+  @override
+  String get uploadFromDeviceAction => 'Upload from Device';
+
+  @override
+  String get orChooseFromDevice => 'or choose a file from your device';
+
+  @override
+  String get allMaterialsFilter => 'All Files';
+
+  @override
+  String get pdfFilesFilter => 'PDF Files';
+
+  @override
+  String get examUnderPreparationNotice =>
+      'This exam is currently being prepared by the teacher and has no questions yet.';
+
+  @override
+  String get lessonUnderPreparationNotice =>
+      'This lecture is currently being prepared by the teacher and content will be published soon.';
+
+  @override
+  String get contentUnderPreparation => 'Content Under Preparation';
+
+  @override
+  String folderCount(int count) {
+    return '$count folders';
+  }
+
+  @override
+  String get submissionReasonStudentSubmitted => 'Student Submitted';
+
+  @override
+  String get submissionReasonTimeExpired => 'Time Expired';
+
+  @override
+  String get submissionReasonForcedExit => 'Forced Exit (Left Exam)';
+
+  @override
+  String get submissionReasonSecurityViolations => 'Security Violations';
+
+  @override
+  String get submissionReasonTabClosed => 'Browser / Window Closed';
+
+  @override
+  String get submissionReasonSystemTimeout => 'System Timeout (Auto-Finalized)';
+
+  @override
+  String get forcedExitWarningTitle => 'Warning: Leaving Exam';
+
+  @override
+  String get forcedExitWarningMessage =>
+      'Leaving this page will immediately force-submit your exam and calculate your score based only on the answers you have provided so far. Are you sure you want to exit and submit?';
+
+  @override
+  String get forcedExitConfirmButton => 'Force Submit & Exit';
+
+  @override
+  String get stayAndContinueButton => 'Stay & Continue Solving';
+
+  @override
+  String get timeExpiredAutoSubmittingNotice =>
+      'Exam time is up! Auto-submitting and grading your answers...';
+
+  @override
+  String get viewStudentAnswersAction => 'Review Student Answers';
+
+  @override
+  String get submissionReasonLabel => 'Submission Type';
+
+  @override
+  String get performanceGradeExcellent => 'Outstanding (Honor)';
+
+  @override
+  String get performanceGradeVeryGood => 'Very Good';
+
+  @override
+  String get performanceGradeGood => 'Good';
+
+  @override
+  String get performanceGradePass => 'Passed';
+
+  @override
+  String get performanceGradeNeedsImprovement => 'Needs Improvement';
+
+  @override
+  String get correctAnswersMetric => 'Correct Answers';
+
+  @override
+  String get incorrectAnswersMetric => 'Incorrect Answers';
+
+  @override
+  String get skippedAnswersMetric => 'Skipped Questions';
+
+  @override
+  String get timeSpentMetric => 'Time Spent';
+
+  @override
+  String get totalScoreMetric => 'Total Score';
+
+  @override
+  String get questionsMatrixTitle => 'Answer Sheet Matrix';
+
+  @override
+  String get questionsMatrixSubtitle =>
+      'Tap any question to review its full solution and explanation';
+
+  @override
+  String get statusCorrect => 'Correct';
+
+  @override
+  String get statusIncorrect => 'Wrong';
+
+  @override
+  String get statusSkipped => 'Skipped';
+
+  @override
+  String get viewExamResultAction => 'View Results & Solutions';
+
+  @override
+  String get retakeToImproveScore => 'Retake (Improve Score)';
+
+  @override
+  String get submissionExplanationStudent =>
+      'You submitted your exam normally and scores were calculated.';
+
+  @override
+  String get submissionExplanationTimeout =>
+      'Exam was automatically submitted as allotted time expired.';
+
+  @override
+  String get submissionExplanationForcedExit =>
+      'Exam was forcibly submitted after leaving the test screen.';
+
+  @override
+  String get submissionExplanationViolations =>
+      'Exam was submitted due to repeated security rule violations.';
+
+  @override
+  String get submissionExplanationTabClosed =>
+      'Exam was submitted because the browser window was closed.';
+
+  @override
+  String get submissionExplanationSystem =>
+      'Exam was automatically graded by the system.';
+
+  @override
+  String examScoreSummary(int score, int maxScore) {
+    return 'Scored $score of $maxScore';
+  }
+
+  @override
+  String passingThresholdLabel(int score) {
+    return 'Passing Threshold: $score%';
+  }
+
+  @override
+  String goToNextLectureSpecific(String title) {
+    return 'Next Lecture: $title';
+  }
+
+  @override
+  String get examPassedSubtitle =>
+      'Great job! You achieved the required passing score for this exam.';
+
+  @override
+  String get examFailedSubtitle =>
+      'Review your mistakes and model answers, then retry to master the material.';
+
+  @override
+  String get previousAttemptSummary => 'Previous Attempt Result';
+
+  @override
+  String get detailedPerformanceAnalytics => 'Performance Breakdown';
+
+  @override
+  String get reviewAllQuestionsAction => 'Review All Questions & Solutions';
+
+  @override
+  String get uploadingFilesTitle => 'Uploading Files';
+
+  @override
+  String uploadingFileProgress(int current, int total, String fileName) {
+    return 'Uploading file $current of $total: $fileName';
+  }
+
+  @override
+  String uploadMaterialSuccess(String fileName) {
+    return 'File \"$fileName\" uploaded successfully';
+  }
+
+  @override
+  String uploadMaterialError(String fileName, String error) {
+    return 'Failed to upload \"$fileName\": $error';
+  }
+
+  @override
+  String get smartBadgePdf => 'PDF';
+
+  @override
+  String get smartBadgeExam => 'Quiz';
+
+  @override
+  String get changeAction => 'Change';
+
+  @override
+  String get inspectLectureAction => 'Inspect & Preview';
+
+  @override
+  String get reorderLecturesHint =>
+      'Drag cards to reorder lectures before saving';
+
+  @override
+  String get singleVideoModeBadge => 'Single Lecture';
+
+  @override
+  String selectedVideosBadge(int count) {
+    return '$count Selected Videos';
+  }
+
+  @override
+  String get attachedExamPdf => 'Attached Exam Booklet (PDF)';
+
+  @override
+  String get attachedExamPdfDesc =>
+      'Attach a PDF question booklet for students to view securely while solving';
+
+  @override
+  String get attachPdfFile => 'Attach PDF Booklet';
+
+  @override
+  String get removeAttachedPdf => 'Remove PDF';
+
+  @override
+  String get pdfAttachedSuccess => 'PDF booklet attached successfully';
+
+  @override
+  String get quickBubbleSheetGenerator => 'Quick Bubble Sheet Generator';
+
+  @override
+  String get quickBubbleSheetPrompt =>
+      'Generate answer sheets quickly for your PDF exam';
+
+  @override
+  String get numberOfQuestions => 'Number of Questions';
+
+  @override
+  String get generateQuestions => 'Generate Questions';
+
+  @override
+  String get viewExamBooklet => 'View Exam Booklet (PDF)';
+
+  @override
+  String get hideExamBooklet => 'Back to Questions';
+
+  @override
+  String get examPdfLoading => 'Loading exam booklet...';
+
+  @override
+  String get numberOfOptionsPerQuestion => 'Options per question';
+
+  @override
+  String get quickPresets => 'Presets';
+
+  @override
+  String get overwriteQuestionsWarning =>
+      'This will replace current questions with a fresh bubble sheet. Continue?';
+
+  @override
+  String get uploadNewPdfFromDevice => 'Upload new PDF from device';
+
+  @override
+  String get previewPdfBooklet => 'Preview Booklet';
+
+  @override
+  String get replacePdfBooklet => 'Replace Booklet';
 }

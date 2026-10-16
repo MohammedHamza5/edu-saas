@@ -32,7 +32,7 @@ class _NotificationsCenterPageState extends State<NotificationsCenterPage> {
   @override
   void initState() {
     super.initState();
-    context.read<NotificationsCubit>().loadNotifications();
+    context.read<NotificationsCubit>().loadNotifications(forceRefresh: true);
     _scrollController.addListener(_onScroll);
   }
 
@@ -283,10 +283,8 @@ class _NotificationsCenterPageState extends State<NotificationsCenterPage> {
                   item.body.toLowerCase().contains(q);
             }).toList();
 
-            return Center(
-              child: ResponsiveContainer(
-                maxWidth: 800,
-                child: Column(
+            return ResponsiveContainer(
+              child: Column(
                   children: [
                     // Search & Filters Header
                     Container(
@@ -449,6 +447,9 @@ class _NotificationsCenterPageState extends State<NotificationsCenterPage> {
                                   .loadNotifications(forceRefresh: true),
                               child: ListView.builder(
                                 controller: _scrollController,
+                                cacheExtent: 350.0,
+                                addRepaintBoundaries: false,
+                                addAutomaticKeepAlives: false,
                                 padding: const EdgeInsets.all(AppSpacing.s16),
                                 itemCount:
                                     displayedItems.length +
@@ -482,8 +483,7 @@ class _NotificationsCenterPageState extends State<NotificationsCenterPage> {
                     ),
                   ],
                 ),
-              ),
-            );
+              );
           }
 
           return const SizedBox.shrink();

@@ -1994,6 +1994,72 @@ abstract class AppLocalizations {
   /// **'Desmos Scientific Calculator'**
   String get satDesmosCalculator;
 
+  /// Desmos graphing calculator title
+  ///
+  /// In en, this message translates to:
+  /// **'Desmos Graphing Calculator'**
+  String get desmosGraphingCalculator;
+
+  /// Desmos scientific calculator title
+  ///
+  /// In en, this message translates to:
+  /// **'Desmos Scientific Calculator'**
+  String get desmosScientificCalculator;
+
+  /// Desmos graphing mode button
+  ///
+  /// In en, this message translates to:
+  /// **'Graphing'**
+  String get desmosModeGraphing;
+
+  /// Desmos scientific mode button
+  ///
+  /// In en, this message translates to:
+  /// **'Scientific'**
+  String get desmosModeScientific;
+
+  /// Tooltip for minimizing Desmos calculator
+  ///
+  /// In en, this message translates to:
+  /// **'Minimize Calculator'**
+  String get desmosMinimizeTooltip;
+
+  /// Tooltip for expanding Desmos calculator
+  ///
+  /// In en, this message translates to:
+  /// **'Expand Calculator'**
+  String get desmosExpandTooltip;
+
+  /// Tooltip for closing Desmos calculator
+  ///
+  /// In en, this message translates to:
+  /// **'Close Calculator'**
+  String get desmosCloseTooltip;
+
+  /// Tooltip for dragging calculator
+  ///
+  /// In en, this message translates to:
+  /// **'Drag to reposition calculator'**
+  String get desmosDragHandleTooltip;
+
+  /// Tooltip for maximizing Desmos calculator
+  ///
+  /// In en, this message translates to:
+  /// **'Maximize Calculator'**
+  String get desmosMaximizeTooltip;
+
+  /// Tooltip for restoring Desmos calculator size
+  ///
+  /// In en, this message translates to:
+  /// **'Restore Calculator Size'**
+  String get desmosRestoreTooltip;
+
+  /// Tooltip for resizing Desmos calculator
+  ///
+  /// In en, this message translates to:
+  /// **'Drag corner to resize calculator'**
+  String get desmosResizeHandleTooltip;
+
   /// Reference sheet tool
   ///
   /// In en, this message translates to:
@@ -6433,6 +6499,12 @@ abstract class AppLocalizations {
   /// **'Resume In-Progress Exam'**
   String get resumeCurrentExam;
 
+  /// Resume exam button
+  ///
+  /// In en, this message translates to:
+  /// **'Resume Exam'**
+  String get examResumeAction;
+
   /// Start exam button
   ///
   /// In en, this message translates to:
@@ -8863,6 +8935,12 @@ abstract class AppLocalizations {
   /// **'Lecture {number}'**
   String lectureNumberBadge(int number);
 
+  /// No description provided for @examNumberBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam {number}'**
+  String examNumberBadge(int number);
+
   /// No description provided for @moveUpAction.
   ///
   /// In en, this message translates to:
@@ -10891,6 +10969,18 @@ abstract class AppLocalizations {
   /// **'Go to Exams Dashboard 📋'**
   String get goToExamsPage;
 
+  /// Button to open group assignment form in upload exam dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Assign to Group Now'**
+  String get assignToGroupNowAction;
+
+  /// Button to dismiss dialog and return to question bank
+  ///
+  /// In en, this message translates to:
+  /// **'Return to Question Bank'**
+  String get returnToQuestionBankAction;
+
   /// Extraction progress step 1
   ///
   /// In en, this message translates to:
@@ -11509,6 +11599,36 @@ abstract class AppLocalizations {
   /// **'Failed to upload image: {error}'**
   String imageUploadFailed(String error);
 
+  /// No description provided for @syncingImageInBackground.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing image in background...'**
+  String get syncingImageInBackground;
+
+  /// No description provided for @imageSavedToCloud.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved to cloud'**
+  String get imageSavedToCloud;
+
+  /// No description provided for @syncingPendingImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Finalizing image uploads to cloud...'**
+  String get syncingPendingImages;
+
+  /// No description provided for @retryUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retryUpload;
+
+  /// No description provided for @imageUploadPendingError.
+  ///
+  /// In en, this message translates to:
+  /// **'Please wait while question images finish uploading.'**
+  String get imageUploadPendingError;
+
   /// No description provided for @questionTextFieldOptional.
   ///
   /// In en, this message translates to:
@@ -11958,6 +12078,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'All Sources'**
   String get allExamsFilter;
+
+  /// No description provided for @studentNavMistakesBank.
+  ///
+  /// In en, this message translates to:
+  /// **'Mistakes Bank'**
+  String get studentNavMistakesBank;
+
+  /// No description provided for @mistakesBankSidebarSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review & master concepts'**
+  String get mistakesBankSidebarSubtitle;
+
+  /// No description provided for @filterWrongAnswersOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong Answers Only'**
+  String get filterWrongAnswersOnly;
+
+  /// No description provided for @filterSkippedOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped Questions Only'**
+  String get filterSkippedOnly;
+
+  /// No description provided for @wrongAnswerBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong Answer'**
+  String get wrongAnswerBadge;
+
+  /// No description provided for @skippedQuestionBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped Question'**
+  String get skippedQuestionBadge;
+
+  /// No description provided for @previousWrongChoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Your previous choice: {option}'**
+  String previousWrongChoice(String option);
+
+  /// No description provided for @questionWasSkippedNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'No option was selected during this exam (skipped question)'**
+  String get questionWasSkippedNotice;
+
+  /// No description provided for @searchMistakesPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Search questions or topic...'**
+  String get searchMistakesPlaceholder;
+
+  /// No description provided for @wrongAnswersCountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong Answers'**
+  String get wrongAnswersCountLabel;
+
+  /// No description provided for @skippedQuestionsCountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped Questions'**
+  String get skippedQuestionsCountLabel;
+
+  /// No description provided for @practiceThisQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Practice This Question'**
+  String get practiceThisQuestion;
+
+  /// No description provided for @practiceFilteredMistakes.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Practice ({count})'**
+  String practiceFilteredMistakes(int count);
+
+  /// No description provided for @mistakesTypeBreakdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Mistakes Breakdown'**
+  String get mistakesTypeBreakdown;
+
+  /// No description provided for @practiceHeaderWrongNote.
+  ///
+  /// In en, this message translates to:
+  /// **'⚠️ You answered this question incorrectly previously'**
+  String get practiceHeaderWrongNote;
+
+  /// No description provided for @practiceHeaderSkippedNote.
+  ///
+  /// In en, this message translates to:
+  /// **'⏸️ You left this question unanswered previously'**
+  String get practiceHeaderSkippedNote;
 
   /// No description provided for @videoBankCmsTitle.
   ///
@@ -14964,6 +15180,804 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reload Player'**
   String get reloadPlayerAction;
+
+  /// No description provided for @examQuestionsSolvedProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{solved} of {total} questions solved'**
+  String examQuestionsSolvedProgress(int solved, int total);
+
+  /// No description provided for @examQuestionsAllSolved.
+  ///
+  /// In en, this message translates to:
+  /// **'All questions solved ({count}/{count})'**
+  String examQuestionsAllSolved(int count);
+
+  /// No description provided for @examNotStartedYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not started yet (0/{total})'**
+  String examNotStartedYet(int total);
+
+  /// No description provided for @examCompletedCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get examCompletedCheck;
+
+  /// No description provided for @examFullyCompletedBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Fully Completed'**
+  String get examFullyCompletedBadge;
+
+  /// No description provided for @examSearchPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Search assessments by title or group...'**
+  String get examSearchPlaceholder;
+
+  /// No description provided for @filterNotStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get filterNotStarted;
+
+  /// No description provided for @studentExamsStatsCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get studentExamsStatsCompleted;
+
+  /// No description provided for @studentExamsStatsInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In Progress'**
+  String get studentExamsStatsInProgress;
+
+  /// No description provided for @studentExamsStatsAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get studentExamsStatsAvailable;
+
+  /// No description provided for @studentExamsStatsTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Assessments'**
+  String get studentExamsStatsTotal;
+
+  /// No description provided for @studentExamsOverallProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Completion Rate'**
+  String get studentExamsOverallProgress;
+
+  /// No description provided for @studentExamsOverviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Assessments Progress Hub'**
+  String get studentExamsOverviewTitle;
+
+  /// No description provided for @examScoreAchieved.
+  ///
+  /// In en, this message translates to:
+  /// **'Score: {score}/{max}'**
+  String examScoreAchieved(int score, int max);
+
+  /// No description provided for @clearSearchTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search'**
+  String get clearSearchTooltip;
+
+  /// No description provided for @studentExamCardReviewTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Review questions and answers'**
+  String get studentExamCardReviewTooltip;
+
+  /// No description provided for @examCompletedStatusCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed Successfully'**
+  String get examCompletedStatusCheck;
+
+  /// No description provided for @openPdfInNewTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Open in New Window (Fast for iPad)'**
+  String get openPdfInNewTab;
+
+  /// No description provided for @openPdfInNewTabTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Open with high-performance native browser engine with Apple Pencil & Split View support'**
+  String get openPdfInNewTabTooltip;
+
+  /// No description provided for @openPdfEmbeddedTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview PDF inside the platform'**
+  String get openPdfEmbeddedTooltip;
+
+  /// No description provided for @examDraftFoundNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsaved draft found ({count} questions • {time})'**
+  String examDraftFoundNotice(int count, String time);
+
+  /// No description provided for @restoreExamDraftAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore Draft'**
+  String get restoreExamDraftAction;
+
+  /// No description provided for @discardExamDraftAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get discardExamDraftAction;
+
+  /// No description provided for @examDraftRestoredSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft restored successfully'**
+  String get examDraftRestoredSuccess;
+
+  /// No description provided for @examDraftDiscardedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Temporary draft discarded'**
+  String get examDraftDiscardedSuccess;
+
+  /// No description provided for @autoSavedDraftBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft Auto-Saved'**
+  String get autoSavedDraftBadge;
+
+  /// No description provided for @materialsLibraryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Materials Library'**
+  String get materialsLibraryTitle;
+
+  /// No description provided for @materialsLibrarySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage handouts, worksheets, and lecture PDFs'**
+  String get materialsLibrarySubtitle;
+
+  /// No description provided for @selectFromMaterialsLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from Materials Library'**
+  String get selectFromMaterialsLibrary;
+
+  /// No description provided for @selectFromMaterialsLibrarySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select an existing file to link directly without re-uploading'**
+  String get selectFromMaterialsLibrarySubtitle;
+
+  /// No description provided for @materialsSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by file or material name...'**
+  String get materialsSearchHint;
+
+  /// No description provided for @noMaterialsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No materials found in this folder'**
+  String get noMaterialsFound;
+
+  /// No description provided for @noMaterialsFoundSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload PDF handouts or create folders to organize your resources.'**
+  String get noMaterialsFoundSubtitle;
+
+  /// No description provided for @uploadMaterialAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload File'**
+  String get uploadMaterialAction;
+
+  /// No description provided for @createNewFolderAction.
+  ///
+  /// In en, this message translates to:
+  /// **'New Folder'**
+  String get createNewFolderAction;
+
+  /// No description provided for @editFolderName.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Folder'**
+  String get editFolderName;
+
+  /// No description provided for @editMaterialAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename File'**
+  String get editMaterialAction;
+
+  /// No description provided for @deleteMaterialAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete File'**
+  String get deleteMaterialAction;
+
+  /// No description provided for @moveMaterialAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to Folder'**
+  String get moveMaterialAction;
+
+  /// No description provided for @usedInLecturesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Used in {count} lectures'**
+  String usedInLecturesCount(int count);
+
+  /// No description provided for @unusedMaterial.
+  ///
+  /// In en, this message translates to:
+  /// **'Unused'**
+  String get unusedMaterial;
+
+  /// No description provided for @materialDuplicateNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'This file is already in your library! Reusing it directly to save space.'**
+  String get materialDuplicateNotice;
+
+  /// No description provided for @materialSelectedFromLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked from Library'**
+  String get materialSelectedFromLibrary;
+
+  /// No description provided for @changeMaterialAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Change File'**
+  String get changeMaterialAction;
+
+  /// No description provided for @previewMaterialAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get previewMaterialAction;
+
+  /// No description provided for @folderFilesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} files'**
+  String folderFilesCount(int count);
+
+  /// No description provided for @rootMaterialsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Library Root'**
+  String get rootMaterialsTitle;
+
+  /// No description provided for @confirmDeleteFolderMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this folder? Files inside it will be moved to root.'**
+  String get confirmDeleteFolderMessage;
+
+  /// No description provided for @confirmDeleteMaterialTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete File?'**
+  String get confirmDeleteMaterialTitle;
+
+  /// No description provided for @confirmDeleteMaterialMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this file from your library?'**
+  String get confirmDeleteMaterialMessage;
+
+  /// No description provided for @selectMaterialAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Select File'**
+  String get selectMaterialAction;
+
+  /// No description provided for @uploadingMaterialNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading and indexing material in library...'**
+  String get uploadingMaterialNotice;
+
+  /// No description provided for @uploadFromDeviceAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload from Device'**
+  String get uploadFromDeviceAction;
+
+  /// No description provided for @orChooseFromDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'or choose a file from your device'**
+  String get orChooseFromDevice;
+
+  /// No description provided for @allMaterialsFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'All Files'**
+  String get allMaterialsFilter;
+
+  /// No description provided for @pdfFilesFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF Files'**
+  String get pdfFilesFilter;
+
+  /// No description provided for @examUnderPreparationNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'This exam is currently being prepared by the teacher and has no questions yet.'**
+  String get examUnderPreparationNotice;
+
+  /// No description provided for @lessonUnderPreparationNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'This lecture is currently being prepared by the teacher and content will be published soon.'**
+  String get lessonUnderPreparationNotice;
+
+  /// No description provided for @contentUnderPreparation.
+  ///
+  /// In en, this message translates to:
+  /// **'Content Under Preparation'**
+  String get contentUnderPreparation;
+
+  /// No description provided for @folderCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} folders'**
+  String folderCount(int count);
+
+  /// No description provided for @submissionReasonStudentSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Student Submitted'**
+  String get submissionReasonStudentSubmitted;
+
+  /// No description provided for @submissionReasonTimeExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Time Expired'**
+  String get submissionReasonTimeExpired;
+
+  /// No description provided for @submissionReasonForcedExit.
+  ///
+  /// In en, this message translates to:
+  /// **'Forced Exit (Left Exam)'**
+  String get submissionReasonForcedExit;
+
+  /// No description provided for @submissionReasonSecurityViolations.
+  ///
+  /// In en, this message translates to:
+  /// **'Security Violations'**
+  String get submissionReasonSecurityViolations;
+
+  /// No description provided for @submissionReasonTabClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Browser / Window Closed'**
+  String get submissionReasonTabClosed;
+
+  /// No description provided for @submissionReasonSystemTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'System Timeout (Auto-Finalized)'**
+  String get submissionReasonSystemTimeout;
+
+  /// No description provided for @forcedExitWarningTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Warning: Leaving Exam'**
+  String get forcedExitWarningTitle;
+
+  /// No description provided for @forcedExitWarningMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Leaving this page will immediately force-submit your exam and calculate your score based only on the answers you have provided so far. Are you sure you want to exit and submit?'**
+  String get forcedExitWarningMessage;
+
+  /// No description provided for @forcedExitConfirmButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Force Submit & Exit'**
+  String get forcedExitConfirmButton;
+
+  /// No description provided for @stayAndContinueButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay & Continue Solving'**
+  String get stayAndContinueButton;
+
+  /// No description provided for @timeExpiredAutoSubmittingNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam time is up! Auto-submitting and grading your answers...'**
+  String get timeExpiredAutoSubmittingNotice;
+
+  /// No description provided for @viewStudentAnswersAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Review Student Answers'**
+  String get viewStudentAnswersAction;
+
+  /// No description provided for @submissionReasonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Submission Type'**
+  String get submissionReasonLabel;
+
+  /// No description provided for @performanceGradeExcellent.
+  ///
+  /// In en, this message translates to:
+  /// **'Outstanding (Honor)'**
+  String get performanceGradeExcellent;
+
+  /// No description provided for @performanceGradeVeryGood.
+  ///
+  /// In en, this message translates to:
+  /// **'Very Good'**
+  String get performanceGradeVeryGood;
+
+  /// No description provided for @performanceGradeGood.
+  ///
+  /// In en, this message translates to:
+  /// **'Good'**
+  String get performanceGradeGood;
+
+  /// No description provided for @performanceGradePass.
+  ///
+  /// In en, this message translates to:
+  /// **'Passed'**
+  String get performanceGradePass;
+
+  /// No description provided for @performanceGradeNeedsImprovement.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs Improvement'**
+  String get performanceGradeNeedsImprovement;
+
+  /// No description provided for @correctAnswersMetric.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct Answers'**
+  String get correctAnswersMetric;
+
+  /// No description provided for @incorrectAnswersMetric.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect Answers'**
+  String get incorrectAnswersMetric;
+
+  /// No description provided for @skippedAnswersMetric.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped Questions'**
+  String get skippedAnswersMetric;
+
+  /// No description provided for @timeSpentMetric.
+  ///
+  /// In en, this message translates to:
+  /// **'Time Spent'**
+  String get timeSpentMetric;
+
+  /// No description provided for @totalScoreMetric.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Score'**
+  String get totalScoreMetric;
+
+  /// No description provided for @questionsMatrixTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer Sheet Matrix'**
+  String get questionsMatrixTitle;
+
+  /// No description provided for @questionsMatrixSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap any question to review its full solution and explanation'**
+  String get questionsMatrixSubtitle;
+
+  /// No description provided for @statusCorrect.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct'**
+  String get statusCorrect;
+
+  /// No description provided for @statusIncorrect.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong'**
+  String get statusIncorrect;
+
+  /// No description provided for @statusSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped'**
+  String get statusSkipped;
+
+  /// No description provided for @viewExamResultAction.
+  ///
+  /// In en, this message translates to:
+  /// **'View Results & Solutions'**
+  String get viewExamResultAction;
+
+  /// No description provided for @retakeToImproveScore.
+  ///
+  /// In en, this message translates to:
+  /// **'Retake (Improve Score)'**
+  String get retakeToImproveScore;
+
+  /// No description provided for @submissionExplanationStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'You submitted your exam normally and scores were calculated.'**
+  String get submissionExplanationStudent;
+
+  /// No description provided for @submissionExplanationTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam was automatically submitted as allotted time expired.'**
+  String get submissionExplanationTimeout;
+
+  /// No description provided for @submissionExplanationForcedExit.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam was forcibly submitted after leaving the test screen.'**
+  String get submissionExplanationForcedExit;
+
+  /// No description provided for @submissionExplanationViolations.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam was submitted due to repeated security rule violations.'**
+  String get submissionExplanationViolations;
+
+  /// No description provided for @submissionExplanationTabClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam was submitted because the browser window was closed.'**
+  String get submissionExplanationTabClosed;
+
+  /// No description provided for @submissionExplanationSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam was automatically graded by the system.'**
+  String get submissionExplanationSystem;
+
+  /// No description provided for @examScoreSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Scored {score} of {maxScore}'**
+  String examScoreSummary(int score, int maxScore);
+
+  /// No description provided for @passingThresholdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Passing Threshold: {score}%'**
+  String passingThresholdLabel(int score);
+
+  /// No description provided for @goToNextLectureSpecific.
+  ///
+  /// In en, this message translates to:
+  /// **'Next Lecture: {title}'**
+  String goToNextLectureSpecific(String title);
+
+  /// No description provided for @examPassedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Great job! You achieved the required passing score for this exam.'**
+  String get examPassedSubtitle;
+
+  /// No description provided for @examFailedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review your mistakes and model answers, then retry to master the material.'**
+  String get examFailedSubtitle;
+
+  /// No description provided for @previousAttemptSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous Attempt Result'**
+  String get previousAttemptSummary;
+
+  /// No description provided for @detailedPerformanceAnalytics.
+  ///
+  /// In en, this message translates to:
+  /// **'Performance Breakdown'**
+  String get detailedPerformanceAnalytics;
+
+  /// No description provided for @reviewAllQuestionsAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Review All Questions & Solutions'**
+  String get reviewAllQuestionsAction;
+
+  /// No description provided for @uploadingFilesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading Files'**
+  String get uploadingFilesTitle;
+
+  /// No description provided for @uploadingFileProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading file {current} of {total}: {fileName}'**
+  String uploadingFileProgress(int current, int total, String fileName);
+
+  /// No description provided for @uploadMaterialSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'File \"{fileName}\" uploaded successfully'**
+  String uploadMaterialSuccess(String fileName);
+
+  /// No description provided for @uploadMaterialError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to upload \"{fileName}\": {error}'**
+  String uploadMaterialError(String fileName, String error);
+
+  /// No description provided for @smartBadgePdf.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF'**
+  String get smartBadgePdf;
+
+  /// No description provided for @smartBadgeExam.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiz'**
+  String get smartBadgeExam;
+
+  /// No description provided for @changeAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get changeAction;
+
+  /// No description provided for @inspectLectureAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Inspect & Preview'**
+  String get inspectLectureAction;
+
+  /// No description provided for @reorderLecturesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag cards to reorder lectures before saving'**
+  String get reorderLecturesHint;
+
+  /// No description provided for @singleVideoModeBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Single Lecture'**
+  String get singleVideoModeBadge;
+
+  /// No description provided for @selectedVideosBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Selected Videos'**
+  String selectedVideosBadge(int count);
+
+  /// No description provided for @attachedExamPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Attached Exam Booklet (PDF)'**
+  String get attachedExamPdf;
+
+  /// No description provided for @attachedExamPdfDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach a PDF question booklet for students to view securely while solving'**
+  String get attachedExamPdfDesc;
+
+  /// No description provided for @attachPdfFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach PDF Booklet'**
+  String get attachPdfFile;
+
+  /// No description provided for @removeAttachedPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove PDF'**
+  String get removeAttachedPdf;
+
+  /// No description provided for @pdfAttachedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF booklet attached successfully'**
+  String get pdfAttachedSuccess;
+
+  /// No description provided for @quickBubbleSheetGenerator.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Bubble Sheet Generator'**
+  String get quickBubbleSheetGenerator;
+
+  /// No description provided for @quickBubbleSheetPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate answer sheets quickly for your PDF exam'**
+  String get quickBubbleSheetPrompt;
+
+  /// No description provided for @numberOfQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Number of Questions'**
+  String get numberOfQuestions;
+
+  /// No description provided for @generateQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate Questions'**
+  String get generateQuestions;
+
+  /// No description provided for @viewExamBooklet.
+  ///
+  /// In en, this message translates to:
+  /// **'View Exam Booklet (PDF)'**
+  String get viewExamBooklet;
+
+  /// No description provided for @hideExamBooklet.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Questions'**
+  String get hideExamBooklet;
+
+  /// No description provided for @examPdfLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading exam booklet...'**
+  String get examPdfLoading;
+
+  /// No description provided for @numberOfOptionsPerQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Options per question'**
+  String get numberOfOptionsPerQuestion;
+
+  /// No description provided for @quickPresets.
+  ///
+  /// In en, this message translates to:
+  /// **'Presets'**
+  String get quickPresets;
+
+  /// No description provided for @overwriteQuestionsWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This will replace current questions with a fresh bubble sheet. Continue?'**
+  String get overwriteQuestionsWarning;
+
+  /// No description provided for @uploadNewPdfFromDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload new PDF from device'**
+  String get uploadNewPdfFromDevice;
+
+  /// No description provided for @previewPdfBooklet.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview Booklet'**
+  String get previewPdfBooklet;
+
+  /// No description provided for @replacePdfBooklet.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace Booklet'**
+  String get replacePdfBooklet;
 }
 
 class _AppLocalizationsDelegate

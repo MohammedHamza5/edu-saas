@@ -12,7 +12,6 @@ import '../../../../core/widgets/app_empty_view.dart';
 import '../../../../core/widgets/app_error_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
 import '../../../../core/extensions/responsive_context_extension.dart';
-import '../../../../core/theme/responsive_breakpoints.dart';
 import '../../../../core/widgets/responsive_container.dart';
 import '../../../../core/widgets/responsive_grid.dart';
 import '../../../../core/utils/app_feedback.dart';
@@ -174,7 +173,6 @@ class _Student360PageState extends State<Student360Page> {
             return SingleChildScrollView(
               padding: context.responsivePagePadding,
               child: ResponsiveContainer(
-                maxWidth: ResponsiveBreakpoints.maxContentWidth,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

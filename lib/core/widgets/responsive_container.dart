@@ -45,13 +45,24 @@ class ResponsiveContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     final effectiveMaxWidth = maxWidth ?? ResponsiveBreakpoints.maxContentWidth;
 
-    Widget content = Align(
-      alignment: alignment,
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: effectiveMaxWidth),
+    Widget content;
+    if (effectiveMaxWidth.isFinite) {
+      content = Align(
+        alignment: alignment,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: effectiveMaxWidth),
+          child: SizedBox(
+            width: double.infinity,
+            child: child,
+          ),
+        ),
+      );
+    } else {
+      content = SizedBox(
+        width: double.infinity,
         child: child,
-      ),
-    );
+      );
+    }
 
     if (padding != null) {
       content = Padding(padding: padding!, child: content);

@@ -24,7 +24,11 @@ abstract interface class GroupsRemoteDataSource {
     int? defaultPassingScore,
   });
 
-  Future<List<GroupMemberModel>> getGroupMembers(String groupId);
+  Future<List<GroupMemberModel>> getGroupMembers(
+    String groupId, {
+    int page = 0,
+    int pageSize = 25,
+  });
 
   Future<GroupMemberModel> addMemberToGroup({
     required String groupId,
@@ -137,12 +141,20 @@ class GroupsRemoteDataSourceImpl implements GroupsRemoteDataSource {
   }
 
   @override
-  Future<List<GroupMemberModel>> getGroupMembers(String groupId) async {
+  Future<List<GroupMemberModel>> getGroupMembers(
+    String groupId, {
+    int page = 0,
+    int pageSize = 25,
+  }) async {
+    final from = page * pageSize;
+    final to = from + pageSize - 1;
+
     final response = await _safeClient
         .from('group_members')
         .select('*, users:student_id(full_name, email, phone)')
         .eq('group_id', groupId)
-        .order('joined_at', ascending: false);
+        .order('joined_at', ascending: false)
+        .range(from, to);
 
     final list = response as List<dynamic>;
     return list

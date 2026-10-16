@@ -5,7 +5,6 @@ import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/responsive_breakpoints.dart';
 import '../../../../core/widgets/app_empty_view.dart';
 import '../../../../core/widgets/app_error_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
@@ -97,6 +96,16 @@ class _StudentAssignmentsPageState extends State<StudentAssignmentsPage> {
         ],
       ),
       body: BlocBuilder<AssignmentsCubit, AssignmentsState>(
+        buildWhen: (prev, curr) {
+          if (prev.runtimeType != curr.runtimeType) return true;
+          if (prev is StudentAssignmentsLoaded &&
+              curr is StudentAssignmentsLoaded) {
+            return prev.assignments != curr.assignments ||
+                prev.hasMore != curr.hasMore ||
+                prev.isLoadingMore != curr.isLoadingMore;
+          }
+          return true;
+        },
         builder: (context, state) {
           if (state is AssignmentsLoading) {
             return const AppLoadingView.cardsGrid(count: 4, columns: 2);
@@ -124,133 +133,127 @@ class _StudentAssignmentsPageState extends State<StudentAssignmentsPage> {
           if (state is StudentAssignmentsLoaded) {
             final filtered = _filterAssignments(state.assignments);
 
-            return Center(
-              child: ResponsiveContainer(
-                maxWidth: ResponsiveBreakpoints.maxContentWidth,
-                child: Column(
-                  children: [
-                    // Filter chips
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.s16,
-                        vertical: AppSpacing.s8,
-                      ),
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: [
-                            _buildFilterChip(
-                              context.l10n.filterAll,
-                              StudentAssignmentFilter.all,
-                              state.assignments.length,
-                            ),
-                            const SizedBox(width: AppSpacing.s8),
-                            _buildFilterChip(
-                              context.l10n.filterPendingSubmission,
-                              StudentAssignmentFilter.pending,
-                              state.assignments
-                                  .where((a) => !a.hasSubmitted)
-                                  .length,
-                            ),
-                            const SizedBox(width: AppSpacing.s8),
-                            _buildFilterChip(
-                              context.l10n.filterSubmitted,
-                              StudentAssignmentFilter.submitted,
-                              state.assignments
-                                  .where((a) => a.hasSubmitted && !a.isReviewed)
-                                  .length,
-                            ),
-                            const SizedBox(width: AppSpacing.s8),
-                            _buildFilterChip(
-                              context.l10n.filterReviewed,
-                              StudentAssignmentFilter.reviewed,
-                              state.assignments
-                                  .where((a) => a.isReviewed)
-                                  .length,
-                            ),
-                          ],
-                        ),
+            return ResponsiveContainer(
+              child: Column(
+                children: [
+                  // Filter chips
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.s16,
+                      vertical: AppSpacing.s8,
+                    ),
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          _buildFilterChip(
+                            context.l10n.filterAll,
+                            StudentAssignmentFilter.all,
+                            state.assignments.length,
+                          ),
+                          const SizedBox(width: AppSpacing.s8),
+                          _buildFilterChip(
+                            context.l10n.filterPendingSubmission,
+                            StudentAssignmentFilter.pending,
+                            state.assignments
+                                .where((a) => !a.hasSubmitted)
+                                .length,
+                          ),
+                          const SizedBox(width: AppSpacing.s8),
+                          _buildFilterChip(
+                            context.l10n.filterSubmitted,
+                            StudentAssignmentFilter.submitted,
+                            state.assignments
+                                .where((a) => a.hasSubmitted && !a.isReviewed)
+                                .length,
+                          ),
+                          const SizedBox(width: AppSpacing.s8),
+                          _buildFilterChip(
+                            context.l10n.filterReviewed,
+                            StudentAssignmentFilter.reviewed,
+                            state.assignments.where((a) => a.isReviewed).length,
+                          ),
+                        ],
                       ),
                     ),
-                    const Divider(height: 1, color: AppColors.border),
+                  ),
+                  const Divider(height: 1, color: AppColors.border),
 
-                    // Assignments List
-                    Expanded(
-                      child: filtered.isEmpty
-                          ? Center(
-                              child: AppEmptyView(
-                                message: context.l10n.noAssignmentsInFilter,
-                                subtitle:
-                                    context.l10n.noAssignmentsInFilterSubtitle,
-                                icon: Icons.filter_list_off_outlined,
-                              ),
-                            )
-                          : RefreshIndicator(
-                              onRefresh: () =>
-                                  _loadAssignments(forceRefresh: true),
-                              child: SingleChildScrollView(
-                                controller: _scrollController,
-                                physics: const AlwaysScrollableScrollPhysics(),
-                                padding: const EdgeInsets.all(AppSpacing.s16),
-                                child: Column(
-                                  children: [
-                                    ResponsiveGrid(
-                                      mobileColumns: 1,
-                                      tabletColumns: 2,
-                                      desktopColumns: 2,
-                                      spacing: AppSpacing.s16,
-                                      runSpacing: AppSpacing.s16,
-                                      children: filtered.map((assignment) {
-                                        return AssignmentCard(
-                                          assignment: assignment,
-                                          isTeacher: false,
-                                          onTap: () {
-                                            Navigator.of(context)
-                                                .push<void>(
-                                                  MaterialPageRoute<void>(
-                                                    builder: (_) =>
-                                                        BlocProvider.value(
-                                                          value: context
-                                                              .read<
-                                                                AssignmentsCubit
-                                                              >(),
-                                                          child:
-                                                              AssignmentSubmissionPage(
-                                                                assignment:
-                                                                    assignment,
-                                                              ),
-                                                        ),
-                                                  ),
-                                                )
-                                                .then((_) {
-                                                  if (context.mounted) {
-                                                    _loadAssignments(
-                                                      forceRefresh: true,
-                                                    );
-                                                  }
-                                                });
-                                          },
-                                        );
-                                      }).toList(),
-                                    ),
-                                    if (state.isLoadingMore)
-                                      const Padding(
-                                        padding: EdgeInsets.symmetric(
-                                          vertical: AppSpacing.s16,
-                                        ),
-                                        child: Center(
-                                          child: AppLoadingView.compact(
-                                            size: 24,
-                                          ),
-                                        ),
+                  // Assignments List
+                  Expanded(
+                    child: filtered.isEmpty
+                        ? Center(
+                            child: AppEmptyView(
+                              message: context.l10n.noAssignmentsInFilter,
+                              subtitle:
+                                  context.l10n.noAssignmentsInFilterSubtitle,
+                              icon: Icons.filter_list_off_outlined,
+                            ),
+                          )
+                        : RefreshIndicator(
+                            onRefresh: () =>
+                                _loadAssignments(forceRefresh: true),
+                            child: SingleChildScrollView(
+                              controller: _scrollController,
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              padding: const EdgeInsets.all(AppSpacing.s16),
+                              child: Column(
+                                children: [
+                                  ResponsiveGrid(
+                                    mobileColumns: 1,
+                                    tabletColumns: 2,
+                                    desktopColumns: 3,
+                                    largeDesktopColumns: 4,
+                                    spacing: AppSpacing.s16,
+                                    runSpacing: AppSpacing.s16,
+                                    children: filtered.map((assignment) {
+                                      return AssignmentCard(
+                                        assignment: assignment,
+                                        isTeacher: false,
+                                        onTap: () {
+                                          Navigator.of(context)
+                                              .push<void>(
+                                                MaterialPageRoute<void>(
+                                                  builder: (_) =>
+                                                      BlocProvider.value(
+                                                        value: context
+                                                            .read<
+                                                              AssignmentsCubit
+                                                            >(),
+                                                        child:
+                                                            AssignmentSubmissionPage(
+                                                              assignment:
+                                                                  assignment,
+                                                            ),
+                                                      ),
+                                                ),
+                                              )
+                                              .then((_) {
+                                                if (context.mounted) {
+                                                  _loadAssignments(
+                                                    forceRefresh: true,
+                                                  );
+                                                }
+                                              });
+                                        },
+                                      );
+                                    }).toList(),
+                                  ),
+                                  if (state.isLoadingMore)
+                                    const Padding(
+                                      padding: EdgeInsets.symmetric(
+                                        vertical: AppSpacing.s16,
                                       ),
-                                  ],
-                                ),
+                                      child: Center(
+                                        child: AppLoadingView.compact(size: 24),
+                                      ),
+                                    ),
+                                ],
                               ),
                             ),
-                    ),
-                  ],
-                ),
+                          ),
+                  ),
+                ],
               ),
             );
           }

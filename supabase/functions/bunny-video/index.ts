@@ -354,6 +354,106 @@ Deno.serve(async (req: Request) => {
       return json({ status: next, duration: patch.duration ?? null, synced: true });
     }
 
+    // ────────────────────────── delete-video ──────────────────────────
+    if (action === "delete-video") {
+      if (caller.role !== "teacher") return json({ error: "NOT_AUTHORIZED" }, 403);
+
+      const videoGuid = String(body?.video_guid ?? "").trim();
+      const contentId = String(body?.content_id ?? "").trim();
+      const videoId = String(body?.video_id ?? "").trim();
+      const libraryVideoId = String(body?.library_video_id ?? "").trim();
+
+      const guidsToDelete: string[] = [];
+
+      if (videoGuid) {
+        guidsToDelete.push(videoGuid);
+      }
+
+      // If content_id provided, find associated videos in caller's tenant
+      if (contentId) {
+        const { data: vList } = await admin
+          .from("videos")
+          .select("id, provider, provider_video_id, library_video_id, content:content!inner(tenant_id)")
+          .eq("content_id", contentId);
+
+        if (vList && vList.length > 0) {
+          for (const v of vList) {
+            if (
+              v.content?.tenant_id === caller.tenant_id &&
+              v.provider === "bunny" &&
+              v.provider_video_id &&
+              !v.library_video_id &&
+              !guidsToDelete.includes(v.provider_video_id)
+            ) {
+              guidsToDelete.push(v.provider_video_id);
+            }
+          }
+        }
+      }
+
+      // If video_id provided (row id in public.videos)
+      if (videoId) {
+        const { data: v } = await admin
+          .from("videos")
+          .select("id, provider, provider_video_id, library_video_id, content:content!inner(tenant_id)")
+          .eq("id", videoId)
+          .maybeSingle();
+
+        if (
+          v &&
+          v.content?.tenant_id === caller.tenant_id &&
+          v.provider === "bunny" &&
+          v.provider_video_id &&
+          !v.library_video_id &&
+          !guidsToDelete.includes(v.provider_video_id)
+        ) {
+          guidsToDelete.push(v.provider_video_id);
+        }
+      }
+
+      // If library_video_id provided (row id in public.video_library)
+      if (libraryVideoId) {
+        const { data: lv } = await admin
+          .from("video_library")
+          .select("id, provider, provider_video_id, tenant_id")
+          .eq("id", libraryVideoId)
+          .maybeSingle();
+
+        if (
+          lv &&
+          lv.tenant_id === caller.tenant_id &&
+          lv.provider === "bunny" &&
+          lv.provider_video_id &&
+          !guidsToDelete.includes(lv.provider_video_id)
+        ) {
+          guidsToDelete.push(lv.provider_video_id);
+        }
+      }
+
+      const deletedGuids: string[] = [];
+      for (const guid of guidsToDelete) {
+        try {
+          const delRes = await fetch(
+            `${BUNNY_API}/library/${libraryId}/videos/${guid}`,
+            {
+              method: "DELETE",
+              headers: {
+                AccessKey: bunnyKey,
+                Accept: "application/json",
+              },
+            },
+          );
+          if (delRes.ok || delRes.status === 404) {
+            deletedGuids.push(guid);
+          }
+        } catch (_) {
+          // Continue best-effort
+        }
+      }
+
+      return json({ success: true, deleted: deletedGuids });
+    }
+
     return json({ error: "VALIDATION_ERROR", details: "unknown action" }, 400);
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);

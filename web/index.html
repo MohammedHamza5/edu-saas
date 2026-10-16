@@ -5,6 +5,7 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
   <!-- Guarantee immediate updates across all browsers: prevent HTML disk caching -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
@@ -47,15 +48,6 @@
           window.console.dir = noop;
           window.console.table = noop;
         } catch (e) {}
-
-        // Clear any residual output if DevTools is force-opened
-        setInterval(function() {
-          try {
-            if (window.console && typeof window.console.clear === 'function') {
-              window.console.clear();
-            }
-          } catch(e) {}
-        }, 1500);
       }
 
       // 2. Prevent Context Menu (Right Click Inspect) — except in input/textarea
@@ -260,8 +252,20 @@
     })();
   </script>
 
-  <!-- Global Content Protection Styles: Disable Printing & Text Dragging -->
+  <!-- Global Content Protection Styles & Mobile/iPad Safari Normalization -->
   <style>
+    html, body {
+      overscroll-behavior: none;
+      overscroll-behavior-x: none;
+      -webkit-text-size-adjust: 100%;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Ensure embedded Bunny & YouTube player iframes on iPadOS WebKit receive direct touch events */
+    flt-platform-view iframe {
+      pointer-events: auto !important;
+    }
+
     @media print {
       html, body, #flutter-view, flt-glass-pane {
         display: none !important;
@@ -371,21 +375,15 @@
   }
   </script>
 
-  <!-- Preconnect & Load Google Fonts (Cairo: Primary Arabic Typeface) -->
+  <!-- Preconnect & Preload High-Performance Web Fonts (Cairo: Arabic Typeface, Inter: Academic Math & Figures) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap">
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-  <noscript>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
-  </noscript>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap">
 
   <!-- hls.js: Enables HLS (.m3u8) video playback on Chrome / Firefox / Edge.
-       Must be loaded BEFORE Flutter so that the video_player_web plugin detects it.
-       Platform serves encrypted adaptive HLS; without hls.js Chrome cannot play it natively. -->
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.15/dist/hls.min.js"
-          crossorigin="anonymous"
-          defer></script>
+       Bundled locally for zero CDN latency, offline resiliency and instant start. -->
+  <script src="hls.min.js"></script>
 
   <!-- Player.js: Enables bidirectional event communication (timeupdate, progress, play, pause, seek) with Bunny Stream embed iframe -->
   <script src="player-0.1.0.min.js"></script>
@@ -402,6 +400,15 @@
   <link rel="manifest" href="manifest.json">
 
   <style>
+    @font-face {
+      font-family: 'Cairo';
+      font-style: normal;
+      font-weight: 400 800;
+      font-display: swap;
+      src: url('assets/assets/fonts/Cairo.ttf') format('truetype'),
+           url('assets/fonts/Cairo.ttf') format('truetype');
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -412,8 +419,9 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
+      overscroll-behavior: none;
       background-color: #0F172A;
-      font-family: 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif;
+      font-family: 'Cairo', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       direction: ltr;
     }
 
@@ -443,6 +451,10 @@
     flt-platform-view {
       pointer-events: none !important;
       direction: ltr !important;
+    }
+
+    flt-platform-view iframe {
+      pointer-events: auto !important;
     }
 
     /* Hide Chrome/Edge native media control overlays & PiP buttons */
@@ -524,6 +536,8 @@
       font-weight: 800;
       margin: 0 0 8px 0;
       letter-spacing: -0.3px;
+      line-height: 1.3;
+      min-height: 32px;
     }
 
     .preloader-subtitle {
@@ -532,6 +546,7 @@
       font-weight: 500;
       margin: 0 0 28px 0;
       line-height: 1.5;
+      min-height: 20px;
     }
 
     .preloader-progress-track {
@@ -559,6 +574,8 @@
       font-size: 12px;
       margin-top: 14px;
       font-weight: 500;
+      min-height: 18px;
+      line-height: 1.5;
     }
 
     @keyframes logoFloat {
@@ -690,7 +707,6 @@
        HLS.JS ENGINE & ADAPTIVE STREAM DECODER FOR FLUTTER WEB
        Enables seamless .m3u8 playback on Chrome, Edge & Firefox
        ═══════════════════════════════════════════════════════ -->
-  <script src="hls.min.js"></script>
   <script>
     (function() {
       // 1. Transparent HLS MediaElement interceptor
@@ -781,9 +797,10 @@
         console.error('[EduSaaS] HLS initialization error:', e);
       }
 
-      // 2. Fullscreen Management for Web
+      // 2. Fullscreen Management for Web (Standard & WebKit / iPadOS Safari)
       window.toggleAppFullscreen = function() {
-        if (!document.fullscreenElement) {
+        var isFull = !!(document.fullscreenElement || document.webkitFullscreenElement);
+        if (!isFull) {
           var el = document.documentElement;
           if (el.requestFullscreen) {
             el.requestFullscreen();
@@ -802,22 +819,25 @@
       };
 
       window.isAppFullscreen = function() {
-        return !!document.fullscreenElement;
+        return !!(document.fullscreenElement || document.webkitFullscreenElement);
       };
 
       window.setFullscreenCallback = function(callback) {
         window._fullscreenCallback = callback;
       };
 
-      document.addEventListener('fullscreenchange', function() {
-        var isFull = !!document.fullscreenElement;
+      function handleFullscreenChange() {
+        var isFull = !!(document.fullscreenElement || document.webkitFullscreenElement);
         if (typeof window._fullscreenCallback === 'function') {
           window._fullscreenCallback(isFull);
         }
         window.dispatchEvent(new CustomEvent('app-fullscreen-changed', {
           detail: { isFullscreen: isFull }
         }));
-      });
+      }
+
+      document.addEventListener('fullscreenchange', handleFullscreenChange);
+      document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
 
       // ═══════════════════════════════════════════════════════════════
       // 3A. Bunny Stream Player Bridge (NATIVE Player.js wire protocol)
@@ -869,26 +889,23 @@
           src = src.replace('player.mediadelivery.net', 'iframe.mediadelivery.net');
         }
 
-        // Force preload=false to eliminate mobile/tablet GPU buffer exhaustion and low-memory kills
-        if (src.indexOf('preload=true') !== -1) {
-          src = src.replace('preload=true', 'preload=false');
-        } else if (src.indexOf('preload=') === -1) {
-          src += '&preload=false';
-        }
-
-        // Ensure playerjs=true query parameter for Bunny Stream postMessage bridge
-        if (src.indexOf('playerjs=true') === -1) {
-          src += (src.indexOf('?') === -1 ? '?' : '&') + 'playerjs=true';
-        }
-
-        // iPadOS / iOS / Safari native HLS stream compatibility (recommended by Bunny Stream)
-        if (src.indexOf('nativeHls=') === -1) {
-          src += '&nativeHls=safari';
-        }
-
-        // Inline video playback required for iPadOS / iOS mobile Safari
-        if (src.indexOf('playsinline=') === -1) {
-          src += '&playsinline=true';
+        // Clean parameter normalization: eliminate malformed query strings
+        // and prevent iPadOS / WebKit GPU process crashes caused by nativeHls=safari
+        try {
+          var u = new URL(src);
+          u.searchParams.set('preload', 'false');
+          u.searchParams.set('playerjs', 'true');
+          u.searchParams.set('playsinline', 'true');
+          u.searchParams.delete('nativeHls');
+          src = u.toString();
+        } catch(e) {
+          src = src.replace(/[?&]nativeHls=[^&]+/g, '');
+          var sep = src.indexOf('?') === -1 ? '?' : '&';
+          if (src.indexOf('preload=') === -1) src += sep + 'preload=false';
+          sep = src.indexOf('?') === -1 ? '?' : '&';
+          if (src.indexOf('playerjs=true') === -1) src += sep + 'playerjs=true';
+          sep = src.indexOf('?') === -1 ? '?' : '&';
+          if (src.indexOf('playsinline=') === -1) src += sep + 'playsinline=true';
         }
 
         var iframe = document.createElement('iframe');
@@ -1457,6 +1474,27 @@
         return iframe;
       };
 
+      // Official Desmos Testing Calculator Embed
+      window.createDesmosCalculator = function(src, viewId) {
+        var existing = document.getElementById('desmos_frame_' + viewId);
+        if (existing) {
+          return existing;
+        }
+
+        var iframe = document.createElement('iframe');
+        iframe.id = 'desmos_frame_' + viewId;
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = '0';
+        iframe.style.borderRadius = '8px';
+        iframe.style.backgroundColor = '#FFFFFF';
+        iframe.style.pointerEvents = 'auto';
+        iframe.setAttribute('loading', 'eager');
+        iframe.setAttribute('allow', 'clipboard-read; clipboard-write; fullscreen');
+        iframe.src = src;
+        return iframe;
+      };
+
       // Controls pointer events for background video players when overlays/modals are active
       window.setVideoPlayerPointerEvents = function(enabled) {
         try {
@@ -1465,7 +1503,7 @@
           for (var i = 0; i < iframes.length; i++) {
             var f = iframes[i];
             if (f.id && (f.id.indexOf('bunny_frame_') === 0 || f.id.indexOf('yt_player_') === 0)) {
-              f.style.pointerEvents = val;
+              f.style.setProperty('pointer-events', val, 'important');
             }
           }
         } catch(e) {}

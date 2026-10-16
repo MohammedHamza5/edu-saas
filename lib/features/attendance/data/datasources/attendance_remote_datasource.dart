@@ -34,6 +34,11 @@ abstract interface class AttendanceRemoteDataSource {
     required String studentId,
     String? groupId,
   });
+
+  Future<StudentAttendanceBundle> getStudentAttendanceBundle({
+    required String studentId,
+    String? groupId,
+  });
 }
 
 
@@ -427,35 +432,203 @@ class AttendanceRemoteDataSourceImpl implements AttendanceRemoteDataSource {
   }
 
   @override
+  Future<StudentAttendanceBundle> getStudentAttendanceBundle({
+    required String studentId,
+    String? groupId,
+  }) async {
+    try {
+      final res = await _safeClient.rpc<dynamic>(
+        'get_student_attendance_engagement',
+        params: {
+          'p_student_id': studentId,
+          if (groupId != null && groupId.isNotEmpty) 'p_group_id': groupId,
+        },
+      );
+
+      if (res != null && res is Map<String, dynamic>) {
+        final summaryJson = res['engagement_summary'] as Map<String, dynamic>?;
+        final statsJson = res['attendance_stats'] as Map<String, dynamic>?;
+        final historyRaw = res['attendance_history'] as List<dynamic>? ?? [];
+
+        final summary = summaryJson != null
+            ? _parseEngagementSummaryFromRpc(summaryJson)
+            : const StudentEngagementSummary.empty();
+
+        final stats = statsJson != null
+            ? AttendanceStats(
+                totalSessions:
+                    (statsJson['total_sessions'] as num?)?.toInt() ?? 0,
+                presentCount:
+                    (statsJson['present_count'] as num?)?.toInt() ?? 0,
+                absentCount:
+                    (statsJson['absent_count'] as num?)?.toInt() ?? 0,
+                lateCount:
+                    (statsJson['late_count'] as num?)?.toInt() ?? 0,
+                excusedCount:
+                    (statsJson['excused_count'] as num?)?.toInt() ?? 0,
+              )
+            : const AttendanceStats.empty();
+
+        final history = historyRaw
+            .map((j) => AttendanceModel.fromJson(j as Map<String, dynamic>))
+            .toList();
+
+        return StudentAttendanceBundle(
+          engagementSummary: summary,
+          stats: stats,
+          records: history,
+        );
+      }
+    } catch (_) {
+      // Fallback gracefully to separate queries
+    }
+
+    final summaryFuture = getStudentEngagementSummary(
+      studentId: studentId,
+      groupId: groupId,
+    );
+    final statsFuture = getStudentAttendanceStats(
+      studentId: studentId,
+      groupId: groupId,
+    );
+    final historyFuture = getStudentAttendanceHistory(
+      studentId: studentId,
+      groupId: groupId,
+      page: 0,
+      pageSize: 20,
+    );
+
+    final results = await Future.wait([summaryFuture, statsFuture, historyFuture]);
+
+    return StudentAttendanceBundle(
+      engagementSummary: results[0] as StudentEngagementSummary,
+      stats: results[1] as AttendanceStats,
+      records: results[2] as List<AttendanceModel>,
+    );
+  }
+
+  static StudentEngagementSummary _parseEngagementSummaryFromRpc(
+    Map<String, dynamic> summaryJson,
+  ) {
+    final rawGroups = summaryJson['enrolled_groups'] as List<dynamic>? ?? [];
+    final enrolledGroups = rawGroups.map((g) {
+      final gMap = g as Map<String, dynamic>;
+      return StudentGroupInfo(
+        id: gMap['id'] as String? ?? '',
+        name: gMap['name'] as String? ?? '',
+        level: gMap['level'] as String? ?? '',
+      );
+    }).toList();
+
+    final rawItems = summaryJson['items'] as List<dynamic>? ?? [];
+    final items = rawItems.map((it) {
+      final itemMap = it as Map<String, dynamic>;
+      final lwStr = itemMap['last_watched_at'] as String?;
+      return StudentLectureEngagementItem(
+        contentId: itemMap['content_id'] as String? ?? '',
+        lectureTitle: itemMap['lecture_title'] as String? ?? '',
+        groupId: itemMap['group_id'] as String? ?? '',
+        groupName: itemMap['group_name'] as String? ?? '',
+        videoId: itemMap['video_id'] as String?,
+        durationSeconds: (itemMap['duration_seconds'] as num?)?.toInt() ?? 0,
+        watchSeconds: (itemMap['watch_seconds'] as num?)?.toInt() ?? 0,
+        watchProgressPercent:
+            (itemMap['watch_progress_percent'] as num?)?.toDouble() ?? 0.0,
+        isCompleted: itemMap['is_completed'] as bool? ?? false,
+        lastWatchedAt: lwStr != null ? DateTime.tryParse(lwStr) : null,
+        sortOrder: (itemMap['sort_order'] as num?)?.toInt() ?? 0,
+      );
+    }).toList();
+
+    final lastActiveStr = summaryJson['last_active_at'] as String?;
+    final lastActive =
+        lastActiveStr != null ? DateTime.tryParse(lastActiveStr) : null;
+
+    final overallCommitment =
+        (summaryJson['overall_commitment_percentage'] as num?)?.toDouble() ??
+        0.0;
+
+    return StudentEngagementSummary(
+      totalWatchSeconds:
+          (summaryJson['total_watch_seconds'] as num?)?.toInt() ?? 0,
+      totalDurationSeconds:
+          (summaryJson['total_duration_seconds'] as num?)?.toInt() ?? 0,
+      totalLecturesCount:
+          (summaryJson['total_lectures_count'] as num?)?.toInt() ?? 0,
+      completedLecturesCount:
+          (summaryJson['completed_lectures_count'] as num?)?.toInt() ?? 0,
+      inProgressLecturesCount:
+          (summaryJson['in_progress_lectures_count'] as num?)?.toInt() ?? 0,
+      notStartedLecturesCount:
+          (summaryJson['not_started_lectures_count'] as num?)?.toInt() ?? 0,
+      overallCommitmentPercentage: overallCommitment.clamp(0.0, 100.0),
+      lastActiveAt: lastActive,
+      items: items,
+      enrolledGroups: enrolledGroups,
+    );
+  }
+
+  @override
   Future<AttendanceStats> getStudentAttendanceStats({
     required String studentId,
     String? groupId,
   }) async {
-    final history = await getStudentAttendanceHistory(
-      studentId: studentId,
-      groupId: groupId,
-    );
+    try {
+      final res = await _safeClient.rpc<dynamic>(
+        'get_student_attendance_engagement',
+        params: {
+          'p_student_id': studentId,
+          if (groupId != null && groupId.isNotEmpty) 'p_group_id': groupId,
+        },
+      );
+      if (res != null && res is Map<String, dynamic>) {
+        final statsJson = res['attendance_stats'] as Map<String, dynamic>?;
+        if (statsJson != null) {
+          return AttendanceStats(
+            totalSessions: (statsJson['total_sessions'] as num?)?.toInt() ?? 0,
+            presentCount: (statsJson['present_count'] as num?)?.toInt() ?? 0,
+            absentCount: (statsJson['absent_count'] as num?)?.toInt() ?? 0,
+            lateCount: (statsJson['late_count'] as num?)?.toInt() ?? 0,
+            excusedCount: (statsJson['excused_count'] as num?)?.toInt() ?? 0,
+          );
+        }
+      }
+    } catch (_) {}
+
+    // Fallback: fast count on attendance table directly, NO unpaginated joins!
+    var query = _safeClient
+        .from('attendance')
+        .select('status')
+        .eq('student_id', studentId);
+
+    if (groupId != null && groupId.isNotEmpty) {
+      query = query.eq('group_id', groupId);
+    }
+
+    final response = await query;
+    final list = response as List<dynamic>;
 
     int present = 0;
     int absent = 0;
     int late = 0;
     int excused = 0;
 
-    for (final record in history) {
-      switch (record.status) {
-        case AttendanceStatus.present:
+    for (final row in list) {
+      final st = (row as Map<String, dynamic>)['status'] as String?;
+      switch (st) {
+        case 'present':
           present++;
-        case AttendanceStatus.absent:
+        case 'absent':
           absent++;
-        case AttendanceStatus.late:
+        case 'late':
           late++;
-        case AttendanceStatus.excused:
+        case 'excused':
           excused++;
       }
     }
 
     return AttendanceStats(
-      totalSessions: history.length,
+      totalSessions: list.length,
       presentCount: present,
       absentCount: absent,
       lateCount: late,
@@ -468,6 +641,23 @@ class AttendanceRemoteDataSourceImpl implements AttendanceRemoteDataSource {
     required String studentId,
     String? groupId,
   }) async {
+    try {
+      final res = await _safeClient.rpc<dynamic>(
+        'get_student_attendance_engagement',
+        params: {
+          'p_student_id': studentId,
+          if (groupId != null && groupId.isNotEmpty) 'p_group_id': groupId,
+        },
+      );
+      if (res != null && res is Map<String, dynamic>) {
+        final summaryJson = res['engagement_summary'] as Map<String, dynamic>?;
+        if (summaryJson != null) {
+          return _parseEngagementSummaryFromRpc(summaryJson);
+        }
+      }
+    } catch (_) {
+      // Fallback to direct queries
+    }
     // 1. Fetch active group memberships for this student
     final membersRes = await _safeClient
         .from('group_members')

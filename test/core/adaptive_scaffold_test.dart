@@ -106,7 +106,7 @@ void main() {
       },
     );
 
-    testWidgets('Renders NavigationRail on medium tablet (600-839dp)', (
+    testWidgets('Renders modern collapsible sidebar on medium tablet (600-839dp)', (
       tester,
     ) async {
       tester.view.physicalSize = const Size(768, 1024);
@@ -118,9 +118,13 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.byType(NavigationRail), findsOneWidget);
+      // Ensure NavigationRail is retired and modern collapsible sidebar is used
+      expect(find.byType(NavigationRail), findsNothing);
       expect(find.byType(NavigationBar), findsNothing);
       expect(find.text('Body Content'), findsOneWidget);
+
+      // Verify collapsed menu expand button is present on tablet portrait
+      expect(find.byIcon(Icons.menu_rounded), findsOneWidget);
     });
 
     testWidgets('Renders Permanent Sidebar on desktop (>=840dp)', (

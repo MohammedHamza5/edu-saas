@@ -9,6 +9,15 @@ import '../datasources/content_remote_datasource.dart';
 class ContentRepositoryImpl implements ContentRepository {
   final ContentRemoteDataSource _remoteDataSource;
 
+  /// In-memory cache for generated signed URLs with expiration tracking.
+  static final Map<String, ({String url, DateTime expiresAt})> _signedUrlCache =
+      {};
+
+  /// Clears the in-memory signed URL cache (useful for testing or cache resets).
+  static void clearSignedUrlCache() {
+    _signedUrlCache.clear();
+  }
+
   ContentRepositoryImpl({required ContentRemoteDataSource remoteDataSource})
     : _remoteDataSource = remoteDataSource;
 
@@ -167,10 +176,22 @@ class ContentRepositoryImpl implements ContentRepository {
     required String storagePath,
     int expiresInSeconds = 3600,
   }) async {
+    final cached = _signedUrlCache[storagePath];
+    if (cached != null && cached.expiresAt.isAfter(DateTime.now())) {
+      return Success(cached.url);
+    }
+
     try {
       final url = await _remoteDataSource.getSignedFileUrl(
         storagePath: storagePath,
         expiresInSeconds: expiresInSeconds,
+      );
+      final cacheTtl = expiresInSeconds > 600
+          ? Duration(seconds: expiresInSeconds - 300)
+          : Duration(seconds: expiresInSeconds);
+      _signedUrlCache[storagePath] = (
+        url: url,
+        expiresAt: DateTime.now().add(cacheTtl),
       );
       return Success(url);
     } catch (e) {
@@ -214,6 +235,28 @@ class ContentRepositoryImpl implements ContentRepository {
     } catch (e) {
       return FailureResult(
         ServerFailure('فشل في ربط المحتوى بالمجموعات: ${e.toString()}'),
+      );
+    }
+  }
+
+  @override
+  Future<Result<String>> resolveOrCreateLectureContent({
+    required String videoId,
+    required String groupId,
+    required String title,
+    String? tenantId,
+  }) async {
+    try {
+      final actualId = await _remoteDataSource.resolveOrCreateLectureContent(
+        videoId: videoId,
+        groupId: groupId,
+        title: title,
+        tenantId: tenantId,
+      );
+      return Success(actualId);
+    } catch (e) {
+      return FailureResult(
+        ServerFailure('فشل في تهيئة معرف المحاضرة: ${e.toString()}'),
       );
     }
   }

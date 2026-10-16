@@ -24,4 +24,16 @@
 - **Feature 10 & 11 (Exams & Question Bank - High-Load Images Optimization):** القضاء الجذري على مشكلة التهنيج والبطء وتوقف المتصفح/التطبيق عند إضافة 30+ سؤال مع صور:
   1. **Image Downsampling Bounds:** فرض `memCacheWidth: 800`, `memCacheHeight: 800`, `maxWidthDiskCache: 1200` على جميع ويدجتس الصور (`CachedNetworkImage` في `ExamImageViewer`, `ExamImageAttachmentBox`, `QuestionOptionTile`, `MathContentView`, `ReviewConsolePage`, `ExamReviewPage`, إلخ) مما خفّض استهلاك ذاكرة الـ GPU/Texture من ~1.5 جيجابايت إلى أقل من 60 ميجابايت (توفير 95% من الذاكرة).
   2. **Smart Accordion Architecture:** تحويل شاشة إنشاء الامتحان (`CreateExamPage`) إلى نظام أكورديون ذكي؛ يتم طي كافة الأسئلة السابقة تلقائياً إلى بطاقات ملخصة خفيفة الحجم (Summary Snippet) وتوسيع السؤال النشط فقط، مع أزرار تحكم جماعية ("طي كافة الأسئلة" / "توسيع كافة الأسئلة")، مما منع رسم 150+ حقل إدخال وكنترولر في نفس اللحظة وحافظ على معدل إطارات 60/120 FPS فائق النعومة. (31/31 tests pass).
+- **Feature 09 (Teacher Materials Library & Smart Deduplication):**
+  1. **Smart Deduplication & Zero Redundant Storage:** فحص البصمة الرقمية للملفات (`SHA-256`) ومطابقة الاسم والحجم فورياً عبر RPC `find_duplicate_material` قبل الرفع؛ إذا كان الملف موجوداً مسبقاً يتم استخدامه مباشرة وإشعار المدرس مع توفير الباندويث والمساحة التخزينية.
+  2. **Hierarchical Folder Organization:** نظام مجلدات هرمي متقدم (`material_folders`) مع ألوان مخصصة لكل مجلد، تتبع عدد الملفات والحجم الإجمالي، مسار تنقل تفاعلي (Breadcrumbs)، وبحث فوري سريع غير متأثر بحجم المكتبة.
+  3. **Seamless Lecture Builder Integration:** دمج زر "اختيار من مكتبة المواد" بجانب زر "رفع من الجهاز" في `AllInOneLectureDialog`، بحيث يختار المدرس الملف بنقرة واحدة ويربطه بالمحاضرة عبر Trigger ذكي يحدّث عداد الاستخدام في المكتبة تلقائياً.
+- **Feature 09 & 10 (Multi-Exams per Lecture in Studio & Batch Mode):**
+  1. **Schema & Backend RPC:** ترقية الـ Schema والـ RPC `assign_batch_content_to_group` في Migration `0086_batch_assign_multi_exams.sql` مع الحفاظ على جدول الربط `lesson_exams` ومزامنة `content_groups.associated_exam_id` تلقائياً مع الامتحان الأول.
+  2. **LessonStudioWorkspace & LessonEditorPane Integration:**
+     - إمكانية ربط أكثر من اختبار أو كويز للمحاضرة الواحدة سواء في وضع التخصيص الفردي (Single Mode) أو في البطاقات المجمعة (Batch Mode).
+     - بطاقة تفاعلية كاملة لكل اختبار مضاف تتيح تحديد حالته ("إلزامي للاجتياز" مقابل "تدريب اختياري") بضغطة زر، وترتيب الاختبارات، مع إمكانية فك الارتباط (Unlink).
+     - شريط إضافة اختبارات إضافية من القائمة المنسدلة بدون أي تكرار للاختبارات المرتبطة بالفعل، مع عداد إجمالي يوضح عدد الاختبارات المرفقة بكل محاضرة.
+
+
 

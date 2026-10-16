@@ -48,6 +48,8 @@ class _FakeVideoBankRepoForBanner implements VideoBankRepository {
   @override
   Future<Result<List<LibraryVideoEntity>>> getVideos({
     String? folderId,
+    int page = 1,
+    int pageSize = 20,
     String? search,
   }) async => const Success([]);
 

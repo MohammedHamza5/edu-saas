@@ -1,8 +1,8 @@
+import 'dart:math' as math;
 import 'dart:typed_data';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/network/supabase_service.dart';
@@ -18,7 +18,11 @@ import '../../../exams/data/models/question_option_model.dart';
 import '../../../exams/domain/entities/exam_entity.dart';
 import '../../../videos/domain/entities/library_video_entity.dart';
 import '../../../videos/presentation/dialogs/select_video_from_bank_dialog.dart';
+import 'package:crypto/crypto.dart';
 import '../../domain/entities/content_entity.dart';
+import '../../domain/entities/library_material_entity.dart';
+import 'select_material_from_library_dialog.dart';
+import '../../../../core/utils/pdf_launcher_helper.dart';
 
 enum VideoSourceType { bank, bunny, youtube, none }
 
@@ -99,7 +103,8 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
   PlatformFile? _pickedBunnyFile;
   Uint8List? _bunnyFileBytes;
 
-  // Handout PDF
+  // Handout PDF (Library selection or Device upload)
+  LibraryMaterialEntity? _selectedLibraryMaterial;
   PlatformFile? _pickedHandoutFile;
   Uint8List? _handoutFileBytes;
 
@@ -170,6 +175,17 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
     } catch (_) {}
   }
 
+  Future<void> _pickFromMaterialsLibrary() async {
+    final selected = await SelectMaterialFromLibraryDialog.show(context);
+    if (selected != null && mounted) {
+      setState(() {
+        _selectedLibraryMaterial = selected;
+        _pickedHandoutFile = null;
+        _handoutFileBytes = null;
+      });
+    }
+  }
+
   Future<void> _pickHandoutPdf() async {
     try {
       final res = await FilePicker.platform.pickFiles(
@@ -178,9 +194,44 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
         withData: true,
       );
       if (res != null && res.files.isNotEmpty) {
+        final file = res.files.first;
+        final bytes = file.bytes;
+
+        if (bytes != null) {
+          // 1. Calculate SHA-256 Hash for smart deduplication check
+          final computedHash = sha256.convert(bytes).toString();
+
+          // 2. Check if this exact file is already present in teacher's library
+          final dupRes = await InjectionContainer.materialsLibraryRepository
+              .checkDuplicate(
+            fileHash: computedHash,
+            fileName: file.name,
+            fileSize: file.size,
+          );
+
+          final duplicate = dupRes.dataOrNull;
+          if (duplicate != null && mounted) {
+            // Smart deduplication: reuse existing library file directly!
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                backgroundColor: AppColors.success,
+                content: Text(context.l10n.materialDuplicateNotice),
+                duration: const Duration(seconds: 4),
+              ),
+            );
+            setState(() {
+              _selectedLibraryMaterial = duplicate;
+              _pickedHandoutFile = null;
+              _handoutFileBytes = null;
+            });
+            return;
+          }
+        }
+
         setState(() {
-          _pickedHandoutFile = res.files.first;
-          _handoutFileBytes = res.files.first.bytes;
+          _selectedLibraryMaterial = null;
+          _pickedHandoutFile = file;
+          _handoutFileBytes = bytes;
         });
       }
     } catch (_) {}
@@ -324,34 +375,54 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
         }
       }
 
-      // 3. PDF Handout Upload
-      if (_pickedHandoutFile != null && _handoutFileBytes != null) {
-        setState(() => _loadingMessage = context.l10n.uploadingNotice);
-        final safeName = _pickedHandoutFile!.name.replaceAll(
-          RegExp(r'[^a-zA-Z0-9._-]'),
-          '_',
+      // 3. PDF Handout Linking / Upload
+      if (_selectedLibraryMaterial != null) {
+        setState(() => _loadingMessage = context.l10n.savingChanges);
+        final linkRes = await InjectionContainer.materialsLibraryRepository
+            .linkToLecture(
+          libraryMaterialId: _selectedLibraryMaterial!.id,
+          contentId: contentId,
+          tenantId: content.tenantId,
         );
-        final storagePath = 'groups/${widget.groupId}/$contentId/$safeName';
+        if (!linkRes.isSuccess) {
+          throw Exception(
+            linkRes.failureOrNull?.message ?? 'Failed to link handout from library',
+          );
+        }
+      } else if (_pickedHandoutFile != null && _handoutFileBytes != null) {
+        setState(() => _loadingMessage = context.l10n.uploadingMaterialNotice);
+        final cleanTitle = _pickedHandoutFile!.name.replaceAll(
+          RegExp(r'\.pdf$', caseSensitive: false),
+          '',
+        );
 
-        await SupabaseService.client.storage
-            .from('group-content')
-            .uploadBinary(
-              storagePath,
-              _handoutFileBytes!,
-              fileOptions: const FileOptions(
-                contentType: 'application/pdf',
-                upsert: true,
-              ),
-            );
+        final uploadRes = await InjectionContainer.materialsLibraryRepository
+            .uploadMaterial(
+          title: cleanTitle,
+          fileName: _pickedHandoutFile!.name,
+          fileBytes: _handoutFileBytes!,
+          mimeType: 'application/pdf',
+        );
 
-        await SupabaseService.client.from('files').insert({
-          'tenant_id': content.tenantId,
-          'content_id': contentId,
-          'storage_path': storagePath,
-          'file_name': _pickedHandoutFile!.name,
-          'mime_type': 'application/pdf',
-          'file_size': _pickedHandoutFile!.size,
-        });
+        if (!uploadRes.isSuccess || uploadRes.dataOrNull == null) {
+          throw Exception(
+            uploadRes.failureOrNull?.message ?? 'Failed to upload handout',
+          );
+        }
+
+        final uploadedMat = uploadRes.dataOrNull!;
+        final linkRes = await InjectionContainer.materialsLibraryRepository
+            .linkToLecture(
+          libraryMaterialId: uploadedMat.id,
+          contentId: contentId,
+          tenantId: content.tenantId,
+        );
+
+        if (!linkRes.isSuccess) {
+          throw Exception(
+            linkRes.failureOrNull?.message ?? 'Failed to link uploaded handout',
+          );
+        }
       }
 
       // 4. Create and Link Inline Quiz
@@ -449,6 +520,7 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
           passingScore: passingScore,
           allowRetake: true,
           showResult: true,
+          isPublished: true,
           initialQuestions: questionsPayload,
         );
 
@@ -458,6 +530,12 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
               .from('content')
               .update({'associated_exam_id': examId})
               .eq('id', contentId);
+
+          await SupabaseService.client
+              .from('content_groups')
+              .update({'associated_exam_id': examId})
+              .eq('content_id', contentId)
+              .catchError((Object _) => <dynamic>[]);
         }
       }
 
@@ -480,13 +558,19 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final media = MediaQuery.of(context);
+    final adaptiveMaxHeight = math.min(850.0, media.size.height * 0.92);
+    final adaptiveMaxWidth = math.min(820.0, media.size.width * 0.95);
 
     return Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppSpacing.radiusLarge),
       ),
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 820, maxHeight: 850),
+        constraints: BoxConstraints(
+          maxWidth: adaptiveMaxWidth,
+          maxHeight: adaptiveMaxHeight,
+        ),
         child: _isLoading
             ? Padding(
                 padding: const EdgeInsets.all(AppSpacing.s32),
@@ -1016,38 +1100,153 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
             ],
           ),
           const SizedBox(height: AppSpacing.s12),
-          if (_pickedHandoutFile == null) ...[
-            OutlinedButton.icon(
-              icon: const Icon(Icons.attach_file_rounded),
-              label: Text(context.l10n.attachHandoutPdf),
-              onPressed: _pickHandoutPdf,
+          if (_selectedLibraryMaterial != null) ...[
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.s12),
+              decoration: BoxDecoration(
+                color: AppColors.success.withValues(alpha: 0.06),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                border: Border.all(
+                  color: AppColors.success.withValues(alpha: 0.35),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(AppSpacing.s8),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                    ),
+                    child: const Icon(
+                      Icons.picture_as_pdf_rounded,
+                      color: Colors.redAccent,
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.s12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.success.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                context.l10n.materialSelectedFromLibrary,
+                                style: const TextStyle(
+                                  color: AppColors.success,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              _selectedLibraryMaterial!.formattedFileSize,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          _selectedLibraryMaterial!.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.remove_red_eye_outlined, size: 20),
+                    tooltip: context.l10n.previewMaterialAction,
+                    onPressed: () async {
+                      final currentContext = context;
+                      try {
+                        final res = await InjectionContainer
+                            .materialsLibraryRepository
+                            .getSignedUrl(
+                          _selectedLibraryMaterial!.storagePath,
+                          storageProvider:
+                              _selectedLibraryMaterial!.storageProvider,
+                        );
+                        if (res.isSuccess && res.dataOrNull != null) {
+                          if (!currentContext.mounted) return;
+                          await PdfLauncherHelper.launchPdfUrl(
+                            res.dataOrNull!,
+                            context: currentContext,
+                          );
+                        }
+                      } catch (_) {}
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close_rounded, size: 18),
+                    tooltip: context.l10n.changeMaterialAction,
+                    onPressed: () {
+                      setState(() {
+                        _selectedLibraryMaterial = null;
+                      });
+                    },
+                  ),
+                ],
+              ),
             ),
-          ] else ...[
+          ] else if (_pickedHandoutFile != null) ...[
             Container(
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.s12,
-                vertical: AppSpacing.s8,
+                vertical: AppSpacing.s10,
               ),
               decoration: BoxDecoration(
-                color: Colors.red.withAlpha(15),
+                color: Colors.red.withValues(alpha: 0.06),
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                border: Border.all(color: Colors.red.withAlpha(40)),
+                border: Border.all(color: Colors.red.withValues(alpha: 0.25)),
               ),
               child: Row(
                 children: [
                   const Icon(
                     Icons.description_rounded,
                     color: Colors.redAccent,
-                    size: 20,
+                    size: 22,
                   ),
-                  const SizedBox(width: AppSpacing.s8),
+                  const SizedBox(width: AppSpacing.s10),
                   Expanded(
-                    child: Text(
-                      '${_pickedHandoutFile!.name} (${(_pickedHandoutFile!.size / 1024).toStringAsFixed(1)} KB)',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _pickedHandoutFile!.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
+                        ),
+                        Text(
+                          '${(_pickedHandoutFile!.size / 1024).toStringAsFixed(1)} KB • ${context.l10n.uploadMaterialAction}',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   IconButton(
@@ -1061,6 +1260,41 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
                   ),
                 ],
               ),
+            ),
+          ] else ...[
+            Wrap(
+              spacing: 12,
+              runSpacing: 10,
+              children: [
+                OutlinedButton.icon(
+                  icon: const Icon(
+                    Icons.folder_shared_rounded,
+                    size: 18,
+                    color: Color(0xFFEA580C),
+                  ),
+                  label: Text(context.l10n.selectFromMaterialsLibrary),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFFEA580C),
+                    side: const BorderSide(color: Color(0xFFEA580C)),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.s16,
+                      vertical: AppSpacing.s12,
+                    ),
+                  ),
+                  onPressed: _pickFromMaterialsLibrary,
+                ),
+                TextButton.icon(
+                  icon: const Icon(Icons.upload_file_rounded, size: 18),
+                  label: Text(context.l10n.uploadFromDeviceAction),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.s14,
+                      vertical: AppSpacing.s12,
+                    ),
+                  ),
+                  onPressed: _pickHandoutPdf,
+                ),
+              ],
             ),
           ],
         ],

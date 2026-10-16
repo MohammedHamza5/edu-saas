@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -47,12 +48,30 @@ class SelectVideoFromBankDialog extends StatefulWidget {
 }
 
 class _SelectVideoFromBankDialogState extends State<SelectVideoFromBankDialog> {
+  final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    if (!mounted) return;
+    if (_scrollController.hasClients &&
+        _scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200) {
+      unawaited(context.read<VideoBankCubit>().loadMoreVideos());
+    }
   }
 
   @override
@@ -268,6 +287,7 @@ class _SelectVideoFromBankDialogState extends State<SelectVideoFromBankDialog> {
                     }
 
                     return CustomScrollView(
+                      controller: _scrollController,
                       slivers: [
                         // Folders Section
                         if (folders.isNotEmpty) ...[
@@ -518,6 +538,17 @@ class _SelectVideoFromBankDialogState extends State<SelectVideoFromBankDialog> {
                             ),
                           ),
                         ],
+                        if (loaded.isLoadingMore)
+                          const SliverToBoxAdapter(
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                vertical: AppSpacing.s12,
+                              ),
+                              child: Center(
+                                child: AppLoadingView.compact(size: 20),
+                              ),
+                            ),
+                          ),
                       ],
                     );
                   },

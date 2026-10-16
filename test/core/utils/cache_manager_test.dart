@@ -7,7 +7,7 @@ void main() {
 
     setUp(() {
       cache = InMemoryCache<String>(
-        ttl: const Duration(milliseconds: 100),
+        ttl: const Duration(seconds: 10),
         maxEntries: 3,
         label: 'TestCache',
       );
@@ -22,24 +22,34 @@ void main() {
     });
 
     test('returns null and prunes expired data after TTL', () async {
-      cache.put('key1', 'value1');
+      final expCache = InMemoryCache<String>(
+        ttl: const Duration(milliseconds: 50),
+        maxEntries: 3,
+        label: 'ExpCache',
+      );
+      expCache.put('key1', 'value1');
 
       // Wait past TTL
-      await Future<void>.delayed(const Duration(milliseconds: 120));
+      await Future<void>.delayed(const Duration(milliseconds: 70));
 
-      expect(cache.has('key1'), isFalse);
-      expect(cache.get('key1'), isNull);
+      expect(expCache.has('key1'), isFalse);
+      expect(expCache.get('key1'), isNull);
     });
 
     test('getStale returns data within 2x TTL even if expired', () async {
-      cache.put('key1', 'value1');
+      final expCache = InMemoryCache<String>(
+        ttl: const Duration(milliseconds: 50),
+        maxEntries: 3,
+        label: 'ExpCache',
+      );
+      expCache.put('key1', 'value1');
 
-      // Wait past 1x TTL (100ms) but less than 2x TTL (200ms)
-      await Future<void>.delayed(const Duration(milliseconds: 120));
+      // Wait past 1x TTL (50ms) but less than 2x TTL (100ms)
+      await Future<void>.delayed(const Duration(milliseconds: 65));
 
-      expect(cache.get('key1'), isNull); // Normal get is expired
-      expect(cache.getStale('key1'), equals('value1')); // Stale still returns
-      expect(cache.isStale('key1'), isTrue);
+      expect(expCache.get('key1'), isNull); // Normal get is expired
+      expect(expCache.getStale('key1'), equals('value1')); // Stale still returns
+      expect(expCache.isStale('key1'), isTrue);
     });
 
     test('evicts oldest accessed entry when maxEntries is exceeded (LRU)', () {

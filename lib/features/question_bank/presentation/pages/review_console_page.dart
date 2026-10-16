@@ -1157,11 +1157,13 @@ class _ReviewConsolePageState extends State<ReviewConsolePage> {
           ),
         ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          // Left side structural actions: Merge, Split, Unreadable
-          Row(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final isStacked = constraints.maxWidth < 780;
+
+          final structuralActions = Wrap(
+            spacing: AppSpacing.s8,
+            runSpacing: AppSpacing.s8,
             children: [
               OutlinedButton.icon(
                 onPressed: () => _confirmMerge(context),
@@ -1181,10 +1183,12 @@ class _ReviewConsolePageState extends State<ReviewConsolePage> {
                 label: Text(l10n.markUnreadableAction),
               ),
             ],
-          ),
+          );
 
-          // Right side approval / publish actions
-          Row(
+          final primaryActions = Wrap(
+            spacing: AppSpacing.s12,
+            runSpacing: AppSpacing.s8,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               if (!isApproved) ...[
                 AppButton(
@@ -1200,7 +1204,6 @@ class _ReviewConsolePageState extends State<ReviewConsolePage> {
                           );
                         },
                 ),
-                const SizedBox(width: AppSpacing.s16),
               ],
               if (!isPublished) ...[
                 AppButton(
@@ -1233,8 +1236,27 @@ class _ReviewConsolePageState extends State<ReviewConsolePage> {
                 ),
               ],
             ],
-          ),
-        ],
+          );
+
+          if (isStacked) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                primaryActions,
+                const SizedBox(height: AppSpacing.s12),
+                structuralActions,
+              ],
+            );
+          }
+
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              structuralActions,
+              primaryActions,
+            ],
+          );
+        },
       ),
     );
   }

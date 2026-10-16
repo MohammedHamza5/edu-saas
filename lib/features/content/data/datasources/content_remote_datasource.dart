@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:typed_data';
-import 'package:dio/dio.dart' as dio;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/network/supabase_service.dart';
 import '../../../../core/utils/app_logger.dart';
@@ -87,6 +86,14 @@ abstract interface class ContentRemoteDataSource {
     required String contentId,
     required List<String> groupIds,
     List<Map<String, dynamic>>? groupConfigs,
+  });
+
+  /// Resolves an existing content_id or creates one for a video assigned to a group
+  Future<String> resolveOrCreateLectureContent({
+    required String videoId,
+    required String groupId,
+    required String title,
+    String? tenantId,
   });
 
   /// Atomically assigns multiple content items/videos to a group in one transaction
@@ -226,7 +233,7 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
         .from('content_groups')
         .select(
           'content_id, file_id, associated_exam_id, prerequisite_exam_id, sort_order, custom_title, is_published, chapter_id, '
-          'file:files!content_groups_file_id_fkey(*), '
+          'file:files!content_groups_file_id_fkey(id, tenant_id, content_id, storage_path, file_name, mime_type, file_size, created_at, storage_provider), '
           'associated_exam:exams!content_groups_associated_exam_id_fkey(id, title), '
           'prerequisite_exam:exams!content_groups_prerequisite_exam_id_fkey(id, title, passing_score), '
           'chapter:chapters!content_groups_chapter_id_fkey(id, title, sort_order)',
@@ -246,11 +253,14 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     var query = _safeClient
         .from('content')
         .select(
-          '*, files(*), videos(id, status, provider_video_id, provider), '
+          'id, tenant_id, group_id, title, description, type, status, sort_order, published_at, created_at, updated_at, associated_exam_id, prerequisite_exam_id, '
+          'files(id, tenant_id, content_id, storage_path, file_name, mime_type, file_size, created_at, storage_provider), '
+          'videos(id, status, provider_video_id, provider), '
           'content_groups(group_id, is_published, groups(name)), '
           'associated_exam:exams!content_associated_exam_id_fkey(id, title), '
           'prerequisite_exam:exams!content_prerequisite_exam_id_fkey(id, title, passing_score)',
-        );
+        )
+        .neq('type', 'exam');
 
     if (junctionIds.isEmpty) {
       query = query.eq('group_id', resolvedGroupId);
@@ -273,7 +283,10 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
             .order('created_at', ascending: true)
             .range(page * pageSize, (page + 1) * pageSize - 1),
         lessonExamsFuture.catchError((Object e) {
-          AppLogger.w('ContentRemoteDataSource', 'Could not fetch lesson_exams concurrently: $e');
+          AppLogger.w(
+            'ContentRemoteDataSource',
+            'Could not fetch lesson_exams concurrently: $e',
+          );
           return <dynamic>[];
         }),
       ]);
@@ -299,7 +312,8 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
             final firstVer = versionsList.first as Map<String, dynamic>;
             final eqList = firstVer['exam_questions'] as List<dynamic>?;
             if (eqList != null && eqList.isNotEmpty) {
-              qCount = (eqList.first as Map<String, dynamic>)['count'] as int? ?? 0;
+              qCount =
+                  (eqList.first as Map<String, dynamic>)['count'] as int? ?? 0;
             }
           }
 
@@ -357,9 +371,11 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
           if (prereqObj != null) {
             if (prereqObj['content'] != null) {
               final contentObj = prereqObj['content'] as Map<String, dynamic>;
-              prereqExamTitle = contentObj['title'] as String? ?? prereqExamTitle;
+              prereqExamTitle =
+                  contentObj['title'] as String? ?? prereqExamTitle;
             } else if (prereqObj['title'] != null) {
-              prereqExamTitle = prereqObj['title'] as String? ?? prereqExamTitle;
+              prereqExamTitle =
+                  prereqObj['title'] as String? ?? prereqExamTitle;
             }
             prereqPassingScore =
                 (prereqObj['passing_score'] as num?)?.toInt() ??
@@ -394,7 +410,8 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
           }
         }
 
-        List<AttachedLessonExamEntity> attached = lessonExamsMap[m.id] ?? const [];
+        List<AttachedLessonExamEntity> attached =
+            lessonExamsMap[m.id] ?? const [];
         if (attached.isEmpty && assocExamId != null) {
           attached = [
             AttachedLessonExamEntity(
@@ -652,44 +669,7 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     required List<int> fileBytes,
     required String defaultStoragePath,
   }) async {
-    try {
-      final r2Res = await _safeClient.functions.invoke(
-        'r2-storage',
-        body: {
-          'action': 'get-upload-url',
-          'file_name': fileName,
-          'content_type': mimeType,
-        },
-      );
-
-      if (r2Res.status == 200 && r2Res.data is Map<String, dynamic>) {
-        final data = r2Res.data as Map<String, dynamic>;
-        final uploadUrl = data['upload_url'] as String?;
-        final r2Path = data['storage_path'] as String?;
-
-        if (uploadUrl != null && r2Path != null) {
-          final dioClient = dio.Dio();
-          final uploadRes = await dioClient.put<dynamic>(
-            uploadUrl,
-            data: Stream.fromIterable([fileBytes]),
-            options: dio.Options(
-              headers: {
-                dio.Headers.contentTypeHeader: mimeType,
-                dio.Headers.contentLengthHeader: fileBytes.length,
-              },
-            ),
-          );
-
-          if (uploadRes.statusCode == 200 || uploadRes.statusCode == 201) {
-            return (path: r2Path, provider: 'r2');
-          }
-        }
-      }
-    } catch (_) {
-      // In case R2 is not configured or Edge Function is unavailable, fallback to Supabase
-    }
-
-    // Fallback to Supabase Private Storage 'group-content'
+    // Supabase Private Storage 'group-content' (fast, reliable native upload)
     await _safeClient.storage
         .from('group-content')
         .uploadBinary(
@@ -990,13 +970,15 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     // ⚡ Performance: RPC واحد بدلاً من N رحلات HTTP
     // ترتيب 10 عناصر = 10 × ~400ms = 4s  →  RPC واحد = ~80ms
     // يُحدّث كلاً من جدول content وجدول content_groups لضمان تزامن الطالب والمعلم 100%
-    final resolvedGroupId =
-        groupId != null ? GroupSlugResolver.toId(groupId) : null;
+    final resolvedGroupId = groupId != null
+        ? GroupSlugResolver.toId(groupId)
+        : null;
     await _safeClient.rpc<void>(
       'reorder_content_items',
       params: {
         'p_ids': contentIdsInOrder,
-        if (resolvedGroupId != null && GroupSlugResolver.isUuid(resolvedGroupId))
+        if (resolvedGroupId != null &&
+            GroupSlugResolver.isUuid(resolvedGroupId))
           'p_group_id': resolvedGroupId,
       },
     );
@@ -1013,28 +995,9 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     // 2. The RPC returns a list of storage paths of deleted files (e.g. materials/... or files in group-content)
     if (res != null && res is List) {
       final paths = res.map((e) => e.toString()).toList();
-      final r2Paths = paths.where((p) => p.startsWith('materials/')).toList();
-      final supabasePaths = paths.where((p) => !p.startsWith('materials/')).toList();
-
-      // Clean up R2 physical files
-      if (r2Paths.isNotEmpty) {
+      if (paths.isNotEmpty) {
         try {
-          await _safeClient.functions.invoke(
-            'r2-storage',
-            body: {
-              'action': 'delete-files',
-              'storage_paths': r2Paths,
-            },
-          );
-        } catch (_) {
-          // Non-blocking cleanup
-        }
-      }
-
-      // Clean up Supabase Storage files if any
-      if (supabasePaths.isNotEmpty) {
-        try {
-          await _safeClient.storage.from('group-content').remove(supabasePaths);
+          await _safeClient.storage.from('group-content').remove(paths);
         } catch (_) {
           // Non-blocking cleanup
         }
@@ -1045,8 +1008,20 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
   @override
   Future<String> getSignedFileUrl({
     required String storagePath,
-    int expiresInSeconds = 900,
+    int expiresInSeconds = 3600,
   }) async {
+    // 1. Primary: Supabase Storage ('group-content') where all platform materials are stored
+    try {
+      final signedUrl = await _safeClient.storage
+          .from('group-content')
+          .createSignedUrl(storagePath, expiresInSeconds);
+      if (signedUrl.isNotEmpty) {
+        return signedUrl;
+      }
+    } catch (_) {
+      // Fallback: If not in Supabase Storage and path starts with materials/, attempt R2
+    }
+
     if (storagePath.startsWith('materials/')) {
       try {
         final r2Res = await _safeClient.functions.invoke(
@@ -1062,14 +1037,13 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
           }
         }
       } catch (_) {
-        // Fallback to Supabase Storage if invocation fails
+        // Fallback
       }
     }
 
-    final signedUrl = await _safeClient.storage
+    return await _safeClient.storage
         .from('group-content')
         .createSignedUrl(storagePath, expiresInSeconds);
-    return signedUrl;
   }
 
   @override
@@ -1169,13 +1143,15 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
 
       for (final c in contentModels) {
         final existingIdx = allVideos.indexWhere((v) {
-          final matchId = v.id == c.id || (c.videoId != null && v.id == c.videoId);
-          final matchProvider = v.videoProviderId != null &&
+          final matchId =
+              v.id == c.id || (c.videoId != null && v.id == c.videoId);
+          final matchProvider =
+              v.videoProviderId != null &&
               v.videoProviderId!.isNotEmpty &&
               c.videoProviderId != null &&
               v.videoProviderId == c.videoProviderId;
-          final matchTitle = v.title.trim().toLowerCase() ==
-              c.title.trim().toLowerCase();
+          final matchTitle =
+              v.title.trim().toLowerCase() == c.title.trim().toLowerCase();
           return matchId || matchProvider || matchTitle;
         });
 
@@ -1219,7 +1195,8 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
           );
         } else {
           // Only add standalone videos that actually have a valid video source (YouTube or video record)
-          final hasVideo = (c.videoProviderId != null && c.videoProviderId!.isNotEmpty) ||
+          final hasVideo =
+              (c.videoProviderId != null && c.videoProviderId!.isNotEmpty) ||
               (c.videoId != null && c.videoId!.isNotEmpty) ||
               c.videoProvider == 'youtube' ||
               c.type == ContentType.video;
@@ -1248,83 +1225,37 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
       return copy;
     }).toList();
 
-    // 1. Check if contentId exists in `content` table
-    final contentCheck = await _safeClient
-        .from('content')
-        .select('id')
-        .eq('id', contentId)
-        .maybeSingle();
+    // 1. Resolve or create actualContentId cleanly
+    final customTitle =
+        (resolvedConfigs != null &&
+            resolvedConfigs.isNotEmpty &&
+            resolvedConfigs.first['custom_title'] != null)
+        ? resolvedConfigs.first['custom_title'] as String
+        : null;
 
-    String actualContentId = contentId;
+    final actualContentId = await resolveOrCreateLectureContent(
+      videoId: contentId,
+      groupId: resolvedGroupIds.isNotEmpty ? resolvedGroupIds.first : '',
+      title: customTitle ?? '',
+    );
 
-    // 2. If not found in `content`, it must be a master video from `video_library`
-    if (contentCheck == null) {
-      final libVideo = await _safeClient
-          .from('video_library')
-          .select()
-          .eq('id', contentId)
-          .maybeSingle();
-
-      if (libVideo != null) {
-        final tenantId = libVideo['tenant_id'] as String;
-        final customTitle = (resolvedConfigs != null &&
-                resolvedConfigs.isNotEmpty &&
-                resolvedConfigs.first['custom_title'] != null)
-            ? resolvedConfigs.first['custom_title'] as String
-            : null;
-        final title = customTitle ?? (libVideo['title'] as String);
-
-        // Calculate sort_order so newly added video appends to the end
-        int initialSortOrder = 0;
-        final cfgOrder = resolvedConfigs?.firstOrNull?['sort_order'];
-        if (cfgOrder != null && cfgOrder is num) {
-          initialSortOrder = cfgOrder.toInt();
-        } else if (resolvedGroupIds.isNotEmpty) {
-          final targetGrp = resolvedGroupIds.first;
-          final existingCg = await _safeClient
-              .from('content_groups')
-              .select('sort_order')
-              .eq('group_id', targetGrp)
-              .order('sort_order', ascending: false)
-              .limit(1);
-          final existingCgList = existingCg as List<dynamic>;
-          if (existingCgList.isNotEmpty) {
-            initialSortOrder =
-                ((existingCgList.first['sort_order'] as num?)?.toInt() ?? -1) + 1;
-          }
+    // Ensure any file_id in groupConfigs has content_id linked in files table
+    if (resolvedConfigs != null) {
+      for (final cfg in resolvedConfigs) {
+        final fId = cfg['file_id'] as String?;
+        if (fId != null && fId.isNotEmpty) {
+          try {
+            await _safeClient
+                .from('files')
+                .update({'content_id': actualContentId})
+                .eq('id', fId)
+                .filter('content_id', 'is', 'null');
+          } catch (_) {}
         }
-
-        // Create the content record in public.content
-        final contentInsert = await _safeClient
-            .from('content')
-            .insert({
-              'tenant_id': tenantId,
-              'group_id': resolvedGroupIds.isNotEmpty ? resolvedGroupIds.first : null,
-              'title': title,
-              'description': libVideo['description'],
-              'type': 'video',
-              'status': 'published',
-              'sort_order': initialSortOrder,
-            })
-            .select('id')
-            .single();
-
-        actualContentId = contentInsert['id'] as String;
-
-        // Insert into videos table linking to video_library
-        await _safeClient.from('videos').insert({
-          'content_id': actualContentId,
-          'library_video_id': contentId,
-          'provider': libVideo['provider'] ?? 'bunny',
-          'provider_video_id': libVideo['provider_video_id'],
-          'thumbnail_url': libVideo['thumbnail_url'],
-          'duration': libVideo['duration'],
-          'status': libVideo['status'] ?? 'ready',
-        });
       }
     }
 
-    // 3. Assign actualContentId to groups via atomic RPC
+    // 2. Assign actualContentId to groups via atomic RPC
     await _safeClient.rpc<void>(
       'assign_content_to_groups',
       params: {
@@ -1336,6 +1267,103 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
   }
 
   @override
+  Future<String> resolveOrCreateLectureContent({
+    required String videoId,
+    required String groupId,
+    required String title,
+    String? tenantId,
+  }) async {
+    final resolvedGroupId = GroupSlugResolver.toId(groupId);
+
+    // 1. Check if videoId is already a valid UUID in public.content
+    final contentCheck = await _safeClient
+        .from('content')
+        .select('id')
+        .eq('id', videoId)
+        .maybeSingle();
+
+    if (contentCheck != null) {
+      return contentCheck['id'] as String;
+    }
+
+    // 2. Check if a lecture already exists in videos table for this library_video_id
+    final existingVideos = await _safeClient
+        .from('videos')
+        .select(
+          'content_id, content:content!videos_content_id_fkey(id, group_id)',
+        )
+        .eq('library_video_id', videoId);
+
+    final list = existingVideos as List<dynamic>;
+    if (list.isNotEmpty) {
+      // Find one matching this group first
+      for (final item in list) {
+        final cId = item['content_id'] as String;
+        if (resolvedGroupId.isNotEmpty) {
+          final cgCheck = await _safeClient
+              .from('content_groups')
+              .select('id')
+              .eq('content_id', cId)
+              .eq('group_id', resolvedGroupId)
+              .maybeSingle();
+          if (cgCheck != null) {
+            return cId;
+          }
+        }
+      }
+      // Or reuse the existing content_id
+      return list.first['content_id'] as String;
+    }
+
+    // 3. Brand new video from video_library — create content and videos records
+    final libVideo = await _safeClient
+        .from('video_library')
+        .select(
+          'id, tenant_id, title, description, bunny_video_id, duration_seconds',
+        )
+        .eq('id', videoId)
+        .maybeSingle();
+
+    if (libVideo != null) {
+      final effTenantId = tenantId ?? (libVideo['tenant_id'] as String);
+      final effTitle = title.trim().isNotEmpty
+          ? title.trim()
+          : (libVideo['title'] as String);
+
+      final contentInsert = await _safeClient
+          .from('content')
+          .insert({
+            'tenant_id': effTenantId,
+            'group_id': resolvedGroupId.isNotEmpty ? resolvedGroupId : null,
+            'title': effTitle,
+            'description': libVideo['description'],
+            'type': 'video',
+            'status': 'published',
+            'sort_order': 0,
+          })
+          .select('id')
+          .single();
+
+      final newContentId = contentInsert['id'] as String;
+
+      await _safeClient.from('videos').insert({
+        'content_id': newContentId,
+        'library_video_id': videoId,
+        'provider': libVideo['provider'] ?? 'bunny',
+        'provider_video_id': libVideo['provider_video_id'],
+        'thumbnail_url': libVideo['thumbnail_url'],
+        'duration': libVideo['duration'],
+        'status': libVideo['status'] ?? 'ready',
+      });
+
+      return newContentId;
+    }
+
+    // Fallback: return videoId directly
+    return videoId;
+  }
+
+  @override
   Future<void> assignBatchContentToGroup({
     required String groupId,
     required List<Map<String, dynamic>> items,
@@ -1343,10 +1371,7 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     final resolvedGroupId = GroupSlugResolver.toId(groupId);
     await _safeClient.rpc<void>(
       'assign_batch_content_to_group',
-      params: {
-        'p_group_id': resolvedGroupId,
-        'p_items': items,
-      },
+      params: {'p_group_id': resolvedGroupId, 'p_items': items},
     );
   }
 
@@ -1388,15 +1413,11 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     if (response is Map) {
       final lessons = response['lessons'];
       if (lessons is List) {
-        return lessons
-            .map((e) => Map<String, dynamic>.from(e as Map))
-            .toList();
+        return lessons.map((e) => Map<String, dynamic>.from(e as Map)).toList();
       }
       return [];
     } else if (response is List) {
-      return response
-          .map((e) => Map<String, dynamic>.from(e as Map))
-          .toList();
+      return response.map((e) => Map<String, dynamic>.from(e as Map)).toList();
     }
     return [];
   }
@@ -1460,7 +1481,9 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     }
     final response = await _safeClient
         .from('chapters')
-        .select()
+        .select(
+          'id, group_id, title, sort_order, is_published, created_at, updated_at',
+        )
         .eq('group_id', resolvedGroupId)
         .order('sort_order', ascending: true)
         .order('created_at', ascending: true);
@@ -1504,10 +1527,7 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
   }) async {
     await _safeClient.rpc<void>(
       'toggle_chapter_visibility',
-      params: {
-        'p_chapter_id': chapterId,
-        'p_is_published': isPublished,
-      },
+      params: {'p_chapter_id': chapterId, 'p_is_published': isPublished},
     );
   }
 
@@ -1518,10 +1538,7 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
   }) async {
     await _safeClient.rpc<void>(
       'update_chapter',
-      params: {
-        'p_chapter_id': chapterId,
-        'p_title': title.trim(),
-      },
+      params: {'p_chapter_id': chapterId, 'p_title': title.trim()},
     );
   }
 
@@ -1529,9 +1546,7 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
   Future<void> deleteChapter(String chapterId) async {
     await _safeClient.rpc<void>(
       'delete_chapter',
-      params: {
-        'p_chapter_id': chapterId,
-      },
+      params: {'p_chapter_id': chapterId},
     );
   }
 
@@ -1591,10 +1606,7 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     final resolvedGroupId = await _resolveGroupId(groupId);
     await _safeClient.rpc<void>(
       'remove_lesson_from_group',
-      params: {
-        'p_content_id': contentId,
-        'p_group_id': resolvedGroupId,
-      },
+      params: {'p_content_id': contentId, 'p_group_id': resolvedGroupId},
     );
   }
 }

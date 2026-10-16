@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import '../di/injection_container.dart';
 import '../../features/students/domain/entities/student_entity.dart';
 import '../../features/attendance/presentation/pages/student_attendance_page.dart';
@@ -18,7 +19,8 @@ import '../../features/groups/presentation/pages/group_detail_page.dart';
 import '../../features/groups/presentation/pages/groups_list_page.dart';
 import '../../features/notifications/presentation/pages/notifications_center_page.dart';
 import '../../features/notifications/presentation/pages/send_announcement_page.dart';
-import '../../features/onboarding/presentation/pages/platform_onboarding_page.dart';
+import '../../features/onboarding/presentation/pages/platform_onboarding_page.dart'
+    deferred as platform_onboarding_page;
 import '../../features/students/presentation/pages/assign_groups_page.dart';
 import '../../features/students/presentation/pages/pending_students_page.dart';
 import '../../features/students/presentation/pages/student_360_page.dart';
@@ -27,7 +29,10 @@ import '../../features/videos/presentation/cubit/videos_cubit.dart';
 import '../../features/videos/presentation/pages/video_player_page.dart';
 import '../../features/content/presentation/pages/teacher_content_library_page.dart';
 import '../../features/content/presentation/pages/teacher_lesson_details_page.dart';
-import '../../features/content/presentation/pages/teacher_video_bank_page.dart';
+import '../../features/content/presentation/pages/teacher_materials_library_page.dart'
+    deferred as teacher_materials_library_page;
+import '../../features/content/presentation/pages/teacher_video_bank_page.dart'
+    deferred as teacher_video_bank_page;
 import '../../features/content/presentation/pages/student_content_feed_page.dart';
 import '../../features/content/domain/entities/content_entity.dart';
 import '../../features/assignments/presentation/pages/teacher_assignments_page.dart';
@@ -36,17 +41,28 @@ import '../../features/exams/presentation/pages/teacher_exams_page.dart';
 import '../../features/exams/presentation/pages/student_exams_page.dart';
 import '../../features/exams/presentation/pages/student_mistakes_page.dart';
 import '../../features/exams/presentation/pages/mistakes_practice_page.dart';
-import '../../features/settings/presentation/pages/teacher_settings_page.dart';
-import '../../features/question_bank/presentation/pages/question_bank_page.dart';
-import '../../features/question_bank/presentation/pages/document_questions_page.dart';
-import '../../features/question_bank/presentation/pages/manual_question_entry_page.dart';
-import '../../features/question_bank/presentation/pages/review_console_page.dart';
-import '../../features/exams/presentation/pages/exam_parent_dispatch_page.dart';
+import '../../features/settings/presentation/pages/teacher_settings_page.dart'
+    deferred as teacher_settings_page;
+import '../../features/question_bank/presentation/pages/question_bank_page.dart'
+    deferred as question_bank_page;
+import '../../features/question_bank/presentation/pages/document_questions_page.dart'
+    deferred as document_questions_page;
+import '../../features/question_bank/presentation/pages/manual_question_entry_page.dart'
+    deferred as manual_question_entry_page;
+import '../../features/question_bank/presentation/pages/review_console_page.dart'
+    deferred as review_console_page;
+import '../../features/exams/presentation/pages/exam_parent_dispatch_page.dart'
+    deferred as exam_parent_dispatch_page;
+import '../widgets/deferred_widget.dart';
 
 import '../network/supabase_service.dart';
 import '../utils/group_slug_resolver.dart';
 import '../widgets/student_shell.dart';
 import '../../features/dashboard/presentation/cubit/student_dashboard_cubit.dart';
+import '../../features/assignments/presentation/cubit/assignments_cubit.dart';
+import '../../features/attendance/presentation/cubit/attendance_cubit.dart';
+import '../../features/exams/presentation/cubit/exams_cubit.dart';
+import '../../features/exams/presentation/cubit/mistakes_cubit.dart';
 import '../widgets/teacher_shell.dart';
 import 'app_route_observer.dart';
 import 'app_routes.dart';
@@ -89,6 +105,8 @@ class AppRouter {
 
   // Feature: Content routes
   static const String teacherContent = AppRoutes.teacherContent;
+  static const String teacherMaterialsLibrary =
+      AppRoutes.teacherMaterialsLibrary;
   static const String teacherGroupContent = AppRoutes.teacherGroupContent;
   static const String teacherLessonDetails = AppRoutes.teacherLessonDetails;
   static const String studentGroupContent = AppRoutes.studentGroupContent;
@@ -102,7 +120,8 @@ class AppRouter {
   // Feature: Exams routes
   static const String teacherExams = AppRoutes.teacherExams;
   static const String teacherGroupExams = AppRoutes.teacherGroupExams;
-  static const String teacherExamParentDispatch = AppRoutes.teacherExamParentDispatch;
+  static const String teacherExamParentDispatch =
+      AppRoutes.teacherExamParentDispatch;
   static const String studentExams = AppRoutes.studentExams;
   static const String studentMistakes = AppRoutes.studentMistakes;
   static const String mistakesPractice = AppRoutes.mistakesPractice;
@@ -218,7 +237,7 @@ class AppRouter {
 
   static final GoRouter router = GoRouter(
     initialLocation: splash,
-    observers: [AppRouteObserver.instance],
+    observers: [AppRouteObserver.instance, SentryNavigatorObserver()],
     redirect: redirectLogic,
     routes: [
       GoRoute(
@@ -243,7 +262,8 @@ class AppRouter {
       GoRoute(
         path: registerStudent,
         builder: (BuildContext context, GoRouterState state) {
-          final tenantId = state.uri.queryParameters['tenant_id'] ??
+          final tenantId =
+              state.uri.queryParameters['tenant_id'] ??
               state.uri.queryParameters['tenant'];
           return RegisterStudentPage(tenantId: tenantId);
         },
@@ -369,15 +389,23 @@ class AppRouter {
           GoRoute(
             path: teacherSettings,
             pageBuilder: (BuildContext context, GoRouterState state) =>
-                const NoTransitionPage(child: TeacherSettingsPage()),
+                NoTransitionPage(
+                  child: DeferredWidget(
+                    loadLibrary: teacher_settings_page.loadLibrary,
+                    builder: () => teacher_settings_page.TeacherSettingsPage(),
+                  ),
+                ),
           ),
           GoRoute(
             path: platformOnboarding,
             pageBuilder: (BuildContext context, GoRouterState state) =>
                 NoTransitionPage(
-                  child: BlocProvider(
-                    create: (_) => InjectionContainer.createOnboardingCubit(),
-                    child: const PlatformOnboardingPage(),
+                  child: DeferredWidget(
+                    loadLibrary: platform_onboarding_page.loadLibrary,
+                    builder: () => BlocProvider(
+                      create: (_) => InjectionContainer.createOnboardingCubit(),
+                      child: platform_onboarding_page.PlatformOnboardingPage(),
+                    ),
                   ),
                 ),
           ),
@@ -438,12 +466,14 @@ class AppRouter {
                 child: MultiBlocProvider(
                   providers: [
                     BlocProvider(
-                      create: (_) => InjectionContainer.createContentCubit()
-                        ..loadGroupContent(groupId),
+                      create: (_) =>
+                          InjectionContainer.createContentCubit()
+                            ..loadGroupContent(groupId),
                     ),
                     BlocProvider(
                       create: (_) =>
-                          InjectionContainer.createVideoBankCubit()..loadFolder(),
+                          InjectionContainer.createVideoBankCubit()
+                            ..loadFolder(),
                     ),
                   ],
                   child: TeacherLessonDetailsPage(
@@ -460,8 +490,23 @@ class AppRouter {
           GoRoute(
             path: teacherVideos,
             pageBuilder: (BuildContext context, GoRouterState state) =>
-                const NoTransitionPage(
-                  child: TeacherVideoBankPage(),
+                NoTransitionPage(
+                  child: DeferredWidget(
+                    loadLibrary: teacher_video_bank_page.loadLibrary,
+                    builder: () =>
+                        teacher_video_bank_page.TeacherVideoBankPage(),
+                  ),
+                ),
+          ),
+          GoRoute(
+            path: teacherMaterialsLibrary,
+            pageBuilder: (BuildContext context, GoRouterState state) =>
+                NoTransitionPage(
+                  child: DeferredWidget(
+                    loadLibrary: teacher_materials_library_page.loadLibrary,
+                    builder: () =>
+                        teacher_materials_library_page.TeacherMaterialsLibraryPage(),
+                  ),
                 ),
           ),
           GoRoute(
@@ -544,11 +589,14 @@ class AppRouter {
               final examId = state.pathParameters['examId'] ?? '';
               final title = state.uri.queryParameters['title'];
               return MaterialPage(
-                child: BlocProvider(
-                  create: (_) => InjectionContainer.createExamDispatchCubit(),
-                  child: ExamParentDispatchPage(
-                    examId: examId,
-                    initialExamTitle: title,
+                child: DeferredWidget(
+                  loadLibrary: exam_parent_dispatch_page.loadLibrary,
+                  builder: () => BlocProvider(
+                    create: (_) => InjectionContainer.createExamDispatchCubit(),
+                    child: exam_parent_dispatch_page.ExamParentDispatchPage(
+                      examId: examId,
+                      initialExamTitle: title,
+                    ),
                   ),
                 ),
               );
@@ -563,9 +611,13 @@ class AppRouter {
             path: questionBank,
             pageBuilder: (BuildContext context, GoRouterState state) =>
                 NoTransitionPage(
-                  child: BlocProvider(
-                    create: (_) => InjectionContainer.createQuestionBankCubit(),
-                    child: const QuestionBankPage(),
+                  child: DeferredWidget(
+                    loadLibrary: question_bank_page.loadLibrary,
+                    builder: () => BlocProvider(
+                      create: (_) =>
+                          InjectionContainer.createQuestionBankCubit(),
+                      child: question_bank_page.QuestionBankPage(),
+                    ),
                   ),
                 ),
           ),
@@ -573,9 +625,14 @@ class AppRouter {
             path: manualQuestionEntry,
             pageBuilder: (BuildContext context, GoRouterState state) =>
                 NoTransitionPage(
-                  child: BlocProvider(
-                    create: (_) => InjectionContainer.createQuestionBankCubit(),
-                    child: const ManualQuestionEntryPage(),
+                  child: DeferredWidget(
+                    loadLibrary: manual_question_entry_page.loadLibrary,
+                    builder: () => BlocProvider(
+                      create: (_) =>
+                          InjectionContainer.createQuestionBankCubit(),
+                      child:
+                          manual_question_entry_page.ManualQuestionEntryPage(),
+                    ),
                   ),
                 ),
           ),
@@ -584,9 +641,14 @@ class AppRouter {
             pageBuilder: (BuildContext context, GoRouterState state) {
               final docId = state.pathParameters['docId'] ?? '';
               return NoTransitionPage(
-                child: BlocProvider(
-                  create: (_) => InjectionContainer.createQuestionBankCubit(),
-                  child: DocumentQuestionsPage(documentId: docId),
+                child: DeferredWidget(
+                  loadLibrary: document_questions_page.loadLibrary,
+                  builder: () => BlocProvider(
+                    create: (_) => InjectionContainer.createQuestionBankCubit(),
+                    child: document_questions_page.DocumentQuestionsPage(
+                      documentId: docId,
+                    ),
+                  ),
                 ),
               );
             },
@@ -596,9 +658,14 @@ class AppRouter {
             pageBuilder: (BuildContext context, GoRouterState state) {
               final questionId = state.pathParameters['id'] ?? '';
               return NoTransitionPage(
-                child: BlocProvider(
-                  create: (_) => InjectionContainer.createQuestionBankCubit(),
-                  child: ReviewConsolePage(questionId: questionId),
+                child: DeferredWidget(
+                  loadLibrary: review_console_page.loadLibrary,
+                  builder: () => BlocProvider(
+                    create: (_) => InjectionContainer.createQuestionBankCubit(),
+                    child: review_console_page.ReviewConsolePage(
+                      questionId: questionId,
+                    ),
+                  ),
                 ),
               );
             },
@@ -609,8 +676,24 @@ class AppRouter {
       // ── Student Shell (Persistent Navigation Bar & Categorized Sidebar) ────────
       ShellRoute(
         builder: (BuildContext context, GoRouterState state, Widget child) {
-          return BlocProvider<StudentDashboardCubit>(
-            create: (_) => InjectionContainer.createStudentDashboardCubit(),
+          return MultiBlocProvider(
+            providers: [
+              BlocProvider<StudentDashboardCubit>(
+                create: (_) => InjectionContainer.createStudentDashboardCubit(),
+              ),
+              BlocProvider<ExamsCubit>(
+                create: (_) => InjectionContainer.createExamsCubit(),
+              ),
+              BlocProvider<AssignmentsCubit>(
+                create: (_) => InjectionContainer.createAssignmentsCubit(),
+              ),
+              BlocProvider<AttendanceCubit>(
+                create: (_) => InjectionContainer.createAttendanceCubit(),
+              ),
+              BlocProvider<MistakesCubit>(
+                create: (_) => InjectionContainer.createMistakesCubit(),
+              ),
+            ],
             child: StudentShell(
               currentLocation: state.matchedLocation,
               child: child,
@@ -621,57 +704,36 @@ class AppRouter {
           GoRoute(
             path: studentDashboard,
             pageBuilder: (BuildContext context, GoRouterState state) =>
-                const NoTransitionPage(
-                  child: StudentDashboardPage(),
-                ),
+                const NoTransitionPage(child: StudentDashboardPage()),
           ),
           GoRoute(
             path: studentAssignments,
             pageBuilder: (BuildContext context, GoRouterState state) =>
-                NoTransitionPage(
-                  child: BlocProvider(
-                    create: (_) => InjectionContainer.createAssignmentsCubit(),
-                    child: const StudentAssignmentsPage(),
-                  ),
-                ),
+                const NoTransitionPage(child: StudentAssignmentsPage()),
           ),
           GoRoute(
             path: studentExams,
             pageBuilder: (BuildContext context, GoRouterState state) {
               final examId = state.uri.queryParameters['examId'];
               return NoTransitionPage(
-                child: MultiBlocProvider(
-                  providers: [
-                    BlocProvider(
-                      create: (_) => InjectionContainer.createExamsCubit(),
-                    ),
-                    BlocProvider(
-                      create: (_) => InjectionContainer.createMistakesCubit(),
-                    ),
-                  ],
-                  child: StudentExamsPage(initialExamId: examId),
-                ),
+                child: StudentExamsPage(initialExamId: examId),
               );
             },
           ),
           GoRoute(
             path: studentMistakes,
             pageBuilder: (BuildContext context, GoRouterState state) =>
-                NoTransitionPage(
-                  child: BlocProvider(
-                    create: (_) => InjectionContainer.createMistakesCubit(),
-                    child: const StudentMistakesPage(),
-                  ),
-                ),
+                const NoTransitionPage(child: StudentMistakesPage()),
           ),
           GoRoute(
             path: mistakesPractice,
             pageBuilder: (BuildContext context, GoRouterState state) {
               final examId = state.uri.queryParameters['examId'];
+              final type = state.uri.queryParameters['type'];
               return NoTransitionPage(
-                child: BlocProvider(
-                  create: (_) => InjectionContainer.createMistakesCubit(),
-                  child: MistakesPracticePage(sourceExamId: examId),
+                child: MistakesPracticePage(
+                  sourceExamId: examId,
+                  typeFilter: type,
                 ),
               );
             },

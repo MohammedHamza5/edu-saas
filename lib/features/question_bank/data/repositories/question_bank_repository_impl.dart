@@ -13,8 +13,14 @@ class QuestionBankRepositoryImpl implements QuestionBankRepository {
   // ── Document-Level Operations ─────────────────────────────────────────────
 
   @override
-  Future<List<DocumentEntity>> getDocuments() {
-    return remoteDataSource.getDocuments();
+  Future<List<DocumentEntity>> getDocuments({
+    int page = 0,
+    int pageSize = 20,
+  }) {
+    return remoteDataSource.getDocuments(
+      page: page,
+      pageSize: pageSize,
+    );
   }
 
   @override
@@ -26,10 +32,14 @@ class QuestionBankRepositoryImpl implements QuestionBankRepository {
   Future<List<QuestionEntity>> getQuestionsByDocument(
     String documentId, {
     String? statusFilter,
+    int page = 0,
+    int pageSize = 20,
   }) {
     return remoteDataSource.getQuestionsByDocument(
       documentId,
       statusFilter: statusFilter,
+      page: page,
+      pageSize: pageSize,
     );
   }
 
@@ -54,10 +64,14 @@ class QuestionBankRepositoryImpl implements QuestionBankRepository {
   Future<List<QuestionEntity>> getQuestions({
     String? statusFilter,
     bool sortByPriority = false,
+    int page = 0,
+    int pageSize = 20,
   }) {
     return remoteDataSource.getQuestions(
       statusFilter: statusFilter,
       sortByPriority: sortByPriority,
+      page: page,
+      pageSize: pageSize,
     );
   }
 

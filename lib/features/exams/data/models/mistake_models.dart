@@ -5,6 +5,10 @@ class MistakeSummaryModel extends MistakeSummaryEntity {
     required super.totalMistakes,
     required super.unresolvedCount,
     required super.resolvedCount,
+    super.unresolvedWrongCount = 0,
+    super.unresolvedSkippedCount = 0,
+    super.totalWrongCount = 0,
+    super.totalSkippedCount = 0,
     required super.sources,
   });
 
@@ -18,6 +22,10 @@ class MistakeSummaryModel extends MistakeSummaryEntity {
       totalMistakes: (json['total_mistakes'] as num?)?.toInt() ?? 0,
       unresolvedCount: (json['unresolved_count'] as num?)?.toInt() ?? 0,
       resolvedCount: (json['resolved_count'] as num?)?.toInt() ?? 0,
+      unresolvedWrongCount: (json['unresolved_wrong_count'] as num?)?.toInt() ?? 0,
+      unresolvedSkippedCount: (json['unresolved_skipped_count'] as num?)?.toInt() ?? 0,
+      totalWrongCount: (json['total_wrong_count'] as num?)?.toInt() ?? 0,
+      totalSkippedCount: (json['total_skipped_count'] as num?)?.toInt() ?? 0,
       sources: sources,
     );
   }
@@ -76,6 +84,7 @@ class MistakeQuestionModel extends MistakeQuestionEntity {
     required super.sourceExamTitle,
     super.lessonTitle,
     super.lastSelectedOptionId,
+    super.selectedOptionText,
     required super.options,
   });
 
@@ -105,6 +114,7 @@ class MistakeQuestionModel extends MistakeQuestionEntity {
       sourceExamTitle: (json['source_exam_title'] as String?) ?? 'اختبار',
       lessonTitle: json['lesson_title'] as String?,
       lastSelectedOptionId: json['last_selected_option_id'] as String?,
+      selectedOptionText: json['selected_option_text'] as String?,
       options: options,
     );
   }

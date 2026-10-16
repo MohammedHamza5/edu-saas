@@ -171,111 +171,104 @@ class _StudentLessonTileState extends State<StudentLessonTile> {
                         // Progress / Status Badge
                         _buildStatusBadge(context),
 
-                        // Handout Chip (Instant PDF access)
-                        if (content.file != null &&
-                            widget.onOpenHandout != null)
-                          InkWell(
-                            onTap: widget.onOpenHandout,
-                            borderRadius: BorderRadius.circular(4),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
+                        // Handout Chip (Informative PDF Badge - Non-clickable)
+                        if (content.file != null ||
+                            (widget.lesson?.pdfFileId != null))
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFEA580C).withAlpha(18),
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(
+                                color: const Color(0xFFEA580C).withAlpha(60),
                               ),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFEA580C).withAlpha(18),
-                                borderRadius: BorderRadius.circular(4),
-                                border: Border.all(
-                                  color: const Color(0xFFEA580C).withAlpha(60),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.picture_as_pdf_rounded,
+                                  size: 11,
+                                  color: Color(0xFFEA580C),
                                 ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(
-                                    Icons.picture_as_pdf_rounded,
-                                    size: 11,
-                                    color: Color(0xFFEA580C),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Flexible(
-                                    child: Text(
-                                      context.l10n.lessonHandoutChip,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.bold,
-                                        color: Color(0xFFEA580C),
-                                      ),
+                                const SizedBox(width: 4),
+                                Flexible(
+                                  child: Text(
+                                    context.l10n.lessonHandoutChip,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFFEA580C),
                                     ),
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           ),
 
-                        // Quiz Chip (Instant quiz access)
-                        if (content.attachedExams.isNotEmpty ||
-                            content.associatedExamTitle != null)
-                          InkWell(
-                            onTap: widget.onTakeQuiz,
-                            borderRadius: BorderRadius.circular(4),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
+                        // Quiz Chip (Informative Quiz Badge for video lectures with attached quizzes)
+                        if (content.type != ContentType.exam &&
+                            (content.attachedExams.isNotEmpty ||
+                                content.associatedExamTitle != null))
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color:
+                                  (content.isExamPassed
+                                          ? AppColors.success
+                                          : AppColors.primary)
+                                      .withAlpha(18),
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(
                                 color:
                                     (content.isExamPassed
                                             ? AppColors.success
                                             : AppColors.primary)
-                                        .withAlpha(18),
-                                borderRadius: BorderRadius.circular(4),
-                                border: Border.all(
-                                  color:
-                                      (content.isExamPassed
-                                              ? AppColors.success
-                                              : AppColors.primary)
-                                          .withAlpha(60),
-                                ),
+                                        .withAlpha(60),
                               ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  content.isExamPassed
+                                      ? Icons.check_circle_rounded
+                                      : Icons.quiz_rounded,
+                                  size: 11,
+                                  color: content.isExamPassed
+                                      ? AppColors.success
+                                      : AppColors.primary,
+                                ),
+                                const SizedBox(width: 4),
+                                Flexible(
+                                  child: Text(
                                     content.isExamPassed
-                                        ? Icons.check_circle_rounded
-                                        : Icons.quiz_rounded,
-                                    size: 11,
-                                    color: content.isExamPassed
-                                        ? AppColors.success
-                                        : AppColors.primary,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Flexible(
-                                    child: Text(
-                                      content.isExamPassed
-                                          ? (content.attachedExams.length > 1
-                                              ? '${content.attachedExams.length} ${context.l10n.attachedQuizzesSection} (${context.l10n.statusCompleted})'
-                                              : '${context.l10n.lessonQuizChip} (${context.l10n.statusCompleted})')
-                                          : (content.attachedExams.length > 1
-                                              ? '${content.attachedExams.where((e) => e.isPassed).length}/${content.attachedExams.length} ${context.l10n.attachedQuizzesSection}'
-                                              : context.l10n.lessonQuizChip),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.bold,
-                                        color: content.isExamPassed
-                                            ? AppColors.success
-                                            : AppColors.primary,
-                                      ),
+                                        ? (content.attachedExams.length > 1
+                                            ? '${content.attachedExams.length} ${context.l10n.attachedQuizzesSection} (${context.l10n.statusCompleted})'
+                                            : '${context.l10n.lessonQuizChip} (${context.l10n.statusCompleted})')
+                                        : (content.attachedExams.length > 1
+                                            ? '${content.attachedExams.where((e) => e.isPassed).length}/${content.attachedExams.length} ${context.l10n.attachedQuizzesSection}'
+                                            : context.l10n.lessonQuizChip),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      color: content.isExamPassed
+                                          ? AppColors.success
+                                          : AppColors.primary,
                                     ),
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           ),
                       ],
@@ -671,9 +664,9 @@ class _StudentLessonTileState extends State<StudentLessonTile> {
       child: Icon(
         isCompleted
             ? Icons.replay_rounded
-            : isQuizReady
-            ? Icons.quiz_rounded
-            : Icons.play_arrow_rounded,
+            : (content.type == ContentType.exam || isQuizReady)
+                ? Icons.quiz_rounded
+                : Icons.play_arrow_rounded,
         size: isCompleted ? 16 : 18,
         color: isCompleted ? AppColors.textSecondary : AppColors.primary,
       ),

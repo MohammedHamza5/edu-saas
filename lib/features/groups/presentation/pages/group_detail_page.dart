@@ -5,7 +5,6 @@ import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/responsive_breakpoints.dart';
 import '../../../../core/theme/math_tokens.dart';
 import '../../../../core/widgets/app_badge.dart';
 import '../../../../core/widgets/app_card.dart';
@@ -34,18 +33,31 @@ class GroupDetailPage extends StatefulWidget {
 
 class _GroupDetailPageState extends State<GroupDetailPage> {
   final _searchMemberController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
   String _searchMemberQuery = '';
 
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
     context.read<GroupsCubit>().loadGroupDetail(widget.groupId);
   }
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
     _searchMemberController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    if (!mounted) return;
+    if (_scrollController.hasClients &&
+        _scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200) {
+      context.read<GroupsCubit>().loadMoreGroupMembers();
+    }
   }
 
   void _confirmRemoveMember(String studentId, String studentName) {
@@ -200,9 +212,9 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
             ],
           ),
           body: ResponsiveContainer(
-            maxWidth: ResponsiveBreakpoints.maxContentWidth,
             padding: const EdgeInsets.all(AppSpacing.s16),
             child: SingleChildScrollView(
+              controller: _scrollController,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -509,10 +521,22 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
                     ListView.separated(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: members.length,
+                      itemCount: members.length +
+                          (state is GroupsLoaded && state.isLoadingMoreMembers
+                              ? 1
+                              : 0),
                       separatorBuilder: (_, __) =>
                           const SizedBox(height: AppSpacing.s8),
                       itemBuilder: (context, index) {
+                        if (index == members.length) {
+                          return const Padding(
+                            padding:
+                                EdgeInsets.symmetric(vertical: AppSpacing.s16),
+                            child: Center(
+                              child: AppLoadingView.compact(size: 24),
+                            ),
+                          );
+                        }
                         final member = members[index];
                         return _MemberRowCard(
                           member: member,

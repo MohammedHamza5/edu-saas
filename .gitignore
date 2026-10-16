@@ -51,6 +51,8 @@ app.*.map.json
 *.pem
 *.key
 .agents/mcp_config.json
+.agents/plugins/
+**/*mcp_config.json
 
 # Firebase & Local Tooling
 .firebase/

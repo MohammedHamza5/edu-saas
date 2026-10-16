@@ -13,13 +13,16 @@ import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../domain/entities/chapter_entity.dart';
 import '../../domain/entities/content_entity.dart';
+import '../../domain/entities/library_material_entity.dart';
 import '../../domain/repositories/content_repository.dart';
 import '../cubit/content_cubit.dart';
 import '../cubit/content_state.dart';
+import '../dialogs/select_material_from_library_dialog.dart';
 import 'video_picker_sheet.dart';
 import '../../../exams/presentation/pages/create_exam_page.dart';
 import '../../../exams/domain/entities/exam_entity.dart';
 import '../../../exams/presentation/cubit/exams_cubit.dart';
+import '../../../notifications/domain/services/notification_dispatcher.dart';
 
 /// Modern Dedicated Lesson Editor Workspace matching the Studio Card System.
 ///
@@ -87,6 +90,7 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
   String? _currentFileName;
   PlatformFile? _pickedFile;
   Uint8List? _pickedFileBytes;
+  LibraryMaterialEntity? _selectedLibraryMaterial;
   bool _removePdf = false;
 
   // Quiz / Exam State
@@ -437,16 +441,73 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
         setState(() {
           _pickedFile = file;
           _pickedFileBytes = file.bytes;
+          _selectedLibraryMaterial = null;
           _removePdf = false;
         });
       }
     } catch (_) {}
   }
 
+  Future<void> _pickFromLibrary() async {
+    final selected = await SelectMaterialFromLibraryDialog.show(context);
+    if (selected != null && mounted) {
+      setState(() {
+        _selectedLibraryMaterial = selected;
+        _pickedFile = null;
+        _pickedFileBytes = null;
+        _removePdf = false;
+      });
+    }
+  }
+
   Future<String?> _uploadPdfIfNeeded() async {
     if (_removePdf) return null;
+    final cubit = context.read<ContentCubit>();
+
+    // 1. If chosen from materials library: link directly without re-uploading
+    if (_selectedLibraryMaterial != null && _selectedVideo != null) {
+      final targetContentId = widget.editingLesson?.id ?? _selectedVideo!.id;
+      final linkRes = await InjectionContainer.materialsLibraryRepository.linkToLecture(
+        libraryMaterialId: _selectedLibraryMaterial!.id,
+        contentId: targetContentId,
+        tenantId: _selectedVideo!.tenantId,
+      );
+      if (linkRes.isSuccess && linkRes.dataOrNull != null) {
+        return linkRes.dataOrNull;
+      }
+    }
+
     if (_pickedFile == null || _pickedFileBytes == null) return _currentFileId;
 
+    // 2. If uploaded from device: upload to teacher's Materials Library first so it is preserved!
+    if (_selectedVideo != null) {
+      final cleanTitle = _pickedFile!.name.replaceAll(
+        RegExp(r'\.pdf$', caseSensitive: false),
+        '',
+      );
+
+      final uploadRes = await InjectionContainer.materialsLibraryRepository.uploadMaterial(
+        title: cleanTitle,
+        fileName: _pickedFile!.name,
+        fileBytes: _pickedFileBytes!,
+        mimeType: 'application/pdf',
+      );
+
+      if (uploadRes.isSuccess && uploadRes.dataOrNull != null) {
+        final newMat = uploadRes.dataOrNull!;
+        final targetContentId = widget.editingLesson?.id ?? _selectedVideo!.id;
+        final linkRes = await InjectionContainer.materialsLibraryRepository.linkToLecture(
+          libraryMaterialId: newMat.id,
+          contentId: targetContentId,
+          tenantId: _selectedVideo!.tenantId,
+        );
+        if (linkRes.isSuccess && linkRes.dataOrNull != null) {
+          return linkRes.dataOrNull;
+        }
+      }
+    }
+
+    // Fallback: direct storage upload
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     final safeName = _pickedFile!.name.toLowerCase().replaceAll(
       RegExp(r'[^a-z0-9_.-]'),
@@ -454,7 +515,6 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
     );
     final storagePath = 'groups/${widget.groupId}/${timestamp}_$safeName';
 
-    final cubit = context.read<ContentCubit>();
     return await cubit.uploadAndCreateFileRecord(
       tenantId: _selectedVideo!.tenantId,
       contentId: _selectedVideo!.id,
@@ -566,6 +626,11 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
             if (fileId == null && _removePdf) 'file_id': null,
             if (_selectedExamId != null) 'associated_exam_id': _selectedExamId,
             if (_selectedExamId == null) 'associated_exam_id': null,
+            'attached_exams': _attachedExams.asMap().entries.map((entry) => {
+              'exam_id': entry.value.examId,
+              'sort_order': entry.key,
+              'is_required': entry.value.isRequired,
+            }).toList(),
             if (passingScore != null) 'passing_score_override': passingScore,
             if (passingScore == null) 'passing_score_override': null,
             'chapter_id': _selectedChapterId,
@@ -574,6 +639,16 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
       );
 
       if (success) {
+        if (_isPublished) {
+          unawaited(
+            NotificationDispatcher.notifyNewLecture(
+              title: lessonTitle ?? _selectedVideo!.title,
+              groupId: widget.groupId,
+              contentId: _selectedVideo!.id,
+              contentType: 'video',
+            ),
+          );
+        }
         widget.onSaved();
       } else if (mounted) {
         final errorMsg = cubit.state is ContentError
@@ -859,7 +934,103 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
                         ),
                       ),
                       const SizedBox(height: AppSpacing.s10),
-                      if (!_removePdf &&
+                      if (!_removePdf && _selectedLibraryMaterial != null)
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFEA580C).withValues(alpha: 0.06),
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.radiusMedium,
+                            ),
+                            border: Border.all(
+                              color: const Color(0xFFEA580C).withValues(alpha: 0.3),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(AppSpacing.s8),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFEA580C).withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                                ),
+                                child: const Icon(
+                                  Icons.folder_shared_rounded,
+                                  color: Color(0xFFEA580C),
+                                  size: 22,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: AppColors.success.withValues(alpha: 0.15),
+                                            borderRadius: BorderRadius.circular(4),
+                                          ),
+                                          child: Text(
+                                            l10n.materialSelectedFromLibrary,
+                                            style: const TextStyle(
+                                              color: AppColors.success,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          _selectedLibraryMaterial!.formattedFileSize,
+                                          style: const TextStyle(
+                                            fontSize: 11,
+                                            color: AppColors.textSecondary,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 3),
+                                    Text(
+                                      _selectedLibraryMaterial!.title,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.refresh_rounded,
+                                  size: 18,
+                                ),
+                                tooltip: l10n.selectFromMaterialsLibrary,
+                                onPressed: _pickFromLibrary,
+                              ),
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.close_rounded,
+                                  size: 18,
+                                  color: AppColors.error,
+                                ),
+                                tooltip: l10n.deleteAction,
+                                onPressed: () {
+                                  setState(() {
+                                    _selectedLibraryMaterial = null;
+                                    _removePdf = true;
+                                  });
+                                },
+                              ),
+                            ],
+                          ),
+                        )
+                      else if (!_removePdf &&
                           (_pickedFile != null || _currentFileName != null))
                         Container(
                           padding: const EdgeInsets.all(12),
@@ -931,16 +1102,36 @@ class _LessonEditorPaneState extends State<LessonEditorPane> {
                           ),
                         )
                       else
-                        OutlinedButton.icon(
-                          onPressed: _pickPdf,
-                          icon: const Icon(
-                            Icons.picture_as_pdf_rounded,
-                            size: 16,
-                          ),
-                          label: Text(l10n.uploadPdfHandout),
-                          style: OutlinedButton.styleFrom(
-                            minimumSize: const Size.fromHeight(42),
-                          ),
+                        Wrap(
+                          spacing: AppSpacing.s10,
+                          runSpacing: AppSpacing.s8,
+                          children: [
+                            OutlinedButton.icon(
+                              onPressed: _pickFromLibrary,
+                              icon: const Icon(
+                                Icons.folder_shared_rounded,
+                                size: 16,
+                                color: Color(0xFFEA580C),
+                              ),
+                              label: Text(l10n.selectFromMaterialsLibrary),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: const Color(0xFFEA580C),
+                                side: const BorderSide(color: Color(0xFFEA580C)),
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                              ),
+                            ),
+                            OutlinedButton.icon(
+                              onPressed: _pickPdf,
+                              icon: const Icon(
+                                Icons.upload_file_rounded,
+                                size: 16,
+                              ),
+                              label: Text(l10n.uploadFromDeviceAction),
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                              ),
+                            ),
+                          ],
                         ),
                     ],
                   ),

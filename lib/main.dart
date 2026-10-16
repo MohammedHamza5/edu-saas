@@ -22,37 +22,60 @@ import 'features/auth/presentation/cubit/auth_cubit.dart';
 import 'features/groups/presentation/cubit/groups_cubit.dart';
 import 'features/notifications/presentation/cubit/notifications_cubit.dart';
 import 'features/students/presentation/cubit/students_cubit.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'features/videos/presentation/cubit/video_bank_cubit.dart';
 
 Future<void> main() async {
   // ── 0. Enable HTML5 Clean Path URLs before engine binding initializes ────────
   configureUrlStrategy();
 
-  // ── runZonedGuarded يجب أن يغلف كل شيء بما فيه ensureInitialized ─────────
-  // السبب: Flutter يشترط أن يكون ensureInitialized و runApp في نفس الـ Zone.
-  await runZonedGuarded(
-    () async {
-      // ── 1. Flutter engine binding (داخل الـ Zone) ──────────────────────────
-      WidgetsFlutterBinding.ensureInitialized();
+  // ── 1. Flutter engine binding ────────────────────────────────────────────────
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // ── 2. Load .env ─────────────────────────────────────────────────────────────
+  try {
+    await dotenv.load(fileName: '.env');
+  } catch (e, st) {
+    AppLogger.w('Main', '.env not found — using fallback config', data: e);
+    if (kDebugMode) AppLogger.d('Main', 'dotenv error detail', data: st);
+  }
+
+  final sentryDsn = dotenv.get(
+    'SENTRY_DSN',
+    fallback:
+        'https://5ecbd6c0805a91b31f1709e1c68f4e2a@o4512255132434432.ingest.de.sentry.io/4512255144886352',
+  );
+
+  await SentryFlutter.init(
+    (options) {
+      options.dsn = sentryDsn;
+      options.tracesSampleRate = 1.0;
+      options.environment = kReleaseMode ? 'production' : 'development';
+      options.sendDefaultPii = false;
+    },
+    appRunner: () async {
       AppLogger.separator('🚀 EduSaaS App Startup');
       AppLogger.i(
         'Main',
-        'Flutter binding initialized & Clean Path URLs enabled',
+        'Flutter binding initialized, Sentry active & Clean Path URLs enabled',
       );
 
-      // ── 2. Register global BlocObserver (Debug Only) ────────────────────────
+      // ── 3. Register global BlocObserver (Debug Only) ────────────────────────
       if (kDebugMode) {
         Bloc.observer = const AppBlocObserver();
         AppLogger.i('Main', 'BlocObserver registered');
       }
 
-      // ── 3. Precision UI Error Tracking & Custom In-App Error Builder ──────────
+      // ── 4. Precision UI Error Tracking & Custom In-App Error Builder ──────────
       FlutterError.onError = (FlutterErrorDetails details) {
         if (kDebugMode) {
-          // Dissects error, logs exact widget, line, and widget tree path in console
           UiErrorTracker.track(details);
           FlutterError.presentError(details);
         }
+        Sentry.captureException(
+          details.exception,
+          stackTrace: details.stack,
+        );
       };
 
       // Custom in-app error card replacing the blank red/grey crash screen
@@ -63,15 +86,6 @@ Future<void> main() async {
         'Main',
         'Precision UI Error Tracker & ErrorWidget.builder active',
       );
-
-      // ── 4. Load .env ─────────────────────────────────────────────────────────
-      try {
-        await dotenv.load(fileName: '.env');
-        AppLogger.s('Main', '.env loaded successfully');
-      } catch (e, st) {
-        AppLogger.w('Main', '.env not found — using fallback config', data: e);
-        if (kDebugMode) AppLogger.d('Main', 'dotenv error detail', data: st);
-      }
 
       // ── 5. Initialize Supabase ────────────────────────────────────────────────
       try {
@@ -93,6 +107,7 @@ Future<void> main() async {
           error: e,
           stackTrace: st,
         );
+        await Sentry.captureException(e, stackTrace: st);
       }
 
       // ── 6. Initialize Dependency Injection ───────────────────────────────────
@@ -109,21 +124,11 @@ Future<void> main() async {
           error: e,
           stackTrace: st,
         );
+        await Sentry.captureException(e, stackTrace: st);
       }
 
       AppLogger.separator('🎬 Running App');
       runApp(const EduSaaSApp());
-    },
-    // ── 7. Zoned error handler — يمسك كل async error لم يُمسك ───────────────
-    (Object error, StackTrace stackTrace) {
-      if (kDebugMode) {
-        AppLogger.e(
-          'ZoneError',
-          '🔥 Unhandled async error caught by Zone',
-          error: error,
-          stackTrace: stackTrace,
-        );
-      }
     },
   );
 }

@@ -18,6 +18,7 @@ import '../../features/groups/presentation/cubit/groups_state.dart';
 import '../../features/notifications/presentation/cubit/notifications_cubit.dart';
 import '../../features/notifications/presentation/cubit/notifications_state.dart';
 import '../../features/auth/presentation/cubit/auth_cubit.dart';
+import '../utils/prefetch_service.dart';
 import 'adaptive_scaffold.dart';
 import 'app_logo.dart';
 import 'language_switcher_button.dart';
@@ -42,14 +43,11 @@ class _StudentShellState extends State<StudentShell> {
   @override
   void initState() {
     super.initState();
-    // Warm up groups cache in background on shell launch for instant navigation
+    // Silently prefetch all student domains in background for instant (0ms) tab switching
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         try {
-          final groupsCubit = context.read<GroupsCubit>();
-          if (groupsCubit.state is! GroupsLoaded) {
-            groupsCubit.loadGroups();
-          }
+          PrefetchService.prefetchStudentData(context);
         } catch (_) {}
       }
     });
@@ -63,11 +61,9 @@ class _StudentShellState extends State<StudentShell> {
     }
     if (path.contains('/content')) return 2;
     if (path.startsWith('/student/assignments')) return 3;
-    if (path.startsWith('/student/exams') ||
-        path.startsWith('/student/mistakes')) {
-      return 4;
-    }
-    if (path.startsWith('/student/attendance')) return 5;
+    if (path.startsWith('/student/exams')) return 4;
+    if (path.startsWith('/student/mistakes')) return 5;
+    if (path.startsWith('/student/attendance')) return 6;
     return 0;
   }
 
@@ -89,6 +85,9 @@ class _StudentShellState extends State<StudentShell> {
         context.go(AppRoutes.studentExams);
         break;
       case 5:
+        context.go(AppRoutes.studentMistakes);
+        break;
+      case 6:
         context.go(AppRoutes.studentAttendance);
         break;
     }
@@ -350,6 +349,13 @@ class _StudentShellState extends State<StudentShell> {
             tooltip: context.l10n.examsListTitle,
           ),
           AdaptiveDestination(
+            icon: Icons.auto_stories_outlined,
+            selectedIcon: Icons.auto_stories_rounded,
+            label: context.l10n.studentNavMistakesBank,
+            subtitle: context.l10n.mistakesBankSidebarSubtitle,
+            tooltip: context.l10n.studentNavMistakesBank,
+          ),
+          AdaptiveDestination(
             icon: Icons.insights_outlined,
             selectedIcon: Icons.insights_rounded,
             label: context.l10n.studentEngagementNavTitle,
@@ -424,47 +430,72 @@ class _StudentShellState extends State<StudentShell> {
 
   Widget _buildSidebarFooter(BuildContext context) {
     final theme = Theme.of(context);
+    final studentName =
+        SupabaseService.currentUser?.userMetadata?['full_name'] as String? ??
+        context.l10n.roleStudent;
     final userEmail =
         SupabaseService.currentUser?.email ?? context.l10n.roleStudent;
 
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.s8),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.s10,
+        vertical: AppSpacing.s8,
+      ),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B).withValues(alpha: 0.7),
-        borderRadius: BorderRadius.circular(10),
+        color: const Color(0xFF1E293B).withValues(alpha: 0.85),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: const Color(0xFF334155).withValues(alpha: 0.6),
+          color: const Color(0xFF334155).withValues(alpha: 0.7),
         ),
       ),
       child: Row(
         children: [
           const CircleAvatar(
-            radius: 16,
+            radius: 18,
             backgroundColor: Color(0xFF334155),
             child: Icon(
               Icons.school_rounded,
-              size: 18,
+              size: 20,
               color: Color(0xFF38BDF8),
             ),
           ),
-          const SizedBox(width: AppSpacing.s8),
+          const SizedBox(width: AppSpacing.s10),
           Expanded(
-            child: Text(
-              userEmail,
-              style: theme.textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-                fontSize: 12,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  studentName,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                    fontSize: 13,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 1),
+                Text(
+                  userEmail,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w400,
+                    color: const Color(0xFF94A3B8),
+                    fontSize: 11,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
           ),
+          const SizedBox(width: AppSpacing.s4),
           const LanguageSwitcherButton(compact: true),
           IconButton(
             icon: const Icon(Icons.logout_rounded, size: 18),
             tooltip: context.l10n.logout,
             color: const Color(0xFFF87171),
+            visualDensity: VisualDensity.compact,
             onPressed: () => _handleLogout(context),
           ),
         ],
@@ -473,35 +504,55 @@ class _StudentShellState extends State<StudentShell> {
   }
 
   Widget _buildCollapsedSidebarFooter(BuildContext context) {
+    final studentName =
+        SupabaseService.currentUser?.userMetadata?['full_name'] as String? ??
+        context.l10n.roleStudent;
     final userEmail =
         SupabaseService.currentUser?.email ?? context.l10n.roleStudent;
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Tooltip(
-          message: userEmail,
-          preferBelow: false,
-          child: const CircleAvatar(
-            radius: 16,
-            backgroundColor: Color(0xFF334155),
-            child: Icon(
-              Icons.school_rounded,
-              size: 18,
-              color: Color(0xFF38BDF8),
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        vertical: AppSpacing.s8,
+        horizontal: AppSpacing.s6,
+      ),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E293B).withValues(alpha: 0.85),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: const Color(0xFF334155).withValues(alpha: 0.7),
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Tooltip(
+            message: '$studentName\n$userEmail',
+            preferBelow: false,
+            child: const CircleAvatar(
+              radius: 18,
+              backgroundColor: Color(0xFF334155),
+              child: Icon(
+                Icons.school_rounded,
+                size: 20,
+                color: Color(0xFF38BDF8),
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: AppSpacing.s10),
-        const LanguageSwitcherButton(compact: true),
-        const SizedBox(height: AppSpacing.s6),
-        IconButton(
-          icon: const Icon(Icons.logout_rounded, size: 18),
-          tooltip: context.l10n.logout,
-          color: const Color(0xFFF87171),
-          onPressed: () => _handleLogout(context),
-        ),
-      ],
+          const SizedBox(height: AppSpacing.s8),
+          const Divider(height: 1, color: Color(0xFF334155)),
+          const SizedBox(height: AppSpacing.s8),
+          const LanguageSwitcherButton(compact: true),
+          const SizedBox(height: AppSpacing.s4),
+          IconButton(
+            icon: const Icon(Icons.logout_rounded, size: 18),
+            tooltip: context.l10n.logout,
+            color: const Color(0xFFF87171),
+            visualDensity: VisualDensity.compact,
+            onPressed: () => _handleLogout(context),
+          ),
+        ],
+      ),
     );
   }
 

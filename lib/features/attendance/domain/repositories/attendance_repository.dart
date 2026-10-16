@@ -35,5 +35,11 @@ abstract interface class AttendanceRepository {
     required String studentId,
     String? groupId,
   });
+
+  /// Fetches consolidated student engagement, stats, and history bundle in a single high-performance call
+  Future<Result<StudentAttendanceBundle>> getStudentAttendanceBundle({
+    required String studentId,
+    String? groupId,
+  });
 }
 

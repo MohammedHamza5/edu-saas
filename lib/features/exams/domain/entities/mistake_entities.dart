@@ -4,12 +4,20 @@ class MistakeSummaryEntity extends Equatable {
   final int totalMistakes;
   final int unresolvedCount;
   final int resolvedCount;
+  final int unresolvedWrongCount;
+  final int unresolvedSkippedCount;
+  final int totalWrongCount;
+  final int totalSkippedCount;
   final List<MistakeSourceEntity> sources;
 
   const MistakeSummaryEntity({
     required this.totalMistakes,
     required this.unresolvedCount,
     required this.resolvedCount,
+    this.unresolvedWrongCount = 0,
+    this.unresolvedSkippedCount = 0,
+    this.totalWrongCount = 0,
+    this.totalSkippedCount = 0,
     required this.sources,
   });
 
@@ -18,6 +26,10 @@ class MistakeSummaryEntity extends Equatable {
         totalMistakes,
         unresolvedCount,
         resolvedCount,
+        unresolvedWrongCount,
+        unresolvedSkippedCount,
+        totalWrongCount,
+        totalSkippedCount,
         sources,
       ];
 }
@@ -78,6 +90,7 @@ class MistakeQuestionEntity extends Equatable {
   final String sourceExamTitle;
   final String? lessonTitle;
   final String? lastSelectedOptionId;
+  final String? selectedOptionText;
   final List<MistakeOptionEntity> options;
 
   const MistakeQuestionEntity({
@@ -96,8 +109,15 @@ class MistakeQuestionEntity extends Equatable {
     required this.sourceExamTitle,
     this.lessonTitle,
     this.lastSelectedOptionId,
+    this.selectedOptionText,
     required this.options,
   });
+
+  /// Returns true if the student skipped the question without selecting any option.
+  bool get isSkipped => lastSelectedOptionId == null || lastSelectedOptionId!.isEmpty;
+
+  /// Returns true if the student chose an incorrect option.
+  bool get isWrongAnswer => !isSkipped;
 
   @override
   List<Object?> get props => [
@@ -116,6 +136,7 @@ class MistakeQuestionEntity extends Equatable {
         sourceExamTitle,
         lessonTitle,
         lastSelectedOptionId,
+        selectedOptionText,
         options,
       ];
 }

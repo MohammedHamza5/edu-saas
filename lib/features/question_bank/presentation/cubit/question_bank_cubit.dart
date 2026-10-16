@@ -1,4 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/utils/cache_manager.dart';
+import '../../domain/entities/document_entity.dart';
 import '../../domain/entities/question_entity.dart';
 import '../../domain/entities/validation_issue_entity.dart';
 import '../../domain/repositories/question_bank_repository.dart';
@@ -6,6 +8,10 @@ import 'question_bank_state.dart';
 
 class QuestionBankCubit extends Cubit<QuestionBankState> {
   final QuestionBankRepository repository;
+  int _documentsPage = 0;
+  static const int _documentsPageSize = 20;
+  int _documentQuestionsPage = 0;
+  static const int _documentQuestionsPageSize = 20;
 
   QuestionBankCubit({required this.repository})
     : super(const QuestionBankInitial());
@@ -14,13 +20,72 @@ class QuestionBankCubit extends Cubit<QuestionBankState> {
   // Document-Level Operations
   // ══════════════════════════════════════════════════════════════════════════
 
-  Future<void> loadDocuments() async {
-    emit(const QuestionBankLoading());
+  Future<void> loadDocuments({bool forceRefresh = false}) async {
+    _documentsPage = 0;
+    final cacheKey = AppCache.userKey('qb_docs_page_0');
+
+    if (!forceRefresh) {
+      final cached =
+          AppCache.questionBank.get(cacheKey) as List<DocumentEntity>?;
+      if (cached != null) {
+        emit(
+          QuestionBankDocumentsLoaded(
+            documents: cached,
+            hasMore: cached.length >= _documentsPageSize,
+            isLoadingMore: false,
+          ),
+        );
+      } else {
+        emit(const QuestionBankLoading());
+      }
+    } else {
+      emit(const QuestionBankLoading());
+    }
+
     try {
-      final documents = await repository.getDocuments();
-      emit(QuestionBankDocumentsLoaded(documents: documents));
+      final documents = await repository.getDocuments(
+        page: 0,
+        pageSize: _documentsPageSize,
+      );
+      AppCache.questionBank.put(cacheKey, documents);
+      emit(
+        QuestionBankDocumentsLoaded(
+          documents: documents,
+          hasMore: documents.length >= _documentsPageSize,
+          isLoadingMore: false,
+        ),
+      );
     } catch (e) {
-      emit(QuestionBankError(e.toString()));
+      if (state is! QuestionBankDocumentsLoaded) {
+        emit(QuestionBankError(e.toString()));
+      }
+    }
+  }
+
+  Future<void> loadMoreDocuments() async {
+    final currentState = state;
+    if (currentState is! QuestionBankDocumentsLoaded) return;
+    if (currentState.isLoadingMore || !currentState.hasMore) return;
+
+    emit(currentState.copyWith(isLoadingMore: true));
+
+    try {
+      final nextPage = _documentsPage + 1;
+      final newDocs = await repository.getDocuments(
+        page: nextPage,
+        pageSize: _documentsPageSize,
+      );
+      _documentsPage = nextPage;
+      final updated = [...currentState.documents, ...newDocs];
+      emit(
+        currentState.copyWith(
+          documents: updated,
+          hasMore: newDocs.length >= _documentsPageSize,
+          isLoadingMore: false,
+        ),
+      );
+    } catch (_) {
+      emit(currentState.copyWith(isLoadingMore: false));
     }
   }
 
@@ -28,22 +93,58 @@ class QuestionBankCubit extends Cubit<QuestionBankState> {
     String documentId, {
     String statusFilter = 'all',
   }) async {
+    _documentQuestionsPage = 0;
     emit(const QuestionBankLoading());
     try {
       final document = await repository.getDocumentById(documentId);
       final questions = await repository.getQuestionsByDocument(
         documentId,
         statusFilter: statusFilter == 'all' ? null : statusFilter,
+        page: 0,
+        pageSize: _documentQuestionsPageSize,
       );
       emit(
         QuestionBankDocumentQuestionsLoaded(
           document: document,
           questions: questions,
           selectedFilter: statusFilter,
+          hasMore: questions.length >= _documentQuestionsPageSize,
+          isLoadingMore: false,
         ),
       );
     } catch (e) {
       emit(QuestionBankError(e.toString()));
+    }
+  }
+
+  Future<void> loadMoreDocumentQuestions() async {
+    final currentState = state;
+    if (currentState is! QuestionBankDocumentQuestionsLoaded) return;
+    if (currentState.isLoadingMore || !currentState.hasMore) return;
+
+    emit(currentState.copyWith(isLoadingMore: true));
+
+    try {
+      final nextPage = _documentQuestionsPage + 1;
+      final newQuestions = await repository.getQuestionsByDocument(
+        currentState.document.id,
+        statusFilter: currentState.selectedFilter == 'all'
+            ? null
+            : currentState.selectedFilter,
+        page: nextPage,
+        pageSize: _documentQuestionsPageSize,
+      );
+      _documentQuestionsPage = nextPage;
+      final updated = [...currentState.questions, ...newQuestions];
+      emit(
+        currentState.copyWith(
+          questions: updated,
+          hasMore: newQuestions.length >= _documentQuestionsPageSize,
+          isLoadingMore: false,
+        ),
+      );
+    } catch (_) {
+      emit(currentState.copyWith(isLoadingMore: false));
     }
   }
 
@@ -52,6 +153,7 @@ class QuestionBankCubit extends Cubit<QuestionBankState> {
     emit(const QuestionBankLoading());
     try {
       await repository.deleteDocument(documentId);
+      AppCache.questionBank.clear();
       // Reload documents list
       final documents = await repository.getDocuments();
       emit(QuestionBankDocumentsLoaded(documents: documents));
@@ -71,6 +173,7 @@ class QuestionBankCubit extends Cubit<QuestionBankState> {
     emit(const QuestionBankLoading());
     try {
       await repository.deleteQuestion(questionId);
+      AppCache.questionBank.clear();
       // Reload the document's questions
       final document = await repository.getDocumentById(
         currentState.document.id,
@@ -99,6 +202,7 @@ class QuestionBankCubit extends Cubit<QuestionBankState> {
     emit(const QuestionBankLoading());
     try {
       await repository.retryDocumentIngestion(documentId);
+      AppCache.questionBank.clear();
       // Reload documents list
       final documents = await repository.getDocuments();
       emit(QuestionBankDocumentsLoaded(documents: documents));
@@ -430,6 +534,7 @@ class QuestionBankCubit extends Cubit<QuestionBankState> {
         imageUrl: imageUrl,
         imageMeta: imageMeta,
       );
+      AppCache.questionBank.clear();
       emit(
         QuestionBankActionSuccess(
           message: 'Question created successfully',
@@ -460,6 +565,7 @@ class QuestionBankCubit extends Cubit<QuestionBankState> {
         contentHash: contentHash,
         acknowledgedIssueIds: ackIds,
       );
+      AppCache.questionBank.clear();
 
       final updatedQuestion = await repository.getQuestionById(
         currentState.question.id,
@@ -497,6 +603,7 @@ class QuestionBankCubit extends Cubit<QuestionBankState> {
     emit(currentState.copyWith(isActionLoading: true));
     try {
       await repository.publishRevision(revisionId: revisionId);
+      AppCache.questionBank.clear();
 
       final updatedQuestion = await repository.getQuestionById(
         currentState.question.id,
@@ -530,6 +637,7 @@ class QuestionBankCubit extends Cubit<QuestionBankState> {
       answerKeyFilename: answerKeyFilename,
       rightsAttestation: rightsAttestation,
     );
+    AppCache.questionBank.clear();
     // After ingestion, reload documents list and highlight the new one
     emit(const QuestionBankLoading());
     try {

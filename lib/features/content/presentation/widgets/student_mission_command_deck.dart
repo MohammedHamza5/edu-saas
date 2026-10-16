@@ -3,6 +3,7 @@ import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 
+import '../../domain/entities/content_entity.dart';
 import '../../domain/entities/lesson_assignment_entity.dart';
 
 /// Hero Academic Mission Command Deck for Students.
@@ -197,11 +198,15 @@ class StudentMissionCommandDeck extends StatelessWidget {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.primary,
+                        color: lesson?.type == ContentType.exam
+                            ? AppColors.success
+                            : AppColors.primary,
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
-                        context.l10n.lectureNumberBadge(index),
+                        lesson?.type == ContentType.exam
+                            ? context.l10n.examNumberBadge(index)
+                            : context.l10n.lectureNumberBadge(index),
                         style: const TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w900,
@@ -244,26 +249,39 @@ class StudentMissionCommandDeck extends StatelessWidget {
             );
 
             final String buttonLabel;
+            final IconData buttonIcon;
             if (lesson == null) {
               buttonLabel = context.l10n.reviewCourseAction;
+              buttonIcon = Icons.play_arrow_rounded;
+            } else if (lesson.type == ContentType.exam) {
+              buttonLabel = lesson.isEffectivelyCompleted
+                  ? context.l10n.reviewLessonAction
+                  : context.l10n.startExamAction;
+              buttonIcon = Icons.quiz_rounded;
             } else if (lesson.progress == LessonProgress.notStarted) {
               buttonLabel = context.l10n.startCourseAction;
+              buttonIcon = Icons.play_arrow_rounded;
             } else if (lesson.progress == LessonProgress.inProgress) {
               buttonLabel = context.l10n.continueLessonAction;
+              buttonIcon = Icons.play_arrow_rounded;
             } else if (lesson.progress == LessonProgress.quizAvailable ||
                 lesson.progress == LessonProgress.videoCompleted) {
               buttonLabel = context.l10n.takeLessonQuizAction;
+              buttonIcon = Icons.quiz_rounded;
             } else if (lesson.progress == LessonProgress.quizFailed) {
               buttonLabel = context.l10n.retryLessonQuizAction;
+              buttonIcon = Icons.refresh_rounded;
             } else if (lesson.progress == LessonProgress.completed) {
               buttonLabel = context.l10n.reviewLessonAction;
+              buttonIcon = Icons.check_circle_outline_rounded;
             } else {
               buttonLabel = context.l10n.continueLessonAction;
+              buttonIcon = Icons.play_arrow_rounded;
             }
 
             final resumeButton = ElevatedButton.icon(
               onPressed: onResume,
-              icon: const Icon(Icons.play_arrow_rounded, size: 20),
+              icon: Icon(buttonIcon, size: 20),
               label: Text(
                 buttonLabel,
                 style: const TextStyle(
@@ -272,7 +290,9 @@ class StudentMissionCommandDeck extends StatelessWidget {
                 ),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: lesson?.type == ContentType.exam
+                    ? AppColors.success
+                    : AppColors.primary,
                 foregroundColor: Colors.white,
                 elevation: 3,
                 shadowColor: AppColors.primary.withAlpha(100),

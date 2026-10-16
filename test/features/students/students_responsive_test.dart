@@ -29,7 +29,10 @@ class _FakeStudentsRepository implements StudentsRepository {
   }
 
   @override
-  Future<Result<List<StudentEntity>>> getPendingStudents() async {
+  Future<Result<List<StudentEntity>>> getPendingStudents({
+    int page = 0,
+    int pageSize = 20,
+  }) async {
     return Success(students.where((s) => s.isPending).toList());
   }
 

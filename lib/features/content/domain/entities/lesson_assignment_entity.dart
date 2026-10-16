@@ -289,8 +289,10 @@ class LessonAssignmentEntity extends Equatable {
       pdfFileId: json['pdf_file_id'] as String?,
       pdfFileName: json['pdf_file_name'] as String?,
       pdfStoragePath: json['pdf_storage_path'] as String?,
-      lessonExamId: json['lesson_exam_id'] as String?,
-      lessonExamTitle: json['lesson_exam_title'] as String?,
+      lessonExamId:
+          (json['lesson_exam_id'] ?? json['quiz_id']) as String?,
+      lessonExamTitle:
+          (json['lesson_exam_title'] ?? json['quiz_title']) as String?,
       attachedExams: parsedAttachedExams,
       effectivePassingScore:
           (json['effective_passing_score'] as num?)?.toInt() ?? 60,

@@ -26,6 +26,8 @@ class VideoBankLoaded extends VideoBankState {
   final double? uploadProgress;
   final String? uploadingTitle;
   final bool isActionLoading;
+  final bool hasMore;
+  final bool isLoadingMore;
 
   const VideoBankLoaded({
     this.currentFolder,
@@ -36,6 +38,8 @@ class VideoBankLoaded extends VideoBankState {
     this.uploadProgress,
     this.uploadingTitle,
     this.isActionLoading = false,
+    this.hasMore = false,
+    this.isLoadingMore = false,
   });
 
   bool get isUploading => uploadProgress != null;
@@ -51,6 +55,8 @@ class VideoBankLoaded extends VideoBankState {
     double? Function()? uploadProgress,
     String? Function()? uploadingTitle,
     bool? isActionLoading,
+    bool? hasMore,
+    bool? isLoadingMore,
   }) {
     return VideoBankLoaded(
       currentFolder:
@@ -64,6 +70,8 @@ class VideoBankLoaded extends VideoBankState {
       uploadingTitle:
           uploadingTitle != null ? uploadingTitle() : this.uploadingTitle,
       isActionLoading: isActionLoading ?? this.isActionLoading,
+      hasMore: hasMore ?? this.hasMore,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
     );
   }
 
@@ -77,6 +85,8 @@ class VideoBankLoaded extends VideoBankState {
     uploadProgress,
     uploadingTitle,
     isActionLoading,
+    hasMore,
+    isLoadingMore,
   ];
 }
 

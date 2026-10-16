@@ -3,6 +3,7 @@ import '../localization/generated/app_localizations.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 import '../theme/responsive_breakpoints.dart';
+import 'language_switcher_button.dart';
 import 'math_grid_background.dart';
 
 /// Destination item representation for [AdaptiveScaffold].
@@ -79,11 +80,13 @@ class AdaptiveScaffold extends StatefulWidget {
 
 class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
   /// Session-wide static state so the collapse/expanded preference persists across route changes
-  static bool _isDesktopCollapsed = false;
+  static bool _isSidebarCollapsed = false;
+  static bool _hasUserToggledSidebarCollapse = false;
 
-  void _toggleDesktopSidebar() {
+  void _toggleSidebar(bool currentCollapsed) {
     setState(() {
-      _isDesktopCollapsed = !_isDesktopCollapsed;
+      _hasUserToggledSidebarCollapse = true;
+      _isSidebarCollapsed = !currentCollapsed;
     });
   }
 
@@ -104,17 +107,15 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    final screenType = ResponsiveBreakpoints.getScreenType(width);
 
-    switch (screenType) {
-      case DeviceScreenType.compact:
-        return _buildMobileScaffold(context);
-      case DeviceScreenType.medium:
-        return _buildTabletScaffold(context);
-      case DeviceScreenType.expanded:
-      case DeviceScreenType.large:
-        return _buildDesktopScaffold(context);
+    // Devices below tablet threshold (< 840dp, including phones and portrait tablets like iPad 768-834dp)
+    // use the clean Drawer layout so the academic workspace has 100% of the screen width,
+    // avoiding squished cards, tables, and cramped multi-column layouts.
+    if (width < ResponsiveBreakpoints.tabletThreshold) {
+      return _buildMobileScaffold(context);
     }
+
+    return _buildResponsiveSidebarScaffold(context, width);
   }
 
   Widget _buildMobileScaffold(BuildContext context) {
@@ -157,7 +158,11 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
               ),
             )
           : null,
-      actions: widget.actions,
+      actions: widget.actions ??
+          const [
+            LanguageSwitcherButton(compact: true),
+            SizedBox(width: AppSpacing.s8),
+          ],
     );
   }
 
@@ -220,133 +225,32 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
     );
   }
 
-  Widget _buildTabletScaffold(BuildContext context) {
-    final all = resolvedDestinations;
-
-    return Scaffold(
-      appBar: widget.appBar,
-      floatingActionButton: widget.floatingActionButton,
-      body: Row(
-        children: [
-          NavigationRail(
-            selectedIndex: widget.currentIndex.clamp(
-              0,
-              all.isEmpty ? 0 : all.length - 1,
-            ),
-            onDestinationSelected: widget.onNavigationIndexChanged,
-            labelType: NavigationRailLabelType.all,
-            backgroundColor: _sidebarBg,
-            unselectedIconTheme: const IconThemeData(color: Color(0xFF94A3B8)),
-            selectedIconTheme: const IconThemeData(color: Color(0xFF38BDF8)),
-            unselectedLabelTextStyle: const TextStyle(
-              color: Color(0xFF94A3B8),
-              fontSize: 11,
-            ),
-            selectedLabelTextStyle: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 11,
-            ),
-            indicatorColor: const Color(0xFF1E293B),
-            leading: widget.sidebarHeader != null
-                ? SizedBox(
-                    width: 72,
-                    child: Padding(
-                      padding: const EdgeInsets.only(
-                        bottom: AppSpacing.s16,
-                        top: AppSpacing.s8,
-                      ),
-                      child: Center(
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: SizedBox(width: 256, child: widget.sidebarHeader),
-                        ),
-                      ),
-                    ),
-                  )
-                : null,
-            trailing: widget.sidebarFooter != null
-                ? Expanded(
-                    child: Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Padding(
-                        padding: const EdgeInsets.only(bottom: AppSpacing.s16),
-                        child: SizedBox(
-                          width: 72,
-                          child: Center(
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: SizedBox(width: 256, child: widget.sidebarFooter),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  )
-                : null,
-            destinations: all.map((d) {
-              Widget iconWidget = Icon(d.icon);
-              if (d.badge != null) {
-                iconWidget = Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    iconWidget,
-                    Positioned(top: -4, right: -4, child: d.badge!),
-                  ],
-                );
-              } else if (d.badgeCount != null && d.badgeCount! > 0) {
-                iconWidget = Badge(
-                  label: Text('${d.badgeCount}'),
-                  child: iconWidget,
-                );
-              }
-
-              Widget selectedIconWidget = Icon(d.selectedIcon ?? d.icon);
-              if (d.badge != null) {
-                selectedIconWidget = Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    selectedIconWidget,
-                    Positioned(top: -4, right: -4, child: d.badge!),
-                  ],
-                );
-              } else if (d.badgeCount != null && d.badgeCount! > 0) {
-                selectedIconWidget = Badge(
-                  label: Text('${d.badgeCount}'),
-                  child: selectedIconWidget,
-                );
-              }
-
-              return NavigationRailDestination(
-                icon: iconWidget,
-                selectedIcon: selectedIconWidget,
-                label: Text(d.label),
-              );
-            }).toList(),
-          ),
-          const VerticalDivider(width: 1, thickness: 1, color: _sidebarBorder),
-          Expanded(child: _buildWorkspaceBody(context)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDesktopScaffold(BuildContext context) {
+  Widget _buildResponsiveSidebarScaffold(
+    BuildContext context,
+    double screenWidth,
+  ) {
     final l10n = AppLocalizations.of(context);
     final collapseTooltip = l10n?.collapseSidebar ?? 'طي الشريط';
     final expandTooltip = l10n?.expandSidebar ?? 'إظهار الشريط';
-    final isCollapsed = _isDesktopCollapsed;
+
+    // Default expanded on wide screens (>= 840dp, e.g. tablet landscape, laptops, desktops).
+    // If user explicitly clicked the collapse toggle, honor their choice.
+    final isCollapsed = _hasUserToggledSidebarCollapse
+        ? _isSidebarCollapsed
+        : false;
+
+    final sidebarWidth = isCollapsed ? 74.0 : 274.0;
 
     return Scaffold(
       appBar: widget.appBar,
       floatingActionButton: widget.floatingActionButton,
       body: Row(
         children: [
-          // Collapsible Desktop Categorized Sidebar (76dp collapsed, 280dp expanded)
+          // Responsive Collapsible Categorized Sidebar (74dp collapsed, 274dp expanded)
           AnimatedContainer(
             duration: const Duration(milliseconds: 220),
             curve: Curves.easeInOutCubic,
-            width: isCollapsed ? 76.0 : 280.0,
+            width: sidebarWidth,
             decoration: BoxDecoration(
               color: _sidebarBg,
               border: Border(
@@ -361,7 +265,12 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _buildDesktopHeader(context, isCollapsed, collapseTooltip, expandTooltip),
+                _buildSidebarHeader(
+                  context,
+                  isCollapsed: isCollapsed,
+                  collapseTooltip: collapseTooltip,
+                  expandTooltip: expandTooltip,
+                ),
                 const Divider(height: 1, color: _sidebarDivider),
                 Expanded(
                   child: _buildCategorizedItems(
@@ -370,7 +279,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
                     isCollapsed: isCollapsed,
                   ),
                 ),
-                _buildDesktopFooter(context, isCollapsed),
+                _buildSidebarFooter(context, isCollapsed: isCollapsed),
               ],
             ),
           ),
@@ -380,12 +289,12 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
     );
   }
 
-  Widget _buildDesktopHeader(
-    BuildContext context,
-    bool isCollapsed,
-    String collapseTooltip,
-    String expandTooltip,
-  ) {
+  Widget _buildSidebarHeader(
+    BuildContext context, {
+    required bool isCollapsed,
+    required String collapseTooltip,
+    required String expandTooltip,
+  }) {
     if (isCollapsed) {
       return Padding(
         padding: const EdgeInsets.symmetric(
@@ -404,7 +313,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
               ),
               tooltip: expandTooltip,
               hoverColor: const Color(0xFF38BDF8).withValues(alpha: 0.15),
-              onPressed: _toggleDesktopSidebar,
+              onPressed: () => _toggleSidebar(isCollapsed),
             ),
             const SizedBox(height: AppSpacing.s8),
             if (widget.collapsedSidebarHeader != null)
@@ -445,14 +354,17 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
             ),
             tooltip: collapseTooltip,
             hoverColor: const Color(0xFF38BDF8).withValues(alpha: 0.15),
-            onPressed: _toggleDesktopSidebar,
+            onPressed: () => _toggleSidebar(isCollapsed),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildDesktopFooter(BuildContext context, bool isCollapsed) {
+  Widget _buildSidebarFooter(
+    BuildContext context, {
+    required bool isCollapsed,
+  }) {
     if (isCollapsed) {
       if (widget.collapsedSidebarFooter != null) {
         return Column(

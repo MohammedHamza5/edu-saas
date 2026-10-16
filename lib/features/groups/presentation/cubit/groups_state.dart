@@ -22,12 +22,16 @@ final class GroupsLoaded extends GroupsState {
   final String? filterLevel;
   final GroupEntity? selectedGroup;
   final List<GroupMemberEntity> groupMembers;
+  final bool hasMoreMembers;
+  final bool isLoadingMoreMembers;
 
   const GroupsLoaded({
     required this.groups,
     this.filterLevel,
     this.selectedGroup,
     this.groupMembers = const [],
+    this.hasMoreMembers = true,
+    this.isLoadingMoreMembers = false,
   });
 
   List<GroupEntity> get filteredGroups {
@@ -43,17 +47,28 @@ final class GroupsLoaded extends GroupsState {
     bool clearFilter = false,
     GroupEntity? selectedGroup,
     List<GroupMemberEntity>? groupMembers,
+    bool? hasMoreMembers,
+    bool? isLoadingMoreMembers,
   }) {
     return GroupsLoaded(
       groups: groups ?? this.groups,
       filterLevel: clearFilter ? null : (filterLevel ?? this.filterLevel),
       selectedGroup: selectedGroup ?? this.selectedGroup,
       groupMembers: groupMembers ?? this.groupMembers,
+      hasMoreMembers: hasMoreMembers ?? this.hasMoreMembers,
+      isLoadingMoreMembers: isLoadingMoreMembers ?? this.isLoadingMoreMembers,
     );
   }
 
   @override
-  List<Object?> get props => [groups, filterLevel, selectedGroup, groupMembers];
+  List<Object?> get props => [
+        groups,
+        filterLevel,
+        selectedGroup,
+        groupMembers,
+        hasMoreMembers,
+        isLoadingMoreMembers,
+      ];
 }
 
 final class GroupsError extends GroupsState {

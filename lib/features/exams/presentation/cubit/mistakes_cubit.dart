@@ -63,12 +63,20 @@ class MistakesCubit extends Cubit<MistakesState> {
       final summary = summaryResult.dataOrNull!;
       final questions = questionsResult.dataOrNull ?? [];
       AppCache.exams.put(cacheKey, (summary: summary, questions: questions));
+      final currentTypeFilter = state is MistakesLoaded
+          ? (state as MistakesLoaded).typeFilter
+          : MistakeTypeFilter.all;
+      final currentSearchQuery = state is MistakesLoaded
+          ? (state as MistakesLoaded).searchQuery
+          : '';
       emit(
         MistakesLoaded(
           summary: summary,
           questions: questions,
           selectedExamId: examId,
           onlyUnresolved: onlyUnresolved,
+          typeFilter: currentTypeFilter,
+          searchQuery: currentSearchQuery,
         ),
       );
     } else {
@@ -78,6 +86,20 @@ class MistakesCubit extends Cubit<MistakesState> {
       if (state is! MistakesLoaded) {
         emit(MistakesError(msg));
       }
+    }
+  }
+
+  void setTypeFilter(MistakeTypeFilter filter) {
+    final s = state;
+    if (s is MistakesLoaded) {
+      emit(s.copyWith(typeFilter: filter));
+    }
+  }
+
+  void setSearchQuery(String query) {
+    final s = state;
+    if (s is MistakesLoaded) {
+      emit(s.copyWith(searchQuery: query));
     }
   }
 

@@ -1,5 +1,12 @@
-class ServerException implements Exception {
+abstract class AppException implements Exception {
+  String get message;
+  String? get code;
+}
+
+class ServerException implements AppException {
+  @override
   final String message;
+  @override
   final String? code;
 
   const ServerException(this.message, {this.code});

@@ -77,6 +77,48 @@ class ExamDispatchStatsEntity extends Equatable {
       ];
 }
 
+class ExamDispatchAttemptEntity extends Equatable {
+  final String id;
+  final int attemptNumber;
+  final int? score;
+  final int maxScore;
+  final double? percentage;
+  final String status;
+  final String submissionReason;
+  final DateTime startedAt;
+  final DateTime? submittedAt;
+  final bool isPassed;
+
+  const ExamDispatchAttemptEntity({
+    required this.id,
+    required this.attemptNumber,
+    this.score,
+    required this.maxScore,
+    this.percentage,
+    required this.status,
+    this.submissionReason = 'student_submitted',
+    required this.startedAt,
+    this.submittedAt,
+    this.isPassed = false,
+  });
+
+  bool get isSubmitted => status == 'submitted';
+
+  @override
+  List<Object?> get props => [
+        id,
+        attemptNumber,
+        score,
+        maxScore,
+        percentage,
+        status,
+        submissionReason,
+        startedAt,
+        submittedAt,
+        isPassed,
+      ];
+}
+
 class ExamDispatchStudentEntity extends Equatable {
   final String studentId;
   final String studentName;
@@ -91,6 +133,7 @@ class ExamDispatchStudentEntity extends Equatable {
   final DateTime? latestSubmittedAt;
   final String? latestAttemptId;
   final bool isPassed;
+  final List<ExamDispatchAttemptEntity> attempts;
 
   const ExamDispatchStudentEntity({
     required this.studentId,
@@ -106,6 +149,7 @@ class ExamDispatchStudentEntity extends Equatable {
     this.latestSubmittedAt,
     this.latestAttemptId,
     this.isPassed = false,
+    this.attempts = const [],
   });
 
   bool get hasParentPhone =>
@@ -117,6 +161,34 @@ class ExamDispatchStudentEntity extends Equatable {
   bool get isSubmitted => status == 'submitted';
   bool get isInProgress => status == 'in_progress';
   bool get isNotStarted => status == 'not_started';
+
+  bool get hasMultipleAttempts => attempts.length > 1;
+
+  ExamDispatchAttemptEntity? get firstAttempt =>
+      attempts.isNotEmpty ? attempts.first : null;
+
+  ExamDispatchAttemptEntity? get latestAttempt =>
+      attempts.isNotEmpty ? attempts.last : null;
+
+  ExamDispatchAttemptEntity? get bestAttempt {
+    if (attempts.isEmpty) return null;
+    ExamDispatchAttemptEntity top = attempts.first;
+    for (final att in attempts) {
+      if ((att.percentage ?? 0.0) > (top.percentage ?? 0.0)) {
+        top = att;
+      }
+    }
+    return top;
+  }
+
+  /// Calculates the improvement in percentage between the first and best attempt
+  double? get scoreImprovement {
+    if (attempts.length < 2) return null;
+    final firstPct = firstAttempt?.percentage ?? 0.0;
+    final bestPct = bestAttempt?.percentage ?? 0.0;
+    final diff = bestPct - firstPct;
+    return diff > 0 ? diff : null;
+  }
 
   ExamDispatchStudentEntity copyWith({
     String? studentId,
@@ -132,6 +204,7 @@ class ExamDispatchStudentEntity extends Equatable {
     DateTime? latestSubmittedAt,
     String? latestAttemptId,
     bool? isPassed,
+    List<ExamDispatchAttemptEntity>? attempts,
   }) {
     return ExamDispatchStudentEntity(
       studentId: studentId ?? this.studentId,
@@ -147,6 +220,7 @@ class ExamDispatchStudentEntity extends Equatable {
       latestSubmittedAt: latestSubmittedAt ?? this.latestSubmittedAt,
       latestAttemptId: latestAttemptId ?? this.latestAttemptId,
       isPassed: isPassed ?? this.isPassed,
+      attempts: attempts ?? this.attempts,
     );
   }
 
@@ -165,6 +239,7 @@ class ExamDispatchStudentEntity extends Equatable {
         latestSubmittedAt,
         latestAttemptId,
         isPassed,
+        attempts,
       ];
 }
 

@@ -242,10 +242,7 @@ class _TeacherSettingsPageState extends State<TeacherSettingsPage> {
           horizontal: AppSpacing.s20,
           vertical: AppSpacing.s16,
         ),
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 860),
-            child: Column(
+        child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // 1. Academic Hero Banner
@@ -586,8 +583,6 @@ class _TeacherSettingsPageState extends State<TeacherSettingsPage> {
                 const SizedBox(height: AppSpacing.s40),
               ],
             ),
-          ),
-        ),
       ),
     );
   }

@@ -6,12 +6,10 @@ import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/responsive_breakpoints.dart';
 import '../../../../core/widgets/app_empty_view.dart';
 import '../../../../core/widgets/app_error_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
 import '../../../../core/widgets/responsive_container.dart';
-import '../../../../core/widgets/responsive_grid.dart';
 import '../../domain/entities/exam_entity.dart';
 import '../../domain/entities/mistake_entities.dart';
 import '../cubit/exams_cubit.dart';
@@ -20,9 +18,9 @@ import '../cubit/mistakes_cubit.dart';
 import '../cubit/mistakes_state.dart';
 import '../widgets/exam_card.dart';
 import 'exam_intro_page.dart';
-import 'exam_review_page.dart';
+import 'exam_result_page.dart';
 
-enum StudentExamFilter { all, inProgress, completed }
+enum StudentExamFilter { all, available, inProgress, completed }
 
 class StudentExamsPage extends StatefulWidget {
   final String? initialExamId;
@@ -35,7 +33,10 @@ class StudentExamsPage extends StatefulWidget {
 
 class _StudentExamsPageState extends State<StudentExamsPage> {
   final ScrollController _scrollController = ScrollController();
+  final TextEditingController _searchController = TextEditingController();
   StudentExamFilter _activeFilter = StudentExamFilter.all;
+  String _searchQuery = '';
+  bool _isLoadingAll = false;
 
   @override
   void initState() {
@@ -60,6 +61,7 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
 
   @override
   void dispose() {
+    _searchController.dispose();
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
@@ -74,16 +76,24 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
   }
 
   Future<void> _loadAll({bool forceRefresh = false}) async {
-    // ⚡ Parallelize loading mistakes and student exams in a single round-trip
-    final mistakesFuture = () async {
-      try {
-        await context.read<MistakesCubit>().loadMistakes();
-      } catch (_) {}
-    }();
+    if (_isLoadingAll) return;
+    _isLoadingAll = true;
+    try {
+      // ⚡ Parallelize loading mistakes and student exams in a single round-trip
+      final mistakesFuture = () async {
+        try {
+          await context.read<MistakesCubit>().loadMistakes();
+        } catch (_) {}
+      }();
 
-    final examsFuture = _loadExams(forceRefresh: forceRefresh);
+      final examsFuture = _loadExams(forceRefresh: forceRefresh);
 
-    await Future.wait<void>([mistakesFuture, examsFuture]);
+      await Future.wait<void>([mistakesFuture, examsFuture]);
+    } finally {
+      if (mounted) {
+        _isLoadingAll = false;
+      }
+    }
   }
 
   Future<void> _loadExams({bool forceRefresh = false}) async {
@@ -96,7 +106,9 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
 
   bool _isLessonQuiz(ExamEntity exam) {
     if (exam.isLectureExam) return true;
-    if (exam.linkedLessonId != null && exam.linkedLessonId!.isNotEmpty) return true;
+    if (exam.linkedLessonId != null && exam.linkedLessonId!.isNotEmpty) {
+      return true;
+    }
     final lower = exam.title.toLowerCase();
     return lower.contains('كويز') ||
         lower.contains('quiz') ||
@@ -106,38 +118,65 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
   }
 
   List<ExamEntity> _filterExams(List<ExamEntity> list) {
+    List<ExamEntity> filtered;
     switch (_activeFilter) {
       case StudentExamFilter.all:
-        return list;
+        filtered = list;
+        break;
+      case StudentExamFilter.available:
+        filtered = list.where((e) => !e.hasAttempted).toList();
+        break;
       case StudentExamFilter.inProgress:
-        return list.where((e) => e.hasActiveAttempt).toList();
+        filtered = list.where((e) => e.hasActiveAttempt).toList();
+        break;
       case StudentExamFilter.completed:
-        return list
-            .where((e) => e.hasAttempted && !e.hasActiveAttempt)
-            .toList();
+        filtered = list.where((e) => e.isFullyCompleted).toList();
+        break;
     }
+
+    if (_searchQuery.trim().isNotEmpty) {
+      final query = _searchQuery.trim().toLowerCase();
+      filtered = filtered.where((e) {
+        final title = e.title.toLowerCase();
+        final group = (e.groupName ?? '').toLowerCase();
+        final folder = (e.folderName ?? '').toLowerCase();
+        return title.contains(query) ||
+            group.contains(query) ||
+            folder.contains(query);
+      }).toList();
+    }
+
+    return filtered;
   }
 
-  void _openExamReview(ExamEntity exam) {
+  void _openExamResult(ExamEntity exam) async {
     final attempt = exam.myLatestAttempt;
     if (attempt == null) return;
-    Navigator.of(context).push<void>(
+    final isLecture = _isLessonQuiz(exam) || exam.isUntimed;
+    final cubit = context.read<ExamsCubit>();
+    await Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
-        builder: (_) => ExamReviewPage(
-          attemptId: attempt.id,
-          exam: exam,
-          initialAttempt: attempt,
+        builder: (_) => BlocProvider.value(
+          value: cubit,
+          child: ExamResultPage(
+            exam: exam,
+            attempt: attempt,
+            isLectureExam: isLecture,
+          ),
         ),
       ),
     );
+    if (mounted) {
+      await _loadAll(forceRefresh: true);
+    }
   }
 
   void _openExamIntro(ExamEntity exam) async {
-    // If student has already completed and retake is disallowed, go directly to review
+    // If student has already completed and retake is disallowed, go directly to result page
     if (exam.hasAttempted &&
         !exam.canTakeExam &&
         exam.myLatestAttempt != null) {
-      _openExamReview(exam);
+      _openExamResult(exam);
       return;
     }
 
@@ -151,7 +190,7 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
         ),
       ),
     );
-    if (mounted && cubit.state is! ExamTakingState) {
+    if (mounted) {
       await _loadAll(forceRefresh: true);
     }
   }
@@ -186,113 +225,150 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
         child: SingleChildScrollView(
           controller: _scrollController,
           physics: const AlwaysScrollableScrollPhysics(),
-          child: Center(
-            child: ResponsiveContainer(
-              maxWidth: ResponsiveBreakpoints.maxContentWidth,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: AppSpacing.s12),
+          child: ResponsiveContainer(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: AppSpacing.s12),
 
-                  // 1. Mistakes Bank Hero Banner (ALWAYS visible)
-                  _buildMistakesBankBanner(context),
-                  const SizedBox(height: AppSpacing.s12),
+                // 1. Mistakes Bank Hero Banner (ALWAYS visible)
+                _buildMistakesBankBanner(context),
+                const SizedBox(height: AppSpacing.s12),
 
-                  // 2. Exams Section via BlocBuilder
-                  BlocBuilder<ExamsCubit, ExamsState>(
-                    builder: (context, state) {
-                      if (state is ExamsLoading) {
-                        return const Padding(
-                          padding: EdgeInsets.all(AppSpacing.s16),
-                          child: AppLoadingView.cardsGrid(count: 2, columns: 2),
-                        );
-                      }
+                // 2. Exams Section via BlocBuilder
+                BlocBuilder<ExamsCubit, ExamsState>(
+                  buildWhen: (prev, curr) {
+                    if (prev.runtimeType != curr.runtimeType) return true;
+                    if (prev is StudentExamsLoaded &&
+                        curr is StudentExamsLoaded) {
+                      return prev.exams != curr.exams ||
+                          prev.isLoadingMore != curr.isLoadingMore ||
+                          prev.hasMore != curr.hasMore;
+                    }
+                    return true;
+                  },
+                  builder: (context, state) {
+                    if (state is ExamsLoading) {
+                      return const Padding(
+                        padding: EdgeInsets.all(AppSpacing.s16),
+                        child: AppLoadingView.cardsGrid(count: 2, columns: 2),
+                      );
+                    }
 
-                      if (state is ExamsError) {
-                        return Padding(
-                          padding: const EdgeInsets.all(AppSpacing.s24),
-                          child: AppErrorView(
-                            message: state.message,
-                            onRetry: () => _loadAll(forceRefresh: true),
-                          ),
-                        );
-                      }
+                    if (state is ExamsError) {
+                      return Padding(
+                        padding: const EdgeInsets.all(AppSpacing.s24),
+                        child: AppErrorView(
+                          message: state.message,
+                          onRetry: () => _loadAll(forceRefresh: true),
+                        ),
+                      );
+                    }
 
-                      final List<ExamEntity> allExams =
-                          state is StudentExamsLoaded
-                              ? state.exams
-                                  .where((e) => !_isLessonQuiz(e))
-                                  .toList()
-                              : [];
+                    final List<ExamEntity> allExams =
+                        state is StudentExamsLoaded
+                        ? state.exams.where((e) => !_isLessonQuiz(e)).toList()
+                        : [];
 
-                      if (state is ExamsEmpty ||
-                          (state is StudentExamsLoaded && allExams.isEmpty)) {
-                        return Padding(
-                          padding: const EdgeInsets.all(AppSpacing.s24),
-                          child: AppEmptyView(
-                            message: state is ExamsEmpty
-                                ? state.message
-                                : context.l10n.noPublishedExams,
-                            subtitle: context.l10n.noPublishedExams,
-                            icon: Icons.quiz_outlined,
-                          ),
-                        );
-                      }
+                    if (state is ExamsEmpty ||
+                        (state is StudentExamsLoaded && allExams.isEmpty)) {
+                      return Padding(
+                        padding: const EdgeInsets.all(AppSpacing.s24),
+                        child: AppEmptyView(
+                          message: state is ExamsEmpty
+                              ? state.message
+                              : context.l10n.noPublishedExams,
+                          subtitle: context.l10n.noPublishedExams,
+                          icon: Icons.quiz_outlined,
+                        ),
+                      );
+                    }
 
-                      if (state is StudentExamsLoaded) {
-                        final filtered = _filterExams(allExams);
+                    if (state is StudentExamsLoaded) {
+                      final filtered = _filterExams(allExams);
 
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            // Filter chips row
-                            _buildFilterChips(context, allExams),
-                            const Divider(height: 1, color: AppColors.border),
-                            const SizedBox(height: AppSpacing.s12),
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // 1. Overview Hub / Summary KPI Banner
+                          _buildOverviewHub(context, allExams),
+                          const SizedBox(height: AppSpacing.s12),
 
-                            // Exams list or filtered empty state
-                            if (filtered.isEmpty) ...[
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: AppSpacing.s32,
-                                  horizontal: AppSpacing.s16,
-                                ),
-                                child: AppEmptyView(
-                                  message: context.l10n.noExamsInFilter,
-                                  subtitle:
-                                      context.l10n.noExamsInFilterSubtitle,
-                                  icon: Icons.filter_list_off_outlined,
-                                ),
+                          // 2. Search Bar
+                          _buildSearchBar(context),
+                          const SizedBox(height: AppSpacing.s6),
+
+                          // 3. Filter chips row
+                          _buildFilterChips(context, allExams),
+                          const Divider(height: 1, color: AppColors.border),
+                          const SizedBox(height: AppSpacing.s12),
+
+                          // 4. Exams list or filtered empty state
+                          if (filtered.isEmpty) ...[
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: AppSpacing.s32,
+                                horizontal: AppSpacing.s16,
                               ),
-                            ] else ...[
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: AppSpacing.s16,
-                                ),
-                                child: _buildExamsGrid(filtered),
+                              child: AppEmptyView(
+                                message: _searchQuery.isNotEmpty
+                                    ? context.l10n.noResultsFound
+                                    : context.l10n.noExamsInFilter,
+                                subtitle: context.l10n.noExamsInFilterSubtitle,
+                                icon: _searchQuery.isNotEmpty
+                                    ? Icons.search_off_rounded
+                                    : Icons.filter_list_off_outlined,
                               ),
-                            ],
-
-                            if (state.isLoadingMore)
-                              const Padding(
-                                padding: EdgeInsets.symmetric(
-                                  vertical: AppSpacing.s16,
-                                ),
-                                child: Center(
-                                  child: AppLoadingView.compact(size: 24),
-                                ),
+                            ),
+                          ] else ...[
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppSpacing.s16,
                               ),
-
-                            const SizedBox(height: AppSpacing.s32),
+                              child: _buildExamsGrid(filtered),
+                            ),
                           ],
-                        );
-                      }
 
-                      return const SizedBox.shrink();
-                    },
-                  ),
-                ],
-              ),
+                          if (state.isLoadingMore)
+                            const Padding(
+                              padding: EdgeInsets.symmetric(
+                                vertical: AppSpacing.s16,
+                              ),
+                              child: Center(
+                                child: AppLoadingView.compact(size: 24),
+                              ),
+                            ),
+
+                          const SizedBox(height: AppSpacing.s32),
+                        ],
+                      );
+                    }
+
+                    if (state is ExamTakingState) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (mounted && !_isLoadingAll) {
+                          context.read<ExamsCubit>().exitExamTaking();
+                          _loadAll(forceRefresh: true);
+                        }
+                      });
+                      return const Padding(
+                        padding: EdgeInsets.all(AppSpacing.s16),
+                        child: AppLoadingView.cardsGrid(count: 2, columns: 2),
+                      );
+                    }
+
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted && !_isLoadingAll) {
+                        _loadAll(forceRefresh: true);
+                      }
+                    });
+                    return const Padding(
+                      padding: EdgeInsets.all(AppSpacing.s16),
+                      child: AppLoadingView.cardsGrid(count: 2, columns: 2),
+                    );
+                  },
+                ),
+              ],
             ),
           ),
         ),
@@ -312,6 +388,13 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
 
     return BlocBuilder<MistakesCubit, MistakesState>(
       bloc: mistakesCubit,
+      buildWhen: (prev, curr) {
+        if (prev.runtimeType != curr.runtimeType) return true;
+        if (prev is MistakesLoaded && curr is MistakesLoaded) {
+          return prev.summary != curr.summary;
+        }
+        return true;
+      },
       builder: (context, mistakesState) {
         MistakeSummaryEntity? summary;
         bool isLoading = mistakesState is MistakesLoading;
@@ -485,7 +568,7 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
                         ),
                       ),
                     OutlinedButton.icon(
-                      onPressed: () => context.push(AppRoutes.studentMistakes),
+                      onPressed: () => context.go(AppRoutes.studentMistakes),
                       icon: const Icon(Icons.auto_stories_outlined, size: 18),
                       label: Text(
                         unresolvedCount > 0
@@ -542,16 +625,377 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
     );
   }
 
-  Widget _buildFilterChips(BuildContext context, List<ExamEntity> allExams) {
+  Widget _buildOverviewHub(BuildContext context, List<ExamEntity> allExams) {
+    final totalCount = allExams.length;
+    final completedCount = allExams.where((e) => e.isFullyCompleted).length;
     final inProgressCount = allExams.where((e) => e.hasActiveAttempt).length;
-    final completedCount = allExams
-        .where((e) => e.hasAttempted && !e.hasActiveAttempt)
-        .length;
+    final availableCount = allExams.where((e) => !e.hasAttempted).length;
+    final overallProgress = totalCount > 0
+        ? (completedCount / totalCount).clamp(0.0, 1.0)
+        : 0.0;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.s16),
+      padding: const EdgeInsets.all(AppSpacing.s16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLarge),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: AppSpacing.s8,
+            runSpacing: AppSpacing.s8,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(AppSpacing.s6),
+                    decoration: BoxDecoration(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.radiusSmall,
+                      ),
+                    ),
+                    child: Icon(
+                      Icons.insights_rounded,
+                      size: 18,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.s8),
+                  Flexible(
+                    child: Text(
+                      context.l10n.studentExamsOverviewTitle,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.s8,
+                  vertical: AppSpacing.s4,
+                ),
+                decoration: BoxDecoration(
+                  color: (completedCount == totalCount && totalCount > 0)
+                      ? AppColors.success.withValues(alpha: 0.12)
+                      : Theme.of(
+                          context,
+                        ).colorScheme.primary.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      (completedCount == totalCount && totalCount > 0)
+                          ? Icons.check_circle_rounded
+                          : Icons.pie_chart_outline_rounded,
+                      size: 13,
+                      color: (completedCount == totalCount && totalCount > 0)
+                          ? AppColors.success
+                          : Theme.of(context).colorScheme.primary,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${(overallProgress * 100).toInt()}% ${context.l10n.studentExamsOverallProgress}',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: (completedCount == totalCount && totalCount > 0)
+                            ? AppColors.success
+                            : Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.s10),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+            child: LinearProgressIndicator(
+              value: overallProgress,
+              minHeight: 6,
+              backgroundColor: AppColors.surfaceVariant,
+              valueColor: AlwaysStoppedAnimation<Color>(
+                overallProgress >= 1.0
+                    ? AppColors.success
+                    : Theme.of(context).colorScheme.primary,
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.s12),
+          LayoutBuilder(
+            builder: (context, kpiConstraints) {
+              final isVeryNarrow = kpiConstraints.maxWidth < 340;
+              if (isVeryNarrow) {
+                return Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildKpiTile(
+                            title: context.l10n.studentExamsStatsTotal,
+                            count: totalCount,
+                            icon: Icons.assignment_outlined,
+                            color: Theme.of(context).colorScheme.primary,
+                            isSelected: _activeFilter == StudentExamFilter.all,
+                            onTap: () => setState(
+                              () => _activeFilter = StudentExamFilter.all,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.s8),
+                        Expanded(
+                          child: _buildKpiTile(
+                            title: context.l10n.studentExamsStatsCompleted,
+                            count: completedCount,
+                            icon: Icons.check_circle_rounded,
+                            color: AppColors.success,
+                            isSelected:
+                                _activeFilter == StudentExamFilter.completed,
+                            onTap: () => setState(
+                              () => _activeFilter = StudentExamFilter.completed,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.s8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildKpiTile(
+                            title: context.l10n.studentExamsStatsInProgress,
+                            count: inProgressCount,
+                            icon: Icons.hourglass_top_rounded,
+                            color: AppColors.warning,
+                            isSelected:
+                                _activeFilter == StudentExamFilter.inProgress,
+                            onTap: () => setState(
+                              () =>
+                                  _activeFilter = StudentExamFilter.inProgress,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.s8),
+                        Expanded(
+                          child: _buildKpiTile(
+                            title: context.l10n.studentExamsStatsAvailable,
+                            count: availableCount,
+                            icon: Icons.rocket_launch_outlined,
+                            color: const Color(0xFF0284C7),
+                            isSelected:
+                                _activeFilter == StudentExamFilter.available,
+                            onTap: () => setState(
+                              () => _activeFilter = StudentExamFilter.available,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                );
+              }
+              return Row(
+                children: [
+                  Expanded(
+                    child: _buildKpiTile(
+                      title: context.l10n.studentExamsStatsTotal,
+                      count: totalCount,
+                      icon: Icons.assignment_outlined,
+                      color: Theme.of(context).colorScheme.primary,
+                      isSelected: _activeFilter == StudentExamFilter.all,
+                      onTap: () =>
+                          setState(() => _activeFilter = StudentExamFilter.all),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.s8),
+                  Expanded(
+                    child: _buildKpiTile(
+                      title: context.l10n.studentExamsStatsCompleted,
+                      count: completedCount,
+                      icon: Icons.check_circle_rounded,
+                      color: AppColors.success,
+                      isSelected: _activeFilter == StudentExamFilter.completed,
+                      onTap: () => setState(
+                        () => _activeFilter = StudentExamFilter.completed,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.s8),
+                  Expanded(
+                    child: _buildKpiTile(
+                      title: context.l10n.studentExamsStatsInProgress,
+                      count: inProgressCount,
+                      icon: Icons.hourglass_top_rounded,
+                      color: AppColors.warning,
+                      isSelected: _activeFilter == StudentExamFilter.inProgress,
+                      onTap: () => setState(
+                        () => _activeFilter = StudentExamFilter.inProgress,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.s8),
+                  Expanded(
+                    child: _buildKpiTile(
+                      title: context.l10n.studentExamsStatsAvailable,
+                      count: availableCount,
+                      icon: Icons.rocket_launch_outlined,
+                      color: const Color(0xFF0284C7),
+                      isSelected: _activeFilter == StudentExamFilter.available,
+                      onTap: () => setState(
+                        () => _activeFilter = StudentExamFilter.available,
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildKpiTile({
+    required String title,
+    required int count,
+    required IconData icon,
+    required Color color,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.s6,
+          vertical: AppSpacing.s8,
+        ),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? color.withValues(alpha: 0.1)
+              : AppColors.surfaceVariant.withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+          border: Border.all(
+            color: isSelected
+                ? color.withValues(alpha: 0.4)
+                : Colors.transparent,
+            width: 1.2,
+          ),
+        ),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, size: 13, color: color),
+                const SizedBox(width: 4),
+                Text(
+                  '$count',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    color: color,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 2),
+            Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 10.5,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                color: isSelected ? color : AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSearchBar(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16),
+      child: TextField(
+        controller: _searchController,
+        decoration: InputDecoration(
+          hintText: context.l10n.examSearchPlaceholder,
+          hintStyle: const TextStyle(fontSize: 13, color: AppColors.textMuted),
+          prefixIcon: const Icon(
+            Icons.search_rounded,
+            size: 20,
+            color: AppColors.textSecondary,
+          ),
+          suffixIcon: _searchQuery.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.clear_rounded, size: 18),
+                  tooltip: context.l10n.clearSearchTooltip,
+                  onPressed: () {
+                    _searchController.clear();
+                    setState(() => _searchQuery = '');
+                  },
+                )
+              : null,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.s16,
+            vertical: AppSpacing.s10,
+          ),
+          filled: true,
+          fillColor: Theme.of(context).cardColor,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+            borderSide: const BorderSide(color: AppColors.border),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+            borderSide: const BorderSide(color: AppColors.border),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+            borderSide: BorderSide(
+              color: Theme.of(context).colorScheme.primary,
+              width: 1.5,
+            ),
+          ),
+        ),
+        onChanged: (val) {
+          setState(() => _searchQuery = val);
+        },
+      ),
+    );
+  }
+
+  Widget _buildFilterChips(BuildContext context, List<ExamEntity> allExams) {
+    final availableCount = allExams.where((e) => !e.hasAttempted).length;
+    final inProgressCount = allExams.where((e) => e.hasActiveAttempt).length;
+    final completedCount = allExams.where((e) => e.isFullyCompleted).length;
 
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.s16,
-        vertical: AppSpacing.s8,
+        vertical: AppSpacing.s6,
       ),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
@@ -561,6 +1005,12 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
               context.l10n.filterAll,
               StudentExamFilter.all,
               allExams.length,
+            ),
+            const SizedBox(width: AppSpacing.s8),
+            _buildFilterChip(
+              context.l10n.filterNotStarted,
+              StudentExamFilter.available,
+              availableCount,
             ),
             const SizedBox(width: AppSpacing.s8),
             _buildFilterChip(
@@ -602,24 +1052,45 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
   }
 
   Widget _buildExamsGrid(List<ExamEntity> exams) {
-    return ResponsiveGrid(
-      mobileColumns: 1,
-      tabletColumns: 2,
-      desktopColumns: 2,
-      spacing: AppSpacing.s16,
-      runSpacing: AppSpacing.s16,
-      children: exams.map((exam) {
-        return ExamCard(
-          exam: exam,
-          isTeacher: false,
-          isLessonQuiz: false,
-          onTap: () => _openExamIntro(exam),
-          onReview:
-              exam.hasAttempted && exam.myLatestAttempt?.isSubmitted == true
-              ? () => _openExamReview(exam)
-              : null,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        final int crossAxisCount;
+        if (width < 640) {
+          crossAxisCount = 1;
+        } else if (width < 1100) {
+          crossAxisCount = 2;
+        } else if (width < 1550) {
+          crossAxisCount = 3;
+        } else {
+          crossAxisCount = 4;
+        }
+
+        return GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            crossAxisSpacing: AppSpacing.s16,
+            mainAxisSpacing: AppSpacing.s16,
+            mainAxisExtent: 340,
+          ),
+          itemCount: exams.length,
+          itemBuilder: (context, index) {
+            final exam = exams[index];
+            return ExamCard(
+              exam: exam,
+              isTeacher: false,
+              isLessonQuiz: false,
+              onTap: () => _openExamIntro(exam),
+              onReview:
+                  exam.hasAttempted && exam.myLatestAttempt?.isSubmitted == true
+                  ? () => _openExamResult(exam)
+                  : null,
+            );
+          },
         );
-      }).toList(),
+      },
     );
   }
 }

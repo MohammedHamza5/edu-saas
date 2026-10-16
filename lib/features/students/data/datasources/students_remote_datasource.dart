@@ -16,7 +16,10 @@ abstract interface class StudentsRemoteDataSource {
     int pageSize = 25,
   });
 
-  Future<List<StudentModel>> getPendingStudents();
+  Future<List<StudentModel>> getPendingStudents({
+    int page = 0,
+    int pageSize = 20,
+  });
 
   /// Calls Edge Function `approve-student` — Server validates JWT + tenant.
   Future<StudentModel> changeStudentStatus({
@@ -97,7 +100,10 @@ class StudentsRemoteDataSourceImpl implements StudentsRemoteDataSource {
   // ── getPendingStudents ────────────────────────────────────────────────────
 
   @override
-  Future<List<StudentModel>> getPendingStudents() async {
+  Future<List<StudentModel>> getPendingStudents({
+    int page = 0,
+    int pageSize = 20,
+  }) async {
     final response = await _c
         .from('users')
         .select(
@@ -105,7 +111,8 @@ class StudentsRemoteDataSourceImpl implements StudentsRemoteDataSource {
         )
         .eq('role', 'student')
         .eq('status', 'pending')
-        .order('created_at', ascending: true); // oldest first for FIFO review
+        .order('created_at', ascending: true) // oldest first for FIFO review
+        .range(page * pageSize, (page + 1) * pageSize - 1);
 
     return (response as List<dynamic>)
         .map((e) => StudentModel.fromJson(e as Map<String, dynamic>))

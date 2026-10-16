@@ -132,7 +132,7 @@ class _SendAnnouncementPageState extends State<SendAnnouncementPage> {
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(AppSpacing.s16),
-            child: ResponsiveContainer.reading(
+            child: ResponsiveContainer(
               child: Form(
                 key: _formKey,
                 child: Column(

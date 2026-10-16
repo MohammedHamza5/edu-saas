@@ -17,9 +17,30 @@ import '../../../videos/domain/entities/video_folder_entity.dart';
 import '../../../videos/domain/repositories/video_bank_repository.dart';
 import '../../../videos/presentation/dialogs/upload_video_to_bank_dialog.dart';
 import '../../domain/entities/chapter_entity.dart';
+import '../../domain/entities/library_material_entity.dart';
 import '../../domain/repositories/content_repository.dart';
 import '../cubit/content_cubit.dart';
 import '../cubit/content_state.dart';
+import '../dialogs/select_material_from_library_dialog.dart';
+import '../../../notifications/domain/services/notification_dispatcher.dart';
+
+class _StudioAttachedExam {
+  final String examId;
+  String examTitle;
+  bool isRequired;
+
+  _StudioAttachedExam({
+    required this.examId,
+    required this.examTitle,
+    this.isRequired = true,
+  });
+
+  Map<String, dynamic> toJson({int sortOrder = 0}) => {
+    'exam_id': examId,
+    'sort_order': sortOrder,
+    'is_required': isRequired,
+  };
+}
 
 class _StagedLecture {
   final LibraryVideoEntity video;
@@ -27,16 +48,48 @@ class _StagedLecture {
   String? chapterId;
   PlatformFile? pdfFile;
   Uint8List? pdfBytes;
+  LibraryMaterialEntity? libraryMaterial;
   bool isPublished;
-  String? examId;
+  final List<_StudioAttachedExam> attachedExams = [];
   int? customPassingScore;
+
+  bool get hasPdf => libraryMaterial != null || pdfFile != null;
+  String get pdfDisplayName =>
+      libraryMaterial != null ? libraryMaterial!.title : (pdfFile?.name ?? '');
+  int? get pdfSize =>
+      libraryMaterial != null ? libraryMaterial!.fileSize : (pdfFile?.size);
+
+  String? get formattedPdfSize {
+    final size = pdfSize;
+    if (size == null) return null;
+    if (size < 1024) return '$size B';
+    if (size < 1024 * 1024) return '${(size / 1024).toStringAsFixed(1)} KB';
+    return '${(size / (1024 * 1024)).toStringAsFixed(1)} MB';
+  }
+
+  bool get hasExam => attachedExams.isNotEmpty;
+
+  String? get examId =>
+      attachedExams.isNotEmpty ? attachedExams.first.examId : null;
+  set examId(String? id) {
+    attachedExams.clear();
+    if (id != null) {
+      attachedExams.add(_StudioAttachedExam(examId: id, examTitle: ''));
+    }
+  }
 
   _StagedLecture({
     required this.video,
     required String initialTitle,
     this.chapterId,
     this.isPublished = true,
-  }) : titleController = TextEditingController(text: initialTitle);
+    List<_StudioAttachedExam>? initialExams,
+    this.libraryMaterial,
+  }) : titleController = TextEditingController(text: initialTitle) {
+    if (initialExams != null) {
+      attachedExams.addAll(initialExams);
+    }
+  }
 
   void dispose() {
     titleController.dispose();
@@ -74,25 +127,25 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
   final Set<String> _loadingFolderIds = {};
   final Set<String> _expandedFolderIds = {};
 
-  // Selection & Search State
+  // Selection & Search State (Unified Single Source of Truth)
   final Map<String, LibraryVideoEntity> _selectedVideos = {};
   final Map<String, _StagedLecture> _stagedLectures = {};
+  final List<String> _stagedOrder = [];
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   bool _showOnlyUnused = false;
   bool _isSidebarCollapsed = false;
 
-  // Single Mode State
-  final _singleTitleController = TextEditingController();
-  PlatformFile? _singlePdfFile;
-  Uint8List? _singlePdfBytes;
-  String? _singleExamId;
-  bool _singleIsPublished = true;
-  String? _selectedChapterId;
+  // Instant O(1) Video In Course Cache
+  final Set<String> _courseVideoIds = {};
+  final Set<String> _courseVideoProviderIds = {};
 
   // Global Batch Controls
   String? _batchGlobalChapterId;
   bool _batchGlobalPublished = true;
+
+  // Active Inspecting Target for Detail Drawer
+  _StagedLecture? _inspectingLecture;
 
   // Available Chapters & Exams Cache
   List<ChapterEntity> _chapters = [];
@@ -105,17 +158,31 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
   @override
   void initState() {
     super.initState();
-    _selectedChapterId = widget.initialChapterId;
     _batchGlobalChapterId = widget.initialChapterId;
+    _initCourseVideoSet();
     _loadLibraryData();
     _loadExams();
     _loadChapters();
   }
 
+  void _initCourseVideoSet() {
+    _courseVideoIds.clear();
+    _courseVideoProviderIds.clear();
+    final cubit = context.read<ContentCubit>();
+    if (cubit.state is ContentLoaded) {
+      for (final item in (cubit.state as ContentLoaded).items) {
+        if (item.id.isNotEmpty) _courseVideoIds.add(item.id);
+        if (item.videoId != null) _courseVideoIds.add(item.videoId!);
+        if (item.videoProviderId != null) {
+          _courseVideoProviderIds.add(item.videoProviderId!);
+        }
+      }
+    }
+  }
+
   @override
   void dispose() {
     _searchController.dispose();
-    _singleTitleController.dispose();
     for (final staged in _stagedLectures.values) {
       staged.dispose();
     }
@@ -152,7 +219,6 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
           _chapters = res.data;
           if (widget.initialChapterId != null &&
               _chapters.any((c) => c.id == widget.initialChapterId)) {
-            _selectedChapterId = widget.initialChapterId;
             _batchGlobalChapterId = widget.initialChapterId;
             for (final s in _stagedLectures.values) {
               s.chapterId = widget.initialChapterId;
@@ -184,9 +250,29 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
       if (rootVideosRes.isSuccess) {
         _folderVideosCache[null] = rootVideosRes.data;
       }
-    } catch (_) {}
-    if (mounted) {
-      setState(() => _isLoadingLibrary = false);
+      if (mounted) {
+        setState(() => _isLoadingLibrary = false);
+      }
+      // Immediately prefetch all folder videos in parallel in the background!
+      // This ensures expanding any folder is 0ms instant without any network lag!
+      if (_allFolders.isNotEmpty) {
+        unawaited(
+          Future.wait(
+            _allFolders.map((f) async {
+              final res = await _videoRepo.getVideos(folderId: f.id);
+              if (res.isSuccess) {
+                _folderVideosCache[f.id] = res.data;
+              }
+            }),
+          ).then((_) {
+            if (mounted) setState(() {});
+          }),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() => _isLoadingLibrary = false);
+      }
     }
   }
 
@@ -210,21 +296,15 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
   }
 
   bool _isVideoAlreadyInCourse(LibraryVideoEntity video) {
-    if (video.assignedGroupNames.any(
-      (name) =>
-          name.trim().toLowerCase() == widget.groupName.trim().toLowerCase(),
-    )) {
+    if (_courseVideoIds.contains(video.id) ||
+        (video.providerVideoId != null &&
+            _courseVideoProviderIds.contains(video.providerVideoId))) {
       return true;
     }
-    final cubit = context.read<ContentCubit>();
-    if (cubit.state is ContentLoaded) {
-      final items = (cubit.state as ContentLoaded).items;
-      return items.any(
-        (item) =>
-            item.id == video.id ||
-            item.videoId == video.id ||
-            item.videoProviderId == video.providerVideoId,
-      );
+    for (final name in video.assignedGroupNames) {
+      if (name.trim().toLowerCase() == widget.groupName.trim().toLowerCase()) {
+        return true;
+      }
     }
     return false;
   }
@@ -234,23 +314,74 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
       if (_selectedVideos.containsKey(video.id)) {
         _selectedVideos.remove(video.id);
         _stagedLectures.remove(video.id)?.dispose();
+        _stagedOrder.remove(video.id);
+        if (_inspectingLecture?.video.id == video.id) {
+          _inspectingLecture = null;
+        }
       } else {
         _selectedVideos[video.id] = video;
+        _stagedOrder.add(video.id);
+
+        // Pre-fill existing configuration if video is already part of this course
+        String initialTitle = video.title;
+        String? initialChapter = _batchGlobalChapterId ?? widget.initialChapterId;
+        bool isPublished = _batchGlobalPublished;
+        LibraryMaterialEntity? initialMaterial;
+        List<_StudioAttachedExam>? initialExams;
+
+        final cubit = context.read<ContentCubit>();
+        if (cubit.state is ContentLoaded) {
+          final items = (cubit.state as ContentLoaded).items;
+          final existing = items.where(
+            (item) =>
+                item.id == video.id ||
+                item.videoId == video.id ||
+                item.videoProviderId == video.providerVideoId,
+          ).firstOrNull;
+          if (existing != null) {
+            initialTitle = existing.title;
+            isPublished = existing.isPublishedInGroup;
+            if (existing.chapterId != null) {
+              initialChapter = existing.chapterId;
+            }
+            if (existing.attachedExams.isNotEmpty) {
+              initialExams = existing.attachedExams.map(
+                (e) => _StudioAttachedExam(
+                  examId: e.examId,
+                  examTitle: e.examTitle,
+                  isRequired: e.isRequired,
+                ),
+              ).toList();
+            }
+            if (existing.file != null) {
+              final f = existing.file!;
+              initialMaterial = LibraryMaterialEntity(
+                id: f.id,
+                tenantId: f.tenantId,
+                title: f.fileName.replaceAll(
+                  RegExp(r'\.pdf$', caseSensitive: false),
+                  '',
+                ),
+                fileName: f.fileName,
+                storagePath: f.storagePath,
+                fileSize: f.fileSize,
+                mimeType: f.mimeType,
+                storageProvider: f.storageProvider,
+                createdAt: f.createdAt,
+                updatedAt: f.createdAt,
+              );
+            }
+          }
+        }
+
         _stagedLectures[video.id] = _StagedLecture(
           video: video,
-          initialTitle: video.title,
-          chapterId: _batchGlobalChapterId ??
-              _selectedChapterId ??
-              widget.initialChapterId,
-          isPublished: _batchGlobalPublished,
+          initialTitle: initialTitle,
+          chapterId: initialChapter,
+          isPublished: isPublished,
+          initialExams: initialExams,
+          libraryMaterial: initialMaterial,
         );
-      }
-
-      // Sync single mode inputs if 1 video selected
-      if (_selectedVideos.length == 1) {
-        final single = _selectedVideos.values.first;
-        _singleTitleController.text = single.title;
-        _singleIsPublished = true;
       }
     });
   }
@@ -267,27 +398,34 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
         for (final v in videos) {
           _selectedVideos.remove(v.id);
           _stagedLectures.remove(v.id)?.dispose();
+          _stagedOrder.remove(v.id);
+          if (_inspectingLecture?.video.id == v.id) {
+            _inspectingLecture = null;
+          }
         }
       } else {
         // Select all in folder
         for (final v in videos) {
           if (!_selectedVideos.containsKey(v.id)) {
             _selectedVideos[v.id] = v;
+            _stagedOrder.add(v.id);
             _stagedLectures[v.id] = _StagedLecture(
               video: v,
               initialTitle: v.title,
-              chapterId: _batchGlobalChapterId ??
-                  _selectedChapterId ??
-                  widget.initialChapterId,
+              chapterId: _batchGlobalChapterId ?? widget.initialChapterId,
               isPublished: _batchGlobalPublished,
             );
           }
         }
       }
+    });
+  }
 
-      if (_selectedVideos.length == 1) {
-        _singleTitleController.text = _selectedVideos.values.first.title;
-      }
+  void _onReorder(int oldIndex, int newIndex) {
+    setState(() {
+      if (newIndex > oldIndex) newIndex--;
+      final item = _stagedOrder.removeAt(oldIndex);
+      _stagedOrder.insert(newIndex, item);
     });
   }
 
@@ -437,7 +575,6 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
         if (!_chapters.any((c) => c.id == createdChapter.id)) {
           _chapters.add(createdChapter);
         }
-        _selectedChapterId = createdChapter.id;
         _batchGlobalChapterId = createdChapter.id;
         for (final staged in _stagedLectures.values) {
           staged.chapterId = createdChapter.id;
@@ -452,21 +589,7 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
     }
   }
 
-  Future<void> _pickSinglePdf() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['pdf'],
-      withData: true,
-    );
-    if (result != null && result.files.isNotEmpty) {
-      setState(() {
-        _singlePdfFile = result.files.first;
-        _singlePdfBytes = result.files.first.bytes;
-      });
-    }
-  }
-
-  Future<void> _pickBatchPdf(_StagedLecture staged) async {
+  Future<void> _pickPdf(_StagedLecture staged) async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['pdf'],
@@ -476,12 +599,82 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
       setState(() {
         staged.pdfFile = result.files.first;
         staged.pdfBytes = result.files.first.bytes;
+        staged.libraryMaterial = null;
       });
     }
   }
 
+  Future<void> _pickFromLibrary(_StagedLecture staged) async {
+    final selected = await SelectMaterialFromLibraryDialog.show(context);
+    if (selected != null && mounted) {
+      setState(() {
+        staged.libraryMaterial = selected;
+        staged.pdfFile = null;
+        staged.pdfBytes = null;
+      });
+    }
+  }
+
+  Future<String?> _resolveOrUploadFileForLecture({
+    required String contentId,
+    required String tenantId,
+    LibraryMaterialEntity? libraryMaterial,
+    PlatformFile? uploadedFile,
+    Uint8List? uploadedBytes,
+  }) async {
+    // 1. If chosen from materials library: link directly without re-uploading
+    if (libraryMaterial != null) {
+      final linkRes = await InjectionContainer.materialsLibraryRepository.linkToLecture(
+        libraryMaterialId: libraryMaterial.id,
+        contentId: contentId,
+        tenantId: tenantId,
+      );
+      if (linkRes.isSuccess && linkRes.dataOrNull != null) {
+        return linkRes.dataOrNull;
+      }
+    }
+
+    // 2. If uploaded from device: upload to teacher's Materials Library first so it is preserved!
+    if (uploadedFile != null && uploadedBytes != null) {
+      final cleanTitle = uploadedFile.name.replaceAll(
+        RegExp(r'\.pdf$', caseSensitive: false),
+        '',
+      );
+
+      final uploadRes = await InjectionContainer.materialsLibraryRepository.uploadMaterial(
+        title: cleanTitle,
+        fileName: uploadedFile.name,
+        fileBytes: uploadedBytes,
+        mimeType: 'application/pdf',
+      );
+
+      if (uploadRes.isSuccess && uploadRes.dataOrNull != null) {
+        final newMaterial = uploadRes.dataOrNull!;
+        final linkRes = await InjectionContainer.materialsLibraryRepository.linkToLecture(
+          libraryMaterialId: newMaterial.id,
+          contentId: contentId,
+          tenantId: tenantId,
+        );
+        if (linkRes.isSuccess && linkRes.dataOrNull != null) {
+          return linkRes.dataOrNull;
+        }
+      }
+
+      // Fallback: direct storage upload if library upload fails
+      return await _uploadPdfForVideo(
+        tenantId: tenantId,
+        contentId: contentId,
+        file: uploadedFile,
+        bytes: uploadedBytes,
+      );
+    }
+
+    return null;
+  }
+
   Future<String?> _uploadPdfForVideo({
-    required LibraryVideoEntity video,
+    required String tenantId,
+    required String contentId,
     required PlatformFile file,
     required Uint8List bytes,
   }) async {
@@ -494,8 +687,8 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
 
     final cubit = context.read<ContentCubit>();
     return await cubit.uploadAndCreateFileRecord(
-      tenantId: video.tenantId,
-      contentId: video.id,
+      tenantId: tenantId,
+      contentId: contentId,
       fileName: file.name,
       mimeType: 'application/pdf',
       fileBytes: bytes,
@@ -503,9 +696,9 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
     );
   }
 
-  Future<void> _handleSaveSingle() async {
-    if (_selectedVideos.isEmpty) return;
-    final video = _selectedVideos.values.first;
+  Future<void> _handleSaveUnified() async {
+    final list = _stagedOrder.map((id) => _stagedLectures[id]!).toList();
+    if (list.isEmpty) return;
 
     final cubit = context.read<ContentCubit>();
     final messenger = ScaffoldMessenger.of(context);
@@ -517,105 +710,53 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
     });
 
     try {
-      String? fileId;
-      if (_singlePdfFile != null && _singlePdfBytes != null) {
-        fileId = await _uploadPdfForVideo(
-          video: video,
-          file: _singlePdfFile!,
-          bytes: _singlePdfBytes!,
+      final items = <Map<String, dynamic>>[];
+
+      for (final staged in list) {
+        final title = staged.titleController.text.trim().isNotEmpty
+            ? staged.titleController.text.trim()
+            : staged.video.title;
+
+        // 1. Resolve or create true content_id before file linking
+        final actualContentId = await cubit.resolveOrCreateLectureContent(
+          videoId: staged.video.id,
+          groupId: widget.groupId,
+          title: title,
+          tenantId: staged.video.tenantId,
+        ) ?? staged.video.id;
+
+        // 2. Upload / link file using the true actualContentId
+        final fileId = await _resolveOrUploadFileForLecture(
+          contentId: actualContentId,
+          tenantId: staged.video.tenantId,
+          libraryMaterial: staged.libraryMaterial,
+          uploadedFile: staged.pdfFile,
+          uploadedBytes: staged.pdfBytes,
         );
-      }
 
-      final title = _singleTitleController.text.trim().isNotEmpty
-          ? _singleTitleController.text.trim()
-          : video.title;
-
-        final singleChapter = _selectedChapterId ??
+        final chapter = staged.chapterId ??
             _batchGlobalChapterId ??
             widget.initialChapterId;
 
-        final success = await cubit.assignContentToGroups(
-          contentId: video.id,
-          groupIds: [widget.groupId],
-          groupConfigs: [
-            {
-              'group_id': widget.groupId,
-              'is_published': _singleIsPublished,
-              'custom_title': title,
-              if (fileId != null) 'file_id': fileId,
-              if (_singleExamId != null) 'associated_exam_id': _singleExamId,
-              if (singleChapter != null) 'chapter_id': singleChapter,
-            },
-          ],
-        );
-
-        if (success && mounted) {
-          messenger.showSnackBar(
-            SnackBar(
-              content: Text(l10n.contentUpdatedToast),
-              backgroundColor: AppColors.success,
-            ),
-          );
-          widget.onSaved();
-        }
-      } catch (_) {
-        if (mounted) {
-          messenger.showSnackBar(
-            SnackBar(
-              content: Text(l10n.lessonEditorErrorSaving),
-              backgroundColor: AppColors.error,
-            ),
-          );
-        }
-      } finally {
-        if (mounted) setState(() => _isSaving = false);
+        items.add({
+          'content_id': actualContentId,
+          'custom_title': title,
+          if (chapter != null) 'chapter_id': chapter,
+          'is_published': staged.isPublished,
+          if (staged.attachedExams.isNotEmpty)
+            'associated_exam_id': staged.attachedExams.first.examId,
+          if (staged.attachedExams.isNotEmpty)
+            'attached_exams': staged.attachedExams
+                .asMap()
+                .entries
+                .map((e) => e.value.toJson(sortOrder: e.key))
+                .toList(),
+          if (staged.attachedExams.isEmpty) 'associated_exam_id': null,
+          if (staged.attachedExams.isEmpty)
+            'attached_exams': <Map<String, dynamic>>[],
+          if (fileId != null) 'file_id': fileId,
+        });
       }
-    }
-
-    Future<void> _handleSaveBatch() async {
-      final list = _stagedLectures.values.toList();
-      if (list.isEmpty) return;
-
-      final cubit = context.read<ContentCubit>();
-      final messenger = ScaffoldMessenger.of(context);
-      final l10n = context.l10n;
-
-      setState(() {
-        _isSaving = true;
-        _savingProgressMessage = l10n.savingChanges;
-      });
-
-      try {
-        final items = <Map<String, dynamic>>[];
-
-        for (final staged in list) {
-          String? fileId;
-          if (staged.pdfFile != null && staged.pdfBytes != null) {
-            fileId = await _uploadPdfForVideo(
-              video: staged.video,
-              file: staged.pdfFile!,
-              bytes: staged.pdfBytes!,
-            );
-          }
-
-          final title = staged.titleController.text.trim().isNotEmpty
-              ? staged.titleController.text.trim()
-              : staged.video.title;
-
-          final chapter = staged.chapterId ??
-              _batchGlobalChapterId ??
-              _selectedChapterId ??
-              widget.initialChapterId;
-
-          items.add({
-            'content_id': staged.video.id,
-            'custom_title': title,
-            if (chapter != null) 'chapter_id': chapter,
-            'is_published': staged.isPublished,
-            if (staged.examId != null) 'associated_exam_id': staged.examId,
-            if (fileId != null) 'file_id': fileId,
-          });
-        }
 
       final success = await cubit.assignBatchContentToGroup(
         groupId: widget.groupId,
@@ -623,9 +764,28 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
       );
 
       if (success && mounted) {
+        for (final staged in list) {
+          if (staged.isPublished) {
+            final title = staged.titleController.text.trim().isNotEmpty
+                ? staged.titleController.text.trim()
+                : staged.video.title;
+            unawaited(
+              NotificationDispatcher.notifyNewLecture(
+                title: title,
+                groupId: widget.groupId,
+                contentId: staged.video.id,
+                contentType: 'video',
+              ),
+            );
+          }
+        }
         messenger.showSnackBar(
           SnackBar(
-            content: Text(l10n.batchAddSuccessToast(items.length)),
+            content: Text(
+              list.length == 1
+                  ? l10n.contentUpdatedToast
+                  : l10n.batchAddSuccessToast(list.length),
+            ),
             backgroundColor: AppColors.success,
           ),
         );
@@ -789,11 +949,7 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
                         ? Icons.rocket_launch_rounded
                         : Icons.save_rounded,
                     isLoading: _isSaving,
-                    onPressed: _selectedVideos.isEmpty
-                        ? null
-                        : (_selectedVideos.length > 1
-                              ? _handleSaveBatch
-                              : _handleSaveSingle),
+                    onPressed: _selectedVideos.isEmpty ? null : _handleSaveUnified,
                   ),
                 ],
               ),
@@ -1321,6 +1477,9 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
   Widget _buildVideoRow(BuildContext context, LibraryVideoEntity video) {
     final isSelected = _selectedVideos.containsKey(video.id);
     final isAlreadyAdded = _isVideoAlreadyInCourse(video);
+    final staged = _stagedLectures[video.id];
+    final hasPdf = staged != null && staged.hasPdf;
+    final hasExam = staged != null && staged.hasExam;
 
     return InkWell(
       onTap: () => _toggleVideoSelection(video),
@@ -1372,15 +1531,90 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  if (isAlreadyAdded)
-                    Text(
-                      context.l10n.alreadyAddedBadge,
-                      style: const TextStyle(
-                        fontSize: 9.5,
-                        color: AppColors.success,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                  Row(
+                    children: [
+                      if (isAlreadyAdded) ...[
+                        Text(
+                          context.l10n.alreadyAddedBadge,
+                          style: const TextStyle(
+                            fontSize: 9.5,
+                            color: AppColors.success,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                      ],
+                      if (hasPdf) ...[
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 4,
+                            vertical: 1,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFEA580C).withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(
+                              color: const Color(0xFFEA580C).withValues(alpha: 0.4),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.picture_as_pdf_rounded,
+                                size: 9,
+                                color: Color(0xFFEA580C),
+                              ),
+                              const SizedBox(width: 2),
+                              Text(
+                                context.l10n.smartBadgePdf,
+                                style: const TextStyle(
+                                  fontSize: 8.5,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFFEA580C),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                      ],
+                      if (hasExam) ...[
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 4,
+                            vertical: 1,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(
+                              color: AppColors.primary.withValues(alpha: 0.4),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.quiz_rounded,
+                                size: 9,
+                                color: AppColors.primary,
+                              ),
+                              const SizedBox(width: 2),
+                              Text(
+                                context.l10n.smartBadgeExam,
+                                style: const TextStyle(
+                                  fontSize: 8.5,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -1392,13 +1626,10 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
 
   // ── Right Workspace Builder ──────────────────────────────────────────────
   Widget _buildRightWorkspace(BuildContext context) {
-    if (_selectedVideos.isEmpty) {
+    if (_stagedOrder.isEmpty) {
       return _buildNoVideosPlaceholder(context);
     }
-    if (_selectedVideos.length == 1) {
-      return _buildSingleLectureDeck(context, _selectedVideos.values.first);
-    }
-    return _buildBatchLecturesDeck(context);
+    return _buildUnifiedStagingDeck(context);
   }
 
   // ── Placeholder when 0 videos selected ───────────────────────────────────
@@ -1469,456 +1700,20 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
     );
   }
 
-  // ── Single Lecture Configuration Deck ────────────────────────────────────
-  Widget _buildSingleLectureDeck(
-    BuildContext context,
-    LibraryVideoEntity video,
-  ) {
+  // ── Unified Staging Deck ────────────────────────────────────────────────
+  Widget _buildUnifiedStagingDeck(BuildContext context) {
     final l10n = context.l10n;
     final chapters = _getEffectiveChapters(context);
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppSpacing.s24),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 820),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Video Summary Header Card
-              AppCard(
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.s16),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 90,
-                        height: 56,
-                        decoration: BoxDecoration(
-                          color: AppColors.background,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: AppColors.border),
-                          image: video.thumbnailUrl != null
-                              ? DecorationImage(
-                                  image: NetworkImage(video.thumbnailUrl!),
-                                  fit: BoxFit.cover,
-                                )
-                              : null,
-                        ),
-                        child: Center(
-                          child: Icon(
-                            Icons.play_circle_fill_rounded,
-                            size: 28,
-                            color: Colors.white.withValues(alpha: 0.9),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.s16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    video.title,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 15,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 6,
-                                    vertical: 2,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.success.withValues(
-                                      alpha: 0.1,
-                                    ),
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Text(
-                                    video.formattedDuration,
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.success,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 4),
-                            TextButton.icon(
-                              onPressed: () {
-                                setState(() {
-                                  _singleTitleController.text = video.title;
-                                });
-                              },
-                              icon: const Icon(Icons.sync_rounded, size: 14),
-                              label: Text(
-                                l10n.useVideoTitleAction,
-                                style: const TextStyle(fontSize: 11),
-                              ),
-                              style: TextButton.styleFrom(
-                                padding: EdgeInsets.zero,
-                                visualDensity: VisualDensity.compact,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.s16),
-
-              // Title Field
-              AppCard(
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.s20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.lessonTitleLabel,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.s8),
-                      AppTextField(
-                        controller: _singleTitleController,
-                        hintText: l10n.lessonTitleHint,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.s16),
-
-              // Academic Chapter Selector
-              AppCard(
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.s20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            l10n.targetChapterLabel,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 13,
-                            ),
-                          ),
-                          OutlinedButton.icon(
-                            onPressed: () =>
-                                _showQuickCreateChapterDialog(context),
-                            icon: const Icon(Icons.add_rounded, size: 14),
-                            label: Text(
-                              l10n.quickCreateChapter,
-                              style: const TextStyle(fontSize: 11),
-                            ),
-                            style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
-                              ),
-                              visualDensity: VisualDensity.compact,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: AppSpacing.s10),
-                      DropdownButtonFormField<String?>(
-                        value: chapters.any((c) => c.id == _selectedChapterId)
-                            ? _selectedChapterId
-                            : null,
-                        decoration: InputDecoration(
-                          isDense: true,
-                          filled: true,
-                          fillColor: AppColors.surfaceVariant.withValues(
-                            alpha: 0.4,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(
-                              AppSpacing.radiusMedium,
-                            ),
-                          ),
-                        ),
-                        items: [
-                          DropdownMenuItem<String?>(
-                            value: null,
-                            child: Text(l10n.noChapterOption),
-                          ),
-                          for (final ch in chapters)
-                            DropdownMenuItem<String?>(
-                              value: ch.id,
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.folder_rounded,
-                                    size: 16,
-                                    color: ch.isPublished
-                                        ? AppColors.primary
-                                        : AppColors.warning,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(ch.title),
-                                  if (!ch.isPublished) ...[
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      '(${l10n.chapterVisibilityDraft})',
-                                      style: const TextStyle(
-                                        fontSize: 10,
-                                        color: AppColors.warning,
-                                      ),
-                                    ),
-                                  ],
-                                ],
-                              ),
-                            ),
-                        ],
-                        onChanged: (val) {
-                          setState(() {
-                            _selectedChapterId = val;
-                            _batchGlobalChapterId = val;
-                            for (final s in _stagedLectures.values) {
-                              s.chapterId = val;
-                            }
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.s16),
-
-              // PDF Handout Attachment
-              AppCard(
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.s20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.pdfHandoutSection,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.s10),
-                      if (_singlePdfFile == null)
-                        OutlinedButton.icon(
-                          onPressed: _pickSinglePdf,
-                          icon: const Icon(
-                            Icons.picture_as_pdf_rounded,
-                            size: 16,
-                          ),
-                          label: Text(l10n.uploadPdfHandout),
-                          style: OutlinedButton.styleFrom(
-                            minimumSize: const Size.fromHeight(42),
-                          ),
-                        )
-                      else
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.05),
-                            borderRadius: BorderRadius.circular(
-                              AppSpacing.radiusMedium,
-                            ),
-                            border: Border.all(
-                              color: AppColors.primary.withValues(alpha: 0.2),
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.picture_as_pdf_rounded,
-                                color: Color(0xFFEA580C),
-                                size: 24,
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      _singlePdfFile!.name,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 13,
-                                      ),
-                                    ),
-                                    Text(
-                                      '${(_singlePdfFile!.size / (1024 * 1024)).toStringAsFixed(2)} MB',
-                                      style: const TextStyle(
-                                        fontSize: 11,
-                                        color: AppColors.textSecondary,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.delete_outline_rounded),
-                                color: AppColors.error,
-                                tooltip: l10n.removePdfHandout,
-                                onPressed: () {
-                                  setState(() {
-                                    _singlePdfFile = null;
-                                    _singlePdfBytes = null;
-                                  });
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.s16),
-
-              // Mandatory Exam / Quiz
-              AppCard(
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.s20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.mandatoryQuizSection,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.s10),
-                      DropdownButtonFormField<String?>(
-                        value: _singleExamId,
-                        decoration: InputDecoration(
-                          isDense: true,
-                          filled: true,
-                          fillColor: AppColors.surfaceVariant.withValues(
-                            alpha: 0.4,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(
-                              AppSpacing.radiusMedium,
-                            ),
-                          ),
-                        ),
-                        items: [
-                          DropdownMenuItem<String?>(
-                            value: null,
-                            child: Text(l10n.noQuizAttached),
-                          ),
-                          for (final exam in _availableExams)
-                            DropdownMenuItem<String?>(
-                              value: exam['id'] as String?,
-                              child: Text(exam['title'] as String? ?? ''),
-                            ),
-                        ],
-                        onChanged: (val) => setState(() => _singleExamId = val),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.s16),
-
-              // Publishing Status Toggle
-              AppCard(
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.s20),
-                  child: Row(
-                    children: [
-                      Icon(
-                        _singleIsPublished
-                            ? Icons.visibility_rounded
-                            : Icons.visibility_off_rounded,
-                        color: _singleIsPublished
-                            ? AppColors.success
-                            : AppColors.warning,
-                        size: 24,
-                      ),
-                      const SizedBox(width: AppSpacing.s14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              l10n.lecturePublishStatus,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              _singleIsPublished
-                                  ? l10n.lecturePublishedDescription
-                                  : l10n.lectureDraftDescription,
-                              style: const TextStyle(
-                                fontSize: 11.5,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Switch(
-                        value: _singleIsPublished,
-                        activeColor: AppColors.success,
-                        onChanged: (val) =>
-                            setState(() => _singleIsPublished = val),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.s32),
-
-              // Bottom Save Button
-              AppButton(
-                text: l10n.saveLectureButton,
-                icon: Icons.save_rounded,
-                isLoading: _isSaving,
-                onPressed: _handleSaveSingle,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ── Batch Lectures Orchestration Deck ────────────────────────────────────
-  Widget _buildBatchLecturesDeck(BuildContext context) {
-    final l10n = context.l10n;
-    final chapters = _getEffectiveChapters(context);
-
-    final stagedList = _stagedLectures.values.toList();
+    final count = _stagedOrder.length;
 
     return Column(
       children: [
-        // Batch Header & Global Toolbar Card
+        // Global Toolbar & Header
         Container(
-          padding: const EdgeInsets.all(AppSpacing.s20),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.s20,
+            vertical: AppSpacing.s16,
+          ),
           decoration: const BoxDecoration(
             color: AppColors.surface,
             border: Border(bottom: BorderSide(color: AppColors.border)),
@@ -1935,7 +1730,7 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Icon(
-                      Icons.rocket_launch_rounded,
+                      Icons.video_library_rounded,
                       color: AppColors.primary,
                       size: 20,
                     ),
@@ -1945,31 +1740,79 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          l10n.batchModeTitle(stagedList.length),
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                          ),
+                        Row(
+                          children: [
+                            Text(
+                              count == 1
+                                  ? l10n.lessonStudioTitle
+                                  : l10n.batchModeTitle(count),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                            const SizedBox(width: AppSpacing.s8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                count == 1
+                                    ? l10n.singleVideoModeBadge
+                                    : l10n.selectedVideosBadge(count),
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
+                        const SizedBox(height: 2),
                         Text(
-                          l10n.batchModeSubtitle,
+                          count > 1
+                              ? l10n.reorderLecturesHint
+                              : l10n.lessonStudioSubtitle,
                           style: const TextStyle(
-                            fontSize: 11.5,
+                            fontSize: 12,
                             color: AppColors.textSecondary,
                           ),
                         ),
                       ],
                     ),
                   ),
+                  // Clear all selections
+                  TextButton.icon(
+                    onPressed: () {
+                      setState(() {
+                        for (final s in _stagedLectures.values) {
+                          s.dispose();
+                        }
+                        _stagedLectures.clear();
+                        _stagedOrder.clear();
+                        _selectedVideos.clear();
+                      });
+                    },
+                    icon: const Icon(Icons.clear_all_rounded, size: 16),
+                    label: Text(l10n.clearSelection),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.textSecondary,
+                      visualDensity: VisualDensity.compact,
+                    ),
+                  ),
                 ],
               ),
-              const SizedBox(height: AppSpacing.s16),
+              const SizedBox(height: AppSpacing.s14),
 
-              // Global Bulk Assignment Bar
+              // Global Batch Assignment Bar (Chapter & Publish)
               Row(
                 children: [
-                  // Global Chapter Selector
                   Expanded(
                     child: Row(
                       children: [
@@ -1980,7 +1823,9 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
                                 : null,
                             isDense: true,
                             decoration: InputDecoration(
-                              labelText: l10n.applyChapterToAll,
+                              labelText: count > 1
+                                  ? l10n.applyChapterToAll
+                                  : l10n.targetChapterLabel,
                               isDense: true,
                               filled: true,
                               fillColor: AppColors.surfaceVariant.withValues(
@@ -1990,6 +1835,10 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
                                 borderRadius: BorderRadius.circular(
                                   AppSpacing.radiusMedium,
                                 ),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 10,
                               ),
                             ),
                             items: [
@@ -2010,22 +1859,15 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
                                             : AppColors.warning,
                                       ),
                                       const SizedBox(width: 8),
-                                      Expanded(
+                                      ConstrainedBox(
+                                        constraints: const BoxConstraints(
+                                          maxWidth: 200,
+                                        ),
                                         child: Text(
                                           ch.title,
                                           overflow: TextOverflow.ellipsis,
                                         ),
                                       ),
-                                      if (!ch.isPublished) ...[
-                                        const SizedBox(width: 6),
-                                        Text(
-                                          '(${l10n.chapterVisibilityDraft})',
-                                          style: const TextStyle(
-                                            fontSize: 10,
-                                            color: AppColors.warning,
-                                          ),
-                                        ),
-                                      ],
                                     ],
                                   ),
                                 ),
@@ -2033,7 +1875,6 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
                             onChanged: (val) {
                               setState(() {
                                 _batchGlobalChapterId = val;
-                                _selectedChapterId = val;
                                 for (final s in _stagedLectures.values) {
                                   s.chapterId = val;
                                 }
@@ -2067,6 +1908,7 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
                       border: Border.all(color: AppColors.border),
                     ),
                     child: Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
                           _batchGlobalPublished
@@ -2087,7 +1929,7 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
                           onChanged: (val) {
                             setState(() {
                               _batchGlobalPublished = val;
-                              for (final s in stagedList) {
+                              for (final s in _stagedLectures.values) {
                                 s.isPublished = val;
                               }
                             });
@@ -2102,20 +1944,53 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
           ),
         ),
 
-        // Staging List of Selected Lectures
+        // Staging List with Drag & Drop Reordering
         Expanded(
-          child: ListView.separated(
-            padding: const EdgeInsets.all(AppSpacing.s20),
-            itemCount: stagedList.length,
-            separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.s12),
-            itemBuilder: (ctx, index) {
-              final staged = stagedList[index];
-              return _buildBatchLectureCard(ctx, staged, index + 1, chapters);
-            },
-          ),
+          child: count == 1
+              ? SingleChildScrollView(
+                  padding: const EdgeInsets.all(AppSpacing.s20),
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 860),
+                      child: _buildUnifiedLectureCard(
+                        context,
+                        _stagedLectures[_stagedOrder.first]!,
+                        0,
+                        chapters,
+                        isOnlyOne: true,
+                      ),
+                    ),
+                  ),
+                )
+              : ReorderableListView.builder(
+                  buildDefaultDragHandles: false,
+                  padding: const EdgeInsets.all(AppSpacing.s20),
+                  itemCount: _stagedOrder.length,
+                  onReorder: _onReorder,
+                  itemBuilder: (ctx, index) {
+                    final videoId = _stagedOrder[index];
+                    final staged = _stagedLectures[videoId];
+                    if (staged == null) {
+                      return SizedBox.shrink(key: ValueKey('empty_$videoId'));
+                    }
+                    return KeyedSubtree(
+                      key: ValueKey(videoId),
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: AppSpacing.s12),
+                        child: _buildUnifiedLectureCard(
+                          ctx,
+                          staged,
+                          index,
+                          chapters,
+                          isOnlyOne: false,
+                        ),
+                      ),
+                    );
+                  },
+                ),
         ),
 
-        // Master Add Button Bottom Bar
+        // Bottom Unified Action Bar
         Container(
           padding: const EdgeInsets.all(AppSpacing.s16),
           decoration: const BoxDecoration(
@@ -2125,7 +2000,9 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
           child: Row(
             children: [
               Text(
-                '${stagedList.length} ${l10n.lessonStudioTitle}',
+                count == 1
+                    ? l10n.singleVideoModeBadge
+                    : l10n.selectedVideosBadge(count),
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   color: AppColors.textSecondary,
@@ -2133,10 +2010,12 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
               ),
               const Spacer(),
               AppButton(
-                text: l10n.addBatchLecturesButton(stagedList.length),
-                icon: Icons.rocket_launch_rounded,
+                text: count == 1
+                    ? l10n.saveLectureButton
+                    : l10n.addBatchLecturesButton(count),
+                icon: count == 1 ? Icons.save_rounded : Icons.rocket_launch_rounded,
                 isLoading: _isSaving,
-                onPressed: _handleSaveBatch,
+                onPressed: _handleSaveUnified,
               ),
             ],
           ),
@@ -2145,13 +2024,14 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
     );
   }
 
-  // ── Individual Card in Batch Staging Queue ───────────────────────────────
-  Widget _buildBatchLectureCard(
+  // ── Unified Lecture Card (Single & Multi Mode) ───────────────────────────
+  Widget _buildUnifiedLectureCard(
     BuildContext context,
     _StagedLecture staged,
     int index,
-    List<ChapterEntity> chapters,
-  ) {
+    List<ChapterEntity> chapters, {
+    required bool isOnlyOne,
+  }) {
     final l10n = context.l10n;
 
     return AppCard(
@@ -2160,75 +2040,117 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Row 1: Index, Duration Badge, Lecture Title, Delete Button
+            // Row 1: Drag handle, Index, Thumbnail, Editable Title, Duration badge, Close
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Index Avatar
-                CircleAvatar(
-                  radius: 13,
-                  backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                  child: Text(
-                    index.toString(),
-                    style: const TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.s10),
-
-                // Duration Badge
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: AppColors.surfaceVariant,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.play_circle_outline_rounded,
-                        size: 13,
-                        color: AppColors.textSecondary,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        staged.video.formattedDuration,
-                        style: const TextStyle(
-                          fontSize: 10,
-                          fontFamily: 'monospace',
-                          fontWeight: FontWeight.bold,
+                if (!isOnlyOne) ...[
+                  ReorderableDragStartListener(
+                    index: index,
+                    child: MouseRegion(
+                      cursor: SystemMouseCursors.grab,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: AppColors.surfaceVariant.withValues(alpha: 0.5),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Icon(
+                          Icons.drag_indicator_rounded,
+                          size: 20,
+                          color: AppColors.textSecondary,
                         ),
                       ),
-                    ],
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.s8),
+                  CircleAvatar(
+                    radius: 12,
+                    backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                    child: Text(
+                      '${index + 1}',
+                      style: const TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.s10),
+                ],
+
+                // Thumbnail
+                Container(
+                  width: 72,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: AppColors.background,
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: AppColors.border),
+                    image: staged.video.thumbnailUrl != null
+                        ? DecorationImage(
+                            image: NetworkImage(staged.video.thumbnailUrl!),
+                            fit: BoxFit.cover,
+                          )
+                        : null,
+                  ),
+                  child: Center(
+                    child: Icon(
+                      Icons.play_circle_fill_rounded,
+                      size: 20,
+                      color: Colors.white.withValues(alpha: 0.9),
+                    ),
                   ),
                 ),
                 const SizedBox(width: AppSpacing.s12),
 
-                // Editable Title
+                // Editable Title Field
                 Expanded(
-                  child: AppTextField(
-                    controller: staged.titleController,
-                    labelText: l10n.lessonTitleLabel,
-                    hintText: staged.video.title,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: AppTextField(
+                              controller: staged.titleController,
+                              labelText: l10n.lessonTitleLabel,
+                              hintText: staged.video.title,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          // Duration badge
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.surfaceVariant,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              staged.video.formattedDuration,
+                              style: const TextStyle(
+                                fontSize: 10,
+                                fontFamily: 'monospace',
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(width: AppSpacing.s8),
 
-                // Remove from batch button
+                // Remove video button
                 IconButton(
                   icon: const Icon(Icons.close_rounded, size: 18),
                   color: AppColors.error,
-                  tooltip: l10n.deleteAction,
-                  onPressed: () {
-                    setState(() {
-                      _selectedVideos.remove(staged.video.id);
-                      _stagedLectures.remove(staged.video.id)?.dispose();
-                    });
-                  },
+                  tooltip: l10n.cancel,
+                  onPressed: () => _toggleVideoSelection(staged.video),
                 ),
               ],
             ),
@@ -2236,18 +2158,18 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
             const Divider(height: 1, color: AppColors.border),
             const SizedBox(height: AppSpacing.s12),
 
-            // Row 2: Chapter Selector, Quiz Selector, PDF Handout, Publish Switch
+            // Row 2: Target Chapter, Quiz Section, PDF Handout, Publish Switch
             LayoutBuilder(
               builder: (ctx, constraints) {
-                final isNarrow = constraints.maxWidth < 650;
+                final isNarrow = constraints.maxWidth < 700;
                 return Wrap(
                   spacing: AppSpacing.s12,
                   runSpacing: AppSpacing.s10,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    // 1. Chapter Dropdown
+                    // 1. Target Chapter Dropdown
                     SizedBox(
-                      width: isNarrow ? double.infinity : 200,
+                      width: isNarrow ? double.infinity : 210,
                       child: DropdownButtonFormField<String?>(
                         value: chapters.any((c) => c.id == staged.chapterId)
                             ? staged.chapterId
@@ -2258,11 +2180,18 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
                           labelText: l10n.targetChapterLabel,
                           isDense: true,
                           filled: true,
-                          fillColor: AppColors.surfaceVariant.withValues(alpha: 0.4),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                          fillColor: AppColors.surfaceVariant.withValues(
+                            alpha: 0.4,
                           ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.radiusMedium,
+                            ),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 8,
+                          ),
                         ),
                         items: [
                           DropdownMenuItem<String?>(
@@ -2282,102 +2211,332 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
                               ),
                             ),
                         ],
-                        onChanged: (val) => setState(() => staged.chapterId = val),
+                        onChanged: (val) =>
+                            setState(() => staged.chapterId = val),
                       ),
                     ),
 
-                    // 2. Quiz / Exam Dropdown
+                    // 2. Quiz / Exam Section
                     SizedBox(
-                      width: isNarrow ? double.infinity : 220,
-                      child: DropdownButtonFormField<String?>(
-                        value: staged.examId,
-                        isDense: true,
-                        decoration: InputDecoration(
-                          prefixIcon: const Icon(Icons.quiz_outlined, size: 16, color: AppColors.primary),
-                          labelText: l10n.mandatoryQuizSection,
-                          isDense: true,
-                          filled: true,
-                          fillColor: AppColors.surfaceVariant.withValues(alpha: 0.4),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                        ),
-                        items: [
-                          DropdownMenuItem<String?>(
-                            value: null,
-                            child: Text(
-                              l10n.noQuizAttached,
-                              style: const TextStyle(fontSize: 11.5),
+                      width: isNarrow ? double.infinity : 260,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (staged.attachedExams.isNotEmpty) ...[
+                            Wrap(
+                              spacing: 6,
+                              runSpacing: 4,
+                              children: [
+                                for (int i = 0;
+                                    i < staged.attachedExams.length;
+                                    i++)
+                                  InputChip(
+                                    avatar: Icon(
+                                      staged.attachedExams[i].isRequired
+                                          ? Icons.lock_rounded
+                                          : Icons.quiz_outlined,
+                                      size: 13,
+                                      color: AppColors.primary,
+                                    ),
+                                    label: Text(
+                                      staged.attachedExams[i].examTitle.isNotEmpty
+                                          ? staged.attachedExams[i].examTitle
+                                          : 'اختبار #${i + 1}',
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    backgroundColor: AppColors.primary.withValues(
+                                      alpha: 0.1,
+                                    ),
+                                    deleteIcon: const Icon(
+                                      Icons.close_rounded,
+                                      size: 13,
+                                    ),
+                                    onDeleted: () {
+                                      setState(() {
+                                        staged.attachedExams.removeAt(i);
+                                      });
+                                    },
+                                  ),
+                              ],
                             ),
+                            const SizedBox(height: 6),
+                          ],
+                          Builder(
+                            builder: (ctx) {
+                              final unattached = _availableExams.where(
+                                (e) => !staged.attachedExams.any(
+                                  (a) => a.examId == e['id'],
+                                ),
+                              ).toList();
+
+                              return DropdownButtonFormField<String?>(
+                                value: null,
+                                isDense: true,
+                                decoration: InputDecoration(
+                                  prefixIcon: const Icon(
+                                    Icons.quiz_outlined,
+                                    size: 16,
+                                    color: AppColors.primary,
+                                  ),
+                                  labelText: staged.attachedExams.isEmpty
+                                      ? l10n.mandatoryQuizSection
+                                      : '+ ${l10n.addQuizToLessonAction}',
+                                  isDense: true,
+                                  filled: true,
+                                  fillColor: AppColors.surfaceVariant.withValues(
+                                    alpha: 0.4,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(
+                                      AppSpacing.radiusMedium,
+                                    ),
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 8,
+                                  ),
+                                ),
+                                items: [
+                                  DropdownMenuItem<String?>(
+                                    value: null,
+                                    child: Text(
+                                      staged.attachedExams.isEmpty
+                                          ? l10n.noQuizAttached
+                                          : '+ ${l10n.addQuizToLessonAction}',
+                                      style: TextStyle(
+                                        fontSize: 11.5,
+                                        color: staged.attachedExams.isEmpty
+                                            ? AppColors.textMuted
+                                            : AppColors.primary,
+                                        fontWeight: staged.attachedExams.isEmpty
+                                            ? FontWeight.normal
+                                            : FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  ...unattached.map(
+                                    (exam) => DropdownMenuItem<String?>(
+                                      value: exam['id'] as String?,
+                                      child: Text(
+                                        exam['title'] as String? ?? '',
+                                        style: const TextStyle(fontSize: 11.5),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                                onChanged: (val) {
+                                  if (val != null) {
+                                    final match = _availableExams.firstWhere(
+                                      (e) => e['id'] == val,
+                                      orElse: () => {'title': ''},
+                                    );
+                                    setState(() {
+                                      staged.attachedExams.add(
+                                        _StudioAttachedExam(
+                                          examId: val,
+                                          examTitle:
+                                              match['title'] as String? ?? '',
+                                          isRequired: true,
+                                        ),
+                                      );
+                                    });
+                                  }
+                                },
+                              );
+                            },
                           ),
-                          for (final exam in _availableExams)
-                            DropdownMenuItem<String?>(
-                              value: exam['id'] as String?,
-                              child: Text(
-                                exam['title'] as String? ?? '',
-                                style: const TextStyle(fontSize: 11.5),
-                                overflow: TextOverflow.ellipsis,
+                        ],
+                      ),
+                    ),
+
+                    // 3. PDF Handout Section (Prominent Chip with Replace and Delete)
+                    if (!staged.hasPdf)
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          OutlinedButton.icon(
+                            onPressed: () => _pickFromLibrary(staged),
+                            icon: const Icon(
+                              Icons.folder_shared_rounded,
+                              size: 15,
+                              color: Color(0xFFEA580C),
+                            ),
+                            label: Text(
+                              l10n.selectFromMaterialsLibrary,
+                              style: const TextStyle(
+                                fontSize: 11.5,
+                                color: Color(0xFFEA580C),
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
-                        ],
-                        onChanged: (val) => setState(() => staged.examId = val),
-                      ),
-                    ),
-
-                    // 3. PDF Handout Action Button or File Chip
-                    if (staged.pdfFile == null)
-                      OutlinedButton.icon(
-                        onPressed: () => _pickBatchPdf(staged),
-                        icon: const Icon(Icons.picture_as_pdf_outlined, size: 16, color: Color(0xFFEA580C)),
-                        label: Text(
-                          l10n.uploadPdfHandout,
-                          style: const TextStyle(fontSize: 11.5, color: Color(0xFFEA580C)),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          side: BorderSide(color: const Color(0xFFEA580C).withValues(alpha: 0.5)),
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(
+                                color: const Color(0xFFEA580C).withValues(
+                                  alpha: 0.5,
+                                ),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 8,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                  AppSpacing.radiusMedium,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
+                          const SizedBox(width: 6),
+                          OutlinedButton.icon(
+                            onPressed: () => _pickPdf(staged),
+                            icon: const Icon(
+                              Icons.upload_file_rounded,
+                              size: 15,
+                            ),
+                            label: Text(
+                              l10n.uploadFromDeviceAction,
+                              style: const TextStyle(fontSize: 11.5),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 8,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                  AppSpacing.radiusMedium,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       )
                     else
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFFEA580C).withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                          border: Border.all(color: const Color(0xFFEA580C).withValues(alpha: 0.4)),
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.radiusMedium,
+                          ),
+                          border: Border.all(
+                            color: const Color(0xFFEA580C).withValues(
+                              alpha: 0.4,
+                            ),
+                          ),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.picture_as_pdf_rounded, size: 16, color: Color(0xFFEA580C)),
+                            const Icon(
+                              Icons.picture_as_pdf_rounded,
+                              size: 16,
+                              color: Color(0xFFEA580C),
+                            ),
                             const SizedBox(width: 6),
                             ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 140),
-                              child: Text(
-                                staged.pdfFile!.name,
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFFEA580C),
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                              constraints: const BoxConstraints(maxWidth: 160),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    staged.pdfDisplayName,
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFFEA580C),
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  if (staged.formattedPdfSize != null)
+                                    Text(
+                                      staged.formattedPdfSize!,
+                                      style: TextStyle(
+                                        fontSize: 9.5,
+                                        color: const Color(
+                                          0xFFEA580C,
+                                        ).withValues(alpha: 0.8),
+                                      ),
+                                    ),
+                                ],
                               ),
                             ),
-                            const SizedBox(width: 4),
+                            const SizedBox(width: 8),
+                            // Quick Replace Menu
+                            PopupMenuButton<String>(
+                              tooltip: l10n.changeAction,
+                              icon: const Icon(
+                                Icons.swap_horiz_rounded,
+                                size: 16,
+                                color: Color(0xFFEA580C),
+                              ),
+                              onSelected: (val) {
+                                if (val == 'library') {
+                                  _pickFromLibrary(staged);
+                                } else if (val == 'upload') {
+                                  _pickPdf(staged);
+                                }
+                              },
+                              itemBuilder: (ctx) => [
+                                PopupMenuItem(
+                                  value: 'library',
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.folder_shared_rounded,
+                                        size: 16,
+                                        color: Color(0xFFEA580C),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        l10n.selectFromMaterialsLibrary,
+                                        style: const TextStyle(fontSize: 12),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                PopupMenuItem(
+                                  value: 'upload',
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.upload_file_rounded,
+                                        size: 16,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        l10n.uploadFromDeviceAction,
+                                        style: const TextStyle(fontSize: 12),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            // Remove Button
                             InkWell(
                               onTap: () => setState(() {
+                                staged.libraryMaterial = null;
                                 staged.pdfFile = null;
                                 staged.pdfBytes = null;
                               }),
                               borderRadius: BorderRadius.circular(12),
                               child: const Padding(
                                 padding: EdgeInsets.all(2.0),
-                                child: Icon(Icons.close_rounded, size: 14, color: Color(0xFFEA580C)),
+                                child: Icon(
+                                  Icons.close_rounded,
+                                  size: 15,
+                                  color: Color(0xFFEA580C),
+                                ),
                               ),
                             ),
                           ],
@@ -2386,12 +2545,17 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
 
                     // 4. Publish Toggle Switch
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: staged.isPublished
                             ? AppColors.success.withValues(alpha: 0.08)
                             : AppColors.warning.withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusMedium,
+                        ),
                         border: Border.all(
                           color: staged.isPublished
                               ? AppColors.success.withValues(alpha: 0.3)
@@ -2406,22 +2570,30 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
                                 ? Icons.visibility_rounded
                                 : Icons.visibility_off_rounded,
                             size: 16,
-                            color: staged.isPublished ? AppColors.success : AppColors.warning,
+                            color: staged.isPublished
+                                ? AppColors.success
+                                : AppColors.warning,
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            staged.isPublished ? l10n.statusPublished : l10n.statusDraft,
+                            staged.isPublished
+                                ? l10n.statusPublished
+                                : l10n.statusDraft,
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
-                              color: staged.isPublished ? AppColors.success : AppColors.warning,
+                              color: staged.isPublished
+                                  ? AppColors.success
+                                  : AppColors.warning,
                             ),
                           ),
                           Switch(
                             value: staged.isPublished,
                             activeColor: AppColors.success,
-                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            onChanged: (val) => setState(() => staged.isPublished = val),
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
+                            onChanged: (val) =>
+                                setState(() => staged.isPublished = val),
                           ),
                         ],
                       ),

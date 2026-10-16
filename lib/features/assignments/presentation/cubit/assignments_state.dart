@@ -30,6 +30,8 @@ final class TeacherAssignmentsLoaded extends AssignmentsState {
   final AssignmentEntity? selectedAssignment;
   final List<AssignmentSubmissionEntity> submissions;
   final bool isLoadingSubmissions;
+  final bool hasMoreSubmissions;
+  final bool isLoadingMoreSubmissions;
   final bool isGrading;
   final bool isCreating;
   final bool actionSuccess;
@@ -43,6 +45,8 @@ final class TeacherAssignmentsLoaded extends AssignmentsState {
     this.selectedAssignment,
     this.submissions = const [],
     this.isLoadingSubmissions = false,
+    this.hasMoreSubmissions = true,
+    this.isLoadingMoreSubmissions = false,
     this.isGrading = false,
     this.isCreating = false,
     this.actionSuccess = false,
@@ -57,6 +61,8 @@ final class TeacherAssignmentsLoaded extends AssignmentsState {
     AssignmentEntity? selectedAssignment,
     List<AssignmentSubmissionEntity>? submissions,
     bool? isLoadingSubmissions,
+    bool? hasMoreSubmissions,
+    bool? isLoadingMoreSubmissions,
     bool? isGrading,
     bool? isCreating,
     bool? actionSuccess,
@@ -70,6 +76,9 @@ final class TeacherAssignmentsLoaded extends AssignmentsState {
       selectedAssignment: selectedAssignment ?? this.selectedAssignment,
       submissions: submissions ?? this.submissions,
       isLoadingSubmissions: isLoadingSubmissions ?? this.isLoadingSubmissions,
+      hasMoreSubmissions: hasMoreSubmissions ?? this.hasMoreSubmissions,
+      isLoadingMoreSubmissions:
+          isLoadingMoreSubmissions ?? this.isLoadingMoreSubmissions,
       isGrading: isGrading ?? this.isGrading,
       isCreating: isCreating ?? this.isCreating,
       actionSuccess: actionSuccess ?? this.actionSuccess,
@@ -86,6 +95,8 @@ final class TeacherAssignmentsLoaded extends AssignmentsState {
     selectedAssignment,
     submissions,
     isLoadingSubmissions,
+    hasMoreSubmissions,
+    isLoadingMoreSubmissions,
     isGrading,
     isCreating,
     actionSuccess,

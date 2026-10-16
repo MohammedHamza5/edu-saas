@@ -33,7 +33,7 @@ class ResponsiveBreakpoints {
   // Maximum content boundaries (allows full fluid width on dashboards/tables while keeping forms focused)
   static const double maxContentWidth = double.infinity;
   static const double maxFormWidth = 480.0;
-  static const double maxReadingWidth = 760.0;
+  static const double maxReadingWidth = double.infinity;
   static const double maxWideContentWidth = double.infinity;
 
   /// Determines the [DeviceScreenType] given the screen or container width.

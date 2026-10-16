@@ -8,6 +8,7 @@ class AppTypography {
   static const String fontFamily = 'Cairo';
   static const List<String> fontFamilyFallback = [
     'Cairo',
+    'Inter',
     'Segoe UI',
     'Tahoma',
     'Arial',

@@ -21,8 +21,10 @@ abstract class AssignmentsRepository {
 
   /// Fetches all student submissions for a specific assignment (for teachers).
   Future<Result<List<AssignmentSubmissionEntity>>> getSubmissions(
-    String assignmentId,
-  );
+    String assignmentId, {
+    int page = 0,
+    int pageSize = 20,
+  });
 
   /// Fetches the current logged-in student's submission for an assignment, if any.
   Future<Result<AssignmentSubmissionEntity?>> getMySubmission(

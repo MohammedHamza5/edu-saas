@@ -443,62 +443,74 @@ class _StudentAttendanceRowCardState extends State<StudentAttendanceRowCard> {
               student.isSkipped ||
               student.lastWatchedAt != null) ...[
             const SizedBox(height: AppSpacing.s6),
-            Row(
+            Wrap(
+              spacing: AppSpacing.s8,
+              runSpacing: AppSpacing.s4,
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                if (student.formattedWatchDuration.isNotEmpty) ...[
-                  const Icon(
-                    Icons.timer_outlined,
-                    size: 12,
-                    color: AppColors.textSecondary,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    student.formattedWatchDuration,
-                    style: const TextStyle(
-                      fontSize: 11,
-                      color: AppColors.textSecondary,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'monospace',
-                    ),
-                  ),
-                ],
-                if (student.isSkipped) ...[
-                  const SizedBox(width: AppSpacing.s8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 1,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.error.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(4),
-                      border: Border.all(
-                        color: AppColors.error.withValues(alpha: 0.3),
+                Wrap(
+                  spacing: AppSpacing.s8,
+                  runSpacing: AppSpacing.s4,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    if (student.formattedWatchDuration.isNotEmpty)
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.timer_outlined,
+                            size: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            student.formattedWatchDuration,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: AppColors.textSecondary,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: 'monospace',
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.speed_rounded,
-                          size: 11,
-                          color: AppColors.error,
+                    if (student.isSkipped)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 1,
                         ),
-                        const SizedBox(width: 3),
-                        Text(
-                          context.l10n.fastSkippingDetected,
-                          style: const TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.error,
+                        decoration: BoxDecoration(
+                          color: AppColors.error.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(
+                            color: AppColors.error.withValues(alpha: 0.3),
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                ],
-                const Spacer(),
-                if (student.lastWatchedAt != null) ...[
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.speed_rounded,
+                              size: 11,
+                              color: AppColors.error,
+                            ),
+                            const SizedBox(width: 3),
+                            Text(
+                              context.l10n.fastSkippingDetected,
+                              style: const TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.error,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+                if (student.lastWatchedAt != null)
                   Text(
                     DateFormat('MM/dd HH:mm').format(
                       student.lastWatchedAt!.toLocal(),
@@ -508,7 +520,6 @@ class _StudentAttendanceRowCardState extends State<StudentAttendanceRowCard> {
                       color: AppColors.textMuted,
                     ),
                   ),
-                ],
               ],
             ),
           ],
@@ -597,7 +608,11 @@ class _StudentAttendanceRowCardState extends State<StudentAttendanceRowCard> {
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  'آخر نشاط: ${DateFormat('yyyy/MM/dd HH:mm').format(student.lastWatchedAt!.toLocal())}',
+                  context.l10n.lastWatchedAtLabel(
+                    DateFormat('yyyy/MM/dd HH:mm').format(
+                      student.lastWatchedAt!.toLocal(),
+                    ),
+                  ),
                   style: const TextStyle(
                     fontSize: 10,
                     color: AppColors.textSecondary,

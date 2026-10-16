@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -49,10 +50,12 @@ class VideoCard extends StatelessWidget {
                           borderRadius: const BorderRadius.vertical(
                             top: Radius.circular(AppSpacing.radiusMedium),
                           ),
-                          child: Image.network(
-                            video.thumbnailUrl!,
+                          child: CachedNetworkImage(
+                            imageUrl: video.thumbnailUrl!,
                             fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) =>
+                            memCacheWidth: 600,
+                            placeholder: (_, __) => _buildPlaceholder(context),
+                            errorWidget: (_, __, ___) =>
                                 _buildPlaceholder(context),
                           ),
                         )

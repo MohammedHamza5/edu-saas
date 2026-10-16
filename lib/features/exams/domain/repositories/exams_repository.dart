@@ -35,6 +35,7 @@ abstract class ExamsRepository {
     DateTime? startAt,
     DateTime? endAt,
     bool isPublished = false,
+    String? pdfFileId,
     required List<ExamQuestionEntity> initialQuestions,
   });
 
@@ -51,6 +52,8 @@ abstract class ExamsRepository {
     DateTime? startAt,
     DateTime? endAt,
     bool? isPublished,
+    String? pdfFileId,
+    bool clearPdfFile = false,
   });
 
   /// Updates a draft exam's metadata and atomic questions.
@@ -66,8 +69,13 @@ abstract class ExamsRepository {
     DateTime? startAt,
     DateTime? endAt,
     bool? isPublished,
+    String? pdfFileId,
+    bool clearPdfFile = false,
     required List<ExamQuestionEntity> questions,
   });
+
+  /// Obtains a secure temporary signed URL to view an attached exam PDF booklet.
+  Future<Result<String>> getSignedPdfUrl(String storagePath);
 
   /// Freezes an exam version as an immutable snapshot and publishes the exam.
   Future<Result<ExamVersionEntity>> publishExamVersion(String versionId);
@@ -88,10 +96,21 @@ abstract class ExamsRepository {
   Future<Result<ExamAttemptEntity>> submitExam({
     required String attemptId,
     required Map<String, String> answers,
+    ExamSubmissionReason reason = ExamSubmissionReason.studentSubmitted,
+  });
+
+  /// Synchronizes student answers to the server while an exam attempt is in progress.
+  Future<Result<void>> syncExamAnswers({
+    required String attemptId,
+    required Map<String, String> answers,
   });
 
   /// Fetches all student attempts and scores for an exam (Teacher view).
-  Future<Result<List<ExamAttemptEntity>>> getExamAttempts(String examId);
+  Future<Result<List<ExamAttemptEntity>>> getExamAttempts(
+    String examId, {
+    int page = 0,
+    int pageSize = 20,
+  });
 
   /// Fetches full attempt details including student answers and points earned.
   Future<Result<ExamAttemptEntity>> getAttemptDetails(String attemptId);
@@ -151,12 +170,13 @@ abstract class ExamsRepository {
     required String parentPhone,
   });
 
-  /// Fetches exam folders with exam count for the current tenant.
-  Future<Result<List<ExamFolderEntity>>> getExamFolders();
+  /// Fetches exam folders with exam count for the current tenant (optionally scoped to a specific group).
+  Future<Result<List<ExamFolderEntity>>> getExamFolders({String? groupId});
 
-  /// Creates a new exam folder.
+  /// Creates a new exam folder (optionally scoped to a specific group).
   Future<Result<ExamFolderEntity>> createExamFolder({
     required String name,
+    String? groupId,
     String? color,
     String? icon,
     String? description,

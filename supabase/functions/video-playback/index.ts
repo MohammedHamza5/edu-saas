@@ -273,7 +273,6 @@ Deno.serve(async (req: Request) => {
       `&preload=false` +
       `&responsive=true` +
       `&captions=false` +
-      `&nativeHls=safari` +
       `&playsinline=true`;
 
     return json({ playback_url: playbackUrl, expires }, 200, origin);

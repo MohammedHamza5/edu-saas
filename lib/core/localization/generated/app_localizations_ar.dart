@@ -1005,6 +1005,39 @@ class AppLocalizationsAr extends AppLocalizations {
   String get satDesmosCalculator => 'آلة ديسموس الحاسبة العلمية (Desmos)';
 
   @override
+  String get desmosGraphingCalculator => 'آلة ديسموس البيانية (Graphing)';
+
+  @override
+  String get desmosScientificCalculator => 'آلة ديسموس العلمية (Scientific)';
+
+  @override
+  String get desmosModeGraphing => 'بيانية';
+
+  @override
+  String get desmosModeScientific => 'علمية';
+
+  @override
+  String get desmosMinimizeTooltip => 'تصغير الآلة الحاسبة';
+
+  @override
+  String get desmosExpandTooltip => 'توسيع الآلة الحاسبة';
+
+  @override
+  String get desmosCloseTooltip => 'إغلاق الآلة الحاسبة';
+
+  @override
+  String get desmosDragHandleTooltip => 'اسحب لتحريك الآلة الحاسبة';
+
+  @override
+  String get desmosMaximizeTooltip => 'تكبير الآلة الحاسبة لأقصى حجم';
+
+  @override
+  String get desmosRestoreTooltip => 'استعادة الحجم الطبيعي';
+
+  @override
+  String get desmosResizeHandleTooltip => 'اسحب لتغيير حجم الآلة الحاسبة';
+
+  @override
   String get satReferenceSheet => 'ورقة القوانين والمراجع الرياضية لـ SAT';
 
   @override
@@ -3529,6 +3562,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get resumeCurrentExam => 'استئناف الامتحان الحالي';
 
   @override
+  String get examResumeAction => 'استئناف الاختبار';
+
+  @override
   String get startExamNow => 'بدء الامتحان الآن';
 
   @override
@@ -4952,6 +4988,11 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String examNumberBadge(int number) {
+    return 'اختبار $number';
+  }
+
+  @override
   String get moveUpAction => 'تحريك لأعلى';
 
   @override
@@ -5896,7 +5937,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get filterAllTypes => 'جميع الأنواع';
+  String get filterAllTypes => 'كافة الأنواع';
 
   @override
   String get typeMultipleChoice => 'اختيار من متعدد (MCQ)';
@@ -6075,6 +6116,12 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get goToExamsPage => 'الانتقال إلى لوحة الاختبارات 📋';
+
+  @override
+  String get assignToGroupNowAction => 'تعيين لمجموعة الآن';
+
+  @override
+  String get returnToQuestionBankAction => 'العودة لبنك الأسئلة';
 
   @override
   String get analyzingForensicStep =>
@@ -6431,6 +6478,23 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get syncingImageInBackground =>
+      'جاري حفظ الصورة في السحابة بالخلفية...';
+
+  @override
+  String get imageSavedToCloud => 'تم الحفظ بالسحابة';
+
+  @override
+  String get syncingPendingImages => 'جاري استكمال رفع الصور إلى السحابة...';
+
+  @override
+  String get retryUpload => 'إعادة المحاولة';
+
+  @override
+  String get imageUploadPendingError =>
+      'يرجى الانتظار حتى يكتمل رفع صور الأسئلة.';
+
+  @override
   String get questionTextFieldOptional => 'نص السؤال (اختياري مع وجود صورة)';
 
   @override
@@ -6692,6 +6756,60 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get allExamsFilter => 'كافة المصادر';
+
+  @override
+  String get studentNavMistakesBank => 'بنك الأخطاء';
+
+  @override
+  String get mistakesBankSidebarSubtitle => 'مراجعة وتثبيت المفاهيم';
+
+  @override
+  String get filterWrongAnswersOnly => 'إجابات خاطئة فقط';
+
+  @override
+  String get filterSkippedOnly => 'أسئلة متروكة فقط';
+
+  @override
+  String get wrongAnswerBadge => 'إجابة خاطئة';
+
+  @override
+  String get skippedQuestionBadge => 'سؤال متروك';
+
+  @override
+  String previousWrongChoice(String option) {
+    return 'اختيارك السابق: $option';
+  }
+
+  @override
+  String get questionWasSkippedNotice =>
+      'لم تختر أي إجابة في هذا الاختبار (سؤال تُرك فارغاً)';
+
+  @override
+  String get searchMistakesPlaceholder => 'البحث في الأسئلة أو الموضوع...';
+
+  @override
+  String get wrongAnswersCountLabel => 'إجابات خاطئة';
+
+  @override
+  String get skippedQuestionsCountLabel => 'أسئلة متروكة';
+
+  @override
+  String get practiceThisQuestion => 'تدريب على هذا السؤال';
+
+  @override
+  String practiceFilteredMistakes(int count) {
+    return 'بدء تدريب ($count)';
+  }
+
+  @override
+  String get mistakesTypeBreakdown => 'تصنيف الأخطاء';
+
+  @override
+  String get practiceHeaderWrongNote => '⚠️ هذا السؤال أخطأت في إجابته سابقاً';
+
+  @override
+  String get practiceHeaderSkippedNote =>
+      '⏸️ هذا السؤال تركته بدون إجابة سابقاً';
 
   @override
   String get videoBankCmsTitle => 'بنك الفيديوهات';
@@ -8450,4 +8568,460 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get reloadPlayerAction => 'تحديث المشغل';
+
+  @override
+  String examQuestionsSolvedProgress(int solved, int total) {
+    return 'تم حل $solved من $total أسئلة';
+  }
+
+  @override
+  String examQuestionsAllSolved(int count) {
+    return 'تم حل جميع الأسئلة ($count/$count)';
+  }
+
+  @override
+  String examNotStartedYet(int total) {
+    return 'لم يتم البدء بعد (0/$total)';
+  }
+
+  @override
+  String get examCompletedCheck => 'مكتمل';
+
+  @override
+  String get examFullyCompletedBadge => 'تم الحل بالكامل';
+
+  @override
+  String get examSearchPlaceholder => 'ابحث عن اختبار بالاسم أو المجموعة...';
+
+  @override
+  String get filterNotStarted => 'متاحة للبدء';
+
+  @override
+  String get studentExamsStatsCompleted => 'مكتملة';
+
+  @override
+  String get studentExamsStatsInProgress => 'قيد الحل';
+
+  @override
+  String get studentExamsStatsAvailable => 'متاحة للبدء';
+
+  @override
+  String get studentExamsStatsTotal => 'إجمالي الاختبارات';
+
+  @override
+  String get studentExamsOverallProgress => 'معدل الإنجاز';
+
+  @override
+  String get studentExamsOverviewTitle => 'لوحة إنجاز الاختبارات';
+
+  @override
+  String examScoreAchieved(int score, int max) {
+    return 'الدرجة: $score/$max';
+  }
+
+  @override
+  String get clearSearchTooltip => 'مسح البحث';
+
+  @override
+  String get studentExamCardReviewTooltip => 'مراجعة الأسئلة والإجابات';
+
+  @override
+  String get examCompletedStatusCheck => 'تم الانتهاء بنجاح';
+
+  @override
+  String get openPdfInNewTab => 'فتح في نافذة مستقلة (سريع للآيباد)';
+
+  @override
+  String get openPdfInNewTabTooltip =>
+      'فتح بمحرك المتصفح عالي الأداء لدعم قلم الآيباد وتقسيم الشاشة';
+
+  @override
+  String get openPdfEmbeddedTooltip => 'معاينة الملف داخل المنصة';
+
+  @override
+  String examDraftFoundNotice(int count, String time) {
+    return 'توجد مسودة غير محفوظة لهذا الاختبار ($count أسئلة • $time)';
+  }
+
+  @override
+  String get restoreExamDraftAction => 'استعادة المسودة';
+
+  @override
+  String get discardExamDraftAction => 'تجاهل وحذف';
+
+  @override
+  String get examDraftRestoredSuccess => 'تمت استعادة مسودة الاختبار بنجاح';
+
+  @override
+  String get examDraftDiscardedSuccess => 'تم حذف المسودة المؤقتة';
+
+  @override
+  String get autoSavedDraftBadge => 'تم الحفظ التلقائي';
+
+  @override
+  String get materialsLibraryTitle => 'مكتبة الملفات والملازم';
+
+  @override
+  String get materialsLibrarySubtitle =>
+      'إدارة الملازم، أوراق العمل، وملفات المحاضرات';
+
+  @override
+  String get selectFromMaterialsLibrary => 'اختيار من مكتبة المذكرات';
+
+  @override
+  String get selectFromMaterialsLibrarySubtitle =>
+      'اختر ملفاً موجوداً مسبقاً لربطه فوراً دون إعادة رفعه';
+
+  @override
+  String get materialsSearchHint => 'ابحث باسم الملف أو الملزمة...';
+
+  @override
+  String get noMaterialsFound => 'لا توجد ملفات في هذا المجلد';
+
+  @override
+  String get noMaterialsFoundSubtitle =>
+      'قم برفع ملازم أو إنشاء مجلدات لتنظيم ملفاتك.';
+
+  @override
+  String get uploadMaterialAction => 'رفع ملف';
+
+  @override
+  String get createNewFolderAction => 'مجلد جديد';
+
+  @override
+  String get editFolderName => 'تعديل المجلد';
+
+  @override
+  String get editMaterialAction => 'تعديل اسم الملف';
+
+  @override
+  String get deleteMaterialAction => 'حذف الملف';
+
+  @override
+  String get moveMaterialAction => 'نقل إلى مجلد';
+
+  @override
+  String usedInLecturesCount(int count) {
+    return 'مستخدم في $count محاضرات';
+  }
+
+  @override
+  String get unusedMaterial => 'غير مستخدم';
+
+  @override
+  String get materialDuplicateNotice =>
+      'هذا الملف موجود بالفعل في مكتبتك! سيتم استخدامه مباشرة لتوفير المساحة وتجنب التكرار.';
+
+  @override
+  String get materialSelectedFromLibrary => 'مربوط من المكتبة';
+
+  @override
+  String get changeMaterialAction => 'تغيير الملف';
+
+  @override
+  String get previewMaterialAction => 'معاينة';
+
+  @override
+  String folderFilesCount(int count) {
+    return '$count ملفات';
+  }
+
+  @override
+  String get rootMaterialsTitle => 'المكتبة الرئيسية';
+
+  @override
+  String get confirmDeleteFolderMessage =>
+      'هل أنت متأكد من حذف هذا المجلد؟ سيتم نقل الملفات بداخله إلى المكتبة الرئيسية.';
+
+  @override
+  String get confirmDeleteMaterialTitle => 'حذف الملف؟';
+
+  @override
+  String get confirmDeleteMaterialMessage =>
+      'هل أنت متأكد من حذف هذا الملف من مكتبتك؟';
+
+  @override
+  String get selectMaterialAction => 'اختيار الملف';
+
+  @override
+  String get uploadingMaterialNotice => 'جاري رفع وفهرسة الملف في المكتبة...';
+
+  @override
+  String get uploadFromDeviceAction => 'رفع من الجهاز';
+
+  @override
+  String get orChooseFromDevice => 'أو اختر ملفاً من جهازك';
+
+  @override
+  String get allMaterialsFilter => 'جميع الملفات';
+
+  @override
+  String get pdfFilesFilter => 'ملفات PDF';
+
+  @override
+  String get examUnderPreparationNotice =>
+      'هذا الاختبار قيد التجهيز من قبل المعلم ولا يحتوي على أسئلة بعد.';
+
+  @override
+  String get lessonUnderPreparationNotice =>
+      'هذه المحاضرة قيد التجهيز من قبل المعلم وسيقوم بنشر المحتوى قريباً.';
+
+  @override
+  String get contentUnderPreparation => 'المحتوى قيد التجهيز';
+
+  @override
+  String folderCount(int count) {
+    return '$count مجلدات';
+  }
+
+  @override
+  String get submissionReasonStudentSubmitted => 'تسليم عادي من الطالب';
+
+  @override
+  String get submissionReasonTimeExpired => 'انتهاء وقت الامتحان';
+
+  @override
+  String get submissionReasonForcedExit => 'تسليم إجباري (مغادرة الامتحان)';
+
+  @override
+  String get submissionReasonSecurityViolations =>
+      'تسليم إجباري (مخالفات أمنية)';
+
+  @override
+  String get submissionReasonTabClosed => 'تسليم تلقائي (إغلاق المتصفح)';
+
+  @override
+  String get submissionReasonSystemTimeout =>
+      'تسليم تلقائي من النظام (مهلة الخادم)';
+
+  @override
+  String get forcedExitWarningTitle => 'تحذير: مغادرة الامتحان';
+
+  @override
+  String get forcedExitWarningMessage =>
+      'الخروج من هذه الشاشة سيؤدي فوراً إلى التسليم الإجباري للامتحان ورصد درجتك بناءً على ما قمت بحله حتى هذه اللحظة فقط. هل تريد بالتأكيد الخروج والتسليم؟';
+
+  @override
+  String get forcedExitConfirmButton => 'تسليم إجباري وخروج';
+
+  @override
+  String get stayAndContinueButton => 'البقاء ومتابعة الحل';
+
+  @override
+  String get timeExpiredAutoSubmittingNotice =>
+      'انتهى وقت الامتحان! جاري التسليم التلقائي وحساب درجتك...';
+
+  @override
+  String get viewStudentAnswersAction => 'عرض ورقة إجابة الطالب';
+
+  @override
+  String get submissionReasonLabel => 'نوع وحالة التسليم';
+
+  @override
+  String get performanceGradeExcellent => 'ممتاز مع مرتبة الشرف';
+
+  @override
+  String get performanceGradeVeryGood => 'جيد جداً مرتفع';
+
+  @override
+  String get performanceGradeGood => 'جيد';
+
+  @override
+  String get performanceGradePass => 'ناجح';
+
+  @override
+  String get performanceGradeNeedsImprovement => 'يحتاج إلى مراجعة وتعزيز';
+
+  @override
+  String get correctAnswersMetric => 'إجابات صحيحة';
+
+  @override
+  String get incorrectAnswersMetric => 'إجابات خاطئة';
+
+  @override
+  String get skippedAnswersMetric => 'أسئلة متروكة';
+
+  @override
+  String get timeSpentMetric => 'الوقت المستغرق';
+
+  @override
+  String get totalScoreMetric => 'الدرجة الكلية';
+
+  @override
+  String get questionsMatrixTitle => 'خريطة ورقة الإجابة';
+
+  @override
+  String get questionsMatrixSubtitle =>
+      'اضغط على أي سؤال لمراجعة حله النموذجي وتفسيره';
+
+  @override
+  String get statusCorrect => 'صحيحة';
+
+  @override
+  String get statusIncorrect => 'خاطئة';
+
+  @override
+  String get statusSkipped => 'متروكة';
+
+  @override
+  String get viewExamResultAction => 'عرض النتيجة ومراجعة الحل';
+
+  @override
+  String get retakeToImproveScore => 'إعادة المحاولة لتحسين الدرجة';
+
+  @override
+  String get submissionExplanationStudent =>
+      'قمت بتسليم الاختبار بنفسك بشكل طبيعي واحتساب النتيجة.';
+
+  @override
+  String get submissionExplanationTimeout =>
+      'تم تسليم الاختبار تلقائياً بعد انتهاء الوقت المحدد له.';
+
+  @override
+  String get submissionExplanationForcedExit =>
+      'تم تسليم الاختبار إجبارياً لمغادرة نافذة الاختبار قبل الانتهاء.';
+
+  @override
+  String get submissionExplanationViolations =>
+      'تم تسليم الاختبار تلقائياً لتكرار مغادرة التطبيق ومخالفة قواعد الأمان.';
+
+  @override
+  String get submissionExplanationTabClosed =>
+      'تم تسليم الاختبار لإغلاق المتصفح أو نافذة الاختبار.';
+
+  @override
+  String get submissionExplanationSystem =>
+      'تم تصحيح واعتماد درجات الاختبار تلقائياً بواسطة النظام.';
+
+  @override
+  String examScoreSummary(int score, int maxScore) {
+    return 'حصلت على $score من $maxScore';
+  }
+
+  @override
+  String passingThresholdLabel(int score) {
+    return 'حد النجاح الأدنى: $score%';
+  }
+
+  @override
+  String goToNextLectureSpecific(String title) {
+    return 'المحاضرة التالية: $title';
+  }
+
+  @override
+  String get examPassedSubtitle =>
+      'أحسنت! لقد حققت متطلبات النجاح في هذا الاختبار بنجاح.';
+
+  @override
+  String get examFailedSubtitle =>
+      'راجع أخطاءك وحلولها النموذجية ثم أعد المحاولة لتثبيت المعلومة والتفوق.';
+
+  @override
+  String get previousAttemptSummary => 'نتيجة محاولتك السابقة';
+
+  @override
+  String get detailedPerformanceAnalytics => 'التحليل التفصيلي للأداء';
+
+  @override
+  String get reviewAllQuestionsAction =>
+      'مراجعة جميع الأسئلة والحلول النموذجية';
+
+  @override
+  String get uploadingFilesTitle => 'جاري رفع الملفات';
+
+  @override
+  String uploadingFileProgress(int current, int total, String fileName) {
+    return 'جاري رفع الملف $current من $total: $fileName';
+  }
+
+  @override
+  String uploadMaterialSuccess(String fileName) {
+    return 'تم رفع الملف \"$fileName\" بنجاح';
+  }
+
+  @override
+  String uploadMaterialError(String fileName, String error) {
+    return 'فشل رفع الملف \"$fileName\": $error';
+  }
+
+  @override
+  String get smartBadgePdf => 'ملزمة';
+
+  @override
+  String get smartBadgeExam => 'اختبار';
+
+  @override
+  String get changeAction => 'استبدال';
+
+  @override
+  String get inspectLectureAction => 'معاينة وتخصيص';
+
+  @override
+  String get reorderLecturesHint =>
+      'اسحب الكروت لإعادة ترتيب ظهور المحاضرات قبل الحفظ';
+
+  @override
+  String get singleVideoModeBadge => 'محاضرة واحدة';
+
+  @override
+  String selectedVideosBadge(int count) {
+    return '$count محاضرات مختارة';
+  }
+
+  @override
+  String get attachedExamPdf => 'كراسة أسئلة الامتحان (PDF)';
+
+  @override
+  String get attachedExamPdfDesc =>
+      'إرفاق كراسة أسئلة بصيغة PDF ليتمكن الطلاب من حل الامتحان بمحاذاتها بأمان تام';
+
+  @override
+  String get attachPdfFile => 'إرفاق كراسة أسئلة (PDF)';
+
+  @override
+  String get removeAttachedPdf => 'إزالة الملف';
+
+  @override
+  String get pdfAttachedSuccess => 'تم إرفاق كراسة الأسئلة بنجاح';
+
+  @override
+  String get quickBubbleSheetGenerator => 'توليد ورقة إجابة سريعة (بابل شيت)';
+
+  @override
+  String get quickBubbleSheetPrompt =>
+      'توليد كروت الإجابة تلقائياً للامتحانات المرفقة بكراسة أسئلة';
+
+  @override
+  String get numberOfQuestions => 'عدد الأسئلة';
+
+  @override
+  String get generateQuestions => 'توليد الأسئلة';
+
+  @override
+  String get viewExamBooklet => 'كراسة الامتحان (PDF)';
+
+  @override
+  String get hideExamBooklet => 'العودة لورقة الإجابة';
+
+  @override
+  String get examPdfLoading => 'جاري تحميل كراسة الامتحان...';
+
+  @override
+  String get numberOfOptionsPerQuestion => 'عدد الخيارات لكل سؤال';
+
+  @override
+  String get quickPresets => 'نماذج جاهزة';
+
+  @override
+  String get overwriteQuestionsWarning =>
+      'سيتم استبدال الأسئلة الحالية بورقة إجابة جديدة مرقمة. هل تريد المتابعة؟';
+
+  @override
+  String get uploadNewPdfFromDevice => 'رفع ملف PDF جديد من الجهاز';
+
+  @override
+  String get previewPdfBooklet => 'معاينة الكراسة';
+
+  @override
+  String get replacePdfBooklet => 'استبدال الكراسة';
 }

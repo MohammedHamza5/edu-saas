@@ -7,7 +7,6 @@ import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/responsive_breakpoints.dart';
 import '../../../../core/widgets/app_empty_view.dart';
 import '../../../../core/widgets/app_error_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
@@ -27,6 +26,7 @@ import '../widgets/exam_card.dart';
 import '../widgets/exam_folder_dialogs.dart';
 import '../widgets/exam_folders_bar.dart';
 import 'create_exam_page.dart';
+import 'exam_review_page.dart';
 
 class TeacherExamsPage extends StatefulWidget {
   final String? groupId;
@@ -575,7 +575,9 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
             },
             onEditQuestions: () {
               Navigator.of(sheetContext).pop();
-              _openEditDraftExam(exam);
+              if (mounted) {
+                _openEditDraftExam(exam);
+              }
             },
           ),
         );
@@ -638,12 +640,9 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
           ),
         ),
       ),
-      body: Center(
-        child: ResponsiveContainer(
-          maxWidth: ResponsiveBreakpoints.maxContentWidth,
-          padding: const EdgeInsets.all(AppSpacing.s16),
-          child: _buildBodyContent(context),
-        ),
+      body: ResponsiveContainer(
+        padding: const EdgeInsets.all(AppSpacing.s16),
+        child: _buildBodyContent(context),
       ),
     );
   }
@@ -886,7 +885,8 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
                     ResponsiveGrid(
                       mobileColumns: 1,
                       tabletColumns: 2,
-                      desktopColumns: 2,
+                      desktopColumns: 3,
+                      largeDesktopColumns: 4,
                       spacing: AppSpacing.s16,
                       runSpacing: AppSpacing.s16,
                       children: filteredExams.map((exam) {
@@ -2346,10 +2346,7 @@ class _ExamDetailsSheetContentState extends State<_ExamDetailsSheetContent> {
                                 size: 16,
                               ),
                               label: Text(context.l10n.editDraftQuestionsAction),
-                              onPressed: () {
-                                Navigator.of(ctx).pop();
-                                widget.onEditQuestions!();
-                              },
+                              onPressed: widget.onEditQuestions,
                             ),
 
                           // Edit basic settings
@@ -2600,6 +2597,7 @@ class _ExamDetailsSheetContentState extends State<_ExamDetailsSheetContent> {
                               exam: exam,
                               scrollController: scrollController,
                               context: context,
+                              isLoadingMore: state.isLoadingMoreAttempts,
                             ),
                 ),
               ],
@@ -2615,6 +2613,7 @@ class _ExamDetailsSheetContentState extends State<_ExamDetailsSheetContent> {
     required ExamEntity exam,
     required ScrollController scrollController,
     required BuildContext context,
+    required bool isLoadingMore,
   }) {
     // Sort attempts by date descending
     final sorted = List<ExamAttemptEntity>.from(attempts)
@@ -2641,70 +2640,89 @@ class _ExamDetailsSheetContentState extends State<_ExamDetailsSheetContent> {
 
     final groups = groupsMap.values.toList();
 
-    return ListView.builder(
-      controller: scrollController,
-      padding: const EdgeInsets.all(AppSpacing.s16),
-      itemCount: groups.length + 1,
-      itemBuilder: (context, index) {
-        if (index == 0) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.s12),
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.s12,
-                vertical: AppSpacing.s8,
-              ),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceVariant.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                border: Border.all(color: AppColors.border),
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.people_alt_outlined,
-                    size: 16,
-                    color: AppColors.primary,
-                  ),
-                  const SizedBox(width: AppSpacing.s8),
-                  Text(
-                    context.l10n.studentsCountSummary(groups.length),
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
+    return NotificationListener<ScrollNotification>(
+      onNotification: (scrollInfo) {
+        if (scrollInfo.metrics.pixels >=
+            scrollInfo.metrics.maxScrollExtent - 200) {
+          widget.cubit.loadMoreExamAttempts();
+        }
+        return false;
+      },
+      child: ListView.builder(
+        controller: scrollController,
+        cacheExtent: 350.0,
+        padding: const EdgeInsets.all(AppSpacing.s16),
+        itemCount: groups.length + 1 + (isLoadingMore ? 1 : 0),
+        itemBuilder: (context, index) {
+          if (index == 0) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.s12),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.s12,
+                  vertical: AppSpacing.s8,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceVariant.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.people_alt_outlined,
+                      size: 16,
+                      color: AppColors.primary,
                     ),
-                  ),
-                  const Spacer(),
-                  const Icon(
-                    Icons.history_edu_rounded,
-                    size: 16,
-                    color: AppColors.textSecondary,
-                  ),
-                  const SizedBox(width: AppSpacing.s6),
-                  Text(
-                    context.l10n.totalAttemptsSummary(attempts.length),
-                    style: const TextStyle(
-                      fontSize: 12,
+                    const SizedBox(width: AppSpacing.s8),
+                    Text(
+                      context.l10n.studentsCountSummary(groups.length),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const Spacer(),
+                    const Icon(
+                      Icons.history_edu_rounded,
+                      size: 16,
                       color: AppColors.textSecondary,
                     ),
-                  ),
-                ],
+                    const SizedBox(width: AppSpacing.s6),
+                    Text(
+                      context.l10n.totalAttemptsSummary(attempts.length),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
               ),
+            );
+          }
+
+          if (index == groups.length + 1) {
+            return const Padding(
+              padding: EdgeInsets.symmetric(vertical: AppSpacing.s16),
+              child: Center(
+                child: AppLoadingView.compact(size: 24),
+              ),
+            );
+          }
+
+          final group = groups[index - 1];
+          return Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.s8),
+            child: _StudentAttemptsGroupCard(
+              group: group,
+              exam: exam,
+              dateFormat: _dateFormat,
             ),
           );
-        }
-
-        final group = groups[index - 1];
-        return Padding(
-          padding: const EdgeInsets.only(bottom: AppSpacing.s8),
-          child: _StudentAttemptsGroupCard(
-            group: group,
-            exam: exam,
-            dateFormat: _dateFormat,
-          ),
-        );
-      },
+        },
+      ),
     );
   }
 }
@@ -2905,6 +2923,37 @@ class _StudentAttemptsGroupCardState extends State<_StudentAttemptsGroupCard> {
                           ),
                         ),
                       ),
+                      const SizedBox(height: 3),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 1.5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: latest.submissionReason.color
+                              .withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              latest.submissionReason.icon,
+                              size: 10,
+                              color: latest.submissionReason.color,
+                            ),
+                            const SizedBox(width: 3),
+                            Text(
+                              latest.submissionReason.localizedLabel(context),
+                              style: TextStyle(
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.bold,
+                                color: latest.submissionReason.color,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                       if (best.score != null) ...[
                         const SizedBox(height: 2),
                         Text(
@@ -2924,8 +2973,30 @@ class _StudentAttemptsGroupCardState extends State<_StudentAttemptsGroupCard> {
                       ],
                     ],
                   ),
+                  const SizedBox(width: 4),
+                  IconButton(
+                    icon: const Icon(
+                      Icons.rate_review_outlined,
+                      size: 17,
+                      color: AppColors.primary,
+                    ),
+                    tooltip: context.l10n.viewStudentAnswersAction,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => ExamReviewPage(
+                            attemptId: latest.id,
+                            exam: exam,
+                            initialAttempt: latest,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                   if (hasMultiple) ...[
-                    const SizedBox(width: 4),
+                    const SizedBox(width: 2),
                     Icon(
                       _isExpanded
                           ? Icons.expand_less_rounded
@@ -2934,7 +3005,7 @@ class _StudentAttemptsGroupCardState extends State<_StudentAttemptsGroupCard> {
                       size: 20,
                     ),
                   ],
-                  const SizedBox(width: 4),
+                  const SizedBox(width: 2),
                   IconButton(
                     icon: const Icon(
                       Icons.send_rounded,
@@ -2943,7 +3014,7 @@ class _StudentAttemptsGroupCardState extends State<_StudentAttemptsGroupCard> {
                     ),
                     tooltip: context.l10n.sendScoreToParentAction,
                     padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                    constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
                     onPressed: () {
                       context.push(
                         '/teacher/exams/${exam.id}/parent-dispatch?title=${Uri.encodeComponent(exam.title)}',
@@ -3039,6 +3110,62 @@ class _StudentAttemptsGroupCardState extends State<_StudentAttemptsGroupCard> {
                                     : AppColors.error,
                               ),
                             ),
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 5,
+                              vertical: 1.5,
+                            ),
+                            decoration: BoxDecoration(
+                              color: att.submissionReason.color
+                                  .withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  att.submissionReason.icon,
+                                  size: 10,
+                                  color: att.submissionReason.color,
+                                ),
+                                const SizedBox(width: 3),
+                                Text(
+                                  att.submissionReason.localizedLabel(context),
+                                  style: TextStyle(
+                                    fontSize: 9.5,
+                                    fontWeight: FontWeight.bold,
+                                    color: att.submissionReason.color,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          IconButton(
+                            icon: const Icon(
+                              Icons.rate_review_outlined,
+                              size: 16,
+                              color: AppColors.primary,
+                            ),
+                            tooltip: context.l10n.viewStudentAnswersAction,
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(
+                              minWidth: 28,
+                              minHeight: 28,
+                            ),
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute<void>(
+                                  builder: (_) => ExamReviewPage(
+                                    attemptId: att.id,
+                                    exam: exam,
+                                    initialAttempt: att,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
                         ],
                       ),
                     );

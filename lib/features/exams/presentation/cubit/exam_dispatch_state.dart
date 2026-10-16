@@ -3,6 +3,8 @@ import '../../domain/entities/exam_parent_dispatch_entity.dart';
 
 enum ExamDispatchFilter {
   all,
+  newAttempts,
+  multipleAttempts,
   submitted,
   passed,
   needsAttention,
@@ -37,6 +39,7 @@ class ExamDispatchLoading extends ExamDispatchState {
 class ExamDispatchLoaded extends ExamDispatchState {
   final ExamParentDispatchRosterEntity roster;
   final Set<String> sentStudentIds;
+  final Set<String> sentAttemptIds;
   final ExamDispatchFilter activeFilter;
   final String searchQuery;
   final ExamDispatchSort activeSort;
@@ -45,11 +48,30 @@ class ExamDispatchLoaded extends ExamDispatchState {
   const ExamDispatchLoaded({
     required this.roster,
     this.sentStudentIds = const {},
+    this.sentAttemptIds = const {},
     this.activeFilter = ExamDispatchFilter.all,
     this.searchQuery = '',
     this.activeSort = ExamDispatchSort.highestScore,
     this.isUpdatingPhone = false,
   });
+
+  bool isAttemptSent(String? attemptId) =>
+      attemptId != null && sentAttemptIds.contains(attemptId);
+
+  bool hasNewUnsentAttempt(ExamDispatchStudentEntity student) {
+    if (!student.isSubmitted || student.latestAttemptId == null) return false;
+    final isLatestSent = sentAttemptIds.contains(student.latestAttemptId);
+    if (isLatestSent) return false;
+    return student.attemptsCount > 1 || sentStudentIds.contains(student.studentId);
+  }
+
+  bool isStudentFullySent(ExamDispatchStudentEntity student) {
+    if (!student.isSubmitted) return sentStudentIds.contains(student.studentId);
+    if (student.latestAttemptId != null) {
+      return sentAttemptIds.contains(student.latestAttemptId);
+    }
+    return sentStudentIds.contains(student.studentId);
+  }
 
   List<ExamDispatchStudentEntity> get filteredStudents {
     var list = List<ExamDispatchStudentEntity>.from(roster.students);
@@ -70,6 +92,14 @@ class ExamDispatchLoaded extends ExamDispatchState {
     switch (activeFilter) {
       case ExamDispatchFilter.all:
         break;
+      case ExamDispatchFilter.newAttempts:
+        list = list
+            .where((s) => hasNewUnsentAttempt(s) || (!isStudentFullySent(s) && s.isSubmitted))
+            .toList();
+        break;
+      case ExamDispatchFilter.multipleAttempts:
+        list = list.where((s) => s.hasMultipleAttempts).toList();
+        break;
       case ExamDispatchFilter.submitted:
         list = list.where((s) => s.isSubmitted).toList();
         break;
@@ -83,10 +113,10 @@ class ExamDispatchLoaded extends ExamDispatchState {
         list = list.where((s) => s.isNotStarted || s.isInProgress).toList();
         break;
       case ExamDispatchFilter.unnotified:
-        list = list.where((s) => !sentStudentIds.contains(s.studentId)).toList();
+        list = list.where((s) => !isStudentFullySent(s)).toList();
         break;
       case ExamDispatchFilter.notified:
-        list = list.where((s) => sentStudentIds.contains(s.studentId)).toList();
+        list = list.where((s) => isStudentFullySent(s)).toList();
         break;
       case ExamDispatchFilter.missingPhone:
         list = list.where((s) => !s.hasParentPhone).toList();

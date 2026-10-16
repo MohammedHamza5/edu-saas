@@ -100,10 +100,16 @@ class GroupsRepositoryImpl implements GroupsRepository {
 
   @override
   Future<Result<List<GroupMemberEntity>>> getGroupMembers(
-    String groupId,
-  ) async {
+    String groupId, {
+    int page = 0,
+    int pageSize = 25,
+  }) async {
     try {
-      final members = await _remoteDataSource.getGroupMembers(groupId);
+      final members = await _remoteDataSource.getGroupMembers(
+        groupId,
+        page: page,
+        pageSize: pageSize,
+      );
       return Success(members);
     } on PostgrestException catch (e) {
       return FailureResult(ServerFailure(e.message, code: e.code));

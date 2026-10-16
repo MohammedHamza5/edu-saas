@@ -46,7 +46,6 @@ class _AssignGroupsPageState extends State<AssignGroupsPage> {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSpacing.s16),
       child: ResponsiveContainer(
-        maxWidth: 800,
         child: Column(
           children: [
             Container(
@@ -142,7 +141,6 @@ class _AssignGroupsPageState extends State<AssignGroupsPage> {
             return SingleChildScrollView(
               padding: const EdgeInsets.all(AppSpacing.s16),
               child: ResponsiveContainer(
-                maxWidth: 800,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

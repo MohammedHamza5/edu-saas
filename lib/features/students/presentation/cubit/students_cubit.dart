@@ -15,6 +15,8 @@ class StudentsCubit extends Cubit<StudentsState> {
   // Pagination state
   int _currentPage = 0;
   static const int _pageSize = 25;
+  int _currentPendingPage = 0;
+  static const int _pendingPageSize = 25;
   String? _currentStatus;
   String? _currentSearch;
 
@@ -350,31 +352,83 @@ class StudentsCubit extends Cubit<StudentsState> {
   // ── Pending Students (T-04) ───────────────────────────────────────────────
 
   Future<void> loadPendingStudents({bool refresh = false}) async {
+    _currentPendingPage = 0;
     if (refresh) {
       AppCache.students.invalidate(_cacheKeyPending);
     }
     // ── Stale-While-Revalidate ────────────────────────────────────────────
     final cached = AppCache.students.getStale(_cacheKeyPending);
     if (cached is List<StudentEntity>) {
-      emit(PendingStudentsLoaded(pending: cached));
+      emit(
+        PendingStudentsLoaded(
+          pending: cached,
+          hasMore: cached.length >= _pendingPageSize,
+        ),
+      );
       if (!refresh && AppCache.students.has(_cacheKeyPending)) return;
       // Continue to refresh silently
     } else {
       emit(const StudentsLoading());
     }
 
-    final result = await _repository.getPendingStudents();
+    final result = await _repository.getPendingStudents(
+      page: 0,
+      pageSize: _pendingPageSize,
+    );
     if (isClosed) return;
 
     result.when(
       onSuccess: (list) {
         if (!isClosed) {
           AppCache.students.put(_cacheKeyPending, list);
-          emit(PendingStudentsLoaded(pending: list));
+          emit(
+            PendingStudentsLoaded(
+              pending: list,
+              hasMore: list.length == _pendingPageSize,
+              isLoadingMore: false,
+            ),
+          );
         }
       },
       onFailure: (f) {
         if (!isClosed) emit(StudentsError(f.message));
+      },
+    );
+  }
+
+  /// Loads next page of pending students on scroll (Infinite Scroll)
+  Future<void> loadMorePendingStudents() async {
+    final current = state;
+    if (current is! PendingStudentsLoaded) return;
+    if (!current.hasMore || current.isLoadingMore) return;
+
+    emit(current.copyWith(isLoadingMore: true));
+    final nextPage = _currentPendingPage + 1;
+
+    final result = await _repository.getPendingStudents(
+      page: nextPage,
+      pageSize: _pendingPageSize,
+    );
+
+    if (isClosed) return;
+
+    result.when(
+      onSuccess: (newPending) {
+        if (!isClosed) {
+          _currentPendingPage = nextPage;
+          final allPending = [...current.pending, ...newPending];
+          AppCache.students.put(_cacheKeyPending, allPending);
+          emit(
+            current.copyWith(
+              pending: allPending,
+              hasMore: newPending.length == _pendingPageSize,
+              isLoadingMore: false,
+            ),
+          );
+        }
+      },
+      onFailure: (_) {
+        if (!isClosed) emit(current.copyWith(isLoadingMore: false));
       },
     );
   }

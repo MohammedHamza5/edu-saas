@@ -160,6 +160,101 @@ enum AttemptStatus {
   }
 }
 
+enum ExamSubmissionReason {
+  studentSubmitted,
+  timeExpired,
+  forcedExit,
+  securityViolations,
+  tabClosed,
+  systemTimeout;
+
+  static ExamSubmissionReason fromString(String? value) {
+    switch (value?.toLowerCase()) {
+      case 'time_expired':
+        return ExamSubmissionReason.timeExpired;
+      case 'forced_exit':
+        return ExamSubmissionReason.forcedExit;
+      case 'security_violations':
+        return ExamSubmissionReason.securityViolations;
+      case 'tab_closed':
+        return ExamSubmissionReason.tabClosed;
+      case 'system_timeout':
+        return ExamSubmissionReason.systemTimeout;
+      case 'student_submitted':
+      default:
+        return ExamSubmissionReason.studentSubmitted;
+    }
+  }
+
+  String get value {
+    switch (this) {
+      case ExamSubmissionReason.studentSubmitted:
+        return 'student_submitted';
+      case ExamSubmissionReason.timeExpired:
+        return 'time_expired';
+      case ExamSubmissionReason.forcedExit:
+        return 'forced_exit';
+      case ExamSubmissionReason.securityViolations:
+        return 'security_violations';
+      case ExamSubmissionReason.tabClosed:
+        return 'tab_closed';
+      case ExamSubmissionReason.systemTimeout:
+        return 'system_timeout';
+    }
+  }
+
+  String localizedLabel(BuildContext context) {
+    switch (this) {
+      case ExamSubmissionReason.studentSubmitted:
+        return context.l10n.submissionReasonStudentSubmitted;
+      case ExamSubmissionReason.timeExpired:
+        return context.l10n.submissionReasonTimeExpired;
+      case ExamSubmissionReason.forcedExit:
+        return context.l10n.submissionReasonForcedExit;
+      case ExamSubmissionReason.securityViolations:
+        return context.l10n.submissionReasonSecurityViolations;
+      case ExamSubmissionReason.tabClosed:
+        return context.l10n.submissionReasonTabClosed;
+      case ExamSubmissionReason.systemTimeout:
+        return context.l10n.submissionReasonSystemTimeout;
+    }
+  }
+
+  Color get color {
+    switch (this) {
+      case ExamSubmissionReason.studentSubmitted:
+        return AppColors.success;
+      case ExamSubmissionReason.timeExpired:
+        return AppColors.warning;
+      case ExamSubmissionReason.forcedExit:
+        return AppColors.error;
+      case ExamSubmissionReason.securityViolations:
+        return const Color(0xFFB91C1C);
+      case ExamSubmissionReason.tabClosed:
+        return const Color(0xFF7C3AED);
+      case ExamSubmissionReason.systemTimeout:
+        return AppColors.textMuted;
+    }
+  }
+
+  IconData get icon {
+    switch (this) {
+      case ExamSubmissionReason.studentSubmitted:
+        return Icons.check_circle_outline_rounded;
+      case ExamSubmissionReason.timeExpired:
+        return Icons.timer_off_outlined;
+      case ExamSubmissionReason.forcedExit:
+        return Icons.exit_to_app_rounded;
+      case ExamSubmissionReason.securityViolations:
+        return Icons.shield_outlined;
+      case ExamSubmissionReason.tabClosed:
+        return Icons.tab_unselected_rounded;
+      case ExamSubmissionReason.systemTimeout:
+        return Icons.hourglass_disabled_rounded;
+    }
+  }
+}
+
 class QuestionOptionEntity extends Equatable {
   final String id;
   final String questionId;
@@ -409,8 +504,11 @@ class ExamAttemptEntity extends Equatable {
   final DateTime startedAt;
   final DateTime? submittedAt;
   final AttemptStatus status;
+  final ExamSubmissionReason submissionReason;
   final int? score;
   final double? percentage;
+  final int? remainingSeconds;
+  final int? answeredQuestionsCount;
   final List<ExamAnswerEntity> answers;
   final List<ExamQuestionEntity> questions;
 
@@ -423,11 +521,22 @@ class ExamAttemptEntity extends Equatable {
     required this.startedAt,
     this.submittedAt,
     this.status = AttemptStatus.inProgress,
+    this.submissionReason = ExamSubmissionReason.studentSubmitted,
     this.score,
     this.percentage,
+    this.remainingSeconds,
+    this.answeredQuestionsCount,
     this.answers = const [],
     this.questions = const [],
   });
+
+  int get answeredCount {
+    if (answeredQuestionsCount != null) return answeredQuestionsCount!;
+    if (answers.isNotEmpty) {
+      return answers.where((a) => a.selectedOptionId != null).length;
+    }
+    return 0;
+  }
 
   bool get isInProgress => status == AttemptStatus.inProgress;
   bool get isSubmitted => status == AttemptStatus.submitted;
@@ -447,8 +556,11 @@ class ExamAttemptEntity extends Equatable {
     DateTime? startedAt,
     DateTime? submittedAt,
     AttemptStatus? status,
+    ExamSubmissionReason? submissionReason,
     int? score,
     double? percentage,
+    int? remainingSeconds,
+    int? answeredQuestionsCount,
     List<ExamAnswerEntity>? answers,
     List<ExamQuestionEntity>? questions,
   }) {
@@ -461,8 +573,12 @@ class ExamAttemptEntity extends Equatable {
       startedAt: startedAt ?? this.startedAt,
       submittedAt: submittedAt ?? this.submittedAt,
       status: status ?? this.status,
+      submissionReason: submissionReason ?? this.submissionReason,
       score: score ?? this.score,
       percentage: percentage ?? this.percentage,
+      remainingSeconds: remainingSeconds ?? this.remainingSeconds,
+      answeredQuestionsCount:
+          answeredQuestionsCount ?? this.answeredQuestionsCount,
       answers: answers ?? this.answers,
       questions: questions ?? this.questions,
     );
@@ -478,8 +594,11 @@ class ExamAttemptEntity extends Equatable {
     startedAt,
     submittedAt,
     status,
+    submissionReason,
     score,
     percentage,
+    remainingSeconds,
+    answeredQuestionsCount,
     answers,
     questions,
   ];
@@ -513,6 +632,10 @@ class ExamEntity extends Equatable {
   final String? folderId;
   final String? folderName;
   final String? folderColor;
+  final String? pdfFileId;
+  final String? pdfFileName;
+  final int? pdfFileSize;
+  final String? pdfStoragePath;
 
   const ExamEntity({
     required this.id,
@@ -542,7 +665,15 @@ class ExamEntity extends Equatable {
     this.folderId,
     this.folderName,
     this.folderColor,
+    this.pdfFileId,
+    this.pdfFileName,
+    this.pdfFileSize,
+    this.pdfStoragePath,
   });
+
+  bool get hasAttachedPdf =>
+      (pdfFileId != null && pdfFileId!.isNotEmpty) ||
+      (pdfStoragePath != null && pdfStoragePath!.isNotEmpty);
 
   int get totalQuestions => questionsCount > 0
       ? questionsCount
@@ -556,9 +687,10 @@ class ExamEntity extends Equatable {
     if (!myLatestAttempt!.isInProgress) return false;
     // An untimed exam is always active while in progress
     if (isUntimed) return true;
-    final elapsedMinutes = DateTime.now()
-        .difference(myLatestAttempt!.startedAt)
+    final elapsedMinutes = DateTime.now().toUtc()
+        .difference(myLatestAttempt!.startedAt.toUtc())
         .inMinutes;
+    if (elapsedMinutes < 0) return true;
     return elapsedMinutes < durationMinutes;
   }
 
@@ -566,6 +698,30 @@ class ExamEntity extends Equatable {
     if (!hasAttempted) return true;
     if (hasActiveAttempt) return true; // Resume
     return allowRetake;
+  }
+
+  bool get isFullyCompleted =>
+      hasAttempted && (myLatestAttempt?.isSubmitted == true);
+
+  int get solvedQuestionsCount {
+    final att = myLatestAttempt;
+    if (att == null) return 0;
+    if (att.answeredQuestionsCount != null) {
+      return att.answeredQuestionsCount!;
+    }
+    if (att.answers.isNotEmpty) {
+      return att.answers.where((a) => a.selectedOptionId != null).length;
+    }
+    if (att.isSubmitted) {
+      return totalQuestions;
+    }
+    return 0;
+  }
+
+  double get completionProgress {
+    if (totalQuestions <= 0) return isFullyCompleted ? 1.0 : 0.0;
+    final solved = solvedQuestionsCount;
+    return (solved / totalQuestions).clamp(0.0, 1.0);
   }
 
   bool get isPublished => activeVersion?.isPublished ?? (activeVersion != null);
@@ -603,6 +759,11 @@ class ExamEntity extends Equatable {
     String? folderId,
     String? folderName,
     String? folderColor,
+    String? pdfFileId,
+    String? pdfFileName,
+    int? pdfFileSize,
+    String? pdfStoragePath,
+    bool clearPdfFile = false,
   }) {
     return ExamEntity(
       id: id ?? this.id,
@@ -632,6 +793,10 @@ class ExamEntity extends Equatable {
       folderId: folderId ?? this.folderId,
       folderName: folderName ?? this.folderName,
       folderColor: folderColor ?? this.folderColor,
+      pdfFileId: clearPdfFile ? null : (pdfFileId ?? this.pdfFileId),
+      pdfFileName: clearPdfFile ? null : (pdfFileName ?? this.pdfFileName),
+      pdfFileSize: clearPdfFile ? null : (pdfFileSize ?? this.pdfFileSize),
+      pdfStoragePath: clearPdfFile ? null : (pdfStoragePath ?? this.pdfStoragePath),
     );
   }
 
@@ -664,5 +829,9 @@ class ExamEntity extends Equatable {
     folderId,
     folderName,
     folderColor,
+    pdfFileId,
+    pdfFileName,
+    pdfFileSize,
+    pdfStoragePath,
   ];
 }

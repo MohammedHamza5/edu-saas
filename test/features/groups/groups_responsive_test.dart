@@ -117,8 +117,10 @@ class _FakeGroupsRepository implements GroupsRepository {
 
   @override
   Future<Result<List<GroupMemberEntity>>> getGroupMembers(
-    String groupId,
-  ) async => Success(membersByGroup[groupId] ?? []);
+    String groupId, {
+    int page = 0,
+    int pageSize = 25,
+  }) async => Success(membersByGroup[groupId] ?? []);
 
   @override
   Future<Result<GroupMemberEntity>> addMemberToGroup({

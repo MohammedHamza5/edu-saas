@@ -445,10 +445,7 @@ class _TeacherLessonDetailsPageState extends State<TeacherLessonDetailsPage>
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSpacing.s24),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 900),
-          child: Column(
+      child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Stats Row
@@ -528,9 +525,7 @@ class _TeacherLessonDetailsPageState extends State<TeacherLessonDetailsPage>
               ),
             ],
           ),
-        ),
-      ),
-    );
+        );
   }
 
   Widget _buildMetricCard({

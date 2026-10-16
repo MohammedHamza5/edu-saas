@@ -17,12 +17,14 @@ class ExamReviewPage extends StatefulWidget {
   final String attemptId;
   final ExamEntity? exam;
   final ExamAttemptEntity? initialAttempt;
+  final int initialQuestionIndex;
 
   const ExamReviewPage({
     super.key,
     required this.attemptId,
     this.exam,
     this.initialAttempt,
+    this.initialQuestionIndex = 0,
   });
 
   @override
@@ -38,9 +40,13 @@ class _ExamReviewPageState extends State<ExamReviewPage> {
   @override
   void initState() {
     super.initState();
+    _currentQuestionIndex = widget.initialQuestionIndex;
     if (widget.initialAttempt != null &&
         widget.initialAttempt!.questions.isNotEmpty) {
       _attempt = widget.initialAttempt;
+      if (_currentQuestionIndex >= _attempt!.questions.length) {
+        _currentQuestionIndex = 0;
+      }
       _isLoading = false;
     } else {
       _loadReview();
@@ -63,6 +69,10 @@ class _ExamReviewPageState extends State<ExamReviewPage> {
       onSuccess: (attempt) {
         setState(() {
           _attempt = attempt;
+          if (_currentQuestionIndex >= attempt.questions.length &&
+              attempt.questions.isNotEmpty) {
+            _currentQuestionIndex = 0;
+          }
           _isLoading = false;
         });
       },
@@ -178,6 +188,37 @@ class _ExamReviewPageState extends State<ExamReviewPage> {
                                       ? AppColors.success
                                       : AppColors.error,
                                 ),
+                              ),
+                            ),
+                            const SizedBox(width: AppSpacing.s8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: attempt.submissionReason.color
+                                    .withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    attempt.submissionReason.icon,
+                                    size: 11,
+                                    color: attempt.submissionReason.color,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    attempt.submissionReason.localizedLabel(context),
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                      color: attempt.submissionReason.color,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                             const SizedBox(width: AppSpacing.s8),
@@ -376,7 +417,7 @@ class _ExamReviewPageState extends State<ExamReviewPage> {
 
                 const SizedBox(height: AppSpacing.s16),
 
-                if (answer == null)
+                if (answer == null || answer.selectedOptionId == null)
                   Container(
                     width: double.infinity,
                     margin: const EdgeInsets.only(bottom: AppSpacing.s12),

@@ -83,6 +83,14 @@ abstract class ContentRepository {
     List<Map<String, dynamic>>? groupConfigs,
   });
 
+  /// Resolves an existing content_id or creates one for a video assigned to a group
+  Future<Result<String>> resolveOrCreateLectureContent({
+    required String videoId,
+    required String groupId,
+    required String title,
+    String? tenantId,
+  });
+
   /// Atomically assigns multiple content items/videos to a group in one transaction
   Future<Result<void>> assignBatchContentToGroup({
     required String groupId,

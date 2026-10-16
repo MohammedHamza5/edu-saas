@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/network/supabase_service.dart';
+import '../../../../core/utils/group_slug_resolver.dart';
 import '../../domain/entities/notification_entity.dart';
 import '../models/notification_model.dart';
 
@@ -108,73 +109,19 @@ class NotificationsRemoteDataSourceImpl
       throw const AuthException('AUTH_REQUIRED: User not authenticated');
     }
 
-    // 1. Fetch teacher tenant_id
-    final userProfile = await _safeClient
-        .from('users')
-        .select('tenant_id')
-        .eq('id', currentUser.id)
-        .maybeSingle();
+    final resolvedGroupId = groupId != null && groupId.isNotEmpty
+        ? GroupSlugResolver.toId(groupId)
+        : null;
 
-    if (userProfile == null) {
-      throw const PostgrestException(message: 'Teacher user profile not found');
-    }
+    final targetGroup = (resolvedGroupId != null && GroupSlugResolver.isUuid(resolvedGroupId))
+        ? resolvedGroupId
+        : null;
 
-    final tenantId = userProfile['tenant_id'] as String;
-
-    // 2. Insert notification record
-    final notifResponse = await _safeClient
-        .from('notifications')
-        .insert({
-          'tenant_id': tenantId,
-          'title': title.trim(),
-          'body': body.trim(),
-          'type': NotificationType.importantAnnouncement.dbValue,
-          'data': groupId != null
-              ? <String, dynamic>{'group_id': groupId}
-              : <String, dynamic>{},
-        })
-        .select('id')
-        .single();
-
-    final notifId = notifResponse['id'] as String;
-
-    // 3. Resolve target user IDs
-    final List<String> targetUserIds = [];
-
-    if (groupId != null && groupId.isNotEmpty) {
-      final membersResponse = await _safeClient
-          .from('group_members')
-          .select('student_id')
-          .eq('group_id', groupId)
-          .eq('status', 'active');
-
-      final membersList = membersResponse as List<dynamic>;
-      for (final m in membersList) {
-        targetUserIds.add(m['student_id'] as String);
-      }
-    } else {
-      // Send to all active students in the tenant
-      final studentsResponse = await _safeClient
-          .from('users')
-          .select('id')
-          .eq('tenant_id', tenantId)
-          .eq('role', 'student')
-          .eq('status', 'active');
-
-      final studentsList = studentsResponse as List<dynamic>;
-      for (final s in studentsList) {
-        targetUserIds.add(s['id'] as String);
-      }
-    }
-
-    // 4. Batch insert into notification_recipients
-    if (targetUserIds.isNotEmpty) {
-      final recipientsData = targetUserIds
-          .map((uid) => {'notification_id': notifId, 'user_id': uid})
-          .toList();
-
-      await _safeClient.from('notification_recipients').insert(recipientsData);
-    }
+    await _safeClient.rpc<dynamic>('dispatch_tenant_announcement', params: {
+      'p_title': title.trim(),
+      'p_body': body.trim(),
+      if (targetGroup != null) 'p_group_id': targetGroup,
+    });
   }
 
   @override
@@ -189,92 +136,30 @@ class NotificationsRemoteDataSourceImpl
     final currentUser = _safeClient.auth.currentUser;
     if (currentUser == null) return;
 
-    // 1. Fetch tenant_id
-    final userProfile = await _safeClient
-        .from('users')
-        .select('tenant_id')
-        .eq('id', currentUser.id)
-        .maybeSingle();
-
-    if (userProfile == null) return;
-    final tenantId = userProfile['tenant_id'] as String;
-
-    // 2. Insert notification record
-    final notifResponse = await _safeClient
-        .from('notifications')
-        .insert({
-          'tenant_id': tenantId,
-          'title': title.trim(),
-          'body': body.trim(),
-          'type': type.dbValue,
-          'data': data ?? (groupId != null ? <String, dynamic>{'group_id': groupId} : <String, dynamic>{}),
-        })
-        .select('id')
-        .single();
-
-    final notifId = notifResponse['id'] as String;
-
-    // 3. Resolve target user IDs (Students + Parents)
-    final Set<String> targetUserIds = {};
-
     if (userId != null && userId.isNotEmpty) {
-      targetUserIds.add(userId);
-      // Also notify parents of this student
-      final parentsRes = await _safeClient
-          .from('parent_students')
-          .select('parent_id')
-          .eq('student_id', userId);
-      for (final p in parentsRes as List<dynamic>) {
-        if (p['parent_id'] != null) {
-          targetUserIds.add(p['parent_id'] as String);
-        }
-      }
+      await _safeClient.rpc<dynamic>('dispatch_user_notification', params: {
+        'p_user_id': userId,
+        'p_title': title.trim(),
+        'p_body': body.trim(),
+        'p_type': type.dbValue,
+        'p_data': data ?? {},
+      });
     } else if (groupId != null && groupId.isNotEmpty) {
-      final membersResponse = await _safeClient
-          .from('group_members')
-          .select('student_id')
-          .eq('group_id', groupId)
-          .eq('status', 'active');
-
-      final membersList = membersResponse as List<dynamic>;
-      for (final m in membersList) {
-        targetUserIds.add(m['student_id'] as String);
-      }
-
-      // Also notify parents of all active students in this group
-      if (targetUserIds.isNotEmpty) {
-        final parentsRes = await _safeClient
-            .from('parent_students')
-            .select('parent_id')
-            .inFilter('student_id', targetUserIds.toList());
-        for (final p in parentsRes as List<dynamic>) {
-          if (p['parent_id'] != null) {
-            targetUserIds.add(p['parent_id'] as String);
-          }
-        }
+      final resolvedGroupId = GroupSlugResolver.toId(groupId);
+      if (GroupSlugResolver.isUuid(resolvedGroupId)) {
+        await _safeClient.rpc<dynamic>('dispatch_group_notification', params: {
+          'p_group_id': resolvedGroupId,
+          'p_title': title.trim(),
+          'p_body': body.trim(),
+          'p_type': type.dbValue,
+          'p_data': data ?? {},
+        });
       }
     } else {
-      // Send to all active students in the tenant
-      final studentsResponse = await _safeClient
-          .from('users')
-          .select('id')
-          .eq('tenant_id', tenantId)
-          .eq('role', 'student')
-          .eq('status', 'active');
-
-      final studentsList = studentsResponse as List<dynamic>;
-      for (final s in studentsList) {
-        targetUserIds.add(s['id'] as String);
-      }
-    }
-
-    // 4. Batch insert into notification_recipients
-    if (targetUserIds.isNotEmpty) {
-      final recipientsData = targetUserIds
-          .map((uid) => {'notification_id': notifId, 'user_id': uid})
-          .toList();
-
-      await _safeClient.from('notification_recipients').insert(recipientsData);
+      await _safeClient.rpc<dynamic>('dispatch_tenant_announcement', params: {
+        'p_title': title.trim(),
+        'p_body': body.trim(),
+      });
     }
   }
 }

@@ -6,7 +6,6 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_empty_view.dart';
 import '../../../../core/widgets/app_error_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
-import '../../../../core/theme/responsive_breakpoints.dart';
 import '../../../../core/widgets/responsive_container.dart';
 import '../../../../core/widgets/responsive_grid.dart';
 import '../cubit/groups_cubit.dart';
@@ -91,7 +90,6 @@ class _GroupsListPageState extends State<GroupsListPage> {
             }).toList();
 
             return ResponsiveContainer(
-              maxWidth: ResponsiveBreakpoints.maxContentWidth,
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.s16,
                 vertical: AppSpacing.s12,

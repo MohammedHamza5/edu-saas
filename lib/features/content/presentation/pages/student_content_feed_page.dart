@@ -10,7 +10,6 @@ import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/group_slug_resolver.dart';
-import '../../../../core/theme/responsive_breakpoints.dart';
 import '../../../../core/widgets/app_empty_view.dart';
 import '../../../../core/widgets/app_error_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
@@ -69,6 +68,7 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   bool _isRoadmapMode = true;
+  bool _isOpeningQuiz = false;
   final Set<String> _expandedChapterIds = {};
   String? _lastGroupIdForExpansion;
 
@@ -213,8 +213,30 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
       case ContentType.exam:
         if (item.hasLessonExam || (item.lessonExamId != null && item.lessonExamId!.isNotEmpty)) {
           await _handleTakeQuiz(item);
+        } else if (item.attachedExams.isNotEmpty) {
+          final firstExam = item.attachedExams.first;
+          await _handleTakeQuiz(item.copyWith(
+            lessonExamId: firstExam.examId,
+            lessonExamTitle: firstExam.examTitle,
+          ));
         } else {
-          await context.push(AppRoutes.studentExams);
+          try {
+            final res = await InjectionContainer.supabaseClient
+                .from('exams')
+                .select('id, title')
+                .eq('content_id', item.contentId)
+                .maybeSingle();
+            if (res != null && res['id'] != null && mounted) {
+              await _handleTakeQuiz(item.copyWith(
+                lessonExamId: res['id'] as String,
+                lessonExamTitle: res['title'] as String?,
+              ));
+              break;
+            }
+          } catch (_) {}
+          if (mounted) {
+            await context.push(AppRoutes.studentExams);
+          }
         }
         break;
       case ContentType.pdf:
@@ -295,23 +317,32 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
 
   Future<void> _handleTakeQuiz(LessonAssignmentEntity item) async {
     if (!item.hasLessonExam || item.lessonExamId == null) return;
+    if (_isOpeningQuiz) return;
+
+    setState(() => _isOpeningQuiz = true);
+
     try {
-      unawaited(
-        showDialog<void>(
-          context: context,
-          barrierDismissible: false,
-          builder: (_) => const Center(child: CircularProgressIndicator()),
-        ),
-      );
       final result = await InjectionContainer.examsRepository.getExamDetails(
         item.lessonExamId!,
       );
-      if (mounted) Navigator.of(context).pop();
+
+      if (!mounted) return;
 
       if (result.isSuccess && result.dataOrNull != null) {
         final exam = result.dataOrNull!;
+        final questions = exam.activeVersion?.questions ?? const [];
+
+        if (questions.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: AppColors.warning,
+              content: Text(context.l10n.examUnderPreparationNotice),
+            ),
+          );
+          return;
+        }
+
         final examsCubit = InjectionContainer.createExamsCubit();
-        if (!mounted) return;
 
         LessonAssignmentEntity? nextLesson;
         int? nextLessonIndex;
@@ -355,16 +386,14 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
           );
         }
       } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              backgroundColor: AppColors.error,
-              content: Text(
-                result.failureOrNull?.message ?? context.l10n.errorOccurred,
-              ),
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: AppColors.error,
+            content: Text(
+              result.failureOrNull?.message ?? context.l10n.errorOccurred,
             ),
-          );
-        }
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -374,6 +403,10 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
             content: Text(e.toString()),
           ),
         );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isOpeningQuiz = false);
       }
     }
   }
@@ -484,7 +517,9 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
           ),
         ],
       ),
-      body: BlocConsumer<CourseProgressCubit, CourseProgressState>(
+      body: Stack(
+        children: [
+          BlocConsumer<CourseProgressCubit, CourseProgressState>(
         listener: (context, state) {
           if (state is CourseProgressError) {
             final userFriendlyMessage = _isTechnicalError(state.message)
@@ -591,10 +626,8 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                   .toList();
             }
 
-            return Center(
-              child: ResponsiveContainer(
-                maxWidth: ResponsiveBreakpoints.maxContentWidth,
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16),
+            return ResponsiveContainer(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16),
                 child: RefreshIndicator(
                   onRefresh: () async =>
                       context.read<CourseProgressCubit>().loadCourseProgress(
@@ -1084,14 +1117,50 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                     ],
                   ),
                 ),
-              ),
-            );
+              );
           }
 
           return const AppLoadingView.cardsGrid(count: 4, columns: 2);
         },
       ),
-    );
+      if (_isOpeningQuiz)
+        Positioned.fill(
+          child: Container(
+            color: Colors.black.withValues(alpha: 0.35),
+            child: Center(
+              child: Card(
+                elevation: 6,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.s24,
+                    vertical: AppSpacing.s16,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2.5),
+                      ),
+                      const SizedBox(width: AppSpacing.s12),
+                      Text(
+                        context.l10n.loading,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+    ],
+  ),
+);
   }
 
   Widget _buildViewModeButton({

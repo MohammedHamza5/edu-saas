@@ -291,12 +291,41 @@ class _CourseLessonTileState extends State<CourseLessonTile> {
                                   : AppColors.warning,
                             ),
 
-                            // Video type chip
-                            _buildMiniChip(
-                              icon: Icons.play_circle_outline_rounded,
-                              label: l10n.contentTypeVideo,
-                              color: AppColors.primary,
-                            ),
+                            // Content type chip
+                            () {
+                              final (typeLabel, typeIcon, typeColor) = switch (widget.content.type) {
+                                ContentType.video => (
+                                  l10n.contentTypeVideo,
+                                  Icons.play_circle_outline_rounded,
+                                  AppColors.primary,
+                                ),
+                                ContentType.exam => (
+                                  l10n.contentTypeExam,
+                                  Icons.quiz_outlined,
+                                  AppColors.success,
+                                ),
+                                ContentType.assignment => (
+                                  l10n.contentTypeAssignment,
+                                  Icons.assignment_outlined,
+                                  AppColors.warning,
+                                ),
+                                ContentType.pdf => (
+                                  l10n.contentTypePdf,
+                                  Icons.picture_as_pdf_outlined,
+                                  const Color(0xFFEA580C),
+                                ),
+                                ContentType.image => (
+                                  l10n.contentTypeImage,
+                                  Icons.image_outlined,
+                                  Colors.purple,
+                                ),
+                              };
+                              return _buildMiniChip(
+                                icon: typeIcon,
+                                label: typeLabel,
+                                color: typeColor,
+                              );
+                            }(),
 
                             // PDF chip
                             if (widget.hasPdf)

@@ -68,6 +68,18 @@ class _AnimatedMathBackgroundState extends State<AnimatedMathBackground>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final reduceMotion =
+        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+    if (reduceMotion && _controller.isAnimating) {
+      _controller.stop();
+    } else if (!reduceMotion && !_controller.isAnimating && !_isInTest) {
+      _controller.repeat();
+    }
+  }
+
+  @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       if (!_isInTest && !_controller.isAnimating) {

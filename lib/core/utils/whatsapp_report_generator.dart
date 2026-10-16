@@ -451,6 +451,119 @@ $notes
         .trim();
   }
 
+  /// Generates report for a specific attempt of an exam
+  static String generateSingleAttemptReport({
+    required String studentName,
+    required String examTitle,
+    required int attemptNumber,
+    int? totalAttempts,
+    required double score,
+    required double maxScore,
+    required double percentage,
+    String? groupName,
+    String? teacherNotes,
+    String? teacherName,
+    DateTime? submittedAt,
+  }) {
+    final sender = (teacherName != null && teacherName.trim().isNotEmpty)
+        ? '\n- $teacherName 📐'
+        : '';
+    final groupSuffix = (groupName != null && groupName.trim().isNotEmpty)
+        ? ' ($groupName)'
+        : '';
+    final attemptLabel = (totalAttempts != null && totalAttempts > 1)
+        ? ' (المحاولة $attemptNumber من أصل $totalAttempts)'
+        : (attemptNumber > 1 ? ' (المحاولة $attemptNumber)' : '');
+
+    final status = percentage >= 85
+        ? 'ممتاز جداً 🌟'
+        : (percentage >= 65 ? 'جيد جداً 👍' : 'يحتاج مزيداً من التركيز والمراجعة ⚠️');
+    final notes = (teacherNotes != null && teacherNotes.trim().isNotEmpty)
+        ? '\n💡 ملاحظة المدرس:\n$teacherNotes'
+        : '';
+
+    final formattedScore = score % 1 == 0 ? score.toInt().toString() : score.toStringAsFixed(1);
+    final formattedMax = maxScore % 1 == 0 ? maxScore.toInt().toString() : maxScore.toStringAsFixed(1);
+    final formattedPct = percentage % 1 == 0 ? percentage.toInt().toString() : percentage.toStringAsFixed(1);
+
+    return '''
+السلام عليكم ورحمة الله وبركاته،
+ولي أمر الطالب العزيز: $studentName 🌟
+
+يسرنا مشاركتكم نتيجة الطالب في اختبار:
+🎯 $examTitle$groupSuffix$attemptLabel
+━━━━━━━━━━━━━━━━━━━━
+• الدرجة المحققة: $formattedScore من $formattedMax
+• النسبة المئوية: $formattedPct%
+• التقييم العام: $status$notes
+━━━━━━━━━━━━━━━━━━━━
+تمنياتنا للطالب بدوام التفوق والتميز والريادة.$sender
+'''
+        .trim();
+  }
+
+  /// Generates a comprehensive progression report covering all attempts for an exam
+  static String generateAllAttemptsProgressionReport({
+    required String studentName,
+    required String examTitle,
+    String? groupName,
+    required List<Map<String, dynamic>> attemptsSummary,
+    required double bestScore,
+    required double maxScore,
+    required double bestPercentage,
+    double? scoreImprovement,
+    String? teacherNotes,
+    String? teacherName,
+  }) {
+    final sender = (teacherName != null && teacherName.trim().isNotEmpty)
+        ? '\n- $teacherName 📐'
+        : '';
+    final groupSuffix = (groupName != null && groupName.trim().isNotEmpty)
+        ? ' ($groupName)'
+        : '';
+
+    final attemptsLines = StringBuffer();
+    for (int i = 0; i < attemptsSummary.length; i++) {
+      final att = attemptsSummary[i];
+      final num = att['attempt_number'] ?? (i + 1);
+      final sc = att['score'];
+      final mx = att['max_score'] ?? maxScore;
+      final pct = att['percentage'];
+      final isBest = att['is_best'] == true;
+      final badge = isBest ? ' ⭐ (الأفضل)' : '';
+      attemptsLines.writeln('• المحاولة $num: $sc من $mx ($pct%)$badge');
+    }
+
+    final improvementLine = (scoreImprovement != null && scoreImprovement > 0)
+        ? '\n📈 نسبة التطور والتحسن: +${scoreImprovement % 1 == 0 ? scoreImprovement.toInt() : scoreImprovement.toStringAsFixed(1)}%'
+        : '';
+
+    final notes = (teacherNotes != null && teacherNotes.trim().isNotEmpty)
+        ? '\n💡 ملاحظة وتوجيه المدرس:\n$teacherNotes'
+        : '';
+
+    final formattedBest = bestScore % 1 == 0 ? bestScore.toInt().toString() : bestScore.toStringAsFixed(1);
+    final formattedMax = maxScore % 1 == 0 ? maxScore.toInt().toString() : maxScore.toStringAsFixed(1);
+    final formattedBestPct = bestPercentage % 1 == 0 ? bestPercentage.toInt().toString() : bestPercentage.toStringAsFixed(1);
+
+    return '''
+السلام عليكم ورحمة الله وبركاته،
+ولي أمر الطالب العزيز: $studentName 🌟
+
+نشارككم تقرير مسار التعلم ومحاولات الطالب في اختبار:
+🎯 $examTitle$groupSuffix
+━━━━━━━━━━━━━━━━━━━━
+📊 سجل كافة المحاولات:
+${attemptsLines.toString().trim()}$improvementLine
+
+🌟 النتيجة المعتمدة: $formattedBest من $formattedMax ($formattedBestPct%)$notes
+━━━━━━━━━━━━━━━━━━━━
+فخورين بسعي واجتهاد الطالب ونتمنى له دوام التفوق.$sender
+'''
+        .trim();
+  }
+
+
 
   /// Generates concise, factual, data-dense academic report for parents without fluff or generalizations.
   static String generateFactualAcademicReport({

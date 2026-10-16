@@ -4,6 +4,7 @@ import 'package:equatable/equatable.dart';
 class ExamFolderEntity extends Equatable {
   final String id;
   final String tenantId;
+  final String? groupId;
   final String name;
   final String? description;
   final String color;
@@ -16,6 +17,7 @@ class ExamFolderEntity extends Equatable {
   const ExamFolderEntity({
     required this.id,
     required this.tenantId,
+    this.groupId,
     required this.name,
     this.description,
     this.color = '#5B4FE0',
@@ -29,6 +31,7 @@ class ExamFolderEntity extends Equatable {
   ExamFolderEntity copyWith({
     String? id,
     String? tenantId,
+    String? groupId,
     String? name,
     String? description,
     String? color,
@@ -41,6 +44,7 @@ class ExamFolderEntity extends Equatable {
     return ExamFolderEntity(
       id: id ?? this.id,
       tenantId: tenantId ?? this.tenantId,
+      groupId: groupId ?? this.groupId,
       name: name ?? this.name,
       description: description ?? this.description,
       color: color ?? this.color,
@@ -56,6 +60,7 @@ class ExamFolderEntity extends Equatable {
   List<Object?> get props => [
     id,
     tenantId,
+    groupId,
     name,
     description,
     color,

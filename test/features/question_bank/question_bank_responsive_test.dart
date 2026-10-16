@@ -18,7 +18,11 @@ class _MockQuestionBankRepository implements QuestionBankRepository {
   _MockQuestionBankRepository(this.sampleQuestions, this.sampleDocuments);
 
   @override
-  Future<List<DocumentEntity>> getDocuments() async => sampleDocuments;
+  Future<List<DocumentEntity>> getDocuments({
+    int page = 0,
+    int pageSize = 20,
+  }) async =>
+      sampleDocuments;
 
   @override
   Future<DocumentEntity> getDocumentById(String documentId) async =>
@@ -28,7 +32,10 @@ class _MockQuestionBankRepository implements QuestionBankRepository {
   Future<List<QuestionEntity>> getQuestionsByDocument(
     String documentId, {
     String? statusFilter,
-  }) async => sampleQuestions;
+    int page = 0,
+    int pageSize = 20,
+  }) async =>
+      sampleQuestions;
 
   @override
   Future<void> deleteDocument(String documentId) async {}
@@ -43,6 +50,8 @@ class _MockQuestionBankRepository implements QuestionBankRepository {
   Future<List<QuestionEntity>> getQuestions({
     String? statusFilter,
     bool sortByPriority = false,
+    int page = 0,
+    int pageSize = 20,
   }) async {
     var result = List<QuestionEntity>.from(sampleQuestions);
     if (statusFilter != null && statusFilter != 'all') {

@@ -341,7 +341,7 @@ class _ChapterAnalyticsSheetState extends State<ChapterAnalyticsSheet> {
                               OutlinedButton.icon(
                                 onPressed: _loadChapterAnalytics,
                                 icon: const Icon(Icons.refresh_rounded, size: 16),
-                                label: const Text('Retry'),
+                                label: Text(l10n.retry),
                               ),
                             ],
                           ),

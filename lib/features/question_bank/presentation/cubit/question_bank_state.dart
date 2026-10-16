@@ -51,22 +51,30 @@ class QuestionBankDocumentsLoaded extends QuestionBankState {
 
   /// Non-null when the page just completed an extraction — drives the highlight.
   final String? lastUploadedDocumentId;
+  final bool hasMore;
+  final bool isLoadingMore;
 
   const QuestionBankDocumentsLoaded({
     required this.documents,
     this.lastUploadedDocumentId,
+    this.hasMore = true,
+    this.isLoadingMore = false,
   });
 
   QuestionBankDocumentsLoaded copyWith({
     List<DocumentEntity>? documents,
     String? lastUploadedDocumentId,
     bool clearLastUpload = false,
+    bool? hasMore,
+    bool? isLoadingMore,
   }) {
     return QuestionBankDocumentsLoaded(
       documents: documents ?? this.documents,
       lastUploadedDocumentId: clearLastUpload
           ? null
           : (lastUploadedDocumentId ?? this.lastUploadedDocumentId),
+      hasMore: hasMore ?? this.hasMore,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
     );
   }
 
@@ -78,7 +86,12 @@ class QuestionBankDocumentsLoaded extends QuestionBankState {
   int get failedCount => documents.where((d) => d.isFailed).length;
 
   @override
-  List<Object?> get props => [documents, lastUploadedDocumentId];
+  List<Object?> get props => [
+    documents,
+    lastUploadedDocumentId,
+    hasMore,
+    isLoadingMore,
+  ];
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -89,22 +102,30 @@ class QuestionBankDocumentQuestionsLoaded extends QuestionBankState {
   final DocumentEntity document;
   final List<QuestionEntity> questions;
   final String selectedFilter;
+  final bool hasMore;
+  final bool isLoadingMore;
 
   const QuestionBankDocumentQuestionsLoaded({
     required this.document,
     required this.questions,
     this.selectedFilter = 'all',
+    this.hasMore = true,
+    this.isLoadingMore = false,
   });
 
   QuestionBankDocumentQuestionsLoaded copyWith({
     DocumentEntity? document,
     List<QuestionEntity>? questions,
     String? selectedFilter,
+    bool? hasMore,
+    bool? isLoadingMore,
   }) {
     return QuestionBankDocumentQuestionsLoaded(
       document: document ?? this.document,
       questions: questions ?? this.questions,
       selectedFilter: selectedFilter ?? this.selectedFilter,
+      hasMore: hasMore ?? this.hasMore,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
     );
   }
 
@@ -120,7 +141,13 @@ class QuestionBankDocumentQuestionsLoaded extends QuestionBankState {
       questions.where((q) => q.status == 'quarantined').length;
 
   @override
-  List<Object?> get props => [document, questions, selectedFilter];
+  List<Object?> get props => [
+    document,
+    questions,
+    selectedFilter,
+    hasMore,
+    isLoadingMore,
+  ];
 }
 
 // ══════════════════════════════════════════════════════════════════════════════

@@ -33,6 +33,7 @@ abstract interface class ExamsRemoteDataSource {
     DateTime? startAt,
     DateTime? endAt,
     bool isPublished = false,
+    String? pdfFileId,
     required List<ExamQuestionModel> initialQuestions,
   });
   Future<ExamModel> updateExam({
@@ -47,6 +48,8 @@ abstract interface class ExamsRemoteDataSource {
     DateTime? startAt,
     DateTime? endAt,
     bool? isPublished,
+    String? pdfFileId,
+    bool clearPdfFile = false,
   });
   Future<ExamModel> updateDraftExamQuestions({
     required String examId,
@@ -60,8 +63,11 @@ abstract interface class ExamsRemoteDataSource {
     DateTime? startAt,
     DateTime? endAt,
     bool? isPublished,
+    String? pdfFileId,
+    bool clearPdfFile = false,
     required List<ExamQuestionModel> questions,
   });
+  Future<String> getSignedPdfUrl(String storagePath);
   Future<ExamVersionModel> publishExamVersion(String versionId);
   Future<void> unpublishExamVersion({
     required String examId,
@@ -72,8 +78,17 @@ abstract interface class ExamsRemoteDataSource {
   Future<ExamAttemptModel> submitExam({
     required String attemptId,
     required Map<String, String> answers,
+    ExamSubmissionReason reason = ExamSubmissionReason.studentSubmitted,
   });
-  Future<List<ExamAttemptModel>> getExamAttempts(String examId);
+  Future<void> syncExamAnswers({
+    required String attemptId,
+    required Map<String, String> answers,
+  });
+  Future<List<ExamAttemptModel>> getExamAttempts(
+    String examId, {
+    int page = 0,
+    int pageSize = 20,
+  });
   Future<ExamAttemptModel> getAttemptDetails(String attemptId);
   Future<MistakeSummaryModel> getStudentMistakesSummary(String studentId);
   Future<List<MistakeQuestionModel>> getStudentMistakesQuestions(
@@ -446,11 +461,18 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
         .inFilter('group_id', groupIds)
         .catchError((Object _) => <dynamic>[]);
 
+    final leFuture = _safeClient
+        .from('lesson_exams')
+        .select('exam_id')
+        .inFilter('group_id', groupIds)
+        .catchError((Object _) => <dynamic>[]);
+
     final parallelStudentRes =
-        await Future.wait([examsFuture, cgFuture, cFuture]);
+        await Future.wait([examsFuture, cgFuture, cFuture, leFuture]);
     final rawList = parallelStudentRes[0] as List<dynamic>;
     final cgRes = parallelStudentRes[1] as List<dynamic>;
     final cRes = parallelStudentRes[2] as List<dynamic>;
+    final leRes = parallelStudentRes[3] as List<dynamic>;
 
     final lessonExamIds = <String>{};
     for (final row in cgRes) {
@@ -466,6 +488,11 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
       final pId = row['prerequisite_exam_id']?.toString();
       if (aId != null && aId.isNotEmpty) lessonExamIds.add(aId);
       if (pId != null && pId.isNotEmpty) lessonExamIds.add(pId);
+    }
+    for (final row in leRes) {
+      if (row is! Map) continue;
+      final eId = row['exam_id']?.toString();
+      if (eId != null && eId.isNotEmpty) lessonExamIds.add(eId);
     }
     if (rawList.isEmpty) return [];
 
@@ -513,10 +540,10 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
     for (final item in list) {
       final map = Map<String, dynamic>.from(item);
       final examId = map['id']?.toString() ?? '';
-      map['exam_attempts'] = attemptsByExam[examId] ?? [];
       if (lessonExamIds.contains(examId)) {
-        map['is_lecture_exam'] = true;
+        continue;
       }
+      map['exam_attempts'] = attemptsByExam[examId] ?? [];
       results.add(ExamModel.fromJson(map));
     }
 
@@ -650,6 +677,7 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
     DateTime? startAt,
     DateTime? endAt,
     bool isPublished = false,
+    String? pdfFileId,
     required List<ExamQuestionModel> initialQuestions,
   }) async {
     final currentUserId = _safeClient.auth.currentUser?.id;
@@ -699,6 +727,7 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
           'p_is_published': isPublished,
           if (startAt != null) 'p_start_at': startAt.toUtc().toIso8601String(),
           if (endAt != null) 'p_end_at': endAt.toUtc().toIso8601String(),
+          if (pdfFileId != null && pdfFileId.isNotEmpty) 'p_pdf_file_id': pdfFileId,
           'p_questions': questionsPayload,
         },
       );
@@ -763,6 +792,7 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
           'allow_retake': allowRetake,
           'start_at': startAt?.toUtc().toIso8601String(),
           'end_at': endAt?.toUtc().toIso8601String(),
+          if (pdfFileId != null && pdfFileId.isNotEmpty) 'pdf_file_id': pdfFileId,
         })
         .select()
         .single();
@@ -852,6 +882,8 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
     DateTime? startAt,
     DateTime? endAt,
     bool? isPublished,
+    String? pdfFileId,
+    bool clearPdfFile = false,
   }) async {
     final currentUserId = _safeClient.auth.currentUser?.id;
     if (currentUserId == null) {
@@ -888,6 +920,11 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
     if (allowRetake != null) examUpdates['allow_retake'] = allowRetake;
     if (startAt != null) examUpdates['start_at'] = startAt.toUtc().toIso8601String();
     if (endAt != null) examUpdates['end_at'] = endAt.toUtc().toIso8601String();
+    if (clearPdfFile) {
+      examUpdates['pdf_file_id'] = null;
+    } else if (pdfFileId != null && pdfFileId.isNotEmpty) {
+      examUpdates['pdf_file_id'] = pdfFileId;
+    }
 
     await _safeClient.from('exams').update(examUpdates).eq('id', examId);
 
@@ -918,11 +955,21 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
     DateTime? startAt,
     DateTime? endAt,
     bool? isPublished,
+    String? pdfFileId,
+    bool clearPdfFile = false,
     required List<ExamQuestionModel> questions,
   }) async {
     final currentUserId = _safeClient.auth.currentUser?.id;
     if (currentUserId == null) {
       throw const AuthException('User not authenticated');
+    }
+
+    // Update PDF reference on exam record if requested
+    if (clearPdfFile || (pdfFileId != null && pdfFileId.isNotEmpty)) {
+      await _safeClient.from('exams').update({
+        'pdf_file_id': clearPdfFile ? null : pdfFileId,
+        'updated_at': DateTime.now().toUtc().toIso8601String(),
+      }).eq('id', examId);
     }
 
     final questionsPayload = questions.asMap().entries.map((entry) {
@@ -1004,6 +1051,11 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
     if (allowRetake != null) examUpdates['allow_retake'] = allowRetake;
     if (startAt != null) examUpdates['start_at'] = startAt.toUtc().toIso8601String();
     if (endAt != null) examUpdates['end_at'] = endAt.toUtc().toIso8601String();
+    if (clearPdfFile) {
+      examUpdates['pdf_file_id'] = null;
+    } else if (pdfFileId != null && pdfFileId.isNotEmpty) {
+      examUpdates['pdf_file_id'] = pdfFileId;
+    }
     await _safeClient.from('exams').update(examUpdates).eq('id', examId);
 
     final versionsRes = await _safeClient
@@ -1433,15 +1485,35 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
               .toList() ??
           <ExamQuestionModel>[];
 
+      final rawSavedAnswers = map['saved_answers'];
+      final initialAnswers = <ExamAnswerEntity>[];
+      if (rawSavedAnswers is Map) {
+        rawSavedAnswers.forEach((qId, optId) {
+          if (qId != null && optId != null && optId.toString().isNotEmpty) {
+            initialAnswers.add(
+              ExamAnswerEntity(
+                id: '',
+                attemptId: map['attempt_id']?.toString() ?? '',
+                questionId: qId.toString(),
+                selectedOptionId: optId.toString(),
+                answeredAt: DateTime.now().toUtc(),
+              ),
+            );
+          }
+        });
+      }
+
       return ExamAttemptModel(
         id: map['attempt_id']?.toString() ?? '',
         examId: examId,
         examVersionId: map['exam_version_id']?.toString() ?? '',
         studentId: _safeClient.auth.currentUser?.id ?? '',
         startedAt: map['started_at'] != null
-            ? DateTime.tryParse(map['started_at'].toString()) ?? DateTime.now()
-            : DateTime.now(),
+            ? DateTime.tryParse(map['started_at'].toString())?.toUtc() ?? DateTime.now().toUtc()
+            : DateTime.now().toUtc(),
         status: AttemptStatus.inProgress,
+        remainingSeconds: (map['remaining_seconds'] as num?)?.toInt(),
+        answers: initialAnswers,
         questions: parsedQuestions,
       );
     }
@@ -1450,14 +1522,38 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
   }
 
   @override
-  Future<ExamAttemptModel> submitExam({
+  Future<void> syncExamAnswers({
     required String attemptId,
     required Map<String, String> answers,
   }) async {
     try {
+      await _safeClient.rpc<dynamic>(
+        'sync_exam_answers',
+        params: {'p_attempt_id': attemptId, 'p_answers': answers},
+      );
+    } catch (e) {
+      AppLogger.w(
+        'ExamsRemoteDataSource',
+        '⚠️ Background sync_exam_answers failed (local answers intact): $e',
+        data: e,
+      );
+    }
+  }
+
+  @override
+  Future<ExamAttemptModel> submitExam({
+    required String attemptId,
+    required Map<String, String> answers,
+    ExamSubmissionReason reason = ExamSubmissionReason.studentSubmitted,
+  }) async {
+    try {
       final rpcRes = await _safeClient.rpc<dynamic>(
         'submit_exam',
-        params: {'p_attempt_id': attemptId, 'p_answers': answers},
+        params: {
+          'p_attempt_id': attemptId,
+          'p_answers': answers,
+          'p_reason': reason.value,
+        },
       );
 
       final map = Map<String, dynamic>.from(rpcRes as Map);
@@ -1481,6 +1577,25 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
         );
       }
 
+      final rawAnswers = map['answers'] ?? map['exam_answers'];
+      final answersList = (rawAnswers as List<dynamic>?)
+              ?.whereType<Map<dynamic, dynamic>>()
+              .map((a) {
+                final aMap = Map<String, dynamic>.from(a);
+                return ExamAnswerEntity(
+                  id: aMap['id']?.toString() ?? '',
+                  attemptId: aMap['attempt_id']?.toString() ?? '',
+                  questionId: aMap['question_id']?.toString() ?? '',
+                  selectedOptionId: aMap['selected_option_id']?.toString(),
+                  isCorrect: aMap['is_correct'] as bool?,
+                  pointsEarned: (aMap['points_earned'] as num?)?.toDouble(),
+                  answeredAt: aMap['answered_at'] != null
+                      ? DateTime.tryParse(aMap['answered_at'].toString())?.toUtc() ?? DateTime.now().toUtc()
+                      : DateTime.now().toUtc(),
+                );
+              }).toList() ??
+          const <ExamAnswerEntity>[];
+
       return ExamAttemptModel(
         id: map['attempt_id']?.toString() ?? attemptId,
         examId: map['exam_id']?.toString() ?? '',
@@ -1491,8 +1606,12 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
         status: AttemptStatus.fromString(
           map['status']?.toString() ?? 'submitted',
         ),
+        submissionReason: ExamSubmissionReason.fromString(
+          map['submission_reason']?.toString() ?? reason.value,
+        ),
         score: (map['score'] as num?)?.toInt(),
         percentage: percentage,
+        answers: answersList,
       );
     } catch (e, st) {
       AppLogger.e(
@@ -1506,7 +1625,22 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
   }
 
   @override
-  Future<List<ExamAttemptModel>> getExamAttempts(String examId) async {
+  Future<List<ExamAttemptModel>> getExamAttempts(
+    String examId, {
+    int page = 0,
+    int pageSize = 20,
+  }) async {
+    final from = page * pageSize;
+    final to = from + pageSize - 1;
+
+    // Trigger atomic auto-finalization of any expired attempts first
+    try {
+      await _safeClient.rpc<dynamic>(
+        'auto_finalize_expired_attempts',
+        params: {'p_exam_id': examId},
+      );
+    } catch (_) {}
+
     final response = await _safeClient
         .from('exam_attempts')
         .select('''
@@ -1517,13 +1651,15 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
           started_at,
           submitted_at,
           status,
+          submission_reason,
           score,
           percentage,
           users!student_id(id, full_name, email, avatar_url),
           exam_answers(*)
         ''')
         .eq('exam_id', examId)
-        .order('submitted_at', ascending: false);
+        .order('submitted_at', ascending: false)
+        .range(from, to);
 
     final list = response as List<dynamic>;
     return list
@@ -1819,6 +1955,37 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
       AppLogger.e('ExamsRemoteDataSource', 'moveExamToFolder failed', error: e);
       rethrow;
     }
+  }
+
+  @override
+  Future<String> getSignedPdfUrl(String storagePath, {int expiresInSeconds = 3600}) async {
+    try {
+      final signedUrl = await _safeClient.storage
+          .from('group-content')
+          .createSignedUrl(storagePath, expiresInSeconds);
+      if (signedUrl.isNotEmpty) {
+        return signedUrl;
+      }
+    } catch (_) {
+      // Fallback if bucket or path resolves differently
+    }
+
+    if (storagePath.startsWith('materials/')) {
+      try {
+        final r2Res = await _safeClient.functions.invoke(
+          'r2-storage',
+          body: {'action': 'get-download-url', 'storage_path': storagePath},
+        );
+        if (r2Res.status == 200 && r2Res.data is Map) {
+          final downloadUrl = (r2Res.data as Map)['download_url']?.toString();
+          if (downloadUrl != null && downloadUrl.isNotEmpty) {
+            return downloadUrl;
+          }
+        }
+      } catch (_) {}
+    }
+
+    return _safeClient.storage.from('group-content').getPublicUrl(storagePath);
   }
 }
 

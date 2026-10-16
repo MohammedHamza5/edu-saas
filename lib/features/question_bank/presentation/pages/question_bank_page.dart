@@ -26,10 +26,29 @@ class QuestionBankPage extends StatefulWidget {
 }
 
 class _QuestionBankPageState extends State<QuestionBankPage> {
+  final ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
     context.read<QuestionBankCubit>().loadDocuments();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (!mounted) return;
+    if (_scrollController.hasClients &&
+        _scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200) {
+      context.read<QuestionBankCubit>().loadMoreDocuments();
+    }
   }
 
   void _reload() {
@@ -127,6 +146,7 @@ class _QuestionBankPageState extends State<QuestionBankPage> {
           return RefreshIndicator(
             onRefresh: () async => _reload(),
             child: CustomScrollView(
+              controller: _scrollController,
               physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
                 // ── Header ──────────────────────────────────────────────
@@ -196,6 +216,17 @@ class _QuestionBankPageState extends State<QuestionBankPage> {
                     }, childCount: documents.length),
                   ),
                 ),
+
+                if (state is QuestionBankDocumentsLoaded &&
+                    state.isLoadingMore)
+                  const SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: AppSpacing.s16),
+                      child: Center(
+                        child: AppLoadingView.compact(size: 24),
+                      ),
+                    ),
+                  ),
 
                 const SliverToBoxAdapter(
                   child: SizedBox(height: AppSpacing.s32),

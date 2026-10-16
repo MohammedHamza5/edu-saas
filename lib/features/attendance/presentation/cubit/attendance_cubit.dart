@@ -216,16 +216,66 @@ class AttendanceCubit extends Cubit<AttendanceState> {
   String? _lastStudentId;
   String? _lastGroupId;
 
-  /// Loads student attendance history, computed stats, and online lecture watch engagement
+  /// Loads student attendance history, computed stats, and online lecture watch engagement with instant SWR cache
   Future<void> loadStudentAttendance({
     required String studentId,
     String? groupId,
+    bool forceRefresh = false,
   }) async {
     _studentPage = 0;
     _lastStudentId = studentId;
     _lastGroupId = groupId;
-    emit(const AttendanceLoading());
 
+    final cacheKey = AppCache.userKey('student_attendance_${groupId ?? "all"}');
+    if (forceRefresh) {
+      AppCache.attendance.invalidate(cacheKey);
+    }
+
+    // ── Stale-While-Revalidate: Instant display from memory cache ──────────
+    final cached = AppCache.attendance.getStale(cacheKey);
+    if (cached is StudentAttendanceBundle) {
+      emit(
+        StudentAttendanceLoaded(
+          records: cached.records,
+          stats: cached.stats,
+          engagementSummary: cached.engagementSummary,
+          selectedGroupId: groupId,
+          hasMore: cached.records.length >= _pageSize,
+          isLoadingMore: false,
+        ),
+      );
+      if (!forceRefresh && AppCache.attendance.has(cacheKey)) {
+        return; // Fresh cache within TTL, skip redundant network call
+      }
+    } else {
+      emit(const AttendanceLoading());
+    }
+
+    // 1. High-Performance fast path: Fetch consolidated single-roundtrip bundle
+    final bundleResult = await _repository.getStudentAttendanceBundle(
+      studentId: studentId,
+      groupId: groupId,
+    );
+
+    if (isClosed) return;
+
+    if (bundleResult.isSuccess && bundleResult.dataOrNull != null) {
+      final bundle = bundleResult.dataOrNull!;
+      AppCache.attendance.put(cacheKey, bundle);
+      emit(
+        StudentAttendanceLoaded(
+          records: bundle.records,
+          stats: bundle.stats,
+          engagementSummary: bundle.engagementSummary,
+          selectedGroupId: groupId,
+          hasMore: bundle.records.length == _pageSize,
+          isLoadingMore: false,
+        ),
+      );
+      return;
+    }
+
+    // 2. Resilient fallback path if consolidated bundle is unavailable
     final historyFuture = _repository.getStudentAttendanceHistory(
       studentId: studentId,
       groupId: groupId,
@@ -255,6 +305,13 @@ class AttendanceCubit extends Cubit<AttendanceState> {
         statsResult.dataOrNull ?? AttendanceStats.fromRecords(records);
 
     if (historyResult.isSuccess || engagementResult.isSuccess) {
+      final fallbackBundle = StudentAttendanceBundle(
+        engagementSummary:
+            engagementSummary ?? const StudentEngagementSummary.empty(),
+        stats: stats,
+        records: records,
+      );
+      AppCache.attendance.put(cacheKey, fallbackBundle);
       emit(
         StudentAttendanceLoaded(
           records: records,
@@ -266,11 +323,13 @@ class AttendanceCubit extends Cubit<AttendanceState> {
         ),
       );
     } else {
-      final error =
-          historyResult.failureOrNull?.message ??
-          engagementResult.failureOrNull?.message ??
-          'Failed to load attendance';
-      emit(AttendanceError(error));
+      if (state is! StudentAttendanceLoaded) {
+        final error =
+            historyResult.failureOrNull?.message ??
+            engagementResult.failureOrNull?.message ??
+            'Failed to load attendance';
+        emit(AttendanceError(error));
+      }
     }
   }
 

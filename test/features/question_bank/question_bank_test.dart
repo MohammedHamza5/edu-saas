@@ -21,7 +21,11 @@ class MockQuestionBankRepository implements QuestionBankRepository {
   bool secondReviewCalled = false;
 
   @override
-  Future<List<DocumentEntity>> getDocuments() async => [];
+  Future<List<DocumentEntity>> getDocuments({
+    int page = 0,
+    int pageSize = 20,
+  }) async =>
+      [];
 
   @override
   Future<DocumentEntity> getDocumentById(String documentId) async =>
@@ -31,7 +35,10 @@ class MockQuestionBankRepository implements QuestionBankRepository {
   Future<List<QuestionEntity>> getQuestionsByDocument(
     String documentId, {
     String? statusFilter,
-  }) async => [];
+    int page = 0,
+    int pageSize = 20,
+  }) async =>
+      [];
 
   @override
   Future<void> deleteDocument(String documentId) async {}
@@ -46,6 +53,8 @@ class MockQuestionBankRepository implements QuestionBankRepository {
   Future<List<QuestionEntity>> getQuestions({
     String? statusFilter,
     bool sortByPriority = false,
+    int page = 0,
+    int pageSize = 20,
   }) async {
     var result = List<QuestionEntity>.from(questions);
     if (statusFilter != null && statusFilter != 'all') {

@@ -17,7 +17,11 @@ abstract interface class AssignmentsRemoteDataSource {
     int pageSize = 15,
   });
   Future<AssignmentModel> getAssignmentDetails(String assignmentId);
-  Future<List<AssignmentSubmissionModel>> getSubmissions(String assignmentId);
+  Future<List<AssignmentSubmissionModel>> getSubmissions(
+    String assignmentId, {
+    int page = 0,
+    int pageSize = 20,
+  });
   Future<AssignmentSubmissionModel?> getMySubmission(String assignmentId);
   Future<AssignmentModel> createAssignment({
     required String groupId,
@@ -284,8 +288,13 @@ class AssignmentsRemoteDataSourceImpl implements AssignmentsRemoteDataSource {
 
   @override
   Future<List<AssignmentSubmissionModel>> getSubmissions(
-    String assignmentId,
-  ) async {
+    String assignmentId, {
+    int page = 0,
+    int pageSize = 20,
+  }) async {
+    final from = page * pageSize;
+    final to = from + pageSize - 1;
+
     final response = await _safeClient
         .from('assignment_submissions')
         .select('''
@@ -303,7 +312,8 @@ class AssignmentsRemoteDataSourceImpl implements AssignmentsRemoteDataSource {
           submission_files(*)
         ''')
         .eq('assignment_id', assignmentId)
-        .order('submitted_at', ascending: false);
+        .order('submitted_at', ascending: false)
+        .range(from, to);
 
     final list = response as List<dynamic>;
     return list

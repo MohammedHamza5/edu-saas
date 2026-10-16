@@ -12,14 +12,24 @@ import 'app_image_cropper_dialog.dart';
 
 class ExamImageAttachmentBox extends StatefulWidget {
   final String? initialImageUrl;
+  final Uint8List? initialLocalBytes;
   final Map<String, dynamic>? initialImageMeta;
-  final ValueChanged<({String? imageUrl, Map<String, dynamic>? imageMeta})>
+  final bool? isUploading;
+  final String? uploadError;
+  final VoidCallback? onRetryUpload;
+  final void Function(Uint8List bytes, String filename)? onBytesSelected;
+  final ValueChanged<({String? imageUrl, Map<String, dynamic>? imageMeta, Uint8List? localBytes})>
   onChanged;
 
   const ExamImageAttachmentBox({
     super.key,
     this.initialImageUrl,
+    this.initialLocalBytes,
     this.initialImageMeta,
+    this.isUploading,
+    this.uploadError,
+    this.onRetryUpload,
+    this.onBytesSelected,
     required this.onChanged,
   });
 
@@ -31,24 +41,45 @@ class _ExamImageAttachmentBoxState extends State<ExamImageAttachmentBox> {
   final _uploadService = ExamImageUploadService();
 
   String? _imageUrl;
+  Uint8List? _localBytes;
   late Map<String, dynamic> _imageMeta;
-  bool _isUploading = false;
+  bool _internalIsUploading = false;
+  String? _internalError;
 
+  bool get _effectiveIsUploading => widget.isUploading ?? _internalIsUploading;
+  String? get _effectiveError => widget.uploadError ?? _internalError;
 
   @override
   void initState() {
     super.initState();
     _imageUrl = widget.initialImageUrl;
+    _localBytes = widget.initialLocalBytes;
     _imageMeta = Map<String, dynamic>.from(
       widget.initialImageMeta ??
-          {'alignment': 'center', 'width_percent': 50, 'enable_zoom': true},
+          {'alignment': 'center', 'width_percent': 75, 'enable_zoom': true},
     );
+  }
+
+  @override
+  void didUpdateWidget(covariant ExamImageAttachmentBox oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialImageUrl != oldWidget.initialImageUrl) {
+      _imageUrl = widget.initialImageUrl;
+    }
+    if (widget.initialLocalBytes != oldWidget.initialLocalBytes) {
+      _localBytes = widget.initialLocalBytes;
+    }
+    if (widget.initialImageMeta != oldWidget.initialImageMeta &&
+        widget.initialImageMeta != null) {
+      _imageMeta = Map<String, dynamic>.from(widget.initialImageMeta!);
+    }
   }
 
   void _notifyChange() {
     widget.onChanged((
       imageUrl: _imageUrl,
-      imageMeta: _imageUrl == null ? null : _imageMeta,
+      imageMeta: (_imageUrl == null && _localBytes == null) ? null : _imageMeta,
+      localBytes: _localBytes,
     ));
   }
 
@@ -76,52 +107,51 @@ class _ExamImageAttachmentBoxState extends State<ExamImageAttachmentBox> {
 
     AppLogger.s(
       'ExamImageBox',
-      '✂️ Cropper returned ${croppedBytes.length} bytes. Setting _isUploading = true',
+      '✂️ Cropper returned ${croppedBytes.length} bytes. Displaying preview instantly!',
     );
 
-    setState(() => _isUploading = true);
+    final safeBytes = Uint8List.fromList(croppedBytes);
 
-    // Yield to the event loop so Flutter can render the _isUploading UI (loading indicator)
-    // before the heavy Supabase upload logic blocks the thread.
-    await Future<void>.delayed(const Duration(milliseconds: 150));
+    setState(() {
+      _localBytes = safeBytes;
+      _imageUrl = null;
+      _internalError = null;
+    });
+    _notifyChange();
 
+    // If parent manages background upload (CreateExamPage)
+    if (widget.onBytesSelected != null) {
+      widget.onBytesSelected!(safeBytes, filename);
+      return;
+    }
+
+    // Standalone fallback:
+    setState(() => _internalIsUploading = true);
     try {
-      final uploadStopwatch = Stopwatch()..start();
-      AppLogger.i(
-        'ExamImageBox',
-        'PERF_TRACE: ☁️ Calling _uploadService.uploadExamImage started...',
-      );
-      // Deep-copy bytes so release web builds pass a real Uint8List to Supabase
-      // (CanvasKit / FilePicker views can fail JS interop as upload payloads).
-      final uploadBytes = Uint8List.fromList(croppedBytes);
+      final uploadBytes = Uint8List.fromList(safeBytes);
       final uploadedUrl = await _uploadService.uploadExamImage(
         bytes: uploadBytes,
         fileName: filename,
         mimeType: 'image/png',
       );
-      uploadStopwatch.stop();
-
-      AppLogger.s(
-        'ExamImageBox',
-        'PERF_TRACE: 🎉 Image uploaded successfully! URL: $uploadedUrl. Took ${uploadStopwatch.elapsedMilliseconds}ms',
-      );
       if (mounted) {
         setState(() {
           _imageUrl = uploadedUrl;
-          _isUploading = false;
-
+          _internalIsUploading = false;
         });
+        _notifyChange();
+      } else {
+        _imageUrl = uploadedUrl;
+        _internalIsUploading = false;
         _notifyChange();
       }
     } catch (e, st) {
-      AppLogger.e(
-        'ExamImageBox',
-        '❌ Error uploading image: $e',
-        error: e,
-        stackTrace: st,
-      );
+      AppLogger.e('ExamImageBox', '❌ Error uploading image: $e', error: e, stackTrace: st);
       if (mounted) {
-        setState(() => _isUploading = false);
+        setState(() {
+          _internalIsUploading = false;
+          _internalError = e.toString();
+        });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(context.l10n.imageUploadFailed(e.toString())),
@@ -186,8 +216,6 @@ class _ExamImageAttachmentBoxState extends State<ExamImageAttachmentBox> {
   }
 
   Future<void> _handlePaste() async {
-    // In web/desktop, try reading clipboard image
-    // If not supported natively by platform clipboard, show guidance tooltip
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(context.l10n.pasteScreenshotTip),
@@ -200,7 +228,8 @@ class _ExamImageAttachmentBoxState extends State<ExamImageAttachmentBox> {
   void _removeImage() {
     setState(() {
       _imageUrl = null;
-
+      _localBytes = null;
+      _internalError = null;
     });
     _notifyChange();
   }
@@ -221,34 +250,9 @@ class _ExamImageAttachmentBoxState extends State<ExamImageAttachmentBox> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isUploading) {
-      return Container(
-        height: 140,
-        decoration: BoxDecoration(
-          color: AppColors.surfaceVariant.withValues(alpha: 0.5),
-          borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-          border: Border.all(color: AppColors.border),
-        ),
-        alignment: Alignment.center,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const CircularProgressIndicator(strokeWidth: 2.5),
-            const SizedBox(height: AppSpacing.s12),
-            Text(
-              context.l10n.uploadingImageToCloud,
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
+    final hasImage = _localBytes != null || (_imageUrl != null && _imageUrl!.isNotEmpty);
 
-    if (_imageUrl != null) {
+    if (hasImage) {
       final alignment = _imageMeta['alignment'] as String? ?? 'center';
       final widthPercent = (_imageMeta['width_percent'] as num?)?.toInt() ?? 75;
 
@@ -262,7 +266,7 @@ class _ExamImageAttachmentBoxState extends State<ExamImageAttachmentBox> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Preview container with chosen width & alignment
+            // Preview container with chosen width & alignment (Instant memory image or network image)
             LayoutBuilder(
               builder: (ctx, constraints) {
                 final displayW = constraints.maxWidth * (widthPercent / 100);
@@ -275,35 +279,40 @@ class _ExamImageAttachmentBoxState extends State<ExamImageAttachmentBox> {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
                     child: Container(
-                      constraints: const BoxConstraints(maxHeight: 260),
+                      constraints: const BoxConstraints(maxHeight: 280),
                       width: displayW,
-                      child: CachedNetworkImage(
-                        imageUrl: _imageUrl!,
-                        memCacheWidth: 600,
-                        memCacheHeight: 600,
-                        maxWidthDiskCache: 800,
-                        fit: BoxFit.contain,
-                        placeholder: (ctx, _) => Container(
-                          height: 140,
-                          color: AppColors.surfaceVariant,
-                          child: const Center(
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          ),
-                        ),
-                        errorWidget: (ctx, _, __) => Container(
-                          height: 100,
-                          color: AppColors.error.withValues(alpha: 0.1),
-                          child: Center(
-                            child: Text(
-                              context.l10n.failedToLoadImage,
-                              style: const TextStyle(
-                                color: AppColors.error,
-                                fontSize: 12,
+                      child: _localBytes != null
+                          ? Image.memory(
+                              _localBytes!,
+                              fit: BoxFit.contain,
+                            )
+                          : CachedNetworkImage(
+                              imageUrl: _imageUrl!,
+                              memCacheWidth: 600,
+                              memCacheHeight: 600,
+                              maxWidthDiskCache: 800,
+                              fit: BoxFit.contain,
+                              placeholder: (ctx, _) => Container(
+                                height: 140,
+                                color: AppColors.surfaceVariant,
+                                child: const Center(
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                ),
+                              ),
+                              errorWidget: (ctx, _, __) => Container(
+                                height: 100,
+                                color: AppColors.error.withValues(alpha: 0.1),
+                                child: Center(
+                                  child: Text(
+                                    context.l10n.failedToLoadImage,
+                                    style: const TextStyle(
+                                      color: AppColors.error,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                        ),
-                      ),
                     ),
                   ),
                 );
@@ -313,7 +322,7 @@ class _ExamImageAttachmentBoxState extends State<ExamImageAttachmentBox> {
             const Divider(height: 1, color: AppColors.border),
             const SizedBox(height: AppSpacing.s8),
 
-            // Controls Bar: Alignment + Width Selector + Delete
+            // Controls Bar: Status Badges + Alignment + Width Selector + Delete
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -323,13 +332,97 @@ class _ExamImageAttachmentBoxState extends State<ExamImageAttachmentBox> {
                     runSpacing: 8,
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
-                      if (_imageUrl!.contains('.webp')) ...[
+                      // 1. Sync / Status Badges
+                      if (_effectiveIsUploading) ...[
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                            border: Border.all(color: AppColors.primary.withValues(alpha: 0.25)),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const SizedBox(
+                                width: 12,
+                                height: 12,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                context.l10n.syncingImageInBackground,
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ] else if (_imageUrl != null && _imageUrl!.isNotEmpty) ...[
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: AppColors.success.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                            border: Border.all(color: AppColors.success.withValues(alpha: 0.25)),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.cloud_done_rounded, size: 14, color: AppColors.success),
+                              const SizedBox(width: 4),
+                              Text(
+                                context.l10n.imageSavedToCloud,
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.success,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ] else if (_effectiveError != null) ...[
+                        InkWell(
+                          onTap: widget.onRetryUpload,
+                          borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: AppColors.error.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                              border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.refresh_rounded, size: 14, color: AppColors.error),
+                                const SizedBox(width: 4),
+                                Text(
+                                  context.l10n.retryUpload,
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.error,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                      if (_imageUrl != null && _imageUrl!.contains('.webp')) ...[
                         AppBadge(
                           label: context.l10n.optimizedWebpBadge,
                           variant: AppBadgeVariant.active,
                           icon: Icons.bolt_rounded,
                         ),
-                        const SizedBox(width: 4),
                       ],
                       Text(
                         context.l10n.imageAlignmentLabel,

@@ -16,8 +16,13 @@ import '../cubit/mistakes_state.dart';
 
 class MistakesPracticePage extends StatefulWidget {
   final String? sourceExamId;
+  final String? typeFilter;
 
-  const MistakesPracticePage({super.key, this.sourceExamId});
+  const MistakesPracticePage({
+    super.key,
+    this.sourceExamId,
+    this.typeFilter,
+  });
 
   @override
   State<MistakesPracticePage> createState() => _MistakesPracticePageState();
@@ -132,7 +137,13 @@ class _MistakesPracticePageState extends State<MistakesPracticePage> {
           }
 
           if (state is MistakesLoaded) {
-            final questions = state.questions;
+            var questions = state.questions;
+            if (widget.typeFilter == 'wrongOnly') {
+              questions = questions.where((q) => q.isWrongAnswer).toList();
+            } else if (widget.typeFilter == 'skippedOnly') {
+              questions = questions.where((q) => q.isSkipped).toList();
+            }
+
             if (questions.isEmpty) {
               return AppEmptyView(
                 message: l10n.noMistakesFound,
@@ -143,7 +154,7 @@ class _MistakesPracticePageState extends State<MistakesPracticePage> {
               );
             }
 
-            final currentQuestion = questions[_currentIndex];
+            final currentQuestion = questions[_currentIndex.clamp(0, questions.length - 1)];
             final total = questions.length;
 
             return ResponsiveContainer(
@@ -201,6 +212,58 @@ class _MistakesPracticePageState extends State<MistakesPracticePage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
+                          // Contextual Badge (Wrong answer vs Skipped question)
+                          Container(
+                            margin: const EdgeInsets.only(bottom: AppSpacing.s12),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.s12,
+                              vertical: AppSpacing.s8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: (currentQuestion.isSkipped
+                                      ? AppColors.warning
+                                      : AppColors.error)
+                                  .withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.radiusSmall,
+                              ),
+                              border: Border.all(
+                                color: (currentQuestion.isSkipped
+                                        ? AppColors.warning
+                                        : AppColors.error)
+                                    .withValues(alpha: 0.3),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  currentQuestion.isSkipped
+                                      ? Icons.pause_circle_outline_rounded
+                                      : Icons.cancel_outlined,
+                                  color: currentQuestion.isSkipped
+                                      ? AppColors.warning
+                                      : AppColors.error,
+                                  size: 18,
+                                ),
+                                const SizedBox(width: AppSpacing.s8),
+                                Expanded(
+                                  child: Text(
+                                    currentQuestion.isSkipped
+                                        ? l10n.practiceHeaderSkippedNote
+                                        : l10n.practiceHeaderWrongNote,
+                                    style: TextStyle(
+                                      fontSize: 12.5,
+                                      fontWeight: FontWeight.bold,
+                                      color: currentQuestion.isSkipped
+                                          ? AppColors.warning
+                                          : AppColors.error,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
                           // Stem
                           if (currentQuestion.questionText.isNotEmpty) ...[
                             Text(

@@ -46,14 +46,15 @@ class TeacherShell extends StatelessWidget {
     if (path.startsWith('/teacher/attendance')) return 5;
     if (path.contains('/content')) return 6;
     if (path.contains('/videos')) return 7;
-    if (path.contains('/question-bank')) return 8;
-    if (path.contains('/exams')) return 9;
-    if (path.contains('/assignments')) return 10;
+    if (path.contains('/materials-library')) return 8;
+    if (path.contains('/question-bank')) return 9;
+    if (path.contains('/exams')) return 10;
+    if (path.contains('/assignments')) return 11;
     if (path.startsWith('/teacher/announcements') ||
         path.startsWith('/teacher/send-announcement')) {
-      return 11;
+      return 12;
     }
-    if (path.startsWith('/teacher/settings')) return 12;
+    if (path.startsWith('/teacher/settings')) return 13;
     return 0;
   }
 
@@ -67,11 +68,12 @@ class TeacherShell extends StatelessWidget {
       AppRoutes.teacherAttendance, // 5
       AppRoutes.teacherContent, // 6 (Course Builder / Manage Lessons)
       AppRoutes.teacherVideos, // 7 (Video Bank)
-      AppRoutes.questionBank, // 8 (Question Bank & Review Console)
-      AppRoutes.teacherExams, // 9 (Exams & Assessments)
-      AppRoutes.teacherAssignments, // 10 (Assignments)
-      AppRoutes.sendAnnouncement, // 11
-      AppRoutes.teacherSettings, // 12
+      AppRoutes.teacherMaterialsLibrary, // 8 (Materials Library)
+      AppRoutes.questionBank, // 9 (Question Bank & Review Console)
+      AppRoutes.teacherExams, // 10 (Exams & Assessments)
+      AppRoutes.teacherAssignments, // 11 (Assignments)
+      AppRoutes.sendAnnouncement, // 12
+      AppRoutes.teacherSettings, // 13
     ];
 
     if (index >= 0 && index < routes.length) {
@@ -177,6 +179,12 @@ class TeacherShell extends StatelessWidget {
             tooltip: context.l10n.videoLibraryTitle,
           ),
           AdaptiveDestination(
+            icon: Icons.folder_shared_outlined,
+            selectedIcon: Icons.folder_shared_rounded,
+            label: context.l10n.materialsLibraryTitle,
+            tooltip: context.l10n.materialsLibraryTitle,
+          ),
+          AdaptiveDestination(
             icon: Icons.functions_rounded,
             selectedIcon: Icons.functions_rounded,
             label: context.l10n.centralQuestionBankTitle,
@@ -269,7 +277,8 @@ class TeacherShell extends StatelessWidget {
     })();
 
     return Tooltip(
-      message: branding.localizedBrandName(context),
+      message:
+          '${branding.localizedBrandName(context)} • ${branding.localizedTeacherName(context)}',
       preferBelow: false,
       child: InkWell(
         onTap: () => context.go(AppRoutes.teacherDashboard),
@@ -285,47 +294,77 @@ class TeacherShell extends StatelessWidget {
 
   Widget _buildSidebarFooter(BuildContext context) {
     final theme = Theme.of(context);
+    final branding = (() {
+      try {
+        return context.watch<TenantThemeCubit>().state;
+      } catch (_) {
+        return TenantRegistry.defaultBranding;
+      }
+    })();
+    final teacherName = branding.localizedTeacherName(context);
     final userEmail =
         SupabaseService.currentUser?.email ?? context.l10n.roleTeacher;
 
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.s8),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.s10,
+        vertical: AppSpacing.s8,
+      ),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B).withValues(alpha: 0.7),
-        borderRadius: BorderRadius.circular(10),
+        color: const Color(0xFF1E293B).withValues(alpha: 0.85),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: const Color(0xFF334155).withValues(alpha: 0.6),
+          color: const Color(0xFF334155).withValues(alpha: 0.7),
         ),
       ),
       child: Row(
         children: [
           const CircleAvatar(
-            radius: 16,
+            radius: 18,
             backgroundColor: Color(0xFF334155),
             child: Icon(
               Icons.person_rounded,
-              size: 18,
+              size: 20,
               color: Color(0xFF38BDF8),
             ),
           ),
-          const SizedBox(width: AppSpacing.s8),
+          const SizedBox(width: AppSpacing.s10),
           Expanded(
-            child: Text(
-              userEmail,
-              style: theme.textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-                fontSize: 12,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  teacherName,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                    fontSize: 13,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 1),
+                Text(
+                  userEmail,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w400,
+                    color: const Color(0xFF94A3B8),
+                    fontSize: 11,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
           ),
+          const SizedBox(width: AppSpacing.s4),
           const LanguageSwitcherButton(compact: true),
           IconButton(
             icon: const Icon(Icons.logout_rounded, size: 18),
             tooltip: context.l10n.logout,
             color: const Color(0xFFF87171),
+            visualDensity: VisualDensity.compact,
             onPressed: () => _handleLogout(context),
           ),
         ],
@@ -334,35 +373,60 @@ class TeacherShell extends StatelessWidget {
   }
 
   Widget _buildCollapsedSidebarFooter(BuildContext context) {
+    final branding = (() {
+      try {
+        return context.watch<TenantThemeCubit>().state;
+      } catch (_) {
+        return TenantRegistry.defaultBranding;
+      }
+    })();
+    final teacherName = branding.localizedTeacherName(context);
     final userEmail =
         SupabaseService.currentUser?.email ?? context.l10n.roleTeacher;
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Tooltip(
-          message: userEmail,
-          preferBelow: false,
-          child: const CircleAvatar(
-            radius: 16,
-            backgroundColor: Color(0xFF334155),
-            child: Icon(
-              Icons.person_rounded,
-              size: 18,
-              color: Color(0xFF38BDF8),
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        vertical: AppSpacing.s8,
+        horizontal: AppSpacing.s6,
+      ),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E293B).withValues(alpha: 0.85),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: const Color(0xFF334155).withValues(alpha: 0.7),
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Tooltip(
+            message: '$teacherName\n$userEmail',
+            preferBelow: false,
+            child: const CircleAvatar(
+              radius: 18,
+              backgroundColor: Color(0xFF334155),
+              child: Icon(
+                Icons.person_rounded,
+                size: 20,
+                color: Color(0xFF38BDF8),
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: AppSpacing.s10),
-        const LanguageSwitcherButton(compact: true),
-        const SizedBox(height: AppSpacing.s6),
-        IconButton(
-          icon: const Icon(Icons.logout_rounded, size: 18),
-          tooltip: context.l10n.logout,
-          color: const Color(0xFFF87171),
-          onPressed: () => _handleLogout(context),
-        ),
-      ],
+          const SizedBox(height: AppSpacing.s8),
+          const Divider(height: 1, color: Color(0xFF334155)),
+          const SizedBox(height: AppSpacing.s8),
+          const LanguageSwitcherButton(compact: true),
+          const SizedBox(height: AppSpacing.s4),
+          IconButton(
+            icon: const Icon(Icons.logout_rounded, size: 18),
+            tooltip: context.l10n.logout,
+            color: const Color(0xFFF87171),
+            visualDensity: VisualDensity.compact,
+            onPressed: () => _handleLogout(context),
+          ),
+        ],
+      ),
     );
   }
 

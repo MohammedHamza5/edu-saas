@@ -41,11 +41,12 @@ final class ParentLoaded extends ParentState {
     ChildAcademicSummary? summary,
     bool? isLoadingSummary,
     String? errorMessage,
+    bool clearSummary = false,
   }) {
     return ParentLoaded(
       children: children ?? this.children,
       selectedChild: selectedChild ?? this.selectedChild,
-      summary: summary ?? this.summary,
+      summary: clearSummary ? null : (summary ?? this.summary),
       isLoadingSummary: isLoadingSummary ?? this.isLoadingSummary,
       errorMessage: errorMessage,
     );

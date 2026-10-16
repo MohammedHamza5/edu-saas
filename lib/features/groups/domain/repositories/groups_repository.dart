@@ -23,7 +23,11 @@ abstract interface class GroupsRepository {
     int? defaultPassingScore,
   });
 
-  Future<Result<List<GroupMemberEntity>>> getGroupMembers(String groupId);
+  Future<Result<List<GroupMemberEntity>>> getGroupMembers(
+    String groupId, {
+    int page = 0,
+    int pageSize = 25,
+  });
 
   Future<Result<GroupMemberEntity>> addMemberToGroup({
     required String groupId,

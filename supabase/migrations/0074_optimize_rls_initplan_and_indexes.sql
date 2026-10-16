@@ -51,6 +51,7 @@ BEGIN
                     AND gm.student_id = p_student_id
                     AND gm.status = 'active'
                     AND (
+                      
                         c.published_at IS NULL
                         OR gm.joined_at <= c.published_at
                         OR g.previous_content_access = 'allow'

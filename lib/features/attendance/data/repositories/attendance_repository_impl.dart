@@ -112,4 +112,22 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
       return FailureResult(ServerFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Result<StudentAttendanceBundle>> getStudentAttendanceBundle({
+    required String studentId,
+    String? groupId,
+  }) async {
+    try {
+      final bundle = await _remoteDataSource.getStudentAttendanceBundle(
+        studentId: studentId,
+        groupId: groupId,
+      );
+      return Success(bundle);
+    } on PostgrestException catch (e) {
+      return FailureResult(ServerFailure(e.message, code: e.code));
+    } catch (e) {
+      return FailureResult(ServerFailure(e.toString()));
+    }
+  }
 }

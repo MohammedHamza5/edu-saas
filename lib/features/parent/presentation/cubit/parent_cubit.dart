@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/utils/cache_manager.dart';
 import '../../domain/entities/child_entity.dart';
 import '../../domain/repositories/parent_repository.dart';
 import 'parent_state.dart';
@@ -11,8 +12,30 @@ class ParentCubit extends Cubit<ParentState> {
       super(const ParentInitial());
 
   /// Loads the parent dashboard by fetching linked children and summary of the first child
-  Future<void> loadParentDashboard() async {
-    emit(const ParentLoading());
+  Future<void> loadParentDashboard({bool forceRefresh = false}) async {
+    final cacheKeyChildren = AppCache.userKey('parent_children');
+    if (!forceRefresh) {
+      final cachedChildren =
+          AppCache.parent.get(cacheKeyChildren) as List<ChildEntity>?;
+      if (cachedChildren != null && cachedChildren.isNotEmpty) {
+        final firstChild = cachedChildren.first;
+        final summaryKey = AppCache.userKey('parent_summary_${firstChild.id}');
+        final cachedSummary =
+            AppCache.parent.get(summaryKey) as ChildAcademicSummary?;
+        emit(
+          ParentLoaded(
+            children: cachedChildren,
+            selectedChild: firstChild,
+            summary: cachedSummary,
+            isLoadingSummary: cachedSummary == null,
+          ),
+        );
+      } else {
+        emit(const ParentLoading());
+      }
+    } else {
+      emit(const ParentLoading());
+    }
 
     final childrenResult = await _repository.getLinkedChildren();
 
@@ -23,6 +46,7 @@ class ParentCubit extends Cubit<ParentState> {
           return;
         }
 
+        AppCache.parent.put(cacheKeyChildren, children);
         final selectedChild = children.first;
         emit(
           ParentLoaded(
@@ -32,10 +56,16 @@ class ParentCubit extends Cubit<ParentState> {
           ),
         );
 
-        await _loadSummaryForChild(selectedChild, children);
+        await _loadSummaryForChild(
+          selectedChild,
+          children,
+          forceRefresh: forceRefresh,
+        );
       },
       onFailure: (failure) async {
-        emit(ParentError(failure.message));
+        if (state is! ParentLoaded) {
+          emit(ParentError(failure.message));
+        }
       },
     );
   }
@@ -49,13 +79,27 @@ class ParentCubit extends Cubit<ParentState> {
       return;
     }
 
-    emit(
-      currentState.copyWith(
-        selectedChild: child,
-        isLoadingSummary: true,
-        summary: null,
-      ),
-    );
+    final summaryKey = AppCache.userKey('parent_summary_${child.id}');
+    final cachedSummary =
+        AppCache.parent.get(summaryKey) as ChildAcademicSummary?;
+
+    if (cachedSummary != null) {
+      emit(
+        currentState.copyWith(
+          selectedChild: child,
+          summary: cachedSummary,
+          isLoadingSummary: false,
+        ),
+      );
+    } else {
+      emit(
+        currentState.copyWith(
+          selectedChild: child,
+          isLoadingSummary: true,
+          clearSummary: true,
+        ),
+      );
+    }
 
     await _loadSummaryForChild(child, currentState.children);
   }
@@ -68,20 +112,25 @@ class ParentCubit extends Cubit<ParentState> {
       await _loadSummaryForChild(
         currentState.selectedChild,
         currentState.children,
+        forceRefresh: true,
       );
     } else {
-      await loadParentDashboard();
+      await loadParentDashboard(forceRefresh: true);
     }
   }
 
   Future<void> _loadSummaryForChild(
     ChildEntity child,
-    List<ChildEntity> allChildren,
-  ) async {
+    List<ChildEntity> allChildren, {
+    bool forceRefresh = false,
+  }) async {
+    final summaryKey = AppCache.userKey('parent_summary_${child.id}');
+
     final summaryResult = await _repository.getChildAcademicSummary(child.id);
 
     summaryResult.when(
       onSuccess: (summary) {
+        AppCache.parent.put(summaryKey, summary);
         emit(
           ParentLoaded(
             children: allChildren,
@@ -92,6 +141,10 @@ class ParentCubit extends Cubit<ParentState> {
         );
       },
       onFailure: (failure) {
+        final current = state;
+        if (current is ParentLoaded && current.summary != null) {
+          return;
+        }
         emit(
           ParentLoaded(
             children: allChildren,

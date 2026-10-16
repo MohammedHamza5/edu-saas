@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
-import '../../../../core/extensions/responsive_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/responsive_breakpoints.dart';
 import '../../../../core/utils/whatsapp_report_generator.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_empty_view.dart';
@@ -252,10 +250,8 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
 
             Widget bodyContent = BlocBuilder<AttendanceCubit, AttendanceState>(
               builder: (context, attendanceState) {
-                return Center(
-                  child: ResponsiveContainer(
-                    maxWidth: ResponsiveBreakpoints.maxContentWidth,
-                    child: Column(
+                return ResponsiveContainer(
+                  child: Column(
                       children: [
                         // Automated Modern SaaS Hero Header (Zero Manual Save Button!)
                         _buildHeroHeader(context),
@@ -272,8 +268,7 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
                         ),
                       ],
                     ),
-                  ),
-                );
+                  );
               },
             );
 
@@ -308,10 +303,8 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
                 builder: (context, groupsState) {
                   if (groupsState is GroupsLoaded &&
                       groupsState.groups.isEmpty) {
-                    return Center(
-                      child: ResponsiveContainer(
-                        maxWidth: ResponsiveBreakpoints.maxContentWidth,
-                        child: Column(
+                    return ResponsiveContainer(
+                      child: Column(
                           children: [
                             _buildHeroHeader(context),
                             Expanded(
@@ -416,8 +409,7 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
                             ),
                           ],
                         ),
-                      ),
-                    );
+                      );
                   }
                   return bodyContent;
                 },
@@ -433,114 +425,118 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
 
   /// Modern Automated SaaS Hero Header
   Widget _buildHeroHeader(BuildContext context) {
-    final isMobile = context.screenWidth < 600;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 600;
 
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(
-        horizontal: isMobile ? AppSpacing.s16 : AppSpacing.s24,
-        vertical: isMobile ? AppSpacing.s12 : AppSpacing.s16,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: const Border(bottom: BorderSide(color: AppColors.border)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
+        return Container(
+          width: double.infinity,
+          padding: EdgeInsets.symmetric(
+            horizontal: isMobile ? AppSpacing.s16 : AppSpacing.s24,
+            vertical: isMobile ? AppSpacing.s12 : AppSpacing.s16,
           ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  AppColors.primary.withValues(alpha: 0.16),
-                  AppColors.primary.withValues(alpha: 0.05),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            border: const Border(bottom: BorderSide(color: AppColors.border)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.02),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
               ),
-              borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-              border: Border.all(
-                color: AppColors.primary.withValues(alpha: 0.25),
-              ),
-            ),
-            child: const Icon(
-              Icons.insights_rounded,
-              color: AppColors.primary,
-              size: 24,
-            ),
+            ],
           ),
-          const SizedBox(width: AppSpacing.s14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Wrap(
-                  spacing: AppSpacing.s8,
-                  runSpacing: 4,
-                  crossAxisAlignment: WrapCrossAlignment.center,
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      AppColors.primary.withValues(alpha: 0.16),
+                      AppColors.primary.withValues(alpha: 0.05),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                  border: Border.all(
+                    color: AppColors.primary.withValues(alpha: 0.25),
+                  ),
+                ),
+                child: const Icon(
+                  Icons.insights_rounded,
+                  color: AppColors.primary,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.s14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      context.l10n.studentEngagementTitle,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary,
-                        letterSpacing: -0.3,
-                      ),
+                    Wrap(
+                      spacing: AppSpacing.s8,
+                      runSpacing: 4,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Text(
+                          context.l10n.studentEngagementTitle,
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.textPrimary,
+                            letterSpacing: -0.3,
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.s8,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryLight.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(
+                              color: AppColors.primary.withValues(alpha: 0.25),
+                            ),
+                          ),
+                          child: Text(
+                            context.l10n.studentEngagementBadge,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.s8,
-                        vertical: 2,
+                    const SizedBox(height: 3),
+                    Text(
+                      context.l10n.studentEngagementSubtitle,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w500,
                       ),
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryLight.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(4),
-                        border: Border.all(
-                          color: AppColors.primary.withValues(alpha: 0.25),
-                        ),
-                      ),
-                      child: Text(
-                        context.l10n.studentEngagementBadge,
-                        style: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.primary,
-                        ),
-                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
-                const SizedBox(height: 3),
-                Text(
-                  context.l10n.studentEngagementSubtitle,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textSecondary,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
+              ),
+              IconButton.filledTonal(
+                icon: const Icon(Icons.refresh_rounded, size: 20),
+                tooltip: context.l10n.refreshEngagementTooltip,
+                onPressed: () => _loadAttendance(forceRefresh: true),
+              ),
+            ],
           ),
-          IconButton.filledTonal(
-            icon: const Icon(Icons.refresh_rounded, size: 20),
-            tooltip: context.l10n.refreshEngagementTooltip,
-            onPressed: () => _loadAttendance(forceRefresh: true),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -549,7 +545,6 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
     BuildContext context,
     AttendanceState attendanceState,
   ) {
-    final isCompact = context.screenWidth < 768;
 
     final groupSelector = BlocBuilder<GroupsCubit, GroupsState>(
       builder: (context, groupsState) {
@@ -762,31 +757,37 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
       );
     }
 
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.s16),
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        border: Border(bottom: BorderSide(color: AppColors.border)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (isCompact) ...[
-            groupSelector,
-            const SizedBox(height: AppSpacing.s10),
-            viewModeToggle,
-          ] else ...[
-            Row(
-              children: [
-                Expanded(flex: 3, child: groupSelector),
-                const SizedBox(width: AppSpacing.s16),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isCompact = constraints.maxWidth < 680;
+
+        return Container(
+          padding: const EdgeInsets.all(AppSpacing.s16),
+          decoration: const BoxDecoration(
+            color: AppColors.surface,
+            border: Border(bottom: BorderSide(color: AppColors.border)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (isCompact) ...[
+                groupSelector,
+                const SizedBox(height: AppSpacing.s10),
                 viewModeToggle,
+              ] else ...[
+                Row(
+                  children: [
+                    Expanded(flex: 3, child: groupSelector),
+                    const SizedBox(width: AppSpacing.s16),
+                    viewModeToggle,
+                  ],
+                ),
               ],
-            ),
-          ],
-          if (lectureSelectorSection != null) lectureSelectorSection,
-        ],
-      ),
+              if (lectureSelectorSection != null) lectureSelectorSection,
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -1127,6 +1128,7 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
                   },
                 )
               : ListView.separated(
+                  cacheExtent: 350.0,
                   padding: const EdgeInsets.all(AppSpacing.s16),
                   itemCount: displayedStudents.length,
                   separatorBuilder: (_, __) =>
@@ -1397,6 +1399,7 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
                   },
                 )
               : ListView.separated(
+                  cacheExtent: 350.0,
                   padding: const EdgeInsets.all(AppSpacing.s16),
                   itemCount: displayedStudents.length,
                   separatorBuilder: (_, __) =>

@@ -11,6 +11,9 @@ class VideoBankCubit extends Cubit<VideoBankState> {
   final VideoBankRepository _repository;
   Timer? _pollingTimer;
 
+  static const int pageSize = 24;
+  int currentPage = 0;
+
   // In-memory cache for ultra-fast, zero-latency folder navigation
   final Map<String?, ({List<VideoFolderEntity> folders, List<LibraryVideoEntity> videos})>
       _cache = {};
@@ -72,10 +75,16 @@ class VideoBankCubit extends Cubit<VideoBankState> {
       newBreadcrumbs = [];
     }
 
+    currentPage = 0;
+
     // Run folders and videos queries concurrently in parallel!
     final results = await Future.wait([
       _repository.getFolders(parentId: folderId),
-      _repository.getVideos(folderId: folderId),
+      _repository.getVideos(
+        folderId: folderId,
+        page: 0,
+        pageSize: pageSize,
+      ),
     ]);
 
     final foldersRes = results[0] as Result<List<VideoFolderEntity>>;
@@ -116,6 +125,8 @@ class VideoBankCubit extends Cubit<VideoBankState> {
         folders: loadedFolders,
         videos: loadedVideos,
         isActionLoading: false,
+        hasMore: loadedVideos.length == pageSize,
+        isLoadingMore: false,
       ),
     );
 
@@ -123,6 +134,50 @@ class VideoBankCubit extends Cubit<VideoBankState> {
     final hasProcessing = loadedVideos.any((v) => v.isProcessing);
     if (hasProcessing) {
       _startStatusPolling();
+    }
+  }
+
+  /// Loads next page of videos on scroll (Infinite Scroll)
+  Future<void> loadMoreVideos() async {
+    final current = currentLoadedState;
+    if (current == null) return;
+    if (!current.hasMore || current.isLoadingMore || current.isActionLoading) {
+      return;
+    }
+
+    emit(current.copyWith(isLoadingMore: true));
+    final nextPage = currentPage + 1;
+
+    final result = await _repository.getVideos(
+      folderId: current.currentFolder?.id,
+      search: current.searchQuery.isNotEmpty ? current.searchQuery : null,
+      page: nextPage,
+      pageSize: pageSize,
+    );
+
+    if (isClosed) return;
+
+    if (result.isSuccess) {
+      currentPage = nextPage;
+      final newVideos = result.data;
+      final combined = [...current.videos, ...newVideos];
+
+      if (current.searchQuery.isEmpty) {
+        _cache[current.currentFolder?.id] = (
+          folders: current.folders,
+          videos: combined,
+        );
+      }
+
+      emit(
+        current.copyWith(
+          videos: combined,
+          hasMore: newVideos.length == pageSize,
+          isLoadingMore: false,
+        ),
+      );
+    } else {
+      emit(current.copyWith(isLoadingMore: false));
     }
   }
 
@@ -341,6 +396,7 @@ class VideoBankCubit extends Cubit<VideoBankState> {
       return;
     }
 
+    currentPage = 0;
     emit(prev.copyWith(searchQuery: trimmed, isActionLoading: true));
 
     // Ensure all folders are cached for folder search
@@ -356,7 +412,11 @@ class VideoBankCubit extends Cubit<VideoBankState> {
         .where((f) => f.name.toLowerCase().contains(queryLower))
         .toList();
 
-    final searchRes = await _repository.getVideos(search: trimmed);
+    final searchRes = await _repository.getVideos(
+      search: trimmed,
+      page: 0,
+      pageSize: pageSize,
+    );
     if (searchRes.isSuccess) {
       emit(
         prev.copyWith(
@@ -364,6 +424,8 @@ class VideoBankCubit extends Cubit<VideoBankState> {
           videos: searchRes.data,
           folders: matchingFolders,
           isActionLoading: false,
+          hasMore: searchRes.data.length == pageSize,
+          isLoadingMore: false,
         ),
       );
     } else {
@@ -372,6 +434,8 @@ class VideoBankCubit extends Cubit<VideoBankState> {
           searchQuery: trimmed,
           folders: matchingFolders,
           isActionLoading: false,
+          hasMore: false,
+          isLoadingMore: false,
         ),
       );
     }

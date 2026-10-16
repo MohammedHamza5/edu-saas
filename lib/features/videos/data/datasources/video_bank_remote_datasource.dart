@@ -33,6 +33,8 @@ abstract interface class VideoBankRemoteDataSource {
   Future<List<LibraryVideoModel>> getVideos({
     String? folderId,
     String? search,
+    int page = 0,
+    int pageSize = 24,
   });
 
   Future<LibraryVideoModel> getVideoById(String id);
@@ -114,10 +116,15 @@ class VideoBankRemoteDataSourceImpl implements VideoBankRemoteDataSource {
     );
   }
 
+  static const String _folderColumns =
+      'id, tenant_id, parent_id, name, color, created_at, updated_at, '
+      'video_count, subfolder_count, total_duration_seconds, '
+      'ready_video_count, assigned_chapters_count, assigned_groups';
+
   @override
   Future<List<VideoFolderModel>> getFolders({String? parentId}) async {
     try {
-      var query = _c.from('video_folders_with_counts').select();
+      var query = _c.from('video_folders_with_counts').select(_folderColumns);
 
       if (parentId == null) {
         query = query.filter('parent_id', 'is', 'null');
@@ -129,7 +136,9 @@ class VideoBankRemoteDataSourceImpl implements VideoBankRemoteDataSource {
       final list = response as List<dynamic>;
 
       return list
-          .map((json) => VideoFolderModel.fromJson(json as Map<String, dynamic>))
+          .map(
+            (json) => VideoFolderModel.fromJson(json as Map<String, dynamic>),
+          )
           .toList();
     } on PostgrestException catch (e) {
       throw ServerException(e.message, code: e.code);
@@ -143,12 +152,14 @@ class VideoBankRemoteDataSourceImpl implements VideoBankRemoteDataSource {
     try {
       final response = await _c
           .from('video_folders_with_counts')
-          .select()
+          .select(_folderColumns)
           .order('name', ascending: true);
 
       final list = response as List<dynamic>;
       return list
-          .map((json) => VideoFolderModel.fromJson(json as Map<String, dynamic>))
+          .map(
+            (json) => VideoFolderModel.fromJson(json as Map<String, dynamic>),
+          )
           .toList();
     } on PostgrestException catch (e) {
       throw ServerException(e.message, code: e.code);
@@ -226,10 +237,7 @@ class VideoBankRemoteDataSourceImpl implements VideoBankRemoteDataSource {
     try {
       final res = await _c.rpc<dynamic>(
         'update_video_folder_color',
-        params: {
-          'p_folder_id': id,
-          'p_color': color,
-        },
+        params: {'p_folder_id': id, 'p_color': color},
       );
       if (res is Map) {
         return VideoFolderModel.fromJson(Map<String, dynamic>.from(res));
@@ -262,6 +270,8 @@ class VideoBankRemoteDataSourceImpl implements VideoBankRemoteDataSource {
   Future<List<LibraryVideoModel>> getVideos({
     String? folderId,
     String? search,
+    int page = 0,
+    int pageSize = 24,
   }) async {
     try {
       var query = _c
@@ -276,11 +286,15 @@ class VideoBankRemoteDataSourceImpl implements VideoBankRemoteDataSource {
         query = query.filter('folder_id', 'is', 'null');
       }
 
-      final response = await query.order('created_at', ascending: false);
+      final response = await query
+          .order('created_at', ascending: false)
+          .range(page * pageSize, (page + 1) * pageSize - 1);
       final list = response as List<dynamic>;
 
       return list
-          .map((json) => LibraryVideoModel.fromJson(json as Map<String, dynamic>))
+          .map(
+            (json) => LibraryVideoModel.fromJson(json as Map<String, dynamic>),
+          )
           .toList();
     } on PostgrestException catch (e) {
       throw ServerException(e.message, code: e.code);
@@ -433,10 +447,7 @@ class VideoBankRemoteDataSourceImpl implements VideoBankRemoteDataSource {
     try {
       await _c.functions.invoke(
         'bunny-video',
-        body: {
-          'action': 'sync-status',
-          'video_id': libraryVideoId,
-        },
+        body: {'action': 'sync-status', 'video_id': libraryVideoId},
       );
 
       return await getVideoById(libraryVideoId);

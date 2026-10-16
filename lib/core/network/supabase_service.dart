@@ -1,4 +1,6 @@
 // ignore_for_file: deprecated_member_use
+import 'dart:async';
+import 'package:flutter/widgets.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/app_config.dart';
 import '../utils/app_logger.dart';
@@ -6,12 +8,15 @@ import '../utils/secure_storage_helper.dart';
 import 'secure_local_storage.dart';
 
 /// Central Supabase service wrapper
-/// Enforces PKCE auth flow and sound client access
+/// Enforces PKCE auth flow, sound client access, and proactive session preservation.
 class SupabaseService {
   SupabaseService._();
 
   static const String _roleStorageKey = 'cached_user_role';
   static const String _statusStorageKey = 'cached_user_status';
+
+  static Timer? _sessionRefreshTimer;
+  static _AppLifecycleSessionObserver? _lifecycleObserver;
 
   static bool get isInitialized {
     try {
@@ -56,6 +61,16 @@ class SupabaseService {
 
     AppLogger.s('SupabaseService', 'Supabase client ready');
 
+    // Proactive background session keeper: keeps teacher and student sessions alive
+    // so the platform never expires while the user is actively working.
+    _startSessionKeeper();
+
+    // Attach lifecycle observer to immediately refresh expired sessions when tab restores
+    if (_lifecycleObserver == null) {
+      _lifecycleObserver = _AppLifecycleSessionObserver();
+      WidgetsBinding.instance.addObserver(_lifecycleObserver!);
+    }
+
     // Listen to auth state changes and log them
     Supabase.instance.client.auth.onAuthStateChange.listen(
       (data) {
@@ -84,6 +99,35 @@ class SupabaseService {
         );
       },
     );
+  }
+
+  /// Proactively refreshes the session if it is expired or will expire within 10 minutes.
+  /// Guarantees that active working sessions (e.g. creating exams) never encounter 403 RLS errors.
+  static Future<void> ensureFreshSession() async {
+    if (!isInitialized) return;
+    final session = client.auth.currentSession;
+    if (session == null) return;
+
+    final expiresAt = session.expiresAt;
+    final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    // If expired or expiring within 600 seconds (10 minutes)
+    if (expiresAt == null || (expiresAt - now) < 600) {
+      try {
+        AppLogger.i('SupabaseService', '🔄 Proactively refreshing auth session token...');
+        await client.auth.refreshSession();
+        AppLogger.s('SupabaseService', '✅ Auth session token successfully refreshed');
+      } catch (e) {
+        AppLogger.w('SupabaseService', '⚠️ Could not refresh session: $e');
+      }
+    }
+  }
+
+  static void _startSessionKeeper() {
+    _sessionRefreshTimer?.cancel();
+    // Check every 5 minutes while app is running
+    _sessionRefreshTimer = Timer.periodic(const Duration(minutes: 5), (_) async {
+      await ensureFreshSession();
+    });
   }
 
   static User? get currentUser =>
@@ -124,3 +168,15 @@ class SupabaseService {
       (currentUser?.userMetadata?['tenant_id'] as String?) ??
       (currentUser?.appMetadata['tenant_id'] as String?);
 }
+
+/// Watches app lifecycle state and proactively refreshes auth sessions
+/// when user switches back to the tab from background/sleep.
+class _AppLifecycleSessionObserver with WidgetsBindingObserver {
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      SupabaseService.ensureFreshSession();
+    }
+  }
+}
+

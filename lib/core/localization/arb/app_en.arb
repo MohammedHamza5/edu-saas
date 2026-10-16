@@ -1338,6 +1338,50 @@
   "@satDesmosCalculator": {
     "description": "Calculator tool"
   },
+  "desmosGraphingCalculator": "Desmos Graphing Calculator",
+  "@desmosGraphingCalculator": {
+    "description": "Desmos graphing calculator title"
+  },
+  "desmosScientificCalculator": "Desmos Scientific Calculator",
+  "@desmosScientificCalculator": {
+    "description": "Desmos scientific calculator title"
+  },
+  "desmosModeGraphing": "Graphing",
+  "@desmosModeGraphing": {
+    "description": "Desmos graphing mode button"
+  },
+  "desmosModeScientific": "Scientific",
+  "@desmosModeScientific": {
+    "description": "Desmos scientific mode button"
+  },
+  "desmosMinimizeTooltip": "Minimize Calculator",
+  "@desmosMinimizeTooltip": {
+    "description": "Tooltip for minimizing Desmos calculator"
+  },
+  "desmosExpandTooltip": "Expand Calculator",
+  "@desmosExpandTooltip": {
+    "description": "Tooltip for expanding Desmos calculator"
+  },
+  "desmosCloseTooltip": "Close Calculator",
+  "@desmosCloseTooltip": {
+    "description": "Tooltip for closing Desmos calculator"
+  },
+  "desmosDragHandleTooltip": "Drag to reposition calculator",
+  "@desmosDragHandleTooltip": {
+    "description": "Tooltip for dragging calculator"
+  },
+  "desmosMaximizeTooltip": "Maximize Calculator",
+  "@desmosMaximizeTooltip": {
+    "description": "Tooltip for maximizing Desmos calculator"
+  },
+  "desmosRestoreTooltip": "Restore Calculator Size",
+  "@desmosRestoreTooltip": {
+    "description": "Tooltip for restoring Desmos calculator size"
+  },
+  "desmosResizeHandleTooltip": "Drag corner to resize calculator",
+  "@desmosResizeHandleTooltip": {
+    "description": "Tooltip for resizing Desmos calculator"
+  },
   "satReferenceSheet": "SAT Reference Formulas",
   "@satReferenceSheet": {
     "description": "Reference sheet tool"
@@ -4704,6 +4748,10 @@
   "@resumeCurrentExam": {
     "description": "Resume exam button"
   },
+  "examResumeAction": "Resume Exam",
+  "@examResumeAction": {
+    "description": "Resume exam button"
+  },
   "startExamNow": "Start Exam Now",
   "@startExamNow": {
     "description": "Start exam button"
@@ -6242,6 +6290,14 @@
       }
     }
   },
+  "examNumberBadge": "Exam {number}",
+  "@examNumberBadge": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
   "moveUpAction": "Move Up",
   "moveDownAction": "Move Down",
   "quizGateNotice": "Must pass previous exam",
@@ -7012,6 +7068,14 @@
   "@goToExamsPage": {
     "description": "Button to navigate to exams dashboard"
   },
+  "assignToGroupNowAction": "Assign to Group Now",
+  "@assignToGroupNowAction": {
+    "description": "Button to open group assignment form in upload exam dialog"
+  },
+  "returnToQuestionBankAction": "Return to Question Bank",
+  "@returnToQuestionBankAction": {
+    "description": "Button to dismiss dialog and return to question bank"
+  },
   "analyzingForensicStep": "Analyzing forensic layers & classifying pages...",
   "@analyzingForensicStep": {
     "description": "Extraction progress step 1"
@@ -7362,6 +7426,16 @@
       }
     }
   },
+  "syncingImageInBackground": "Syncing image in background...",
+  "@syncingImageInBackground": {},
+  "imageSavedToCloud": "Saved to cloud",
+  "@imageSavedToCloud": {},
+  "syncingPendingImages": "Finalizing image uploads to cloud...",
+  "@syncingPendingImages": {},
+  "retryUpload": "Retry",
+  "@retryUpload": {},
+  "imageUploadPendingError": "Please wait while question images finish uploading.",
+  "@imageUploadPendingError": {},
   "questionTextFieldOptional": "Question Prompt (Optional if image attached)",
   "@questionTextFieldOptional": {},
   "questionTextOptionalHint": "Optional: Add problem details or leave blank if image contains full question...",
@@ -7587,6 +7661,52 @@
   "@retakeMistakesPractice": {},
   "allExamsFilter": "All Sources",
   "@allExamsFilter": {},
+  "studentNavMistakesBank": "Mistakes Bank",
+  "@studentNavMistakesBank": {},
+  "mistakesBankSidebarSubtitle": "Review & master concepts",
+  "@mistakesBankSidebarSubtitle": {},
+  "filterWrongAnswersOnly": "Wrong Answers Only",
+  "@filterWrongAnswersOnly": {},
+  "filterSkippedOnly": "Skipped Questions Only",
+  "@filterSkippedOnly": {},
+  "filterAllTypes": "All Types",
+  "@filterAllTypes": {},
+  "wrongAnswerBadge": "Wrong Answer",
+  "@wrongAnswerBadge": {},
+  "skippedQuestionBadge": "Skipped Question",
+  "@skippedQuestionBadge": {},
+  "previousWrongChoice": "Your previous choice: {option}",
+  "@previousWrongChoice": {
+    "placeholders": {
+      "option": {
+        "type": "String"
+      }
+    }
+  },
+  "questionWasSkippedNotice": "No option was selected during this exam (skipped question)",
+  "@questionWasSkippedNotice": {},
+  "searchMistakesPlaceholder": "Search questions or topic...",
+  "@searchMistakesPlaceholder": {},
+  "wrongAnswersCountLabel": "Wrong Answers",
+  "@wrongAnswersCountLabel": {},
+  "skippedQuestionsCountLabel": "Skipped Questions",
+  "@skippedQuestionsCountLabel": {},
+  "practiceThisQuestion": "Practice This Question",
+  "@practiceThisQuestion": {},
+  "practiceFilteredMistakes": "Start Practice ({count})",
+  "@practiceFilteredMistakes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mistakesTypeBreakdown": "Mistakes Breakdown",
+  "@mistakesTypeBreakdown": {},
+  "practiceHeaderWrongNote": "⚠️ You answered this question incorrectly previously",
+  "@practiceHeaderWrongNote": {},
+  "practiceHeaderSkippedNote": "⏸️ You left this question unanswered previously",
+  "@practiceHeaderSkippedNote": {},
   "videoBankCmsTitle": "Video Bank",
   "@videoBankCmsTitle": {},
   "videoBankCmsSubtitle": "Organize lectures into folders and assign them to any course seamlessly.",
@@ -9078,5 +9198,348 @@
   "reloadPlayerTooltip": "Reload player",
   "@reloadPlayerTooltip": {},
   "reloadPlayerAction": "Reload Player",
-  "@reloadPlayerAction": {}
+  "@reloadPlayerAction": {},
+  "examQuestionsSolvedProgress": "{solved} of {total} questions solved",
+  "@examQuestionsSolvedProgress": {
+    "placeholders": {
+      "solved": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "examQuestionsAllSolved": "All questions solved ({count}/{count})",
+  "@examQuestionsAllSolved": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "examNotStartedYet": "Not started yet (0/{total})",
+  "@examNotStartedYet": {
+    "placeholders": {
+      "total": { "type": "int" }
+    }
+  },
+  "examCompletedCheck": "Completed",
+  "@examCompletedCheck": {},
+  "examFullyCompletedBadge": "Fully Completed",
+  "@examFullyCompletedBadge": {},
+  "examSearchPlaceholder": "Search assessments by title or group...",
+  "@examSearchPlaceholder": {},
+  "filterNotStarted": "Available",
+  "@filterNotStarted": {},
+  "studentExamsStatsCompleted": "Completed",
+  "@studentExamsStatsCompleted": {},
+  "studentExamsStatsInProgress": "In Progress",
+  "@studentExamsStatsInProgress": {},
+  "studentExamsStatsAvailable": "Available",
+  "@studentExamsStatsAvailable": {},
+  "studentExamsStatsTotal": "Total Assessments",
+  "@studentExamsStatsTotal": {},
+  "studentExamsOverallProgress": "Completion Rate",
+  "@studentExamsOverallProgress": {},
+  "studentExamsOverviewTitle": "Assessments Progress Hub",
+  "@studentExamsOverviewTitle": {},
+  "examScoreAchieved": "Score: {score}/{max}",
+  "@examScoreAchieved": {
+    "placeholders": {
+      "score": { "type": "int" },
+      "max": { "type": "int" }
+    }
+  },
+  "clearSearchTooltip": "Clear search",
+  "@clearSearchTooltip": {},
+  "studentExamCardReviewTooltip": "Review questions and answers",
+  "@studentExamCardReviewTooltip": {},
+  "examCompletedStatusCheck": "Completed Successfully",
+  "@examCompletedStatusCheck": {},
+  "openPdfInNewTab": "Open in New Window (Fast for iPad)",
+  "@openPdfInNewTab": {},
+  "openPdfInNewTabTooltip": "Open with high-performance native browser engine with Apple Pencil & Split View support",
+  "@openPdfInNewTabTooltip": {},
+  "openPdfEmbeddedTooltip": "Preview PDF inside the platform",
+  "@openPdfEmbeddedTooltip": {},
+  "examDraftFoundNotice": "Unsaved draft found ({count} questions • {time})",
+  "@examDraftFoundNotice": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "time": { "type": "String" }
+    }
+  },
+  "restoreExamDraftAction": "Restore Draft",
+  "@restoreExamDraftAction": {},
+  "discardExamDraftAction": "Discard",
+  "@discardExamDraftAction": {},
+  "examDraftRestoredSuccess": "Draft restored successfully",
+  "@examDraftRestoredSuccess": {},
+  "examDraftDiscardedSuccess": "Temporary draft discarded",
+  "@examDraftDiscardedSuccess": {},
+  "autoSavedDraftBadge": "Draft Auto-Saved",
+  "@autoSavedDraftBadge": {},
+  "materialsLibraryTitle": "Materials Library",
+  "@materialsLibraryTitle": {},
+  "materialsLibrarySubtitle": "Manage handouts, worksheets, and lecture PDFs",
+  "@materialsLibrarySubtitle": {},
+  "selectFromMaterialsLibrary": "Select from Materials Library",
+  "@selectFromMaterialsLibrary": {},
+  "selectFromMaterialsLibrarySubtitle": "Select an existing file to link directly without re-uploading",
+  "@selectFromMaterialsLibrarySubtitle": {},
+  "materialsSearchHint": "Search by file or material name...",
+  "@materialsSearchHint": {},
+  "noMaterialsFound": "No materials found in this folder",
+  "@noMaterialsFound": {},
+  "noMaterialsFoundSubtitle": "Upload PDF handouts or create folders to organize your resources.",
+  "@noMaterialsFoundSubtitle": {},
+  "uploadMaterialAction": "Upload File",
+  "@uploadMaterialAction": {},
+  "createNewFolderAction": "New Folder",
+  "@createNewFolderAction": {},
+  "editFolderName": "Edit Folder",
+  "@editFolderName": {},
+  "editMaterialAction": "Rename File",
+  "@editMaterialAction": {},
+  "deleteFolderAction": "Delete Folder",
+  "@deleteFolderAction": {},
+  "deleteMaterialAction": "Delete File",
+  "@deleteMaterialAction": {},
+  "moveMaterialAction": "Move to Folder",
+  "@moveMaterialAction": {},
+  "usedInLecturesCount": "Used in {count} lectures",
+  "@usedInLecturesCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "unusedMaterial": "Unused",
+  "@unusedMaterial": {},
+  "materialDuplicateNotice": "This file is already in your library! Reusing it directly to save space.",
+  "@materialDuplicateNotice": {},
+  "materialSelectedFromLibrary": "Linked from Library",
+  "@materialSelectedFromLibrary": {},
+  "changeMaterialAction": "Change File",
+  "@changeMaterialAction": {},
+  "previewMaterialAction": "Preview",
+  "@previewMaterialAction": {},
+  "folderFilesCount": "{count} files",
+  "@folderFilesCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "rootMaterialsTitle": "Library Root",
+  "@rootMaterialsTitle": {},
+  "folderNameLabel": "Folder Name",
+  "@folderNameLabel": {},
+  "folderColorLabel": "Folder Color",
+  "@folderColorLabel": {},
+  "confirmDeleteFolderTitle": "Delete Folder?",
+  "@confirmDeleteFolderTitle": {},
+  "confirmDeleteFolderMessage": "Are you sure you want to delete this folder? Files inside it will be moved to root.",
+  "@confirmDeleteFolderMessage": {},
+  "confirmDeleteMaterialTitle": "Delete File?",
+  "@confirmDeleteMaterialTitle": {},
+  "confirmDeleteMaterialMessage": "Are you sure you want to delete this file from your library?",
+  "@confirmDeleteMaterialMessage": {},
+  "selectMaterialAction": "Select File",
+  "@selectMaterialAction": {},
+  "uploadingMaterialNotice": "Uploading and indexing material in library...",
+  "@uploadingMaterialNotice": {},
+  "uploadFromDeviceAction": "Upload from Device",
+  "@uploadFromDeviceAction": {},
+  "orChooseFromDevice": "or choose a file from your device",
+  "@orChooseFromDevice": {},
+  "allMaterialsFilter": "All Files",
+  "@allMaterialsFilter": {},
+  "pdfFilesFilter": "PDF Files",
+  "@pdfFilesFilter": {},
+  "examUnderPreparationNotice": "This exam is currently being prepared by the teacher and has no questions yet.",
+  "@examUnderPreparationNotice": {},
+  "lessonUnderPreparationNotice": "This lecture is currently being prepared by the teacher and content will be published soon.",
+  "@lessonUnderPreparationNotice": {},
+  "contentUnderPreparation": "Content Under Preparation",
+  "@contentUnderPreparation": {},
+  "folderCount": "{count} folders",
+  "@folderCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "submissionReasonStudentSubmitted": "Student Submitted",
+  "@submissionReasonStudentSubmitted": {},
+  "submissionReasonTimeExpired": "Time Expired",
+  "@submissionReasonTimeExpired": {},
+  "submissionReasonForcedExit": "Forced Exit (Left Exam)",
+  "@submissionReasonForcedExit": {},
+  "submissionReasonSecurityViolations": "Security Violations",
+  "@submissionReasonSecurityViolations": {},
+  "submissionReasonTabClosed": "Browser / Window Closed",
+  "@submissionReasonTabClosed": {},
+  "submissionReasonSystemTimeout": "System Timeout (Auto-Finalized)",
+  "@submissionReasonSystemTimeout": {},
+  "forcedExitWarningTitle": "Warning: Leaving Exam",
+  "@forcedExitWarningTitle": {},
+  "forcedExitWarningMessage": "Leaving this page will immediately force-submit your exam and calculate your score based only on the answers you have provided so far. Are you sure you want to exit and submit?",
+  "@forcedExitWarningMessage": {},
+  "forcedExitConfirmButton": "Force Submit & Exit",
+  "@forcedExitConfirmButton": {},
+  "stayAndContinueButton": "Stay & Continue Solving",
+  "@stayAndContinueButton": {},
+  "timeExpiredAutoSubmittingNotice": "Exam time is up! Auto-submitting and grading your answers...",
+  "@timeExpiredAutoSubmittingNotice": {},
+  "viewStudentAnswersAction": "Review Student Answers",
+  "@viewStudentAnswersAction": {},
+  "submissionReasonLabel": "Submission Type",
+  "@submissionReasonLabel": {},
+  "performanceGradeExcellent": "Outstanding (Honor)",
+  "@performanceGradeExcellent": {},
+  "performanceGradeVeryGood": "Very Good",
+  "@performanceGradeVeryGood": {},
+  "performanceGradeGood": "Good",
+  "@performanceGradeGood": {},
+  "performanceGradePass": "Passed",
+  "@performanceGradePass": {},
+  "performanceGradeNeedsImprovement": "Needs Improvement",
+  "@performanceGradeNeedsImprovement": {},
+  "correctAnswersMetric": "Correct Answers",
+  "@correctAnswersMetric": {},
+  "incorrectAnswersMetric": "Incorrect Answers",
+  "@incorrectAnswersMetric": {},
+  "skippedAnswersMetric": "Skipped Questions",
+  "@skippedAnswersMetric": {},
+  "timeSpentMetric": "Time Spent",
+  "@timeSpentMetric": {},
+  "totalScoreMetric": "Total Score",
+  "@totalScoreMetric": {},
+  "questionsMatrixTitle": "Answer Sheet Matrix",
+  "@questionsMatrixTitle": {},
+  "questionsMatrixSubtitle": "Tap any question to review its full solution and explanation",
+  "@questionsMatrixSubtitle": {},
+  "statusCorrect": "Correct",
+  "@statusCorrect": {},
+  "statusIncorrect": "Wrong",
+  "@statusIncorrect": {},
+  "statusSkipped": "Skipped",
+  "@statusSkipped": {},
+  "viewExamResultAction": "View Results & Solutions",
+  "@viewExamResultAction": {},
+  "retakeToImproveScore": "Retake (Improve Score)",
+  "@retakeToImproveScore": {},
+  "submissionExplanationStudent": "You submitted your exam normally and scores were calculated.",
+  "@submissionExplanationStudent": {},
+  "submissionExplanationTimeout": "Exam was automatically submitted as allotted time expired.",
+  "@submissionExplanationTimeout": {},
+  "submissionExplanationForcedExit": "Exam was forcibly submitted after leaving the test screen.",
+  "@submissionExplanationForcedExit": {},
+  "submissionExplanationViolations": "Exam was submitted due to repeated security rule violations.",
+  "@submissionExplanationViolations": {},
+  "submissionExplanationTabClosed": "Exam was submitted because the browser window was closed.",
+  "@submissionExplanationTabClosed": {},
+  "submissionExplanationSystem": "Exam was automatically graded by the system.",
+  "@submissionExplanationSystem": {},
+  "examScoreSummary": "Scored {score} of {maxScore}",
+  "@examScoreSummary": {
+    "placeholders": {
+      "score": { "type": "int" },
+      "maxScore": { "type": "int" }
+    }
+  },
+  "passingThresholdLabel": "Passing Threshold: {score}%",
+  "@passingThresholdLabel": {
+    "placeholders": {
+      "score": { "type": "int" }
+    }
+  },
+  "goToNextLectureSpecific": "Next Lecture: {title}",
+  "@goToNextLectureSpecific": {
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "examPassedSubtitle": "Great job! You achieved the required passing score for this exam.",
+  "@examPassedSubtitle": {},
+  "examFailedSubtitle": "Review your mistakes and model answers, then retry to master the material.",
+  "@examFailedSubtitle": {},
+  "previousAttemptSummary": "Previous Attempt Result",
+  "@previousAttemptSummary": {},
+  "detailedPerformanceAnalytics": "Performance Breakdown",
+  "@detailedPerformanceAnalytics": {},
+  "reviewAllQuestionsAction": "Review All Questions & Solutions",
+  "@reviewAllQuestionsAction": {},
+  "uploadingFilesTitle": "Uploading Files",
+  "@uploadingFilesTitle": {},
+  "uploadingFileProgress": "Uploading file {current} of {total}: {fileName}",
+  "@uploadingFileProgress": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" },
+      "fileName": { "type": "String" }
+    }
+  },
+  "uploadMaterialSuccess": "File \"{fileName}\" uploaded successfully",
+  "@uploadMaterialSuccess": {
+    "placeholders": {
+      "fileName": { "type": "String" }
+    }
+  },
+  "uploadMaterialError": "Failed to upload \"{fileName}\": {error}",
+  "@uploadMaterialError": {
+    "placeholders": {
+      "fileName": { "type": "String" },
+      "error": { "type": "String" }
+    }
+  },
+  "smartBadgePdf": "PDF",
+  "@smartBadgePdf": {},
+  "smartBadgeExam": "Quiz",
+  "@smartBadgeExam": {},
+  "changeAction": "Change",
+  "@changeAction": {},
+  "inspectLectureAction": "Inspect & Preview",
+  "@inspectLectureAction": {},
+  "reorderLecturesHint": "Drag cards to reorder lectures before saving",
+  "@reorderLecturesHint": {},
+  "singleVideoModeBadge": "Single Lecture",
+  "@singleVideoModeBadge": {},
+  "selectedVideosBadge": "{count} Selected Videos",
+  "@selectedVideosBadge": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "attachedExamPdf": "Attached Exam Booklet (PDF)",
+  "@attachedExamPdf": {},
+  "attachedExamPdfDesc": "Attach a PDF question booklet for students to view securely while solving",
+  "@attachedExamPdfDesc": {},
+  "attachPdfFile": "Attach PDF Booklet",
+  "@attachPdfFile": {},
+  "removeAttachedPdf": "Remove PDF",
+  "@removeAttachedPdf": {},
+  "pdfAttachedSuccess": "PDF booklet attached successfully",
+  "@pdfAttachedSuccess": {},
+  "quickBubbleSheetGenerator": "Quick Bubble Sheet Generator",
+  "@quickBubbleSheetGenerator": {},
+  "quickBubbleSheetPrompt": "Generate answer sheets quickly for your PDF exam",
+  "@quickBubbleSheetPrompt": {},
+  "numberOfQuestions": "Number of Questions",
+  "@numberOfQuestions": {},
+  "generateQuestions": "Generate Questions",
+  "@generateQuestions": {},
+  "viewExamBooklet": "View Exam Booklet (PDF)",
+  "@viewExamBooklet": {},
+  "hideExamBooklet": "Back to Questions",
+  "@hideExamBooklet": {},
+  "examPdfLoading": "Loading exam booklet...",
+  "@examPdfLoading": {},
+  "numberOfOptionsPerQuestion": "Options per question",
+  "@numberOfOptionsPerQuestion": {},
+  "quickPresets": "Presets",
+  "@quickPresets": {},
+  "overwriteQuestionsWarning": "This will replace current questions with a fresh bubble sheet. Continue?",
+  "@overwriteQuestionsWarning": {},
+  "selectFromMaterialsLibrary": "Choose from Materials Library",
+  "@selectFromMaterialsLibrary": {},
+  "uploadNewPdfFromDevice": "Upload new PDF from device",
+  "@uploadNewPdfFromDevice": {},
+  "previewPdfBooklet": "Preview Booklet",
+  "@previewPdfBooklet": {},
+  "replacePdfBooklet": "Replace Booklet",
+  "@replacePdfBooklet": {}
 }

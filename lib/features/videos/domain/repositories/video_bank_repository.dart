@@ -29,6 +29,8 @@ abstract interface class VideoBankRepository {
   Future<Result<List<LibraryVideoEntity>>> getVideos({
     String? folderId,
     String? search,
+    int page = 0,
+    int pageSize = 24,
   });
 
   Future<Result<LibraryVideoEntity>> getVideoById(String id);

@@ -8,7 +8,7 @@ import '../../../../core/widgets/app_card.dart';
 import '../../domain/entities/exam_entity.dart';
 import '../cubit/exams_cubit.dart';
 import '../cubit/exams_state.dart';
-import 'exam_review_page.dart';
+import 'exam_result_page.dart';
 import 'exam_taking_page.dart';
 import '../../../content/domain/entities/lesson_assignment_entity.dart';
 import '../utils/exam_asset_preloader.dart';
@@ -258,35 +258,57 @@ class ExamIntroPage extends StatelessWidget {
 
             // Action Button
             if (canTake) ...[
-              if (isLectureExam && exam.hasAttempted && !isPassed && !hasActive) ...[
+              if (exam.hasAttempted && exam.myLatestAttempt != null && !hasActive) ...[
+                // Banner showing previous attempt results
                 Container(
                   width: double.infinity,
                   margin: const EdgeInsets.only(bottom: AppSpacing.s16),
                   padding: const EdgeInsets.all(AppSpacing.s14),
                   decoration: BoxDecoration(
-                    color: AppColors.warning.withValues(alpha: 0.1),
+                    color: (isPassed ? AppColors.success : AppColors.warning)
+                        .withValues(alpha: 0.1),
                     borderRadius:
                         BorderRadius.circular(AppSpacing.radiusMedium),
-                    border: Border.all(color: AppColors.warning),
+                    border: Border.all(
+                      color: isPassed ? AppColors.success : AppColors.warning,
+                    ),
                   ),
                   child: Row(
                     children: [
-                      const Icon(
-                        Icons.info_outline_rounded,
-                        color: AppColors.warning,
+                      Icon(
+                        isPassed
+                            ? Icons.emoji_events_rounded
+                            : Icons.info_outline_rounded,
+                        color: isPassed ? AppColors.success : AppColors.warning,
                       ),
                       const SizedBox(width: AppSpacing.s12),
                       Expanded(
-                        child: Text(
-                          context.l10n.retakeToUnlockNextLesson(
-                            exam.myBestScore ?? 0,
-                            exam.maxScore,
-                          ),
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
-                          ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              context.l10n.previousAttemptSummary,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: AppColors.textMuted,
+                              ),
+                            ),
+                            Text(
+                              context.l10n.examScoreSummary(
+                                exam.myBestScore ??
+                                    exam.myLatestAttempt!.score ??
+                                    0,
+                                exam.maxScore,
+                              ),
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: isPassed
+                                    ? AppColors.success
+                                    : AppColors.warning,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -296,6 +318,34 @@ class ExamIntroPage extends StatelessWidget {
               BlocConsumer<ExamsCubit, ExamsState>(
                 listener: (context, state) {
                   if (state is ExamsError) {
+                    if (state.message.contains('ATTEMPTS_LIMIT_REACHED')) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(context.l10n.errorExamAlreadySubmittedMessage),
+                          backgroundColor: AppColors.warning,
+                        ),
+                      );
+                      if (exam.myLatestAttempt != null) {
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute<void>(
+                            builder: (_) => BlocProvider.value(
+                              value: context.read<ExamsCubit>(),
+                              child: ExamResultPage(
+                                exam: exam,
+                                attempt: exam.myLatestAttempt!,
+                                isLectureExam: isLectureExam ||
+                                    exam.isLectureExam ||
+                                    exam.isLinkedToLesson,
+                                nextLesson: nextLesson,
+                                nextLessonIndex: nextLessonIndex,
+                                totalLessonsCount: totalLessonsCount,
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                      return;
+                    }
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(state.message),
@@ -306,70 +356,112 @@ class ExamIntroPage extends StatelessWidget {
                 },
                 builder: (context, state) {
                   final isLoading = state is ExamsLoading;
+                  final hasAttempt =
+                      exam.hasAttempted && exam.myLatestAttempt != null && !hasActive;
+
                   return Column(
                     children: [
-                      AppButton(
-                        text: hasActive
-                            ? context.l10n.resumeCurrentExam
-                            : (isLectureExam && exam.hasAttempted && !isPassed
-                                ? context.l10n.retakeExamNow
-                                : context.l10n.startExamNow),
-                        icon: hasActive
-                            ? Icons.play_arrow
-                            : (isLectureExam && exam.hasAttempted && !isPassed
-                                ? Icons.replay_outlined
-                                : Icons.rocket_launch_outlined),
-                        isLoading: isLoading,
-                        onPressed: isLoading
-                            ? null
-                            : () async {
-                                final cubit = context.read<ExamsCubit>();
-                                final success = await cubit.startExamTaking(
-                                  exam,
-                                  isLectureExam: isUntimed,
-                                );
-
-                                if (context.mounted && success) {
-                                  await Navigator.of(context).push<void>(
-                                    MaterialPageRoute<void>(
-                                      builder: (_) => BlocProvider.value(
-                                        value: cubit,
-                                        child: ExamTakingPage(
-                                          isLectureExam: isLectureExam ||
-                                              exam.isLectureExam ||
-                                              exam.isLinkedToLesson,
-                                          nextLesson: nextLesson,
-                                          nextLessonIndex: nextLessonIndex,
-                                          totalLessonsCount: totalLessonsCount,
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                  if (context.mounted) {
-                                    Navigator.of(context).pop();
-                                  }
-                                }
-                              },
-                      ),
-                      if (exam.hasAttempted &&
-                          exam.myLatestAttempt != null &&
-                          !hasActive) ...[
-                        const SizedBox(height: AppSpacing.s12),
+                      if (hasAttempt) ...[
+                        // Primary: View Results & Solutions
                         AppButton(
-                          text: context.l10n.reviewPreviousAttempt,
+                          text: context.l10n.viewExamResultAction,
                           icon: Icons.fact_check_outlined,
-                          variant: AppButtonVariant.secondary,
                           onPressed: () {
+                            final cubit = context.read<ExamsCubit>();
                             Navigator.of(context).push(
                               MaterialPageRoute<void>(
-                                builder: (_) => ExamReviewPage(
-                                  attemptId: exam.myLatestAttempt!.id,
-                                  exam: exam,
-                                  initialAttempt: exam.myLatestAttempt,
+                                builder: (_) => BlocProvider.value(
+                                  value: cubit,
+                                  child: ExamResultPage(
+                                    exam: exam,
+                                    attempt: exam.myLatestAttempt!,
+                                    isLectureExam: isLectureExam ||
+                                        exam.isLectureExam ||
+                                        exam.isLinkedToLesson,
+                                    nextLesson: nextLesson,
+                                    nextLessonIndex: nextLessonIndex,
+                                    totalLessonsCount: totalLessonsCount,
+                                  ),
                                 ),
                               ),
                             );
                           },
+                        ),
+                        const SizedBox(height: AppSpacing.s12),
+                        // Secondary: Retake if allowed
+                        AppButton(
+                          text: isLectureExam && !isPassed
+                              ? context.l10n.retakeExamNow
+                              : context.l10n.retakeToImproveScore,
+                          icon: Icons.replay_outlined,
+                          variant: AppButtonVariant.secondary,
+                          isLoading: isLoading,
+                          onPressed: isLoading
+                              ? null
+                              : () async {
+                                  final cubit = context.read<ExamsCubit>();
+                                  final success = await cubit.startExamTaking(
+                                    exam,
+                                    isLectureExam: isUntimed,
+                                  );
+
+                                  if (context.mounted && success) {
+                                    await Navigator.of(context).pushReplacement<void, void>(
+                                      MaterialPageRoute<void>(
+                                        builder: (_) => BlocProvider.value(
+                                          value: cubit,
+                                          child: ExamTakingPage(
+                                            isLectureExam: isLectureExam ||
+                                                exam.isLectureExam ||
+                                                exam.isLinkedToLesson,
+                                            nextLesson: nextLesson,
+                                            nextLessonIndex: nextLessonIndex,
+                                            totalLessonsCount:
+                                                totalLessonsCount,
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                },
+                        ),
+                      ] else ...[
+                        AppButton(
+                          text: hasActive
+                              ? context.l10n.resumeCurrentExam
+                              : context.l10n.startExamNow,
+                          icon: hasActive
+                              ? Icons.play_arrow
+                              : Icons.rocket_launch_outlined,
+                          isLoading: isLoading,
+                          onPressed: isLoading
+                              ? null
+                              : () async {
+                                  final cubit = context.read<ExamsCubit>();
+                                  final success = await cubit.startExamTaking(
+                                    exam,
+                                    isLectureExam: isUntimed,
+                                  );
+
+                                  if (context.mounted && success) {
+                                    await Navigator.of(context).pushReplacement<void, void>(
+                                      MaterialPageRoute<void>(
+                                        builder: (_) => BlocProvider.value(
+                                          value: cubit,
+                                          child: ExamTakingPage(
+                                            isLectureExam: isLectureExam ||
+                                                exam.isLectureExam ||
+                                                exam.isLinkedToLesson,
+                                            nextLesson: nextLesson,
+                                            nextLessonIndex: nextLessonIndex,
+                                            totalLessonsCount:
+                                                totalLessonsCount,
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                },
                         ),
                       ],
                     ],
@@ -444,15 +536,24 @@ class ExamIntroPage extends StatelessWidget {
               if (exam.myLatestAttempt != null) ...[
                 const SizedBox(height: AppSpacing.s16),
                 AppButton(
-                  text: context.l10n.reviewExamAnswersAction,
+                  text: context.l10n.viewExamResultAction,
                   icon: Icons.fact_check_outlined,
                   onPressed: () {
+                    final cubit = context.read<ExamsCubit>();
                     Navigator.of(context).push(
                       MaterialPageRoute<void>(
-                        builder: (_) => ExamReviewPage(
-                          attemptId: exam.myLatestAttempt!.id,
-                          exam: exam,
-                          initialAttempt: exam.myLatestAttempt,
+                        builder: (_) => BlocProvider.value(
+                          value: cubit,
+                          child: ExamResultPage(
+                            exam: exam,
+                            attempt: exam.myLatestAttempt!,
+                            isLectureExam: isLectureExam ||
+                                exam.isLectureExam ||
+                                exam.isLinkedToLesson,
+                            nextLesson: nextLesson,
+                            nextLessonIndex: nextLessonIndex,
+                            totalLessonsCount: totalLessonsCount,
+                          ),
                         ),
                       ),
                     );

@@ -14,6 +14,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/responsive_breakpoints.dart';
 import '../../../../core/utils/cache_manager.dart';
 import '../../../../core/utils/fullscreen_util.dart';
+import '../../../../core/utils/pdf_launcher_helper.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_loading_view.dart';
 import '../../../../core/widgets/responsive_container.dart';
@@ -27,6 +28,7 @@ import '../../../content/presentation/widgets/material_viewer_sheet.dart';
 import '../../../exams/domain/entities/exam_entity.dart';
 import '../../../exams/presentation/cubit/exams_cubit.dart';
 import '../../../exams/presentation/pages/exam_intro_page.dart';
+import '../../../exams/presentation/pages/exam_result_page.dart';
 import '../../domain/entities/video_entity.dart';
 import '../../domain/entities/video_progress_entity.dart';
 import '../cubit/videos_cubit.dart';
@@ -91,8 +93,29 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   /// بيانات الدرس الخاصة بالمجموعة (PDF + Exam من content_groups / lesson_exams)
   String? _groupPdfStoragePath;
   String? _groupPdfFileName;
+  String? _preloadedPdfPath;
+  String? _preloadedPdfUrl;
+  bool _isOpeningPdf = false;
   String? _groupExamId;
   String? _groupExamTitle;
+
+  /// Pre-warms the signed URL in the background as soon as storage path is discovered.
+  void _prewarmPdfUrl(String storagePath) {
+    if (storagePath.isEmpty ||
+        (_preloadedPdfPath == storagePath && _preloadedPdfUrl != null)) {
+      return;
+    }
+    unawaited(
+      context.read<VideosCubit>().getSignedFileUrl(storagePath).then((url) {
+        if (mounted && url != null && url.isNotEmpty) {
+          setState(() {
+            _preloadedPdfPath = storagePath;
+            _preloadedPdfUrl = url;
+          });
+        }
+      }),
+    );
+  }
   ExamEntity? _lessonExam;
   List<LessonAssignmentEntity> _courseLessons = [];
   List<AttachedLessonExamEntity> _attachedExams = [];
@@ -105,14 +128,17 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       return [
         AttachedLessonExamEntity(
           examId: legacyId,
-          examTitle: _lessonExam?.title ??
+          examTitle:
+              _lessonExam?.title ??
               _groupExamTitle ??
               widget.associatedExamTitle ??
               '',
           isRequired: true,
           sortOrder: 0,
-          isPassed: _lessonExam?.myLatestAttempt
-                  ?.isPassed(_lessonExam?.passingScore ?? 60) ??
+          isPassed:
+              _lessonExam?.myLatestAttempt?.isPassed(
+                _lessonExam?.passingScore ?? 60,
+              ) ??
               false,
           bestScore: _lessonExam?.myLatestAttempt?.score?.toDouble(),
           passingScore: _lessonExam?.passingScore ?? 60,
@@ -170,18 +196,21 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
 
         final lessonsResult =
             results[0] as Result<List<LessonAssignmentEntity>>?;
-        final contextResult =
-            results[1] as Result<Map<String, dynamic>?>;
+        final contextResult = results[1] as Result<Map<String, dynamic>?>;
 
         if (lessonsResult != null &&
             lessonsResult.isSuccess &&
             lessonsResult.dataOrNull != null) {
           final loadedLessons = lessonsResult.dataOrNull!;
           setState(() {
-            _courseLessons = loadedLessons;
+            _courseLessons = loadedLessons
+                .where((l) => l.type == ContentType.video)
+                .toList();
           });
           final current = loadedLessons
-              .where((LessonAssignmentEntity l) => l.contentId == widget.videoId)
+              .where(
+                (LessonAssignmentEntity l) => l.contentId == widget.videoId,
+              )
               .firstOrNull;
           if (current != null && current.attachedExams.isNotEmpty) {
             setState(() {
@@ -201,10 +230,12 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
               final rawAttached = ctx['attached_exams'] as List<dynamic>?;
               final parsedAttached = rawAttached != null
                   ? rawAttached
-                      .map((e) => AttachedLessonExamEntity.fromJson(
+                        .map(
+                          (e) => AttachedLessonExamEntity.fromJson(
                             e as Map<String, dynamic>,
-                          ))
-                      .toList()
+                          ),
+                        )
+                        .toList()
                   : <AttachedLessonExamEntity>[];
 
               setState(() {
@@ -214,8 +245,27 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                 _groupExamTitle = examTitle;
                 if (parsedAttached.isNotEmpty) {
                   _attachedExams = parsedAttached;
+                  for (final att in parsedAttached) {
+                    unawaited(
+                      InjectionContainer.examsRepository
+                          .getExamDetails(att.examId)
+                          .then((res) {
+                        if (res.isSuccess &&
+                            res.dataOrNull != null &&
+                            mounted) {
+                          setState(() {
+                            _attachedExamDetails[att.examId] = res.dataOrNull!;
+                          });
+                        }
+                      }),
+                    );
+                  }
                 }
               });
+              if (_groupPdfStoragePath != null &&
+                  _groupPdfStoragePath!.isNotEmpty) {
+                _prewarmPdfUrl(_groupPdfStoragePath!);
+              }
             }
           },
           onFailure: (_) {},
@@ -259,9 +309,46 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
             (l) => l.contentId == widget.videoId,
           );
           if (cIdx >= 0 && cIdx < _courseLessons.length - 1) {
-            nextLesson = _courseLessons[cIdx + 1];
-            nextLessonIndex = cIdx + 2;
+            final candidate = _courseLessons[cIdx + 1];
+            if (candidate.type == ContentType.video &&
+                candidate.contentId != widget.videoId &&
+                candidate.lessonExamId != exam.id &&
+                !candidate.attachedExams.any((e) => e.examId == exam.id)) {
+              nextLesson = candidate;
+              nextLessonIndex = cIdx + 2;
+            }
           }
+        }
+
+        final isPassed = (exam.myBestScore != null &&
+                exam.passingScore != null &&
+                exam.myBestScore! >= exam.passingScore!) ||
+            (exam.myLatestAttempt?.score != null &&
+                exam.passingScore != null &&
+                exam.myLatestAttempt!.score! >= exam.passingScore!);
+
+        if (isPassed && !exam.allowRetake && exam.myLatestAttempt != null) {
+          await Navigator.of(context).push<void>(
+            MaterialPageRoute<void>(
+              builder: (_) => BlocProvider<ExamsCubit>.value(
+                value: examsCubit,
+                child: ExamResultPage(
+                  exam: exam,
+                  attempt: exam.myLatestAttempt!,
+                  isLectureExam: true,
+                  nextLesson: nextLesson,
+                  nextLessonIndex: nextLessonIndex,
+                  totalLessonsCount: _courseLessons.length,
+                ),
+              ),
+            ),
+          );
+          if (mounted) {
+            AppCache.content.clear();
+            AppCache.exams.clear();
+            await _loadLessonContext();
+          }
+          return;
         }
 
         await Navigator.of(context).push<void>(
@@ -307,13 +394,74 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     }
   }
 
-  void _handleFullscreenChanged(bool isFull) {
-    if (kIsWeb) {
-      final currentWeb = checkIsFullscreen();
-      if (isFull != currentWeb) {
-        requestToggleFullscreen();
+  Future<void> _openQuizResult(String examId) async {
+    try {
+      unawaited(
+        showDialog<void>(
+          context: context,
+          barrierDismissible: false,
+          builder: (_) => const Center(child: CircularProgressIndicator()),
+        ),
+      );
+      final result = await InjectionContainer.examsRepository.getExamDetails(
+        examId,
+      );
+      if (mounted) Navigator.of(context).pop();
+
+      if (result.isSuccess && result.dataOrNull != null) {
+        final exam = result.dataOrNull!;
+        if (!mounted) return;
+        final attempt = exam.myLatestAttempt;
+        if (attempt == null) {
+          await _startLessonQuiz(examId);
+          return;
+        }
+
+        LessonAssignmentEntity? nextLesson;
+        int? nextLessonIndex;
+        if (_courseLessons.isNotEmpty) {
+          final cIdx = _courseLessons.indexWhere(
+            (l) => l.contentId == widget.videoId,
+          );
+          if (cIdx >= 0 && cIdx < _courseLessons.length - 1) {
+            final candidate = _courseLessons[cIdx + 1];
+            if (candidate.type == ContentType.video &&
+                candidate.contentId != widget.videoId &&
+                candidate.lessonExamId != exam.id &&
+                !candidate.attachedExams.any((e) => e.examId == exam.id)) {
+              nextLesson = candidate;
+              nextLessonIndex = cIdx + 2;
+            }
+          }
+        }
+
+        final examsCubit = InjectionContainer.createExamsCubit();
+        await Navigator.of(context).push<void>(
+          MaterialPageRoute<void>(
+            builder: (_) => BlocProvider<ExamsCubit>.value(
+              value: examsCubit,
+              child: ExamResultPage(
+                exam: exam,
+                attempt: attempt,
+                isLectureExam: true,
+                nextLesson: nextLesson,
+                nextLessonIndex: nextLessonIndex,
+                totalLessonsCount: _courseLessons.length,
+              ),
+            ),
+          ),
+        );
+        if (mounted) {
+          AppCache.content.clear();
+          AppCache.exams.clear();
+          await _loadLessonContext();
+        }
       }
-    } else {
+    } catch (_) {}
+  }
+
+  void _handleFullscreenChanged(bool isFull) {
+    if (!kIsWeb) {
       if (isFull) {
         SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
       } else {
@@ -469,7 +617,10 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
         : null;
     final nextLesson =
         (currentIndex >= 0 && currentIndex < _courseLessons.length - 1)
-        ? _courseLessons[currentIndex + 1]
+        ? (_courseLessons[currentIndex + 1].type == ContentType.video &&
+           _courseLessons[currentIndex + 1].contentId != widget.videoId
+              ? _courseLessons[currentIndex + 1]
+              : null)
         : null;
 
     return Container(
@@ -652,6 +803,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
               // Lessons List
               Flexible(
                 child: ListView.separated(
+                  cacheExtent: 250.0,
                   shrinkWrap: true,
                   itemCount: _courseLessons.length,
                   separatorBuilder: (_, __) =>
@@ -919,7 +1071,18 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                 ],
                 leading: BackButton(onPressed: _flushProgressAndExit),
               ),
-        body: BlocBuilder<VideosCubit, VideosState>(
+        body: BlocConsumer<VideosCubit, VideosState>(
+          listener: (context, state) {
+            if (state is VideosLoaded) {
+              final attachedPath =
+                  state.currentVideo?.attachedFile?.storagePath;
+              if (_groupPdfStoragePath == null &&
+                  attachedPath != null &&
+                  attachedPath.isNotEmpty) {
+                _prewarmPdfUrl(attachedPath);
+              }
+            }
+          },
           buildWhen: (previous, current) {
             if (previous is VideosLoaded && current is VideosLoaded) {
               return previous.playbackUrl != current.playbackUrl ||
@@ -1081,10 +1244,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                 );
               }
 
-              return Center(
-                child: ResponsiveContainer(
-                  maxWidth: ResponsiveBreakpoints.maxWideContentWidth,
-                  child: LayoutBuilder(
+              return ResponsiveContainer(
+                child: LayoutBuilder(
                     builder: (context, constraints) {
                       final isDesktopTheater = constraints.maxWidth >= 960;
 
@@ -1168,8 +1329,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                       );
                     },
                   ),
-                ),
-              );
+                );
             }
 
             return const SizedBox.shrink();
@@ -1448,8 +1608,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
         final pct = liveDur > 0
             ? ((effectivePos / liveDur) * 100).clamp(0.0, 100.0)
             : (progress?.percentage ?? 0.0);
-        final completed =
-            isCompleted || pct >= 90.0 || _videoCompletedLocally;
+        final completed = isCompleted || pct >= 90.0 || _videoCompletedLocally;
         final remainingSecs = liveDur > 0
             ? (liveDur - effectivePos).clamp(0, liveDur)
             : 0;
@@ -1854,8 +2013,56 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     await MaterialViewerSheet.show(
       context,
       content: contentWrapper,
-      onGetSignedUrl: (storagePath) => cubit.getSignedFileUrl(storagePath),
+      onGetSignedUrl: (storagePath) async {
+        final path = storagePath.isNotEmpty ? storagePath : file.storagePath;
+        if (_preloadedPdfPath == path && _preloadedPdfUrl != null) {
+          return _preloadedPdfUrl!;
+        }
+        return cubit.getSignedFileUrl(path);
+      },
     );
+  }
+
+  Future<void> _handleOpenPdfDirectly(
+    VideoEntity? video, {
+    required bool hasGroupPdf,
+  }) async {
+    if (_isOpeningPdf) return;
+
+    final storagePath = hasGroupPdf
+        ? _groupPdfStoragePath
+        : video?.attachedFile?.storagePath;
+    if (storagePath == null || storagePath.isEmpty) return;
+
+    // Fast path: If the signed URL has already been pre-warmed for this exact file,
+    // launch immediately in the same synchronous gesture turn.
+    // This executes synchronously (0ms delay) and guarantees the web browser treats this
+    // as an authentic user-initiated window.open, preventing popup suppression.
+    if (_preloadedPdfPath == storagePath &&
+        _preloadedPdfUrl != null &&
+        _preloadedPdfUrl!.isNotEmpty) {
+      unawaited(
+        PdfLauncherHelper.launchPdfUrl(_preloadedPdfUrl!, context: context),
+      );
+      return;
+    }
+
+    setState(() => _isOpeningPdf = true);
+    try {
+      final cubit = context.read<VideosCubit>();
+      final url = await cubit.getSignedFileUrl(storagePath);
+      if (mounted && url != null && url.isNotEmpty) {
+        setState(() {
+          _preloadedPdfPath = storagePath;
+          _preloadedPdfUrl = url;
+        });
+        unawaited(PdfLauncherHelper.launchPdfUrl(url, context: context));
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isOpeningPdf = false);
+      }
+    }
   }
 
   Future<void> _pickAndAttachPdf(VideoEntity video) async {
@@ -1942,8 +2149,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
 
         final requiredExams = attachedList.where((e) => e.isRequired).toList();
         final totalRequired = requiredExams.length;
-        final passedRequiredCount =
-            requiredExams.where(checkIsPassed).length;
+        final passedRequiredCount = requiredExams.where(checkIsPassed).length;
         final allRequiredPassed =
             totalRequired == 0 || passedRequiredCount == totalRequired;
 
@@ -1955,8 +2161,12 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
             (l) => l.contentId == widget.videoId,
           );
           if (cIdx >= 0 && cIdx < _courseLessons.length - 1) {
-            nextLesson = _courseLessons[cIdx + 1];
-            nextLessonIndex = cIdx + 2;
+            final candidate = _courseLessons[cIdx + 1];
+            if (candidate.type == ContentType.video &&
+                candidate.contentId != widget.videoId) {
+              nextLesson = candidate;
+              nextLessonIndex = cIdx + 2;
+            }
           }
         }
 
@@ -2029,8 +2239,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                           allRequiredPassed
                               ? Icons.check_circle_rounded
                               : (isVideoCompleted
-                                  ? Icons.quiz_rounded
-                                  : Icons.lock_outline_rounded),
+                                    ? Icons.quiz_rounded
+                                    : Icons.lock_outline_rounded),
                           size: 11,
                           color: headerColor,
                         ),
@@ -2039,10 +2249,10 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                           totalRequired > 1
                               ? '$passedRequiredCount / $totalRequired'
                               : (allRequiredPassed
-                                  ? 'COMPLETED'
-                                  : isVideoCompleted
-                                  ? 'QUIZ'
-                                  : 'LOCKED'),
+                                    ? 'COMPLETED'
+                                    : isVideoCompleted
+                                    ? 'QUIZ'
+                                    : 'LOCKED'),
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
@@ -2090,7 +2300,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
               ...attachedList.map((attached) {
                 final examDetails = _attachedExamDetails[attached.examId];
                 final latestAttempt = examDetails?.myLatestAttempt;
-                final passingScore = (examDetails?.passingScore != null && examDetails!.passingScore! > 0)
+                final passingScore =
+                    (examDetails?.passingScore != null &&
+                        examDetails!.passingScore! > 0)
                     ? examDetails.passingScore!
                     : attached.passingScore;
                 final isSubmitted =
@@ -2102,14 +2314,15 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                 final scorePct =
                     latestAttempt?.percentage?.toInt() ??
                     attached.bestScore?.toInt();
-                final resolvedQuestionsCount = (examDetails != null && examDetails.totalQuestions > 0)
+                final resolvedQuestionsCount =
+                    (examDetails != null && examDetails.totalQuestions > 0)
                     ? examDetails.totalQuestions
                     : attached.questionsCount;
                 final quizTitle = (examDetails?.title.isNotEmpty == true)
                     ? examDetails!.title
                     : (attached.examTitle.isNotEmpty
-                        ? attached.examTitle
-                        : context.l10n.associatedExamBadge);
+                          ? attached.examTitle
+                          : context.l10n.associatedExamBadge);
 
                 Color itemColor;
                 if (isPassed) {
@@ -2198,7 +2411,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                                       ),
                                       child: Text(
                                         attached.isRequired
-                                            ? context.l10n.requiredForProgression
+                                            ? context
+                                                  .l10n
+                                                  .requiredForProgression
                                             : context.l10n.optionalPractice,
                                         style: TextStyle(
                                           fontSize: 9,
@@ -2246,13 +2461,18 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                       const SizedBox(height: AppSpacing.s10),
                       // Action button per quiz
                       if (isPassed) ...[
-                        OutlinedButton.icon(
-                          icon: const Icon(Icons.refresh_rounded, size: 14),
+                        ElevatedButton.icon(
+                          icon: const Icon(Icons.fact_check_outlined, size: 14),
                           label: Text(
-                            context.l10n.retryLessonQuizAction,
-                            style: const TextStyle(fontSize: 11),
+                            context.l10n.viewExamResultAction,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                          style: OutlinedButton.styleFrom(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.success,
+                            foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(
                               vertical: 6,
                               horizontal: 12,
@@ -2264,8 +2484,31 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                               ),
                             ),
                           ),
-                          onPressed: () => _startLessonQuiz(attached.examId),
+                          onPressed: () => _openQuizResult(attached.examId),
                         ),
+                        if (examDetails?.allowRetake == true) ...[
+                          const SizedBox(height: 6),
+                          OutlinedButton.icon(
+                            icon: const Icon(Icons.refresh_rounded, size: 14),
+                            label: Text(
+                              context.l10n.retryLessonQuizAction,
+                              style: const TextStyle(fontSize: 11),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 6,
+                                horizontal: 12,
+                              ),
+                              minimumSize: const Size.fromHeight(32),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                  AppSpacing.radiusSmall,
+                                ),
+                              ),
+                            ),
+                            onPressed: () => _startLessonQuiz(attached.examId),
+                          ),
+                        ],
                       ] else if (isFailed) ...[
                         ElevatedButton.icon(
                           icon: const Icon(Icons.refresh_rounded, size: 14),
@@ -2291,6 +2534,27 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                             ),
                           ),
                           onPressed: () => _startLessonQuiz(attached.examId),
+                        ),
+                        const SizedBox(height: 6),
+                        OutlinedButton.icon(
+                          icon: const Icon(Icons.fact_check_outlined, size: 14),
+                          label: Text(
+                            context.l10n.viewExamResultAction,
+                            style: const TextStyle(fontSize: 11),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 6,
+                              horizontal: 12,
+                            ),
+                            minimumSize: const Size.fromHeight(32),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.radiusSmall,
+                              ),
+                            ),
+                          ),
+                          onPressed: () => _openQuizResult(attached.examId),
                         ),
                       ] else ...[
                         ElevatedButton.icon(
@@ -2543,62 +2807,123 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
               ),
             ),
             const SizedBox(height: AppSpacing.s12),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.picture_as_pdf_rounded, size: 16),
-              label: Flexible(
-                child: Text(
-                  context.l10n.openPdfAction,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  vertical: AppSpacing.s12,
-                  horizontal: AppSpacing.s16,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                ),
-              ),
-              onPressed: () {
-                if (hasGroupPdf) {
-                  // فتح PDF المجموعة
-                  final contentWrapper = ContentEntity(
-                    id: video!.contentId,
-                    tenantId: '',
-                    groupId: widget.groupId ?? '',
-                    title: video.title ?? _groupPdfFileName!,
-                    description: video.description,
-                    type: ContentType.pdf,
-                    status: ContentStatus.published,
-                    file: FileAttachmentEntity(
-                      id: '',
-                      tenantId: '',
-                      contentId: video.contentId,
-                      storagePath: _groupPdfStoragePath!,
-                      fileName: _groupPdfFileName!,
-                      mimeType: 'application/pdf',
-                      fileSize: 0,
-                      createdAt: video.createdAt,
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.picture_as_pdf_rounded, size: 16),
+                    label: Flexible(
+                      child: Text(
+                        context.l10n.openPdfAction,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                    createdAt: video.createdAt,
-                    updatedAt: video.updatedAt,
-                  );
-                  final cubit = context.read<VideosCubit>();
-                  MaterialViewerSheet.show(
-                    context,
-                    content: contentWrapper,
-                    onGetSignedUrl: (path) => cubit.getSignedFileUrl(
-                      path.isNotEmpty ? path : _groupPdfStoragePath!,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: AppSpacing.s12,
+                        horizontal: AppSpacing.s16,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusMedium,
+                        ),
+                      ),
                     ),
-                  );
-                } else {
-                  _handleOpenAttachedMaterial(video!);
-                }
-              },
+                    onPressed: () {
+                      if (hasGroupPdf) {
+                        // فتح PDF المجموعة
+                        final contentWrapper = ContentEntity(
+                          id: video!.contentId,
+                          tenantId: '',
+                          groupId: widget.groupId ?? '',
+                          title: video.title ?? _groupPdfFileName!,
+                          description: video.description,
+                          type: ContentType.pdf,
+                          status: ContentStatus.published,
+                          file: FileAttachmentEntity(
+                            id: '',
+                            tenantId: '',
+                            contentId: video.contentId,
+                            storagePath: _groupPdfStoragePath!,
+                            fileName: _groupPdfFileName!,
+                            mimeType: 'application/pdf',
+                            fileSize: 0,
+                            createdAt: video.createdAt,
+                          ),
+                          createdAt: video.createdAt,
+                          updatedAt: video.updatedAt,
+                        );
+                        final cubit = context.read<VideosCubit>();
+                        MaterialViewerSheet.show(
+                          context,
+                          content: contentWrapper,
+                          onGetSignedUrl: (path) async {
+                            final effectivePath =
+                                path.isNotEmpty ? path : _groupPdfStoragePath!;
+                            if (_preloadedPdfPath == effectivePath &&
+                                _preloadedPdfUrl != null) {
+                              return _preloadedPdfUrl!;
+                            }
+                            return cubit.getSignedFileUrl(effectivePath);
+                          },
+                        );
+                      } else {
+                        _handleOpenAttachedMaterial(video!);
+                      }
+                    },
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.s8),
+                Tooltip(
+                  message: context.l10n.openPdfInNewTabTooltip,
+                  child: Material(
+                    color: AppColors.primary.withAlpha(20),
+                    borderRadius: BorderRadius.circular(
+                      AppSpacing.radiusMedium,
+                    ),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.radiusMedium,
+                      ),
+                      onTap: _isOpeningPdf
+                          ? null
+                          : () => _handleOpenPdfDirectly(
+                              video,
+                              hasGroupPdf: hasGroupPdf,
+                            ),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: AppSpacing.s12,
+                          horizontal: AppSpacing.s14,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (_isOpeningPdf)
+                              const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: AppColors.primary,
+                                ),
+                              )
+                            else
+                              const Icon(
+                                Icons.open_in_new_rounded,
+                                size: 18,
+                                color: AppColors.primary,
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
             if (_isTeacher) ...[
               const SizedBox(height: AppSpacing.s8),

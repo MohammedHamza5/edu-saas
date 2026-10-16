@@ -6,7 +6,6 @@ import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/responsive_breakpoints.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_empty_view.dart';
 import '../../../../core/widgets/app_error_view.dart';
@@ -47,6 +46,7 @@ class TeacherContentLibraryPage extends StatefulWidget {
 }
 
 class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
+  final ScrollController _scrollController = ScrollController();
   String? _selectedGroupId;
   String? _selectedGroupName;
   bool _isCreatingChapter = false;
@@ -157,9 +157,26 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
         context.read<ContentCubit>().loadGroupContent(_selectedGroupId!),
       );
     }
+    _scrollController.addListener(_onScroll);
     try {
       context.read<GroupsCubit>().loadGroups();
     } catch (_) {}
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (!mounted) return;
+    if (_scrollController.hasClients &&
+        _scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200) {
+      unawaited(context.read<ContentCubit>().loadMoreContent());
+    }
   }
 
   void _onGroupChanged(GroupEntity group) {
@@ -828,7 +845,6 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
               foregroundColor: Colors.white,
             ),
       body: ResponsiveContainer(
-        maxWidth: ResponsiveBreakpoints.maxContentWidth,
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.s20,
           vertical: AppSpacing.s4,
@@ -887,8 +903,6 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
 
                         if (state is ContentLoaded) {
                           final lessons = state.items;
-                          final isDesktop =
-                              MediaQuery.of(context).size.width >= 960;
 
                           final chapters = state.chapters;
                           final generalLessons = lessons
@@ -902,6 +916,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                           final Widget masterList = RefreshIndicator(
                             onRefresh: () => _loadContent(forceRefresh: true),
                             child: CustomScrollView(
+                              controller: _scrollController,
                               physics: const AlwaysScrollableScrollPhysics(),
                               slivers: [
                                 if (isCourseEmpty)
@@ -960,6 +975,17 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                             context: context,
                                             generalLessons: generalLessons,
                                             allChapters: chapters,
+                                          ),
+
+                                        // 3. Loading More Footer Indicator
+                                        if (state.isLoadingMore)
+                                          const Padding(
+                                            padding: EdgeInsets.symmetric(
+                                              vertical: AppSpacing.s16,
+                                            ),
+                                            child: Center(
+                                              child: AppLoadingView.compact(size: 24),
+                                            ),
                                           ),
                                       ]),
                                     ),
@@ -1052,21 +1078,24 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                 padding: const EdgeInsets.only(
                                   bottom: AppSpacing.s12,
                                 ),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: AppSpacing.s16,
-                                    vertical: AppSpacing.s12,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.surface,
-                                    borderRadius: BorderRadius.circular(
-                                      AppSpacing.radiusMedium,
-                                    ),
-                                    border: Border.all(color: AppColors.border),
-                                  ),
-                                  child: isDesktop
-                                      ? Row(
-                                          children: [
+                                child: LayoutBuilder(
+                                  builder: (context, bannerConstraints) {
+                                    final isDesktop = bannerConstraints.maxWidth >= 1150;
+                                    return Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: AppSpacing.s16,
+                                        vertical: AppSpacing.s12,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.surface,
+                                        borderRadius: BorderRadius.circular(
+                                          AppSpacing.radiusMedium,
+                                        ),
+                                        border: Border.all(color: AppColors.border),
+                                      ),
+                                      child: isDesktop
+                                          ? Row(
+                                              children: [
                                             Container(
                                               padding: const EdgeInsets.all(
                                                 AppSpacing.s8,
@@ -1399,7 +1428,9 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                                             ),
                                           ],
                                         ),
-                                ),
+                                      );
+                                    },
+                                  ),
                               ),
 
                               // Content Area: Clean, full-width course syllabus
@@ -1672,7 +1703,7 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                   const SizedBox(width: 2),
 
                   // Actions: Add lecture to chapter
-                  if (MediaQuery.of(context).size.width < 500)
+                  if (MediaQuery.of(context).size.width < 680)
                     IconButton(
                       onPressed: () => _handleAddLesson(chapterId: chapter.id),
                       tooltip: l10n.addLectureToChapter,

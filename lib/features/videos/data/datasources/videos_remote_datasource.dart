@@ -614,9 +614,21 @@ class VideosRemoteDataSourceImpl implements VideosRemoteDataSource {
   @override
   Future<String> getSignedFileUrl({
     required String storagePath,
-    int expiresInSeconds = 900,
+    int expiresInSeconds = 3600,
   }) async {
     try {
+      // 1. Primary: Supabase Storage ('group-content') where all platform materials are stored
+      try {
+        final signedUrl = await _c.storage
+            .from('group-content')
+            .createSignedUrl(storagePath, expiresInSeconds);
+        if (signedUrl.isNotEmpty) {
+          return signedUrl;
+        }
+      } catch (_) {
+        // Fallback: If not in Supabase Storage and path starts with materials/, attempt R2
+      }
+
       if (storagePath.startsWith('materials/')) {
         try {
           final r2Res = await _c.functions.invoke(

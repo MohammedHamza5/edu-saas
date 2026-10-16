@@ -279,6 +279,25 @@ class ContentCubit extends Cubit<ContentState> {
     }
   }
 
+  /// Resolves an existing content_id or creates one for a video assigned to a group
+  Future<String?> resolveOrCreateLectureContent({
+    required String videoId,
+    required String groupId,
+    required String title,
+    String? tenantId,
+  }) async {
+    final result = await _repository.resolveOrCreateLectureContent(
+      videoId: videoId,
+      groupId: groupId,
+      title: title,
+      tenantId: tenantId,
+    );
+    if (result.isSuccess) {
+      return result.dataOrNull;
+    }
+    return null;
+  }
+
   Future<bool> assignBatchContentToGroup({
     required String groupId,
     required List<Map<String, dynamic>> items,

@@ -11,11 +11,13 @@ import '../../domain/entities/validation_issue_entity.dart';
 
 abstract class QuestionBankRemoteDataSource {
   // ── Document operations ──
-  Future<List<DocumentEntity>> getDocuments();
+  Future<List<DocumentEntity>> getDocuments({int page = 0, int pageSize = 20});
   Future<DocumentEntity> getDocumentById(String documentId);
   Future<List<QuestionEntity>> getQuestionsByDocument(
     String documentId, {
     String? statusFilter,
+    int page = 0,
+    int pageSize = 20,
   });
   Future<void> deleteDocument(String documentId);
   Future<void> deleteQuestion(String questionId);
@@ -25,6 +27,8 @@ abstract class QuestionBankRemoteDataSource {
   Future<List<QuestionEntity>> getQuestions({
     String? statusFilter,
     bool sortByPriority = false,
+    int page = 0,
+    int pageSize = 20,
   });
   Future<QuestionEntity> getQuestionById(String questionId);
   Future<QuestionRevisionEntity?> getLatestRevision(String questionId);
@@ -100,12 +104,19 @@ class QuestionBankRemoteDataSourceImpl implements QuestionBankRemoteDataSource {
   // ════════════════════════════════════════════════════════════════════════════
 
   @override
-  Future<List<DocumentEntity>> getDocuments() async {
+  Future<List<DocumentEntity>> getDocuments({
+    int page = 0,
+    int pageSize = 20,
+  }) async {
+    final from = page * pageSize;
+    final to = from + pageSize - 1;
+
     // ⚡ Single batched query with embedded count instead of N+1 individual queries
     final response = await supabaseClient
         .from('qb_documents')
         .select('*, qb_questions(id)')
-        .order('created_at', ascending: false);
+        .order('created_at', ascending: false)
+        .range(from, to);
 
     final list = response as List<dynamic>;
     return list.map((item) {
@@ -138,7 +149,12 @@ class QuestionBankRemoteDataSourceImpl implements QuestionBankRemoteDataSource {
   Future<List<QuestionEntity>> getQuestionsByDocument(
     String documentId, {
     String? statusFilter,
+    int page = 0,
+    int pageSize = 20,
   }) async {
+    final from = page * pageSize;
+    final to = from + pageSize - 1;
+
     var query = supabaseClient
         .from('qb_questions')
         .select()
@@ -150,7 +166,9 @@ class QuestionBankRemoteDataSourceImpl implements QuestionBankRemoteDataSource {
       query = query.eq('status', statusFilter);
     }
 
-    final response = await query.order('created_at', ascending: true);
+    final response = await query
+        .order('created_at', ascending: true)
+        .range(from, to);
     final list = response as List<dynamic>;
     return list
         .map((json) => _mapQuestion(json as Map<String, dynamic>))
@@ -237,12 +255,22 @@ class QuestionBankRemoteDataSourceImpl implements QuestionBankRemoteDataSource {
   // Question-Level Operations (existing)
   // ════════════════════════════════════════════════════════════════════════════
 
+  static const String _qbQuestionColumns =
+      'id, tenant_id, document_id, section_id, source_label, question_type, '
+      'status, current_published_revision_id, priority_score, policy_state, '
+      'duplicate_cluster_id, requires_second_review, created_at, updated_at';
+
   @override
   Future<List<QuestionEntity>> getQuestions({
     String? statusFilter,
     bool sortByPriority = false,
+    int page = 0,
+    int pageSize = 20,
   }) async {
-    var query = supabaseClient.from('qb_questions').select();
+    final from = page * pageSize;
+    final to = from + pageSize - 1;
+
+    var query = supabaseClient.from('qb_questions').select(_qbQuestionColumns);
 
     if (statusFilter != null &&
         statusFilter.isNotEmpty &&
@@ -250,7 +278,9 @@ class QuestionBankRemoteDataSourceImpl implements QuestionBankRemoteDataSource {
       query = query.eq('status', statusFilter);
     }
 
-    final response = await query.order('created_at', ascending: false);
+    final response = await query
+        .order('created_at', ascending: false)
+        .range(from, to);
     final list = response as List<dynamic>;
 
     final questions = list
@@ -266,7 +296,7 @@ class QuestionBankRemoteDataSourceImpl implements QuestionBankRemoteDataSource {
   Future<QuestionEntity> getQuestionById(String questionId) async {
     final response = await supabaseClient
         .from('qb_questions')
-        .select()
+        .select(_qbQuestionColumns)
         .eq('id', questionId)
         .single();
     return _mapQuestion(response);
@@ -588,7 +618,9 @@ class QuestionBankRemoteDataSourceImpl implements QuestionBankRemoteDataSource {
           'tenant_id': tenantId,
           'document_id': documentId,
           'source_label': sourceLabel,
-          'question_type': questionType == 'true_false' ? 'true_false' : 'multiple_choice',
+          'question_type': questionType == 'true_false'
+              ? 'true_false'
+              : 'multiple_choice',
           'status': 'review_required',
         })
         .select('id')
@@ -822,7 +854,7 @@ class QuestionBankRemoteDataSourceImpl implements QuestionBankRemoteDataSource {
   ) async {
     final response = await supabaseClient
         .from('qb_questions')
-        .select()
+        .select(_qbQuestionColumns)
         .eq('document_id', documentId)
         .order('created_at', ascending: true);
     final list = response as List<dynamic>;
@@ -903,9 +935,11 @@ class QuestionBankRemoteDataSourceImpl implements QuestionBankRemoteDataSource {
 
       final stemList = (latestRev?.content['stem'] as List?) ?? [];
       final stemParts = stemList
-          .map((b) => (b is Map && (b['type'] == 'text' || b['type'] == 'math'))
-              ? (b['value'] ?? b['latex'] ?? '')
-              : '')
+          .map(
+            (b) => (b is Map && (b['type'] == 'text' || b['type'] == 'math'))
+                ? (b['value'] ?? b['latex'] ?? '')
+                : '',
+          )
           .where((s) => s.toString().trim().isNotEmpty)
           .join('\n');
 

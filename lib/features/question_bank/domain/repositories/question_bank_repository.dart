@@ -8,7 +8,10 @@ abstract class QuestionBankRepository {
   // ── Document-Level Operations ─────────────────────────────────────────────
 
   /// Fetches all documents for the current tenant, ordered by creation date (newest first).
-  Future<List<DocumentEntity>> getDocuments();
+  Future<List<DocumentEntity>> getDocuments({
+    int page = 0,
+    int pageSize = 20,
+  });
 
   /// Fetches a single document by ID.
   Future<DocumentEntity> getDocumentById(String documentId);
@@ -17,6 +20,8 @@ abstract class QuestionBankRepository {
   Future<List<QuestionEntity>> getQuestionsByDocument(
     String documentId, {
     String? statusFilter,
+    int page = 0,
+    int pageSize = 20,
   });
 
   /// Deletes a document and all its associated questions, revisions, validation data (cascade).
@@ -34,6 +39,8 @@ abstract class QuestionBankRepository {
   Future<List<QuestionEntity>> getQuestions({
     String? statusFilter,
     bool sortByPriority = false,
+    int page = 0,
+    int pageSize = 20,
   });
 
   /// Fetches a question by its unique ID.

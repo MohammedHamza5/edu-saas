@@ -4,6 +4,7 @@ class ExamFolderModel extends ExamFolderEntity {
   const ExamFolderModel({
     required super.id,
     required super.tenantId,
+    super.groupId,
     required super.name,
     super.description,
     super.color = '#5B4FE0',
@@ -32,6 +33,7 @@ class ExamFolderModel extends ExamFolderEntity {
     return ExamFolderModel(
       id: json['id']?.toString() ?? '',
       tenantId: json['tenant_id']?.toString() ?? '',
+      groupId: json['group_id']?.toString(),
       name: json['name']?.toString() ?? '',
       description: json['description']?.toString(),
       color: json['color']?.toString() ?? '#5B4FE0',
@@ -51,6 +53,7 @@ class ExamFolderModel extends ExamFolderEntity {
     return {
       'id': id,
       'tenant_id': tenantId,
+      if (groupId != null) 'group_id': groupId,
       'name': name,
       if (description != null) 'description': description,
       'color': color,

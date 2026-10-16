@@ -8,6 +8,7 @@ import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_empty_view.dart';
 import '../../../../core/widgets/app_error_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
+import '../../../../core/widgets/responsive_container.dart';
 import '../../../groups/presentation/cubit/groups_cubit.dart';
 import '../../../videos/domain/entities/library_video_entity.dart';
 import '../../../videos/domain/entities/video_folder_entity.dart';
@@ -32,6 +33,7 @@ class TeacherVideoBankPage extends StatefulWidget {
 }
 
 class _TeacherVideoBankPageState extends State<TeacherVideoBankPage> {
+  final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
   Timer? _searchDebounce;
@@ -40,6 +42,7 @@ class _TeacherVideoBankPageState extends State<TeacherVideoBankPage> {
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
     context.read<VideoBankCubit>().loadFolder();
     context.read<GroupsCubit>().loadGroups();
   }
@@ -49,7 +52,18 @@ class _TeacherVideoBankPageState extends State<TeacherVideoBankPage> {
     _searchDebounce?.cancel();
     _searchFocusNode.dispose();
     _searchController.dispose();
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    if (!mounted) return;
+    if (_scrollController.hasClients &&
+        _scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200) {
+      unawaited(context.read<VideoBankCubit>().loadMoreVideos());
+    }
   }
 
   void _onSearchChanged(String query) {
@@ -382,15 +396,17 @@ class _TeacherVideoBankPageState extends State<TeacherVideoBankPage> {
               .where((v) => v.assignedLecturesCount == 0)
               .length;
 
-          final isMobile = MediaQuery.of(context).size.width < 650;
+          final isMobile = MediaQuery.of(context).size.width < 800;
           final hPadding = isMobile ? AppSpacing.s16 : AppSpacing.s24;
 
           return RefreshIndicator(
             onRefresh: () =>
                 context.read<VideoBankCubit>().loadFolder(forceRefresh: true),
-            child: CustomScrollView(
-              slivers: [
-                // ── Header Banner ─────────────────────────────────────────
+            child: ResponsiveContainer(
+              child: CustomScrollView(
+                controller: _scrollController,
+                slivers: [
+                  // ── Header Banner ─────────────────────────────────────────
                 SliverToBoxAdapter(
                   key: const PageStorageKey('video_bank_header_sliver'),
                   child: Container(
@@ -463,19 +479,30 @@ class _TeacherVideoBankPageState extends State<TeacherVideoBankPage> {
                             ],
                           ),
                           const SizedBox(height: AppSpacing.s12),
-                          Row(
+                          Wrap(
+                            spacing: AppSpacing.s8,
+                            runSpacing: AppSpacing.s8,
                             children: [
-                              Expanded(
-                                child: OutlinedButton.icon(
-                                  onPressed: _handleCreateFolder,
-                                  icon: const Icon(
-                                    Icons.create_new_folder_outlined,
-                                    size: 18,
+                              if (isInsideFolder && loaded.currentFolder != null)
+                                OutlinedButton.icon(
+                                  onPressed: () => _handleAssignFolderAsChapter(
+                                    loaded.currentFolder!,
                                   ),
-                                  label: Text(l10n.createFolder),
+                                  icon: const Icon(
+                                    Icons.auto_stories_rounded,
+                                    size: 18,
+                                    color: AppColors.primary,
+                                  ),
+                                  label: Text(
+                                    l10n.assignFolderAsChapter,
+                                    style: const TextStyle(
+                                      color: AppColors.primary,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                   style: OutlinedButton.styleFrom(
                                     padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
+                                      horizontal: 12,
                                       vertical: 10,
                                     ),
                                     shape: RoundedRectangleBorder(
@@ -483,15 +510,28 @@ class _TeacherVideoBankPageState extends State<TeacherVideoBankPage> {
                                     ),
                                   ),
                                 ),
-                              ),
-                              const SizedBox(width: AppSpacing.s8),
-                              Expanded(
-                                child: AppButton(
-                                  text: l10n.uploadToBank,
-                                  icon: Icons.cloud_upload_outlined,
-                                  onPressed: () => _handleUploadVideo(
-                                    loaded.currentFolder?.name,
+                              OutlinedButton.icon(
+                                onPressed: _handleCreateFolder,
+                                icon: const Icon(
+                                  Icons.create_new_folder_outlined,
+                                  size: 18,
+                                ),
+                                label: Text(l10n.createFolder),
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 10,
                                   ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                              ),
+                              AppButton(
+                                text: l10n.uploadToBank,
+                                icon: Icons.cloud_upload_outlined,
+                                onPressed: () => _handleUploadVideo(
+                                  loaded.currentFolder?.name,
                                 ),
                               ),
                             ],
@@ -903,7 +943,7 @@ class _TeacherVideoBankPageState extends State<TeacherVideoBankPage> {
                             maxCrossAxisExtent: 360,
                             mainAxisSpacing: AppSpacing.s16,
                             crossAxisSpacing: AppSpacing.s16,
-                            mainAxisExtent: 320,
+                            mainAxisExtent: 360,
                           ),
                       delegate: SliverChildBuilderDelegate((ctx, i) {
                         final v = filteredVideos[i];
@@ -922,12 +962,23 @@ class _TeacherVideoBankPageState extends State<TeacherVideoBankPage> {
                   ),
                 ],
 
+                if (loaded.isLoadingMore)
+                  const SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: AppSpacing.s16),
+                      child: Center(
+                        child: AppLoadingView.compact(size: 24),
+                      ),
+                    ),
+                  ),
+
                 const SliverToBoxAdapter(
                   child: SizedBox(height: AppSpacing.s32),
                 ),
               ],
             ),
-          );
+          ),
+        );
         },
       ),
     );

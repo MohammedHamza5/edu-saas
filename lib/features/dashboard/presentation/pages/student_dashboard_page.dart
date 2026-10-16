@@ -9,7 +9,6 @@ import '../../../../core/extensions/responsive_context_extension.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/responsive_breakpoints.dart';
 import '../../../../core/theme/tenant_theme_cubit.dart';
 import '../../../../core/utils/cache_manager.dart';
 import '../../../../core/utils/group_slug_resolver.dart';
@@ -82,7 +81,8 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
 
     // Check GroupsCubit state safely (may not be present in isolated widget tests)
     try {
-      final groupsState = context.read<GroupsCubit>().state;
+      final groupsCubit = context.read<GroupsCubit>();
+      final groupsState = groupsCubit.state;
       if (groupsState is GroupsLoaded && groupsState.groups.isNotEmpty) {
         if (mounted) {
           setState(() {
@@ -92,6 +92,21 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
         }
         return;
       }
+      await groupsCubit.loadGroups();
+      if (mounted) {
+        final updatedState = groupsCubit.state;
+        if (updatedState is GroupsLoaded) {
+          setState(() {
+            _enrolledCourses = updatedState.groups;
+            _isLoadingCourses = false;
+          });
+          return;
+        }
+      }
+      if (mounted) {
+        setState(() => _isLoadingCourses = false);
+      }
+      return;
     } catch (_) {
       // GroupsCubit may not be provided in isolated test trees
     }
@@ -219,6 +234,7 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
           );
         },
         child: BlocBuilder<StudentDashboardCubit, StudentDashboardState>(
+          buildWhen: (previous, current) => previous != current,
           builder: (context, dashboardState) {
             if (dashboardState is StudentDashboardLoading ||
                 dashboardState is StudentDashboardInitial) {
@@ -254,7 +270,6 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: context.responsivePagePadding,
                 child: ResponsiveContainer(
-                  maxWidth: ResponsiveBreakpoints.maxContentWidth,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -376,7 +391,9 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        context.l10n.studentLecturesCardSubtitle,
+                                        context
+                                            .l10n
+                                            .studentLecturesCardSubtitle,
                                         style: const TextStyle(
                                           fontSize: 12,
                                           color: AppColors.textSecondary,
@@ -522,8 +539,7 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
                           // Card D: Mistakes Bank (بنك الأخطاء)
                           AppCard(
                             variant: AppCardVariant.elevated,
-                            onTap: () =>
-                                context.push(AppRoutes.studentMistakes),
+                            onTap: () => context.go(AppRoutes.studentMistakes),
                             child: Row(
                               children: [
                                 Container(

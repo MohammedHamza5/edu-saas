@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -231,13 +232,20 @@ class _UploadExamDialogState extends State<UploadExamDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final media = MediaQuery.of(context);
+    final adaptiveMaxHeight = media.size.height * 0.90;
+    final adaptiveMaxWidth = math.min(640.0, media.size.width * 0.95);
+
     return Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppSpacing.radiusLarge),
       ),
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 640),
-        child: Padding(
+        constraints: BoxConstraints(
+          maxWidth: adaptiveMaxWidth,
+          maxHeight: adaptiveMaxHeight,
+        ),
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppSpacing.s24),
           child: AnimatedSize(
             duration: const Duration(milliseconds: 250),

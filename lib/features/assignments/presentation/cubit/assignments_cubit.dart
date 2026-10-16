@@ -8,8 +8,10 @@ class AssignmentsCubit extends Cubit<AssignmentsState> {
   final AssignmentsRepository _repository;
 
   static const int _pageSize = 15;
+  static const int _submissionsPageSize = 20;
   int _teacherPage = 0;
   int _studentPage = 0;
+  int _submissionsPage = 0;
 
   AssignmentsCubit({required AssignmentsRepository repository})
     : _repository = repository,
@@ -117,6 +119,7 @@ class AssignmentsCubit extends Cubit<AssignmentsState> {
     final currentState = state;
     if (currentState is! TeacherAssignmentsLoaded) return;
 
+    _submissionsPage = 0;
     emit(
       currentState.copyWith(
         selectedAssignment: assignment,
@@ -124,7 +127,11 @@ class AssignmentsCubit extends Cubit<AssignmentsState> {
       ),
     );
 
-    final result = await _repository.getSubmissions(assignment.id);
+    final result = await _repository.getSubmissions(
+      assignment.id,
+      page: 0,
+      pageSize: _submissionsPageSize,
+    );
 
     result.when(
       onSuccess: (submissions) {
@@ -132,6 +139,7 @@ class AssignmentsCubit extends Cubit<AssignmentsState> {
           currentState.copyWith(
             selectedAssignment: assignment,
             submissions: submissions,
+            hasMoreSubmissions: submissions.length >= _submissionsPageSize,
             isLoadingSubmissions: false,
           ),
         );
@@ -144,6 +152,46 @@ class AssignmentsCubit extends Cubit<AssignmentsState> {
             message: failure.message,
           ),
         );
+      },
+    );
+  }
+
+  /// Loads the next page of submissions for the currently selected assignment
+  Future<void> loadMoreSubmissions() async {
+    final currentState = state;
+    if (currentState is! TeacherAssignmentsLoaded) return;
+    if (currentState.isLoadingMoreSubmissions ||
+        !currentState.hasMoreSubmissions) {
+      return;
+    }
+    final assignment = currentState.selectedAssignment;
+    if (assignment == null) return;
+
+    emit(currentState.copyWith(isLoadingMoreSubmissions: true));
+
+    final nextPage = _submissionsPage + 1;
+    final result = await _repository.getSubmissions(
+      assignment.id,
+      page: nextPage,
+      pageSize: _submissionsPageSize,
+    );
+
+    if (isClosed) return;
+
+    result.when(
+      onSuccess: (newSubmissions) {
+        _submissionsPage = nextPage;
+        final updated = [...currentState.submissions, ...newSubmissions];
+        emit(
+          currentState.copyWith(
+            submissions: updated,
+            hasMoreSubmissions: newSubmissions.length >= _submissionsPageSize,
+            isLoadingMoreSubmissions: false,
+          ),
+        );
+      },
+      onFailure: (_) {
+        emit(currentState.copyWith(isLoadingMoreSubmissions: false));
       },
     );
   }
@@ -307,7 +355,7 @@ class AssignmentsCubit extends Cubit<AssignmentsState> {
   /// Loads all assignments for the currently logged-in student (Student flow) with instant SWR cache
   Future<void> loadStudentAssignments({bool forceRefresh = false}) async {
     _studentPage = 0;
-    const cacheKey = 'student_assignments_all';
+    final cacheKey = AppCache.userKey('student_assignments');
     if (forceRefresh) {
       AppCache.assignments.invalidate(cacheKey);
     }
@@ -380,7 +428,7 @@ class AssignmentsCubit extends Cubit<AssignmentsState> {
       onSuccess: (newAssignments) {
         _studentPage = nextPage;
         final allAssignments = [...currentState.assignments, ...newAssignments];
-        AppCache.assignments.put('student_assignments_all', allAssignments);
+        AppCache.assignments.put(AppCache.userKey('student_assignments'), allAssignments);
         emit(
           currentState.copyWith(
             assignments: allAssignments,

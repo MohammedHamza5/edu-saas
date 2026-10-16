@@ -11,6 +11,7 @@ import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_loading_view.dart';
 import '../../../../core/widgets/forensic_watermark_overlay.dart';
+import '../../../../core/utils/pdf_launcher_helper.dart';
 import '../../domain/entities/content_entity.dart';
 import 'secure_pdf_viewer.dart';
 import 'video_pointer_events_helper.dart';
@@ -39,12 +40,14 @@ class MaterialViewerSheet extends StatefulWidget {
       final height = MediaQuery.of(context).size.height;
       final isPdf = content.type == ContentType.pdf;
       if (width >= 600) {
+        final maxAvailableWidth = (width - 32.0).clamp(320.0, width);
         final dialogWidth = isPdf
-            ? (width > 1200 ? 1100.0 : (width * 0.94).clamp(720.0, 1100.0))
-            : 520.0;
-        final dialogMaxHeight = isPdf
-            ? (height * 0.94).clamp(580.0, 960.0)
-            : 640.0;
+            ? (width > 1200 ? 1100.0 : (width * 0.94).clamp(320.0, maxAvailableWidth))
+            : math.min(520.0, maxAvailableWidth);
+        final maxAvailableHeight = (height - 40.0).clamp(280.0, height);
+        final double dialogMaxHeight = isPdf
+            ? (height * 0.94).clamp(280.0, math.min<double>(960.0, maxAvailableHeight))
+            : math.min<double>(640.0, maxAvailableHeight);
         await showDialog<void>(
           context: context,
           builder: (ctx) => Dialog(
@@ -301,6 +304,13 @@ class _MaterialViewerSheetState extends State<MaterialViewerSheet> {
                     ],
                   ),
                 ),
+                if (isPdf && _signedUrl != null) ...[
+                  IconButton(
+                    icon: const Icon(Icons.open_in_new_rounded, size: 20),
+                    onPressed: () => PdfLauncherHelper.launchPdfUrl(_signedUrl!, context: context),
+                    tooltip: context.l10n.openPdfInNewTabTooltip,
+                  ),
+                ],
                 if (isTeacher && isPdf && _signedUrl != null) ...[
                   IconButton(
                     icon: const Icon(Icons.copy_rounded, size: 18),
@@ -508,6 +518,57 @@ class _MaterialViewerSheetState extends State<MaterialViewerSheet> {
                 ),
               ],
               if (isPdf) ...[
+                if (_signedUrl != null) ...[
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.s10),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.s12,
+                        vertical: AppSpacing.s8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withAlpha(16),
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                        border: Border.all(color: AppColors.primary.withAlpha(45)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.rocket_launch_rounded,
+                            size: 18,
+                            color: AppColors.primary,
+                          ),
+                          const SizedBox(width: AppSpacing.s8),
+                          Expanded(
+                            child: Text(
+                              context.l10n.openPdfInNewTabTooltip,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.textPrimary,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.s8),
+                          AppButton(
+                            text: context.l10n.openPdfInNewTab,
+                            icon: Icons.open_in_new_rounded,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.s12,
+                              vertical: AppSpacing.s6,
+                            ),
+                            onPressed: () => PdfLauncherHelper.launchPdfUrl(
+                              _signedUrl!,
+                              context: context,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.only(bottom: AppSpacing.s12),
@@ -530,7 +591,12 @@ class _MaterialViewerSheetState extends State<MaterialViewerSheet> {
                           AppButton(
                             text: context.l10n.downloadOrOpenFile,
                             icon: Icons.open_in_new_rounded,
-                            onPressed: _copyUrl,
+                            onPressed: _signedUrl != null
+                                ? () => PdfLauncherHelper.launchPdfUrl(
+                                      _signedUrl!,
+                                      context: context,
+                                    )
+                                : _copyUrl,
                           ),
                           const SizedBox(height: AppSpacing.s8),
                           AppButton(
@@ -557,7 +623,12 @@ class _MaterialViewerSheetState extends State<MaterialViewerSheet> {
                           child: AppButton(
                             text: context.l10n.downloadOrOpenFile,
                             icon: Icons.open_in_new_rounded,
-                            onPressed: _copyUrl,
+                            onPressed: _signedUrl != null
+                                ? () => PdfLauncherHelper.launchPdfUrl(
+                                      _signedUrl!,
+                                      context: context,
+                                    )
+                                : _copyUrl,
                           ),
                         ),
                       ],

@@ -162,10 +162,7 @@ class _ManualQuestionEntryPageState extends State<ManualQuestionEntryPage> {
       appBar: AppBar(title: Text(l10n.manualQuestionEntry)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.s24),
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 860),
-            child: Form(
+        child: Form(
               key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -522,8 +519,6 @@ class _ManualQuestionEntryPageState extends State<ManualQuestionEntryPage> {
               ),
             ),
           ),
-        ),
-      ),
-    );
+        );
   }
 }

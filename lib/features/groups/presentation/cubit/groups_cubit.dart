@@ -7,6 +7,8 @@ import 'groups_state.dart';
 
 class GroupsCubit extends Cubit<GroupsState> {
   final GroupsRepository _repository;
+  int _currentMembersPage = 0;
+  static const int _membersPageSize = 25;
 
   String get _cacheKeyGroups => AppCache.userKey('groups');
 
@@ -137,6 +139,8 @@ class GroupsCubit extends Cubit<GroupsState> {
       group ??= current.groups.isNotEmpty ? current.groups.first : null;
       if (group == null) return;
 
+      _currentMembersPage = 0;
+
       // Check members cache
       final membersCacheKey = 'members_$groupId';
       if (forceRefresh) {
@@ -148,28 +152,87 @@ class GroupsCubit extends Cubit<GroupsState> {
           current.copyWith(
             selectedGroup: group,
             groupMembers: (cachedMembers as List).cast(),
+            hasMoreMembers: true,
+            isLoadingMoreMembers: false,
           ),
         );
         if (!forceRefresh && AppCache.groups.has(membersCacheKey)) return;
       }
 
-      final membersResult = await _repository.getGroupMembers(groupId);
+      final membersResult = await _repository.getGroupMembers(
+        groupId,
+        page: 0,
+        pageSize: _membersPageSize,
+      );
       if (isClosed) return;
 
       membersResult.when(
         onSuccess: (members) {
           if (!isClosed) {
+            _currentMembersPage = 0;
             AppCache.groups.put(membersCacheKey, members);
-            emit(current.copyWith(selectedGroup: group, groupMembers: members));
+            emit(
+              current.copyWith(
+                selectedGroup: group,
+                groupMembers: members,
+                hasMoreMembers: members.length >= _membersPageSize,
+                isLoadingMoreMembers: false,
+              ),
+            );
           }
         },
         onFailure: (failure) {
           if (!isClosed) {
-            emit(current.copyWith(selectedGroup: group));
+            emit(
+              current.copyWith(
+                selectedGroup: group,
+                isLoadingMoreMembers: false,
+              ),
+            );
           }
         },
       );
     }
+  }
+
+  Future<void> loadMoreGroupMembers() async {
+    if (state is! GroupsLoaded) return;
+    final current = state as GroupsLoaded;
+    if (current.isLoadingMoreMembers || !current.hasMoreMembers) return;
+    final groupId = current.selectedGroup?.id;
+    if (groupId == null) return;
+
+    emit(current.copyWith(isLoadingMoreMembers: true));
+
+    final nextPage = _currentMembersPage + 1;
+    final result = await _repository.getGroupMembers(
+      groupId,
+      page: nextPage,
+      pageSize: _membersPageSize,
+    );
+
+    if (isClosed) return;
+
+    result.when(
+      onSuccess: (newMembers) {
+        if (!isClosed) {
+          _currentMembersPage = nextPage;
+          final updatedMembers = [...current.groupMembers, ...newMembers];
+          emit(
+            current.copyWith(
+              groupMembers: updatedMembers,
+              hasMoreMembers: newMembers.length >= _membersPageSize,
+              isLoadingMoreMembers: false,
+            ),
+          );
+        }
+      },
+      onFailure: (_) {
+        if (!isClosed) {
+          emit(current.copyWith(isLoadingMoreMembers: false));
+        }
+      },
+    );
   }
 
   Future<bool> addMember({

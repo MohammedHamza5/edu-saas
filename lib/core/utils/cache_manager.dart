@@ -252,6 +252,27 @@ abstract final class AppCache {
     label: 'Exams',
   );
 
+  /// Materials library folders & files.
+  static final materials = InMemoryCache<dynamic>(
+    ttl: CacheDuration.cacheable,
+    maxEntries: 25,
+    label: 'Materials',
+  );
+
+  /// Question bank documents & questions.
+  static final questionBank = InMemoryCache<dynamic>(
+    ttl: CacheDuration.cacheable,
+    maxEntries: 25,
+    label: 'QuestionBank',
+  );
+
+  /// Parent portal linked children & summaries.
+  static final parent = InMemoryCache<dynamic>(
+    ttl: CacheDuration.cacheable,
+    maxEntries: 10,
+    label: 'Parent',
+  );
+
   /// Tenant branding, config.
   static final tenant = InMemoryCache<dynamic>(
     ttl: CacheDuration.staticData,
@@ -296,6 +317,9 @@ abstract final class AppCache {
     attendance.clear();
     assignments.clear();
     exams.clear();
+    materials.clear();
+    questionBank.clear();
+    parent.clear();
     AppLogger.d('AppCache', '🧹 All domain caches invalidated after write');
   }
 
@@ -308,6 +332,9 @@ abstract final class AppCache {
     attendance.clear();
     assignments.clear();
     exams.clear();
+    materials.clear();
+    questionBank.clear();
+    parent.clear();
     tenant.clear();
     AppLogger.d('AppCache', '🧹 All caches cleared (logout/reset)');
   }

@@ -34,10 +34,14 @@ import '../../features/students/data/repositories/students_repository_impl.dart'
 import '../../features/students/domain/repositories/students_repository.dart';
 import '../../features/students/presentation/cubit/students_cubit.dart';
 import '../../features/content/data/datasources/content_remote_datasource.dart';
+import '../../features/content/data/datasources/materials_library_remote_datasource.dart';
 import '../../features/content/data/repositories/content_repository_impl.dart';
+import '../../features/content/data/repositories/materials_library_repository_impl.dart';
 import '../../features/content/domain/repositories/content_repository.dart';
+import '../../features/content/domain/repositories/materials_library_repository.dart';
 import '../../features/content/presentation/cubit/content_cubit.dart';
 import '../../features/content/presentation/cubit/course_progress_cubit.dart';
+import '../../features/content/presentation/cubit/materials_library_cubit.dart';
 import '../../features/videos/data/datasources/videos_remote_datasource.dart';
 import '../../features/videos/data/datasources/video_bank_remote_datasource.dart';
 import '../../features/videos/data/repositories/videos_repository_impl.dart';
@@ -118,6 +122,11 @@ class InjectionContainer {
   static late final ContentRemoteDataSource contentRemoteDataSource;
   static late final ContentRepository contentRepository;
 
+  // Feature: Materials Library CMS (Folders, Deduplication, Reusable Handouts)
+  static late final MaterialsLibraryRemoteDataSource
+      materialsLibraryRemoteDataSource;
+  static late final MaterialsLibraryRepository materialsLibraryRepository;
+
   // Feature: Assignments Singletons & Repositories
   static late final AssignmentsRemoteDataSource assignmentsRemoteDataSource;
   static late final AssignmentsRepository assignmentsRepository;
@@ -160,6 +169,8 @@ class InjectionContainer {
       VideoBankCubit(repository: videoBankRepository);
   static ContentCubit createContentCubit() =>
       ContentCubit(repository: contentRepository);
+  static MaterialsLibraryCubit createMaterialsLibraryCubit() =>
+      MaterialsLibraryCubit(repository: materialsLibraryRepository);
   static CourseProgressCubit createCourseProgressCubit() =>
       CourseProgressCubit(repository: contentRepository);
   static AssignmentsCubit createAssignmentsCubit() =>
@@ -265,6 +276,15 @@ class InjectionContainer {
       remoteDataSource: contentRemoteDataSource,
     );
     AppLogger.i('DI', '✅ Content layer ready');
+
+    // 10b. Materials Library CMS Dependencies
+    materialsLibraryRemoteDataSource = MaterialsLibraryRemoteDataSourceImpl(
+      client: customClient,
+    );
+    materialsLibraryRepository = MaterialsLibraryRepositoryImpl(
+      remoteDataSource: materialsLibraryRemoteDataSource,
+    );
+    AppLogger.i('DI', '✅ Materials Library CMS layer ready');
 
     // 11. Assignments Dependencies
     assignmentsRemoteDataSource = AssignmentsRemoteDataSourceImpl(

@@ -11,8 +11,11 @@ class ExamAttemptModel extends ExamAttemptEntity {
     required super.startedAt,
     super.submittedAt,
     super.status,
+    super.submissionReason,
     super.score,
     super.percentage,
+    super.remainingSeconds,
+    super.answeredQuestionsCount,
     super.answers,
     super.questions,
   });
@@ -40,8 +43,8 @@ class ExamAttemptModel extends ExamAttemptEntity {
                 isCorrect: aMap['is_correct'] as bool?,
                 pointsEarned: (aMap['points_earned'] as num?)?.toDouble(),
                 answeredAt: aMap['answered_at'] != null
-                    ? DateTime.tryParse(aMap['answered_at'].toString()) ?? DateTime.now()
-                    : DateTime.now(),
+                    ? DateTime.tryParse(aMap['answered_at'].toString())?.toUtc() ?? DateTime.now().toUtc()
+                    : DateTime.now().toUtc(),
               );
             }).toList() ??
         <ExamAnswerEntity>[];
@@ -58,6 +61,15 @@ class ExamAttemptModel extends ExamAttemptEntity {
             }).toList() ??
         <ExamQuestionEntity>[];
 
+    int? answeredQuestionsCount;
+    if (json['answered_questions_count'] != null) {
+      answeredQuestionsCount =
+          (json['answered_questions_count'] as num).toInt();
+    } else if (answersList.isNotEmpty) {
+      answeredQuestionsCount =
+          answersList.where((a) => a.selectedOptionId != null).length;
+    }
+
     return ExamAttemptModel(
       id: json['id']?.toString() ?? '',
       examId: json['exam_id']?.toString() ?? '',
@@ -65,16 +77,21 @@ class ExamAttemptModel extends ExamAttemptEntity {
       studentId: json['student_id']?.toString() ?? '',
       studentName: studentName,
       startedAt: json['started_at'] != null
-          ? DateTime.tryParse(json['started_at'].toString()) ?? DateTime.now()
-          : DateTime.now(),
+          ? DateTime.tryParse(json['started_at'].toString())?.toUtc() ?? DateTime.now().toUtc()
+          : DateTime.now().toUtc(),
       submittedAt: json['submitted_at'] != null
-          ? DateTime.tryParse(json['submitted_at'].toString())
+          ? DateTime.tryParse(json['submitted_at'].toString())?.toUtc()
           : null,
       status: AttemptStatus.fromString(
         json['status'] as String? ?? 'in_progress',
       ),
+      submissionReason: ExamSubmissionReason.fromString(
+        json['submission_reason'] as String?,
+      ),
       score: (json['score'] as num?)?.toInt(),
       percentage: (json['percentage'] as num?)?.toDouble(),
+      remainingSeconds: (json['remaining_seconds'] as num?)?.toInt(),
+      answeredQuestionsCount: answeredQuestionsCount,
       answers: answersList,
       questions: questionsList,
     );
@@ -89,6 +106,7 @@ class ExamAttemptModel extends ExamAttemptEntity {
       'started_at': startedAt.toIso8601String(),
       if (submittedAt != null) 'submitted_at': submittedAt!.toIso8601String(),
       'status': status.value,
+      'submission_reason': submissionReason.value,
       if (score != null) 'score': score,
       if (percentage != null) 'percentage': percentage,
     };
