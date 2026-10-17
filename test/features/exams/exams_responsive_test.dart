@@ -228,12 +228,13 @@ class _FakeExamsRepository implements ExamsRepository {
   }) async => const Success(true);
 
   @override
-  Future<Result<List<ExamFolderEntity>>> getExamFolders() async =>
+  Future<Result<List<ExamFolderEntity>>> getExamFolders({String? groupId}) async =>
       const Success([]);
 
   @override
   Future<Result<ExamFolderEntity>> createExamFolder({
     required String name,
+    String? groupId,
     String? color,
     String? icon,
     String? description,
@@ -241,6 +242,7 @@ class _FakeExamsRepository implements ExamsRepository {
         ExamFolderEntity(
           id: 'f1',
           tenantId: 't1',
+          groupId: groupId,
           name: name,
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),

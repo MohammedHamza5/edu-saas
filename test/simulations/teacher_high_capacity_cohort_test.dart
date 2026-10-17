@@ -415,9 +415,9 @@ class _CohortExamsRepo implements ExamsRepository {
   @override
   Future<Result<bool>> updateStudentParentPhone({required String studentId, required String parentPhone}) async => const Success(true);
   @override
-  Future<Result<List<ExamFolderEntity>>> getExamFolders() async => const Success([]);
+  Future<Result<List<ExamFolderEntity>>> getExamFolders({String? groupId}) async => const Success([]);
   @override
-  Future<Result<ExamFolderEntity>> createExamFolder({required String name, String? color, String? icon, String? description}) async => throw UnimplementedError();
+  Future<Result<ExamFolderEntity>> createExamFolder({required String name, String? groupId, String? color, String? icon, String? description}) async => throw UnimplementedError();
   @override
   Future<Result<ExamFolderEntity>> updateExamFolder({required String folderId, required String name, String? color, String? icon, String? description}) async => throw UnimplementedError();
   @override

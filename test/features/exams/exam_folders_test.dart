@@ -167,4 +167,123 @@ void main() {
       expect(resetState.filteredExams.length, 3);
     });
   });
+
+  group('StudentExamsLoaded Folders Filtering Logic', () {
+    final now = DateTime.now();
+
+    final examInFolder1 = ExamEntity(
+      id: 'exam-1',
+      contentId: 'content-1',
+      tenantId: 'tenant-1',
+      groupId: 'group-1',
+      title: 'Exam 1 (In Folder 1)',
+      maxScore: 100,
+      questionsCount: 10,
+      createdAt: now,
+      updatedAt: now,
+      folderId: 'folder-1',
+      folderName: 'Unit 1',
+    );
+
+    final examInFolder2 = ExamEntity(
+      id: 'exam-2',
+      contentId: 'content-2',
+      tenantId: 'tenant-1',
+      groupId: 'group-1',
+      title: 'Exam 2 (In Folder 2)',
+      maxScore: 50,
+      questionsCount: 5,
+      createdAt: now,
+      updatedAt: now,
+      folderId: 'folder-2',
+      folderName: 'Unit 2',
+    );
+
+    final uncategorizedExam = ExamEntity(
+      id: 'exam-3',
+      contentId: 'content-3',
+      tenantId: 'tenant-1',
+      groupId: 'group-1',
+      title: 'Exam 3 (No Folder)',
+      maxScore: 20,
+      questionsCount: 2,
+      createdAt: now,
+      updatedAt: now,
+      folderId: null,
+      folderName: null,
+    );
+
+    final List<ExamEntity> allExams = [
+      examInFolder1,
+      examInFolder2,
+      uncategorizedExam,
+    ];
+
+    final folders = [
+      ExamFolderEntity(
+        id: 'folder-1',
+        tenantId: 'tenant-1',
+        groupId: 'group-1',
+        name: 'Unit 1',
+        examCount: 1,
+        createdAt: now,
+        updatedAt: now,
+      ),
+      ExamFolderEntity(
+        id: 'folder-2',
+        tenantId: 'tenant-1',
+        groupId: 'group-1',
+        name: 'Unit 2',
+        examCount: 1,
+        createdAt: now,
+        updatedAt: now,
+      ),
+    ];
+
+    test('StudentExamsLoaded selectedFolderId == null returns all exams', () {
+      final state = StudentExamsLoaded(
+        exams: allExams,
+        folders: folders,
+        selectedFolderId: null,
+      );
+
+      expect(state.filteredExams.length, 3);
+      expect(state.filteredExams, containsAll(allExams));
+    });
+
+    test('StudentExamsLoaded selectedFolderId == "uncategorized" returns exams without folder', () {
+      final state = StudentExamsLoaded(
+        exams: allExams,
+        folders: folders,
+        selectedFolderId: 'uncategorized',
+      );
+
+      expect(state.filteredExams.length, 1);
+      expect(state.filteredExams.first.id, 'exam-3');
+    });
+
+    test('StudentExamsLoaded selectedFolderId == specific UUID filters to that folder', () {
+      final state = StudentExamsLoaded(
+        exams: allExams,
+        folders: folders,
+        selectedFolderId: 'folder-2',
+      );
+
+      expect(state.filteredExams.length, 1);
+      expect(state.filteredExams.first.id, 'exam-2');
+      expect(state.filteredExams.first.folderId, 'folder-2');
+    });
+
+    test('StudentExamsLoaded copyWith clearSelectedFolder resets filter', () {
+      final state = StudentExamsLoaded(
+        exams: allExams,
+        folders: folders,
+        selectedFolderId: 'folder-1',
+      );
+
+      final resetState = state.copyWith(clearSelectedFolder: true);
+      expect(resetState.selectedFolderId, isNull);
+      expect(resetState.filteredExams.length, 3);
+    });
+  });
 }

@@ -11,12 +11,14 @@ import '../../../../core/widgets/app_error_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
 import '../../../../core/widgets/responsive_container.dart';
 import '../../domain/entities/exam_entity.dart';
+import '../../domain/entities/exam_folder_entity.dart';
 import '../../domain/entities/mistake_entities.dart';
 import '../cubit/exams_cubit.dart';
 import '../cubit/exams_state.dart';
 import '../cubit/mistakes_cubit.dart';
 import '../cubit/mistakes_state.dart';
 import '../widgets/exam_card.dart';
+import '../widgets/exam_folders_bar.dart';
 import 'exam_intro_page.dart';
 import 'exam_result_page.dart';
 
@@ -117,20 +119,30 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
         lower.contains('lesson');
   }
 
-  List<ExamEntity> _filterExams(List<ExamEntity> list) {
-    List<ExamEntity> filtered;
+  List<ExamEntity> _filterExams(List<ExamEntity> list, String? selectedFolderId) {
+    List<ExamEntity> filtered = list;
+
+    if (selectedFolderId != null) {
+      if (selectedFolderId == 'uncategorized') {
+        filtered = filtered
+            .where((e) => e.folderId == null || e.folderId!.trim().isEmpty)
+            .toList();
+      } else {
+        filtered = filtered.where((e) => e.folderId == selectedFolderId).toList();
+      }
+    }
+
     switch (_activeFilter) {
       case StudentExamFilter.all:
-        filtered = list;
         break;
       case StudentExamFilter.available:
-        filtered = list.where((e) => !e.hasAttempted).toList();
+        filtered = filtered.where((e) => !e.hasAttempted).toList();
         break;
       case StudentExamFilter.inProgress:
-        filtered = list.where((e) => e.hasActiveAttempt).toList();
+        filtered = filtered.where((e) => e.hasActiveAttempt).toList();
         break;
       case StudentExamFilter.completed:
-        filtered = list.where((e) => e.isFullyCompleted).toList();
+        filtered = filtered.where((e) => e.isFullyCompleted).toList();
         break;
     }
 
@@ -285,7 +297,45 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
                     }
 
                     if (state is StudentExamsLoaded) {
-                      final filtered = _filterExams(allExams);
+                      // Extract unique folders scoped to the student's accessible exams
+                      final Map<String, ExamFolderEntity> folderMap = {};
+                      for (final exam in allExams) {
+                        if (exam.folderId != null && exam.folderId!.trim().isNotEmpty) {
+                          final fid = exam.folderId!.trim();
+                          if (!folderMap.containsKey(fid)) {
+                            folderMap[fid] = ExamFolderEntity(
+                              id: fid,
+                              tenantId: exam.tenantId,
+                              groupId: exam.groupId,
+                              name: exam.folderName ?? '',
+                              color: exam.folderColor ?? '#5B4FE0',
+                              examCount: 1,
+                              createdAt: exam.createdAt,
+                              updatedAt: exam.updatedAt,
+                            );
+                          } else {
+                            final existing = folderMap[fid]!;
+                            folderMap[fid] = existing.copyWith(
+                              examCount: existing.examCount + 1,
+                            );
+                          }
+                        }
+                      }
+                      final studentFolders = folderMap.values.toList()
+                        ..sort((a, b) => a.name.compareTo(b.name));
+
+                      final uncategorizedCount = allExams
+                          .where((e) => e.folderId == null || e.folderId!.trim().isEmpty)
+                          .length;
+
+                      final filtered = _filterExams(allExams, state.selectedFolderId);
+
+                      // For status filter chips counts, use exams within the selected folder
+                      final folderScopedExams = state.selectedFolderId == null
+                          ? allExams
+                          : state.selectedFolderId == 'uncategorized'
+                              ? allExams.where((e) => e.folderId == null || e.folderId!.trim().isEmpty).toList()
+                              : allExams.where((e) => e.folderId == state.selectedFolderId).toList();
 
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -298,8 +348,21 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
                           _buildSearchBar(context),
                           const SizedBox(height: AppSpacing.s6),
 
+                          // 2.5. Exam Folders Bar (shown when student has organized folders)
+                          if (studentFolders.isNotEmpty) ...[
+                            ExamFoldersBar(
+                              folders: studentFolders,
+                              selectedFolderId: state.selectedFolderId,
+                              totalExamsCount: allExams.length,
+                              uncategorizedCount: uncategorizedCount,
+                              onSelectFolder: (String? fId) =>
+                                  context.read<ExamsCubit>().selectStudentFolder(fId),
+                            ),
+                            const SizedBox(height: AppSpacing.s6),
+                          ],
+
                           // 3. Filter chips row
-                          _buildFilterChips(context, allExams),
+                          _buildFilterChips(context, folderScopedExams),
                           const Divider(height: 1, color: AppColors.border),
                           const SizedBox(height: AppSpacing.s12),
 
