@@ -16,7 +16,8 @@ class MistakesCubit extends Cubit<MistakesState> {
 
   Future<void> loadMistakes({
     String? examId,
-    bool onlyUnresolved = true,
+    bool onlyUnresolved = false,
+    MistakeStatusFilter? initialStatusFilter,
     bool forceRefresh = false,
   }) async {
     final studentId = _currentStudentId;
@@ -30,12 +31,16 @@ class MistakesCubit extends Cubit<MistakesState> {
     if (!forceRefresh) {
       final cached = AppCache.exams.getStale(cacheKey);
       if (cached is ({MistakeSummaryEntity summary, List<MistakeQuestionEntity> questions})) {
+        final currentStatus = initialStatusFilter ??
+            (state is MistakesLoaded
+                ? (state as MistakesLoaded).statusFilter
+                : MistakeStatusFilter.unresolved);
         emit(
           MistakesLoaded(
             summary: cached.summary,
             questions: cached.questions,
             selectedExamId: examId,
-            onlyUnresolved: onlyUnresolved,
+            statusFilter: currentStatus,
           ),
         );
         if (AppCache.exams.has(cacheKey)) return;
@@ -69,12 +74,16 @@ class MistakesCubit extends Cubit<MistakesState> {
       final currentSearchQuery = state is MistakesLoaded
           ? (state as MistakesLoaded).searchQuery
           : '';
+      final currentStatusFilter = initialStatusFilter ??
+          (state is MistakesLoaded
+              ? (state as MistakesLoaded).statusFilter
+              : MistakeStatusFilter.unresolved);
       emit(
         MistakesLoaded(
           summary: summary,
           questions: questions,
           selectedExamId: examId,
-          onlyUnresolved: onlyUnresolved,
+          statusFilter: currentStatusFilter,
           typeFilter: currentTypeFilter,
           searchQuery: currentSearchQuery,
         ),
@@ -86,6 +95,13 @@ class MistakesCubit extends Cubit<MistakesState> {
       if (state is! MistakesLoaded) {
         emit(MistakesError(msg));
       }
+    }
+  }
+
+  void setStatusFilter(MistakeStatusFilter filter) {
+    final s = state;
+    if (s is MistakesLoaded) {
+      emit(s.copyWith(statusFilter: filter));
     }
   }
 
@@ -108,23 +124,18 @@ class MistakesCubit extends Cubit<MistakesState> {
     if (s is MistakesLoaded) {
       await loadMistakes(
         examId: examId,
-        onlyUnresolved: s.onlyUnresolved,
+        onlyUnresolved: false,
+        initialStatusFilter: s.statusFilter,
       );
     } else {
       await loadMistakes(examId: examId);
     }
   }
 
-  Future<void> toggleResolvedFilter(bool onlyUnresolved) async {
-    final s = state;
-    if (s is MistakesLoaded) {
-      await loadMistakes(
-        examId: s.selectedExamId,
-        onlyUnresolved: onlyUnresolved,
-      );
-    } else {
-      await loadMistakes(onlyUnresolved: onlyUnresolved);
-    }
+  void toggleResolvedFilter(bool onlyUnresolved) {
+    setStatusFilter(onlyUnresolved
+        ? MistakeStatusFilter.unresolved
+        : MistakeStatusFilter.resolved);
   }
 
   Future<void> submitPractice(List<Map<String, String>> answers) async {

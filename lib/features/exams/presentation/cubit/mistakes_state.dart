@@ -12,6 +12,12 @@ final class MistakesInitial extends MistakesState {
   const MistakesInitial();
 }
 
+enum MistakeStatusFilter {
+  unresolved,
+  resolved,
+  all,
+}
+
 enum MistakeTypeFilter {
   all,
   wrongOnly,
@@ -26,7 +32,7 @@ final class MistakesLoaded extends MistakesState {
   final MistakeSummaryEntity summary;
   final List<MistakeQuestionEntity> questions;
   final String? selectedExamId;
-  final bool onlyUnresolved;
+  final MistakeStatusFilter statusFilter;
   final MistakeTypeFilter typeFilter;
   final String searchQuery;
 
@@ -34,20 +40,39 @@ final class MistakesLoaded extends MistakesState {
     required this.summary,
     required this.questions,
     this.selectedExamId,
-    this.onlyUnresolved = true,
+    MistakeStatusFilter? statusFilter,
+    bool? onlyUnresolved,
     this.typeFilter = MistakeTypeFilter.all,
     this.searchQuery = '',
-  });
+  }) : statusFilter = statusFilter ??
+            (onlyUnresolved != null
+                ? (onlyUnresolved
+                    ? MistakeStatusFilter.unresolved
+                    : MistakeStatusFilter.all)
+                : MistakeStatusFilter.unresolved);
 
-  /// Instant filtered projection based on type filter and search query.
+  bool get onlyUnresolved => statusFilter == MistakeStatusFilter.unresolved;
+
+  /// Instant filtered projection based on status filter, type filter, and search query.
   List<MistakeQuestionEntity> get filteredQuestions {
     return questions.where((q) {
+      // 1. Status Filter
+      if (statusFilter == MistakeStatusFilter.unresolved && q.isResolved) {
+        return false;
+      }
+      if (statusFilter == MistakeStatusFilter.resolved && !q.isResolved) {
+        return false;
+      }
+
+      // 2. Type Filter
       if (typeFilter == MistakeTypeFilter.wrongOnly && q.isSkipped) {
         return false;
       }
       if (typeFilter == MistakeTypeFilter.skippedOnly && !q.isSkipped) {
         return false;
       }
+
+      // 3. Search Query
       if (searchQuery.isNotEmpty) {
         final query = searchQuery.trim().toLowerCase();
         final textMatches = q.questionText.toLowerCase().contains(query);
@@ -61,6 +86,14 @@ final class MistakesLoaded extends MistakesState {
       return true;
     }).toList();
   }
+
+  int get unresolvedCountInList =>
+      questions.where((q) => !q.isResolved).length;
+
+  int get resolvedCountInList =>
+      questions.where((q) => q.isResolved).length;
+
+  int get totalCountInList => questions.length;
 
   int get wrongCountInList =>
       questions.where((q) => q.isWrongAnswer).length;
@@ -79,6 +112,7 @@ final class MistakesLoaded extends MistakesState {
     List<MistakeQuestionEntity>? questions,
     String? selectedExamId,
     bool clearSelectedExam = false,
+    MistakeStatusFilter? statusFilter,
     bool? onlyUnresolved,
     MistakeTypeFilter? typeFilter,
     String? searchQuery,
@@ -89,7 +123,12 @@ final class MistakesLoaded extends MistakesState {
       selectedExamId: clearSelectedExam
           ? null
           : (selectedExamId ?? this.selectedExamId),
-      onlyUnresolved: onlyUnresolved ?? this.onlyUnresolved,
+      statusFilter: statusFilter ??
+          (onlyUnresolved != null
+              ? (onlyUnresolved
+                  ? MistakeStatusFilter.unresolved
+                  : MistakeStatusFilter.all)
+              : this.statusFilter),
       typeFilter: typeFilter ?? this.typeFilter,
       searchQuery: searchQuery ?? this.searchQuery,
     );
@@ -100,7 +139,7 @@ final class MistakesLoaded extends MistakesState {
         summary,
         questions,
         selectedExamId,
-        onlyUnresolved,
+        statusFilter,
         typeFilter,
         searchQuery,
       ];

@@ -9066,4 +9066,84 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get replacePdfBooklet => 'Replace Booklet';
+
+  @override
+  String get mistakeTabUnresolved => 'Needs Practice';
+
+  @override
+  String get mistakeTabResolved => 'Mastered';
+
+  @override
+  String get mistakeTabAll => 'All Mistakes';
+
+  @override
+  String get practiceModeDialogTitle => 'Choose Practice Mode';
+
+  @override
+  String get practiceModeDialogSubtitle =>
+      'Select how you would like to practice and reinforce your learning';
+
+  @override
+  String get practiceModeUnresolvedTitle => 'Active Mistakes Practice';
+
+  @override
+  String get practiceModeUnresolvedDesc =>
+      'Focus on questions that need practice to clear your backlog';
+
+  @override
+  String get practiceModeResolvedTitle => 'Mastery Retention & Review';
+
+  @override
+  String get practiceModeResolvedDesc =>
+      'Review mastered questions to ensure long-term retention (Spaced Repetition)';
+
+  @override
+  String get practiceModeAllTitle => 'Mixed Challenge';
+
+  @override
+  String get practiceModeAllDesc =>
+      'A randomized mix of active mistakes and mastered questions';
+
+  @override
+  String practiceModeBadgeQuestions(int count) {
+    return '$count Questions';
+  }
+
+  @override
+  String practiceModeBadgeMastered(int count) {
+    return '$count Mastered';
+  }
+
+  @override
+  String get practiceModeHeaderUnresolved => 'Active Mistakes Practice';
+
+  @override
+  String get practiceModeHeaderResolved => 'Mastery Retention Review';
+
+  @override
+  String get practiceModeHeaderAll => 'Mixed Challenge Practice';
+
+  @override
+  String get badgeMastered => 'Mastered';
+
+  @override
+  String get badgeNeedsPractice => 'Needs Practice';
+
+  @override
+  String resolvedAfterAttempts(int count) {
+    return 'Mastered after $count attempts';
+  }
+
+  @override
+  String get startMasteryPractice => 'Start Mastery Review';
+
+  @override
+  String get noMasteredMistakesFound => 'No mastered questions yet';
+
+  @override
+  String get noMasteredMistakesFoundSub =>
+      'Solve mistakes in practice mode to move them to your mastered vault';
+
+  @override
+  String get practiceSingleQuestionAction => 'Practice Question';
 }

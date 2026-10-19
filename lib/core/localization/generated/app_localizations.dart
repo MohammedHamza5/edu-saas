@@ -15978,6 +15978,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Replace Booklet'**
   String get replacePdfBooklet;
+
+  /// No description provided for @mistakeTabUnresolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs Practice'**
+  String get mistakeTabUnresolved;
+
+  /// No description provided for @mistakeTabResolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Mastered'**
+  String get mistakeTabResolved;
+
+  /// No description provided for @mistakeTabAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All Mistakes'**
+  String get mistakeTabAll;
+
+  /// No description provided for @practiceModeDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Practice Mode'**
+  String get practiceModeDialogTitle;
+
+  /// No description provided for @practiceModeDialogSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select how you would like to practice and reinforce your learning'**
+  String get practiceModeDialogSubtitle;
+
+  /// No description provided for @practiceModeUnresolvedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Mistakes Practice'**
+  String get practiceModeUnresolvedTitle;
+
+  /// No description provided for @practiceModeUnresolvedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus on questions that need practice to clear your backlog'**
+  String get practiceModeUnresolvedDesc;
+
+  /// No description provided for @practiceModeResolvedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mastery Retention & Review'**
+  String get practiceModeResolvedTitle;
+
+  /// No description provided for @practiceModeResolvedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Review mastered questions to ensure long-term retention (Spaced Repetition)'**
+  String get practiceModeResolvedDesc;
+
+  /// No description provided for @practiceModeAllTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mixed Challenge'**
+  String get practiceModeAllTitle;
+
+  /// No description provided for @practiceModeAllDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'A randomized mix of active mistakes and mastered questions'**
+  String get practiceModeAllDesc;
+
+  /// No description provided for @practiceModeBadgeQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Questions'**
+  String practiceModeBadgeQuestions(int count);
+
+  /// No description provided for @practiceModeBadgeMastered.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Mastered'**
+  String practiceModeBadgeMastered(int count);
+
+  /// No description provided for @practiceModeHeaderUnresolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Mistakes Practice'**
+  String get practiceModeHeaderUnresolved;
+
+  /// No description provided for @practiceModeHeaderResolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Mastery Retention Review'**
+  String get practiceModeHeaderResolved;
+
+  /// No description provided for @practiceModeHeaderAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Mixed Challenge Practice'**
+  String get practiceModeHeaderAll;
+
+  /// No description provided for @badgeMastered.
+  ///
+  /// In en, this message translates to:
+  /// **'Mastered'**
+  String get badgeMastered;
+
+  /// No description provided for @badgeNeedsPractice.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs Practice'**
+  String get badgeNeedsPractice;
+
+  /// No description provided for @resolvedAfterAttempts.
+  ///
+  /// In en, this message translates to:
+  /// **'Mastered after {count} attempts'**
+  String resolvedAfterAttempts(int count);
+
+  /// No description provided for @startMasteryPractice.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Mastery Review'**
+  String get startMasteryPractice;
+
+  /// No description provided for @noMasteredMistakesFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No mastered questions yet'**
+  String get noMasteredMistakesFound;
+
+  /// No description provided for @noMasteredMistakesFoundSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Solve mistakes in practice mode to move them to your mastered vault'**
+  String get noMasteredMistakesFoundSub;
+
+  /// No description provided for @practiceSingleQuestionAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Practice Question'**
+  String get practiceSingleQuestionAction;
 }
 
 class _AppLocalizationsDelegate

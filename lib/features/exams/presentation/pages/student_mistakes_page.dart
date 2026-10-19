@@ -13,6 +13,7 @@ import '../../../../core/widgets/responsive_container.dart';
 import '../../domain/entities/mistake_entities.dart';
 import '../cubit/mistakes_cubit.dart';
 import '../cubit/mistakes_state.dart';
+import '../widgets/mistake_practice_mode_dialog.dart';
 
 class StudentMistakesPage extends StatefulWidget {
   const StudentMistakesPage({super.key});
@@ -133,9 +134,15 @@ class _StudentMistakesPageState extends State<StudentMistakesPage> {
                       // Questions List or Empty State
                       if (questions.isEmpty)
                         AppEmptyView(
-                          message: l10n.noMistakesFound,
-                          subtitle: l10n.noMistakesFoundSub,
-                          icon: Icons.check_circle_outline_rounded,
+                          message: state.statusFilter == MistakeStatusFilter.resolved
+                              ? l10n.noMasteredMistakesFound
+                              : l10n.noMistakesFound,
+                          subtitle: state.statusFilter == MistakeStatusFilter.resolved
+                              ? l10n.noMasteredMistakesFoundSub
+                              : l10n.noMistakesFoundSub,
+                          icon: state.statusFilter == MistakeStatusFilter.resolved
+                              ? Icons.stars_rounded
+                              : Icons.check_circle_outline_rounded,
                         )
                       else ...[
                         ListView.separated(
@@ -170,8 +177,6 @@ class _StudentMistakesPageState extends State<StudentMistakesPage> {
   ) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
-    final summary = state.summary;
-    final hasUnresolved = summary.unresolvedCount > 0;
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.s24),
@@ -242,28 +247,30 @@ class _StudentMistakesPageState extends State<StudentMistakesPage> {
             runSpacing: AppSpacing.s8,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              if (hasUnresolved)
+              if (state.totalCountInList > 0)
                 ElevatedButton.icon(
                   onPressed: () {
-                    final typeParam = state.typeFilter == MistakeTypeFilter.wrongOnly
-                        ? '&type=wrongOnly'
-                        : state.typeFilter == MistakeTypeFilter.skippedOnly
-                            ? '&type=skippedOnly'
-                            : '';
-                    final query = state.selectedExamId != null
-                        ? '?examId=${state.selectedExamId}$typeParam'
-                        : typeParam.isNotEmpty
-                            ? '?${typeParam.substring(1)}'
-                            : '';
-                    context.push('${AppRoutes.mistakesPractice}$query');
+                    MistakePracticeModeDialog.show(
+                      context: context,
+                      unresolvedCount: state.unresolvedCountInList,
+                      resolvedCount: state.resolvedCountInList,
+                      totalCount: state.totalCountInList,
+                      onSelectMode: (mode) {
+                        final typeParam = state.typeFilter == MistakeTypeFilter.wrongOnly
+                            ? '&type=wrongOnly'
+                            : state.typeFilter == MistakeTypeFilter.skippedOnly
+                                ? '&type=skippedOnly'
+                                : '';
+                        final query = state.selectedExamId != null
+                            ? '?examId=${state.selectedExamId}&mode=$mode$typeParam'
+                            : '?mode=$mode$typeParam';
+                        context.push('${AppRoutes.mistakesPractice}$query');
+                      },
+                    );
                   },
                   icon: const Icon(Icons.play_arrow_rounded),
                   label: Text(
-                    state.typeFilter == MistakeTypeFilter.wrongOnly
-                        ? l10n.practiceFilteredMistakes(state.unresolvedWrongCountInList)
-                        : state.typeFilter == MistakeTypeFilter.skippedOnly
-                            ? l10n.practiceFilteredMistakes(state.unresolvedSkippedCountInList)
-                            : l10n.startMistakesPractice,
+                    l10n.startMistakesPractice,
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   style: ElevatedButton.styleFrom(
@@ -481,7 +488,56 @@ class _StudentMistakesPageState extends State<StudentMistakesPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // 1. Search Box
+        // 1. Prominent Status Segment Tabs (Needs Practice / Mastered / All)
+        Container(
+          padding: const EdgeInsets.all(AppSpacing.s4),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
+            ),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: _buildStatusTab(
+                  context,
+                  title: l10n.mistakeTabUnresolved,
+                  count: state.unresolvedCountInList,
+                  isSelected: state.statusFilter == MistakeStatusFilter.unresolved,
+                  color: AppColors.warning,
+                  onTap: () => cubit.setStatusFilter(MistakeStatusFilter.unresolved),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.s4),
+              Expanded(
+                child: _buildStatusTab(
+                  context,
+                  title: l10n.mistakeTabResolved,
+                  count: state.resolvedCountInList,
+                  isSelected: state.statusFilter == MistakeStatusFilter.resolved,
+                  color: AppColors.success,
+                  onTap: () => cubit.setStatusFilter(MistakeStatusFilter.resolved),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.s4),
+              Expanded(
+                child: _buildStatusTab(
+                  context,
+                  title: l10n.mistakeTabAll,
+                  count: state.totalCountInList,
+                  isSelected: state.statusFilter == MistakeStatusFilter.all,
+                  color: Theme.of(context).colorScheme.primary,
+                  onTap: () => cubit.setStatusFilter(MistakeStatusFilter.all),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppSpacing.s12),
+
+        // 2. Search Box
         TextField(
           controller: _searchController,
           decoration: InputDecoration(
@@ -517,7 +573,7 @@ class _StudentMistakesPageState extends State<StudentMistakesPage> {
         ),
         const SizedBox(height: AppSpacing.s12),
 
-        // 2. Type Filter Chips & Status Chips
+        // 3. Type Filter Chips
         Wrap(
           spacing: AppSpacing.s8,
           runSpacing: AppSpacing.s8,
@@ -543,20 +599,6 @@ class _StudentMistakesPageState extends State<StudentMistakesPage> {
               selected: state.typeFilter == MistakeTypeFilter.skippedOnly,
               selectedColor: AppColors.warning.withValues(alpha: 0.15),
               onSelected: (_) => cubit.setTypeFilter(MistakeTypeFilter.skippedOnly),
-            ),
-
-            const SizedBox(width: AppSpacing.s8),
-
-            // Review Status
-            FilterChip(
-              label: Text(l10n.filterUnresolved),
-              selected: state.onlyUnresolved,
-              onSelected: (_) => cubit.toggleResolvedFilter(true),
-            ),
-            FilterChip(
-              label: Text(l10n.filterResolved),
-              selected: !state.onlyUnresolved,
-              onSelected: (_) => cubit.toggleResolvedFilter(false),
             ),
           ],
         ),
@@ -595,6 +637,73 @@ class _StudentMistakesPageState extends State<StudentMistakesPage> {
           ),
         ],
       ],
+    );
+  }
+
+  Widget _buildStatusTab(
+    BuildContext context, {
+    required String title,
+    required int count,
+    required bool isSelected,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    final theme = Theme.of(context);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.s8,
+            vertical: AppSpacing.s8,
+          ),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? color.withValues(alpha: 0.12)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+            border: isSelected
+                ? Border.all(color: color.withValues(alpha: 0.4), width: 1.5)
+                : Border.all(color: Colors.transparent, width: 1.5),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                title,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                  color: isSelected ? color : AppColors.textSecondary,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 3),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 1.5),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? color
+                      : Colors.grey.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  '$count',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: isSelected ? Colors.white : AppColors.textSecondary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -711,13 +820,26 @@ class _StudentMistakesPageState extends State<StudentMistakesPage> {
                       : AppColors.warning.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
                 ),
-                child: Text(
-                  q.isResolved ? l10n.statusMastered : l10n.statusNeedsReview,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: q.isResolved ? AppColors.success : AppColors.warning,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 11,
-                  ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      q.isResolved
+                          ? Icons.check_circle_rounded
+                          : Icons.pending_actions_rounded,
+                      size: 13,
+                      color: q.isResolved ? AppColors.success : AppColors.warning,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      q.isResolved ? l10n.badgeMastered : l10n.badgeNeedsPractice,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: q.isResolved ? AppColors.success : AppColors.warning,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -894,14 +1016,24 @@ class _StudentMistakesPageState extends State<StudentMistakesPage> {
             alignment: AlignmentDirectional.centerEnd,
             child: OutlinedButton.icon(
               onPressed: () {
-                context.push('${AppRoutes.mistakesPractice}?examId=${q.sourceExamId}');
+                final modeParam = q.isResolved ? 'resolved' : 'unresolved';
+                context.push('${AppRoutes.mistakesPractice}?examId=${q.sourceExamId}&mode=$modeParam');
               },
-              icon: const Icon(Icons.fitness_center_rounded, size: 16),
+              icon: Icon(
+                q.isResolved ? Icons.restart_alt_rounded : Icons.fitness_center_rounded,
+                size: 16,
+              ),
               label: Text(
-                l10n.practiceThisQuestion,
+                q.isResolved
+                    ? l10n.practiceSingleQuestionAction
+                    : l10n.practiceThisQuestion,
                 style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
               ),
               style: OutlinedButton.styleFrom(
+                foregroundColor: q.isResolved ? AppColors.success : theme.colorScheme.primary,
+                side: BorderSide(
+                  color: (q.isResolved ? AppColors.success : theme.colorScheme.primary).withValues(alpha: 0.5),
+                ),
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 visualDensity: VisualDensity.compact,
               ),

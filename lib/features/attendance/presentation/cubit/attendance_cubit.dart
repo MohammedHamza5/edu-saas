@@ -57,6 +57,12 @@ class AttendanceCubit extends Cubit<AttendanceState> {
       onSuccess: (data) {
         if (!isClosed) {
           AppCache.attendance.put(cacheKey, data);
+          if (data.selectedLectureContentId != null && lectureContentId == null) {
+            AppCache.attendance.put(
+              '${groupId}_${dateKey}_${data.selectedLectureContentId}',
+              data,
+            );
+          }
           emit(
             TeacherAttendanceLoaded(
               groupId: groupId,
@@ -184,10 +190,21 @@ class AttendanceCubit extends Cubit<AttendanceState> {
         if (!isClosed) {
           final dateKey =
               "${currentState.selectedDate.year}-${currentState.selectedDate.month.toString().padLeft(2, '0')}-${currentState.selectedDate.day.toString().padLeft(2, '0')}";
-          AppCache.attendance.put(
-            '${currentState.groupId}_$dateKey',
-            currentState.students,
+          final groupData = GroupAttendanceData(
+            students: currentState.students,
+            lectures: currentState.availableLectures,
+            selectedLectureContentId: currentState.selectedLectureContentId,
           );
+          AppCache.attendance.put(
+            '${currentState.groupId}_${dateKey}_default',
+            groupData,
+          );
+          if (currentState.selectedLectureContentId != null) {
+            AppCache.attendance.put(
+              '${currentState.groupId}_${dateKey}_${currentState.selectedLectureContentId}',
+              groupData,
+            );
+          }
           emit(
             currentState.copyWith(
               isSaving: false,

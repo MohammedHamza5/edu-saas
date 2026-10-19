@@ -125,5 +125,64 @@ void main() {
       expect(stateSearch.filteredQuestions.length, equals(1));
       expect(stateSearch.filteredQuestions.first.questionId, equals('q1'));
     });
+
+    test('MistakesLoaded filters by MistakeStatusFilter (unresolved, resolved, all) accurately', () {
+      const qUnresolved = MistakeQuestionEntity(
+        mistakeId: 'm1',
+        questionId: 'q1',
+        questionText: 'Question 1',
+        questionType: 'single_choice',
+        points: 5,
+        sortOrder: 1,
+        isResolved: false,
+        failureCount: 2,
+        sourceExamId: 'e1',
+        sourceExamTitle: 'Algebra',
+        lastSelectedOptionId: 'opt_1',
+        options: [],
+      );
+
+      const qResolved = MistakeQuestionEntity(
+        mistakeId: 'm2',
+        questionId: 'q2',
+        questionText: 'Question 2',
+        questionType: 'single_choice',
+        points: 5,
+        sortOrder: 2,
+        isResolved: true,
+        failureCount: 1,
+        sourceExamId: 'e1',
+        sourceExamTitle: 'Algebra',
+        lastSelectedOptionId: 'opt_2',
+        options: [],
+      );
+
+      const state = MistakesLoaded(
+        summary: MistakeSummaryEntity(
+          totalMistakes: 2,
+          unresolvedCount: 1,
+          resolvedCount: 1,
+          sources: [],
+        ),
+        questions: [qUnresolved, qResolved],
+        statusFilter: MistakeStatusFilter.unresolved,
+      );
+
+      // Default: unresolved only
+      expect(state.filteredQuestions.length, equals(1));
+      expect(state.filteredQuestions.first.questionId, equals('q1'));
+      expect(state.unresolvedCountInList, equals(1));
+      expect(state.resolvedCountInList, equals(1));
+      expect(state.totalCountInList, equals(2));
+
+      // Switch to resolved
+      final stateResolved = state.copyWith(statusFilter: MistakeStatusFilter.resolved);
+      expect(stateResolved.filteredQuestions.length, equals(1));
+      expect(stateResolved.filteredQuestions.first.questionId, equals('q2'));
+
+      // Switch to all
+      final stateAllStatus = state.copyWith(statusFilter: MistakeStatusFilter.all);
+      expect(stateAllStatus.filteredQuestions.length, equals(2));
+    });
   });
 }

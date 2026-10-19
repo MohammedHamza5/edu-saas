@@ -9024,4 +9024,84 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get replacePdfBooklet => 'استبدال الكراسة';
+
+  @override
+  String get mistakeTabUnresolved => 'تحتاج تدريب';
+
+  @override
+  String get mistakeTabResolved => 'تم إتقانها';
+
+  @override
+  String get mistakeTabAll => 'كل الأخطاء';
+
+  @override
+  String get practiceModeDialogTitle => 'اختر نمط التدريب';
+
+  @override
+  String get practiceModeDialogSubtitle =>
+      'حدد طريقة المراجعة المناسبة لتثبيت معلوماتك وتفوقك';
+
+  @override
+  String get practiceModeUnresolvedTitle => 'تدريب الأخطاء المعلقة';
+
+  @override
+  String get practiceModeUnresolvedDesc =>
+      'التركيز على الأسئلة التي تحتاج إلى تدريب وتصفيرها';
+
+  @override
+  String get practiceModeResolvedTitle => 'مراجعة وتثبيت الإتقان';
+
+  @override
+  String get practiceModeResolvedDesc =>
+      'تدريب على الأسئلة التي تم حلها لضمان عدم نسيانها (Spaced Repetition)';
+
+  @override
+  String get practiceModeAllTitle => 'التحدي الشامل';
+
+  @override
+  String get practiceModeAllDesc =>
+      'تدريب عشوائي يجمع بين الأخطاء غير المحلولة والأسئلة المتقنة';
+
+  @override
+  String practiceModeBadgeQuestions(int count) {
+    return '$count سؤال';
+  }
+
+  @override
+  String practiceModeBadgeMastered(int count) {
+    return '$count سؤال متقن';
+  }
+
+  @override
+  String get practiceModeHeaderUnresolved => 'تدريب الأخطاء النشطة';
+
+  @override
+  String get practiceModeHeaderResolved => 'مراجعة وتثبيت الإتقان';
+
+  @override
+  String get practiceModeHeaderAll => 'التحدي الشامل';
+
+  @override
+  String get badgeMastered => 'تم الإتقان';
+
+  @override
+  String get badgeNeedsPractice => 'تحتاج تدريب';
+
+  @override
+  String resolvedAfterAttempts(int count) {
+    return 'تم إتقانها بعد $count محاولات';
+  }
+
+  @override
+  String get startMasteryPractice => 'بدء مراجعة الإتقان';
+
+  @override
+  String get noMasteredMistakesFound => 'لا توجد أسئلة متقنة بعد';
+
+  @override
+  String get noMasteredMistakesFoundSub =>
+      'حل الأخطاء في وضع التدريب لنقلها إلى قائمة الإتقان وتثبيتها';
+
+  @override
+  String get practiceSingleQuestionAction => 'تدريب على هذا السؤال';
 }

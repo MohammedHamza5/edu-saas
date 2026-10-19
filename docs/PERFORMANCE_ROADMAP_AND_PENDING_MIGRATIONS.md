@@ -95,15 +95,9 @@
 
 ### أ. ترحيل التحصين الأمني الحرج `0096` (`0096_enterprise_security_hardening.sql`)
 - **الملف محلياً:** [supabase/migrations/0096_enterprise_security_hardening.sql](file:///c:/Users/KimoStore/StudioProjects/edu_saas/supabase/migrations/0096_enterprise_security_hardening.sql)
-- **الحالة الحالية:** 🟡 **محفوظ محلياً ومختبر (Pending Deployment to Production)**
-- **مستوى الأهمية:** 🔴 **أمني حرج (Critical Security Fixes)**
-- **طرق التطبيق على السيرفر الحي:**
-  * **الطريقة الأولى (الأسهل والأسرع):**  
-    نسخ المحتوى الكامل للملف ولصقه في **SQL Editor** داخل لوحة تحكم مشروع الإنتاج في Supabase، ثم الضغط على **Run**.
-  * **الطريقة الثانية (عبر Supabase CLI):**  
-    ```bash
-    supabase db push
-    ```
+- **الحالة الحالية:** ✅ **تم التطبيق والتحقق بنجاح على الإنتاج الحي (`vfjialpvgorpslqjdqwq`) بتاريخ 19 أكتوبر 2026**
+- **مستوى الأهمية:** 🔴 **أمني حرج (Critical Security Fixes) — تم الإغلاق والتحصين 100%**
+- **طرق التطبيق:** تم عبر Supabase Management API مع توثيقه في `schema_migrations`.
 - **المحاور الأمنية الـ 7 المحصنة داخل الملف:**
   1. **إلغاء سياسة القراءة المباشرة لـ `question_options` من قبل الطلاب (`qo_student_read_published`):**  
      منع الطلاب من استعلام الخيارات وعمود `is_correct` مباشرة عبر واجهة PostgREST؛ وإلزام الوصول حصرياً عبر الـ RPCs الآمنة التي تحجب الإجابة الصحيحة.
@@ -123,15 +117,10 @@
 ---
 
 ### ب. نشر الدوال السحابية المحدثة (Edge Functions Deployment)
-- **الحالة:** 🟡 **جاهزة للنشر الفوري (Pending Deployment)**
-- لتحديث الدوال السحابية التي تم تطهيرها ومطابقتها للمتطلبات الأمنية:
-  ```bash
-  supabase functions deploy r2-storage
-  supabase functions deploy bunny-webhook
-  ```
-- **الوظيفة:**
-  - `r2-storage`: إدارة الرفع والروابط المؤقتة الموقعة لـ Cloudflare R2 مع التحقق الصارم من جلسة المستخدم وصلاحيات المستأجر.
-  - `bunny-webhook`: استقبال تحديثات معالجة وترميز الفيديو بأمان وتحديث حالة الدروس دون قبول أي مدخلات غير موثوقة.
+- **الحالة:** ✅ **تم النشر والتحقق بنجاح على الإنتاج الحي (`vfjialpvgorpslqjdqwq`) بتاريخ 19 أكتوبر 2026**
+- **الدوال المنشورة:**
+  - `r2-storage` (النسخة النشطة 13): إدارة الرفع والروابط المؤقتة الموقعة لـ Cloudflare R2 مع التحقق الصارم من جلسة المستخدم وصلاحيات المستأجر.
+  - `bunny-webhook` (النسخة النشطة 8): استقبال تحديثات معالجة وترميز الفيديو بأمان وتحديث حالة الدروس دون قبول أي مدخلات غير موثوقة.
 
 ---
 
@@ -154,7 +143,7 @@ git commit -m "feat(security): enterprise platform hardening, RLS fix and multi-
 
 ### هـ. ترحيل فهارس الاستعلامات المركبة `0097` (`0097_composite_query_performance_indexes.sql`)
 - **اسم الملف محلياً:** [supabase/migrations/0097_composite_query_performance_indexes.sql](file:///c:/Users/KimoStore/StudioProjects/edu_saas/supabase/migrations/0097_composite_query_performance_indexes.sql)
-- **الحالة الحالية:** 🟡 **محفوظ محلياً فقط (Local Staged)** — **لم يُطبق على الإنتاج بعد.**
+- **الحالة الحالية:** ✅ **تم التطبيق والتحقق بنجاح على الإنتاج الحي (`vfjialpvgorpslqjdqwq`) بتاريخ 19 أكتوبر 2026** (بناء الفهارس الـ 8 بتقنية `CONCURRENTLY` بدون أي توقف)
 - **الهدف الفني:** القضاء على الـ Sequential Scans و In-Memory Sorts على الجداول التي تشهد استعلامات لحظية مستمرة.
 
 #### جدول الفهارس المركبة والجزئية الـ 8:
@@ -255,7 +244,7 @@ DROP INDEX CONCURRENTLY IF EXISTS public.idx_video_progress_active_uncompleted;
 
 ### ط. ترحيل تنظيم مجلدات الامتحانات حسب المجموعات `0098` (`0098_add_group_id_to_exam_folders.sql`)
 - **اسم الملف محلياً:** [supabase/migrations/0098_add_group_id_to_exam_folders.sql](file:///c:/Users/KimoStore/StudioProjects/edu_saas/supabase/migrations/0098_add_group_id_to_exam_folders.sql)
-- **الحالة الحالية:** 🟡 **محفوظ محلياً فقط (Pending Deployment)**
+- **الحالة الحالية:** ✅ **تم التطبيق والتحقق بنجاح على الإنتاج الحي (`vfjialpvgorpslqjdqwq`) بتاريخ 19 أكتوبر 2026**
 - **الهدف:** إضافة عمود `group_id` لجدول `exam_folders` لعزل مجلدات الامتحانات حسب المجموعة وتحديث سياسات الـ RLS ودالة `move_exam_to_folder` للتحقق من اتساق المجموعة.
 
 ---

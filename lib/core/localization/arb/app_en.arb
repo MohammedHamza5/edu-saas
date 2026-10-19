@@ -9541,5 +9541,63 @@
   "previewPdfBooklet": "Preview Booklet",
   "@previewPdfBooklet": {},
   "replacePdfBooklet": "Replace Booklet",
-  "@replacePdfBooklet": {}
+  "@replacePdfBooklet": {},
+  "mistakeTabUnresolved": "Needs Practice",
+  "@mistakeTabUnresolved": {},
+  "mistakeTabResolved": "Mastered",
+  "@mistakeTabResolved": {},
+  "mistakeTabAll": "All Mistakes",
+  "@mistakeTabAll": {},
+  "practiceModeDialogTitle": "Choose Practice Mode",
+  "@practiceModeDialogTitle": {},
+  "practiceModeDialogSubtitle": "Select how you would like to practice and reinforce your learning",
+  "@practiceModeDialogSubtitle": {},
+  "practiceModeUnresolvedTitle": "Active Mistakes Practice",
+  "@practiceModeUnresolvedTitle": {},
+  "practiceModeUnresolvedDesc": "Focus on questions that need practice to clear your backlog",
+  "@practiceModeUnresolvedDesc": {},
+  "practiceModeResolvedTitle": "Mastery Retention & Review",
+  "@practiceModeResolvedTitle": {},
+  "practiceModeResolvedDesc": "Review mastered questions to ensure long-term retention (Spaced Repetition)",
+  "@practiceModeResolvedDesc": {},
+  "practiceModeAllTitle": "Mixed Challenge",
+  "@practiceModeAllTitle": {},
+  "practiceModeAllDesc": "A randomized mix of active mistakes and mastered questions",
+  "@practiceModeAllDesc": {},
+  "practiceModeBadgeQuestions": "{count} Questions",
+  "@practiceModeBadgeQuestions": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "practiceModeBadgeMastered": "{count} Mastered",
+  "@practiceModeBadgeMastered": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "practiceModeHeaderUnresolved": "Active Mistakes Practice",
+  "@practiceModeHeaderUnresolved": {},
+  "practiceModeHeaderResolved": "Mastery Retention Review",
+  "@practiceModeHeaderResolved": {},
+  "practiceModeHeaderAll": "Mixed Challenge Practice",
+  "@practiceModeHeaderAll": {},
+  "badgeMastered": "Mastered",
+  "@badgeMastered": {},
+  "badgeNeedsPractice": "Needs Practice",
+  "@badgeNeedsPractice": {},
+  "resolvedAfterAttempts": "Mastered after {count} attempts",
+  "@resolvedAfterAttempts": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "startMasteryPractice": "Start Mastery Review",
+  "@startMasteryPractice": {},
+  "noMasteredMistakesFound": "No mastered questions yet",
+  "@noMasteredMistakesFound": {},
+  "noMasteredMistakesFoundSub": "Solve mistakes in practice mode to move them to your mastered vault",
+  "@noMasteredMistakesFoundSub": {},
+  "practiceSingleQuestionAction": "Practice Question",
+  "@practiceSingleQuestionAction": {}
 }

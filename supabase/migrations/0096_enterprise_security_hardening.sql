@@ -1490,57 +1490,32 @@ WITH CHECK (
 -- 7. LOCK DOWN SEARCH_PATH & REVOKE UNAUTHORIZED EXECUTE PRIVILEGES
 -- ----------------------------------------------------------------------------
 
--- Lock down search_path on remaining SECURITY DEFINER functions
-ALTER FUNCTION IF EXISTS public.delete_student(uuid) SET search_path = public, pg_temp;
-ALTER FUNCTION IF EXISTS public.delete_group(uuid) SET search_path = public, pg_temp;
-ALTER FUNCTION IF EXISTS public.delete_lesson_with_cleanup(uuid) SET search_path = public, pg_temp;
-ALTER FUNCTION IF EXISTS public.delete_exam(uuid, boolean) SET search_path = public, pg_temp;
-ALTER FUNCTION IF EXISTS public.create_exam_version(uuid) SET search_path = public, pg_temp;
-ALTER FUNCTION IF EXISTS public.create_exam_with_questions(text, uuid, int, numeric, numeric, boolean, boolean, boolean, timestamptz, timestamptz, jsonb, boolean, uuid) SET search_path = public, pg_temp;
-ALTER FUNCTION IF EXISTS public.auto_finalize_expired_attempts(uuid) SET search_path = public, pg_temp;
-ALTER FUNCTION IF EXISTS public.dispatch_group_notification(uuid, text, text, text, jsonb) SET search_path = public, pg_temp;
-ALTER FUNCTION IF EXISTS public.dispatch_user_notification(uuid, text, text, text, jsonb) SET search_path = public, pg_temp;
-ALTER FUNCTION IF EXISTS public.dispatch_tenant_announcement(text, text, uuid) SET search_path = public, pg_temp;
-ALTER FUNCTION IF EXISTS public.assign_batch_content_to_group(uuid, jsonb) SET search_path = public, pg_temp;
-
--- Revoke execute from anon and PUBLIC on all sensitive administrative & academic RPCs
+-- Lock down search_path and revoke unauthorized execute privileges on administrative & academic RPCs
 DO $$
+DECLARE
+  r RECORD;
+  fn_names text[] := ARRAY[
+    'delete_student', 'delete_group', 'delete_lesson_with_cleanup', 'delete_exam',
+    'create_exam_version', 'create_exam_with_questions', 'auto_finalize_expired_attempts',
+    'dispatch_group_notification', 'dispatch_user_notification', 'dispatch_tenant_announcement',
+    'assign_batch_content_to_group', 'delete_chapter', 'create_chapter', 'update_chapter',
+    'reorder_course_chapters', 'reorder_chapter_lessons', 'set_lesson_chapter',
+    'toggle_chapter_visibility', 'assign_folder_as_chapter_to_group', 'update_tenant_video_provider',
+    'get_teacher_radar_alerts', 'get_teacher_exam_attempts', 'get_teacher_group_exams',
+    'get_group_academic_reports', 'get_student_360', 'get_student_dashboard',
+    'get_student_academic_report', 'get_student_mistakes_summary', 'get_student_mistakes_questions',
+    'submit_mistakes_practice'
+  ];
 BEGIN
-  -- Administrative / Deletion RPCs
-  REVOKE EXECUTE ON FUNCTION public.delete_student(uuid) FROM anon, PUBLIC;
-  REVOKE EXECUTE ON FUNCTION public.delete_group(uuid) FROM anon, PUBLIC;
-  REVOKE EXECUTE ON FUNCTION public.delete_lesson_with_cleanup(uuid) FROM anon, PUBLIC;
-  REVOKE EXECUTE ON FUNCTION public.delete_exam(uuid, boolean) FROM anon, PUBLIC;
-  REVOKE EXECUTE ON FUNCTION public.delete_chapter(uuid) FROM anon, PUBLIC;
-  REVOKE EXECUTE ON FUNCTION public.create_chapter(uuid, text, text, uuid) FROM anon, PUBLIC;
-  REVOKE EXECUTE ON FUNCTION public.update_chapter(uuid, text, text) FROM anon, PUBLIC;
-  REVOKE EXECUTE ON FUNCTION public.reorder_course_chapters(uuid, uuid[]) FROM anon, PUBLIC;
-  REVOKE EXECUTE ON FUNCTION public.reorder_chapter_lessons(uuid, uuid[]) FROM anon, PUBLIC;
-  REVOKE EXECUTE ON FUNCTION public.set_lesson_chapter(uuid, uuid, uuid) FROM anon, PUBLIC;
-  REVOKE EXECUTE ON FUNCTION public.toggle_chapter_visibility(uuid, uuid, boolean) FROM anon, PUBLIC;
-  REVOKE EXECUTE ON FUNCTION public.assign_folder_as_chapter_to_group(uuid, uuid) FROM anon, PUBLIC;
-  REVOKE EXECUTE ON FUNCTION public.assign_batch_content_to_group(uuid, jsonb) FROM anon, PUBLIC;
-  REVOKE EXECUTE ON FUNCTION public.update_tenant_video_provider(text) FROM anon, PUBLIC;
-
-  -- Notifications & Dispatch
-  REVOKE EXECUTE ON FUNCTION public.dispatch_group_notification(uuid, text, text, text, jsonb) FROM anon, PUBLIC;
-  REVOKE EXECUTE ON FUNCTION public.dispatch_user_notification(uuid, text, text, text, jsonb) FROM anon, PUBLIC;
-  REVOKE EXECUTE ON FUNCTION public.dispatch_tenant_announcement(text, text, uuid) FROM anon, PUBLIC;
-
-  -- Teacher Analytics & Roster
-  REVOKE EXECUTE ON FUNCTION public.get_teacher_radar_alerts(uuid) FROM anon, PUBLIC;
-  REVOKE EXECUTE ON FUNCTION public.get_teacher_exam_attempts(uuid) FROM anon, PUBLIC;
-  REVOKE EXECUTE ON FUNCTION public.get_teacher_group_exams(uuid, int, int) FROM anon, PUBLIC;
-  REVOKE EXECUTE ON FUNCTION public.get_group_academic_reports(uuid, int) FROM anon, PUBLIC;
-  REVOKE EXECUTE ON FUNCTION public.auto_finalize_expired_attempts(uuid) FROM anon, PUBLIC;
-
-  -- Sensitive Student Analytics & Privacy
-  REVOKE EXECUTE ON FUNCTION public.get_student_360(uuid) FROM anon, PUBLIC;
-  REVOKE EXECUTE ON FUNCTION public.get_student_dashboard(uuid) FROM anon, PUBLIC;
-  REVOKE EXECUTE ON FUNCTION public.get_student_academic_report(uuid, int) FROM anon, PUBLIC;
-  REVOKE EXECUTE ON FUNCTION public.get_student_mistakes_summary(uuid) FROM anon, PUBLIC;
-  REVOKE EXECUTE ON FUNCTION public.get_student_mistakes_questions(uuid, uuid, boolean) FROM anon, PUBLIC;
-  REVOKE EXECUTE ON FUNCTION public.submit_mistakes_practice(jsonb) FROM anon, PUBLIC;
+  FOR r IN 
+    SELECT p.oid::regprocedure AS proc_sig
+    FROM pg_proc p
+    JOIN pg_namespace n ON p.pronamespace = n.oid
+    WHERE n.nspname = 'public' AND p.proname = ANY(fn_names)
+  LOOP
+    EXECUTE 'ALTER FUNCTION ' || r.proc_sig || ' SET search_path = public, pg_temp;';
+    EXECUTE 'REVOKE EXECUTE ON FUNCTION ' || r.proc_sig || ' FROM anon, PUBLIC;';
+  END LOOP;
 END $$;
 
 NOTIFY pgrst, 'reload schema';

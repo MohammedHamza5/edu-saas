@@ -3505,5 +3505,63 @@
   "previewPdfBooklet": "معاينة الكراسة",
   "@previewPdfBooklet": {},
   "replacePdfBooklet": "استبدال الكراسة",
-  "@replacePdfBooklet": {}
+  "@replacePdfBooklet": {},
+  "mistakeTabUnresolved": "تحتاج تدريب",
+  "@mistakeTabUnresolved": {},
+  "mistakeTabResolved": "تم إتقانها",
+  "@mistakeTabResolved": {},
+  "mistakeTabAll": "كل الأخطاء",
+  "@mistakeTabAll": {},
+  "practiceModeDialogTitle": "اختر نمط التدريب",
+  "@practiceModeDialogTitle": {},
+  "practiceModeDialogSubtitle": "حدد طريقة المراجعة المناسبة لتثبيت معلوماتك وتفوقك",
+  "@practiceModeDialogSubtitle": {},
+  "practiceModeUnresolvedTitle": "تدريب الأخطاء المعلقة",
+  "@practiceModeUnresolvedTitle": {},
+  "practiceModeUnresolvedDesc": "التركيز على الأسئلة التي تحتاج إلى تدريب وتصفيرها",
+  "@practiceModeUnresolvedDesc": {},
+  "practiceModeResolvedTitle": "مراجعة وتثبيت الإتقان",
+  "@practiceModeResolvedTitle": {},
+  "practiceModeResolvedDesc": "تدريب على الأسئلة التي تم حلها لضمان عدم نسيانها (Spaced Repetition)",
+  "@practiceModeResolvedDesc": {},
+  "practiceModeAllTitle": "التحدي الشامل",
+  "@practiceModeAllTitle": {},
+  "practiceModeAllDesc": "تدريب عشوائي يجمع بين الأخطاء غير المحلولة والأسئلة المتقنة",
+  "@practiceModeAllDesc": {},
+  "practiceModeBadgeQuestions": "{count} سؤال",
+  "@practiceModeBadgeQuestions": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "practiceModeBadgeMastered": "{count} سؤال متقن",
+  "@practiceModeBadgeMastered": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "practiceModeHeaderUnresolved": "تدريب الأخطاء النشطة",
+  "@practiceModeHeaderUnresolved": {},
+  "practiceModeHeaderResolved": "مراجعة وتثبيت الإتقان",
+  "@practiceModeHeaderResolved": {},
+  "practiceModeHeaderAll": "التحدي الشامل",
+  "@practiceModeHeaderAll": {},
+  "badgeMastered": "تم الإتقان",
+  "@badgeMastered": {},
+  "badgeNeedsPractice": "تحتاج تدريب",
+  "@badgeNeedsPractice": {},
+  "resolvedAfterAttempts": "تم إتقانها بعد {count} محاولات",
+  "@resolvedAfterAttempts": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "startMasteryPractice": "بدء مراجعة الإتقان",
+  "@startMasteryPractice": {},
+  "noMasteredMistakesFound": "لا توجد أسئلة متقنة بعد",
+  "@noMasteredMistakesFound": {},
+  "noMasteredMistakesFoundSub": "حل الأخطاء في وضع التدريب لنقلها إلى قائمة الإتقان وتثبيتها",
+  "@noMasteredMistakesFoundSub": {},
+  "practiceSingleQuestionAction": "تدريب على هذا السؤال",
+  "@practiceSingleQuestionAction": {}
 }

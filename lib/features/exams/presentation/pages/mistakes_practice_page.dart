@@ -17,11 +17,13 @@ import '../cubit/mistakes_state.dart';
 class MistakesPracticePage extends StatefulWidget {
   final String? sourceExamId;
   final String? typeFilter;
+  final String? mode;
 
   const MistakesPracticePage({
     super.key,
     this.sourceExamId,
     this.typeFilter,
+    this.mode,
   });
 
   @override
@@ -31,14 +33,23 @@ class MistakesPracticePage extends StatefulWidget {
 class _MistakesPracticePageState extends State<MistakesPracticePage> {
   int _currentIndex = 0;
   final Map<String, String> _selectedAnswers = {}; // questionId -> optionId
+  final Map<String, List<MistakeOptionEntity>> _shuffledOptions = {};
+
+  List<MistakeOptionEntity> _getOptionsFor(MistakeQuestionEntity question) {
+    return _shuffledOptions.putIfAbsent(question.questionId, () {
+      final list = List<MistakeOptionEntity>.from(question.options);
+      list.shuffle();
+      return list;
+    });
+  }
 
   @override
   void initState() {
     super.initState();
-    // Load unresolved mistakes for practice
+    // Load mistakes for practice
     context.read<MistakesCubit>().loadMistakes(
           examId: widget.sourceExamId,
-          onlyUnresolved: true,
+          onlyUnresolved: false,
         );
   }
 
@@ -98,7 +109,13 @@ class _MistakesPracticePageState extends State<MistakesPracticePage> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(l10n.practiceExamTitle),
+        title: Text(
+          widget.mode == 'resolved'
+              ? l10n.practiceModeHeaderResolved
+              : widget.mode == 'all'
+                  ? l10n.practiceModeHeaderAll
+                  : l10n.practiceModeHeaderUnresolved,
+        ),
         elevation: 0,
         centerTitle: false,
       ),
@@ -131,13 +148,22 @@ class _MistakesPracticePageState extends State<MistakesPracticePage> {
               message: state.message,
               onRetry: () => context.read<MistakesCubit>().loadMistakes(
                     examId: widget.sourceExamId,
-                    onlyUnresolved: true,
+                    onlyUnresolved: false,
                   ),
             );
           }
 
           if (state is MistakesLoaded) {
             var questions = state.questions;
+            if (widget.mode == 'resolved') {
+              questions = questions.where((q) => q.isResolved).toList();
+            } else if (widget.mode == 'all') {
+              // all questions
+            } else {
+              // default: unresolved
+              questions = questions.where((q) => !q.isResolved).toList();
+            }
+
             if (widget.typeFilter == 'wrongOnly') {
               questions = questions.where((q) => q.isWrongAnswer).toList();
             } else if (widget.typeFilter == 'skippedOnly') {
@@ -212,7 +238,7 @@ class _MistakesPracticePageState extends State<MistakesPracticePage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          // Contextual Badge (Wrong answer vs Skipped question)
+                          // Contextual Badge (Mastered vs Wrong answer vs Skipped question)
                           Container(
                             margin: const EdgeInsets.only(bottom: AppSpacing.s12),
                             padding: const EdgeInsets.symmetric(
@@ -220,43 +246,55 @@ class _MistakesPracticePageState extends State<MistakesPracticePage> {
                               vertical: AppSpacing.s8,
                             ),
                             decoration: BoxDecoration(
-                              color: (currentQuestion.isSkipped
-                                      ? AppColors.warning
-                                      : AppColors.error)
+                              color: (currentQuestion.isResolved
+                                      ? AppColors.success
+                                      : currentQuestion.isSkipped
+                                          ? AppColors.warning
+                                          : AppColors.error)
                                   .withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(
                                 AppSpacing.radiusSmall,
                               ),
                               border: Border.all(
-                                color: (currentQuestion.isSkipped
-                                        ? AppColors.warning
-                                        : AppColors.error)
+                                color: (currentQuestion.isResolved
+                                        ? AppColors.success
+                                        : currentQuestion.isSkipped
+                                            ? AppColors.warning
+                                            : AppColors.error)
                                     .withValues(alpha: 0.3),
                               ),
                             ),
                             child: Row(
                               children: [
                                 Icon(
-                                  currentQuestion.isSkipped
-                                      ? Icons.pause_circle_outline_rounded
-                                      : Icons.cancel_outlined,
-                                  color: currentQuestion.isSkipped
-                                      ? AppColors.warning
-                                      : AppColors.error,
+                                  currentQuestion.isResolved
+                                      ? Icons.check_circle_rounded
+                                      : currentQuestion.isSkipped
+                                          ? Icons.pause_circle_outline_rounded
+                                          : Icons.cancel_outlined,
+                                  color: currentQuestion.isResolved
+                                      ? AppColors.success
+                                      : currentQuestion.isSkipped
+                                          ? AppColors.warning
+                                          : AppColors.error,
                                   size: 18,
                                 ),
                                 const SizedBox(width: AppSpacing.s8),
                                 Expanded(
                                   child: Text(
-                                    currentQuestion.isSkipped
-                                        ? l10n.practiceHeaderSkippedNote
-                                        : l10n.practiceHeaderWrongNote,
+                                    currentQuestion.isResolved
+                                        ? '${l10n.badgeMastered} - ${l10n.practiceModeResolvedDesc}'
+                                        : currentQuestion.isSkipped
+                                            ? l10n.practiceHeaderSkippedNote
+                                            : l10n.practiceHeaderWrongNote,
                                     style: TextStyle(
                                       fontSize: 12.5,
                                       fontWeight: FontWeight.bold,
-                                      color: currentQuestion.isSkipped
-                                          ? AppColors.warning
-                                          : AppColors.error,
+                                      color: currentQuestion.isResolved
+                                          ? AppColors.success
+                                          : currentQuestion.isSkipped
+                                              ? AppColors.warning
+                                              : AppColors.error,
                                     ),
                                   ),
                                 ),
@@ -329,8 +367,8 @@ class _MistakesPracticePageState extends State<MistakesPracticePage> {
                           ),
                           const SizedBox(height: AppSpacing.s16),
 
-                          // Options
-                          ...currentQuestion.options.map((opt) {
+                          // Options (with session-level shuffling)
+                          ..._getOptionsFor(currentQuestion).map((opt) {
                             final isSelected =
                                 _selectedAnswers[currentQuestion.questionId] ==
                                     opt.id;
@@ -621,10 +659,12 @@ class _MistakesPracticePageState extends State<MistakesPracticePage> {
                   setState(() {
                     _currentIndex = 0;
                     _selectedAnswers.clear();
+                    _shuffledOptions.clear();
                   });
                   context.read<MistakesCubit>().loadMistakes(
                         examId: widget.sourceExamId,
-                        onlyUnresolved: true,
+                        onlyUnresolved: false,
+                        forceRefresh: true,
                       );
                 },
                 icon: const Icon(Icons.refresh_rounded),

@@ -730,10 +730,12 @@ class AppRouter {
             pageBuilder: (BuildContext context, GoRouterState state) {
               final examId = state.uri.queryParameters['examId'];
               final type = state.uri.queryParameters['type'];
+              final mode = state.uri.queryParameters['mode'];
               return NoTransitionPage(
                 child: MistakesPracticePage(
                   sourceExamId: examId,
                   typeFilter: type,
+                  mode: mode,
                 ),
               );
             },
