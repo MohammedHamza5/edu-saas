@@ -1015,6 +1015,8 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
           if (showResult != null) 'p_show_result': showResult,
           if (allowRetake != null) 'p_allow_retake': allowRetake,
           if (isPublished != null) 'p_is_published': isPublished,
+          if (pdfFileId != null && pdfFileId.isNotEmpty) 'p_pdf_file_id': pdfFileId,
+          if (clearPdfFile) 'p_clear_pdf': true,
           'p_questions': questionsPayload,
         },
       );
