@@ -2020,14 +2020,15 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
 
     // 3. Fallback to Supabase Storage signed URL (default for 'supabase' or unspecified)
     try {
+      final cleanPath = storagePath.startsWith('/') ? storagePath.substring(1) : storagePath;
       final signedUrl = await _safeClient.storage
           .from('group-content')
-          .createSignedUrl(storagePath, expiresInSeconds);
+          .createSignedUrl(cleanPath, expiresInSeconds);
       if (signedUrl.isNotEmpty) {
         return signedUrl;
       }
-    } catch (_) {
-      // Fallback if bucket or path resolves differently
+    } catch (e) {
+      AppLogger.w('ExamsRemoteDataSource', 'Supabase signed URL generation failed: $e');
     }
 
     // 4. Last resort: if provider was unknown and path starts with materials/, attempt r2

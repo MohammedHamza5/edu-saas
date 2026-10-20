@@ -629,23 +629,48 @@
           }
 
           statusText.textContent = 'جاري تحضير الصفحات بسرعة فائقة...';
-          var loadingTask = pdfjsLib.getDocument({
-            url: url,
-            withCredentials: false,
-            enableXfa: false,
-            rangeChunkSize: 65536,
-            disableAutoFetch: true,
-            disableStream: false
-          });
+          try {
+            var loadingTask = pdfjsLib.getDocument({
+              url: url,
+              withCredentials: false,
+              enableXfa: false,
+              rangeChunkSize: 65536,
+              disableAutoFetch: true,
+              disableStream: false
+            });
 
-          loadingTask.onProgress = function(progress) {
-            if (progress && progress.total > 0) {
-              var percent = Math.min(Math.round((progress.loaded / progress.total) * 100), 99);
-              statusText.textContent = 'جاري التحميل... ' + percent + '%';
+            loadingTask.onProgress = function(progress) {
+              if (progress && progress.total > 0) {
+                var percent = Math.min(Math.round((progress.loaded / progress.total) * 100), 99);
+                statusText.textContent = 'جاري التحميل... ' + percent + '%';
+              }
+            };
+
+            currentPdfDoc = await loadingTask.promise;
+          } catch (firstErr) {
+            console.warn('[SecurePdfViewer] Chunked stream load failed, attempting direct fetch:', firstErr);
+            statusText.textContent = 'جاري الاتصال المباشر بالمستند...';
+            try {
+              var fallbackTask = pdfjsLib.getDocument({
+                url: url,
+                withCredentials: false,
+                enableXfa: false,
+                disableRange: true,
+                disableStream: true
+              });
+              currentPdfDoc = await fallbackTask.promise;
+            } catch (secondErr) {
+              console.warn('[SecurePdfViewer] Direct URL failed, fetching raw ArrayBuffer:', secondErr);
+              statusText.textContent = 'جاري استرداد بيانات المستند بالكامل...';
+              var resp = await fetch(url);
+              if (!resp.ok) {
+                throw new Error('HTTP ' + resp.status + ': ' + resp.statusText);
+              }
+              var arrayBuf = await resp.arrayBuffer();
+              var bufferTask = pdfjsLib.getDocument({ data: arrayBuf });
+              currentPdfDoc = await bufferTask.promise;
             }
-          };
-
-          currentPdfDoc = await loadingTask.promise;
+          }
           totalPages = currentPdfDoc.numPages;
           pageTotalCount.textContent = totalPages;
           pageNumberInput.max = totalPages;
