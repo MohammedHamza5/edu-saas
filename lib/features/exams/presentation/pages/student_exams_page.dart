@@ -141,7 +141,10 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
       case StudentExamFilter.all:
         break;
       case StudentExamFilter.available:
-        filtered = filtered.where((e) => !e.hasAttempted).toList();
+        filtered = filtered
+            .where((e) =>
+                !e.hasAttempted || (!e.isFullyCompleted && !e.hasActiveAttempt))
+            .toList();
         break;
       case StudentExamFilter.inProgress:
         filtered = filtered.where((e) => e.hasActiveAttempt).toList();
@@ -691,7 +694,10 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
     final totalCount = allExams.length;
     final completedCount = allExams.where((e) => e.isFullyCompleted).length;
     final inProgressCount = allExams.where((e) => e.hasActiveAttempt).length;
-    final availableCount = allExams.where((e) => !e.hasAttempted).length;
+    final availableCount = allExams
+        .where(
+            (e) => !e.hasAttempted || (!e.isFullyCompleted && !e.hasActiveAttempt))
+        .length;
     final overallProgress = totalCount > 0
         ? (completedCount / totalCount).clamp(0.0, 1.0)
         : 0.0;
@@ -1050,7 +1056,10 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
   }
 
   Widget _buildFilterChips(BuildContext context, List<ExamEntity> allExams) {
-    final availableCount = allExams.where((e) => !e.hasAttempted).length;
+    final availableCount = allExams
+        .where(
+            (e) => !e.hasAttempted || (!e.isFullyCompleted && !e.hasActiveAttempt))
+        .length;
     final inProgressCount = allExams.where((e) => e.hasActiveAttempt).length;
     final completedCount = allExams.where((e) => e.isFullyCompleted).length;
 

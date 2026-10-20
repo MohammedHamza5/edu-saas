@@ -962,13 +962,14 @@ class ExamCard extends StatelessWidget {
 
     if (isCompleted) {
       final attempt = exam.myLatestAttempt;
+      final displayScore = exam.myBestScore ?? attempt?.score;
       return Wrap(
         spacing: AppSpacing.s8,
         runSpacing: AppSpacing.s8,
         alignment: WrapAlignment.spaceBetween,
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
-          if (attempt?.score != null)
+          if (displayScore != null)
             Container(
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.s8,
@@ -989,7 +990,7 @@ class ExamCard extends StatelessWidget {
                   const SizedBox(width: 4),
                   Text(
                     context.l10n.examScoreAchieved(
-                      attempt!.score!,
+                      displayScore,
                       exam.maxScore,
                     ),
                     maxLines: 1,
@@ -1388,7 +1389,8 @@ class ExamCard extends StatelessWidget {
 
     // Student Status Badge
     final attempt = exam.myLatestAttempt;
-    if (exam.isFullyCompleted && attempt != null) {
+    final displayScore = exam.myBestScore ?? attempt?.score;
+    if (exam.isFullyCompleted) {
       return Container(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.s8,
@@ -1409,8 +1411,8 @@ class ExamCard extends StatelessWidget {
             ),
             const SizedBox(width: 4),
             Text(
-              attempt.score != null
-                  ? '${context.l10n.examCompletedCheck} (${attempt.score}/${exam.maxScore})'
+              displayScore != null
+                  ? '${context.l10n.examCompletedCheck} ($displayScore/${exam.maxScore})'
                   : context.l10n.examCompletedCheck,
               style: const TextStyle(
                 fontSize: 11,
@@ -1423,7 +1425,7 @@ class ExamCard extends StatelessWidget {
       );
     }
 
-    if (exam.hasActiveAttempt || (attempt != null && attempt.isInProgress)) {
+    if (exam.hasActiveAttempt || (attempt != null && attempt.isInProgress && !exam.isFullyCompleted)) {
       return Container(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.s8,

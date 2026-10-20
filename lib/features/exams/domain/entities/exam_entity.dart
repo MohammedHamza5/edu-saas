@@ -681,7 +681,7 @@ class ExamEntity extends Equatable {
       ? questionsCount
       : (activeVersion?.questions.length ?? 0);
 
-  bool get hasAttempted => myLatestAttempt != null;
+  bool get hasAttempted => myLatestAttempt != null || attemptsCount > 0;
   bool get isUntimed => durationMinutes <= 0;
 
   bool get hasPassed =>
@@ -697,7 +697,7 @@ class ExamEntity extends Equatable {
         .difference(myLatestAttempt!.startedAt.toUtc())
         .inMinutes;
     if (elapsedMinutes < 0) return true;
-    return elapsedMinutes < durationMinutes;
+    return elapsedMinutes < (durationMinutes + 5);
   }
 
   bool get canTakeExam {
@@ -706,26 +706,27 @@ class ExamEntity extends Equatable {
     return allowRetake;
   }
 
-  bool get isFullyCompleted =>
-      hasAttempted && (myLatestAttempt?.isSubmitted == true);
+  bool get isFullyCompleted {
+    if (myBestScore != null && !hasActiveAttempt) return true;
+    return hasAttempted && (myLatestAttempt?.isSubmitted == true) && !hasActiveAttempt;
+  }
 
   int get solvedQuestionsCount {
+    if (isFullyCompleted) return totalQuestions;
     final att = myLatestAttempt;
     if (att == null) return 0;
-    if (att.answeredQuestionsCount != null) {
+    if (att.answeredQuestionsCount != null && att.answeredQuestionsCount! > 0) {
       return att.answeredQuestionsCount!;
     }
     if (att.answers.isNotEmpty) {
       return att.answers.where((a) => a.selectedOptionId != null).length;
     }
-    if (att.isSubmitted) {
-      return totalQuestions;
-    }
     return 0;
   }
 
   double get completionProgress {
-    if (totalQuestions <= 0) return isFullyCompleted ? 1.0 : 0.0;
+    if (isFullyCompleted) return 1.0;
+    if (totalQuestions <= 0) return 0.0;
     final solved = solvedQuestionsCount;
     return (solved / totalQuestions).clamp(0.0, 1.0);
   }
