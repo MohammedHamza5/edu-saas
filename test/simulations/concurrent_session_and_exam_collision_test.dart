@@ -290,7 +290,7 @@ class _SimulatedExamsRepo implements ExamsRepository {
   @override
   Future<Result<ExamEntity>> updateDraftExamQuestions({required String examId, required String title, int? durationMinutes, int? maxScore, int? passingScore, bool? shuffleQuestions, bool? showResult, bool? allowRetake, DateTime? startAt, DateTime? endAt, bool? isPublished, String? pdfFileId, bool clearPdfFile = false, required List<ExamQuestionEntity> questions}) async => throw UnimplementedError();
   @override
-  Future<Result<String>> getSignedPdfUrl(String storagePath) async => const Success('https://cdn.sat.academy/mock.pdf');
+  Future<Result<String>> getSignedPdfUrl(String storagePath, {String? storageProvider}) async => const Success('https://cdn.sat.academy/mock.pdf');
   @override
   Future<Result<ExamVersionEntity>> publishExamVersion(String versionId) async => throw UnimplementedError();
   @override

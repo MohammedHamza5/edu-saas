@@ -103,8 +103,7 @@ class StudentDashboardRemoteDataSourceImpl
   StudentDashboardStats _parseDashboardRpcData(Map<String, dynamic> data) {
     final activeGroupName =
         (data['active_group_name'] as String?) ?? 'No Active Group';
-    final activeGroupLevel =
-        (data['active_group_level'] as String?) ?? 'N/A';
+    final activeGroupLevel = (data['active_group_level'] as String?) ?? 'N/A';
     final attendancePercentage =
         (data['attendance_percentage'] as num?)?.toDouble() ?? 0.0;
     final examAverage =
@@ -121,7 +120,9 @@ class StudentDashboardRemoteDataSourceImpl
       final pSec = (ci['progress_seconds'] as num?)?.toInt() ?? 0;
       final dSec = (ci['duration_seconds'] as num?)?.toInt() ?? 0;
       final rawPct = (ci['percentage'] as num?)?.toDouble() ?? 0.0;
-      final calculatedPct = dSec > 0 ? (pSec / dSec * 100.0).clamp(0.0, 100.0) : 0.0;
+      final calculatedPct = dSec > 0
+          ? (pSec / dSec * 100.0).clamp(0.0, 100.0)
+          : 0.0;
       final effectivePct = rawPct > 0 ? rawPct : calculatedPct;
 
       continueItem = ContinueLearningItem(
@@ -141,14 +142,18 @@ class StudentDashboardRemoteDataSourceImpl
     if (utList != null) {
       for (final t in utList) {
         if (t is Map<String, dynamic>) {
+          final dueVal = t['due_at'] ?? t['due_date'];
           urgentTasks.add(
             UrgentTaskItem(
               id: (t['id'] as String?) ?? '',
               title: (t['title'] as String?) ?? '',
               groupName: (t['group_name'] as String?) ?? activeGroupName,
-              taskType: (t['task_type'] as String?) ?? 'assignment',
-              dueAt: t['due_at'] != null
-                  ? DateTime.tryParse(t['due_at'] as String)
+              taskType:
+                  (t['task_type'] as String?) ??
+                  (t['type'] as String?) ??
+                  'assignment',
+              dueAt: dueVal != null
+                  ? DateTime.tryParse(dueVal as String)
                   : null,
               status: (t['status'] as String?) ?? 'pending',
               maxScore: (t['max_score'] as num?)?.toInt(),
@@ -248,7 +253,8 @@ class StudentDashboardRemoteDataSourceImpl
         if (cli is Map<String, dynamic>) {
           continueItem = ContinueLearningItem(
             videoId: (cli['video_id'] as String?) ?? '',
-            contentId: (cli['content_id'] as String?) ??
+            contentId:
+                (cli['content_id'] as String?) ??
                 (cli['video_id'] as String? ?? ''),
             title: (cli['title'] as String?) ?? 'Video Lesson',
             groupName: (cli['group_name'] as String?) ?? groupName,

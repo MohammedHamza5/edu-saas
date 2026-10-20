@@ -427,7 +427,7 @@ class _CohortExamsRepo implements ExamsRepository {
   @override
   Future<Result<List<Map<String, dynamic>>>> getGroupLessons(String groupId) async => const Success([]);
   @override
-  Future<Result<String>> getSignedPdfUrl(String storagePath) async => const Success('https://storage.mock.pdf');
+  Future<Result<String>> getSignedPdfUrl(String storagePath, {String? storageProvider}) async => const Success('https://storage.mock.pdf');
 }
 
 // ---------------------------------------------------------------------------

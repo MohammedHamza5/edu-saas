@@ -106,7 +106,8 @@ class _SplashPageState extends State<SplashPage>
           _navigateByState(state);
         } else if (hasSession) {
           // Fallback to cached role if network timed out without logging user out
-          final role = SupabaseService.cachedRole ?? SupabaseService.currentUserRole;
+          final role =
+              SupabaseService.cachedRole ?? SupabaseService.currentUserRole;
           final target = switch (role) {
             'teacher' => AppRoutes.teacherDashboard,
             'parent' => AppRoutes.parentDashboard,
@@ -141,7 +142,8 @@ class _SplashPageState extends State<SplashPage>
     } else {
       // If still loading or initial, do not immediately force login if user has a session
       if (SupabaseService.currentUser != null) {
-        final role = SupabaseService.cachedRole ?? SupabaseService.currentUserRole;
+        final role =
+            SupabaseService.cachedRole ?? SupabaseService.currentUserRole;
         final target = switch (role) {
           'teacher' => AppRoutes.teacherDashboard,
           'parent' => AppRoutes.parentDashboard,

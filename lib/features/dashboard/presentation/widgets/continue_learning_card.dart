@@ -28,8 +28,11 @@ class ContinueLearningCard extends StatelessWidget {
     final effectivePercentage = item.percentage > 0
         ? item.percentage
         : (item.durationSeconds > 0
-            ? (item.progressSeconds / item.durationSeconds * 100.0).clamp(0.0, 100.0)
-            : 0.0);
+              ? (item.progressSeconds / item.durationSeconds * 100.0).clamp(
+                  0.0,
+                  100.0,
+                )
+              : 0.0);
     final pctValue = (effectivePercentage / 100.0).clamp(0.0, 1.0);
     final pctString = effectivePercentage.toStringAsFixed(0);
 
@@ -201,11 +204,13 @@ class ContinueLearningCard extends StatelessWidget {
             child: ElevatedButton.icon(
               onPressed: () {
                 final encodedGroup = Uri.encodeComponent(item.groupName);
-                final groupParam = item.groupId != null && item.groupId!.isNotEmpty
+                final groupParam =
+                    item.groupId != null && item.groupId!.isNotEmpty
                     ? '&groupId=${item.groupId}'
                     : '';
-                final targetId =
-                    item.contentId.isNotEmpty ? item.contentId : item.videoId;
+                final targetId = item.contentId.isNotEmpty
+                    ? item.contentId
+                    : item.videoId;
                 context.push(
                   '${AppRoutes.videoPlayer}?id=$targetId&groupName=$encodedGroup$groupParam',
                 );

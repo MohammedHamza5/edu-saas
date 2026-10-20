@@ -503,7 +503,7 @@ class _BenchExamsRepo implements ExamsRepository {
   @override
   Future<Result<List<Map<String, dynamic>>>> getGroupLessons(String groupId) async => const Success([]);
   @override
-  Future<Result<String>> getSignedPdfUrl(String storagePath) async => const Success('https://storage.supabase.co/file.pdf');
+  Future<Result<String>> getSignedPdfUrl(String storagePath, {String? storageProvider}) async => const Success('https://storage.supabase.co/file.pdf');
   @override
   Future<Result<void>> linkExamToLesson({required String examId, required String lessonId, required String groupId}) async => const Success(null);
   @override

@@ -1,8 +1,10 @@
 import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
+import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/network/supabase_service.dart';
+import '../../../../core/utils/app_logger.dart';
 import '../models/library_material_model.dart';
 import '../models/material_folder_model.dart';
 
@@ -364,26 +366,83 @@ class MaterialsLibraryRemoteDataSourceImpl
         return existing;
       }
 
-      // 3. Fast direct upload to Supabase Storage ('group-content' bucket)
-      final cleanFileName = fileName.replaceAll(
-        RegExp(r'[^a-zA-Z0-9._-]'),
-        '_',
-      );
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final storagePath = 'materials/$tenantId/${timestamp}_$cleanFileName';
+      // 3. Upload to Cloudflare R2 (presigned URL via r2-storage) with Supabase Storage fallback
+      String storagePath;
+      String storageProvider;
 
-      final bytes = fileBytes is Uint8List
-          ? fileBytes
-          : Uint8List.fromList(fileBytes);
+      try {
+        final r2Res = await _c.functions.invoke(
+          'r2-storage',
+          body: {
+            'action': 'get-upload-url',
+            'file_name': fileName,
+            'content_type': mimeType,
+          },
+        );
 
-      await _c.storage.from('group-content').uploadBinary(
-            storagePath,
-            bytes,
-            fileOptions: FileOptions(
-              contentType: mimeType,
-              upsert: true,
-            ),
-          );
+        if (r2Res.status == 200 && r2Res.data is Map<String, dynamic>) {
+          final data = r2Res.data as Map<String, dynamic>;
+          final uploadUrl = data['upload_url'] as String?;
+          final r2Path = data['storage_path'] as String?;
+
+          if (uploadUrl != null &&
+              r2Path != null &&
+              uploadUrl.isNotEmpty &&
+              r2Path.isNotEmpty) {
+            final uploadResponse = await http.put(
+              Uri.parse(uploadUrl),
+              headers: {
+                'Content-Type': mimeType,
+              },
+              body: fileBytes,
+            );
+
+            if (uploadResponse.statusCode >= 200 &&
+                uploadResponse.statusCode < 300) {
+              storagePath = r2Path;
+              storageProvider = 'r2';
+              AppLogger.s(
+                'MaterialsLibrary',
+                '✅ [Cloudflare R2] Material uploaded successfully: $storagePath',
+              );
+            } else {
+              throw Exception(
+                'Cloudflare R2 PUT returned HTTP ${uploadResponse.statusCode}',
+              );
+            }
+          } else {
+            throw Exception('Invalid get-upload-url response from r2-storage');
+          }
+        } else {
+          throw Exception('r2-storage invocation failed: status ${r2Res.status}');
+        }
+      } catch (r2Error) {
+        AppLogger.w(
+          'MaterialsLibrary',
+          '⚠️ Cloudflare R2 upload failed, falling back to Supabase Storage: $r2Error',
+        );
+
+        final cleanFileName = fileName.replaceAll(
+          RegExp(r'[^a-zA-Z0-9._-]'),
+          '_',
+        );
+        final timestamp = DateTime.now().millisecondsSinceEpoch;
+        storagePath = 'materials/$tenantId/${timestamp}_$cleanFileName';
+        storageProvider = 'supabase';
+
+        final bytes = fileBytes is Uint8List
+            ? fileBytes
+            : Uint8List.fromList(fileBytes);
+
+        await _c.storage.from('group-content').uploadBinary(
+              storagePath,
+              bytes,
+              fileOptions: FileOptions(
+                contentType: mimeType,
+                upsert: true,
+              ),
+            );
+      }
 
       // 4. Create record in material_library
       final payload = {
@@ -395,7 +454,7 @@ class MaterialsLibraryRemoteDataSourceImpl
         'storage_path': storagePath,
         'file_size': fileBytes.length,
         'mime_type': mimeType,
-        'storage_provider': 'supabase',
+        'storage_provider': storageProvider,
         'file_hash': computedHash,
         'assigned_lectures_count': 0,
       };
@@ -503,8 +562,8 @@ class MaterialsLibraryRemoteDataSourceImpl
     String? storageProvider,
     int expiresInSeconds = 3600,
   }) async {
-    // 1. Try Cloudflare R2 if provider is explicitly r2
-    if (storageProvider == 'r2') {
+    // 1. Try Cloudflare R2 if provider is explicitly r2 or path starts with materials/
+    if (storageProvider == 'r2' || storagePath.startsWith('materials/')) {
       try {
         final r2Res = await _c.functions.invoke(
           'r2-storage',

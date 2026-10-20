@@ -19,8 +19,7 @@ import '../../features/groups/presentation/pages/group_detail_page.dart';
 import '../../features/groups/presentation/pages/groups_list_page.dart';
 import '../../features/notifications/presentation/pages/notifications_center_page.dart';
 import '../../features/notifications/presentation/pages/send_announcement_page.dart';
-import '../../features/onboarding/presentation/pages/platform_onboarding_page.dart'
-    deferred as platform_onboarding_page;
+import '../../features/onboarding/presentation/pages/platform_onboarding_page.dart';
 import '../../features/students/presentation/pages/assign_groups_page.dart';
 import '../../features/students/presentation/pages/pending_students_page.dart';
 import '../../features/students/presentation/pages/student_360_page.dart';
@@ -29,10 +28,8 @@ import '../../features/videos/presentation/cubit/videos_cubit.dart';
 import '../../features/videos/presentation/pages/video_player_page.dart';
 import '../../features/content/presentation/pages/teacher_content_library_page.dart';
 import '../../features/content/presentation/pages/teacher_lesson_details_page.dart';
-import '../../features/content/presentation/pages/teacher_materials_library_page.dart'
-    deferred as teacher_materials_library_page;
-import '../../features/content/presentation/pages/teacher_video_bank_page.dart'
-    deferred as teacher_video_bank_page;
+import '../../features/content/presentation/pages/teacher_materials_library_page.dart';
+import '../../features/content/presentation/pages/teacher_video_bank_page.dart';
 import '../../features/content/presentation/pages/student_content_feed_page.dart';
 import '../../features/content/domain/entities/content_entity.dart';
 import '../../features/assignments/presentation/pages/teacher_assignments_page.dart';
@@ -41,19 +38,12 @@ import '../../features/exams/presentation/pages/teacher_exams_page.dart';
 import '../../features/exams/presentation/pages/student_exams_page.dart';
 import '../../features/exams/presentation/pages/student_mistakes_page.dart';
 import '../../features/exams/presentation/pages/mistakes_practice_page.dart';
-import '../../features/settings/presentation/pages/teacher_settings_page.dart'
-    deferred as teacher_settings_page;
-import '../../features/question_bank/presentation/pages/question_bank_page.dart'
-    deferred as question_bank_page;
-import '../../features/question_bank/presentation/pages/document_questions_page.dart'
-    deferred as document_questions_page;
-import '../../features/question_bank/presentation/pages/manual_question_entry_page.dart'
-    deferred as manual_question_entry_page;
-import '../../features/question_bank/presentation/pages/review_console_page.dart'
-    deferred as review_console_page;
-import '../../features/exams/presentation/pages/exam_parent_dispatch_page.dart'
-    deferred as exam_parent_dispatch_page;
-import '../widgets/deferred_widget.dart';
+import '../../features/settings/presentation/pages/teacher_settings_page.dart';
+import '../../features/question_bank/presentation/pages/question_bank_page.dart';
+import '../../features/question_bank/presentation/pages/document_questions_page.dart';
+import '../../features/question_bank/presentation/pages/manual_question_entry_page.dart';
+import '../../features/question_bank/presentation/pages/review_console_page.dart';
+import '../../features/exams/presentation/pages/exam_parent_dispatch_page.dart';
 
 import '../network/supabase_service.dart';
 import '../utils/group_slug_resolver.dart';
@@ -389,23 +379,17 @@ class AppRouter {
           GoRoute(
             path: teacherSettings,
             pageBuilder: (BuildContext context, GoRouterState state) =>
-                NoTransitionPage(
-                  child: DeferredWidget(
-                    loadLibrary: teacher_settings_page.loadLibrary,
-                    builder: () => teacher_settings_page.TeacherSettingsPage(),
-                  ),
+                const NoTransitionPage(
+                  child: TeacherSettingsPage(),
                 ),
           ),
           GoRoute(
             path: platformOnboarding,
             pageBuilder: (BuildContext context, GoRouterState state) =>
                 NoTransitionPage(
-                  child: DeferredWidget(
-                    loadLibrary: platform_onboarding_page.loadLibrary,
-                    builder: () => BlocProvider(
-                      create: (_) => InjectionContainer.createOnboardingCubit(),
-                      child: platform_onboarding_page.PlatformOnboardingPage(),
-                    ),
+                  child: BlocProvider(
+                    create: (_) => InjectionContainer.createOnboardingCubit(),
+                    child: const PlatformOnboardingPage(),
                   ),
                 ),
           ),
@@ -490,23 +474,15 @@ class AppRouter {
           GoRoute(
             path: teacherVideos,
             pageBuilder: (BuildContext context, GoRouterState state) =>
-                NoTransitionPage(
-                  child: DeferredWidget(
-                    loadLibrary: teacher_video_bank_page.loadLibrary,
-                    builder: () =>
-                        teacher_video_bank_page.TeacherVideoBankPage(),
-                  ),
+                const NoTransitionPage(
+                  child: TeacherVideoBankPage(),
                 ),
           ),
           GoRoute(
             path: teacherMaterialsLibrary,
             pageBuilder: (BuildContext context, GoRouterState state) =>
-                NoTransitionPage(
-                  child: DeferredWidget(
-                    loadLibrary: teacher_materials_library_page.loadLibrary,
-                    builder: () =>
-                        teacher_materials_library_page.TeacherMaterialsLibraryPage(),
-                  ),
+                const NoTransitionPage(
+                  child: TeacherMaterialsLibraryPage(),
                 ),
           ),
           GoRoute(
@@ -589,14 +565,11 @@ class AppRouter {
               final examId = state.pathParameters['examId'] ?? '';
               final title = state.uri.queryParameters['title'];
               return MaterialPage(
-                child: DeferredWidget(
-                  loadLibrary: exam_parent_dispatch_page.loadLibrary,
-                  builder: () => BlocProvider(
-                    create: (_) => InjectionContainer.createExamDispatchCubit(),
-                    child: exam_parent_dispatch_page.ExamParentDispatchPage(
-                      examId: examId,
-                      initialExamTitle: title,
-                    ),
+                child: BlocProvider(
+                  create: (_) => InjectionContainer.createExamDispatchCubit(),
+                  child: ExamParentDispatchPage(
+                    examId: examId,
+                    initialExamTitle: title,
                   ),
                 ),
               );
@@ -611,13 +584,10 @@ class AppRouter {
             path: questionBank,
             pageBuilder: (BuildContext context, GoRouterState state) =>
                 NoTransitionPage(
-                  child: DeferredWidget(
-                    loadLibrary: question_bank_page.loadLibrary,
-                    builder: () => BlocProvider(
-                      create: (_) =>
-                          InjectionContainer.createQuestionBankCubit(),
-                      child: question_bank_page.QuestionBankPage(),
-                    ),
+                  child: BlocProvider(
+                    create: (_) =>
+                        InjectionContainer.createQuestionBankCubit(),
+                    child: const QuestionBankPage(),
                   ),
                 ),
           ),
@@ -625,14 +595,10 @@ class AppRouter {
             path: manualQuestionEntry,
             pageBuilder: (BuildContext context, GoRouterState state) =>
                 NoTransitionPage(
-                  child: DeferredWidget(
-                    loadLibrary: manual_question_entry_page.loadLibrary,
-                    builder: () => BlocProvider(
-                      create: (_) =>
-                          InjectionContainer.createQuestionBankCubit(),
-                      child:
-                          manual_question_entry_page.ManualQuestionEntryPage(),
-                    ),
+                  child: BlocProvider(
+                    create: (_) =>
+                        InjectionContainer.createQuestionBankCubit(),
+                    child: const ManualQuestionEntryPage(),
                   ),
                 ),
           ),
@@ -641,13 +607,10 @@ class AppRouter {
             pageBuilder: (BuildContext context, GoRouterState state) {
               final docId = state.pathParameters['docId'] ?? '';
               return NoTransitionPage(
-                child: DeferredWidget(
-                  loadLibrary: document_questions_page.loadLibrary,
-                  builder: () => BlocProvider(
-                    create: (_) => InjectionContainer.createQuestionBankCubit(),
-                    child: document_questions_page.DocumentQuestionsPage(
-                      documentId: docId,
-                    ),
+                child: BlocProvider(
+                  create: (_) => InjectionContainer.createQuestionBankCubit(),
+                  child: DocumentQuestionsPage(
+                    documentId: docId,
                   ),
                 ),
               );
@@ -658,13 +621,10 @@ class AppRouter {
             pageBuilder: (BuildContext context, GoRouterState state) {
               final questionId = state.pathParameters['id'] ?? '';
               return NoTransitionPage(
-                child: DeferredWidget(
-                  loadLibrary: review_console_page.loadLibrary,
-                  builder: () => BlocProvider(
-                    create: (_) => InjectionContainer.createQuestionBankCubit(),
-                    child: review_console_page.ReviewConsolePage(
-                      questionId: questionId,
-                    ),
+                child: BlocProvider(
+                  create: (_) => InjectionContainer.createQuestionBankCubit(),
+                  child: ReviewConsolePage(
+                    questionId: questionId,
                   ),
                 ),
               );

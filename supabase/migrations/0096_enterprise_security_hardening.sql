@@ -420,8 +420,8 @@ BEGIN
   JOIN public.users s ON s.id = gm.student_id
   JOIN public.groups g ON g.id = gm.group_id
   WHERE a.tenant_id = v_tenant_id
-    AND a.due_date IS NOT NULL
-    AND a.due_date < NOW()
+    AND a.due_at IS NOT NULL
+    AND a.due_at < NOW()
     AND NOT EXISTS (
       SELECT 1 FROM public.assignment_submissions sub
       WHERE sub.assignment_id = a.id AND sub.student_id = s.id
@@ -915,9 +915,10 @@ BEGIN
             'id', t.id,
             'title', t.title,
             'type', t.type,
-            'due_date', t.due_date,
+            'due_at', t.due_at,
+            'due_date', t.due_at,
             'group_name', t.group_name
-          ) ORDER BY t.due_date ASC NULLS LAST
+          ) ORDER BY t.due_at ASC NULLS LAST
         ),
         '[]'::json
       )
@@ -926,7 +927,7 @@ BEGIN
           a.id, 
           c.title, 
           'assignment' AS type, 
-          a.due_date, 
+          a.due_at, 
           g.name AS group_name
         FROM public.assignments a
         JOIN public.content c ON c.id = a.content_id
@@ -942,7 +943,7 @@ BEGIN
           e.id, 
           c.title, 
           'exam' AS type, 
-          e.end_at AS due_date, 
+          e.end_at AS due_at, 
           g.name AS group_name
         FROM public.exams e
         JOIN public.content c ON c.id = e.content_id

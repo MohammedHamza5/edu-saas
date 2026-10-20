@@ -48,7 +48,13 @@ class _DeferredWidgetState extends State<DeferredWidget> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done &&
             !snapshot.hasError) {
-          return widget.builder();
+          try {
+            return widget.builder();
+          } catch (e) {
+            return Scaffold(
+              body: AppErrorView(error: e, onRetry: _retry),
+            );
+          }
         }
 
         if (snapshot.hasError) {
