@@ -636,6 +636,7 @@ class ExamEntity extends Equatable {
   final String? pdfFileName;
   final int? pdfFileSize;
   final String? pdfStoragePath;
+  final String? pdfStorageProvider;
 
   const ExamEntity({
     required this.id,
@@ -669,6 +670,7 @@ class ExamEntity extends Equatable {
     this.pdfFileName,
     this.pdfFileSize,
     this.pdfStoragePath,
+    this.pdfStorageProvider,
   });
 
   bool get hasAttachedPdf =>
@@ -681,6 +683,10 @@ class ExamEntity extends Equatable {
 
   bool get hasAttempted => myLatestAttempt != null;
   bool get isUntimed => durationMinutes <= 0;
+
+  bool get hasPassed =>
+      myBestScore != null &&
+      (passingScore == null || myBestScore! >= passingScore!);
 
   bool get hasActiveAttempt {
     if (myLatestAttempt == null) return false;
@@ -763,6 +769,7 @@ class ExamEntity extends Equatable {
     String? pdfFileName,
     int? pdfFileSize,
     String? pdfStoragePath,
+    String? pdfStorageProvider,
     bool clearPdfFile = false,
   }) {
     return ExamEntity(
@@ -797,6 +804,7 @@ class ExamEntity extends Equatable {
       pdfFileName: clearPdfFile ? null : (pdfFileName ?? this.pdfFileName),
       pdfFileSize: clearPdfFile ? null : (pdfFileSize ?? this.pdfFileSize),
       pdfStoragePath: clearPdfFile ? null : (pdfStoragePath ?? this.pdfStoragePath),
+      pdfStorageProvider: clearPdfFile ? null : (pdfStorageProvider ?? this.pdfStorageProvider),
     );
   }
 
@@ -833,5 +841,6 @@ class ExamEntity extends Equatable {
     pdfFileName,
     pdfFileSize,
     pdfStoragePath,
+    pdfStorageProvider,
   ];
 }

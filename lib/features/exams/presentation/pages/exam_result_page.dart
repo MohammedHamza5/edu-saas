@@ -318,8 +318,10 @@ class _ExamResultPageState extends State<ExamResultPage> {
     MaterialViewerSheet.show(
       context,
       content: content,
-      onGetSignedUrl: (path) =>
-          context.read<ExamsCubit>().getSignedPdfUrl(path),
+      onGetSignedUrl: (path) => context.read<ExamsCubit>().getSignedPdfUrl(
+            path,
+            storageProvider: widget.exam.pdfStorageProvider,
+          ),
     );
   }
 

@@ -119,7 +119,10 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
         lower.contains('lesson');
   }
 
-  List<ExamEntity> _filterExams(List<ExamEntity> list, String? selectedFolderId) {
+  List<ExamEntity> _filterExams(
+    List<ExamEntity> list,
+    String? selectedFolderId,
+  ) {
     List<ExamEntity> filtered = list;
 
     if (selectedFolderId != null) {
@@ -128,7 +131,9 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
             .where((e) => e.folderId == null || e.folderId!.trim().isEmpty)
             .toList();
       } else {
-        filtered = filtered.where((e) => e.folderId == selectedFolderId).toList();
+        filtered = filtered
+            .where((e) => e.folderId == selectedFolderId)
+            .toList();
       }
     }
 
@@ -250,14 +255,7 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
                 // 2. Exams Section via BlocBuilder
                 BlocBuilder<ExamsCubit, ExamsState>(
                   buildWhen: (prev, curr) {
-                    if (prev.runtimeType != curr.runtimeType) return true;
-                    if (prev is StudentExamsLoaded &&
-                        curr is StudentExamsLoaded) {
-                      return prev.exams != curr.exams ||
-                          prev.isLoadingMore != curr.isLoadingMore ||
-                          prev.hasMore != curr.hasMore;
-                    }
-                    return true;
+                    return curr is StudentExamsLoaded || curr is ExamsLoading || curr is ExamsError || curr is ExamsEmpty;
                   },
                   builder: (context, state) {
                     if (state is ExamsLoading) {
@@ -300,7 +298,8 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
                       // Extract unique folders scoped to the student's accessible exams
                       final Map<String, ExamFolderEntity> folderMap = {};
                       for (final exam in allExams) {
-                        if (exam.folderId != null && exam.folderId!.trim().isNotEmpty) {
+                        if (exam.folderId != null &&
+                            exam.folderId!.trim().isNotEmpty) {
                           final fid = exam.folderId!.trim();
                           if (!folderMap.containsKey(fid)) {
                             folderMap[fid] = ExamFolderEntity(
@@ -325,17 +324,34 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
                         ..sort((a, b) => a.name.compareTo(b.name));
 
                       final uncategorizedCount = allExams
-                          .where((e) => e.folderId == null || e.folderId!.trim().isEmpty)
+                          .where(
+                            (e) =>
+                                e.folderId == null ||
+                                e.folderId!.trim().isEmpty,
+                          )
                           .length;
 
-                      final filtered = _filterExams(allExams, state.selectedFolderId);
+                      final filtered = _filterExams(
+                        allExams,
+                        state.selectedFolderId,
+                      );
 
                       // For status filter chips counts, use exams within the selected folder
                       final folderScopedExams = state.selectedFolderId == null
                           ? allExams
                           : state.selectedFolderId == 'uncategorized'
-                              ? allExams.where((e) => e.folderId == null || e.folderId!.trim().isEmpty).toList()
-                              : allExams.where((e) => e.folderId == state.selectedFolderId).toList();
+                          ? allExams
+                                .where(
+                                  (e) =>
+                                      e.folderId == null ||
+                                      e.folderId!.trim().isEmpty,
+                                )
+                                .toList()
+                          : allExams
+                                .where(
+                                  (e) => e.folderId == state.selectedFolderId,
+                                )
+                                .toList();
 
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -355,8 +371,9 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
                               selectedFolderId: state.selectedFolderId,
                               totalExamsCount: allExams.length,
                               uncategorizedCount: uncategorizedCount,
-                              onSelectFolder: (String? fId) =>
-                                  context.read<ExamsCubit>().selectStudentFolder(fId),
+                              onSelectFolder: (String? fId) => context
+                                  .read<ExamsCubit>()
+                                  .selectStudentFolder(fId),
                             ),
                             const SizedBox(height: AppSpacing.s6),
                           ],
@@ -407,24 +424,6 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
                       );
                     }
 
-                    if (state is ExamTakingState) {
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (mounted && !_isLoadingAll) {
-                          context.read<ExamsCubit>().exitExamTaking();
-                          _loadAll(forceRefresh: true);
-                        }
-                      });
-                      return const Padding(
-                        padding: EdgeInsets.all(AppSpacing.s16),
-                        child: AppLoadingView.cardsGrid(count: 2, columns: 2),
-                      );
-                    }
-
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      if (mounted && !_isLoadingAll) {
-                        _loadAll(forceRefresh: true);
-                      }
-                    });
                     return const Padding(
                       padding: EdgeInsets.all(AppSpacing.s16),
                       child: AppLoadingView.cardsGrid(count: 2, columns: 2),

@@ -67,7 +67,11 @@ abstract interface class ExamsRemoteDataSource {
     bool clearPdfFile = false,
     required List<ExamQuestionModel> questions,
   });
-  Future<String> getSignedPdfUrl(String storagePath);
+  Future<String> getSignedPdfUrl(
+    String storagePath, {
+    String? storageProvider,
+    int expiresInSeconds = 3600,
+  });
   Future<ExamVersionModel> publishExamVersion(String versionId);
   Future<void> unpublishExamVersion({
     required String examId,
@@ -1967,7 +1971,52 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
   }
 
   @override
-  Future<String> getSignedPdfUrl(String storagePath, {int expiresInSeconds = 3600}) async {
+  Future<String> getSignedPdfUrl(
+    String storagePath, {
+    String? storageProvider,
+    int expiresInSeconds = 3600,
+  }) async {
+    // 1. Determine storage provider (prefer caller hint, then DB lookup)
+    String? provider = storageProvider;
+    if (provider == null || provider.isEmpty) {
+      try {
+        final matRes = await _safeClient
+            .from('material_library')
+            .select('storage_provider')
+            .eq('storage_path', storagePath)
+            .maybeSingle();
+        if (matRes != null && matRes['storage_provider'] != null) {
+          provider = matRes['storage_provider']?.toString();
+        } else {
+          final fileRes = await _safeClient
+              .from('files')
+              .select('storage_provider')
+              .eq('storage_path', storagePath)
+              .maybeSingle();
+          if (fileRes != null && fileRes['storage_provider'] != null) {
+            provider = fileRes['storage_provider']?.toString();
+          }
+        }
+      } catch (_) {}
+    }
+
+    // 2. If provider is explicitly 'r2', invoke r2-storage Edge Function
+    if (provider == 'r2') {
+      try {
+        final r2Res = await _safeClient.functions.invoke(
+          'r2-storage',
+          body: {'action': 'get-download-url', 'storage_path': storagePath},
+        );
+        if (r2Res.status == 200 && r2Res.data is Map) {
+          final downloadUrl = (r2Res.data as Map)['download_url']?.toString();
+          if (downloadUrl != null && downloadUrl.isNotEmpty) {
+            return downloadUrl;
+          }
+        }
+      } catch (_) {}
+    }
+
+    // 3. Fallback to Supabase Storage signed URL (default for 'supabase' or unspecified)
     try {
       final signedUrl = await _safeClient.storage
           .from('group-content')
@@ -1979,7 +2028,8 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
       // Fallback if bucket or path resolves differently
     }
 
-    if (storagePath.startsWith('materials/')) {
+    // 4. Last resort: if provider was unknown and path starts with materials/, attempt r2
+    if (provider == null && storagePath.startsWith('materials/')) {
       try {
         final r2Res = await _safeClient.functions.invoke(
           'r2-storage',

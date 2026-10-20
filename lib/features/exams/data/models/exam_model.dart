@@ -35,6 +35,7 @@ class ExamModel extends ExamEntity {
     super.pdfFileName,
     super.pdfFileSize,
     super.pdfStoragePath,
+    super.pdfStorageProvider,
   });
 
   factory ExamModel.fromJson(Map<String, dynamic> json) {
@@ -77,6 +78,16 @@ class ExamModel extends ExamEntity {
       if (versions.isNotEmpty) {
         activeVersion = ExamVersionModel.fromJson(versions.first);
       }
+    } else if (json['questions'] is List || json['version_id'] != null) {
+      activeVersion = ExamVersionModel.fromJson({
+        'id': json['version_id']?.toString() ?? '',
+        'exam_id': json['id']?.toString() ?? '',
+        'version_number': json['version_number'] ?? 1,
+        'status': json['version_status']?.toString() ?? 'published',
+        'created_at': json['created_at'],
+        'questions': json['questions'],
+        'contexts': json['contexts'],
+      });
     }
 
     // Student attempts metadata
@@ -114,12 +125,28 @@ class ExamModel extends ExamEntity {
           myBestScore = scores.last; // Highest score policy
         }
       }
+    } else if (json['latest_attempt_id'] != null) {
+      final statusStr = json['latest_attempt_status']?.toString();
+      final scoreNum = json['student_score'] as num?;
+      final percNum = json['student_percentage'] as num?;
+      myLatestAttempt = ExamAttemptModel(
+        id: json['latest_attempt_id'].toString(),
+        examId: json['id']?.toString() ?? '',
+        examVersionId: '',
+        studentId: '',
+        startedAt: DateTime.now(),
+        status: AttemptStatus.fromString(statusStr ?? 'in_progress'),
+        score: scoreNum?.toInt(),
+        percentage: percNum?.toDouble(),
+      );
     }
 
     if (json['my_best_score'] != null) {
       myBestScore = (json['my_best_score'] as num).toInt();
     } else if (json['best_score'] != null) {
       myBestScore = (json['best_score'] as num).toInt();
+    } else if (json['student_score'] != null) {
+      myBestScore = (json['student_score'] as num).toInt();
     } else if (myBestScore == null && myLatestAttempt?.score != null) {
       myBestScore = myLatestAttempt!.score;
     }
@@ -191,6 +218,7 @@ class ExamModel extends ExamEntity {
     final pdfFileName = json['pdf_file_name']?.toString();
     final pdfFileSize = (json['pdf_file_size'] as num?)?.toInt();
     final pdfStoragePath = json['pdf_storage_path']?.toString();
+    final pdfStorageProvider = json['pdf_storage_provider']?.toString();
 
     return ExamModel(
       id: json['id']?.toString() ?? '',
@@ -228,6 +256,7 @@ class ExamModel extends ExamEntity {
       pdfFileName: pdfFileName,
       pdfFileSize: pdfFileSize,
       pdfStoragePath: pdfStoragePath,
+      pdfStorageProvider: pdfStorageProvider,
     );
   }
 
@@ -248,6 +277,7 @@ class ExamModel extends ExamEntity {
       if (pdfFileName != null) 'pdf_file_name': pdfFileName,
       if (pdfFileSize != null) 'pdf_file_size': pdfFileSize,
       if (pdfStoragePath != null) 'pdf_storage_path': pdfStoragePath,
+      if (pdfStorageProvider != null) 'pdf_storage_provider': pdfStorageProvider,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
     };

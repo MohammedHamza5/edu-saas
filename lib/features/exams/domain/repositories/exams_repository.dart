@@ -75,7 +75,10 @@ abstract class ExamsRepository {
   });
 
   /// Obtains a secure temporary signed URL to view an attached exam PDF booklet.
-  Future<Result<String>> getSignedPdfUrl(String storagePath);
+  Future<Result<String>> getSignedPdfUrl(
+    String storagePath, {
+    String? storageProvider,
+  });
 
   /// Freezes an exam version as an immutable snapshot and publishes the exam.
   Future<Result<ExamVersionEntity>> publishExamVersion(String versionId);

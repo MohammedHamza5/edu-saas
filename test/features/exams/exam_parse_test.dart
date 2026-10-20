@@ -210,4 +210,122 @@ void main() {
       expect(exam.groupName, 'TEST-TEST 2');
     }
   });
+
+  test('parse get_exam_details response with root questions and populate activeVersion', () {
+    final rpcDetails = {
+      'id': 'dcacbf7f-2100-4b17-9a47-a857151bb548',
+      'content_id': 'bd703631-ca79-48bd-8efc-72650c518d55',
+      'title': 'تجريب PDF',
+      'description': null,
+      'group_id': '41c2bce0-88c4-4f9f-b75c-27dd4de60506',
+      'group_name': 'TEST-TEST 2',
+      'status': 'published',
+      'duration_minutes': 8,
+      'max_score': 24,
+      'passing_score': 14,
+      'shuffle_questions': true,
+      'show_result': true,
+      'allow_retake': true,
+      'pdf_file_id': '5ed8ebac-9760-47c7-be35-f1457ef529d4',
+      'pdf_file_name': 'facebook-page-service-offer.pdf',
+      'pdf_file_size': 115617,
+      'pdf_storage_path': 'materials/1111/test.pdf',
+      'pdf_storage_provider': 'supabase',
+      'created_at': '2026-10-19T23:56:11.697943+00:00',
+      'version_id': 'a62f87d8-ab84-4f26-9f13-30c0d4b9bc70',
+      'version_number': 1,
+      'version_status': 'published',
+      'contexts': <Map<String, dynamic>>[],
+      'questions': [
+        {
+          'id': 'q1',
+          'points': 8,
+          'sort_order': 1,
+          'question_text': '',
+          'question_type': 'multiple_choice',
+          'image_url': 'https://example.com/q1.webp',
+          'options': [
+            {'id': 'o1', 'option_text': 'A', 'sort_order': 1, 'is_correct': true},
+            {'id': 'o2', 'option_text': 'B', 'sort_order': 2, 'is_correct': false},
+          ],
+        },
+        {
+          'id': 'q2',
+          'points': 8,
+          'sort_order': 2,
+          'question_text': '',
+          'question_type': 'multiple_choice',
+          'image_url': 'https://example.com/q2.webp',
+          'options': [
+            {'id': 'o3', 'option_text': 'A', 'sort_order': 1, 'is_correct': true},
+          ],
+        },
+        {
+          'id': 'q3',
+          'points': 8,
+          'sort_order': 3,
+          'question_text': '',
+          'question_type': 'multiple_choice',
+          'image_url': 'https://example.com/q3.webp',
+          'options': [
+            {'id': 'o4', 'option_text': 'A', 'sort_order': 1, 'is_correct': true},
+          ],
+        },
+      ],
+    };
+
+    final exam = ExamModel.fromJson(rpcDetails);
+    expect(exam.id, 'dcacbf7f-2100-4b17-9a47-a857151bb548');
+    expect(exam.title, 'تجريب PDF');
+    expect(exam.pdfStorageProvider, 'supabase');
+    expect(exam.hasAttachedPdf, true);
+    expect(exam.activeVersion, isNotNull);
+    expect(exam.activeVersion?.id, 'a62f87d8-ab84-4f26-9f13-30c0d4b9bc70');
+    expect(exam.activeVersion?.questions.length, 3);
+    expect(exam.questionsCount, 3);
+    expect(exam.totalQuestions, 3);
+    expect(exam.activeVersion?.questions.first.imageUrl, 'https://example.com/q1.webp');
+  });
+
+  test('parse get_student_exams with student_score and active attempt preserves completed score', () {
+    final rpcStudentExam = {
+      'id': '8b09c8ec-9d6d-4cdb-a3be-1f5f744e99fe',
+      'title': 'تجربة الاله',
+      'end_at': null,
+      'status': 'published',
+      'group_id': '41c2bce0-88c4-4f9f-b75c-27dd4de60506',
+      'start_at': null,
+      'folder_id': '980f7e6b-be25-45d0-81b2-11cb9d5e8810',
+      'max_score': 10,
+      'best_score': 10,
+      'my_best_score': 10,
+      'student_score': 10,
+      'my_best_percentage': 100,
+      'student_percentage': 100,
+      'passing_score': 6,
+      'has_passed': true,
+      'attempts_count': 3,
+      'has_active_attempt': true,
+      'latest_attempt_id': '7b7bf502-3abd-4bd2-8483-00b800f06d59',
+      'latest_attempt_status': 'in_progress',
+      'my_latest_attempt': {
+        'id': '7b7bf502-3abd-4bd2-8483-00b800f06d59',
+        'score': null,
+        'status': 'in_progress',
+        'percentage': null,
+        'started_at': DateTime.now().toUtc().toIso8601String(),
+        'submitted_at': null,
+      },
+    };
+
+    final exam = ExamModel.fromJson(rpcStudentExam);
+    expect(exam.id, '8b09c8ec-9d6d-4cdb-a3be-1f5f744e99fe');
+    expect(exam.myBestScore, 10);
+    expect(exam.attemptsCount, 3);
+    expect(exam.hasPassed, true);
+    expect(exam.hasActiveAttempt, true);
+    expect(exam.hasAttempted, true);
+    expect(exam.myLatestAttempt, isNotNull);
+    expect(exam.myLatestAttempt?.isInProgress, true);
+  });
 }

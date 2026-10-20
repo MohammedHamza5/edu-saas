@@ -283,7 +283,10 @@ class _ExamTakingPageState extends State<ExamTakingPage>
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
       try {
-        final url = await context.read<ExamsCubit>().getSignedPdfUrl(path);
+        final url = await context.read<ExamsCubit>().getSignedPdfUrl(
+              path,
+              storageProvider: exam.pdfStorageProvider,
+            );
         if (mounted) {
           setState(() {
             _cachedPdfSignedUrl = url;

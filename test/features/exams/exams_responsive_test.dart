@@ -94,7 +94,10 @@ class _FakeExamsRepository implements ExamsRepository {
   }) async => Success(mockExams.first);
 
   @override
-  Future<Result<String>> getSignedPdfUrl(String storagePath) async =>
+  Future<Result<String>> getSignedPdfUrl(
+    String storagePath, {
+    String? storageProvider,
+  }) async =>
       const Success('https://example.com/test.pdf');
 
   @override

@@ -426,8 +426,14 @@ class ExamsCubit extends Cubit<ExamsState> {
   }
 
   /// Obtains a secure signed URL for viewing an attached exam PDF booklet
-  Future<String?> getSignedPdfUrl(String storagePath) async {
-    final result = await _repository.getSignedPdfUrl(storagePath);
+  Future<String?> getSignedPdfUrl(
+    String storagePath, {
+    String? storageProvider,
+  }) async {
+    final result = await _repository.getSignedPdfUrl(
+      storagePath,
+      storageProvider: storageProvider,
+    );
     switch (result) {
       case Success(:final data):
         return data;
@@ -848,7 +854,8 @@ class ExamsCubit extends Cubit<ExamsState> {
   }) async {
     emit(const ExamsLoading());
 
-    // 1. Fetch full details to ensure we have questions
+    try {
+      // 1. Fetch full details to ensure we have questions
     final detailsRes = await _repository.getExamDetails(exam.id);
     final fullExam = detailsRes
         .when(
@@ -945,6 +952,16 @@ class ExamsCubit extends Cubit<ExamsState> {
           _startTimer();
         }
         return true;
+    }
+    } catch (e, st) {
+      AppLogger.e(
+        'ExamsCubit',
+        'Error in startExamTaking: $e',
+        error: e,
+        stackTrace: st,
+      );
+      emit(ExamsError('تعذر بدء الاختبار: ${e.toString()}'));
+      return false;
     }
   }
 

@@ -406,7 +406,7 @@ class ExamIntroPage extends StatelessWidget {
                                   );
 
                                   if (context.mounted && success) {
-                                    await Navigator.of(context).pushReplacement<void, void>(
+                                    await Navigator.of(context).push<void>(
                                       MaterialPageRoute<void>(
                                         builder: (_) => BlocProvider.value(
                                           value: cubit,
@@ -422,6 +422,9 @@ class ExamIntroPage extends StatelessWidget {
                                         ),
                                       ),
                                     );
+                                    if (context.mounted) {
+                                      Navigator.of(context).pop();
+                                    }
                                   }
                                 },
                         ),
@@ -444,7 +447,7 @@ class ExamIntroPage extends StatelessWidget {
                                   );
 
                                   if (context.mounted && success) {
-                                    await Navigator.of(context).pushReplacement<void, void>(
+                                    await Navigator.of(context).push<void>(
                                       MaterialPageRoute<void>(
                                         builder: (_) => BlocProvider.value(
                                           value: cubit,
@@ -460,6 +463,9 @@ class ExamIntroPage extends StatelessWidget {
                                         ),
                                       ),
                                     );
+                                    if (context.mounted) {
+                                      Navigator.of(context).pop();
+                                    }
                                   }
                                 },
                         ),

@@ -230,9 +230,15 @@ class ExamsRepositoryImpl implements ExamsRepository {
   }
 
   @override
-  Future<Result<String>> getSignedPdfUrl(String storagePath) async {
+  Future<Result<String>> getSignedPdfUrl(
+    String storagePath, {
+    String? storageProvider,
+  }) async {
     try {
-      final url = await _remoteDataSource.getSignedPdfUrl(storagePath);
+      final url = await _remoteDataSource.getSignedPdfUrl(
+        storagePath,
+        storageProvider: storageProvider,
+      );
       return Success(url);
     } on PostgrestException catch (e) {
       return FailureResult(ServerFailure(e.message, code: e.code));
