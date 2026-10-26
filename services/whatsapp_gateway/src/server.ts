@@ -169,6 +169,20 @@ app.post('/api/send', authMiddleware, async (req: Request, res: Response) => {
   }
 });
 
+// Self-KeepAlive for Free Cloud Instances (e.g. Render / Always-On)
+const KEEP_ALIVE_URL = process.env.RENDER_EXTERNAL_URL || process.env.KEEP_ALIVE_URL;
+if (KEEP_ALIVE_URL) {
+  console.log(`[KeepAlive] Configured self-ping to ${KEEP_ALIVE_URL} every 10 minutes to stay awake 24/7.`);
+  setInterval(async () => {
+    try {
+      await fetch(`${KEEP_ALIVE_URL}/health`);
+      console.log('[KeepAlive] Self-ping successful, container active 24/7.');
+    } catch (e) {
+      console.warn('[KeepAlive] Ping warning:', (e as Error).message);
+    }
+  }, 10 * 60 * 1000);
+}
+
 // Start application
 const startServer = async () => {
   app.listen(PORT, () => {

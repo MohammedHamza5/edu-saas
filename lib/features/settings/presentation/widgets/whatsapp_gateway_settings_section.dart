@@ -230,6 +230,17 @@ class _WhatsAppGatewaySettingsSectionState
                     ),
                   ),
                 ],
+                if (!isConnected && !isQrReady) ...[
+                  const SizedBox(height: 4),
+                  const Text(
+                    '⚠️ الجلسة غير متصلة أو انتهت صلاحيتها. يرجى إعادة مسح الرمز لاستئناف الإرسال التلقائي.',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: AppColors.error,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
