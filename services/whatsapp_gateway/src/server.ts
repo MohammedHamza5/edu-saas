@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express';
 import dotenv from 'dotenv';
+import ws from 'ws';
 import { createClient } from '@supabase/supabase-js';
 import { BaileysGatewayClient } from './engine/baileys_client';
 import { QueueWorker } from './worker/queue_worker';
@@ -24,6 +25,9 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
   auth: {
     persistSession: false,
     autoRefreshToken: false
+  },
+  realtime: {
+    transport: ws
   }
 });
 
