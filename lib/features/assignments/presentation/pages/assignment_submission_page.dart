@@ -5,11 +5,13 @@ import 'package:intl/intl.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/utils/app_feedback.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../domain/entities/assignment_entity.dart';
 import '../cubit/assignments_cubit.dart';
 import '../cubit/assignments_state.dart';
+import '../extensions/submission_status_ui_extensions.dart';
 
 class AssignmentSubmissionPage extends StatefulWidget {
   final AssignmentEntity assignment;
@@ -40,11 +42,9 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(context.l10n.filePickFailed(e.toString())),
-            backgroundColor: AppColors.error,
-          ),
+        AppFeedback.showError(
+          context,
+          context.l10n.filePickFailed(e.toString()),
         );
       }
     }
@@ -58,12 +58,7 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
 
   Future<void> _submitAssignment() async {
     if (_selectedFiles.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.attachAtLeastOneFile),
-          backgroundColor: AppColors.warning,
-        ),
-      );
+      AppFeedback.showWarning(context, context.l10n.attachAtLeastOneFile);
       return;
     }
 
@@ -84,16 +79,23 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
     }).toList();
 
     final successMsg = context.l10n.assignmentSubmittedSuccess;
-    final success = await context.read<AssignmentsCubit>().submitAssignment(
+    final cubit = context.read<AssignmentsCubit>();
+    final success = await cubit.submitAssignment(
       assignmentId: widget.assignment.id,
       files: filesToUpload,
     );
 
-    if (mounted && success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(successMsg), backgroundColor: AppColors.success),
-      );
+    if (!mounted) return;
+
+    if (success) {
+      AppFeedback.showSuccess(context, successMsg);
       Navigator.of(context).pop();
+    } else {
+      final state = cubit.state;
+      final errorMsg = state is StudentAssignmentsLoaded && state.message != null
+          ? state.message!
+          : context.l10n.errorOccurred;
+      AppFeedback.showError(context, errorMsg);
     }
   }
 

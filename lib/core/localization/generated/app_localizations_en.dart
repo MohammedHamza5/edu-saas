@@ -958,7 +958,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get previousQuestionAction => 'Previous';
 
   @override
-  String get nextQuestionAction => 'Next';
+  String get nextQuestionAction => 'Next Question';
 
   @override
   String get flagQuestionAction => 'Flag for Review';
@@ -3683,7 +3683,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get previousQuestion => 'Previous';
 
   @override
-  String get nextQuestion => 'Next';
+  String get nextQuestion => 'Next Question';
 
   @override
   String get submitExamNow => 'Submit Exam Now';
@@ -8173,6 +8173,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get resendToParentAction => 'Resend';
 
   @override
+  String get examResultsHiddenSubtitle =>
+      'The instructor has temporarily hidden answer keys and question review. It will become accessible once results are officially published.';
+
+  @override
+  String get examResultsHiddenTitle => 'Answers Submitted Successfully';
+
+  @override
+  String get sendNewScoreToParentAction => 'Send Updated Score';
+
+  @override
   String get dispatchSentBadge => 'Sent';
 
   @override
@@ -9146,4 +9156,653 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get practiceSingleQuestionAction => 'Practice Question';
+
+  @override
+  String get pacingRadarTitle => 'Time & Speed Analysis';
+
+  @override
+  String get pacingRadarSubtitle =>
+      'Detailed breakdown of your pacing per question';
+
+  @override
+  String get pacingFast => 'Fast (< 60s)';
+
+  @override
+  String get pacingNormal => 'Optimal (60-90s)';
+
+  @override
+  String get pacingSlow => 'Time Sink (> 90s)';
+
+  @override
+  String pacingAvgPerQuestion(int seconds) {
+    return 'Avg Time per Question: ${seconds}s';
+  }
+
+  @override
+  String get flagAsGuessTooltip => 'Mark as uncertain / guess';
+
+  @override
+  String get unflagGuessTooltip => 'Unmark guess';
+
+  @override
+  String get guessFlagLabel => 'Guess';
+
+  @override
+  String get luckyGuessBadge => 'Lucky Guess 🍀';
+
+  @override
+  String get luckyGuessNotice =>
+      'You answered correctly but marked this as a guess. Review to solidify the concept.';
+
+  @override
+  String get eliminateOptionTooltip => 'Cross out option (Elimination)';
+
+  @override
+  String get reflectionHeader => 'Why did you miss this question?';
+
+  @override
+  String get reflectionConceptGap => 'Concept Gap';
+
+  @override
+  String get reflectionConceptGapDesc => 'Did not know the rule or formula';
+
+  @override
+  String get reflectionCarelessError => 'Calculation Error';
+
+  @override
+  String get reflectionCarelessErrorDesc => 'Arithmetic or sign error';
+
+  @override
+  String get reflectionMisreadQuestion => 'Misread Wording';
+
+  @override
+  String get reflectionMisreadQuestionDesc =>
+      'Missed keyword or solved for wrong variable';
+
+  @override
+  String get reflectionTimePressure => 'Time Pressure';
+
+  @override
+  String get reflectionTimePressureDesc => 'Ran out of time and had to guess';
+
+  @override
+  String get reflectionUnclassified => 'Not Classified';
+
+  @override
+  String get filterByReflectionReason => 'Filter by Mistake Reason';
+
+  @override
+  String get reflectionSavedSuccess => 'Reflection saved successfully';
+
+  @override
+  String get scratchpadPen => 'Pen';
+
+  @override
+  String get scratchpadHighlighter => 'Highlighter';
+
+  @override
+  String get scratchpadEraser => 'Eraser';
+
+  @override
+  String get scratchpadUndo => 'Undo';
+
+  @override
+  String get scratchpadClear => 'Clear Canvas';
+
+  @override
+  String get scratchpadGridPaper => 'Grid Paper';
+
+  @override
+  String get scratchpadOverlay => 'Transparent Mode';
+
+  @override
+  String get scratchpadClose => 'Close Scratchpad';
+
+  @override
+  String get scratchpadTooltip => 'Digital Scratchpad (Pencil)';
+
+  @override
+  String get formulaSheetTooltip => 'Formula Reference Sheet';
+
+  @override
+  String get formulaSheetTitle => 'Math Reference Sheet & Desmos';
+
+  @override
+  String get formulaGeometryTab => 'SAT Formulas';
+
+  @override
+  String get formulaDesmosTab => 'Desmos Hacks';
+
+  @override
+  String get formulaCircleDegrees =>
+      'The number of degrees of arc in a circle is 360°';
+
+  @override
+  String get formulaCircleRadians =>
+      'The number of radians of arc in a circle is 2π';
+
+  @override
+  String get formulaTriangleSum =>
+      'The sum of the measures of the angles of a triangle is 180°';
+
+  @override
+  String get desmosRegressionTip =>
+      'Table Regression: Add table and type y1 ~ mx1 + b to instantly find slope and y-intercept.';
+
+  @override
+  String get desmosIntersectionTip =>
+      'Finding Intersections: Graph both equations; tap the gray intersection point to see exact (x, y).';
+
+  @override
+  String get desmosVertexTip =>
+      'Quadratic Vertex: Type y = ax^2 + bx + c; tap the peak or bottom point for vertex coordinates.';
+
+  @override
+  String get desmosSlidersTip =>
+      'Sliders: Type equations with constants like k and click add slider to test values visually.';
+
+  @override
+  String get gauntletTitle => 'Zero-Mistake Gauntlet';
+
+  @override
+  String get gauntletSubtitle =>
+      'Slay your unresolved mistakes and master every concept!';
+
+  @override
+  String gauntletRemainingLabel(Object count) {
+    return '$count to Zero';
+  }
+
+  @override
+  String get gauntletStartBtn => 'Start Gauntlet';
+
+  @override
+  String gauntletCriticalBadge(Object count) {
+    return '$count Critical';
+  }
+
+  @override
+  String get sprintTitle => '5-Question Sprint';
+
+  @override
+  String get sprintSubtitle => 'Rapid 7-minute challenge';
+
+  @override
+  String get sprintStartBtn => '5-Q Sprint';
+
+  @override
+  String get sortDefault => 'Default';
+
+  @override
+  String get sortMostFailed => 'Most Failed';
+
+  @override
+  String get sortNewest => 'Newest';
+
+  @override
+  String get sortPoints => 'Highest Points';
+
+  @override
+  String get mistakeSlayedSuccess => 'Mistake Slayed! 🎯';
+
+  @override
+  String streakDaysCount(int count) {
+    return '$count Day Streak';
+  }
+
+  @override
+  String get streakTodayDone => 'Active today! Flame is lit 🔥';
+
+  @override
+  String get streakTodayPending =>
+      'Complete an exam or drill today to extend streak!';
+
+  @override
+  String longestStreakRecord(int count) {
+    return 'Best: ${count}d';
+  }
+
+  @override
+  String get predictedSatScoreTitle => 'Estimated SAT Math Score';
+
+  @override
+  String predictedSatScoreBand(int low, int high) {
+    return '$low - $high';
+  }
+
+  @override
+  String get predictedSatScoreNeedsMore =>
+      'Complete 2+ exams to unlock your estimated SAT score range';
+
+  @override
+  String get predictedSatScoreSubtitle =>
+      'Based on your recent assessment performance';
+
+  @override
+  String get earnedBadgesTitle => 'Mastery Badges';
+
+  @override
+  String get badgeGauntletSlayer => 'Gauntlet Slayer';
+
+  @override
+  String get badgeGauntletSlayerDesc =>
+      'Eliminated all unresolved mistakes from the Mistakes Bank.';
+
+  @override
+  String get badgeConsistencyKing => 'Consistency King';
+
+  @override
+  String get badgeConsistencyKingDesc =>
+      'Maintained a 5-day active study streak.';
+
+  @override
+  String get badgeSpeedDemon => 'Speed Demon';
+
+  @override
+  String get badgeSpeedDemonDesc =>
+      'Completed an exam in under 50% time with score ≥ 85%.';
+
+  @override
+  String get badgeHighAchiever => 'High Achiever';
+
+  @override
+  String get badgeHighAchieverDesc =>
+      'Maintained an overall average score of 90% or higher.';
+
+  @override
+  String get badgeLockedStatus => 'Locked';
+
+  @override
+  String get badgeUnlockedStatus => 'Unlocked!';
+
+  @override
+  String get viewAllBadges => 'View All';
+
+  @override
+  String get allBadgesDialogTitle => 'Academic Badges & Honors';
+
+  @override
+  String get dockCalculatorTooltip => 'Dock calculator to side panel';
+
+  @override
+  String get undockCalculatorTooltip => 'Float calculator as movable window';
+
+  @override
+  String get utilityDockTitle => 'Exam Tools';
+
+  @override
+  String get collapseToolsTooltip => 'Collapse tools panel';
+
+  @override
+  String get expandToolsTooltip => 'Expand tools panel';
+
+  @override
+  String get dockTabCalculator => 'Calculator';
+
+  @override
+  String get dockTabFormulas => 'Reference Sheet';
+
+  @override
+  String get savedQuestionsVaultTitle => 'Saved Questions Vault';
+
+  @override
+  String get savedQuestionsVaultSubtitle =>
+      'Review and practice bookmarked questions smartly';
+
+  @override
+  String get saveToVault => 'Save to Vault';
+
+  @override
+  String get removeFromVault => 'Remove from Vault';
+
+  @override
+  String get savedToVaultSuccess => 'Question saved to your personal vault ⭐';
+
+  @override
+  String get removedFromVaultSuccess => 'Question removed from your vault';
+
+  @override
+  String get personalNote => 'Personal Note';
+
+  @override
+  String get addPersonalNote => 'Add Personal Note';
+
+  @override
+  String get editPersonalNote => 'Edit Note';
+
+  @override
+  String get addNoteHint =>
+      'Write a quick note or mnemonic for this problem...';
+
+  @override
+  String get saveNote => 'Save Note';
+
+  @override
+  String get difficultyRatingTitle =>
+      'How difficult was this question for you?';
+
+  @override
+  String get difficultyEasy => 'Easy';
+
+  @override
+  String get difficultyMedium => 'Medium';
+
+  @override
+  String get difficultyHard => 'Hard';
+
+  @override
+  String get difficultyEasyDesc => 'Mastered • Shows less often';
+
+  @override
+  String get difficultyMediumDesc => 'Review later';
+
+  @override
+  String get difficultyHardDesc => 'Repeats this session';
+
+  @override
+  String get startAnkiDrill => 'Start Active Recall Drill';
+
+  @override
+  String get ankiDrillTitle => 'Active Recall Drill';
+
+  @override
+  String get checkAnswer => 'Check Answer';
+
+  @override
+  String get ankiDrillCompletedTitle => 'Drill Session Completed! 🎯';
+
+  @override
+  String get ankiDrillCompletedDesc =>
+      'You reviewed all questions in your active recall queue.';
+
+  @override
+  String get drillTotalReviewed => 'Questions Reviewed';
+
+  @override
+  String get drillMasteredCount => 'Mastered (Easy)';
+
+  @override
+  String get drillHardRepeated => 'Repeated (Hard)';
+
+  @override
+  String get finishDrill => 'Finish Drill';
+
+  @override
+  String get emptyVaultTitle => 'Your Vault is Empty';
+
+  @override
+  String get emptyVaultSubtitle =>
+      'Save questions from exams or mistake drills to practice them in active recall mode.';
+
+  @override
+  String get bluebookReviewGrid => 'Review & Question Grid';
+
+  @override
+  String unansweredQuestionsWarning(int count) {
+    return 'Warning: You have $count unanswered question(s)!';
+  }
+
+  @override
+  String get unansweredQuestionsDesc =>
+      'Are you sure you want to finish the exam without answering them?';
+
+  @override
+  String get flaggedForReview => 'Flagged for Review';
+
+  @override
+  String get answeredStatus => 'Answered';
+
+  @override
+  String get unansweredStatus => 'Unanswered';
+
+  @override
+  String get allDifficulties => 'All';
+
+  @override
+  String get searchSavedQuestions => 'Search in questions or notes...';
+
+  @override
+  String get mistakeVaultTitle => 'Tactical Mistake Vault';
+
+  @override
+  String get saveToMistakeVaultAction => 'Save to Mistake Vault';
+
+  @override
+  String get savedToMistakeVaultSuccess =>
+      'Saved to your tactical mistake vault';
+
+  @override
+  String get smartReattemptAction => 'Smart Re-Attempt';
+
+  @override
+  String get filterNeedsReview => 'Needs Review';
+
+  @override
+  String get filterMastered => 'Mastered';
+
+  @override
+  String get filterAllQuestions => 'All Questions';
+
+  @override
+  String get markAsMasteredAction => 'Mark as Mastered';
+
+  @override
+  String get markedAsMasteredSuccess => 'Great job! Marked as mastered';
+
+  @override
+  String get unmarkAsMasteredAction => 'Needs Review Again';
+
+  @override
+  String get previousExamMistakeBadge => 'Previous Exam Mistake';
+
+  @override
+  String get masteredBadge => 'Mastered';
+
+  @override
+  String get checkAnswerButton => 'Check Answer';
+
+  @override
+  String get correctAnswerCelebration => 'Brilliant! Your answer is correct 🎉';
+
+  @override
+  String get wrongAnswerNotice => 'Not quite. The correct answer was';
+
+  @override
+  String get pdfExamQuestionNotice => 'Question from PDF Exam';
+
+  @override
+  String get tacticalMistakeVaultSubtitle =>
+      'Review and master the questions you got wrong to guarantee a top score.';
+
+  @override
+  String get startPracticeSession => 'Start Practice Session';
+
+  @override
+  String get practiceSessionTitle => 'Smart Practice & Review';
+
+  @override
+  String questionCounter(int current, int total) {
+    return 'Question $current of $total';
+  }
+
+  @override
+  String get finishSession => 'Finish Session';
+
+  @override
+  String get practiceCompleteTitle => 'Session Completed! 🎉';
+
+  @override
+  String practiceCompleteSubtitle(int count) {
+    return 'You reviewed $count questions. Keep going to master all your weak spots.';
+  }
+
+  @override
+  String get solveQuestionAction => 'Solve Question';
+
+  @override
+  String get filterDueToday => 'Due Today';
+
+  @override
+  String get filterUpcoming => 'Upcoming';
+
+  @override
+  String startDuePracticeAction(int count) {
+    return 'Start Today\'s Review ($count)';
+  }
+
+  @override
+  String get startDuePracticeEmpty => 'No Due Reviews Today';
+
+  @override
+  String get noDueTodayTitle => 'All Caught Up for Today! 🎉';
+
+  @override
+  String get noDueTodaySubtitle =>
+      'You\'ve completed all scheduled questions for today. Your next review date is scheduled.';
+
+  @override
+  String get leitnerScheduleTitle => 'Spaced Repetition Schedule (1-3-6 Days)';
+
+  @override
+  String get leitnerBox1Title => 'Daily (1 Day)';
+
+  @override
+  String get leitnerBox2Title => 'Every 3 Days';
+
+  @override
+  String get leitnerBox3Title => 'Every 6 Days';
+
+  @override
+  String get rateDifficultyPrompt => 'Schedule Next Review:';
+
+  @override
+  String get rateHard1Day => 'Hard (Tomorrow - 1d)';
+
+  @override
+  String get rateMedium3Days => 'Medium (3 Days)';
+
+  @override
+  String get rateEasy6Days => 'Easy (6 Days)';
+
+  @override
+  String get reviewDueTodayBadge => 'Due Today ⚡';
+
+  @override
+  String get reviewDueTomorrowBadge => 'Review: Tomorrow';
+
+  @override
+  String reviewDueInDaysBadge(int days) {
+    return 'Review in ${days}d';
+  }
+
+  @override
+  String get practiceCompletedDueNotice =>
+      'Today\'s review session complete! All due questions scheduled.';
+
+  @override
+  String get backToVaultAction => 'Back to Vault';
+
+  @override
+  String get demoQuickAccessHeader => 'Quick Access • 1-Click Login';
+
+  @override
+  String get demoLiveBadge => 'LIVE DEMO';
+
+  @override
+  String get demoSelectAccountPrompt =>
+      'Select an account to log in instantly without typing:';
+
+  @override
+  String get demoTeacherLoginTitle => 'Login as Teacher (Dashboard & WhatsApp)';
+
+  @override
+  String get demoTeacherLoginSubtitle =>
+      'Create quizzes, Question Bank, WhatsApp parent dispatch';
+
+  @override
+  String get demoStudentTestLoginTitle =>
+      'Login as Student (Take SAT Exam with Desmos)';
+
+  @override
+  String get demoStudentTestLoginSubtitle =>
+      'Experience embedded Desmos calculator, scratchpad & formulas';
+
+  @override
+  String get demoStudentMistakesLoginTitle =>
+      'Login as Student (Mistakes Vault & Anki Drills)';
+
+  @override
+  String get demoStudentMistakesLoginSubtitle =>
+      'Explore spaced-repetition practice with flashcards';
+
+  @override
+  String get demoBannerTitle =>
+      'Interactive VIP Demo • Experience the Future of Teaching';
+
+  @override
+  String get demoBannerSubtitle =>
+      'Explore real quizzes, Desmos, parent reports, and attendance tracking.';
+
+  @override
+  String get demoBannerCta => 'Book Platform Demo / Contact Us';
+
+  @override
+  String get newFileBadge => 'New';
+
+  @override
+  String get whatsappGatewayDialogTitle =>
+      'Automated WhatsApp Gateway Settings';
+
+  @override
+  String get whatsappAutoDispatchToggleTitle =>
+      'Auto-Dispatch Exam Results on Submit';
+
+  @override
+  String get whatsappAutoDispatchToggleSubtitle =>
+      'Instantly send exam report to parent WhatsApp hands-free';
+
+  @override
+  String get whatsappGatewayConnectedStatus =>
+      'Connected & Ready for Auto-Dispatch';
+
+  @override
+  String get whatsappGatewayQrReadyStatus => 'Waiting for QR Code Scan';
+
+  @override
+  String get whatsappGatewayDisconnectedStatus => 'Gateway Disconnected';
+
+  @override
+  String get whatsappConnectedPhoneLabel => 'Connected Phone';
+
+  @override
+  String get whatsappScanQrInstruction =>
+      'Open WhatsApp on device > Linked Devices > Scan the QR code below';
+
+  @override
+  String get whatsappQrAutoRefreshNote =>
+      'QR code refreshes automatically until pairing completes';
+
+  @override
+  String get whatsappSentTodayMetric => 'Sent Today';
+
+  @override
+  String get whatsappPendingQueueMetric => 'In Queue';
+
+  @override
+  String get whatsappFailedMetric => 'Failed';
+
+  @override
+  String get whatsappGatewaySettingsTooltip =>
+      'WhatsApp Gateway Auto-Dispatch Settings';
+
+  @override
+  String get whatsappAutoDispatchActiveBannerTitle =>
+      'Parent WhatsApp Auto-Dispatch is Active';
+
+  @override
+  String get whatsappAutoDispatchActiveBannerSubtitle =>
+      'Upon student exam submission, the report is dispatched to parent WhatsApp automatically';
+
+  @override
+  String get configureGatewayAction => 'Configure Gateway';
 }

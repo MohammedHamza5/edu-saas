@@ -7,6 +7,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_badge.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../domain/entities/content_entity.dart';
+import 'content_item_card_helpers.dart';
 
 class ContentItemCard extends StatelessWidget {
   final ContentEntity content;
@@ -245,7 +246,7 @@ class ContentItemCard extends StatelessWidget {
                 ),
 
                 // 3-Pillars Summary Row (Video ➔ PDF Handout ➔ Quiz)
-                _buildPillarsRow(context),
+                ContentPillarsRow(content: content),
 
                 // Prerequisite Locked Notification Banner
                 if (!isTeacher && content.isLocked) ...[
@@ -314,7 +315,10 @@ class ContentItemCard extends StatelessWidget {
                 if (content.attachedExams.isNotEmpty ||
                     content.associatedExamTitle != null) ...[
                   const SizedBox(height: AppSpacing.s8),
-                  _buildAssociatedExamBanner(context),
+                  ContentAssociatedExamBanner(
+                    content: content,
+                    isTeacher: isTeacher,
+                  ),
                 ],
 
                 // Student Action: Watch / Rewatch Lecture Button
@@ -477,7 +481,7 @@ class ContentItemCard extends StatelessWidget {
                   const SizedBox(height: AppSpacing.s8),
                   // Case A: video already uploaded → show status badge
                   if (content.hasVideo)
-                    _VideoStatusBadge(
+                    ContentVideoStatusBadge(
                       status: content.videoStatus ?? 'uploading',
                       onReplace: onUploadVideo,
                     )
@@ -702,305 +706,4 @@ class ContentItemCard extends StatelessWidget {
     );
   }
 
-  Widget _buildPillarsRow(BuildContext context) {
-    final hasVideo = content.type == ContentType.video || content.hasVideo;
-    final hasHandout = content.file != null;
-    final hasQuiz =
-        content.attachedExams.isNotEmpty || content.associatedExamId != null;
-
-    return Container(
-      margin: const EdgeInsets.only(top: AppSpacing.s8),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceVariant,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
-      ),
-      child: Row(
-        children: [
-          // 1. Video Pillar
-          Expanded(
-            child: _PillarItem(
-              icon: Icons.play_circle_outline_rounded,
-              label: hasVideo
-                  ? (content.videoProvider == 'youtube'
-                        ? context.l10n.videoSourceYoutube
-                        : context.l10n.videoSourceBunny)
-                  : context.l10n.videoSourceNone,
-              isActive: hasVideo,
-              color: hasVideo ? AppColors.primary : AppColors.textMuted,
-            ),
-          ),
-          Container(
-            width: 1,
-            height: 16,
-            color: AppColors.border.withValues(alpha: 0.5),
-            margin: const EdgeInsets.symmetric(horizontal: 4),
-          ),
-          // 2. Handout Pillar
-          Expanded(
-            child: _PillarItem(
-              icon: Icons.picture_as_pdf_outlined,
-              label: hasHandout ? 'PDF' : '—',
-              isActive: hasHandout,
-              color: hasHandout ? const Color(0xFFEA580C) : AppColors.textMuted,
-            ),
-          ),
-          Container(
-            width: 1,
-            height: 16,
-            color: AppColors.border.withValues(alpha: 0.5),
-            margin: const EdgeInsets.symmetric(horizontal: 4),
-          ),
-          // 3. Quiz Pillar
-          Expanded(
-            child: _PillarItem(
-              icon: Icons.quiz_outlined,
-              label: hasQuiz
-                  ? '${content.prerequisitePassingScore ?? 60}%'
-                  : '—',
-              isActive: hasQuiz,
-              color: hasQuiz ? AppColors.success : AppColors.textMuted,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAssociatedExamBanner(BuildContext context) {
-    final isPassed = content.isExamPassed;
-    final canTake = content.canTakeExam;
-    final bannerColor = isPassed
-        ? AppColors.success
-        : canTake
-        ? AppColors.primaryLight
-        : AppColors.warning;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: bannerColor.withValues(alpha: 0.08),
-        border: Border.all(color: bannerColor.withValues(alpha: 0.3)),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            isPassed
-                ? Icons.check_circle_outline_rounded
-                : canTake
-                ? Icons.quiz_outlined
-                : Icons.lock_outline_rounded,
-            size: 16,
-            color: bannerColor,
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  content.attachedExams.length > 1
-                      ? '${content.attachedExams.where((e) => e.isPassed).length}/${content.attachedExams.length} ${context.l10n.attachedQuizzesSection}'
-                      : (content.attachedExams.isNotEmpty &&
-                              content.attachedExams.first.examTitle.isNotEmpty
-                          ? content.attachedExams.first.examTitle
-                          : (content.associatedExamTitle ??
-                              context.l10n.quizPrefix)),
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: bannerColor,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                if (!isTeacher && !content.isLocked) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    isPassed
-                        ? context.l10n.quizPassedUnlockNext
-                        : canTake
-                        ? context.l10n.quizUnlockedReady
-                        : context.l10n.quizGateNotice,
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: bannerColor.withValues(alpha: 0.9),
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          if (!isTeacher && !content.isLocked)
-            TextButton(
-              onPressed: () => context.push(AppRoutes.studentExams),
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: Text(
-                isPassed
-                    ? context.l10n.reviewQuizResultAction
-                    : canTake
-                    ? context.l10n.takeQuizNowAction
-                    : context.l10n.takeRequiredExamAction,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  color: bannerColor,
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Private helper widget: Video Status Badge
-// Shown on teacher cards when a video has already been uploaded for this content
-// ─────────────────────────────────────────────────────────────────────────────
-class _VideoStatusBadge extends StatelessWidget {
-  final String status; // 'uploading' | 'processing' | 'ready' | 'failed'
-  final VoidCallback? onReplace;
-
-  const _VideoStatusBadge({required this.status, this.onReplace});
-
-  @override
-  Widget build(BuildContext context) {
-    final isReady = status == 'ready';
-    final isFailed = status == 'failed';
-    final isProcessing = status == 'uploading' || status == 'processing';
-
-    final Color bgColor = isReady
-        ? AppColors.success.withAlpha(22)
-        : isFailed
-        ? AppColors.error.withAlpha(22)
-        : AppColors.warning.withAlpha(22);
-
-    final Color borderColor = isReady
-        ? AppColors.success.withAlpha(70)
-        : isFailed
-        ? AppColors.error.withAlpha(70)
-        : AppColors.warning.withAlpha(70);
-
-    final Color textColor = isReady
-        ? AppColors.success
-        : isFailed
-        ? AppColors.error
-        : AppColors.warning;
-
-    final IconData icon = isReady
-        ? Icons.check_circle_rounded
-        : isFailed
-        ? Icons.error_rounded
-        : Icons.hourglass_top_rounded;
-
-    final String label = isReady
-        ? context.l10n.videoReadyBadge
-        : isFailed
-        ? context.l10n.videoFailedBadge
-        : context.l10n.videoProcessingBadge;
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-          decoration: BoxDecoration(
-            color: bgColor,
-            borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-            border: Border.all(color: borderColor),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (isProcessing)
-                SizedBox(
-                  width: 12,
-                  height: 12,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 1.5,
-                    color: textColor,
-                  ),
-                )
-              else
-                Icon(icon, size: 14, color: textColor),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: textColor,
-                ),
-              ),
-            ],
-          ),
-        ),
-        // Small "change video" icon button (only if callback provided)
-        if (onReplace != null) ...[
-          const SizedBox(width: 6),
-          InkWell(
-            onTap: onReplace,
-            borderRadius: BorderRadius.circular(4),
-            child: Padding(
-              padding: const EdgeInsets.all(4),
-              child: Tooltip(
-                message: context.l10n.uploadUpdateLectureVideo,
-                child: const Icon(
-                  Icons.swap_horiz_rounded,
-                  size: 16,
-                  color: AppColors.textMuted,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-}
-
-class _PillarItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool isActive;
-  final Color color;
-
-  const _PillarItem({
-    required this.icon,
-    required this.label,
-    required this.isActive,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 14, color: color),
-        const SizedBox(width: 4),
-        Flexible(
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
-              color: color,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ],
-    );
-  }
 }

@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/errors/result.dart';
@@ -5,15 +6,26 @@ import '../../domain/entities/exam_entity.dart';
 import '../../domain/entities/exam_parent_dispatch_entity.dart';
 import '../../domain/entities/mistake_entities.dart';
 import '../../domain/entities/exam_folder_entity.dart';
+import '../../domain/repositories/exam_draft_storage.dart';
 import '../../domain/repositories/exams_repository.dart';
+import '../../domain/services/exam_image_uploader.dart';
+import '../datasources/exam_draft_local_datasource.dart';
 import '../datasources/exams_remote_datasource.dart';
 import '../models/exam_question_model.dart';
+import '../services/exam_image_upload_service.dart';
 
 class ExamsRepositoryImpl implements ExamsRepository {
   final ExamsRemoteDataSource _remoteDataSource;
+  final ExamImageUploader _imageUploadService;
+  final ExamDraftStorage _draftStorage;
 
-  ExamsRepositoryImpl({ExamsRemoteDataSource? remoteDataSource})
-    : _remoteDataSource = remoteDataSource ?? ExamsRemoteDataSourceImpl();
+  ExamsRepositoryImpl({
+    ExamsRemoteDataSource? remoteDataSource,
+    ExamImageUploader? imageUploadService,
+    ExamDraftStorage? draftStorage,
+  })  : _remoteDataSource = remoteDataSource ?? ExamsRemoteDataSourceImpl(),
+        _imageUploadService = imageUploadService ?? ExamImageUploadService(),
+        _draftStorage = draftStorage ?? const ExamDraftLocalDataSource();
 
   @override
   Future<Result<List<ExamEntity>>> getGroupExams(
@@ -442,6 +454,26 @@ class ExamsRepositoryImpl implements ExamsRepository {
   }
 
   @override
+  Future<Result<bool>> updateMistakeReflection({
+    required String mistakeId,
+    required String? reflectionReason,
+  }) async {
+    try {
+      await _remoteDataSource.updateMistakeReflection(
+        mistakeId: mistakeId,
+        reflectionReason: reflectionReason,
+      );
+      return const Success(true);
+    } on PostgrestException catch (e) {
+      return FailureResult(ServerFailure(e.message, code: e.code));
+    } on AuthException catch (e) {
+      return FailureResult(AuthFailure(e.message, code: e.statusCode));
+    } catch (e) {
+      return FailureResult(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
   Future<Result<List<Map<String, dynamic>>>> getGroupLessons(String groupId) async {
     try {
       final lessons = await _remoteDataSource.getGroupLessons(groupId);
@@ -678,6 +710,37 @@ class ExamsRepositoryImpl implements ExamsRepository {
     } catch (e) {
       return FailureResult(ServerFailure(e.toString()));
     }
+  }
+
+  @override
+  Future<String> uploadExamImage({
+    required Uint8List bytes,
+    required String fileName,
+    String mimeType = 'image/png',
+  }) {
+    return _imageUploadService.uploadExamImage(
+      bytes: bytes,
+      fileName: fileName,
+      mimeType: mimeType,
+    );
+  }
+
+  @override
+  Future<void> saveExamDraft({
+    required String draftKey,
+    required Map<String, dynamic> data,
+  }) {
+    return _draftStorage.saveDraft(draftKey: draftKey, data: data);
+  }
+
+  @override
+  Future<Map<String, dynamic>?> getExamDraft(String draftKey) {
+    return _draftStorage.getDraft(draftKey);
+  }
+
+  @override
+  Future<void> clearExamDraft(String draftKey) {
+    return _draftStorage.clearDraft(draftKey);
   }
 }
 

@@ -57,12 +57,15 @@ class AppRoutes {
   static const String studentExams = '/student/exams';
   static const String studentMistakes = '/student/mistakes';
   static const String mistakesPractice = '/student/mistakes/practice';
+  static const String studentSavedQuestions = '/student/saved-questions';
+  static const String studentAnkiDrill = '/student/saved-questions/drill';
 
   // Feature: Platform Onboarding
   static const String platformOnboarding = '/platform/onboarding';
 
-  // Feature: Settings
+  // Feature: Settings & Profile
   static const String teacherSettings = '/teacher/settings';
+  static const String studentProfile = '/student/profile';
 
   // Feature: Videos routes
   static const String teacherVideos = '/teacher/videos';

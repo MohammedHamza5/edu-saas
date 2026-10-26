@@ -1,27 +1,29 @@
-import 'dart:math' as math;
-import 'dart:ui' show ImageFilter;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/di/injection_container.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
-import '../../../../core/network/supabase_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/widgets/app_card.dart';
+import '../../../../core/utils/app_feedback.dart';
+import '../../../../core/utils/exam_security_util.dart';
 import '../../../../core/widgets/app_loading_view.dart';
-import '../../../content/presentation/widgets/secure_pdf_viewer.dart';
+import '../../../content/domain/entities/lesson_assignment_entity.dart';
+import '../../domain/entities/exam_entity.dart';
+import '../../domain/entities/saved_question_entity.dart';
 import '../cubit/exams_cubit.dart';
 import '../cubit/exams_state.dart';
-import '../../domain/entities/exam_entity.dart';
-import '../widgets/exam_image_viewer.dart';
-import '../widgets/question_option_tile.dart';
-import '../widgets/sat_exam_tools_sheet.dart';
-import '../widgets/floating_desmos_calculator.dart';
-import 'exam_result_page.dart';
-import '../../../content/domain/entities/lesson_assignment_entity.dart';
-import '../../../question_bank/presentation/widgets/question_display_widgets.dart';
-import '../../../../core/widgets/forensic_watermark_overlay.dart';
-import '../../../../core/utils/exam_security_util.dart';
 import '../utils/exam_asset_preloader.dart';
+import '../widgets/bluebook/bluebook_review_grid_modal.dart';
+import '../widgets/desmos_embed_view.dart';
+import '../widgets/dock/exam_adaptive_tools_pane.dart';
+import '../widgets/dock/exam_dock_state.dart';
+import '../widgets/exam_taking_app_bar.dart';
+import '../widgets/exam_taking_overlays.dart';
+import '../widgets/exam_taking_pdf_booklet.dart';
+import '../widgets/exam_taking_questions_view.dart';
+import '../widgets/exam_taking_submission_dialogs.dart';
+import '../widgets/scratchpad/exam_scratchpad_overlay.dart';
+import 'exam_result_page.dart';
 
 class ExamTakingPage extends StatefulWidget {
   final bool isLectureExam;
@@ -46,21 +48,53 @@ class _ExamTakingPageState extends State<ExamTakingPage>
   int _securityViolationsCount = 0;
   bool _isPrivacyShieldActive = false;
   bool _isAutoSubmitting = false;
-  bool _isDesmosCalculatorOpen = false;
-  bool _hasOpenedCalculatorEver = false;
+  ExamDockMode _dockMode = ExamDockMode.hidden;
+  ExamDockTab _dockTab = ExamDockTab.calculator;
+  DesmosCalculatorMode _desmosMode = DesmosCalculatorMode.graphing;
+  bool _hasOpenedToolsEver = false;
   bool _showMobilePdfOverlay = false;
   bool _showDesktopPdfPane = true;
-  String? _cachedPdfSignedUrl;
-  bool _isLoadingPdfUrl = false;
-  String? _pdfLoadError;
   static const int _maxAllowedViolations = 3;
   final ExamAssetPreloader _assetPreloader = ExamAssetPreloader();
+  final Set<String> _savedQuestionIds = {};
+  double? _customDockWidth;
+  bool _isDraggingDockSplitter = false;
 
   @override
   void initState() {
     super.initState();
+    ExamResultPage.retakeBuilder = (
+      ctx,
+      cubit,
+      isLecture,
+      nextLesson,
+      nextIndex,
+      totalCount,
+    ) =>
+        BlocProvider.value(
+          value: cubit,
+          child: ExamTakingPage(
+            isLectureExam: isLecture,
+            nextLesson: nextLesson,
+            nextLessonIndex: nextIndex,
+            totalLessonsCount: totalCount,
+          ),
+        );
     WidgetsBinding.instance.addObserver(this);
     setExamSecurityActive(true);
+    _initSavedQuestions();
+  }
+
+  Future<void> _initSavedQuestions() async {
+    try {
+      final res =
+          await InjectionContainer.savedQuestionsRepository.getSavedQuestions();
+      if (res.isSuccess && res.dataOrNull != null && mounted) {
+        setState(() {
+          _savedQuestionIds.addAll(res.dataOrNull!.map((q) => q.questionId));
+        });
+      }
+    } catch (_) {}
   }
 
   @override
@@ -82,8 +116,6 @@ class _ExamTakingPageState extends State<ExamTakingPage>
       return;
     }
 
-    // Flag violations only when page is genuinely hidden or paused (tab switch/backgrounding).
-    // Inactive is ignored to avoid false positives on mobile volume buttons, notifications, or keyboard.
     final isViolation =
         state == AppLifecycleState.hidden || state == AppLifecycleState.paused;
 
@@ -94,8 +126,6 @@ class _ExamTakingPageState extends State<ExamTakingPage>
         if (currentState is ExamTakingState &&
             !currentState.isSubmitting &&
             !currentState.submitSuccess) {
-          // Untimed lecture exams / homework quizzes are flexible practice activities;
-          // do not enforce strict anti-cheat auto-submission.
           if (currentState.isUntimed || widget.isLectureExam) {
             return;
           }
@@ -107,7 +137,6 @@ class _ExamTakingPageState extends State<ExamTakingPage>
             });
 
             if (_securityViolationsCount >= _maxAllowedViolations) {
-              // Final Violation: Immediate auto-submission
               _isAutoSubmitting = true;
               cubit.submitExam(reason: ExamSubmissionReason.securityViolations);
 
@@ -119,7 +148,6 @@ class _ExamTakingPageState extends State<ExamTakingPage>
                 ),
               );
             } else {
-              // Warning notice
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(context.l10n.examSecurityWarningSubtitle),
@@ -135,776 +163,129 @@ class _ExamTakingPageState extends State<ExamTakingPage>
   }
 
   void _confirmForcedExit(BuildContext context, ExamTakingState state) {
-    final unanswered = state.totalQuestions - state.answeredCount;
-
-    showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) => AlertDialog(
-        title: Row(
-          children: [
-            const Icon(Icons.warning_rounded, color: AppColors.error),
-            const SizedBox(width: AppSpacing.s8),
-            Expanded(child: Text(context.l10n.forcedExitWarningTitle)),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              context.l10n.forcedExitWarningMessage,
-              style: const TextStyle(fontSize: 14, height: 1.4),
-            ),
-            const SizedBox(height: AppSpacing.s12),
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.s10),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceVariant,
-                borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    context.l10n.answeredQuestionsCount(
-                      state.answeredCount,
-                      state.totalQuestions,
-                    ),
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13,
-                    ),
-                  ),
-                  if (unanswered > 0) ...[
-                    const SizedBox(height: AppSpacing.s4),
-                    Text(
-                      context.l10n.unansweredWarning(unanswered),
-                      style: const TextStyle(
-                        color: AppColors.error,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(context.l10n.stayAndContinueButton),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.error,
-              foregroundColor: Colors.white,
-            ),
-            onPressed: () {
-              Navigator.of(ctx).pop();
-              setState(() {
-                _isAutoSubmitting = true;
-              });
-              context.read<ExamsCubit>().submitExam(
-                reason: ExamSubmissionReason.forcedExit,
-              );
-            },
-            child: Text(context.l10n.forcedExitConfirmButton),
-          ),
-        ],
-      ),
+    ExamTakingSubmissionDialogs.confirmForcedExit(
+      context,
+      state: state,
+      onConfirm: () {
+        setState(() {
+          _isAutoSubmitting = true;
+        });
+        context.read<ExamsCubit>().submitExam(
+              reason: ExamSubmissionReason.forcedExit,
+            );
+      },
     );
   }
 
   void _confirmSubmit(BuildContext context, ExamTakingState state) {
-    final unanswered = state.totalQuestions - state.answeredCount;
-
-    showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(context.l10n.confirmSubmitExamTitle),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              context.l10n.answeredQuestionsCount(
-                state.answeredCount,
-                state.totalQuestions,
-              ),
-            ),
-            if (unanswered > 0) ...[
-              const SizedBox(height: AppSpacing.s8),
-              Text(
-                context.l10n.unansweredWarning(unanswered),
-                style: const TextStyle(
-                  color: AppColors.error,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-            const SizedBox(height: AppSpacing.s12),
-            Text(context.l10n.confirmSubmitQuestion),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(context.l10n.continueSolving),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-            onPressed: () {
-              Navigator.of(ctx).pop();
-              context.read<ExamsCubit>().submitExam(
-                reason: ExamSubmissionReason.studentSubmitted,
-              );
-            },
-            child: Text(
-              context.l10n.yesSubmitExam,
-              style: const TextStyle(color: Colors.white),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _ensurePdfUrlLoaded(ExamEntity exam) {
-    if (_cachedPdfSignedUrl != null || _isLoadingPdfUrl) return;
-    final path = exam.pdfStoragePath;
-    if (path == null || path.isEmpty) return;
-
-    _isLoadingPdfUrl = true;
-    _pdfLoadError = null;
-
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (!mounted) return;
-      try {
-        final url = await context.read<ExamsCubit>().getSignedPdfUrl(
-              path,
-              storageProvider: exam.pdfStorageProvider,
+    ExamTakingSubmissionDialogs.confirmSubmit(
+      context,
+      state: state,
+      onConfirm: () {
+        context.read<ExamsCubit>().submitExam(
+              reason: ExamSubmissionReason.studentSubmitted,
             );
-        if (mounted) {
-          setState(() {
-            _cachedPdfSignedUrl = url;
-            _isLoadingPdfUrl = false;
-            if (url == null || url.isEmpty) {
-              _pdfLoadError = context.l10n.secureUrlErrorFallback;
-            }
-          });
-        }
-      } catch (e) {
-        if (mounted) {
-          setState(() {
-            _isLoadingPdfUrl = false;
-            _pdfLoadError = context.l10n.secureUrlGenericError;
-          });
-        }
-      }
-    });
-  }
-
-  String _resolveWatermarkText() {
-    final user = SupabaseService.currentUser;
-    final metadata = user?.userMetadata;
-    final name = (metadata?['full_name'] as String?) ??
-        user?.email?.split('@').first ??
-        '';
-    final phone = (metadata?['phone'] as String?) ?? user?.phone ?? '';
-    final id = user != null && user.id.isNotEmpty
-        ? user.id.substring(0, math.min(8, user.id.length))
-        : '';
-    final parts = <String>[];
-    if (name.isNotEmpty) parts.add(name);
-    if (phone.isNotEmpty) parts.add(phone);
-    if (id.isNotEmpty) parts.add('ID: $id');
-    return parts.isEmpty ? 'EduSaaS Protected' : parts.join(' • ');
-  }
-
-  Widget _buildPdfViewerWidget(ExamTakingState state) {
-    _ensurePdfUrlLoaded(state.exam);
-
-    if (_isLoadingPdfUrl) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const AppLoadingView.compact(size: 32),
-            const SizedBox(height: AppSpacing.s12),
-            Text(
-              context.l10n.examPdfLoading,
-              style: const TextStyle(
-                fontSize: 13,
-                color: AppColors.textSecondary,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    if (_pdfLoadError != null || _cachedPdfSignedUrl == null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.s16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.error_outline_rounded,
-                color: AppColors.error,
-                size: 36,
-              ),
-              const SizedBox(height: AppSpacing.s12),
-              Text(
-                _pdfLoadError ?? context.l10n.secureUrlGenericError,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 13, color: AppColors.error),
-              ),
-              const SizedBox(height: AppSpacing.s12),
-              OutlinedButton.icon(
-                onPressed: () {
-                  setState(() {
-                    _cachedPdfSignedUrl = null;
-                    _pdfLoadError = null;
-                  });
-                  _ensurePdfUrlLoaded(state.exam);
-                },
-                icon: const Icon(Icons.refresh_rounded, size: 16),
-                label: Text(context.l10n.retryAction),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    return Container(
-      color: Colors.grey.shade900,
-      child: buildSecurePdfViewer(
-        pdfUrl: _cachedPdfSignedUrl!,
-        watermarkText: _resolveWatermarkText(),
-        docTitle: state.exam.pdfFileName ?? state.exam.title,
-      ),
+      },
     );
   }
 
-  Widget _buildMobilePdfOverlay(
+  Future<void> _toggleCurrentQuestionVault(
     BuildContext context,
     ExamTakingState state,
-    int qIndex,
-  ) {
-    return Positioned.fill(
-      child: Container(
-        color: AppColors.surface,
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.s16,
-                vertical: AppSpacing.s10,
-              ),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                border: const Border(
-                  bottom: BorderSide(color: AppColors.border),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.04),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.picture_as_pdf_rounded,
-                    color: AppColors.primary,
-                    size: 20,
-                  ),
-                  const SizedBox(width: AppSpacing.s8),
-                  Expanded(
-                    child: Text(
-                      state.exam.pdfFileName ?? state.exam.title,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.s8,
-                      vertical: 3,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusSmall),
-                    ),
-                    child: Text(
-                      context.l10n.questionProgress(
-                        qIndex + 1,
-                        state.totalQuestions,
-                      ),
-                      style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.s8),
-                  ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.s12,
-                        vertical: AppSpacing.s8,
-                      ),
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _showMobilePdfOverlay = false;
-                      });
-                    },
-                    icon: const Icon(Icons.arrow_back_rounded, size: 16),
-                    label: Text(
-                      context.l10n.hideExamBooklet,
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: _buildPdfViewerWidget(state),
-            ),
-          ],
-        ),
-      ),
+  ) async {
+    final q = state.currentQuestion;
+    final isSaved = _savedQuestionIds.contains(q.id);
+
+    if (isSaved) {
+      setState(() => _savedQuestionIds.remove(q.id));
+      await InjectionContainer.savedQuestionsRepository.removeSavedQuestion(q.id);
+      if (context.mounted) {
+        AppFeedback.showInfo(context, context.l10n.removedFromVaultSuccess);
+      }
+    } else {
+      setState(() => _savedQuestionIds.add(q.id));
+      final saved = SavedQuestionEntity(
+        id: 'sq_${q.id}',
+        questionId: q.id,
+        examId: state.exam.id,
+        examTitle: state.exam.title,
+        questionText: q.questionText,
+        questionImageUrl: q.imageUrl,
+        options: q.options,
+        savedAt: DateTime.now(),
+        questionIndex: state.currentQuestionIndex + 1,
+        isPdfQuestion: state.exam.hasAttachedPdf,
+        pdfUrl: state.exam.pdfStoragePath,
+      );
+      await InjectionContainer.savedQuestionsRepository.saveQuestion(saved);
+      if (context.mounted) {
+        AppFeedback.showSuccess(context, context.l10n.savedToVaultSuccess);
+      }
+    }
+  }
+
+  void _openBluebookReviewGrid(BuildContext context, ExamTakingState state) {
+    if (state.isSubmitting) return;
+    final answeredIndices = <int>{};
+    final flaggedIndices = <int>{};
+    for (int i = 0; i < state.questions.length; i++) {
+      final qId = state.questions[i].id;
+      if (state.answers.containsKey(qId)) {
+        answeredIndices.add(i);
+      }
+      if (state.flaggedGuesses.contains(qId)) {
+        flaggedIndices.add(i);
+      }
+    }
+
+    BluebookReviewGridModal.show(
+      context,
+      totalQuestions: state.questions.length,
+      currentQuestionIndex: state.currentQuestionIndex,
+      answeredIndices: answeredIndices,
+      flaggedIndices: flaggedIndices,
+      onQuestionSelected: (idx) {
+        context.read<ExamsCubit>().goToQuestion(idx);
+      },
+      onConfirmFinish: () => _confirmSubmit(context, state),
     );
   }
 
-  Widget _buildQuestionsView(
+  Widget _buildQuestionsViewWidget(
     BuildContext context,
     ExamTakingState state,
     int qIndex,
     ExamQuestionEntity question, {
     required bool isDesktop,
   }) {
-    return ForensicWatermarkOverlay(
-      child: Column(
-        children: [
-          // Progress indicator
-          LinearProgressIndicator(
-            value: state.totalQuestions > 0
-                ? (state.currentQuestionIndex + 1) / state.totalQuestions
-                : 0,
-            backgroundColor: AppColors.surfaceVariant,
-            valueColor: const AlwaysStoppedAnimation<Color>(
-              AppColors.primary,
-            ),
-            minHeight: 4,
-          ),
-
-          // Attached PDF quick ribbon (for mobile or when desktop PDF pane is closed)
-          if (state.exam.hasAttachedPdf && (!isDesktop || !_showDesktopPdfPane))
-            Container(
-              margin: const EdgeInsets.fromLTRB(
-                AppSpacing.s16,
-                AppSpacing.s8,
-                AppSpacing.s16,
-                0,
-              ),
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.s12,
-                vertical: AppSpacing.s8,
-              ),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                border: Border.all(
-                  color: AppColors.primary.withValues(alpha: 0.25),
-                ),
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.picture_as_pdf_rounded,
-                    size: 18,
-                    color: AppColors.primary,
-                  ),
-                  const SizedBox(width: AppSpacing.s8),
-                  Expanded(
-                    child: Text(
-                      state.exam.pdfFileName ?? context.l10n.attachedExamPdf,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.s8),
-                  TextButton.icon(
-                    style: TextButton.styleFrom(
-                      visualDensity: VisualDensity.compact,
-                      foregroundColor: AppColors.primary,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.s8,
-                        vertical: 4,
-                      ),
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        if (isDesktop) {
-                          _showDesktopPdfPane = true;
-                        } else {
-                          _showMobilePdfOverlay = true;
-                        }
-                      });
-                    },
-                    icon: const Icon(Icons.visibility_outlined, size: 16),
-                    label: Text(
-                      context.l10n.viewExamBooklet,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-          // Question Header info
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.s16,
-              vertical: AppSpacing.s12,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  context.l10n.questionProgress(
-                    qIndex + 1,
-                    state.totalQuestions,
-                  ),
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                Text(
-                  context.l10n.solvedCount(
-                    state.answeredCount,
-                    state.totalQuestions,
-                  ),
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textMuted,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const Divider(height: 1, color: AppColors.border),
-
-          // Question Content
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(AppSpacing.s16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Question Card
-                  AppCard(
-                    padding: const EdgeInsets.all(AppSpacing.s16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment:
-                              MainAxisAlignment.spaceBetween,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: AppSpacing.s8,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppColors.surfaceVariant,
-                                borderRadius: BorderRadius.circular(
-                                  AppSpacing.radiusSmall,
-                                ),
-                              ),
-                              child: Text(
-                                question.questionType
-                                    .localizedLabel(context),
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                            ),
-                            Text(
-                              context.l10n.scorePoints(
-                                question.points,
-                              ),
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.primary,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Builder(
-                          builder: (context) {
-                            final hasExplicitImage =
-                                question.imageUrl != null &&
-                                question.imageUrl!
-                                    .trim()
-                                    .isNotEmpty;
-                            final isTextAnImageUrl =
-                                QuestionStemView.isImageUrl(
-                                  question.questionText.trim(),
-                                );
-                            final effectiveImageUrl =
-                                hasExplicitImage
-                                ? question.imageUrl!
-                                : (isTextAnImageUrl
-                                      ? question.questionText.trim()
-                                      : null);
-                            final shouldShowText =
-                                question.questionText
-                                    .trim()
-                                    .isNotEmpty &&
-                                !isTextAnImageUrl;
-
-                            return Column(
-                              crossAxisAlignment:
-                                  CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                if (shouldShowText) ...[
-                                  Text(
-                                    question.questionText,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                      color: AppColors.textPrimary,
-                                      height: 1.4,
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                    height: AppSpacing.s12,
-                                  ),
-                                ],
-                                if (effectiveImageUrl != null &&
-                                    effectiveImageUrl.isNotEmpty)
-                                  ExamImageViewer(
-                                    key: ValueKey(
-                                      'exam_q_${question.id}_$effectiveImageUrl',
-                                    ),
-                                    imageUrl: effectiveImageUrl,
-                                    imageMeta: question.imageMeta,
-                                    caption: context.l10n
-                                        .questionProgress(
-                                          qIndex + 1,
-                                          state.totalQuestions,
-                                        ),
-                                  ),
-                              ],
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: AppSpacing.s20),
-
-                  // Options list
-                  if (question.options.isNotEmpty) ...[
-                    Text(
-                      context.l10n.chooseCorrectAnswer,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.s12),
-
-                    ...question.options.asMap().entries.map((
-                      optEntry,
-                    ) {
-                      final optIdx = optEntry.key;
-                      final option = optEntry.value;
-                      final isSelected =
-                          state.answers[question.id] == option.id;
-
-                      return Padding(
-                        padding: const EdgeInsets.only(
-                          bottom: AppSpacing.s10,
-                        ),
-                        child: QuestionOptionTile(
-                          option: option,
-                          index: optIdx,
-                          isSelected: isSelected,
-                          onTap: () {
-                            context.read<ExamsCubit>().selectAnswer(
-                              question.id,
-                              option.id,
-                            );
-                          },
-                        ),
-                      );
-                    }),
-                  ] else ...[
-                    Container(
-                      padding: const EdgeInsets.all(AppSpacing.s16),
-                      decoration: BoxDecoration(
-                        color: AppColors.error.withValues(
-                          alpha: 0.08,
-                        ),
-                        borderRadius: BorderRadius.circular(
-                          AppSpacing.radiusMedium,
-                        ),
-                        border: Border.all(
-                          color: AppColors.error.withValues(
-                            alpha: 0.3,
-                          ),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.warning_amber_rounded,
-                            color: AppColors.error,
-                            size: 24,
-                          ),
-                          const SizedBox(width: AppSpacing.s12),
-                          Expanded(
-                            child: Text(
-                              context
-                                  .l10n
-                                  .noOptionsAvailableForQuestionWarning,
-                              style: const TextStyle(
-                                color: AppColors.error,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 13,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ),
-
-          // Bottom Navigation Control Bar
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.s16),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              border: const Border(
-                top: BorderSide(color: AppColors.border),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.03),
-                  blurRadius: 10,
-                  offset: const Offset(0, -4),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                // Previous button
-                if (state.hasPrevious)
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        context.read<ExamsCubit>().goToQuestion(
-                          qIndex - 1,
-                        );
-                      },
-                      icon: const Icon(
-                        Icons.arrow_forward,
-                        size: 16,
-                      ),
-                      label: Text(context.l10n.previousQuestion),
-                    ),
-                  )
-                else
-                  const Spacer(),
-
-                const SizedBox(width: AppSpacing.s12),
-
-                // Next or Submit button
-                if (state.hasNext)
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                      ),
-                      onPressed: () {
-                        context.read<ExamsCubit>().goToQuestion(
-                          qIndex + 1,
-                        );
-                      },
-                      icon: const Icon(Icons.arrow_back, size: 16),
-                      label: Text(context.l10n.nextQuestion),
-                    ),
-                  )
-                else
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.success,
-                        foregroundColor: Colors.white,
-                      ),
-                      onPressed: state.isSubmitting
-                          ? null
-                          : () => _confirmSubmit(context, state),
-                      icon: const Icon(
-                        Icons.check_circle_outline,
-                        size: 16,
-                      ),
-                      label: state.isSubmitting
-                          ? const AppLoadingView.compact(
-                              size: 16,
-                              color: Colors.white,
-                            )
-                          : Text(context.l10n.submitExamNow),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ],
-      ),
+    return ExamTakingQuestionsView(
+      state: state,
+      questionIndex: qIndex,
+      question: question,
+      isDesktop: isDesktop,
+      showDesktopPdfPane: _showDesktopPdfPane,
+      onOpenPdfBooklet: () {
+        setState(() {
+          if (isDesktop) {
+            _showDesktopPdfPane = true;
+          } else {
+            _showMobilePdfOverlay = true;
+          }
+        });
+      },
+      onToggleFlagGuess: () =>
+          context.read<ExamsCubit>().toggleFlagGuess(question.id),
+      onToggleVault: () => _toggleCurrentQuestionVault(context, state),
+      onSelectOption: (optionId) {
+        context.read<ExamsCubit>().selectAnswer(question.id, optionId);
+      },
+      onToggleEliminateOption: (optionId) {
+        context.read<ExamsCubit>().toggleEliminateOption(question.id, optionId);
+      },
+      onPrevious: () => context.read<ExamsCubit>().goToQuestion(qIndex - 1),
+      onNext: () => context.read<ExamsCubit>().goToQuestion(qIndex + 1),
+      onReviewGrid: () => _openBluebookReviewGrid(context, state),
+      onSubmit: () => _confirmSubmit(context, state),
     );
   }
 
@@ -963,12 +344,7 @@ class _ExamTakingPageState extends State<ExamTakingPage>
               ),
             );
           } else if (state.errorMessage != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.errorMessage!),
-                backgroundColor: AppColors.error,
-              ),
-            );
+            AppFeedback.showError(context, state.errorMessage!);
           }
         }
       },
@@ -1044,66 +420,66 @@ class _ExamTakingPageState extends State<ExamTakingPage>
         return PopScope(
           canPop: false,
           onPopInvokedWithResult: (didPop, _) {
-            if (!didPop) {
-              _confirmForcedExit(context, state);
-            }
+            if (didPop || state.isSubmitting) return;
+            _confirmForcedExit(context, state);
           },
           child: Scaffold(
-            appBar: AppBar(
-              title: Text(state.exam.title),
-              centerTitle: false,
-              actions: [
-                if (state.exam.hasAttachedPdf)
-                  IconButton(
-                    icon: Icon(
-                      Icons.picture_as_pdf_rounded,
-                      color: (_showMobilePdfOverlay || _showDesktopPdfPane)
-                          ? AppColors.primary
-                          : null,
-                    ),
-                    tooltip: context.l10n.viewExamBooklet,
-                    onPressed: () {
-                      final isDesktop =
-                          MediaQuery.of(context).size.width >= 900;
-                      setState(() {
-                        if (isDesktop) {
-                          _showDesktopPdfPane = !_showDesktopPdfPane;
-                        } else {
-                          _showMobilePdfOverlay = !_showMobilePdfOverlay;
-                        }
-                      });
-                    },
-                  ),
-                // SAT Reference Formulas Sheet
-                IconButton(
-                  icon: const Icon(Icons.menu_book_rounded),
-                  tooltip: context.l10n.referenceSheetTooltip,
-                  onPressed: () =>
-                      SatExamToolsSheet.showReferenceSheet(context),
-                ),
-                // Official SAT Desmos Calculator (Floating Window)
-                IconButton(
-                  icon: Icon(
-                    Icons.calculate_rounded,
-                    color: _isDesmosCalculatorOpen
-                        ? AppColors.primaryLight
-                        : null,
-                  ),
-                  tooltip: context.l10n.calculatorTooltip,
-                  onPressed: () {
-                    setState(() {
-                      _hasOpenedCalculatorEver = true;
-                      _isDesmosCalculatorOpen = !_isDesmosCalculatorOpen;
-                    });
-                  },
-                ),
-                // Timer / Untimed badge
-                const _ExamTimerBadge(),
-              ],
+            appBar: ExamTakingAppBar(
+              title: state.exam.title,
+              hasAttachedPdf: state.exam.hasAttachedPdf,
+              isPdfActive: _showMobilePdfOverlay || _showDesktopPdfPane,
+              onTogglePdf: () {
+                final isDesktop = MediaQuery.of(context).size.width >= 900;
+                setState(() {
+                  if (isDesktop) {
+                    _showDesktopPdfPane = !_showDesktopPdfPane;
+                  } else {
+                    _showMobilePdfOverlay = !_showMobilePdfOverlay;
+                  }
+                });
+              },
+              isScratchpadOpen: state.isScratchpadOpen,
+              onToggleScratchpad: () =>
+                  context.read<ExamsCubit>().toggleScratchpad(),
+              isFormulaActive: _dockMode.isVisible && _dockTab.isFormulas,
+              onToggleFormula: () {
+                final isDesktop = MediaQuery.of(context).size.width >= 900;
+                setState(() {
+                  _hasOpenedToolsEver = true;
+                  if (_dockMode.isVisible && _dockTab.isFormulas) {
+                    _dockMode = ExamDockMode.hidden;
+                  } else {
+                    _dockMode = isDesktop
+                        ? ExamDockMode.docked
+                        : ExamDockMode.floating;
+                    _dockTab = ExamDockTab.formulas;
+                  }
+                });
+              },
+              isCalculatorActive: _dockMode.isVisible && _dockTab.isCalculator,
+              onToggleCalculator: () {
+                final isDesktop = MediaQuery.of(context).size.width >= 900;
+                setState(() {
+                  _hasOpenedToolsEver = true;
+                  if (_dockMode.isVisible && _dockTab.isCalculator) {
+                    _dockMode = ExamDockMode.hidden;
+                  } else {
+                    _dockMode = isDesktop
+                        ? ExamDockMode.docked
+                        : ExamDockMode.floating;
+                    _dockTab = ExamDockTab.calculator;
+                  }
+                });
+              },
+              isQuestionSaved: _savedQuestionIds.contains(state.currentQuestion.id),
+              isSubmitting: state.isSubmitting,
+              onToggleVault: () => _toggleCurrentQuestionVault(context, state),
+              onOpenReviewGrid: () => _openBluebookReviewGrid(context, state),
             ),
             floatingActionButton: (MediaQuery.of(context).size.width < 900 &&
                     state.exam.hasAttachedPdf &&
-                    !_showMobilePdfOverlay)
+                    !_showMobilePdfOverlay &&
+                    !state.isSubmitting)
                 ? FloatingActionButton.extended(
                     onPressed: () {
                       setState(() {
@@ -1122,14 +498,24 @@ class _ExamTakingPageState extends State<ExamTakingPage>
                 LayoutBuilder(
                   builder: (context, constraints) {
                     final isDesktop = constraints.maxWidth >= 900;
+                    final defaultDockWidth =
+                        (constraints.maxWidth * 0.38).clamp(380.0, 560.0);
+                    const minDockWidth = 320.0;
+                    final maxDockWidth = constraints.maxWidth * 0.65;
+                    final dockWidth = (_customDockWidth ?? defaultDockWidth)
+                        .clamp(minDockWidth, maxDockWidth);
+                    final isDocked = isDesktop && _dockMode.isDocked;
+                    final rightPadding = isDocked ? dockWidth : 0.0;
+
+                    Widget mainContent;
                     if (isDesktop &&
                         state.exam.hasAttachedPdf &&
                         _showDesktopPdfPane) {
-                      return Row(
+                      mainContent = Row(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Expanded(
-                            flex: 55,
+                            flex: 52,
                             child: Column(
                               children: [
                                 Container(
@@ -1178,14 +564,18 @@ class _ExamTakingPageState extends State<ExamTakingPage>
                                     ],
                                   ),
                                 ),
-                                Expanded(child: _buildPdfViewerWidget(state)),
+                                Expanded(
+                                  child: ExamTakingPdfBooklet(
+                                    exam: state.exam,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
                           Container(width: 1, color: AppColors.border),
                           Expanded(
-                            flex: 45,
-                            child: _buildQuestionsView(
+                            flex: 48,
+                            child: _buildQuestionsViewWidget(
                               context,
                               state,
                               qIndex,
@@ -1195,328 +585,133 @@ class _ExamTakingPageState extends State<ExamTakingPage>
                           ),
                         ],
                       );
+                    } else {
+                      mainContent = Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          _buildQuestionsViewWidget(
+                            context,
+                            state,
+                            qIndex,
+                            question,
+                            isDesktop: isDesktop,
+                          ),
+                          if (!isDesktop &&
+                              state.exam.hasAttachedPdf &&
+                              _showMobilePdfOverlay)
+                            ExamTakingPdfBooklet(
+                              exam: state.exam,
+                              isMobileOverlay: true,
+                              currentQuestionIndex: qIndex,
+                              totalQuestions: state.totalQuestions,
+                              onCloseMobileOverlay: () {
+                                setState(() {
+                                  _showMobilePdfOverlay = false;
+                                });
+                              },
+                            ),
+                        ],
+                      );
                     }
 
                     return Stack(
                       fit: StackFit.expand,
                       children: [
-                        _buildQuestionsView(
-                          context,
-                          state,
-                          qIndex,
-                          question,
-                          isDesktop: isDesktop,
+                        Positioned(
+                          left: 0,
+                          top: 0,
+                          bottom: 0,
+                          right: rightPadding,
+                          child: mainContent,
                         ),
-                        if (!isDesktop &&
-                            state.exam.hasAttachedPdf &&
-                            _showMobilePdfOverlay)
-                          _buildMobilePdfOverlay(context, state, qIndex),
+                        if (_hasOpenedToolsEver)
+                          ExamAdaptiveToolsPane(
+                            dockMode: _dockMode,
+                            activeTab: _dockTab,
+                            desmosMode: _desmosMode,
+                            onDockModeChanged: (mode) =>
+                                setState(() => _dockMode = mode),
+                            onTabChanged: (tab) =>
+                                setState(() => _dockTab = tab),
+                            onDesmosModeChanged: (mode) =>
+                                setState(() => _desmosMode = mode),
+                            dockWidth: dockWidth,
+                            isDesktop: isDesktop,
+                            parentSize: Size(
+                              constraints.maxWidth,
+                              constraints.maxHeight,
+                            ),
+                          ),
+                        if (isDocked)
+                          Positioned(
+                            right: dockWidth - 6,
+                            top: 0,
+                            bottom: 0,
+                            width: 12,
+                            child: MouseRegion(
+                              cursor: SystemMouseCursors.resizeColumn,
+                              child: GestureDetector(
+                                behavior: HitTestBehavior.translucent,
+                                onHorizontalDragStart: (_) => setState(
+                                    () => _isDraggingDockSplitter = true),
+                                onHorizontalDragEnd: (_) => setState(
+                                    () => _isDraggingDockSplitter = false),
+                                onHorizontalDragCancel: () => setState(
+                                    () => _isDraggingDockSplitter = false),
+                                onHorizontalDragUpdate: (details) {
+                                  setState(() {
+                                    final cur =
+                                        _customDockWidth ?? defaultDockWidth;
+                                    _customDockWidth = (cur - details.delta.dx)
+                                        .clamp(minDockWidth, maxDockWidth);
+                                  });
+                                },
+                                child: Container(
+                                  color: Colors.transparent,
+                                  child: Center(
+                                    child: AnimatedContainer(
+                                      duration:
+                                          const Duration(milliseconds: 100),
+                                      width: _isDraggingDockSplitter ? 4 : 2,
+                                      decoration: BoxDecoration(
+                                        color: _isDraggingDockSplitter
+                                            ? AppColors.primary
+                                            : AppColors.border
+                                                .withValues(alpha: 0.8),
+                                        borderRadius: BorderRadius.circular(2),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
                       ],
                     );
                   },
                 ),
-                // Official Floating SAT Desmos Calculator (Simulating CollegeBoard Bluebook)
-                // Stays mounted in DOM after first opening so student formulas/graphs NEVER reset!
-                if (_hasOpenedCalculatorEver)
-                  FloatingDesmosCalculator(
-                    isVisible: _isDesmosCalculatorOpen,
-                    onClose: () {
+                // Digital Scratchpad Overlay (Transparent or Grid paper canvas)
+                const ExamScratchpadOverlay(),
+                if (state.isSubmitting)
+                  const ExamSubmittingBlockingOverlay()
+                else if (_isPrivacyShieldActive)
+                  ExamPrivacyShieldOverlay(
+                    isAutoSubmitting: _isAutoSubmitting,
+                    securityViolationsCount: _securityViolationsCount,
+                    maxAllowedViolations: _maxAllowedViolations,
+                    onReturnToExam: () {
                       setState(() {
-                        _isDesmosCalculatorOpen = false;
+                        _isPrivacyShieldActive = false;
                       });
                     },
-                  ),
-                if (_isPrivacyShieldActive)
-                  _buildPrivacyShield()
+                  )
                 else if (state.isExpired ||
                     (!state.isUntimed &&
                         state.remainingSeconds <= 0 &&
                         state.isSubmitting))
-                  _buildTimeExpiredOverlay(),
+                  const ExamTimeExpiredOverlay(),
               ],
             ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildPrivacyShield() {
-    return Positioned.fill(
-      child: Container(
-        color: Colors.black.withValues(alpha: 0.88),
-        padding: const EdgeInsets.all(AppSpacing.s24),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-          child: Center(
-            child: AppCard(
-              padding: const EdgeInsets.all(AppSpacing.s24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(AppSpacing.s12),
-                    decoration: BoxDecoration(
-                      color:
-                          (_isAutoSubmitting
-                                  ? AppColors.error
-                                  : AppColors.warning)
-                              .withValues(alpha: 0.12),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      _isAutoSubmitting
-                          ? Icons.lock_outline_rounded
-                          : Icons.warning_amber_rounded,
-                      color: _isAutoSubmitting
-                          ? AppColors.error
-                          : AppColors.warning,
-                      size: 40,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.s16),
-                  Text(
-                    context.l10n.examSecurityAlertTitle,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: _isAutoSubmitting
-                          ? AppColors.error
-                          : AppColors.warning,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.s8),
-                  Text(
-                    _isAutoSubmitting
-                        ? context.l10n.examAutoSubmittedDueToViolations
-                        : context.l10n.examSecurityWarningSubtitle,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: AppColors.textSecondary,
-                      height: 1.5,
-                    ),
-                  ),
-                  if (!_isAutoSubmitting) ...[
-                    const SizedBox(height: AppSpacing.s12),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.warning.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(
-                          AppSpacing.radiusSmall,
-                        ),
-                        border: Border.all(
-                          color: AppColors.warning.withValues(alpha: 0.35),
-                        ),
-                      ),
-                      child: Text(
-                        context.l10n.examSecurityViolationsCount(
-                          _securityViolationsCount,
-                          _maxAllowedViolations,
-                        ),
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.warning,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.s20),
-                    ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.s24,
-                          vertical: AppSpacing.s12,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                            AppSpacing.radiusMedium,
-                          ),
-                        ),
-                      ),
-                      icon: const Icon(Icons.arrow_back_rounded, size: 18),
-                      label: Text(context.l10n.returnToExamAction),
-                      onPressed: () {
-                        setState(() {
-                          _isPrivacyShieldActive = false;
-                        });
-                      },
-                    ),
-                  ] else ...[
-                    const SizedBox(height: AppSpacing.s20),
-                    const Center(child: AppLoadingView.signature()),
-                  ],
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTimeExpiredOverlay() {
-    return Positioned.fill(
-      child: Container(
-        color: Colors.black.withValues(alpha: 0.88),
-        padding: const EdgeInsets.all(AppSpacing.s24),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-          child: Center(
-            child: AppCard(
-              padding: const EdgeInsets.all(AppSpacing.s24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(AppSpacing.s12),
-                    decoration: BoxDecoration(
-                      color: AppColors.warning.withValues(alpha: 0.12),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.timer_off_outlined,
-                      color: AppColors.warning,
-                      size: 40,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.s16),
-                  Text(
-                    context.l10n.submissionReasonTimeExpired,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.warning,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.s8),
-                  Text(
-                    context.l10n.timeExpiredAutoSubmittingNotice,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: AppColors.textSecondary,
-                      height: 1.5,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.s20),
-                  const Center(child: AppLoadingView.signature()),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ExamTimerBadge extends StatelessWidget {
-  const _ExamTimerBadge();
-
-  String _formatDuration(int totalSeconds) {
-    final minutes = totalSeconds ~/ 60;
-    final seconds = totalSeconds % 60;
-    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocSelector<
-      ExamsCubit,
-      ExamsState,
-      ({int remainingSeconds, bool isUntimed})
-    >(
-      selector: (state) {
-        if (state is ExamTakingState) {
-          return (
-            remainingSeconds: state.remainingSeconds,
-            isUntimed: state.isUntimed,
-          );
-        }
-        return (remainingSeconds: 0, isUntimed: false);
-      },
-      builder: (context, timerData) {
-        if (timerData.isUntimed) {
-          return Container(
-            margin: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.s12,
-              vertical: AppSpacing.s8,
-            ),
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.s12,
-              vertical: AppSpacing.s6,
-            ),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-              border: Border.all(
-                color: AppColors.primary.withValues(alpha: 0.3),
-              ),
-            ),
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.all_inclusive_rounded,
-                  size: 16,
-                  color: AppColors.primary,
-                ),
-                const SizedBox(width: AppSpacing.s6),
-                Text(
-                  context.l10n.untimedExamBadge,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }
-
-        final isUrgent = timerData.remainingSeconds < 300; // < 5 minutes
-        return Container(
-          margin: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.s12,
-            vertical: AppSpacing.s8,
-          ),
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.s12,
-            vertical: AppSpacing.s6,
-          ),
-          decoration: BoxDecoration(
-            color: isUrgent
-                ? AppColors.error.withValues(alpha: 0.15)
-                : AppColors.surfaceVariant,
-            borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-            border: isUrgent ? Border.all(color: AppColors.error) : null,
-          ),
-          child: Row(
-            children: [
-              Icon(
-                Icons.timer_outlined,
-                size: 16,
-                color: isUrgent ? AppColors.error : AppColors.textPrimary,
-              ),
-              const SizedBox(width: AppSpacing.s6),
-              Text(
-                _formatDuration(timerData.remainingSeconds),
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: isUrgent ? AppColors.error : AppColors.textPrimary,
-                ),
-              ),
-            ],
           ),
         );
       },

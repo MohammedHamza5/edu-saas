@@ -1,11 +1,9 @@
 import 'dart:math' as math;
 import 'dart:typed_data';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
-import '../../../../core/network/supabase_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/youtube_url_parser.dart';
@@ -13,8 +11,6 @@ import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_loading_view.dart';
 import '../../../../core/widgets/app_text_field.dart';
-import '../../../exams/data/models/exam_question_model.dart';
-import '../../../exams/data/models/question_option_model.dart';
 import '../../../exams/domain/entities/exam_entity.dart';
 import '../../../videos/domain/entities/library_video_entity.dart';
 import '../../../videos/presentation/dialogs/select_video_from_bank_dialog.dart';
@@ -22,38 +18,10 @@ import 'package:crypto/crypto.dart';
 import '../../domain/entities/content_entity.dart';
 import '../../domain/entities/library_material_entity.dart';
 import 'select_material_from_library_dialog.dart';
-import '../../../../core/utils/pdf_launcher_helper.dart';
 
-enum VideoSourceType { bank, bunny, youtube, none }
-
-class InlineQuizQuestionData {
-  QuestionType type;
-  final TextEditingController questionController = TextEditingController();
-  final TextEditingController pointsController = TextEditingController(
-    text: '1',
-  );
-
-  // MCQ Options
-  final TextEditingController optA = TextEditingController();
-  final TextEditingController optB = TextEditingController();
-  final TextEditingController optC = TextEditingController();
-  final TextEditingController optD = TextEditingController();
-  int correctIndex = 0; // 0: A, 1: B, 2: C, 3: D
-
-  // True / False
-  bool isTrueCorrect = true;
-
-  InlineQuizQuestionData({this.type = QuestionType.multipleChoice});
-
-  void dispose() {
-    questionController.dispose();
-    pointsController.dispose();
-    optA.dispose();
-    optB.dispose();
-    optC.dispose();
-    optD.dispose();
-  }
-}
+import '../widgets/inline_quiz_builder_section.dart';
+import '../widgets/lecture_pdf_handout_section.dart';
+import '../widgets/lecture_video_source_section.dart';
 
 class AllInOneLectureDialog extends StatefulWidget {
   final String groupId;
@@ -429,14 +397,14 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
       if (_isQuizEnabled && _questions.isNotEmpty) {
         setState(() => _loadingMessage = context.l10n.creatingExam);
 
-        final questionsPayload = <ExamQuestionModel>[];
+        final questionsPayload = <ExamQuestionEntity>[];
         for (int i = 0; i < _questions.length; i++) {
           final q = _questions[i];
           final pts = int.tryParse(q.pointsController.text.trim()) ?? 1;
 
           if (q.type == QuestionType.multipleChoice) {
             questionsPayload.add(
-              ExamQuestionModel(
+              ExamQuestionEntity(
                 id: '',
                 examVersionId: '',
                 questionText: q.questionController.text.trim(),
@@ -444,28 +412,28 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
                 points: pts,
                 sortOrder: i + 1,
                 options: [
-                  QuestionOptionModel(
+                  QuestionOptionEntity(
                     id: '',
                     questionId: '',
                     optionText: q.optA.text.trim(),
                     sortOrder: 1,
                     isCorrect: q.correctIndex == 0,
                   ),
-                  QuestionOptionModel(
+                  QuestionOptionEntity(
                     id: '',
                     questionId: '',
                     optionText: q.optB.text.trim(),
                     sortOrder: 2,
                     isCorrect: q.correctIndex == 1,
                   ),
-                  QuestionOptionModel(
+                  QuestionOptionEntity(
                     id: '',
                     questionId: '',
                     optionText: q.optC.text.trim(),
                     sortOrder: 3,
                     isCorrect: q.correctIndex == 2,
                   ),
-                  QuestionOptionModel(
+                  QuestionOptionEntity(
                     id: '',
                     questionId: '',
                     optionText: q.optD.text.trim(),
@@ -477,7 +445,7 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
             );
           } else {
             questionsPayload.add(
-              ExamQuestionModel(
+              ExamQuestionEntity(
                 id: '',
                 examVersionId: '',
                 questionText: q.questionController.text.trim(),
@@ -485,14 +453,14 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
                 points: pts,
                 sortOrder: i + 1,
                 options: [
-                  QuestionOptionModel(
+                  QuestionOptionEntity(
                     id: '',
                     questionId: '',
                     optionText: 'True',
                     sortOrder: 1,
                     isCorrect: q.isTrueCorrect,
                   ),
-                  QuestionOptionModel(
+                  QuestionOptionEntity(
                     id: '',
                     questionId: '',
                     optionText: 'False',
@@ -526,16 +494,10 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
 
         if (examRes.isSuccess && examRes.dataOrNull != null) {
           final examId = examRes.dataOrNull!.id;
-          await SupabaseService.client
-              .from('content')
-              .update({'associated_exam_id': examId})
-              .eq('id', contentId);
-
-          await SupabaseService.client
-              .from('content_groups')
-              .update({'associated_exam_id': examId})
-              .eq('content_id', contentId)
-              .catchError((Object _) => <dynamic>[]);
+          await InjectionContainer.contentRepository.linkLessonExam(
+            contentId: contentId,
+            examId: examId,
+          );
         }
       }
 
@@ -666,15 +628,72 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
                             const SizedBox(height: AppSpacing.s20),
 
                             // 2. Video Source
-                            _buildVideoSourceSection(),
+                            LectureVideoSourceSection(
+                              selectedSource: _selectedSource,
+                              onSourceChanged: (src) =>
+                                  setState(() => _selectedSource = src),
+                              selectedBankVideo: _selectedBankVideo,
+                              onSelectFromBank: () async {
+                                final picked =
+                                    await SelectVideoFromBankDialog.show(context);
+                                if (picked != null) {
+                                  setState(() {
+                                    _selectedBankVideo = picked;
+                                    if (_titleController.text.trim().isEmpty) {
+                                      _titleController.text = picked.title;
+                                    }
+                                    if (_descriptionController.text.trim().isEmpty &&
+                                        picked.description != null) {
+                                      _descriptionController.text =
+                                          picked.description!;
+                                    }
+                                  });
+                                }
+                              },
+                              onChangeBankVideo: () async {
+                                final picked =
+                                    await SelectVideoFromBankDialog.show(context);
+                                if (picked != null) {
+                                  setState(() => _selectedBankVideo = picked);
+                                }
+                              },
+                              youtubeUrlController: _youtubeUrlController,
+                              extractedYouTubeId: _extractedYouTubeId,
+                              onYouTubeUrlChanged: _onYouTubeUrlChanged,
+                              pickedBunnyFile: _pickedBunnyFile,
+                              onPickBunnyVideo: _pickBunnyVideo,
+                            ),
                             const SizedBox(height: AppSpacing.s20),
 
                             // 3. PDF Handout
-                            _buildPdfHandoutSection(),
+                            LecturePdfHandoutSection(
+                              selectedLibraryMaterial: _selectedLibraryMaterial,
+                              pickedHandoutFile: _pickedHandoutFile,
+                              onPickFromMaterialsLibrary: _pickFromMaterialsLibrary,
+                              onPickHandoutPdf: _pickHandoutPdf,
+                              onClearLibraryMaterial: () =>
+                                  setState(() => _selectedLibraryMaterial = null),
+                              onClearPickedHandoutFile: () => setState(() {
+                                _pickedHandoutFile = null;
+                                _handoutFileBytes = null;
+                              }),
+                            ),
                             const SizedBox(height: AppSpacing.s20),
 
                             // 4. Inline Quiz Builder
-                            _buildInlineQuizSection(),
+                            InlineQuizBuilderSection(
+                              isQuizEnabled: _isQuizEnabled,
+                              onQuizEnabledChanged: (v) =>
+                                  setState(() => _isQuizEnabled = v),
+                              passingScoreController: _passingScoreController,
+                              questions: _questions,
+                              onAddMcq: () =>
+                                  _addQuestion(QuestionType.multipleChoice),
+                              onAddTrueFalse: () =>
+                                  _addQuestion(QuestionType.trueFalse),
+                              onRemoveQuestion: _removeQuestion,
+                              onStateChanged: () => setState(() {}),
+                            ),
                           ],
                         ),
                       ),
@@ -760,812 +779,6 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildVideoSourceSection() {
-    return AppCard(
-      variant: AppCardVariant.elevated,
-      padding: const EdgeInsets.all(AppSpacing.s16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(
-                Icons.videocam_outlined,
-                size: 18,
-                color: AppColors.primary,
-              ),
-              const SizedBox(width: AppSpacing.s8),
-              Text(
-                context.l10n.videoSourceLabel,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.s12),
-          SegmentedButton<VideoSourceType>(
-            segments: [
-              ButtonSegment(
-                value: VideoSourceType.bank,
-                label: Text(context.l10n.videoBankCmsTitle),
-                icon: const Icon(
-                  Icons.video_library_rounded,
-                  color: AppColors.primary,
-                ),
-              ),
-              ButtonSegment(
-                value: VideoSourceType.bunny,
-                label: Text(context.l10n.videoSourceBunny),
-                icon: const Icon(
-                  Icons.cloud_upload_rounded,
-                  color: AppColors.primary,
-                ),
-              ),
-              ButtonSegment(
-                value: VideoSourceType.youtube,
-                label: Text(context.l10n.videoSourceYoutube),
-                icon: const Icon(
-                  Icons.play_circle_fill_rounded,
-                  color: Colors.red,
-                ),
-              ),
-              ButtonSegment(
-                value: VideoSourceType.none,
-                label: Text(context.l10n.videoSourceNone),
-                icon: const Icon(Icons.block_rounded),
-              ),
-            ],
-            selected: {_selectedSource},
-            onSelectionChanged: (set) {
-              setState(() => _selectedSource = set.first);
-            },
-          ),
-          const SizedBox(height: AppSpacing.s16),
-
-          if (_selectedSource == VideoSourceType.bank) ...[
-            if (_selectedBankVideo == null) ...[
-              InkWell(
-                onTap: () async {
-                  final picked = await SelectVideoFromBankDialog.show(context);
-                  if (picked != null) {
-                    setState(() {
-                      _selectedBankVideo = picked;
-                      if (_titleController.text.trim().isEmpty) {
-                        _titleController.text = picked.title;
-                      }
-                      if (_descriptionController.text.trim().isEmpty &&
-                          picked.description != null) {
-                        _descriptionController.text = picked.description!;
-                      }
-                    });
-                  }
-                },
-                borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: AppSpacing.s20,
-                    horizontal: AppSpacing.s16,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.04),
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                    border: Border.all(
-                      color: AppColors.primary.withValues(alpha: 0.3),
-                      style: BorderStyle.solid,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.video_library_outlined,
-                        color: AppColors.primary,
-                        size: 26,
-                      ),
-                      const SizedBox(width: AppSpacing.s10),
-                      Text(
-                        context.l10n.selectFromBank,
-                        style: const TextStyle(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ] else ...[
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.s12),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                  border: Border.all(
-                    color: AppColors.primary.withValues(alpha: 0.3),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(6),
-                      child: Container(
-                        width: 90,
-                        height: 52,
-                        color: AppColors.surfaceVariant,
-                        child: _selectedBankVideo!.thumbnailUrl != null
-                            ? CachedNetworkImage(
-                                imageUrl: _selectedBankVideo!.thumbnailUrl!,
-                                fit: BoxFit.cover,
-                                errorWidget: (_, __, ___) => const Center(
-                                  child: Icon(Icons.videocam_rounded),
-                                ),
-                              )
-                            : const Center(child: Icon(Icons.videocam_rounded)),
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.s12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.success
-                                      .withValues(alpha: 0.15),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: Text(
-                                  context.l10n.videoSelectedFromBank,
-                                  style: const TextStyle(
-                                    color: AppColors.success,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                _selectedBankVideo!.formattedDuration,
-                                style: const TextStyle(
-                                  color: AppColors.textSecondary,
-                                  fontSize: 11,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            _selectedBankVideo!.title,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 13,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                    TextButton.icon(
-                      icon: const Icon(Icons.swap_horiz_rounded, size: 16),
-                      label: Text(context.l10n.changeVideo),
-                      onPressed: () async {
-                        final picked =
-                            await SelectVideoFromBankDialog.show(context);
-                        if (picked != null) {
-                          setState(() => _selectedBankVideo = picked);
-                        }
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ] else if (_selectedSource == VideoSourceType.youtube) ...[
-            AppTextField(
-              controller: _youtubeUrlController,
-              label: context.l10n.youtubeUrlLabel,
-              hintText: context.l10n.youtubeUrlHint,
-              onChanged: _onYouTubeUrlChanged,
-              validator: (v) {
-                if (_selectedSource == VideoSourceType.youtube) {
-                  if (v == null || v.trim().isEmpty) {
-                    return context.l10n.youtubeUrlRequired;
-                  }
-                }
-                return null;
-              },
-            ),
-            if (_extractedYouTubeId != null) ...[
-              const SizedBox(height: AppSpacing.s12),
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.s8),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceVariant.withAlpha(50),
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                  border: Border.all(color: AppColors.border),
-                ),
-                child: Row(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: CachedNetworkImage(
-                        imageUrl:
-                            'https://img.youtube.com/vi/$_extractedYouTubeId/hqdefault.jpg',
-                        width: 100,
-                        height: 56,
-                        fit: BoxFit.cover,
-                        errorWidget: (_, __, ___) => Container(
-                          width: 100,
-                          height: 56,
-                          color: Colors.black12,
-                          child: const Icon(Icons.broken_image, size: 24),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.s12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'YouTube Video ID Validated',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 13,
-                              color: AppColors.success,
-                            ),
-                          ),
-                          Text(
-                            _extractedYouTubeId!,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ] else if (_selectedSource == VideoSourceType.bunny) ...[
-            Row(
-              children: [
-                OutlinedButton.icon(
-                  icon: const Icon(Icons.file_upload_outlined),
-                  label: Text(
-                    _pickedBunnyFile != null
-                        ? context.l10n.changeVideoFileAction
-                        : context.l10n.selectVideoFileAction,
-                  ),
-                  onPressed: _pickBunnyVideo,
-                ),
-                const SizedBox(width: AppSpacing.s12),
-                if (_pickedBunnyFile != null)
-                  Expanded(
-                    child: Text(
-                      '${_pickedBunnyFile!.name} (${(_pickedBunnyFile!.size / (1024 * 1024)).toStringAsFixed(1)} MB)',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPdfHandoutSection() {
-    return AppCard(
-      variant: AppCardVariant.elevated,
-      padding: const EdgeInsets.all(AppSpacing.s16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(
-                Icons.picture_as_pdf_outlined,
-                size: 18,
-                color: Colors.redAccent,
-              ),
-              const SizedBox(width: AppSpacing.s8),
-              Text(
-                context.l10n.handoutAttachmentSection,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.s12),
-          if (_selectedLibraryMaterial != null) ...[
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.s12),
-              decoration: BoxDecoration(
-                color: AppColors.success.withValues(alpha: 0.06),
-                borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                border: Border.all(
-                  color: AppColors.success.withValues(alpha: 0.35),
-                ),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(AppSpacing.s8),
-                    decoration: BoxDecoration(
-                      color: Colors.red.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                    ),
-                    child: const Icon(
-                      Icons.picture_as_pdf_rounded,
-                      color: Colors.redAccent,
-                      size: 22,
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.s12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppColors.success.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                context.l10n.materialSelectedFromLibrary,
-                                style: const TextStyle(
-                                  color: AppColors.success,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              _selectedLibraryMaterial!.formattedFileSize,
-                              style: const TextStyle(
-                                fontSize: 11,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          _selectedLibraryMaterial!.title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.remove_red_eye_outlined, size: 20),
-                    tooltip: context.l10n.previewMaterialAction,
-                    onPressed: () async {
-                      final currentContext = context;
-                      try {
-                        final res = await InjectionContainer
-                            .materialsLibraryRepository
-                            .getSignedUrl(
-                          _selectedLibraryMaterial!.storagePath,
-                          storageProvider:
-                              _selectedLibraryMaterial!.storageProvider,
-                        );
-                        if (res.isSuccess && res.dataOrNull != null) {
-                          if (!currentContext.mounted) return;
-                          await PdfLauncherHelper.launchPdfUrl(
-                            res.dataOrNull!,
-                            context: currentContext,
-                          );
-                        }
-                      } catch (_) {}
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close_rounded, size: 18),
-                    tooltip: context.l10n.changeMaterialAction,
-                    onPressed: () {
-                      setState(() {
-                        _selectedLibraryMaterial = null;
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ] else if (_pickedHandoutFile != null) ...[
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.s12,
-                vertical: AppSpacing.s10,
-              ),
-              decoration: BoxDecoration(
-                color: Colors.red.withValues(alpha: 0.06),
-                borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                border: Border.all(color: Colors.red.withValues(alpha: 0.25)),
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.description_rounded,
-                    color: Colors.redAccent,
-                    size: 22,
-                  ),
-                  const SizedBox(width: AppSpacing.s10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _pickedHandoutFile!.name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
-                          ),
-                        ),
-                        Text(
-                          '${(_pickedHandoutFile!.size / 1024).toStringAsFixed(1)} KB • ${context.l10n.uploadMaterialAction}',
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close_rounded, size: 18),
-                    onPressed: () {
-                      setState(() {
-                        _pickedHandoutFile = null;
-                        _handoutFileBytes = null;
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ] else ...[
-            Wrap(
-              spacing: 12,
-              runSpacing: 10,
-              children: [
-                OutlinedButton.icon(
-                  icon: const Icon(
-                    Icons.folder_shared_rounded,
-                    size: 18,
-                    color: Color(0xFFEA580C),
-                  ),
-                  label: Text(context.l10n.selectFromMaterialsLibrary),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFFEA580C),
-                    side: const BorderSide(color: Color(0xFFEA580C)),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.s16,
-                      vertical: AppSpacing.s12,
-                    ),
-                  ),
-                  onPressed: _pickFromMaterialsLibrary,
-                ),
-                TextButton.icon(
-                  icon: const Icon(Icons.upload_file_rounded, size: 18),
-                  label: Text(context.l10n.uploadFromDeviceAction),
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.s14,
-                      vertical: AppSpacing.s12,
-                    ),
-                  ),
-                  onPressed: _pickHandoutPdf,
-                ),
-              ],
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInlineQuizSection() {
-    return AppCard(
-      variant: AppCardVariant.elevated,
-      padding: const EdgeInsets.all(AppSpacing.s16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header Switch
-          Row(
-            children: [
-              const Icon(
-                Icons.quiz_outlined,
-                size: 18,
-                color: AppColors.primary,
-              ),
-              const SizedBox(width: AppSpacing.s8),
-              Expanded(
-                child: Text(
-                  context.l10n.inlineQuizSection,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
-              ),
-              Switch(
-                value: _isQuizEnabled,
-                onChanged: (v) => setState(() => _isQuizEnabled = v),
-              ),
-            ],
-          ),
-
-          if (_isQuizEnabled) ...[
-            const SizedBox(height: AppSpacing.s12),
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.s10),
-              decoration: BoxDecoration(
-                color: AppColors.success.withAlpha(15),
-                borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                border: Border.all(color: AppColors.success.withAlpha(50)),
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.lock_open_rounded,
-                    color: AppColors.success,
-                    size: 18,
-                  ),
-                  const SizedBox(width: AppSpacing.s8),
-                  Expanded(
-                    child: Text(
-                      context.l10n.enableInlineQuiz,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: AppSpacing.s8),
-            Text(
-              context.l10n.lessonQuizSequentialRequirement,
-              style: const TextStyle(
-                fontSize: 11,
-                color: AppColors.textSecondary,
-                fontStyle: FontStyle.italic,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.s14),
-
-            // Passing score percentage
-            SizedBox(
-              width: 250,
-              child: AppTextField(
-                controller: _passingScoreController,
-                label: context.l10n.examPassingScoreLabel,
-                keyboardType: TextInputType.number,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.s16),
-
-            // Questions list
-            ..._questions.asMap().entries.map((entry) {
-              final idx = entry.key;
-              final q = entry.value;
-              return _buildQuestionCard(idx, q);
-            }),
-
-            const SizedBox(height: AppSpacing.s12),
-            // Add Question Actions
-            Wrap(
-              spacing: AppSpacing.s8,
-              runSpacing: AppSpacing.s8,
-              children: [
-                OutlinedButton.icon(
-                  icon: const Icon(Icons.add_circle_outline_rounded, size: 16),
-                  label: Text(context.l10n.addMcqQuestionAction),
-                  onPressed: () => _addQuestion(QuestionType.multipleChoice),
-                ),
-                OutlinedButton.icon(
-                  icon: const Icon(
-                    Icons.check_circle_outline_rounded,
-                    size: 16,
-                  ),
-                  label: Text(context.l10n.addTrueFalseQuestionAction),
-                  onPressed: () => _addQuestion(QuestionType.trueFalse),
-                ),
-              ],
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildQuestionCard(int index, InlineQuizQuestionData q) {
-    final isMcq = q.type == QuestionType.multipleChoice;
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppSpacing.s16),
-      padding: const EdgeInsets.all(AppSpacing.s16),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceVariant.withAlpha(30),
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                ),
-                child: Text(
-                  '${index + 1}',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.s8),
-              Text(
-                isMcq
-                    ? context.l10n.questionTypeMcq
-                    : context.l10n.questionTypeTrueFalse,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
-                ),
-              ),
-              const Spacer(),
-              SizedBox(
-                width: 70,
-                child: AppTextField(
-                  controller: q.pointsController,
-                  label: context.l10n.questionPointsLabel,
-                  keyboardType: TextInputType.number,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.s8),
-              if (_questions.length > 1)
-                IconButton(
-                  icon: const Icon(
-                    Icons.delete_outline_rounded,
-                    color: AppColors.error,
-                    size: 20,
-                  ),
-                  tooltip: context.l10n.removeQuestionTooltip,
-                  onPressed: () => _removeQuestion(index),
-                ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.s12),
-          AppTextField(
-            controller: q.questionController,
-            label: context.l10n.questionTextLabel,
-          ),
-          const SizedBox(height: AppSpacing.s12),
-
-          if (isMcq) ...[
-            _buildMcqOptionRow(q, 0, 'A', q.optA),
-            const SizedBox(height: AppSpacing.s8),
-            _buildMcqOptionRow(q, 1, 'B', q.optB),
-            const SizedBox(height: AppSpacing.s8),
-            _buildMcqOptionRow(q, 2, 'C', q.optC),
-            const SizedBox(height: AppSpacing.s8),
-            _buildMcqOptionRow(q, 3, 'D', q.optD),
-          ] else ...[
-            Row(
-              children: [
-                Expanded(
-                  child: RadioListTile<bool>(
-                    value: true,
-                    groupValue: q.isTrueCorrect,
-                    title: Text(context.l10n.trueOptionLabel),
-                    onChanged: (v) => setState(() => q.isTrueCorrect = v!),
-                  ),
-                ),
-                Expanded(
-                  child: RadioListTile<bool>(
-                    value: false,
-                    groupValue: q.isTrueCorrect,
-                    title: Text(context.l10n.falseOptionLabel),
-                    onChanged: (v) => setState(() => q.isTrueCorrect = v!),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMcqOptionRow(
-    InlineQuizQuestionData q,
-    int optionIndex,
-    String letter,
-    TextEditingController controller,
-  ) {
-    final isSelected = q.correctIndex == optionIndex;
-
-    return Row(
-      children: [
-        Radio<int>(
-          value: optionIndex,
-          groupValue: q.correctIndex,
-          onChanged: (v) {
-            setState(() => q.correctIndex = v!);
-          },
-        ),
-        Container(
-          width: 24,
-          height: 24,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: isSelected ? AppColors.success : AppColors.surfaceVariant,
-            shape: BoxShape.circle,
-          ),
-          child: Text(
-            letter,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
-              color: isSelected ? Colors.white : AppColors.textPrimary,
-            ),
-          ),
-        ),
-        const SizedBox(width: AppSpacing.s8),
-        Expanded(
-          child: AppTextField(
-            controller: controller,
-            hintText: context.l10n.optionLabel(optionIndex + 1),
-          ),
-        ),
-      ],
     );
   }
 }

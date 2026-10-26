@@ -20,6 +20,7 @@ import '../../features/groups/presentation/cubit/groups_cubit.dart';
 import '../../features/notifications/data/datasources/notifications_remote_datasource.dart';
 import '../../features/notifications/data/repositories/notifications_repository_impl.dart';
 import '../../features/notifications/domain/repositories/notifications_repository.dart';
+import '../../features/notifications/domain/services/notification_dispatcher.dart';
 import '../../features/notifications/presentation/cubit/notifications_cubit.dart';
 import '../../features/onboarding/data/datasources/onboarding_remote_datasource.dart';
 import '../../features/onboarding/data/repositories/onboarding_repository_impl.dart';
@@ -55,11 +56,17 @@ import '../../features/assignments/data/repositories/assignments_repository_impl
 import '../../features/assignments/domain/repositories/assignments_repository.dart';
 import '../../features/assignments/presentation/cubit/assignments_cubit.dart';
 import '../../features/exams/data/datasources/exams_remote_datasource.dart';
+import '../../features/exams/data/datasources/exam_answers_local_datasource.dart';
 import '../../features/exams/data/repositories/exams_repository_impl.dart';
 import '../../features/exams/domain/repositories/exams_repository.dart';
 import '../../features/exams/presentation/cubit/exam_dispatch_cubit.dart';
 import '../../features/exams/presentation/cubit/exams_cubit.dart';
 import '../../features/exams/presentation/cubit/mistakes_cubit.dart';
+import '../../features/exams/data/datasources/saved_questions_local_datasource.dart';
+import '../../features/exams/data/repositories/saved_questions_repository_impl.dart';
+import '../../features/exams/domain/repositories/saved_questions_repository.dart';
+import '../../features/exams/presentation/cubit/saved_questions_cubit.dart';
+import '../../features/exams/presentation/cubit/anki_drill_cubit.dart';
 import '../../features/dashboard/data/datasources/student_dashboard_remote_datasource.dart';
 import '../../features/dashboard/data/datasources/teacher_dashboard_remote_datasource.dart';
 import '../../features/dashboard/data/repositories/student_dashboard_repository_impl.dart';
@@ -72,6 +79,13 @@ import '../../features/question_bank/data/datasources/question_bank_remote_datas
 import '../../features/question_bank/data/repositories/question_bank_repository_impl.dart';
 import '../../features/question_bank/domain/repositories/question_bank_repository.dart';
 import '../../features/question_bank/presentation/cubit/question_bank_cubit.dart';
+import '../../features/settings/data/datasources/settings_remote_datasource.dart';
+import '../../features/settings/data/repositories/settings_repository_impl.dart';
+import '../../features/settings/domain/repositories/settings_repository.dart';
+import '../../features/profile/data/datasources/profile_remote_datasource.dart';
+import '../../features/profile/data/repositories/profile_repository_impl.dart';
+import '../../features/profile/domain/repositories/profile_repository.dart';
+import '../../features/profile/presentation/cubit/student_profile_cubit.dart';
 
 /// Pure Dart Dependency Injection Container (Composition Root)
 /// Enforces Constructor Injection, Inversion of Control, and Zero-Package DI.
@@ -134,6 +148,8 @@ class InjectionContainer {
   // Feature: Exams Singletons & Repositories
   static late final ExamsRemoteDataSource examsRemoteDataSource;
   static late final ExamsRepository examsRepository;
+  static late final SavedQuestionsLocalDataSource savedQuestionsLocalDataSource;
+  static late final SavedQuestionsRepository savedQuestionsRepository;
 
   // Feature: Student Dashboard
   static late final StudentDashboardRemoteDataSource
@@ -148,6 +164,13 @@ class InjectionContainer {
   // Feature: Question Bank & Review Console (M1)
   static late final QuestionBankRemoteDataSource questionBankRemoteDataSource;
   static late final QuestionBankRepository questionBankRepository;
+
+  // Feature: Settings
+  static late final SettingsRepository settingsRepository;
+
+  // Feature: Profile
+  static late final ProfileRemoteDataSource profileRemoteDataSource;
+  static late final ProfileRepository profileRepository;
 
   // Factory methods for Cubits
   static AuthCubit createAuthCubit() => AuthCubit(repository: authRepository);
@@ -176,11 +199,18 @@ class InjectionContainer {
   static AssignmentsCubit createAssignmentsCubit() =>
       AssignmentsCubit(repository: assignmentsRepository);
   static ExamsCubit createExamsCubit() =>
-      ExamsCubit(repository: examsRepository);
+      ExamsCubit(
+        repository: examsRepository,
+        answersStorage: const ExamAnswersLocalDataSource(),
+      );
   static ExamDispatchCubit createExamDispatchCubit() =>
       ExamDispatchCubit(repository: examsRepository);
   static MistakesCubit createMistakesCubit() =>
       MistakesCubit(repository: examsRepository);
+  static SavedQuestionsCubit createSavedQuestionsCubit() =>
+      SavedQuestionsCubit(repository: savedQuestionsRepository);
+  static AnkiDrillCubit createAnkiDrillCubit() =>
+      AnkiDrillCubit(repository: savedQuestionsRepository);
   static StudentDashboardCubit createStudentDashboardCubit() =>
       StudentDashboardCubit(repository: studentDashboardRepository);
   static TeacherDashboardCubit createTeacherDashboardCubit() =>
@@ -190,6 +220,8 @@ class InjectionContainer {
   static TenantThemeCubit createTenantThemeCubit() =>
       TenantThemeCubit(initialBranding: TenantResolver.resolveBranding());
   static LocaleCubit createLocaleCubit() => LocaleCubit();
+  static StudentProfileCubit createStudentProfileCubit() =>
+      StudentProfileCubit(repository: profileRepository);
 
   /// Initializes all dependencies in topological dependency order
   static Future<void> init({SupabaseClient? customClient}) async {
@@ -236,6 +268,7 @@ class InjectionContainer {
     notificationsRepository = NotificationsRepositoryImpl(
       remoteDataSource: notificationsRemoteDataSource,
     );
+    NotificationDispatcher.initialize(notificationsRepository);
     AppLogger.i('DI', '✅ Notifications layer ready');
 
     // 7. Onboarding Dependencies
@@ -302,6 +335,13 @@ class InjectionContainer {
     );
     AppLogger.i('DI', '✅ Exams layer ready');
 
+    // 12b. Saved Questions & Active Recall Vault Dependencies
+    savedQuestionsLocalDataSource = SavedQuestionsLocalDataSourceImpl();
+    savedQuestionsRepository = SavedQuestionsRepositoryImpl(
+      localDataSource: savedQuestionsLocalDataSource,
+    );
+    AppLogger.i('DI', '✅ Student Vault layer ready');
+
     // 13. Student Dashboard Dependencies
     studentDashboardRemoteDataSource = StudentDashboardRemoteDataSourceImpl(
       customClient ?? SupabaseService.client,
@@ -328,6 +368,20 @@ class InjectionContainer {
       remoteDataSource: questionBankRemoteDataSource,
     );
     AppLogger.i('DI', '✅ Question Bank layer ready');
+
+    // 16. Settings Dependencies
+    final settingsRemoteDataSource = SettingsRemoteDataSourceImpl(client: customClient);
+    settingsRepository = SettingsRepositoryImpl(
+      remoteDataSource: settingsRemoteDataSource,
+    );
+    AppLogger.i('DI', '✅ Settings layer ready');
+
+    // 17. Profile Dependencies
+    profileRemoteDataSource = ProfileRemoteDataSourceImpl(client: customClient);
+    profileRepository = ProfileRepositoryImpl(
+      remoteDataSource: profileRemoteDataSource,
+    );
+    AppLogger.i('DI', '✅ Profile layer ready');
 
     AppLogger.s('DI', '🎉 All dependency layers initialized successfully');
   }

@@ -14,6 +14,7 @@ import '../../../../core/widgets/responsive_container.dart';
 import '../../domain/entities/notification_entity.dart';
 import '../cubit/notifications_cubit.dart';
 import '../cubit/notifications_state.dart';
+import '../extensions/notification_ui_extensions.dart';
 import '../widgets/notification_tile.dart';
 
 class NotificationsCenterPage extends StatefulWidget {

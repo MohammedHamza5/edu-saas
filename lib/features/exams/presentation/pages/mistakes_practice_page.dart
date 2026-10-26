@@ -110,11 +110,15 @@ class _MistakesPracticePageState extends State<MistakesPracticePage> {
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
-          widget.mode == 'resolved'
-              ? l10n.practiceModeHeaderResolved
-              : widget.mode == 'all'
-                  ? l10n.practiceModeHeaderAll
-                  : l10n.practiceModeHeaderUnresolved,
+          widget.mode == 'gauntlet'
+              ? l10n.gauntletTitle
+              : widget.mode == 'sprint_5'
+                  ? l10n.sprintTitle
+                  : widget.mode == 'resolved'
+                      ? l10n.practiceModeHeaderResolved
+                      : widget.mode == 'all'
+                          ? l10n.practiceModeHeaderAll
+                          : l10n.practiceModeHeaderUnresolved,
         ),
         elevation: 0,
         centerTitle: false,
@@ -159,6 +163,14 @@ class _MistakesPracticePageState extends State<MistakesPracticePage> {
               questions = questions.where((q) => q.isResolved).toList();
             } else if (widget.mode == 'all') {
               // all questions
+            } else if (widget.mode == 'gauntlet') {
+              // Zero-Mistake Gauntlet: only unresolved, sorted by most failed first
+              questions = questions.where((q) => !q.isResolved).toList();
+              questions.sort((a, b) => b.failureCount.compareTo(a.failureCount));
+            } else if (widget.mode == 'sprint_5') {
+              // 5-Question Rapid Sprint: take up to 5 questions (unresolved preferred)
+              final unresolved = questions.where((q) => !q.isResolved).toList();
+              questions = (unresolved.isNotEmpty ? unresolved : questions).take(5).toList();
             } else {
               // default: unresolved
               questions = questions.where((q) => !q.isResolved).toList();
@@ -209,13 +221,66 @@ class _MistakesPracticePageState extends State<MistakesPracticePage> {
                                 color: theme.colorScheme.primary,
                               ),
                             ),
-                            Text(
-                              currentQuestion.sourceExamTitle,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: AppColors.textSecondary,
+                            if (widget.mode == 'sprint_5')
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: AppSpacing.s8,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.warning.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.timer_outlined, size: 13, color: AppColors.warning),
+                                    const SizedBox(width: 3),
+                                    Text(
+                                      l10n.sprintSubtitle,
+                                      style: const TextStyle(
+                                        fontSize: 10.5,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.warning,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            else if (widget.mode == 'gauntlet')
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: AppSpacing.s8,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: theme.colorScheme.primary.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.shield_outlined, size: 13, color: theme.colorScheme.primary),
+                                    const SizedBox(width: 3),
+                                    Text(
+                                      l10n.gauntletTitle,
+                                      style: TextStyle(
+                                        fontSize: 10.5,
+                                        fontWeight: FontWeight.bold,
+                                        color: theme.colorScheme.primary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            else
+                              Text(
+                                currentQuestion.sourceExamTitle,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
                           ],
                         ),
                         const SizedBox(height: AppSpacing.s4),

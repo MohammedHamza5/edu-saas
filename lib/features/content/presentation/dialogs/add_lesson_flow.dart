@@ -98,7 +98,8 @@ class AddLessonFlow extends StatelessWidget {
       currentGroupId: groupId,
       currentGroupName: groupName,
     );
-    if (video == null || !context.mounted) return;
+    if (!context.mounted) return;
+    if (video == null) return;
 
     // Step 3: Lesson setup
     final saved = await LessonSetupSheet.show(

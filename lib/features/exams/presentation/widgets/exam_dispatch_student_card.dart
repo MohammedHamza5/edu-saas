@@ -9,6 +9,7 @@ class ExamDispatchStudentCard extends StatelessWidget {
   final ExamDispatchMetaEntity exam;
   final int index;
   final bool isSent;
+  final bool hasNewAttempt;
   final VoidCallback onTapDispatch;
   final VoidCallback? onEditPhone;
 
@@ -18,6 +19,7 @@ class ExamDispatchStudentCard extends StatelessWidget {
     required this.exam,
     required this.index,
     required this.isSent,
+    this.hasNewAttempt = false,
     required this.onTapDispatch,
     this.onEditPhone,
   });
@@ -304,13 +306,17 @@ class ExamDispatchStudentCard extends StatelessWidget {
                 // Primary Dispatch Button
                 ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: isSent
-                        ? AppColors.surfaceVariant
-                        : const Color(0xFF22C55E),
-                    foregroundColor: isSent
-                        ? AppColors.textPrimary
-                        : Colors.white,
-                    elevation: isSent ? 0 : 1,
+                    backgroundColor: hasNewAttempt
+                        ? const Color(0xFF16A34A)
+                        : (isSent
+                            ? AppColors.surfaceVariant
+                            : const Color(0xFF22C55E)),
+                    foregroundColor: hasNewAttempt
+                        ? Colors.white
+                        : (isSent
+                            ? AppColors.textPrimary
+                            : Colors.white),
+                    elevation: isSent && !hasNewAttempt ? 0 : 1,
                     padding: const EdgeInsets.symmetric(
                       horizontal: AppSpacing.s12,
                       vertical: AppSpacing.s8,
@@ -322,20 +328,24 @@ class ExamDispatchStudentCard extends StatelessWidget {
                     ),
                   ),
                   icon: Icon(
-                    isSent
-                        ? Icons.replay_rounded
-                        : Icons.send_rounded,
+                    hasNewAttempt
+                        ? Icons.update_rounded
+                        : (isSent
+                            ? Icons.replay_rounded
+                            : Icons.send_rounded),
                     size: 14,
-                    color: isSent ? AppColors.textSecondary : Colors.white,
+                    color: isSent && !hasNewAttempt ? AppColors.textSecondary : Colors.white,
                   ),
                   label: Text(
-                    isSent
-                        ? context.l10n.resendToParentAction
-                        : context.l10n.sendScoreToParentAction,
+                    hasNewAttempt
+                        ? context.l10n.sendNewScoreToParentAction
+                        : (isSent
+                            ? context.l10n.resendToParentAction
+                            : context.l10n.sendScoreToParentAction),
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
-                      color: isSent ? AppColors.textSecondary : Colors.white,
+                      color: isSent && !hasNewAttempt ? AppColors.textSecondary : Colors.white,
                     ),
                   ),
                   onPressed: onTapDispatch,

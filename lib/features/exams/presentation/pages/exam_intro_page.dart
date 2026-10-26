@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/utils/app_feedback.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../domain/entities/exam_entity.dart';
@@ -50,6 +51,22 @@ class ExamIntroPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final effectiveAttempt = exam.myLatestAttempt ??
+        (exam.hasAttempted || exam.myBestScore != null
+            ? ExamAttemptEntity(
+                id: '',
+                examId: exam.id,
+                examVersionId: exam.activeVersion?.id ?? '',
+                studentId: '',
+                startedAt: DateTime.now(),
+                submittedAt: DateTime.now(),
+                score: exam.myBestScore ?? 0,
+                percentage: exam.maxScore > 0
+                    ? ((exam.myBestScore ?? 0) / exam.maxScore) * 100
+                    : 0,
+                status: AttemptStatus.submitted,
+              )
+            : null);
     final isUntimed = isLectureExam || exam.isUntimed;
     final hasActive = exam.hasActiveAttempt;
     final isPassed = exam.myBestScore != null &&
@@ -346,12 +363,7 @@ class ExamIntroPage extends StatelessWidget {
                       }
                       return;
                     }
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(state.message),
-                        backgroundColor: AppColors.error,
-                      ),
-                    );
+                    AppFeedback.showError(context, state.message);
                   }
                 },
                 builder: (context, state) {
@@ -405,8 +417,9 @@ class ExamIntroPage extends StatelessWidget {
                                     isLectureExam: isUntimed,
                                   );
 
-                                  if (context.mounted && success) {
-                                    await Navigator.of(context).push<void>(
+                                  if (!context.mounted) return;
+                                  if (success) {
+                                    await Navigator.of(context).pushReplacement<void, void>(
                                       MaterialPageRoute<void>(
                                         builder: (_) => BlocProvider.value(
                                           value: cubit,
@@ -422,9 +435,6 @@ class ExamIntroPage extends StatelessWidget {
                                         ),
                                       ),
                                     );
-                                    if (context.mounted) {
-                                      Navigator.of(context).pop();
-                                    }
                                   }
                                 },
                         ),
@@ -446,8 +456,9 @@ class ExamIntroPage extends StatelessWidget {
                                     isLectureExam: isUntimed,
                                   );
 
-                                  if (context.mounted && success) {
-                                    await Navigator.of(context).push<void>(
+                                  if (!context.mounted) return;
+                                  if (success) {
+                                    await Navigator.of(context).pushReplacement<void, void>(
                                       MaterialPageRoute<void>(
                                         builder: (_) => BlocProvider.value(
                                           value: cubit,
@@ -463,9 +474,6 @@ class ExamIntroPage extends StatelessWidget {
                                         ),
                                       ),
                                     );
-                                    if (context.mounted) {
-                                      Navigator.of(context).pop();
-                                    }
                                   }
                                 },
                         ),
@@ -539,7 +547,8 @@ class ExamIntroPage extends StatelessWidget {
                   ],
                 ),
               ),
-              if (exam.myLatestAttempt != null) ...[
+
+              if (effectiveAttempt != null) ...[
                 const SizedBox(height: AppSpacing.s16),
                 AppButton(
                   text: context.l10n.viewExamResultAction,
@@ -552,7 +561,7 @@ class ExamIntroPage extends StatelessWidget {
                           value: cubit,
                           child: ExamResultPage(
                             exam: exam,
-                            attempt: exam.myLatestAttempt!,
+                            attempt: effectiveAttempt,
                             isLectureExam: isLectureExam ||
                                 exam.isLectureExam ||
                                 exam.isLinkedToLesson,

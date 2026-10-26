@@ -141,4 +141,7 @@ abstract class QuestionBankRepository {
     required int durationMinutes,
     required List<QuestionEntity> questions,
   });
+
+  /// Fetches active groups for exam assignment / deployment.
+  Future<List<Map<String, dynamic>>> getActiveGroups();
 }

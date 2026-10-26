@@ -1,6 +1,7 @@
 import '../../../../core/errors/result.dart';
 import '../entities/chapter_entity.dart';
 import '../entities/content_entity.dart';
+import '../entities/content_analytics_entity.dart';
 import '../entities/lesson_assignment_entity.dart';
 
 /// Contract for Academic Content operations
@@ -189,5 +190,36 @@ abstract class ContentRepository {
   Future<Result<void>> removeLessonFromGroup({
     required String contentId,
     required String groupId,
+  });
+
+  /// Fetches summary list of available exams (id, title) for content/lesson association
+  Future<Result<List<Map<String, dynamic>>>> getAvailableExamsSummary();
+
+  /// Fetches the linked exam for a content item
+  Future<Result<Map<String, String>?>> getExamByContentId(String contentId);
+
+  /// Fetches aggregated analytics for a single lesson
+  Future<Result<LessonAnalyticsEntity>> getLessonAnalytics({
+    required String lessonId,
+    required String groupId,
+    String? videoId,
+    String? examId,
+  });
+
+  /// Fetches aggregated analytics for a chapter
+  Future<Result<ChapterAnalyticsEntity>> getChapterAnalytics({
+    required String groupId,
+    required List<String> lessonIds,
+    required List<String> examIds,
+  });
+
+  /// Fetches existing group customizations for a specific content item
+  Future<Result<List<Map<String, dynamic>>>> getContentGroupCustomizations(String contentId);
+
+  /// Fetches panoramic aggregated group analytics for courses
+  Future<Result<GroupAnalyticsEntity>> getGroupAnalytics({
+    required String groupId,
+    required List<ChapterEntity> chapters,
+    required List<ContentEntity> lessons,
   });
 }

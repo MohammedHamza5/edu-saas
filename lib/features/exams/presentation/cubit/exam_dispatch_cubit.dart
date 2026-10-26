@@ -27,8 +27,9 @@ class ExamDispatchCubit extends Cubit<ExamDispatchState> {
     // 1. Fetch roster from repository
     final result = await _repository.getExamParentDispatchRoster(examId);
 
-    // 2. Load persisted sent student IDs for this exam
+    // 2. Load persisted sent student & attempt IDs for this exam
     final sentIds = await _loadSentIds(examId);
+    final sentAttemptIds = await _loadSentAttemptIds(examId);
 
     result.when(
       onSuccess: (roster) {
@@ -36,6 +37,7 @@ class ExamDispatchCubit extends Cubit<ExamDispatchState> {
           ExamDispatchLoaded(
             roster: roster,
             sentStudentIds: sentIds,
+            sentAttemptIds: sentAttemptIds,
           ),
         );
       },
@@ -66,13 +68,25 @@ class ExamDispatchCubit extends Cubit<ExamDispatchState> {
     }
   }
 
-  Future<void> markAsSent(String studentId) async {
+  Future<void> markAsSent(String studentId, {String? attemptId}) async {
     final state = this.state;
     if (state is! ExamDispatchLoaded || _currentExamId == null) return;
 
-    final updated = Set<String>.from(state.sentStudentIds)..add(studentId);
-    emit(state.copyWith(sentStudentIds: updated));
-    await _saveSentIds(_currentExamId!, updated);
+    final updatedStudents = Set<String>.from(state.sentStudentIds)..add(studentId);
+    final updatedAttempts = Set<String>.from(state.sentAttemptIds);
+    if (attemptId != null && attemptId.isNotEmpty) {
+      updatedAttempts.add(attemptId);
+    }
+
+    emit(state.copyWith(
+      sentStudentIds: updatedStudents,
+      sentAttemptIds: updatedAttempts,
+    ));
+
+    await _saveSentIds(_currentExamId!, updatedStudents);
+    if (attemptId != null && attemptId.isNotEmpty) {
+      await _saveSentAttemptIds(_currentExamId!, updatedAttempts);
+    }
   }
 
   Future<bool> updateStudentParentPhone({
@@ -91,7 +105,6 @@ class ExamDispatchCubit extends Cubit<ExamDispatchState> {
 
     return result.when(
       onSuccess: (success) {
-        // Update local roster in memory
         final updatedStudents = state.roster.students.map((s) {
           if (s.studentId == studentId) {
             return s.copyWith(parentPhone: newPhone);
@@ -137,6 +150,28 @@ class ExamDispatchCubit extends Cubit<ExamDispatchState> {
       await _storage.write(key: 'exam_dispatch_sent_$examId', value: jsonStr);
     } catch (e) {
       AppLogger.w('ExamDispatchCubit', 'Failed to save sent student IDs: $e');
+    }
+  }
+
+  Future<Set<String>> _loadSentAttemptIds(String examId) async {
+    try {
+      final jsonStr = await _storage.read(key: 'exam_dispatch_sent_attempts_$examId');
+      if (jsonStr != null && jsonStr.isNotEmpty) {
+        final list = jsonDecode(jsonStr) as List<dynamic>;
+        return list.map((e) => e.toString()).toSet();
+      }
+    } catch (e) {
+      AppLogger.w('ExamDispatchCubit', 'Failed to load sent attempt IDs: $e');
+    }
+    return <String>{};
+  }
+
+  Future<void> _saveSentAttemptIds(String examId, Set<String> ids) async {
+    try {
+      final jsonStr = jsonEncode(ids.toList());
+      await _storage.write(key: 'exam_dispatch_sent_attempts_$examId', value: jsonStr);
+    } catch (e) {
+      AppLogger.w('ExamDispatchCubit', 'Failed to save sent attempt IDs: $e');
     }
   }
 }

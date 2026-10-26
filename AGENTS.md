@@ -1,9 +1,7 @@
----
 > **Canonical v1.0 · 2026-09-06 · قواعد الوكيل الموحدة**
 > = AGENTS.md (النسخة النهائية) + rules/01-architecture + 03-security + 04-ui-design + 05-workflow.
 > قاعدة 02-data-model مستبدلة بـ 04_DATA_MODEL.md (منع التكرار).
 > عند التعارض: 03_ARCHITECTURE_MASTER > هذا الملف > 10_DECISIONS.md.
----
 
 # AGENTS.md — عقد تنفيذ منصة SaaS التعليمية
 > لأي AI Coding Agent (Antigravity IDE / Claude Code / Cursor / Codex …)

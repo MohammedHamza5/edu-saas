@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 import '../../domain/entities/exam_entity.dart';
 import '../../domain/entities/exam_folder_entity.dart';
+import '../../domain/entities/scratchpad_entity.dart';
 
 sealed class ExamsState extends Equatable {
   const ExamsState();
@@ -200,6 +202,14 @@ final class ExamTakingState extends ExamsState {
   final List<ExamQuestionEntity> questions;
   final int currentQuestionIndex;
   final Map<String, String> answers; // questionId -> selectedOptionId
+  final Map<String, int> questionTimes; // questionId -> elapsed seconds
+  final Set<String> flaggedGuesses; // questionIds flagged as guess/uncertain
+  final Map<String, Set<String>> eliminatedOptions; // questionId -> set of eliminated optionIds
+  final Map<String, List<DrawingStroke>> questionScratchpads; // questionId -> list of drawn strokes
+  final bool isScratchpadOpen;
+  final bool isScratchpadGridBackground;
+  final DrawingTool activeDrawingTool;
+  final Color activeDrawingColor;
   final int remainingSeconds;
   final bool isUntimed;
   final bool isSubmitting;
@@ -214,6 +224,14 @@ final class ExamTakingState extends ExamsState {
     required this.questions,
     this.currentQuestionIndex = 0,
     this.answers = const {},
+    this.questionTimes = const {},
+    this.flaggedGuesses = const {},
+    this.eliminatedOptions = const {},
+    this.questionScratchpads = const {},
+    this.isScratchpadOpen = false,
+    this.isScratchpadGridBackground = false,
+    this.activeDrawingTool = DrawingTool.pen,
+    this.activeDrawingColor = const Color(0xFF1E293B),
     this.remainingSeconds = 0,
     this.isUntimed = false,
     this.isSubmitting = false,
@@ -228,6 +246,21 @@ final class ExamTakingState extends ExamsState {
   bool get hasPrevious => currentQuestionIndex > 0;
   int get answeredCount => answers.length;
   int get totalQuestions => questions.length;
+  bool get isCurrentQuestionFlaggedAsGuess =>
+      questions.isNotEmpty &&
+      currentQuestionIndex < questions.length &&
+      flaggedGuesses.contains(currentQuestion.id);
+
+  bool isOptionEliminated(String questionId, String optionId) =>
+      eliminatedOptions[questionId]?.contains(optionId) ?? false;
+
+  bool isQuestionFlagged(String questionId) =>
+      flaggedGuesses.contains(questionId);
+
+  List<DrawingStroke> get currentQuestionStrokes =>
+      (questions.isNotEmpty && currentQuestionIndex < questions.length)
+          ? (questionScratchpads[currentQuestion.id] ?? const [])
+          : const [];
 
   ExamTakingState copyWith({
     ExamEntity? exam,
@@ -235,6 +268,14 @@ final class ExamTakingState extends ExamsState {
     List<ExamQuestionEntity>? questions,
     int? currentQuestionIndex,
     Map<String, String>? answers,
+    Map<String, int>? questionTimes,
+    Set<String>? flaggedGuesses,
+    Map<String, Set<String>>? eliminatedOptions,
+    Map<String, List<DrawingStroke>>? questionScratchpads,
+    bool? isScratchpadOpen,
+    bool? isScratchpadGridBackground,
+    DrawingTool? activeDrawingTool,
+    Color? activeDrawingColor,
     int? remainingSeconds,
     bool? isUntimed,
     bool? isSubmitting,
@@ -249,6 +290,15 @@ final class ExamTakingState extends ExamsState {
       questions: questions ?? this.questions,
       currentQuestionIndex: currentQuestionIndex ?? this.currentQuestionIndex,
       answers: answers ?? this.answers,
+      questionTimes: questionTimes ?? this.questionTimes,
+      flaggedGuesses: flaggedGuesses ?? this.flaggedGuesses,
+      eliminatedOptions: eliminatedOptions ?? this.eliminatedOptions,
+      questionScratchpads: questionScratchpads ?? this.questionScratchpads,
+      isScratchpadOpen: isScratchpadOpen ?? this.isScratchpadOpen,
+      isScratchpadGridBackground:
+          isScratchpadGridBackground ?? this.isScratchpadGridBackground,
+      activeDrawingTool: activeDrawingTool ?? this.activeDrawingTool,
+      activeDrawingColor: activeDrawingColor ?? this.activeDrawingColor,
       remainingSeconds: remainingSeconds ?? this.remainingSeconds,
       isUntimed: isUntimed ?? this.isUntimed,
       isSubmitting: isSubmitting ?? this.isSubmitting,
@@ -266,6 +316,14 @@ final class ExamTakingState extends ExamsState {
     questions,
     currentQuestionIndex,
     answers,
+    questionTimes,
+    flaggedGuesses,
+    eliminatedOptions,
+    questionScratchpads,
+    isScratchpadOpen,
+    isScratchpadGridBackground,
+    activeDrawingTool,
+    activeDrawingColor,
     remainingSeconds,
     isUntimed,
     isSubmitting,

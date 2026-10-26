@@ -64,6 +64,36 @@ class AppErrorView extends StatelessWidget {
     this.padding,
   });
 
+  static bool _isTechnicalOrRawError(String text) {
+    final lower = text.trim().toLowerCase();
+    if (lower.startsWith('exception:') ||
+        lower.startsWith('clientexception:') ||
+        lower.startsWith('postgrestexception:') ||
+        lower.startsWith('authstateexception:') ||
+        lower.startsWith('formatexception:') ||
+        lower.startsWith('typeerror:') ||
+        lower.contains('xmlhttprequest') ||
+        lower.contains('failed to fetch') ||
+        lower.contains('socketexception') ||
+        lower.contains('handshakeexception') ||
+        lower.contains('failed host lookup') ||
+        lower.contains('row-level security') ||
+        lower.contains('42501') ||
+        lower.contains('42725') ||
+        lower.contains('23505') ||
+        lower.contains('23502') ||
+        lower.contains('23503') ||
+        lower.contains('stack trace') ||
+        lower.contains('stacktrace') ||
+        lower.contains('error code:') ||
+        lower.contains('{message:') ||
+        lower.contains('{"error"') ||
+        lower.contains('null check operator')) {
+      return true;
+    }
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -73,8 +103,18 @@ class AppErrorView extends StatelessWidget {
           (l10n != null ? l10n.errorOccurred : 'An unexpected error occurred'),
     );
 
-    final displayTitle = title ?? effectiveError.title(context);
-    final displayMessage = message ?? effectiveError.message(context);
+    final rawTitle = title;
+    final isTitleTechnical = rawTitle != null && _isTechnicalOrRawError(rawTitle);
+    final displayTitle = (rawTitle != null && !isTitleTechnical)
+        ? rawTitle
+        : effectiveError.title(context);
+
+    final rawMessage = message;
+    final isMsgTechnical = rawMessage != null && _isTechnicalOrRawError(rawMessage);
+    final displayMessage = (rawMessage != null && !isMsgTechnical)
+        ? rawMessage
+        : effectiveError.message(context);
+
     final displayHint = effectiveError.hint(context);
 
     if (isCompact) {

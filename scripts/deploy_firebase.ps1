@@ -28,7 +28,11 @@ if (-not $SkipBuild) {
     Write-Host "`n[1/2] Skipping rebuild as requested (-SkipBuild). Deploying existing build in build/web..." -ForegroundColor Yellow
 }
 
-Write-Host "`n[2/2] Deploying to Firebase Hosting (target: $Target -> site: $siteName)..." -ForegroundColor Yellow
+Write-Host "`n[2/3] Injecting target-specific metadata ($Target)..." -ForegroundColor Yellow
+$metadataScript = Join-Path $PSScriptRoot "prepare_target_metadata.cjs"
+node $metadataScript $Target
+
+Write-Host "`n[3/3] Deploying to Firebase Hosting (target: $Target -> site: $siteName)..." -ForegroundColor Yellow
 $forceIpv4 = (Join-Path $PSScriptRoot "force_ipv4.cjs").Replace('\', '/')
 $env:NODE_OPTIONS = "-r `"$forceIpv4`""
 firebase deploy --only hosting:$Target
@@ -36,13 +40,15 @@ $deploySuccess = ($LASTEXITCODE -eq 0)
 
 # Check if deploy actually completed despite CLI analytics telemetry timeout
 if (-not $deploySuccess) {
-    $debugLog = Join-Path $PSScriptRoot "..\firebase-debug.log"
-    if (Test-Path $debugLog) {
-        $tail = (Get-Content $debugLog -Tail 40) -join "`n"
-        if ($tail -match "release complete" -or $tail -match "Deploy complete") {
-            $deploySuccess = $true
+    try {
+        $debugLog = Join-Path $PSScriptRoot "..\firebase-debug.log"
+        if (Test-Path $debugLog) {
+            $tail = (Get-Content $debugLog -Tail 40 -ErrorAction SilentlyContinue) -join "`n"
+            if ($tail -match "release complete" -or $tail -match "Deploy complete") {
+                $deploySuccess = $true
+            }
         }
-    }
+    } catch {}
 }
 
 if ($deploySuccess) {

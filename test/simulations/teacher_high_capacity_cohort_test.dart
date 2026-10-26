@@ -278,6 +278,9 @@ class _CohortExamsRepo implements ExamsRepository {
   _CohortExamsRepo(this.backend);
 
   @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+
+  @override
   Future<Result<ExamEntity>> createExam({
     String? groupId,
     required String title,
@@ -422,6 +425,11 @@ class _CohortExamsRepo implements ExamsRepository {
   Future<Result<ExamFolderEntity>> updateExamFolder({required String folderId, required String name, String? color, String? icon, String? description}) async => throw UnimplementedError();
   @override
   Future<Result<bool>> deleteExamFolder(String folderId) async => const Success(true);
+  @override
+  Future<Result<bool>> updateMistakeReflection({
+    required String mistakeId,
+    required String? reflectionReason,
+  }) async => const Success(true);
   @override
   Future<Result<bool>> moveExamToFolder({required String examId, String? folderId}) async => const Success(true);
   @override

@@ -1,17 +1,20 @@
 import 'dart:async';
+import 'dart:typed_data';
 import 'package:edu_saas/core/errors/result.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/utils/app_logger.dart';
 import '../../../../core/utils/cache_manager.dart';
-import '../../data/datasources/exam_answers_local_datasource.dart';
+import '../../domain/repositories/exam_answers_storage.dart';
 import '../../domain/entities/exam_entity.dart';
+import '../../domain/entities/scratchpad_entity.dart';
 import '../../domain/repositories/exams_repository.dart';
 import '../../domain/entities/exam_folder_entity.dart';
 import 'exams_state.dart';
 
 class ExamsCubit extends Cubit<ExamsState> {
   final ExamsRepository _repository;
-  final ExamAnswersLocalDataSource _answersStorage;
+  final ExamAnswersStorage _answersStorage;
   Timer? _countdownTimer;
   Timer? _syncAnswersDebounce;
 
@@ -23,9 +26,9 @@ class ExamsCubit extends Cubit<ExamsState> {
 
   ExamsCubit({
     required ExamsRepository repository,
-    ExamAnswersLocalDataSource answersStorage = const ExamAnswersLocalDataSource(),
+    ExamAnswersStorage? answersStorage,
   })  : _repository = repository,
-        _answersStorage = answersStorage,
+        _answersStorage = answersStorage ?? InMemoryExamAnswersStorage(),
         super(const ExamsInitial());
 
   @override
@@ -967,29 +970,139 @@ class ExamsCubit extends Cubit<ExamsState> {
 
   void _startTimer() {
     _countdownTimer?.cancel();
-    final currentState = state;
-    if (currentState is ExamTakingState && currentState.isUntimed) {
-      return;
-    }
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       final currentState = state;
-      if (currentState is! ExamTakingState || currentState.isUntimed) {
+      if (currentState is! ExamTakingState) {
         timer.cancel();
         return;
       }
 
-      if (currentState.remainingSeconds <= 1) {
+      // Track active question elapsed seconds
+      final currentQId = currentState.currentQuestion.id;
+      final updatedTimes = Map<String, int>.from(currentState.questionTimes);
+      updatedTimes[currentQId] = (updatedTimes[currentQId] ?? 0) + 1;
+
+      if (!currentState.isUntimed && currentState.remainingSeconds <= 1) {
         timer.cancel();
-        emit(currentState.copyWith(remainingSeconds: 0, isExpired: true));
+        emit(currentState.copyWith(
+          remainingSeconds: 0,
+          isExpired: true,
+          questionTimes: updatedTimes,
+        ));
         submitExam(reason: ExamSubmissionReason.timeExpired);
       } else {
         emit(
           currentState.copyWith(
-            remainingSeconds: currentState.remainingSeconds - 1,
+            remainingSeconds: currentState.isUntimed
+                ? currentState.remainingSeconds
+                : currentState.remainingSeconds - 1,
+            questionTimes: updatedTimes,
           ),
         );
       }
     });
+  }
+
+  /// Toggles whether the student marked the question as a guess/uncertain
+  void toggleFlagGuess(String questionId) {
+    final currentState = state;
+    if (currentState is! ExamTakingState) return;
+
+    final updatedGuesses = Set<String>.from(currentState.flaggedGuesses);
+    if (updatedGuesses.contains(questionId)) {
+      updatedGuesses.remove(questionId);
+    } else {
+      updatedGuesses.add(questionId);
+    }
+    emit(currentState.copyWith(flaggedGuesses: updatedGuesses));
+  }
+
+  /// Toggles eliminating an option for process of elimination
+  void toggleEliminateOption(String questionId, String optionId) {
+    final currentState = state;
+    if (currentState is! ExamTakingState) return;
+
+    final updatedEliminated =
+        Map<String, Set<String>>.from(currentState.eliminatedOptions);
+    final currentSet = Set<String>.from(updatedEliminated[questionId] ?? {});
+    if (currentSet.contains(optionId)) {
+      currentSet.remove(optionId);
+    } else {
+      currentSet.add(optionId);
+    }
+    updatedEliminated[questionId] = currentSet;
+    emit(currentState.copyWith(eliminatedOptions: updatedEliminated));
+  }
+
+  /// Toggles visibility of the in-exam scratchpad canvas
+  void toggleScratchpad({bool? open}) {
+    final currentState = state;
+    if (currentState is! ExamTakingState) return;
+    emit(currentState.copyWith(
+      isScratchpadOpen: open ?? !currentState.isScratchpadOpen,
+    ));
+  }
+
+  /// Toggles background between transparent overlay and math grid paper
+  void toggleScratchpadBackground() {
+    final currentState = state;
+    if (currentState is! ExamTakingState) return;
+    emit(currentState.copyWith(
+      isScratchpadGridBackground: !currentState.isScratchpadGridBackground,
+    ));
+  }
+
+  /// Sets the active drawing tool (pen, highlighter, eraser)
+  void setDrawingTool(DrawingTool tool) {
+    final currentState = state;
+    if (currentState is! ExamTakingState) return;
+    emit(currentState.copyWith(activeDrawingTool: tool));
+  }
+
+  /// Sets the active drawing color
+  void setDrawingColor(Color color) {
+    final currentState = state;
+    if (currentState is! ExamTakingState) return;
+    emit(currentState.copyWith(activeDrawingColor: color));
+  }
+
+  /// Adds a completed drawing stroke to the current question's scratchpad
+  void addStrokeToCurrentQuestion(DrawingStroke stroke) {
+    final currentState = state;
+    if (currentState is! ExamTakingState) return;
+    final qId = currentState.currentQuestion.id;
+    final updatedMap =
+        Map<String, List<DrawingStroke>>.from(currentState.questionScratchpads);
+    final currentStrokes = List<DrawingStroke>.from(updatedMap[qId] ?? []);
+    currentStrokes.add(stroke);
+    updatedMap[qId] = currentStrokes;
+    emit(currentState.copyWith(questionScratchpads: updatedMap));
+  }
+
+  /// Undoes the last stroke for the current question
+  void undoLastStroke() {
+    final currentState = state;
+    if (currentState is! ExamTakingState) return;
+    final qId = currentState.currentQuestion.id;
+    final updatedMap =
+        Map<String, List<DrawingStroke>>.from(currentState.questionScratchpads);
+    final currentStrokes = List<DrawingStroke>.from(updatedMap[qId] ?? []);
+    if (currentStrokes.isNotEmpty) {
+      currentStrokes.removeLast();
+      updatedMap[qId] = currentStrokes;
+      emit(currentState.copyWith(questionScratchpads: updatedMap));
+    }
+  }
+
+  /// Clears all strokes for the current question
+  void clearCurrentQuestionScratchpad() {
+    final currentState = state;
+    if (currentState is! ExamTakingState) return;
+    final qId = currentState.currentQuestion.id;
+    final updatedMap =
+        Map<String, List<DrawingStroke>>.from(currentState.questionScratchpads);
+    updatedMap[qId] = const [];
+    emit(currentState.copyWith(questionScratchpads: updatedMap));
   }
 
   /// Selects an answer option for the current question
@@ -1060,11 +1173,15 @@ class ExamsCubit extends Cubit<ExamsState> {
         AppCache.exams.clear();
         AppCache.content.clear();
         unawaited(_answersStorage.clearAnswers(currentState.attempt.id));
+        final enrichedResult = submitResult.copyWith(
+          questionTimes: currentState.questionTimes,
+          flaggedGuesses: currentState.flaggedGuesses,
+        );
         emit(
           currentState.copyWith(
             isSubmitting: false,
             submitSuccess: true,
-            submitResult: submitResult,
+            submitResult: enrichedResult,
           ),
         );
         return true;
@@ -1268,5 +1385,36 @@ class ExamsCubit extends Cubit<ExamsState> {
         return false;
       },
     );
+  }
+
+  /// Uploads an exam image via repository.
+  Future<String> uploadExamImage({
+    required Uint8List bytes,
+    required String fileName,
+    String mimeType = 'image/png',
+  }) {
+    return _repository.uploadExamImage(
+      bytes: bytes,
+      fileName: fileName,
+      mimeType: mimeType,
+    );
+  }
+
+  /// Persists exam creation draft locally.
+  Future<void> saveExamDraft({
+    required String draftKey,
+    required Map<String, dynamic> data,
+  }) {
+    return _repository.saveExamDraft(draftKey: draftKey, data: data);
+  }
+
+  /// Retrieves saved exam creation draft.
+  Future<Map<String, dynamic>?> getExamDraft(String draftKey) {
+    return _repository.getExamDraft(draftKey);
+  }
+
+  /// Clears saved exam creation draft.
+  Future<void> clearExamDraft(String draftKey) {
+    return _repository.clearExamDraft(draftKey);
   }
 }

@@ -1,5 +1,9 @@
 const dns = require('node:dns');
 
+try {
+  dns.setDefaultResultOrder('ipv4first');
+} catch (_) {}
+
 const origLookup = dns.lookup;
 dns.lookup = function (hostname, options, callback) {
   if (typeof options === 'function') {

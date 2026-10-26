@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubit/content_cubit.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
-import '../../../../core/network/supabase_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_text_field.dart';
@@ -162,23 +161,10 @@ class _LessonSetupSheetState extends State<LessonSetupSheet> {
 
   Future<void> _loadExams() async {
     try {
-      final client = SupabaseService.client;
-      final res = await client
-          .from('exams')
-          .select('id, title, content:content!exams_content_id_fkey(group_id, title)')
-          .order('created_at', ascending: false);
+      final exams = await context.read<ContentCubit>().getAvailableExamsSummary();
       if (mounted) {
         setState(() {
-          _availableExams = (res as List).map((e) {
-            final contentMap = e['content'] as Map<String, dynamic>?;
-            final title = e['title'] as String? ??
-                contentMap?['title'] as String? ??
-                'بدون عنوان';
-            return {
-              'id': e['id'],
-              'title': title,
-            };
-          }).toList();
+          _availableExams = exams;
           _isLoadingExams = false;
         });
       }

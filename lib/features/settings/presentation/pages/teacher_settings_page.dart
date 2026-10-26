@@ -4,8 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/config/tenant_registry.dart';
 import '../../../../core/config/tenant_resolver.dart';
-import '../../../../core/localization/generated/app_localizations.dart';
-import '../../../../core/localization/locale_cubit.dart';
+import '../../../../core/di/injection_container.dart';
+import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/network/supabase_service.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -13,10 +13,10 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/tenant_branding.dart';
 import '../../../../core/theme/tenant_theme_cubit.dart';
 import '../../../../core/widgets/academic_hero_banner.dart';
-import '../../../../core/widgets/app_button.dart';
-import '../../../../core/widgets/app_card.dart';
-import '../../../../core/widgets/app_text_field.dart';
-import '../../../auth/presentation/cubit/auth_cubit.dart';
+import '../widgets/academy_profile_settings_section.dart';
+import '../widgets/language_settings_section.dart';
+import '../widgets/streaming_provider_settings_section.dart';
+import '../widgets/teacher_account_security_section.dart';
 
 /// صفحة إعدادات المنصة والأكاديمية للمعلم (Teacher & Academy Settings)
 /// مخصصة لإدارة بيانات الأكاديمية، لغة المنصة، وبيانات حساب المعلم.
@@ -36,11 +36,14 @@ class _TeacherSettingsPageState extends State<TeacherSettingsPage> {
   late final TextEditingController _supportEmailController;
 
   bool _isSaving = false;
-  String _selectedVideoProvider = TenantRegistry.defaultBranding.videoProvider;
+  late String _selectedVideoProvider;
+
   @override
   void initState() {
     super.initState();
-    final branding = TenantRegistry.defaultBranding;
+    final tenantId =
+        SupabaseService.currentTenantId ?? TenantResolver.resolveTenantId();
+    final branding = TenantRegistry.resolve(tenantId);
 
     _academyNameController = TextEditingController(text: branding.brandName);
     _subjectController = TextEditingController(text: branding.subjectTitle);
@@ -59,23 +62,25 @@ class _TeacherSettingsPageState extends State<TeacherSettingsPage> {
     try {
       final tenantId = SupabaseService.currentTenantId ??
           TenantResolver.resolveTenantId();
-      final row = await SupabaseService.client
-          .from('tenants')
-          .select('video_provider')
-          .eq('id', tenantId)
-          .maybeSingle();
-      if (row != null && row['video_provider'] != null && mounted) {
-        final prov = row['video_provider'] as String;
-        setState(() {
-          _selectedVideoProvider = prov;
-        });
-        final updated = TenantRegistry.defaultBranding.copyWith(
-          videoProvider: prov,
-        );
-        TenantRegistry.register(updated);
-        try {
-          context.read<TenantThemeCubit>().setBranding(updated);
-        } catch (_) {}
+      final res = await InjectionContainer.settingsRepository.getTenantSettings(tenantId);
+      final row = res.when(
+        onSuccess: (data) => data,
+        onFailure: (_) => null,
+      );
+      if (row != null && mounted) {
+        if (row['video_provider'] != null) {
+          final prov = row['video_provider'] as String;
+          setState(() {
+            _selectedVideoProvider = prov;
+          });
+          final updated = TenantRegistry.resolve(tenantId).copyWith(
+            videoProvider: prov,
+          );
+          TenantRegistry.register(updated);
+          try {
+            context.read<TenantThemeCubit>().setBranding(updated);
+          } catch (_) {}
+        }
       }
     } catch (_) {}
   }
@@ -93,7 +98,9 @@ class _TeacherSettingsPageState extends State<TeacherSettingsPage> {
   void _handleSaveAcademyProfile() {
     setState(() => _isSaving = true);
 
-    final currentBranding = TenantRegistry.defaultBranding;
+    final tenantId =
+        SupabaseService.currentTenantId ?? TenantResolver.resolveTenantId();
+    final currentBranding = TenantRegistry.resolve(tenantId);
     final updatedBranding = TenantBranding.fromPrimary(
       tenantId: currentBranding.tenantId,
       brandName: _academyNameController.text.trim(),
@@ -120,10 +127,7 @@ class _TeacherSettingsPageState extends State<TeacherSettingsPage> {
 
     // Also persist video provider if changed
     try {
-      SupabaseService.client.rpc<void>(
-        'update_tenant_video_provider',
-        params: {'p_provider': _selectedVideoProvider},
-      );
+      InjectionContainer.settingsRepository.updateTenantVideoProvider(_selectedVideoProvider);
     } catch (_) {}
 
     setState(() => _isSaving = false);
@@ -144,78 +148,11 @@ class _TeacherSettingsPageState extends State<TeacherSettingsPage> {
     }
   }
 
-  void _showPasswordResetDialog() {
-    final isAr = Localizations.localeOf(context).languageCode == 'ar';
-    final userEmail = SupabaseService.currentUser?.email ?? '';
-
-    showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
-          children: [
-            const Icon(Icons.lock_reset_rounded, color: AppColors.primary),
-            const SizedBox(width: AppSpacing.s8),
-            Text(isAr ? 'تغيير كلمة المرور' : 'Change Password'),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '${isAr ? 'بريد الحساب' : 'Account Email'}: $userEmail',
-              style: const TextStyle(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: AppSpacing.s12),
-            Text(
-              isAr
-                  ? 'سيتم إرسال رابط تعيين كلمة المرور الجديدة إلى بريدك الإلكتروني.'
-                  : 'A password reset link will be sent to your registered email address.',
-              style: const TextStyle(
-                fontSize: 13,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(isAr ? 'إلغاء' : 'Cancel'),
-          ),
-          AppButton(
-            text: isAr ? 'إرسال الرابط' : 'Send Link',
-            onPressed: () {
-              Navigator.of(ctx).pop();
-              if (userEmail.isNotEmpty) {
-                context.read<AuthCubit>().resetPassword(userEmail);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      isAr
-                          ? 'تم إرسال رابط إعادة التعيين بنجاح'
-                          : 'Password reset email sent successfully',
-                    ),
-                    backgroundColor: AppColors.success,
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-              }
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = context.l10n;
     final theme = Theme.of(context);
-    final currentUser = SupabaseService.currentUser;
-    final currentLocale = Localizations.localeOf(context);
-    final isAr = currentLocale.languageCode == 'ar';
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -243,644 +180,54 @@ class _TeacherSettingsPageState extends State<TeacherSettingsPage> {
           vertical: AppSpacing.s16,
         ),
         child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // 1. Academic Hero Banner
-                AcademicHeroBanner(
-                  title: l10n.settingsTitle,
-                  subtitle: l10n.settingsSubtitle,
-                  trailing: Container(
-                    padding: const EdgeInsets.all(AppSpacing.s12),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: AppColors.primary.withValues(alpha: 0.2),
-                      ),
-                    ),
-                    child: const Icon(
-                      Icons.settings_suggest_rounded,
-                      color: AppColors.primary,
-                      size: 32,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.s24),
-
-                // 2. Section: Academy & Platform Profile
-                _buildSectionCard(
-                  context,
-                  title: l10n.settingsAcademySection,
-                  icon: Icons.school_rounded,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      AppTextField(
-                        label: l10n.settingsAcademyNameLabel,
-                        controller: _academyNameController,
-                        prefixIcon: const Icon(
-                          Icons.business_rounded,
-                          size: 20,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.s16),
-                      AppTextField(
-                        label: l10n.settingsSubjectLabel,
-                        controller: _subjectController,
-                        prefixIcon: const Icon(
-                          Icons.menu_book_rounded,
-                          size: 20,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.s16),
-                      AppTextField(
-                        label: l10n.settingsTaglineLabel,
-                        controller: _taglineController,
-                        prefixIcon: const Icon(Icons.stars_rounded, size: 20),
-                      ),
-                      const SizedBox(height: AppSpacing.s16),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: AppTextField(
-                              label: l10n.settingsSupportPhoneLabel,
-                              controller: _supportPhoneController,
-                              prefixIcon: const Icon(
-                                Icons.phone_rounded,
-                                size: 20,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: AppSpacing.s16),
-                          Expanded(
-                            child: AppTextField(
-                              label: l10n.settingsSupportEmailLabel,
-                              controller: _supportEmailController,
-                              prefixIcon: const Icon(
-                                Icons.email_rounded,
-                                size: 20,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: AppSpacing.s20),
-                      Align(
-                        alignment: AlignmentDirectional.centerEnd,
-                        child: AppButton(
-                          text: isAr ? 'حفظ التعديلات' : 'Save Changes',
-                          icon: Icons.check_circle_outline_rounded,
-                          isLoading: _isSaving,
-                          onPressed: _handleSaveAcademyProfile,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.s24),
-
-                // 3. Section: Video Streaming Provider (YouTube vs Bunny Stream)
-                _buildSectionCard(
-                  context,
-                  title: l10n.streamingProviderSettingTitle,
-                  icon: Icons.video_settings_rounded,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.streamingProviderSettingDesc,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.s16),
-                      LayoutBuilder(
-                        builder: (context, constraints) {
-                          final isCompact = constraints.maxWidth < 600;
-                          if (isCompact) {
-                            return Column(
-                              children: [
-                                _buildProviderOptionCard(
-                                  context,
-                                  providerKey: 'bunny',
-                                  providerName: l10n.providerBunnyLabel,
-                                  subtitle: l10n.providerBunnyDesc,
-                                  icon: Icons.cloud_done_rounded,
-                                  iconColor: const Color(0xFFF97316),
-                                  isSelected: true,
-                                  isLocked: false,
-                                  onTap: null,
-                                ),
-                                const SizedBox(height: AppSpacing.s12),
-                                _buildProviderOptionCard(
-                                  context,
-                                  providerKey: 'youtube',
-                                  providerName: l10n.providerYoutubeLabel,
-                                  subtitle: l10n.providerYoutubeDesc,
-                                  icon: Icons.play_circle_fill_rounded,
-                                  iconColor: const Color(0xFFFF0000),
-                                  isSelected: false,
-                                  isLocked: true,
-                                  onTap: null,
-                                ),
-                              ],
-                            );
-                          }
-                          return Row(
-                            children: [
-                              Expanded(
-                                child: _buildProviderOptionCard(
-                                  context,
-                                  providerKey: 'bunny',
-                                  providerName: l10n.providerBunnyLabel,
-                                  subtitle: l10n.providerBunnyDesc,
-                                  icon: Icons.cloud_done_rounded,
-                                  iconColor: const Color(0xFFF97316),
-                                  isSelected: true,
-                                  isLocked: false,
-                                  onTap: null,
-                                ),
-                              ),
-                              const SizedBox(width: AppSpacing.s16),
-                              Expanded(
-                                child: _buildProviderOptionCard(
-                                  context,
-                                  providerKey: 'youtube',
-                                  providerName: l10n.providerYoutubeLabel,
-                                  subtitle: l10n.providerYoutubeDesc,
-                                  icon: Icons.play_circle_fill_rounded,
-                                  iconColor: const Color(0xFFFF0000),
-                                  isSelected: false,
-                                  isLocked: true,
-                                  onTap: null,
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.s24),
-
-                // 4. Section: Language Preference (Arabic / English)
-                _buildSectionCard(
-                  context,
-                  title: l10n.settingsLanguageSection,
-                  icon: Icons.translate_rounded,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.settingsLanguageDesc,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.s16),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildLanguageOptionCard(
-                              context,
-                              langCode: 'ar',
-                              langName: l10n.settingsLangArabic,
-                              subtitle: 'العربية (من اليمين لليسار)',
-                              isSelected: currentLocale.languageCode == 'ar',
-                            ),
-                          ),
-                          const SizedBox(width: AppSpacing.s16),
-                          Expanded(
-                            child: _buildLanguageOptionCard(
-                              context,
-                              langCode: 'en',
-                              langName: l10n.settingsLangEnglish,
-                              subtitle: 'English (Left-to-Right)',
-                              isSelected: currentLocale.languageCode == 'en',
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.s24),
-
-                // 4. Section: Teacher Account & Security
-                _buildSectionCard(
-                  context,
-                  title: l10n.settingsAccountSection,
-                  icon: Icons.admin_panel_settings_rounded,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 28,
-                            backgroundColor: AppColors.primary.withValues(
-                              alpha: 0.12,
-                            ),
-                            child: const Text(
-                              '∑',
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.primary,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: AppSpacing.s16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  TenantRegistry.defaultBranding.teacherName,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                    color: AppColors.textPrimary,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  currentUser?.email ??
-                                      (TenantRegistry
-                                              .defaultBranding
-                                              .supportEmail ??
-                                          ''),
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: AppSpacing.s20),
-                      const Divider(color: AppColors.border),
-                      const SizedBox(height: AppSpacing.s16),
-                      Wrap(
-                        spacing: AppSpacing.s16,
-                        runSpacing: AppSpacing.s12,
-                        children: [
-                          OutlinedButton.icon(
-                            onPressed: _showPasswordResetDialog,
-                            icon: const Icon(
-                              Icons.lock_outline_rounded,
-                              size: 18,
-                            ),
-                            label: Text(l10n.settingsChangePasswordBtn),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: AppColors.textPrimary,
-                              side: const BorderSide(
-                                color: AppColors.borderDark,
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: AppSpacing.s16,
-                                vertical: AppSpacing.s12,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                          ),
-                          OutlinedButton.icon(
-                            onPressed: () => context.read<AuthCubit>().logout(),
-                            icon: const Icon(
-                              Icons.logout_rounded,
-                              size: 18,
-                              color: AppColors.error,
-                            ),
-                            label: Text(
-                              l10n.settingsSignOutBtn,
-                              style: const TextStyle(color: AppColors.error),
-                            ),
-                            style: OutlinedButton.styleFrom(
-                              side: BorderSide(
-                                color: AppColors.error.withValues(alpha: 0.4),
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: AppSpacing.s16,
-                                vertical: AppSpacing.s12,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.s40),
-              ],
-            ),
-      ),
-    );
-  }
-
-  Widget _buildSectionCard(
-    BuildContext context, {
-    required String title,
-    required IconData icon,
-    required Widget child,
-  }) {
-    return AppCard(
-      variant: AppCardVariant.standard,
-      padding: const EdgeInsets.all(AppSpacing.s20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.s8),
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // 1. Academic Hero Banner
+            AcademicHeroBanner(
+              title: l10n.settingsTitle,
+              subtitle: l10n.settingsSubtitle,
+              trailing: Container(
+                padding: const EdgeInsets.all(AppSpacing.s12),
                 decoration: BoxDecoration(
                   color: AppColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: AppColors.primary.withValues(alpha: 0.2),
+                  ),
                 ),
-                child: Icon(icon, color: AppColors.primary, size: 20),
-              ),
-              const SizedBox(width: AppSpacing.s12),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  color: AppColors.textPrimary,
+                child: const Icon(
+                  Icons.settings_suggest_rounded,
+                  color: AppColors.primary,
+                  size: 32,
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.s16),
-          const Divider(color: AppColors.border),
-          const SizedBox(height: AppSpacing.s16),
-          child,
-        ],
-      ),
-    );
-  }
+            ),
+            const SizedBox(height: AppSpacing.s24),
 
-  Widget _buildLanguageOptionCard(
-    BuildContext context, {
-    required String langCode,
-    required String langName,
-    required String subtitle,
-    required bool isSelected,
-  }) {
-    return InkWell(
-      onTap: () {
-        context.read<LocaleCubit>().setLocale(Locale(langCode));
-      },
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.s16),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.primary.withValues(alpha: 0.08)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.borderDark,
-            width: isSelected ? 2 : 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              isSelected
-                  ? Icons.check_circle_rounded
-                  : Icons.radio_button_unchecked_rounded,
-              color: isSelected ? AppColors.primary : AppColors.textMuted,
-              size: 22,
+            // 2. Section: Academy & Platform Profile
+            AcademyProfileSettingsSection(
+              academyNameController: _academyNameController,
+              subjectController: _subjectController,
+              taglineController: _taglineController,
+              supportPhoneController: _supportPhoneController,
+              supportEmailController: _supportEmailController,
+              isSaving: _isSaving,
+              onSave: _handleSaveAcademyProfile,
             ),
-            const SizedBox(width: AppSpacing.s12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    langName,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                      color: isSelected
-                          ? AppColors.primary
-                          : AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    style: const TextStyle(
-                      fontSize: 11,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            const SizedBox(height: AppSpacing.s24),
+
+            // 3. Section: Video Streaming Provider (Bunny Stream vs YouTube)
+            const StreamingProviderSettingsSection(),
+            const SizedBox(height: AppSpacing.s24),
+
+            // 4. Section: Language Preference (Arabic / English)
+            const LanguageSettingsSection(),
+            const SizedBox(height: AppSpacing.s24),
+
+            // 5. Section: Teacher Account & Security
+            const TeacherAccountSecuritySection(),
+            const SizedBox(height: AppSpacing.s40),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildProviderOptionCard(
-    BuildContext context, {
-    required String providerKey,
-    required String providerName,
-    required String subtitle,
-    required IconData icon,
-    required Color iconColor,
-    required bool isSelected,
-    bool isLocked = false,
-    VoidCallback? onTap,
-  }) {
-    final l10n = AppLocalizations.of(context)!;
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: isLocked
-            ? () {
-                ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Row(
-                      children: [
-                        const Icon(
-                          Icons.lock_rounded,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                        const SizedBox(width: AppSpacing.s12),
-                        Expanded(
-                          child: Text(
-                            l10n.providerLockedNoticeToast,
-                            style: const TextStyle(fontWeight: FontWeight.w600),
-                          ),
-                        ),
-                      ],
-                    ),
-                    backgroundColor: AppColors.surfaceElevated,
-                    behavior: SnackBarBehavior.floating,
-                    duration: const Duration(seconds: 3),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      side: const BorderSide(color: AppColors.borderDark),
-                    ),
-                  ),
-                );
-              }
-            : onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Opacity(
-          opacity: isLocked ? 0.60 : 1.0,
-          child: Container(
-            padding: const EdgeInsets.all(AppSpacing.s16),
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? AppColors.primary.withValues(alpha: 0.08)
-                  : Colors.transparent,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: isSelected
-                    ? AppColors.primary
-                    : AppColors.borderDark
-                        .withValues(alpha: isLocked ? 0.5 : 1.0),
-                width: isSelected ? 2 : 1,
-              ),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(AppSpacing.s8),
-                  decoration: BoxDecoration(
-                    color: iconColor.withValues(alpha: isLocked ? 0.06 : 0.12),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(
-                    icon,
-                    color:
-                        isLocked ? iconColor.withValues(alpha: 0.6) : iconColor,
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.s12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Flexible(
-                            child: Text(
-                              providerName,
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                                color: isSelected
-                                    ? AppColors.primary
-                                    : (isLocked
-                                        ? AppColors.textSecondary
-                                        : AppColors.textPrimary),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: AppSpacing.s8),
-                          if (isSelected)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppColors.primary.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Text(
-                                l10n.providerActiveStatusBadge,
-                                style: const TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.primary,
-                                ),
-                              ),
-                            )
-                          else if (isLocked)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppColors.surfaceVariant,
-                                borderRadius: BorderRadius.circular(6),
-                                border: Border.all(
-                                  color: AppColors.borderDark
-                                      .withValues(alpha: 0.6),
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(
-                                    Icons.lock_rounded,
-                                    size: 10,
-                                    color: AppColors.textMuted,
-                                  ),
-                                  const SizedBox(width: 3),
-                                  Text(
-                                    l10n.providerLockedByAdminBadge,
-                                    style: const TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.textMuted,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        subtitle,
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: isLocked
-                              ? AppColors.textMuted
-                              : AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.s8),
-                if (isSelected)
-                  const Icon(
-                    Icons.check_circle_rounded,
-                    color: AppColors.primary,
-                    size: 22,
-                  )
-                else
-                  const Icon(
-                    Icons.lock_outline_rounded,
-                    color: AppColors.textMuted,
-                    size: 20,
-                  ),
-              ],
-            ),
-          ),
         ),
       ),
     );

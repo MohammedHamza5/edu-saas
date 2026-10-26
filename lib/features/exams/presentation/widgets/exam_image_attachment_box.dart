@@ -7,7 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/app_logger.dart';
 import '../../../../core/widgets/app_badge.dart';
-import '../../data/services/exam_image_upload_service.dart';
+import '../../../../core/di/injection_container.dart';
 import 'app_image_cropper_dialog.dart';
 
 class ExamImageAttachmentBox extends StatefulWidget {
@@ -38,7 +38,6 @@ class ExamImageAttachmentBox extends StatefulWidget {
 }
 
 class _ExamImageAttachmentBoxState extends State<ExamImageAttachmentBox> {
-  final _uploadService = ExamImageUploadService();
 
   String? _imageUrl;
   Uint8List? _localBytes;
@@ -129,7 +128,7 @@ class _ExamImageAttachmentBoxState extends State<ExamImageAttachmentBox> {
     setState(() => _internalIsUploading = true);
     try {
       final uploadBytes = Uint8List.fromList(safeBytes);
-      final uploadedUrl = await _uploadService.uploadExamImage(
+      final uploadedUrl = await InjectionContainer.examsRepository.uploadExamImage(
         bytes: uploadBytes,
         fileName: filename,
         mimeType: 'image/png',

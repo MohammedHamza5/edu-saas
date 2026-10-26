@@ -1,0 +1,29 @@
+{
+  "name": "edusaas-whatsapp-gateway",
+  "version": "1.0.0",
+  "description": "Enterprise-grade, Self-Hosted WhatsApp Gateway with Anti-Ban Heuristics & Postgres Session Persistence",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts"
+  },
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.7.19",
+    "@supabase/supabase-js": "^2.49.1",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "pino": "^9.6.0",
+    "qrcode": "^1.5.4"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.13.4",
+    "@types/qrcode": "^1.5.5",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.7.3"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

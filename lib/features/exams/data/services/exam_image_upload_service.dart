@@ -6,9 +6,10 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/network/supabase_service.dart';
 import '../../../../core/utils/app_logger.dart';
 
+import '../../domain/services/exam_image_uploader.dart';
 import 'exam_image_compressor.dart';
 
-class ExamImageUploadService {
+class ExamImageUploadService implements ExamImageUploader {
   final SupabaseClient? _client;
 
   ExamImageUploadService({SupabaseClient? client}) : _client = client;
@@ -24,6 +25,7 @@ class ExamImageUploadService {
   /// Uploads an exam image (crop, screenshot, or picked file).
   /// Automatically compresses and transcodes to WebP before uploading to
   /// Supabase 'group-content' bucket → 'test/exam_images/' path.
+  @override
   Future<String> uploadExamImage({
     required Uint8List bytes,
     required String fileName,

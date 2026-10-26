@@ -252,4 +252,9 @@ class QuestionBankRepositoryImpl implements QuestionBankRepository {
   Future<Map<String, dynamic>> getJobStatus(String jobId) {
     return remoteDataSource.getJobStatus(jobId);
   }
+
+  @override
+  Future<List<Map<String, dynamic>>> getActiveGroups() {
+    return remoteDataSource.getActiveGroups();
+  }
 }

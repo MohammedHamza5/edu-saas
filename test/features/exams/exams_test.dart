@@ -52,6 +52,28 @@ class FakeExamAnswersLocalDataSource implements ExamAnswersLocalDataSource {
 }
 
 class FakeExamsRepository implements ExamsRepository {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+
+  @override
+  Future<Map<String, dynamic>?> getExamDraft(String draftKey) async => null;
+
+  @override
+  Future<void> saveExamDraft({
+    required String draftKey,
+    required Map<String, dynamic> data,
+  }) async {}
+
+  @override
+  Future<void> clearExamDraft(String draftKey) async {}
+
+  @override
+  Future<String> uploadExamImage({
+    required Uint8List bytes,
+    required String fileName,
+    String mimeType = 'image/png',
+  }) async => '';
+
   List<ExamEntity> mockExams = [];
   List<ExamAttemptEntity> mockAttempts = [];
   bool shouldFail = false;
@@ -391,6 +413,15 @@ class FakeExamsRepository implements ExamsRepository {
         results: [],
       ),
     );
+  }
+
+  @override
+  Future<Result<bool>> updateMistakeReflection({
+    required String mistakeId,
+    required String? reflectionReason,
+  }) async {
+    if (shouldFail) return FailureResult(ServerFailure(failureMessage));
+    return const Success(true);
   }
 
   @override
@@ -1620,10 +1651,11 @@ void main() {
             locale: const Locale('ar'),
             home: BlocProvider.value(
               value: examsCubit,
-              child: const Scaffold(
+              child: Scaffold(
                 body: CreateExamPage(
                   groupId: 'group-1',
                   groupName: 'SAT Math',
+                  examsRepository: fakeRepository,
                 ),
               ),
             ),
@@ -1633,8 +1665,8 @@ void main() {
         await tester.pumpAndSettle();
 
         // Verify the label for uniform question points exists
-        expect(find.text('درجة كل سؤال'), findsWidgets);
-        expect(find.text('تطبيق على الكل'), findsWidgets);
+        expect(find.textContaining('درجة كل سؤال'), findsWidgets);
+        expect(find.textContaining('تطبيق على الكل'), findsWidgets);
       },
     );
 

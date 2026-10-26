@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -84,17 +83,10 @@ class _DeployDocumentExamDialogState extends State<DeployDocumentExamDialog> {
 
   Future<void> _fetchGroups() async {
     try {
-      final res = await Supabase.instance.client
-          .from('groups')
-          .select('id, name, level')
-          .eq('status', 'active')
-          .order('name');
-      final list = res as List<dynamic>;
+      final list = await context.read<QuestionBankCubit>().getActiveGroups();
       if (mounted) {
         setState(() {
-          _groups = list
-              .map((e) => Map<String, dynamic>.from(e as Map))
-              .toList();
+          _groups = list;
           if (_groups.isNotEmpty) {
             _selectedGroupId = _groups.first['id'] as String;
           }

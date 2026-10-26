@@ -1,11 +1,12 @@
+import 'dart:typed_data';
 import '../../../../core/errors/result.dart';
 import '../entities/exam_entity.dart';
 import '../entities/exam_parent_dispatch_entity.dart';
 import '../entities/mistake_entities.dart';
 import '../entities/exam_folder_entity.dart';
+import '../services/exam_image_uploader.dart';
 
-
-abstract class ExamsRepository {
+abstract class ExamsRepository implements ExamImageUploader {
   /// Fetches all exams belonging to a specific group (Teacher view).
   Future<Result<List<ExamEntity>>> getGroupExams(
     String groupId, {
@@ -133,6 +134,12 @@ abstract class ExamsRepository {
     List<Map<String, String>> answers,
   );
 
+  /// Updates student's self-reflection reason for a specific mistake.
+  Future<Result<bool>> updateMistakeReflection({
+    required String mistakeId,
+    required String? reflectionReason,
+  });
+
   /// Fetches group lessons for linking exams.
   Future<Result<List<Map<String, dynamic>>>> getGroupLessons(String groupId);
 
@@ -202,5 +209,25 @@ abstract class ExamsRepository {
     required String examId,
     String? folderId,
   });
+
+  /// Uploads an exam image (compressed/WebP) and returns the public CDN URL.
+  @override
+  Future<String> uploadExamImage({
+    required Uint8List bytes,
+    required String fileName,
+    String mimeType = 'image/png',
+  });
+
+  /// Persists teacher's in-progress exam draft locally.
+  Future<void> saveExamDraft({
+    required String draftKey,
+    required Map<String, dynamic> data,
+  });
+
+  /// Retrieves teacher's in-progress exam draft.
+  Future<Map<String, dynamic>?> getExamDraft(String draftKey);
+
+  /// Clears teacher's in-progress exam draft.
+  Future<void> clearExamDraft(String draftKey);
 }
 

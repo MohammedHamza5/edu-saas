@@ -11,7 +11,7 @@ import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_empty_view.dart';
 import '../../../../core/widgets/app_error_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
-import '../../../videos/presentation/utils/folder_color_palette.dart';
+import '../../../../core/theme/folder_color_palette.dart';
 import '../../domain/entities/library_material_entity.dart';
 import '../cubit/materials_library_cubit.dart';
 import '../cubit/materials_library_state.dart';

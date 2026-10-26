@@ -18,8 +18,11 @@ import '../../../content/presentation/widgets/material_viewer_sheet.dart';
 import '../../domain/entities/exam_entity.dart';
 import '../cubit/exams_cubit.dart';
 import '../cubit/exams_state.dart';
+import '../widgets/exam_pacing_radar_card.dart';
+import '../widgets/exam_result_hero_card.dart';
+import '../widgets/exam_result_questions_matrix.dart';
 import 'exam_review_page.dart';
-import 'exam_taking_page.dart';
+import '../extensions/exam_ui_extensions.dart';
 
 class ExamResultPage extends StatefulWidget {
   final ExamEntity exam;
@@ -28,6 +31,16 @@ class ExamResultPage extends StatefulWidget {
   final LessonAssignmentEntity? nextLesson;
   final int? nextLessonIndex;
   final int? totalLessonsCount;
+
+  /// Optional builder to decouple ExamResultPage from ExamTakingPage (preventing circular dependencies).
+  static Widget Function(
+    BuildContext context,
+    ExamsCubit cubit,
+    bool isLecture,
+    LessonAssignmentEntity? nextLesson,
+    int? nextLessonIndex,
+    int? totalLessonsCount,
+  )? retakeBuilder;
 
   const ExamResultPage({
     super.key,
@@ -236,21 +249,24 @@ class _ExamResultPageState extends State<ExamResultPage> {
       if (!mounted) return;
 
       if (success) {
-        unawaited(
-          Navigator.of(context).pushReplacement<void, void>(
-            MaterialPageRoute<void>(
-              builder: (_) => BlocProvider.value(
-                value: cubit,
-                child: ExamTakingPage(
-                  isLectureExam: isLecture,
-                  nextLesson: _nextLesson,
-                  nextLessonIndex: _nextLessonIndex,
-                  totalLessonsCount: _totalLessonsCount,
+        if (ExamResultPage.retakeBuilder != null) {
+          unawaited(
+            Navigator.of(context).pushReplacement<void, void>(
+              MaterialPageRoute<void>(
+                builder: (ctx) => ExamResultPage.retakeBuilder!(
+                  ctx,
+                  cubit,
+                  isLecture,
+                  _nextLesson,
+                  _nextLessonIndex,
+                  _totalLessonsCount,
                 ),
               ),
             ),
-          ),
-        );
+          );
+        } else {
+          Navigator.of(context).pop();
+        }
       } else {
         final errorMsg = cubit.state is ExamsError
             ? (cubit.state as ExamsError).message
@@ -355,45 +371,6 @@ class _ExamResultPageState extends State<ExamResultPage> {
     }
   }
 
-  _GradeTier _getGradeTier(BuildContext context, double percentage, bool isPassed) {
-    if (percentage >= 90) {
-      return _GradeTier(
-        label: context.l10n.performanceGradeExcellent,
-        color: AppColors.success,
-        icon: Icons.military_tech_rounded,
-        badgeText: '90%+',
-      );
-    } else if (percentage >= 80) {
-      return _GradeTier(
-        label: context.l10n.performanceGradeVeryGood,
-        color: const Color(0xFF2563EB),
-        icon: Icons.star_rounded,
-        badgeText: '80%+',
-      );
-    } else if (percentage >= 70) {
-      return _GradeTier(
-        label: context.l10n.performanceGradeGood,
-        color: const Color(0xFF0D9488),
-        icon: Icons.thumb_up_alt_rounded,
-        badgeText: '70%+',
-      );
-    } else if (isPassed) {
-      return _GradeTier(
-        label: context.l10n.performanceGradePass,
-        color: AppColors.success,
-        icon: Icons.check_circle_rounded,
-        badgeText: 'PASS',
-      );
-    } else {
-      return _GradeTier(
-        label: context.l10n.performanceGradeNeedsImprovement,
-        color: AppColors.error,
-        icon: Icons.trending_up_rounded,
-        badgeText: 'RETRY',
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final isLecture = widget.isLectureExam ??
@@ -405,7 +382,6 @@ class _ExamResultPageState extends State<ExamResultPage> {
 
     final percentage = _attempt.percentage ??
         (maxScore > 0 ? (score / maxScore) * 100 : 0.0);
-    final gradeTier = _getGradeTier(context, percentage, isPassed);
 
     final questions = _attempt.questions;
     final answers = _attempt.answers;
@@ -483,198 +459,13 @@ class _ExamResultPageState extends State<ExamResultPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // 1. Hero Performance & Verdict Card
-              AppCard(
-                padding: const EdgeInsets.all(AppSpacing.s20),
-                child: Column(
-                  children: [
-                    // Top Icon & Grade Badge
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.s12,
-                            vertical: AppSpacing.s6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: gradeTier.color.withValues(alpha: 0.12),
-                            borderRadius:
-                                BorderRadius.circular(AppSpacing.radiusFull),
-                            border: Border.all(
-                              color: gradeTier.color.withValues(alpha: 0.3),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                gradeTier.icon,
-                                color: gradeTier.color,
-                                size: 16,
-                              ),
-                              const SizedBox(width: AppSpacing.s6),
-                              Text(
-                                gradeTier.label,
-                                style: TextStyle(
-                                  fontSize: 12.5,
-                                  fontWeight: FontWeight.bold,
-                                  color: gradeTier.color,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.s16),
-
-                    // Verdict Title
-                    Text(
-                      isPassed
-                          ? context.l10n.congratulationsPassed
-                          : context.l10n.sorryNotPassed,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 19,
-                        fontWeight: FontWeight.w800,
-                        color: isPassed ? AppColors.success : AppColors.error,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.s4),
-
-                    Text(
-                      widget.exam.title,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-
-                    const SizedBox(height: AppSpacing.s20),
-                    const Divider(height: 1, color: AppColors.border),
-                    const SizedBox(height: AppSpacing.s20),
-
-                    // Prominent Academic Score Typography
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
-                      children: [
-                        Text(
-                          '$score',
-                          style: TextStyle(
-                            fontSize: 52,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -1,
-                            color:
-                                isPassed ? AppColors.success : AppColors.error,
-                          ),
-                        ),
-                        Text(
-                          ' / $maxScore',
-                          style: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textMuted,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: AppSpacing.s4),
-
-                    // Percentage & Pass Status
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.s12,
-                        vertical: AppSpacing.s4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: (isPassed ? AppColors.success : AppColors.error)
-                            .withValues(alpha: 0.1),
-                        borderRadius:
-                            BorderRadius.circular(AppSpacing.radiusSmall),
-                      ),
-                      child: Text(
-                        context.l10n.percentageLabel(
-                          percentage.toStringAsFixed(1),
-                        ),
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: isPassed ? AppColors.success : AppColors.error,
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: AppSpacing.s16),
-
-                    // Linear Passing Indicator Bar
-                    if (passingScore != null) ...[
-                      Column(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
-                            child: LinearProgressIndicator(
-                              value: (maxScore > 0 ? (score / maxScore) : 0.0)
-                                  .clamp(0.0, 1.0),
-                              minHeight: 8,
-                              backgroundColor: AppColors.surfaceVariant,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                isPassed ? AppColors.success : AppColors.error,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: AppSpacing.s6),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                context.l10n.requiredPassingScore(
-                                  passingScore,
-                                  maxScore,
-                                ),
-                                style: const TextStyle(
-                                  fontSize: 11.5,
-                                  color: AppColors.textMuted,
-                                ),
-                              ),
-                              Text(
-                                context.l10n.passingThresholdLabel(
-                                  ((passingScore / maxScore) * 100).round(),
-                                ),
-                                style: TextStyle(
-                                  fontSize: 11.5,
-                                  fontWeight: FontWeight.bold,
-                                  color: isPassed
-                                      ? AppColors.success
-                                      : AppColors.warning,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
-
-                    const SizedBox(height: AppSpacing.s16),
-
-                    // Subtitle message (Guidance & next steps)
-                    Text(
-                      isPassed
-                          ? context.l10n.examPassedSubtitle
-                          : context.l10n.examFailedSubtitle,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 12.5,
-                        height: 1.4,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
+              ExamResultHeroCard(
+                examTitle: widget.exam.title,
+                score: score,
+                maxScore: maxScore,
+                percentage: percentage,
+                isPassed: isPassed,
+                passingScore: passingScore,
               ),
 
               const SizedBox(height: AppSpacing.s16),
@@ -865,181 +656,28 @@ class _ExamResultPageState extends State<ExamResultPage> {
                 ],
               ),
 
+              // Pacing & Time Radar Analysis
+              if (_attempt.questionTimes.isNotEmpty) ...[
+                const SizedBox(height: AppSpacing.s16),
+                ExamPacingRadarCard(
+                  questionTimes: _attempt.questionTimes,
+                  flaggedGuesses: _attempt.flaggedGuesses,
+                  totalQuestions: totalQuestions,
+                ),
+              ],
+
               const SizedBox(height: AppSpacing.s16),
 
               // 4. Interactive Answer Sheet Matrix
-              if (questions.isNotEmpty) ...[
-                AppCard(
-                  padding: const EdgeInsets.all(AppSpacing.s16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            context.l10n.questionsMatrixTitle,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                          Wrap(
-                            spacing: AppSpacing.s8,
-                            children: [
-                              if (widget.exam.hasAttachedPdf)
-                                TextButton.icon(
-                                  style: TextButton.styleFrom(
-                                    visualDensity: VisualDensity.compact,
-                                    padding: EdgeInsets.zero,
-                                  ),
-                                  icon: const Icon(
-                                    Icons.picture_as_pdf_rounded,
-                                    size: 14,
-                                  ),
-                                  label: Text(
-                                    context.l10n.viewExamBooklet,
-                                    style: const TextStyle(fontSize: 11.5),
-                                  ),
-                                  onPressed: _openPdfBooklet,
-                                ),
-                              TextButton.icon(
-                                style: TextButton.styleFrom(
-                                  visualDensity: VisualDensity.compact,
-                                  padding: EdgeInsets.zero,
-                                ),
-                                icon: const Icon(
-                                  Icons.fact_check_outlined,
-                                  size: 14,
-                                ),
-                                label: Text(
-                                  context.l10n.reviewAllQuestionsAction,
-                                  style: const TextStyle(fontSize: 11.5),
-                                ),
-                                onPressed: () => _openReview(),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: AppSpacing.s4),
-                      Text(
-                        context.l10n.questionsMatrixSubtitle,
-                        style: const TextStyle(
-                          fontSize: 11.5,
-                          color: AppColors.textMuted,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.s12),
-
-                      // Status Legends
-                      Row(
-                        children: [
-                          _buildLegendPill(
-                            context.l10n.statusCorrect,
-                            AppColors.success,
-                          ),
-                          const SizedBox(width: AppSpacing.s8),
-                          _buildLegendPill(
-                            context.l10n.statusIncorrect,
-                            AppColors.error,
-                          ),
-                          const SizedBox(width: AppSpacing.s8),
-                          _buildLegendPill(
-                            context.l10n.statusSkipped,
-                            AppColors.warning,
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: AppSpacing.s14),
-
-                      // Questions Grid Tiles
-                      Wrap(
-                        spacing: AppSpacing.s8,
-                        runSpacing: AppSpacing.s8,
-                        children: List.generate(questions.length, (index) {
-                          final q = questions[index];
-                          final ans = answers.firstWhere(
-                            (a) => a.questionId == q.id,
-                            orElse: () => ExamAnswerEntity(
-                              id: '',
-                              attemptId: _attempt.id,
-                              questionId: q.id,
-                              answeredAt: DateTime.now(),
-                            ),
-                          );
-
-                          Color chipColor;
-                          Color chipBg;
-                          IconData chipIcon;
-
-                          if (ans.isCorrect == true) {
-                            chipColor = AppColors.success;
-                            chipBg = AppColors.success.withValues(alpha: 0.12);
-                            chipIcon = Icons.check;
-                          } else if (ans.selectedOptionId != null &&
-                              ans.isCorrect == false) {
-                            chipColor = AppColors.error;
-                            chipBg = AppColors.error.withValues(alpha: 0.12);
-                            chipIcon = Icons.close;
-                          } else {
-                            chipColor = AppColors.warning;
-                            chipBg = AppColors.warning.withValues(alpha: 0.12);
-                            chipIcon = Icons.remove;
-                          }
-
-                          return InkWell(
-                            onTap: () => _openReview(initialQuestionIndex: index),
-                            borderRadius: BorderRadius.circular(
-                              AppSpacing.radiusSmall,
-                            ),
-                            child: Container(
-                              width: 54,
-                              height: 48,
-                              decoration: BoxDecoration(
-                                color: chipBg,
-                                borderRadius: BorderRadius.circular(
-                                  AppSpacing.radiusSmall,
-                                ),
-                                border: Border.all(
-                                  color: chipColor.withValues(alpha: 0.5),
-                                ),
-                              ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    '${index + 1}',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.bold,
-                                      color: chipColor,
-                                    ),
-                                  ),
-                                  Icon(
-                                    chipIcon,
-                                    size: 13,
-                                    color: chipColor,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        }),
-                      ),
-                    ],
-                  ),
-                ),
-              ] else if (_isLoadingDetails) ...[
-                const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(AppSpacing.s16),
-                    child: CircularProgressIndicator(),
-                  ),
-                ),
-              ],
+              ExamResultQuestionsMatrix(
+                questions: questions,
+                answers: answers,
+                attemptId: _attempt.id,
+                isLoadingDetails: _isLoadingDetails,
+                hasAttachedPdf: widget.exam.hasAttachedPdf,
+                onOpenReview: (idx) => _openReview(initialQuestionIndex: idx),
+                onOpenPdfBooklet: _openPdfBooklet,
+              ),
 
               const SizedBox(height: AppSpacing.s24),
 
@@ -1248,43 +886,4 @@ class _ExamResultPageState extends State<ExamResultPage> {
       ),
     );
   }
-
-  Widget _buildLegendPill(String label, Color color) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
-        ),
-        const SizedBox(width: 4),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
-            color: color,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _GradeTier {
-  final String label;
-  final Color color;
-  final IconData icon;
-  final String badgeText;
-
-  const _GradeTier({
-    required this.label,
-    required this.color,
-    required this.icon,
-    required this.badgeText,
-  });
 }

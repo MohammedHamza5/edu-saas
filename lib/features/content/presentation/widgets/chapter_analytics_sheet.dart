@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
-import '../../../../core/network/supabase_service.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../cubit/content_cubit.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_loading_view.dart';
 import '../../domain/entities/chapter_entity.dart';
@@ -86,91 +87,14 @@ class _ChapterAnalyticsSheetState extends State<ChapterAnalyticsSheet> {
   }
 
   Future<void> _loadChapterAnalytics() async {
+    if (!mounted) return;
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
 
     try {
-      final client = SupabaseService.client;
-
-      // 1. Fetch active students in the group
-      final membersRes = await client
-          .from('group_members')
-          .select('student_id')
-          .eq('group_id', widget.groupId)
-          .eq('status', 'active');
-      final studentIds = (membersRes as List)
-          .map((m) => m['student_id'] as String?)
-          .whereType<String>()
-          .toSet()
-          .toList();
-
-      final totalStudents = studentIds.length;
-
-      // 2. Fetch video IDs belonging to this chapter's lessons
       final lessonIds = widget.chapterLessons.map((l) => l.id).toList();
-      final List<String> videoIds = [];
-      if (lessonIds.isNotEmpty) {
-        final videosRes = await client
-            .from('videos')
-            .select('id, content_id')
-            .inFilter('content_id', lessonIds);
-        for (final v in (videosRes as List)) {
-          if (v['id'] != null) {
-            videoIds.add(v['id'] as String);
-          }
-        }
-      }
-
-      // 3. Calculate video views & student completion
-      int totalViews = 0;
-      final Map<String, Set<String>> studentCompletedVideos = {};
-      final Map<String, int> studentWatchedCount = {};
-
-      if (videoIds.isNotEmpty) {
-        final vpRes = await client
-            .from('video_progress')
-            .select('student_id, video_id, completed, progress_seconds')
-            .inFilter('video_id', videoIds);
-
-        final vpList = vpRes as List;
-        for (final row in vpList) {
-          final sId = row['student_id'] as String?;
-          final vId = row['video_id'] as String?;
-          final progSec = row['progress_seconds'] as int? ?? 0;
-          final isComp = row['completed'] == true;
-
-          if (progSec > 0) {
-            totalViews++;
-            if (sId != null) {
-              studentWatchedCount[sId] = (studentWatchedCount[sId] ?? 0) + 1;
-            }
-          }
-
-          if (isComp && sId != null && vId != null) {
-            studentCompletedVideos.putIfAbsent(sId, () => <String>{}).add(vId);
-          }
-        }
-      }
-
-      int completedCount = 0;
-      int inProgressCount = 0;
-      int notStartedCount = 0;
-
-      for (final sId in studentIds) {
-        final completedSet = studentCompletedVideos[sId] ?? {};
-        if (videoIds.isNotEmpty && completedSet.length >= videoIds.length) {
-          completedCount++;
-        } else if ((studentWatchedCount[sId] ?? 0) > 0 || completedSet.isNotEmpty) {
-          inProgressCount++;
-        } else {
-          notStartedCount++;
-        }
-      }
-
-      // 4. Calculate Quizzes average for this chapter
-      double? avgScore;
       final examIds = widget.chapterLessons
           .expand((l) => [
                 if (l.associatedExamId != null) l.associatedExamId!,
@@ -179,43 +103,24 @@ class _ChapterAnalyticsSheetState extends State<ChapterAnalyticsSheet> {
           .toSet()
           .toList();
 
-      if (examIds.isNotEmpty) {
-        final attemptsRes = await client
-            .from('exam_attempts')
-            .select('percentage')
-            .inFilter('exam_id', examIds)
-            .inFilter('status', ['submitted', 'completed']);
+      final analytics = await context.read<ContentCubit>().getChapterAnalytics(
+        groupId: widget.groupId,
+        lessonIds: lessonIds,
+        examIds: examIds,
+      );
 
-        final attempts = attemptsRes as List;
-        if (attempts.isNotEmpty) {
-          double sum = 0;
-          int valid = 0;
-          for (final a in attempts) {
-            final p = a['percentage'];
-            if (p != null) {
-              final val = p is num ? p.toDouble() : double.tryParse(p.toString());
-              if (val != null) {
-                sum += val;
-                valid++;
-              }
-            }
-          }
-          if (valid > 0) {
-            avgScore = sum / valid;
-          }
-        }
-      }
-
-      if (mounted) {
+      if (mounted && analytics != null) {
         setState(() {
-          _totalActiveStudents = totalStudents;
-          _totalVideoViews = totalViews;
-          _completedStudentsCount = completedCount;
-          _inProgressStudentsCount = inProgressCount;
-          _notStartedStudentsCount = notStartedCount;
-          _averageQuizScore = avgScore;
+          _totalActiveStudents = analytics.totalStudents;
+          _totalVideoViews = analytics.totalViews;
+          _completedStudentsCount = analytics.completedCount;
+          _inProgressStudentsCount = analytics.inProgressCount;
+          _notStartedStudentsCount = analytics.notStartedCount;
+          _averageQuizScore = analytics.averageScore;
           _isLoading = false;
         });
+      } else if (mounted) {
+        setState(() => _isLoading = false);
       }
     } catch (e) {
       if (mounted) {
@@ -227,7 +132,7 @@ class _ChapterAnalyticsSheetState extends State<ChapterAnalyticsSheet> {
     }
   }
 
-  @override
+    @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);

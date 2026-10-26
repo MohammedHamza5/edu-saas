@@ -442,16 +442,35 @@ class ErrorMapper {
   }) {
     final lower = text.toLowerCase();
 
-    // Network indicators
+    // Network & Transport indicators (Native & Modern Web)
     if (lower.contains('socketexception') ||
         lower.contains('failed host lookup') ||
         lower.contains('network is unreachable') ||
         lower.contains('connection refused') ||
         lower.contains('connection reset') ||
+        lower.contains('connection aborted') ||
+        lower.contains('connection closed') ||
         lower.contains('clientexception') ||
         lower.contains('handshakeexception') ||
         lower.contains('network error') ||
-        lower.contains('network connection error')) {
+        lower.contains('network connection error') ||
+        lower.contains('xmlhttprequest') ||
+        lower.contains('failed to fetch') ||
+        lower.contains('load failed') ||
+        lower.contains('typeerror: load failed') ||
+        lower.contains('typeerror: failed to fetch') ||
+        lower.contains('networkerror') ||
+        lower.contains('net::err') ||
+        lower.contains('offline') ||
+        lower.contains('is offline') ||
+        lower.contains('err_internet_disconnected') ||
+        lower.contains('err_name_not_resolved') ||
+        lower.contains('err_connection_refused') ||
+        lower.contains('err_connection_timed_out') ||
+        lower.contains('host lookup failed') ||
+        lower.contains('no address associated with hostname') ||
+        lower.contains('http status code 0') ||
+        lower.contains('status code 0')) {
       return _networkError(customCode ?? 'NET_001', raw: text);
     }
 
@@ -529,8 +548,33 @@ class ErrorMapper {
     }
 
     // Video
-    if (lower.contains('video_not_ready')) {
+    if (lower.contains('video_not_ready') ||
+        lower.contains('bunny_404') ||
+        lower.contains('transcoding')) {
       return _videoProcessingError(customCode ?? 'VID_PROC', raw: text);
+    }
+
+    // Database & Constraint Indicators (Prevent raw SQL/PostgREST leaks)
+    if (lower.contains('duplicate key') ||
+        lower.contains('violates unique constraint') ||
+        lower.contains('23505')) {
+      return _conflictError('', customCode ?? 'DB_DUP_KEY', raw: text);
+    }
+    if (lower.contains('null value in column') ||
+        lower.contains('violates not-null constraint') ||
+        lower.contains('violates check constraint') ||
+        lower.contains('23502')) {
+      return _validationError('', customCode ?? 'DB_VALIDATION', raw: text);
+    }
+    if (lower.contains('violates foreign key constraint') ||
+        lower.contains('23503')) {
+      return _conflictError('', customCode ?? 'DB_FK_CONSTRAINT', raw: text);
+    }
+    if (lower.contains('pgrst116') ||
+        lower.contains('no rows returned') ||
+        lower.contains('item not found') ||
+        lower.contains('record not found')) {
+      return _notFoundError(customCode ?? 'RES_404', raw: text);
     }
 
     // Default server/unknown error

@@ -310,6 +310,14 @@ class _SimulatedContentRepo implements ContentRepository {
   Future<Result<void>> reorderCourseChapters({required String groupId, required List<String> chapterIdsInOrder}) async => const Success(null);
   @override
   Future<Result<void>> removeLessonFromGroup({required String contentId, required String groupId}) async => const Success(null);
+  @override
+  Future<Result<List<Map<String, dynamic>>>> getAvailableExamsSummary() async =>
+      const Success([]);
+
+  @override
+  Future<Result<Map<String, String>?>> getExamByContentId(String contentId) async =>
+      const Success(null);
+
 }
 
 // ---------------------------------------------------------------------------

@@ -1,16 +1,18 @@
 import 'dart:convert';
 import '../../../../core/utils/app_logger.dart';
 import '../../../../core/utils/secure_storage_helper.dart';
+import '../../domain/repositories/exam_draft_storage.dart';
 
 /// Local data source to safely persist teacher's in-progress exam creation drafts.
 /// Protects against power outages, accidental browser closures, or reloads.
 /// Operates with zero database impact and zero risk to existing production workflows.
-class ExamDraftLocalDataSource {
+class ExamDraftLocalDataSource implements ExamDraftStorage {
   static const String _keyPrefix = 'edu_exam_draft_';
 
   const ExamDraftLocalDataSource();
 
   /// Persists the draft JSON structure into secure local storage.
+  @override
   Future<void> saveDraft({
     required String draftKey,
     required Map<String, dynamic> data,
@@ -32,6 +34,7 @@ class ExamDraftLocalDataSource {
   }
 
   /// Retrieves the saved draft for the given key, or null if none exists.
+  @override
   Future<Map<String, dynamic>?> getDraft(String draftKey) async {
     try {
       final jsonStr = await SecureStorageHelper.read(key: '$_keyPrefix$draftKey');
@@ -53,6 +56,7 @@ class ExamDraftLocalDataSource {
   }
 
   /// Removes the draft when the exam is successfully created or discarded.
+  @override
   Future<void> clearDraft(String draftKey) async {
     try {
       await SecureStorageHelper.delete(key: '$_keyPrefix$draftKey');

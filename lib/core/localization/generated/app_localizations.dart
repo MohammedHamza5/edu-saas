@@ -1898,10 +1898,10 @@ abstract class AppLocalizations {
   /// **'Previous'**
   String get previousQuestionAction;
 
-  /// Next question button
+  /// No description provided for @nextQuestionAction.
   ///
   /// In en, this message translates to:
-  /// **'Next'**
+  /// **'Next Question'**
   String get nextQuestionAction;
 
   /// Flag button
@@ -6631,10 +6631,10 @@ abstract class AppLocalizations {
   /// **'Previous'**
   String get previousQuestion;
 
-  /// Next question button
+  /// No description provided for @nextQuestion.
   ///
   /// In en, this message translates to:
-  /// **'Next'**
+  /// **'Next Question'**
   String get nextQuestion;
 
   /// Submit exam button
@@ -14431,6 +14431,24 @@ abstract class AppLocalizations {
   /// **'Resend'**
   String get resendToParentAction;
 
+  /// No description provided for @examResultsHiddenSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The instructor has temporarily hidden answer keys and question review. It will become accessible once results are officially published.'**
+  String get examResultsHiddenSubtitle;
+
+  /// No description provided for @examResultsHiddenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Answers Submitted Successfully'**
+  String get examResultsHiddenTitle;
+
+  /// No description provided for @sendNewScoreToParentAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Updated Score'**
+  String get sendNewScoreToParentAction;
+
   /// No description provided for @dispatchSentBadge.
   ///
   /// In en, this message translates to:
@@ -16116,6 +16134,1170 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Practice Question'**
   String get practiceSingleQuestionAction;
+
+  /// No description provided for @pacingRadarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Time & Speed Analysis'**
+  String get pacingRadarTitle;
+
+  /// No description provided for @pacingRadarSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Detailed breakdown of your pacing per question'**
+  String get pacingRadarSubtitle;
+
+  /// No description provided for @pacingFast.
+  ///
+  /// In en, this message translates to:
+  /// **'Fast (< 60s)'**
+  String get pacingFast;
+
+  /// No description provided for @pacingNormal.
+  ///
+  /// In en, this message translates to:
+  /// **'Optimal (60-90s)'**
+  String get pacingNormal;
+
+  /// No description provided for @pacingSlow.
+  ///
+  /// In en, this message translates to:
+  /// **'Time Sink (> 90s)'**
+  String get pacingSlow;
+
+  /// No description provided for @pacingAvgPerQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg Time per Question: {seconds}s'**
+  String pacingAvgPerQuestion(int seconds);
+
+  /// No description provided for @flagAsGuessTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as uncertain / guess'**
+  String get flagAsGuessTooltip;
+
+  /// No description provided for @unflagGuessTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmark guess'**
+  String get unflagGuessTooltip;
+
+  /// No description provided for @guessFlagLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Guess'**
+  String get guessFlagLabel;
+
+  /// No description provided for @luckyGuessBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Lucky Guess 🍀'**
+  String get luckyGuessBadge;
+
+  /// No description provided for @luckyGuessNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'You answered correctly but marked this as a guess. Review to solidify the concept.'**
+  String get luckyGuessNotice;
+
+  /// No description provided for @eliminateOptionTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Cross out option (Elimination)'**
+  String get eliminateOptionTooltip;
+
+  /// No description provided for @reflectionHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Why did you miss this question?'**
+  String get reflectionHeader;
+
+  /// No description provided for @reflectionConceptGap.
+  ///
+  /// In en, this message translates to:
+  /// **'Concept Gap'**
+  String get reflectionConceptGap;
+
+  /// No description provided for @reflectionConceptGapDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Did not know the rule or formula'**
+  String get reflectionConceptGapDesc;
+
+  /// No description provided for @reflectionCarelessError.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculation Error'**
+  String get reflectionCarelessError;
+
+  /// No description provided for @reflectionCarelessErrorDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Arithmetic or sign error'**
+  String get reflectionCarelessErrorDesc;
+
+  /// No description provided for @reflectionMisreadQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Misread Wording'**
+  String get reflectionMisreadQuestion;
+
+  /// No description provided for @reflectionMisreadQuestionDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Missed keyword or solved for wrong variable'**
+  String get reflectionMisreadQuestionDesc;
+
+  /// No description provided for @reflectionTimePressure.
+  ///
+  /// In en, this message translates to:
+  /// **'Time Pressure'**
+  String get reflectionTimePressure;
+
+  /// No description provided for @reflectionTimePressureDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Ran out of time and had to guess'**
+  String get reflectionTimePressureDesc;
+
+  /// No description provided for @reflectionUnclassified.
+  ///
+  /// In en, this message translates to:
+  /// **'Not Classified'**
+  String get reflectionUnclassified;
+
+  /// No description provided for @filterByReflectionReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by Mistake Reason'**
+  String get filterByReflectionReason;
+
+  /// No description provided for @reflectionSavedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Reflection saved successfully'**
+  String get reflectionSavedSuccess;
+
+  /// No description provided for @scratchpadPen.
+  ///
+  /// In en, this message translates to:
+  /// **'Pen'**
+  String get scratchpadPen;
+
+  /// No description provided for @scratchpadHighlighter.
+  ///
+  /// In en, this message translates to:
+  /// **'Highlighter'**
+  String get scratchpadHighlighter;
+
+  /// No description provided for @scratchpadEraser.
+  ///
+  /// In en, this message translates to:
+  /// **'Eraser'**
+  String get scratchpadEraser;
+
+  /// No description provided for @scratchpadUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get scratchpadUndo;
+
+  /// No description provided for @scratchpadClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Canvas'**
+  String get scratchpadClear;
+
+  /// No description provided for @scratchpadGridPaper.
+  ///
+  /// In en, this message translates to:
+  /// **'Grid Paper'**
+  String get scratchpadGridPaper;
+
+  /// No description provided for @scratchpadOverlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Transparent Mode'**
+  String get scratchpadOverlay;
+
+  /// No description provided for @scratchpadClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close Scratchpad'**
+  String get scratchpadClose;
+
+  /// No description provided for @scratchpadTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Digital Scratchpad (Pencil)'**
+  String get scratchpadTooltip;
+
+  /// No description provided for @formulaSheetTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Formula Reference Sheet'**
+  String get formulaSheetTooltip;
+
+  /// No description provided for @formulaSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Math Reference Sheet & Desmos'**
+  String get formulaSheetTitle;
+
+  /// No description provided for @formulaGeometryTab.
+  ///
+  /// In en, this message translates to:
+  /// **'SAT Formulas'**
+  String get formulaGeometryTab;
+
+  /// No description provided for @formulaDesmosTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Desmos Hacks'**
+  String get formulaDesmosTab;
+
+  /// No description provided for @formulaCircleDegrees.
+  ///
+  /// In en, this message translates to:
+  /// **'The number of degrees of arc in a circle is 360°'**
+  String get formulaCircleDegrees;
+
+  /// No description provided for @formulaCircleRadians.
+  ///
+  /// In en, this message translates to:
+  /// **'The number of radians of arc in a circle is 2π'**
+  String get formulaCircleRadians;
+
+  /// No description provided for @formulaTriangleSum.
+  ///
+  /// In en, this message translates to:
+  /// **'The sum of the measures of the angles of a triangle is 180°'**
+  String get formulaTriangleSum;
+
+  /// No description provided for @desmosRegressionTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Table Regression: Add table and type y1 ~ mx1 + b to instantly find slope and y-intercept.'**
+  String get desmosRegressionTip;
+
+  /// No description provided for @desmosIntersectionTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Finding Intersections: Graph both equations; tap the gray intersection point to see exact (x, y).'**
+  String get desmosIntersectionTip;
+
+  /// No description provided for @desmosVertexTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Quadratic Vertex: Type y = ax^2 + bx + c; tap the peak or bottom point for vertex coordinates.'**
+  String get desmosVertexTip;
+
+  /// No description provided for @desmosSlidersTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Sliders: Type equations with constants like k and click add slider to test values visually.'**
+  String get desmosSlidersTip;
+
+  /// No description provided for @gauntletTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Zero-Mistake Gauntlet'**
+  String get gauntletTitle;
+
+  /// No description provided for @gauntletSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Slay your unresolved mistakes and master every concept!'**
+  String get gauntletSubtitle;
+
+  /// No description provided for @gauntletRemainingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} to Zero'**
+  String gauntletRemainingLabel(Object count);
+
+  /// No description provided for @gauntletStartBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Gauntlet'**
+  String get gauntletStartBtn;
+
+  /// No description provided for @gauntletCriticalBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Critical'**
+  String gauntletCriticalBadge(Object count);
+
+  /// No description provided for @sprintTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'5-Question Sprint'**
+  String get sprintTitle;
+
+  /// No description provided for @sprintSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rapid 7-minute challenge'**
+  String get sprintSubtitle;
+
+  /// No description provided for @sprintStartBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'5-Q Sprint'**
+  String get sprintStartBtn;
+
+  /// No description provided for @sortDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get sortDefault;
+
+  /// No description provided for @sortMostFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Failed'**
+  String get sortMostFailed;
+
+  /// No description provided for @sortNewest.
+  ///
+  /// In en, this message translates to:
+  /// **'Newest'**
+  String get sortNewest;
+
+  /// No description provided for @sortPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'Highest Points'**
+  String get sortPoints;
+
+  /// No description provided for @mistakeSlayedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Mistake Slayed! 🎯'**
+  String get mistakeSlayedSuccess;
+
+  /// No description provided for @streakDaysCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Day Streak'**
+  String streakDaysCount(int count);
+
+  /// No description provided for @streakTodayDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Active today! Flame is lit 🔥'**
+  String get streakTodayDone;
+
+  /// No description provided for @streakTodayPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete an exam or drill today to extend streak!'**
+  String get streakTodayPending;
+
+  /// No description provided for @longestStreakRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'Best: {count}d'**
+  String longestStreakRecord(int count);
+
+  /// No description provided for @predictedSatScoreTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated SAT Math Score'**
+  String get predictedSatScoreTitle;
+
+  /// No description provided for @predictedSatScoreBand.
+  ///
+  /// In en, this message translates to:
+  /// **'{low} - {high}'**
+  String predictedSatScoreBand(int low, int high);
+
+  /// No description provided for @predictedSatScoreNeedsMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete 2+ exams to unlock your estimated SAT score range'**
+  String get predictedSatScoreNeedsMore;
+
+  /// No description provided for @predictedSatScoreSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Based on your recent assessment performance'**
+  String get predictedSatScoreSubtitle;
+
+  /// No description provided for @earnedBadgesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mastery Badges'**
+  String get earnedBadgesTitle;
+
+  /// No description provided for @badgeGauntletSlayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Gauntlet Slayer'**
+  String get badgeGauntletSlayer;
+
+  /// No description provided for @badgeGauntletSlayerDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Eliminated all unresolved mistakes from the Mistakes Bank.'**
+  String get badgeGauntletSlayerDesc;
+
+  /// No description provided for @badgeConsistencyKing.
+  ///
+  /// In en, this message translates to:
+  /// **'Consistency King'**
+  String get badgeConsistencyKing;
+
+  /// No description provided for @badgeConsistencyKingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Maintained a 5-day active study streak.'**
+  String get badgeConsistencyKingDesc;
+
+  /// No description provided for @badgeSpeedDemon.
+  ///
+  /// In en, this message translates to:
+  /// **'Speed Demon'**
+  String get badgeSpeedDemon;
+
+  /// No description provided for @badgeSpeedDemonDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed an exam in under 50% time with score ≥ 85%.'**
+  String get badgeSpeedDemonDesc;
+
+  /// No description provided for @badgeHighAchiever.
+  ///
+  /// In en, this message translates to:
+  /// **'High Achiever'**
+  String get badgeHighAchiever;
+
+  /// No description provided for @badgeHighAchieverDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Maintained an overall average score of 90% or higher.'**
+  String get badgeHighAchieverDesc;
+
+  /// No description provided for @badgeLockedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked'**
+  String get badgeLockedStatus;
+
+  /// No description provided for @badgeUnlockedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlocked!'**
+  String get badgeUnlockedStatus;
+
+  /// No description provided for @viewAllBadges.
+  ///
+  /// In en, this message translates to:
+  /// **'View All'**
+  String get viewAllBadges;
+
+  /// No description provided for @allBadgesDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Academic Badges & Honors'**
+  String get allBadgesDialogTitle;
+
+  /// Tooltip to dock calculator to side panel
+  ///
+  /// In en, this message translates to:
+  /// **'Dock calculator to side panel'**
+  String get dockCalculatorTooltip;
+
+  /// Tooltip to undock calculator into a floating window
+  ///
+  /// In en, this message translates to:
+  /// **'Float calculator as movable window'**
+  String get undockCalculatorTooltip;
+
+  /// Title for the exam utility dock
+  ///
+  /// In en, this message translates to:
+  /// **'Exam Tools'**
+  String get utilityDockTitle;
+
+  /// Tooltip to collapse tools panel
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse tools panel'**
+  String get collapseToolsTooltip;
+
+  /// Tooltip to expand tools panel
+  ///
+  /// In en, this message translates to:
+  /// **'Expand tools panel'**
+  String get expandToolsTooltip;
+
+  /// Tab title for calculator in utility dock
+  ///
+  /// In en, this message translates to:
+  /// **'Calculator'**
+  String get dockTabCalculator;
+
+  /// Tab title for formula reference in utility dock
+  ///
+  /// In en, this message translates to:
+  /// **'Reference Sheet'**
+  String get dockTabFormulas;
+
+  /// No description provided for @savedQuestionsVaultTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved Questions Vault'**
+  String get savedQuestionsVaultTitle;
+
+  /// No description provided for @savedQuestionsVaultSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review and practice bookmarked questions smartly'**
+  String get savedQuestionsVaultSubtitle;
+
+  /// No description provided for @saveToVault.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to Vault'**
+  String get saveToVault;
+
+  /// No description provided for @removeFromVault.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from Vault'**
+  String get removeFromVault;
+
+  /// No description provided for @savedToVaultSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Question saved to your personal vault ⭐'**
+  String get savedToVaultSuccess;
+
+  /// No description provided for @removedFromVaultSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Question removed from your vault'**
+  String get removedFromVaultSuccess;
+
+  /// No description provided for @personalNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal Note'**
+  String get personalNote;
+
+  /// No description provided for @addPersonalNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Personal Note'**
+  String get addPersonalNote;
+
+  /// No description provided for @editPersonalNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Note'**
+  String get editPersonalNote;
+
+  /// No description provided for @addNoteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a quick note or mnemonic for this problem...'**
+  String get addNoteHint;
+
+  /// No description provided for @saveNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Note'**
+  String get saveNote;
+
+  /// No description provided for @difficultyRatingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How difficult was this question for you?'**
+  String get difficultyRatingTitle;
+
+  /// No description provided for @difficultyEasy.
+  ///
+  /// In en, this message translates to:
+  /// **'Easy'**
+  String get difficultyEasy;
+
+  /// No description provided for @difficultyMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get difficultyMedium;
+
+  /// No description provided for @difficultyHard.
+  ///
+  /// In en, this message translates to:
+  /// **'Hard'**
+  String get difficultyHard;
+
+  /// No description provided for @difficultyEasyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Mastered • Shows less often'**
+  String get difficultyEasyDesc;
+
+  /// No description provided for @difficultyMediumDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Review later'**
+  String get difficultyMediumDesc;
+
+  /// No description provided for @difficultyHardDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeats this session'**
+  String get difficultyHardDesc;
+
+  /// No description provided for @startAnkiDrill.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Active Recall Drill'**
+  String get startAnkiDrill;
+
+  /// No description provided for @ankiDrillTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Recall Drill'**
+  String get ankiDrillTitle;
+
+  /// No description provided for @checkAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Check Answer'**
+  String get checkAnswer;
+
+  /// No description provided for @ankiDrillCompletedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Drill Session Completed! 🎯'**
+  String get ankiDrillCompletedTitle;
+
+  /// No description provided for @ankiDrillCompletedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'You reviewed all questions in your active recall queue.'**
+  String get ankiDrillCompletedDesc;
+
+  /// No description provided for @drillTotalReviewed.
+  ///
+  /// In en, this message translates to:
+  /// **'Questions Reviewed'**
+  String get drillTotalReviewed;
+
+  /// No description provided for @drillMasteredCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Mastered (Easy)'**
+  String get drillMasteredCount;
+
+  /// No description provided for @drillHardRepeated.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeated (Hard)'**
+  String get drillHardRepeated;
+
+  /// No description provided for @finishDrill.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish Drill'**
+  String get finishDrill;
+
+  /// No description provided for @emptyVaultTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Vault is Empty'**
+  String get emptyVaultTitle;
+
+  /// No description provided for @emptyVaultSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save questions from exams or mistake drills to practice them in active recall mode.'**
+  String get emptyVaultSubtitle;
+
+  /// No description provided for @bluebookReviewGrid.
+  ///
+  /// In en, this message translates to:
+  /// **'Review & Question Grid'**
+  String get bluebookReviewGrid;
+
+  /// No description provided for @unansweredQuestionsWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Warning: You have {count} unanswered question(s)!'**
+  String unansweredQuestionsWarning(int count);
+
+  /// No description provided for @unansweredQuestionsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to finish the exam without answering them?'**
+  String get unansweredQuestionsDesc;
+
+  /// No description provided for @flaggedForReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Flagged for Review'**
+  String get flaggedForReview;
+
+  /// No description provided for @answeredStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Answered'**
+  String get answeredStatus;
+
+  /// No description provided for @unansweredStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Unanswered'**
+  String get unansweredStatus;
+
+  /// No description provided for @allDifficulties.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get allDifficulties;
+
+  /// No description provided for @searchSavedQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Search in questions or notes...'**
+  String get searchSavedQuestions;
+
+  /// No description provided for @mistakeVaultTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tactical Mistake Vault'**
+  String get mistakeVaultTitle;
+
+  /// No description provided for @saveToMistakeVaultAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to Mistake Vault'**
+  String get saveToMistakeVaultAction;
+
+  /// No description provided for @savedToMistakeVaultSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved to your tactical mistake vault'**
+  String get savedToMistakeVaultSuccess;
+
+  /// No description provided for @smartReattemptAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Smart Re-Attempt'**
+  String get smartReattemptAction;
+
+  /// No description provided for @filterNeedsReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs Review'**
+  String get filterNeedsReview;
+
+  /// No description provided for @filterMastered.
+  ///
+  /// In en, this message translates to:
+  /// **'Mastered'**
+  String get filterMastered;
+
+  /// No description provided for @filterAllQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'All Questions'**
+  String get filterAllQuestions;
+
+  /// No description provided for @markAsMasteredAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as Mastered'**
+  String get markAsMasteredAction;
+
+  /// No description provided for @markedAsMasteredSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Great job! Marked as mastered'**
+  String get markedAsMasteredSuccess;
+
+  /// No description provided for @unmarkAsMasteredAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs Review Again'**
+  String get unmarkAsMasteredAction;
+
+  /// No description provided for @previousExamMistakeBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous Exam Mistake'**
+  String get previousExamMistakeBadge;
+
+  /// No description provided for @masteredBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Mastered'**
+  String get masteredBadge;
+
+  /// No description provided for @checkAnswerButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Check Answer'**
+  String get checkAnswerButton;
+
+  /// No description provided for @correctAnswerCelebration.
+  ///
+  /// In en, this message translates to:
+  /// **'Brilliant! Your answer is correct 🎉'**
+  String get correctAnswerCelebration;
+
+  /// No description provided for @wrongAnswerNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Not quite. The correct answer was'**
+  String get wrongAnswerNotice;
+
+  /// No description provided for @pdfExamQuestionNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Question from PDF Exam'**
+  String get pdfExamQuestionNotice;
+
+  /// No description provided for @tacticalMistakeVaultSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review and master the questions you got wrong to guarantee a top score.'**
+  String get tacticalMistakeVaultSubtitle;
+
+  /// No description provided for @startPracticeSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Practice Session'**
+  String get startPracticeSession;
+
+  /// No description provided for @practiceSessionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Smart Practice & Review'**
+  String get practiceSessionTitle;
+
+  /// No description provided for @questionCounter.
+  ///
+  /// In en, this message translates to:
+  /// **'Question {current} of {total}'**
+  String questionCounter(int current, int total);
+
+  /// No description provided for @finishSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish Session'**
+  String get finishSession;
+
+  /// No description provided for @practiceCompleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Session Completed! 🎉'**
+  String get practiceCompleteTitle;
+
+  /// No description provided for @practiceCompleteSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You reviewed {count} questions. Keep going to master all your weak spots.'**
+  String practiceCompleteSubtitle(int count);
+
+  /// No description provided for @solveQuestionAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Solve Question'**
+  String get solveQuestionAction;
+
+  /// No description provided for @filterDueToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Due Today'**
+  String get filterDueToday;
+
+  /// No description provided for @filterUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get filterUpcoming;
+
+  /// No description provided for @startDuePracticeAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Today\'s Review ({count})'**
+  String startDuePracticeAction(int count);
+
+  /// No description provided for @startDuePracticeEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No Due Reviews Today'**
+  String get startDuePracticeEmpty;
+
+  /// No description provided for @noDueTodayTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'All Caught Up for Today! 🎉'**
+  String get noDueTodayTitle;
+
+  /// No description provided for @noDueTodaySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve completed all scheduled questions for today. Your next review date is scheduled.'**
+  String get noDueTodaySubtitle;
+
+  /// No description provided for @leitnerScheduleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Spaced Repetition Schedule (1-3-6 Days)'**
+  String get leitnerScheduleTitle;
+
+  /// No description provided for @leitnerBox1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily (1 Day)'**
+  String get leitnerBox1Title;
+
+  /// No description provided for @leitnerBox2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Every 3 Days'**
+  String get leitnerBox2Title;
+
+  /// No description provided for @leitnerBox3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Every 6 Days'**
+  String get leitnerBox3Title;
+
+  /// No description provided for @rateDifficultyPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule Next Review:'**
+  String get rateDifficultyPrompt;
+
+  /// No description provided for @rateHard1Day.
+  ///
+  /// In en, this message translates to:
+  /// **'Hard (Tomorrow - 1d)'**
+  String get rateHard1Day;
+
+  /// No description provided for @rateMedium3Days.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium (3 Days)'**
+  String get rateMedium3Days;
+
+  /// No description provided for @rateEasy6Days.
+  ///
+  /// In en, this message translates to:
+  /// **'Easy (6 Days)'**
+  String get rateEasy6Days;
+
+  /// No description provided for @reviewDueTodayBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Due Today ⚡'**
+  String get reviewDueTodayBadge;
+
+  /// No description provided for @reviewDueTomorrowBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Review: Tomorrow'**
+  String get reviewDueTomorrowBadge;
+
+  /// No description provided for @reviewDueInDaysBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Review in {days}d'**
+  String reviewDueInDaysBadge(int days);
+
+  /// No description provided for @practiceCompletedDueNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s review session complete! All due questions scheduled.'**
+  String get practiceCompletedDueNotice;
+
+  /// No description provided for @backToVaultAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Vault'**
+  String get backToVaultAction;
+
+  /// No description provided for @demoQuickAccessHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Access • 1-Click Login'**
+  String get demoQuickAccessHeader;
+
+  /// No description provided for @demoLiveBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'LIVE DEMO'**
+  String get demoLiveBadge;
+
+  /// No description provided for @demoSelectAccountPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Select an account to log in instantly without typing:'**
+  String get demoSelectAccountPrompt;
+
+  /// No description provided for @demoTeacherLoginTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Login as Teacher (Dashboard & WhatsApp)'**
+  String get demoTeacherLoginTitle;
+
+  /// No description provided for @demoTeacherLoginSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create quizzes, Question Bank, WhatsApp parent dispatch'**
+  String get demoTeacherLoginSubtitle;
+
+  /// No description provided for @demoStudentTestLoginTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Login as Student (Take SAT Exam with Desmos)'**
+  String get demoStudentTestLoginTitle;
+
+  /// No description provided for @demoStudentTestLoginSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Experience embedded Desmos calculator, scratchpad & formulas'**
+  String get demoStudentTestLoginSubtitle;
+
+  /// No description provided for @demoStudentMistakesLoginTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Login as Student (Mistakes Vault & Anki Drills)'**
+  String get demoStudentMistakesLoginTitle;
+
+  /// No description provided for @demoStudentMistakesLoginSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore spaced-repetition practice with flashcards'**
+  String get demoStudentMistakesLoginSubtitle;
+
+  /// No description provided for @demoBannerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Interactive VIP Demo • Experience the Future of Teaching'**
+  String get demoBannerTitle;
+
+  /// No description provided for @demoBannerSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore real quizzes, Desmos, parent reports, and attendance tracking.'**
+  String get demoBannerSubtitle;
+
+  /// No description provided for @demoBannerCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Book Platform Demo / Contact Us'**
+  String get demoBannerCta;
+
+  /// No description provided for @newFileBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get newFileBadge;
+
+  /// No description provided for @whatsappGatewayDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Automated WhatsApp Gateway Settings'**
+  String get whatsappGatewayDialogTitle;
+
+  /// No description provided for @whatsappAutoDispatchToggleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-Dispatch Exam Results on Submit'**
+  String get whatsappAutoDispatchToggleTitle;
+
+  /// No description provided for @whatsappAutoDispatchToggleSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Instantly send exam report to parent WhatsApp hands-free'**
+  String get whatsappAutoDispatchToggleSubtitle;
+
+  /// No description provided for @whatsappGatewayConnectedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected & Ready for Auto-Dispatch'**
+  String get whatsappGatewayConnectedStatus;
+
+  /// No description provided for @whatsappGatewayQrReadyStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for QR Code Scan'**
+  String get whatsappGatewayQrReadyStatus;
+
+  /// No description provided for @whatsappGatewayDisconnectedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Gateway Disconnected'**
+  String get whatsappGatewayDisconnectedStatus;
+
+  /// No description provided for @whatsappConnectedPhoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected Phone'**
+  String get whatsappConnectedPhoneLabel;
+
+  /// No description provided for @whatsappScanQrInstruction.
+  ///
+  /// In en, this message translates to:
+  /// **'Open WhatsApp on device > Linked Devices > Scan the QR code below'**
+  String get whatsappScanQrInstruction;
+
+  /// No description provided for @whatsappQrAutoRefreshNote.
+  ///
+  /// In en, this message translates to:
+  /// **'QR code refreshes automatically until pairing completes'**
+  String get whatsappQrAutoRefreshNote;
+
+  /// No description provided for @whatsappSentTodayMetric.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent Today'**
+  String get whatsappSentTodayMetric;
+
+  /// No description provided for @whatsappPendingQueueMetric.
+  ///
+  /// In en, this message translates to:
+  /// **'In Queue'**
+  String get whatsappPendingQueueMetric;
+
+  /// No description provided for @whatsappFailedMetric.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get whatsappFailedMetric;
+
+  /// No description provided for @whatsappGatewaySettingsTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'WhatsApp Gateway Auto-Dispatch Settings'**
+  String get whatsappGatewaySettingsTooltip;
+
+  /// No description provided for @whatsappAutoDispatchActiveBannerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Parent WhatsApp Auto-Dispatch is Active'**
+  String get whatsappAutoDispatchActiveBannerTitle;
+
+  /// No description provided for @whatsappAutoDispatchActiveBannerSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Upon student exam submission, the report is dispatched to parent WhatsApp automatically'**
+  String get whatsappAutoDispatchActiveBannerSubtitle;
+
+  /// No description provided for @configureGatewayAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Configure Gateway'**
+  String get configureGatewayAction;
 }
 
 class _AppLocalizationsDelegate

@@ -243,6 +243,9 @@ class _SimulatedExamsRepo implements ExamsRepository {
   _SimulatedExamsRepo(this.backend, {this.activeStudentId = 'std-omar-01'});
 
   @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+
+  @override
   Future<Result<ExamEntity>> getExamDetails(String examId) async {
     return Success(backend.satOfficialExam);
   }
@@ -329,6 +332,11 @@ class _SimulatedExamsRepo implements ExamsRepository {
   Future<Result<ExamFolderEntity>> updateExamFolder({required String folderId, required String name, String? color, String? icon, String? description}) async => throw UnimplementedError();
   @override
   Future<Result<bool>> deleteExamFolder(String folderId) async => const Success(true);
+  @override
+  Future<Result<bool>> updateMistakeReflection({
+    required String mistakeId,
+    required String? reflectionReason,
+  }) async => const Success(true);
   @override
   Future<Result<bool>> moveExamToFolder({required String examId, String? folderId}) async => const Success(true);
 }

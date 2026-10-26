@@ -16,6 +16,7 @@ import 'package:edu_saas/features/notifications/domain/entities/notification_ent
 import 'package:edu_saas/features/notifications/domain/repositories/notifications_repository.dart';
 import 'package:edu_saas/features/notifications/presentation/cubit/notifications_cubit.dart';
 import 'package:edu_saas/features/notifications/presentation/cubit/notifications_state.dart';
+import 'package:edu_saas/features/notifications/presentation/extensions/notification_ui_extensions.dart';
 import 'package:edu_saas/features/notifications/presentation/pages/notifications_center_page.dart';
 import 'package:edu_saas/features/notifications/presentation/pages/send_announcement_page.dart';
 import 'package:edu_saas/features/notifications/presentation/widgets/notification_badge_button.dart';

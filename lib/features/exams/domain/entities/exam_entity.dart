@@ -1,7 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
-import '../../../../core/extensions/localized_context_extension.dart';
-import '../../../../core/theme/app_colors.dart';
 
 enum QuestionType {
   multipleChoice,
@@ -23,15 +20,6 @@ enum QuestionType {
         return 'multiple_choice';
       case QuestionType.trueFalse:
         return 'true_false';
-    }
-  }
-
-  String localizedLabel(BuildContext context) {
-    switch (this) {
-      case QuestionType.multipleChoice:
-        return context.l10n.questionTypeMultipleChoice;
-      case QuestionType.trueFalse:
-        return context.l10n.questionTypeTrueFalse;
     }
   }
 
@@ -64,17 +52,6 @@ enum ExamStatus {
 
   String get value => name;
 
-  String localizedLabel(BuildContext context) {
-    switch (this) {
-      case ExamStatus.draft:
-        return context.l10n.examStatusDraft;
-      case ExamStatus.published:
-        return context.l10n.examStatusPublished;
-      case ExamStatus.archived:
-        return context.l10n.statusArchived;
-    }
-  }
-
   String get labelAr {
     switch (this) {
       case ExamStatus.draft:
@@ -83,17 +60,6 @@ enum ExamStatus {
         return 'منشور (مجمد)';
       case ExamStatus.archived:
         return 'مؤرشف';
-    }
-  }
-
-  Color get color {
-    switch (this) {
-      case ExamStatus.draft:
-        return AppColors.warning;
-      case ExamStatus.published:
-        return AppColors.success;
-      case ExamStatus.archived:
-        return AppColors.textMuted;
     }
   }
 }
@@ -126,17 +92,6 @@ enum AttemptStatus {
     }
   }
 
-  String localizedLabel(BuildContext context) {
-    switch (this) {
-      case AttemptStatus.inProgress:
-        return context.l10n.attemptStatusInProgress;
-      case AttemptStatus.submitted:
-        return context.l10n.attemptStatusSubmitted;
-      case AttemptStatus.expired:
-        return context.l10n.attemptStatusExpired;
-    }
-  }
-
   String get labelAr {
     switch (this) {
       case AttemptStatus.inProgress:
@@ -145,17 +100,6 @@ enum AttemptStatus {
         return 'تم التسليم';
       case AttemptStatus.expired:
         return 'انتهى الوقت';
-    }
-  }
-
-  Color get color {
-    switch (this) {
-      case AttemptStatus.inProgress:
-        return AppColors.primary;
-      case AttemptStatus.submitted:
-        return AppColors.success;
-      case AttemptStatus.expired:
-        return AppColors.error;
     }
   }
 }
@@ -203,56 +147,7 @@ enum ExamSubmissionReason {
     }
   }
 
-  String localizedLabel(BuildContext context) {
-    switch (this) {
-      case ExamSubmissionReason.studentSubmitted:
-        return context.l10n.submissionReasonStudentSubmitted;
-      case ExamSubmissionReason.timeExpired:
-        return context.l10n.submissionReasonTimeExpired;
-      case ExamSubmissionReason.forcedExit:
-        return context.l10n.submissionReasonForcedExit;
-      case ExamSubmissionReason.securityViolations:
-        return context.l10n.submissionReasonSecurityViolations;
-      case ExamSubmissionReason.tabClosed:
-        return context.l10n.submissionReasonTabClosed;
-      case ExamSubmissionReason.systemTimeout:
-        return context.l10n.submissionReasonSystemTimeout;
-    }
-  }
 
-  Color get color {
-    switch (this) {
-      case ExamSubmissionReason.studentSubmitted:
-        return AppColors.success;
-      case ExamSubmissionReason.timeExpired:
-        return AppColors.warning;
-      case ExamSubmissionReason.forcedExit:
-        return AppColors.error;
-      case ExamSubmissionReason.securityViolations:
-        return const Color(0xFFB91C1C);
-      case ExamSubmissionReason.tabClosed:
-        return const Color(0xFF7C3AED);
-      case ExamSubmissionReason.systemTimeout:
-        return AppColors.textMuted;
-    }
-  }
-
-  IconData get icon {
-    switch (this) {
-      case ExamSubmissionReason.studentSubmitted:
-        return Icons.check_circle_outline_rounded;
-      case ExamSubmissionReason.timeExpired:
-        return Icons.timer_off_outlined;
-      case ExamSubmissionReason.forcedExit:
-        return Icons.exit_to_app_rounded;
-      case ExamSubmissionReason.securityViolations:
-        return Icons.shield_outlined;
-      case ExamSubmissionReason.tabClosed:
-        return Icons.tab_unselected_rounded;
-      case ExamSubmissionReason.systemTimeout:
-        return Icons.hourglass_disabled_rounded;
-    }
-  }
 }
 
 class QuestionOptionEntity extends Equatable {
@@ -511,6 +406,8 @@ class ExamAttemptEntity extends Equatable {
   final int? answeredQuestionsCount;
   final List<ExamAnswerEntity> answers;
   final List<ExamQuestionEntity> questions;
+  final Map<String, int> questionTimes;
+  final Set<String> flaggedGuesses;
 
   const ExamAttemptEntity({
     required this.id,
@@ -528,6 +425,8 @@ class ExamAttemptEntity extends Equatable {
     this.answeredQuestionsCount,
     this.answers = const [],
     this.questions = const [],
+    this.questionTimes = const {},
+    this.flaggedGuesses = const {},
   });
 
   int get answeredCount {
@@ -563,6 +462,8 @@ class ExamAttemptEntity extends Equatable {
     int? answeredQuestionsCount,
     List<ExamAnswerEntity>? answers,
     List<ExamQuestionEntity>? questions,
+    Map<String, int>? questionTimes,
+    Set<String>? flaggedGuesses,
   }) {
     return ExamAttemptEntity(
       id: id ?? this.id,
@@ -581,6 +482,8 @@ class ExamAttemptEntity extends Equatable {
           answeredQuestionsCount ?? this.answeredQuestionsCount,
       answers: answers ?? this.answers,
       questions: questions ?? this.questions,
+      questionTimes: questionTimes ?? this.questionTimes,
+      flaggedGuesses: flaggedGuesses ?? this.flaggedGuesses,
     );
   }
 
@@ -601,6 +504,8 @@ class ExamAttemptEntity extends Equatable {
     answeredQuestionsCount,
     answers,
     questions,
+    questionTimes,
+    flaggedGuesses,
   ];
 }
 

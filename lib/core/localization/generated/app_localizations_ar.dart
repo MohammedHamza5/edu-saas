@@ -956,7 +956,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get previousQuestionAction => 'السابق';
 
   @override
-  String get nextQuestionAction => 'التالي';
+  String get nextQuestionAction => 'السؤال التالي';
 
   @override
   String get flagQuestionAction => 'تعليم السؤال للمراجعة';
@@ -3673,7 +3673,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get previousQuestion => 'السابق';
 
   @override
-  String get nextQuestion => 'التالي';
+  String get nextQuestion => 'السؤال التالي';
 
   @override
   String get submitExamNow => 'تسليم الامتحان الآن';
@@ -4616,7 +4616,7 @@ class AppLocalizationsAr extends AppLocalizations {
       'الوصول إلى جميع مجموعاتك والمحتوى المخصص لك';
 
   @override
-  String get academicMomentumTitle => 'الزخم الأكاديمي';
+  String get academicMomentumTitle => 'زخم الاستمرارية الأكاديمية';
 
   @override
   String get statExamAverage => 'متوسط درجات الاختبارات';
@@ -8134,6 +8134,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get resendToParentAction => 'إعادة الإرسال';
 
   @override
+  String get examResultsHiddenSubtitle =>
+      'قام المعلم بحجب مصفوفة الإجابات والحلول النموذجية حالياً، وستتاح مراجعة الأسئلة فور إعلان النتائج رسمياً.';
+
+  @override
+  String get examResultsHiddenTitle => 'تم استلام إجاباتك بنجاح';
+
+  @override
+  String get sendNewScoreToParentAction => 'إرسال النتيجة المحدثة';
+
+  @override
   String get dispatchSentBadge => 'تم الإرسال';
 
   @override
@@ -9104,4 +9114,645 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get practiceSingleQuestionAction => 'تدريب على هذا السؤال';
+
+  @override
+  String get pacingRadarTitle => 'تحليل الوقت وسرعة الحل';
+
+  @override
+  String get pacingRadarSubtitle => 'تحليل تفصيلي لسرعتك في حل كل سؤال';
+
+  @override
+  String get pacingFast => 'سريع (< 60 ث)';
+
+  @override
+  String get pacingNormal => 'متوازن (60-90 ث)';
+
+  @override
+  String get pacingSlow => 'فخ وقت (> 90 ث)';
+
+  @override
+  String pacingAvgPerQuestion(int seconds) {
+    return 'متوسط الوقت لكل سؤال: $seconds ثانية';
+  }
+
+  @override
+  String get flagAsGuessTooltip => 'تحديد كسؤال غير متأكد منه (تخمين)';
+
+  @override
+  String get unflagGuessTooltip => 'إلغاء وسم التخمين';
+
+  @override
+  String get guessFlagLabel => 'تخمين';
+
+  @override
+  String get luckyGuessBadge => 'تخمين صائب 🍀';
+
+  @override
+  String get luckyGuessNotice =>
+      'أجبت بشكل صحيح ولكنك علمت السؤال كتخمين. راجعه لتثبيت الفكرة.';
+
+  @override
+  String get eliminateOptionTooltip => 'شطب الخيار المستبعد';
+
+  @override
+  String get reflectionHeader => 'ما سبب الخطأ في هذا السؤال؟';
+
+  @override
+  String get reflectionConceptGap => 'فجوة مفهومية';
+
+  @override
+  String get reflectionConceptGapDesc =>
+      'لم أكن أعرف القاعدة الرياضية أو القانون';
+
+  @override
+  String get reflectionCarelessError => 'تسرع حسابي';
+
+  @override
+  String get reflectionCarelessErrorDesc =>
+      'خطأ في إشارة أو عملية حسابية بسيطة';
+
+  @override
+  String get reflectionMisreadQuestion => 'سوء قراءة';
+
+  @override
+  String get reflectionMisreadQuestionDesc =>
+      'لم أنتبه لكلمة مفتاحية أو حسبت المطلوب الخطأ';
+
+  @override
+  String get reflectionTimePressure => 'ضغط الوقت';
+
+  @override
+  String get reflectionTimePressureDesc => 'الوقت كان يداهمني واضطررت للتخمين';
+
+  @override
+  String get reflectionUnclassified => 'غير مصنف';
+
+  @override
+  String get filterByReflectionReason => 'فلترة حسب سبب الخطأ';
+
+  @override
+  String get reflectionSavedSuccess => 'تم حفظ سبب الخطأ بنجاح';
+
+  @override
+  String get scratchpadPen => 'قلم';
+
+  @override
+  String get scratchpadHighlighter => 'قلم تمييز';
+
+  @override
+  String get scratchpadEraser => 'ممحاة';
+
+  @override
+  String get scratchpadUndo => 'تراجع';
+
+  @override
+  String get scratchpadClear => 'مسح المسودة';
+
+  @override
+  String get scratchpadGridPaper => 'ورقة رسم بياني';
+
+  @override
+  String get scratchpadOverlay => 'وضع شفاف فوق السؤال';
+
+  @override
+  String get scratchpadClose => 'إغلاق المسودة';
+
+  @override
+  String get scratchpadTooltip => 'المسودة ولوحة الرسم الرقمي';
+
+  @override
+  String get formulaSheetTooltip => 'قائمة القوانين وحيل الدسموس';
+
+  @override
+  String get formulaSheetTitle => 'مرجع قوانين الماث وحيل الدسموس';
+
+  @override
+  String get formulaGeometryTab => 'قوانين الـ SAT';
+
+  @override
+  String get formulaDesmosTab => 'حيل الدسموس';
+
+  @override
+  String get formulaCircleDegrees => 'مجموع درجات قوس الدائرة = 360°';
+
+  @override
+  String get formulaCircleRadians => 'مجموع الراديان لقوس الدائرة = 2π';
+
+  @override
+  String get formulaTriangleSum => 'مجموع قياسات زوايا المثلث = 180°';
+
+  @override
+  String get desmosRegressionTip =>
+      'الانحدار الخطي: أضف جدولاً واكتب y1 ~ mx1 + b لإيجاد الميل ونقطة التقاطع الصادي فوراً.';
+
+  @override
+  String get desmosIntersectionTip =>
+      'نقاط التقاطع: ارسم المعادلتين واضغط على النقطة الرمادية لإظهار إحداثيات (x, y) فوراً.';
+
+  @override
+  String get desmosVertexTip =>
+      'رأس القطع المكافئ: ارسم y = ax^2 + bx + c واضغط على القمة/القاع لإظهار إحداثيات الرأس والقيمة العظمى/الصغرى.';
+
+  @override
+  String get desmosSlidersTip =>
+      'منزلقات المتغيرات: اكتب معادلة بمتغير مثل k واضغط add slider لتجربة الخيارات بصرياً.';
+
+  @override
+  String get gauntletTitle => 'تحدي تصفير الأخطاء';
+
+  @override
+  String get gauntletSubtitle =>
+      'اقضِ على أخطائك المتراكمة وثبّت مفاهيمك للوصول للإتقان!';
+
+  @override
+  String gauntletRemainingLabel(Object count) {
+    return 'متبقي $count أخطاء للتصفير';
+  }
+
+  @override
+  String get gauntletStartBtn => 'بدء التحدي';
+
+  @override
+  String gauntletCriticalBadge(Object count) {
+    return '$count أخطاء حرجة';
+  }
+
+  @override
+  String get sprintTitle => 'سبرنت سريع (5 أسئلة)';
+
+  @override
+  String get sprintSubtitle => 'جلسة تدريب سريعة في 7 دقائق';
+
+  @override
+  String get sprintStartBtn => 'سبرنت 5 أسئلة';
+
+  @override
+  String get sortDefault => 'الافتراضي';
+
+  @override
+  String get sortMostFailed => 'الأكثر تكراراً';
+
+  @override
+  String get sortNewest => 'الأحدث';
+
+  @override
+  String get sortPoints => 'النقاط';
+
+  @override
+  String get mistakeSlayedSuccess => 'تم القضاء على الخطأ بنجاح! 🎯';
+
+  @override
+  String streakDaysCount(int count) {
+    return 'توالي $count أيام';
+  }
+
+  @override
+  String get streakTodayDone => 'مكتمل اليوم! الشعلة مستمرة 🔥';
+
+  @override
+  String get streakTodayPending =>
+      'أكمل نشاطاً أو امتحاناً اليوم لتمديد سلسلتك!';
+
+  @override
+  String longestStreakRecord(int count) {
+    return 'الأفضل: $countي';
+  }
+
+  @override
+  String get predictedSatScoreTitle => 'الدرجة التقديرية (SAT Math)';
+
+  @override
+  String predictedSatScoreBand(int low, int high) {
+    return '$low - $high';
+  }
+
+  @override
+  String get predictedSatScoreNeedsMore =>
+      'أدِّ امتحانين على الأقل لإظهار نطاق درجاتك المتوقعة';
+
+  @override
+  String get predictedSatScoreSubtitle => 'مبنية على أدائك في أحدث التقييمات';
+
+  @override
+  String get earnedBadgesTitle => 'شارات الإتقان';
+
+  @override
+  String get badgeGauntletSlayer => 'قاهر الأخطاء';
+
+  @override
+  String get badgeGauntletSlayerDesc =>
+      'صفّر جميع الأخطاء غير المحلولة في بنك الأخطاء.';
+
+  @override
+  String get badgeConsistencyKing => 'بطل الاستمرارية';
+
+  @override
+  String get badgeConsistencyKingDesc =>
+      'حافظ على سلسلة مذاكرة متواصلة لمدة 5 أيام.';
+
+  @override
+  String get badgeSpeedDemon => 'الفارس السريع';
+
+  @override
+  String get badgeSpeedDemonDesc =>
+      'أنهى امتحاناً كاملاً في أقل من نصف الوقت بدرجة ≥ 85%.';
+
+  @override
+  String get badgeHighAchiever => 'النخبة الأكاديمية';
+
+  @override
+  String get badgeHighAchieverDesc =>
+      'حقق متوسط درجات إجمالي بنسبة 90% أو أعلى.';
+
+  @override
+  String get badgeLockedStatus => 'مقفلة';
+
+  @override
+  String get badgeUnlockedStatus => 'مستحقة!';
+
+  @override
+  String get viewAllBadges => 'عرض الكل';
+
+  @override
+  String get allBadgesDialogTitle => 'أوسمة وشارات الإتقان الأكاديمية';
+
+  @override
+  String get dockCalculatorTooltip => 'تثبيت الآلة الحاسبة في اللوحة الجانبية';
+
+  @override
+  String get undockCalculatorTooltip => 'فك التثبيت وجعلها نافذة حرة عائمة';
+
+  @override
+  String get utilityDockTitle => 'أدوات الاختبار';
+
+  @override
+  String get collapseToolsTooltip => 'طي لوحة الأدوات';
+
+  @override
+  String get expandToolsTooltip => 'فتح لوحة الأدوات';
+
+  @override
+  String get dockTabCalculator => 'الآلة الحاسبة';
+
+  @override
+  String get dockTabFormulas => 'ورقة القوانين';
+
+  @override
+  String get savedQuestionsVaultTitle => 'خزنة الأسئلة المفضلة';
+
+  @override
+  String get savedQuestionsVaultSubtitle =>
+      'مراجعة وحل الأسئلة المميزة والمثبتة بذكاء';
+
+  @override
+  String get saveToVault => 'حفظ في الخزنة';
+
+  @override
+  String get removeFromVault => 'إزالة من الخزنة';
+
+  @override
+  String get savedToVaultSuccess => 'تم حفظ السؤال في خزنتك الشخصية ⭐';
+
+  @override
+  String get removedFromVaultSuccess => 'تمت إزالة السؤال من الخزنة';
+
+  @override
+  String get personalNote => 'ملاحظتي الشخصية';
+
+  @override
+  String get addPersonalNote => 'إضافة ملاحظة شخصية';
+
+  @override
+  String get editPersonalNote => 'تعديل الملاحظة';
+
+  @override
+  String get addNoteHint => 'اكتب تذكيراً أو حيلة خاصة لحل هذه المسألة...';
+
+  @override
+  String get saveNote => 'حفظ الملاحظة';
+
+  @override
+  String get difficultyRatingTitle => 'ما مدى صعوبة السؤال بالنسبة لك؟';
+
+  @override
+  String get difficultyEasy => 'سهل';
+
+  @override
+  String get difficultyMedium => 'متوسط';
+
+  @override
+  String get difficultyHard => 'صعب';
+
+  @override
+  String get difficultyEasyDesc => 'متقن • يتباعد موعد ظهوره';
+
+  @override
+  String get difficultyMediumDesc => 'يُراجع لاحقاً';
+
+  @override
+  String get difficultyHardDesc => 'يتكرر في نفس الجلسة';
+
+  @override
+  String get startAnkiDrill => 'بدء تدريب الاستدعاء النشط';
+
+  @override
+  String get ankiDrillTitle => 'تدريب الاستدعاء النشط';
+
+  @override
+  String get checkAnswer => 'تحقق من الإجابة';
+
+  @override
+  String get ankiDrillCompletedTitle => 'اكتملت جلسة التدريب بنجاح! 🎯';
+
+  @override
+  String get ankiDrillCompletedDesc =>
+      'أتممت مراجعة كافة الأسئلة في قائمة التكرار المتباعد.';
+
+  @override
+  String get drillTotalReviewed => 'الأسئلة المُراجعة';
+
+  @override
+  String get drillMasteredCount => 'المتقنة (سهل)';
+
+  @override
+  String get drillHardRepeated => 'المُعادة (صعب)';
+
+  @override
+  String get finishDrill => 'إنهاء التدريب';
+
+  @override
+  String get emptyVaultTitle => 'خزنتك فارغة حالياً';
+
+  @override
+  String get emptyVaultSubtitle =>
+      'احفظ أي سؤال يعجبك أو تجده صعباً أثناء الامتحانات للتدريب عليه بنمط Anki.';
+
+  @override
+  String get bluebookReviewGrid => 'شبكة مراجعة الأسئلة';
+
+  @override
+  String unansweredQuestionsWarning(int count) {
+    return 'تنبيه: لديك $count سؤال بدون إجابة!';
+  }
+
+  @override
+  String get unansweredQuestionsDesc =>
+      'هل أنت متأكد من رغبتك في تسليم الامتحان دون الإجابة عليها؟';
+
+  @override
+  String get flaggedForReview => 'مُعلَّم للمراجعة';
+
+  @override
+  String get answeredStatus => 'تمت إجابته';
+
+  @override
+  String get unansweredStatus => 'فارغ لم يُجب';
+
+  @override
+  String get allDifficulties => 'الكل';
+
+  @override
+  String get searchSavedQuestions => 'ابحث في الأسئلة أو الملاحظات...';
+
+  @override
+  String get mistakeVaultTitle => 'دفتر الأخطاء التكتيكي';
+
+  @override
+  String get saveToMistakeVaultAction => 'حفظ في دفتر الأخطاء';
+
+  @override
+  String get savedToMistakeVaultSuccess => 'تم الحفظ في دفتر الأخطاء التكتيكي';
+
+  @override
+  String get smartReattemptAction => 'إعادة الحل الذكي';
+
+  @override
+  String get filterNeedsReview => 'بحاجة لمراجعة';
+
+  @override
+  String get filterMastered => 'تم إتقانها';
+
+  @override
+  String get filterAllQuestions => 'جميع الأسئلة';
+
+  @override
+  String get markAsMasteredAction => 'أتقنت السؤال';
+
+  @override
+  String get markedAsMasteredSuccess => 'رائع! تم تحديد السؤال كـ متقن';
+
+  @override
+  String get unmarkAsMasteredAction => 'إعادة للمراجعة';
+
+  @override
+  String get previousExamMistakeBadge => 'خطأ في الامتحان السابق';
+
+  @override
+  String get masteredBadge => 'تم الإتقان';
+
+  @override
+  String get checkAnswerButton => 'تحقق من الإجابة';
+
+  @override
+  String get correctAnswerCelebration => 'رائع جداً! إجابتك صحيحة 🎉';
+
+  @override
+  String get wrongAnswerNotice => 'إجابة غير صحيحة. الإجابة الصحيحة كانت';
+
+  @override
+  String get pdfExamQuestionNotice => 'مسألة رياضية من اختبار PDF';
+
+  @override
+  String get tacticalMistakeVaultSubtitle =>
+      'راجع وثبّت الأسئلة التي تعثرت بها لتضمن الدرجة النهائية.';
+
+  @override
+  String get startPracticeSession => 'بدء جلسة التدريب';
+
+  @override
+  String get practiceSessionTitle => 'جلسة التدريب والمراجعة';
+
+  @override
+  String questionCounter(int current, int total) {
+    return 'السؤال $current من $total';
+  }
+
+  @override
+  String get finishSession => 'إنهاء الجلسة';
+
+  @override
+  String get practiceCompleteTitle => 'اكتملت جلسة التدريب! 🎉';
+
+  @override
+  String practiceCompleteSubtitle(int count) {
+    return 'راجعت $count أسئلة بنجاح. استمر في التدريب لتثبيت كل أفكار الامتحان.';
+  }
+
+  @override
+  String get solveQuestionAction => 'حل المسألة';
+
+  @override
+  String get filterDueToday => 'مستحق اليوم';
+
+  @override
+  String get filterUpcoming => 'مجدول لاحقاً';
+
+  @override
+  String startDuePracticeAction(int count) {
+    return 'بدء مراجعات اليوم ($count)';
+  }
+
+  @override
+  String get startDuePracticeEmpty => 'لا توجد مراجعات مستحقة اليوم';
+
+  @override
+  String get noDueTodayTitle => 'أحسنت! لا توجد مراجعات مستحقة اليوم 🎉';
+
+  @override
+  String get noDueTodaySubtitle =>
+      'أنجزت جميع الأسئلة المستحقة لهذا اليوم. راحة تامة، وموعدك القادم مجدول تلقائياً.';
+
+  @override
+  String get leitnerScheduleTitle => 'جدول التكرار المتباعد (1 - 3 - 6 أيام)';
+
+  @override
+  String get leitnerBox1Title => 'يومي (1 يوم)';
+
+  @override
+  String get leitnerBox2Title => 'كل 3 أيام';
+
+  @override
+  String get leitnerBox3Title => 'كل 6 أيام';
+
+  @override
+  String get rateDifficultyPrompt => 'حدد موعد المراجعة القادمة:';
+
+  @override
+  String get rateHard1Day => 'صعب (غداً - يوم 1)';
+
+  @override
+  String get rateMedium3Days => 'متوسط (بعد 3 أيام)';
+
+  @override
+  String get rateEasy6Days => 'سهل (بعد 6 أيام)';
+
+  @override
+  String get reviewDueTodayBadge => 'مستحق اليوم ⚡';
+
+  @override
+  String get reviewDueTomorrowBadge => 'المراجعة: غداً';
+
+  @override
+  String reviewDueInDaysBadge(int days) {
+    return 'المراجعة: بعد $days أيام';
+  }
+
+  @override
+  String get practiceCompletedDueNotice =>
+      'تم إنهاء مراجعات اليوم بنجاح! تم جدولة المواعيد القادمة.';
+
+  @override
+  String get backToVaultAction => 'العودة للحقيبة';
+
+  @override
+  String get demoQuickAccessHeader => 'المعاينة السريعة • الدخول بضغطة زر';
+
+  @override
+  String get demoLiveBadge => 'LIVE DEMO';
+
+  @override
+  String get demoSelectAccountPrompt =>
+      'اختر الحساب لتسجيل الدخول الفوري دون كتابة بيانات:';
+
+  @override
+  String get demoTeacherLoginTitle => 'دخول كـ مدرس (لوحة التحكم والواتساب)';
+
+  @override
+  String get demoTeacherLoginSubtitle =>
+      'إنشاء كويزات، بنك الأسئلة، إرسال الدرجات لواتساب ولي الأمر';
+
+  @override
+  String get demoStudentTestLoginTitle =>
+      'دخول كـ طالب (حل امتحان الـ SAT بـ Desmos)';
+
+  @override
+  String get demoStudentTestLoginSubtitle =>
+      'تجربة حاسبة Desmos المدمجة والمسودة وورقة القوانين';
+
+  @override
+  String get demoStudentMistakesLoginTitle =>
+      'دخول كـ طالب (دفتر الأخطاء والـ Anki Drills)';
+
+  @override
+  String get demoStudentMistakesLoginSubtitle =>
+      'استكشاف التمرن على المسائل السابقة بنظام الفلاش كاردز';
+
+  @override
+  String get demoBannerTitle =>
+      'وضع المعاينة التفاعلية للمدرسين • VIP Live Demo';
+
+  @override
+  String get demoBannerSubtitle =>
+      'استكشف بيئة الامتحانات المتقدمة، حاسبة Desmos، بنك الأسئلة، وتقارير أولياء الأمور.';
+
+  @override
+  String get demoBannerCta => 'تفعيل نسختك الخاصة • تواصل معنا';
+
+  @override
+  String get newFileBadge => 'جديد';
+
+  @override
+  String get whatsappGatewayDialogTitle => 'إعدادات بوابة واتساب الآلية';
+
+  @override
+  String get whatsappAutoDispatchToggleTitle =>
+      'الإرسال التلقائي للنتائج فور التسليم';
+
+  @override
+  String get whatsappAutoDispatchToggleSubtitle =>
+      'إرسال كشف الدرجات لواتساب ولي الأمر فوراً بدون تدخل يدوي';
+
+  @override
+  String get whatsappGatewayConnectedStatus => 'متصل وجاهز للإرسال التلقائي';
+
+  @override
+  String get whatsappGatewayQrReadyStatus => 'بانتظار مسح رمز الاستجابة (QR)';
+
+  @override
+  String get whatsappGatewayDisconnectedStatus => 'البوابة غير متصلة';
+
+  @override
+  String get whatsappConnectedPhoneLabel => 'الرقم المتصل';
+
+  @override
+  String get whatsappScanQrInstruction =>
+      'افتح واتساب على الهاتف المخصص > الأجهزة المرتبطة > امسح الرمز أدناه للربط';
+
+  @override
+  String get whatsappQrAutoRefreshNote =>
+      'يتم تحديث الرمز دورياً حتى إتمام الربط بنجاح';
+
+  @override
+  String get whatsappSentTodayMetric => 'أُرسل اليوم';
+
+  @override
+  String get whatsappPendingQueueMetric => 'في الانتظار';
+
+  @override
+  String get whatsappFailedMetric => 'أخطاء الإرسال';
+
+  @override
+  String get whatsappGatewaySettingsTooltip =>
+      'إعدادات بوابة واتساب للإرسال التلقائي';
+
+  @override
+  String get whatsappAutoDispatchActiveBannerTitle =>
+      'الإرسال التلقائي لواتساب ولي الأمر نشط';
+
+  @override
+  String get whatsappAutoDispatchActiveBannerSubtitle =>
+      'فور تسليم الطالب لاختباره، يُرسل تقرير الدرجات لواتساب ولي الأمر مباشرة دون الحاجة لأي تدخل يدوي';
+
+  @override
+  String get configureGatewayAction => 'إعدادات البوابة';
 }

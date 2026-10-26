@@ -17,6 +17,9 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class _FakeExamsRepository implements ExamsRepository {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+
   List<ExamEntity> mockExams = [];
 
   @override
@@ -272,6 +275,12 @@ class _FakeExamsRepository implements ExamsRepository {
   @override
   Future<Result<bool>> deleteExamFolder(String folderId) async =>
       const Success(true);
+
+  @override
+  Future<Result<bool>> updateMistakeReflection({
+    required String mistakeId,
+    required String? reflectionReason,
+  }) async => const Success(true);
 
   @override
   Future<Result<bool>> moveExamToFolder({

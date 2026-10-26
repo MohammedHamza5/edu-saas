@@ -15,12 +15,14 @@ import 'desmos_embed_view.dart';
 class FloatingDesmosCalculator extends StatefulWidget {
   final bool isVisible;
   final VoidCallback onClose;
+  final VoidCallback? onDock;
   final VoidCallback? onInteractionStart;
 
   const FloatingDesmosCalculator({
     super.key,
     this.isVisible = true,
     required this.onClose,
+    this.onDock,
     this.onInteractionStart,
   });
 
@@ -50,13 +52,13 @@ class _FloatingDesmosCalculatorState extends State<FloatingDesmosCalculator> {
     final screenSize = MediaQuery.of(context).size;
 
     // Standard generous default sizes for SAT math (wide enough for equations + graph)
-    final defaultWidth = math.min(960.0, screenSize.width * 0.72);
-    final defaultHeight = math.min(640.0, screenSize.height * 0.74);
-
     final double maxW = math.max(280.0, screenSize.width - 24.0);
     final double minW = math.min(360.0, maxW);
     final double maxH = math.max(240.0, screenSize.height - 48.0);
     final double minH = math.min(280.0, maxH);
+
+    final defaultWidth = math.min(600.0, math.max(480.0, screenSize.width * 0.62));
+    final defaultHeight = math.min(560.0, math.max(400.0, screenSize.height * 0.68));
 
     final double effectiveWidth = _isMaximized
         ? (screenSize.width * 0.94).clamp(minW, maxW)
@@ -72,10 +74,10 @@ class _FloatingDesmosCalculatorState extends State<FloatingDesmosCalculator> {
 
     final bool isCompact = effectiveWidth < 420;
 
-    // Initial positioning: nicely centered-right
+    // Initial positioning: anchored neatly at bottom-right corner leaving question area unobstructed
     final initialPosition = Offset(
-      math.max(16.0, screenSize.width - effectiveWidth - 28.0),
-      math.max(20.0, (screenSize.height - effectiveHeight) / 2.5),
+      math.max(16.0, screenSize.width - effectiveWidth - 24.0),
+      math.max(20.0, screenSize.height - effectiveHeight - 48.0),
     );
 
     // Maximize position: centered with equal margin
@@ -330,6 +332,23 @@ class _FloatingDesmosCalculatorState extends State<FloatingDesmosCalculator> {
                               ),
                             const SizedBox(width: 4),
                           ],
+
+                          // Re-dock to Side Pane (if onDock callback provided)
+                          if (widget.onDock != null)
+                            IconButton(
+                              icon: const Icon(
+                                Icons.vertical_split_rounded,
+                                color: Colors.white,
+                                size: 18,
+                              ),
+                              tooltip: l10n.dockCalculatorTooltip,
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(
+                                minWidth: 28,
+                                minHeight: 28,
+                              ),
+                              onPressed: widget.onDock,
+                            ),
 
                           // Maximize / Restore Toggle
                           if (!_isMinimized)

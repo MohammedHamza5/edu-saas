@@ -403,6 +403,9 @@ class _BenchExamsRepo implements ExamsRepository {
   _BenchExamsRepo();
 
   @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+
+  @override
   Future<Result<List<ExamEntity>>> getStudentExams({int page = 0, int pageSize = 15}) async {
     return Success(List.generate(
       20,
@@ -498,6 +501,11 @@ class _BenchExamsRepo implements ExamsRepository {
   Future<Result<ExamFolderEntity>> updateExamFolder({required String folderId, required String name, String? color, String? icon, String? description}) async => throw UnimplementedError();
   @override
   Future<Result<bool>> deleteExamFolder(String folderId) async => const Success(true);
+  @override
+  Future<Result<bool>> updateMistakeReflection({
+    required String mistakeId,
+    required String? reflectionReason,
+  }) async => const Success(true);
   @override
   Future<Result<bool>> moveExamToFolder({required String examId, String? folderId}) async => const Success(true);
   @override

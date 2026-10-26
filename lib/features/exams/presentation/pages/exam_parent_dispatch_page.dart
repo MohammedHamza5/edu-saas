@@ -12,6 +12,9 @@ import '../cubit/exam_dispatch_cubit.dart';
 import '../cubit/exam_dispatch_state.dart';
 import '../widgets/exam_dispatch_student_card.dart';
 import '../widgets/exam_whatsapp_dispatch_modal.dart';
+import '../widgets/whatsapp_auto_dispatch_banner.dart';
+import '../widgets/whatsapp_gateway_connect_dialog.dart';
+import '../../../settings/data/datasources/whatsapp_gateway_remote_datasource.dart';
 
 class ExamParentDispatchPage extends StatefulWidget {
   final String examId;
@@ -50,7 +53,7 @@ class _ExamParentDispatchPageState extends State<ExamParentDispatchPage> {
     if (students.isEmpty) return;
 
     final startIndex = students.indexWhere(
-      (s) => !state.sentStudentIds.contains(s.studentId),
+      (s) => !state.isStudentFullySent(s),
     );
     final targetIndex = startIndex != -1 ? startIndex : 0;
     _openDispatchModalForStudent(state, targetIndex);
@@ -69,7 +72,7 @@ class _ExamParentDispatchPageState extends State<ExamParentDispatchPage> {
       context: context,
       student: student,
       exam: state.roster.exam,
-      onSent: () => cubit.markAsSent(student.studentId),
+      onSent: () => cubit.markAsSent(student.studentId, attemptId: student.latestAttemptId),
       onNext: hasNext
           ? () => _openDispatchModalForStudent(state, index + 1)
           : null,
@@ -220,6 +223,16 @@ class _ExamParentDispatchPageState extends State<ExamParentDispatchPage> {
               return Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  // WhatsApp Gateway Settings Action
+                  IconButton(
+                    icon: const Icon(Icons.settings_phone_rounded, size: 20),
+                    tooltip: context.l10n.whatsappGatewaySettingsTooltip,
+                    onPressed: () => WhatsAppGatewayConnectDialog.show(
+                      context,
+                      dataSource: WhatsAppGatewayRemoteDataSourceImpl(),
+                    ),
+                  ),
+
                   // Copy Roster Action
                   IconButton(
                     icon: const Icon(Icons.copy_all_rounded, size: 20),
@@ -282,6 +295,9 @@ class _ExamParentDispatchPageState extends State<ExamParentDispatchPage> {
             child: ListView(
               padding: const EdgeInsets.all(AppSpacing.s16),
               children: [
+                // ── 0. WhatsApp Auto-Dispatch Banner ───────────────────────
+                const WhatsAppAutoDispatchBanner(),
+
                 // ── 1. Hero KPI Stats Header ──────────────────────────────
                 _buildHeroStatsBanner(context, exam, stats, state),
                 const SizedBox(height: AppSpacing.s16),
@@ -361,7 +377,8 @@ class _ExamParentDispatchPageState extends State<ExamParentDispatchPage> {
                   ...filtered.asMap().entries.map((entry) {
                     final index = entry.key;
                     final student = entry.value;
-                    final isSent = state.sentStudentIds.contains(student.studentId);
+                    final isSent = state.isStudentFullySent(student);
+                    final hasNewAttempt = state.hasNewUnsentAttempt(student);
 
                     return Padding(
                       padding: const EdgeInsets.only(bottom: AppSpacing.s8),
@@ -370,6 +387,7 @@ class _ExamParentDispatchPageState extends State<ExamParentDispatchPage> {
                         exam: exam,
                         index: index + 1,
                         isSent: isSent,
+                        hasNewAttempt: hasNewAttempt,
                         onTapDispatch: () => _openDispatchModalForStudent(state, index),
                         onEditPhone: () => _showEditPhoneDialog(
                           context,

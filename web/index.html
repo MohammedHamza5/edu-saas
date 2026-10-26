@@ -291,6 +291,29 @@
     })();
   </script>
 
+  <!-- Dynamic Multi-Tenant White-Label Detection -->
+  <script>
+    (function() {
+      var h = window.location.hostname.toLowerCase();
+      var q = window.location.search.toLowerCase();
+      var isDemo = h.indexOf('demo') !== -1 || q.indexOf('demo') !== -1 || h.indexOf('test') !== -1;
+      if (isDemo) {
+        document.title = "منصة رياضيات الدبلومة الأمريكية (نسخة تجريبية) | American Math Platform";
+        var updatePreloader = function() {
+          var elTitle = document.getElementById('preloader-main-title');
+          if (elTitle) elTitle.textContent = "منصة رياضيات الدبلومة الأمريكية";
+          var elSub = document.getElementById('preloader-main-subtitle');
+          if (elSub) elSub.textContent = "Digital SAT • ACT • EST (نسخة تجريبية)";
+        };
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', updatePreloader);
+        } else {
+          updatePreloader();
+        }
+      }
+    })();
+  </script>
+
   <!-- Primary SEO Metadata -->
   <title>منصة دكتور أنطونيوس أشرف | Dr. Antounios Ashraf - SAT / EST / ACT American Platform</title>
   <meta name="title" content="منصة دكتور أنطونيوس أشرف | Dr. Antounios Ashraf - SAT / EST / ACT American Platform">
@@ -634,13 +657,13 @@
     <div class="preloader-card">
       <div class="preloader-logo-wrap">
         <div class="preloader-logo">
-          <img src="/icons/Icon-192.png" alt="EduSaaS" width="76" height="76" style="border-radius: 20px; object-fit: cover; display: block;" onerror="this.style.display='none'; document.getElementById('preloader-math-fallback').style.display='block';">
+          <img id="preloader-avatar-img" src="/icons/Icon-192.png" alt="EduSaaS" width="76" height="76" style="border-radius: 20px; object-fit: cover; display: block;" onerror="this.style.display='none'; document.getElementById('preloader-math-fallback').style.display='block';">
           <div id="preloader-math-fallback" class="math-symbol" style="display: none;">∑</div>
         </div>
         <div class="preloader-glow"></div>
       </div>
-      <h1 class="preloader-title">منصة د. أنطونيوس أشرف</h1>
-      <p class="preloader-subtitle">SAT / EST / ACT &bull; Better Scores Bigger Dreams</p>
+      <h1 class="preloader-title" id="preloader-main-title">منصة د. أنطونيوس أشرف</h1>
+      <p class="preloader-subtitle" id="preloader-main-subtitle">SAT / EST / ACT &bull; Better Scores Bigger Dreams</p>
       
       <div class="preloader-progress-track">
         <div class="preloader-progress-bar"></div>
@@ -651,6 +674,21 @@
 
   <script>
     (function() {
+      // Dynamic white-label demo styling for preloader
+      var h = window.location.hostname.toLowerCase();
+      var q = window.location.search.toLowerCase();
+      var isDemo = h.indexOf('demo') !== -1 || q.indexOf('demo') !== -1 || h.indexOf('test') !== -1;
+      if (isDemo) {
+        var t = document.getElementById('preloader-main-title');
+        if (t) t.textContent = "منصة رياضيات الدبلومة الأمريكية";
+        var s = document.getElementById('preloader-main-subtitle');
+        if (s) s.textContent = "Digital SAT • ACT • EST • نظام تعليمي متكامل";
+        var img = document.getElementById('preloader-avatar-img');
+        if (img) img.style.display = 'none';
+        var fb = document.getElementById('preloader-math-fallback');
+        if (fb) fb.style.display = 'block';
+      }
+
       // 1. Auto-migrate legacy hash URLs (e.g. /#/teacher or /login#/teacher) to clean HTML5 pushState paths
       if (window.location.hash && window.location.hash.startsWith('#/')) {
         var cleanPath = window.location.hash.substring(1);

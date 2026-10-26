@@ -112,6 +112,60 @@ class MistakesCubit extends Cubit<MistakesState> {
     }
   }
 
+  void setReasonFilter(MistakeReasonFilter filter) {
+    final s = state;
+    if (s is MistakesLoaded) {
+      emit(s.copyWith(reasonFilter: filter));
+    }
+  }
+
+  void setSortOrder(MistakeSortOrder sortOrder) {
+    final s = state;
+    if (s is MistakesLoaded) {
+      emit(s.copyWith(sortOrder: sortOrder));
+    }
+  }
+
+  Future<void> updateReflection({
+    required String mistakeId,
+    required String? reason,
+  }) async {
+    final s = state;
+    if (s is! MistakesLoaded) return;
+
+    // Optimistically update the question and taxonomy counts in UI
+    final updatedList = s.questions.map((q) {
+      if (q.mistakeId == mistakeId) {
+        return q.copyWith(reflectionReason: reason);
+      }
+      return q;
+    }).toList();
+
+    final updatedSummary = s.summary.copyWith(
+      conceptGapCount: updatedList.where((q) => q.reflectionReason == 'concept_gap').length,
+      carelessErrorCount: updatedList.where((q) => q.reflectionReason == 'careless_error').length,
+      misreadQuestionCount: updatedList.where((q) => q.reflectionReason == 'misread_question').length,
+      timePressureCount: updatedList.where((q) => q.reflectionReason == 'time_pressure').length,
+      unclassifiedCount: updatedList.where((q) => q.reflectionReason == null).length,
+    );
+
+    emit(s.copyWith(questions: updatedList, summary: updatedSummary));
+
+    // Call repository
+    final result = await _repository.updateMistakeReflection(
+      mistakeId: mistakeId,
+      reflectionReason: reason,
+    );
+
+    if (!result.isSuccess) {
+      // Revert if failed
+      emit(s);
+    } else {
+      // Invalidate cache to ensure sync
+      AppCache.exams.invalidate(AppCache.userKey('mistakes_'));
+    }
+  }
+
   void setSearchQuery(String query) {
     final s = state;
     if (s is MistakesLoaded) {

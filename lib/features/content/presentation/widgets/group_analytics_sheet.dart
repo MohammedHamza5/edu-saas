@@ -1,43 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
-import '../../../../core/network/supabase_service.dart';
 import '../../../../core/localization/generated/app_localizations.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_loading_view.dart';
 import '../../domain/entities/chapter_entity.dart';
 import '../../domain/entities/content_entity.dart';
+import '../../domain/entities/content_analytics_entity.dart';
+import '../cubit/content_cubit.dart';
 
-class _StudentAttentionItem {
-  final String id;
-  final String name;
-  final String? avatarUrl;
-  final int completionPercentage;
-
-  _StudentAttentionItem({
-    required this.id,
-    required this.name,
-    this.avatarUrl,
-    required this.completionPercentage,
-  });
-}
-
-class _ChapterMetricItem {
-  final String chapterId;
-  final String title;
-  final int lessonCount;
-  final int completionRate;
-  final double? quizAvg;
-
-  _ChapterMetricItem({
-    required this.chapterId,
-    required this.title,
-    required this.lessonCount,
-    required this.completionRate,
-    this.quizAvg,
-  });
-}
+typedef _StudentAttentionItem = StudentAttentionItemEntity;
+typedef _ChapterMetricItem = ChapterMetricItemEntity;
 
 /// Panoramic Group Academic Analytics Masterboard (100% Real Supabase Data).
 class GroupAnalyticsSheet extends StatefulWidget {
@@ -128,214 +103,20 @@ class _GroupAnalyticsSheetState extends State<GroupAnalyticsSheet> {
     });
 
     try {
-      final client = SupabaseService.client;
-
-      // 1. Fetch active students in this group with user profiles
-      final membersRes = await client
-          .from('group_members')
-          .select('student_id, users!inner(id, full_name, avatar_url)')
-          .eq('group_id', widget.groupId)
-          .eq('status', 'active');
-
-      final membersList = membersRes as List;
-      final Map<String, Map<String, dynamic>> studentsMap = {};
-      for (final row in membersList) {
-        final sId = row['student_id'] as String?;
-        final userObj = row['users'] as Map<String, dynamic>?;
-        if (sId != null && userObj != null) {
-          studentsMap[sId] = userObj;
-        }
-      }
-
-      final totalStudents = studentsMap.length;
-
-      // 2. Fetch all video IDs for this course's lessons
-      final allLessonIds = widget.lessons.map((l) => l.id).toList();
-      final Map<String, String> videoIdToLessonId = {};
-      final List<String> allVideoIds = [];
-
-      if (allLessonIds.isNotEmpty) {
-        final videosRes = await client
-            .from('videos')
-            .select('id, content_id')
-            .inFilter('content_id', allLessonIds);
-
-        for (final v in (videosRes as List)) {
-          final vid = v['id'] as String?;
-          final cid = v['content_id'] as String?;
-          if (vid != null && cid != null) {
-            allVideoIds.add(vid);
-            videoIdToLessonId[vid] = cid;
-          }
-        }
-      }
-
-      // 3. Fetch video progress across all course videos
-      int totalViews = 0;
-      final Map<String, Set<String>> studentCompletedVideoIds = {};
-
-      if (allVideoIds.isNotEmpty) {
-        final vpRes = await client
-            .from('video_progress')
-            .select('student_id, video_id, completed, progress_seconds')
-            .inFilter('video_id', allVideoIds);
-
-        for (final row in (vpRes as List)) {
-          final sId = row['student_id'] as String?;
-          final vId = row['video_id'] as String?;
-          final progSec = row['progress_seconds'] as int? ?? 0;
-          final isComp = row['completed'] == true;
-
-          if (progSec > 0) {
-            totalViews++;
-          }
-          if (isComp && sId != null && vId != null) {
-            studentCompletedVideoIds
-                .putIfAbsent(sId, () => <String>{})
-                .add(vId);
-          }
-        }
-      }
-
-      // 4. Calculate overall completion per student & identify attention list (< 50%)
-      int sumStudentProgress = 0;
-      final List<_StudentAttentionItem> attentionList = [];
-      final totalVideosCount = allVideoIds.length;
-
-      for (final entry in studentsMap.entries) {
-        final sId = entry.key;
-        final profile = entry.value;
-        final name = (profile['full_name'] as String?)?.trim();
-        final avatar = profile['avatar_url'] as String?;
-
-        final completedCount = studentCompletedVideoIds[sId]?.length ?? 0;
-        final rate = totalVideosCount > 0
-            ? ((completedCount / totalVideosCount) * 100).round()
-            : 0;
-
-        sumStudentProgress += rate;
-
-        if (rate < 50) {
-          attentionList.add(
-            _StudentAttentionItem(
-              id: sId,
-              name: name?.isNotEmpty == true ? name! : 'Student',
-              avatarUrl: avatar,
-              completionPercentage: rate,
-            ),
+      final analytics = await context.read<ContentCubit>().getGroupAnalytics(
+            groupId: widget.groupId,
+            chapters: widget.chapters,
+            lessons: widget.lessons,
           );
-        }
-      }
-
-      final overallProgress = totalStudents > 0
-          ? (sumStudentProgress ~/ totalStudents)
-          : 0;
-
-      // 5. Calculate overall quizzes average
-      final allExamIds = widget.lessons
-          .expand((l) => [
-                if (l.associatedExamId != null) l.associatedExamId!,
-                ...l.attachedExams.map((e) => e.examId),
-              ])
-          .toSet()
-          .toList();
-
-      double? groupQuizAvg;
-      final Map<String, double> examAvgMap = {};
-
-      if (allExamIds.isNotEmpty) {
-        final attemptsRes = await client
-            .from('exam_attempts')
-            .select('exam_id, percentage')
-            .inFilter('exam_id', allExamIds)
-            .inFilter('status', ['submitted', 'completed']);
-
-        final Map<String, List<double>> examScores = {};
-        for (final row in (attemptsRes as List)) {
-          final eId = row['exam_id'] as String?;
-          final p = row['percentage'];
-          if (eId != null && p != null) {
-            final val = p is num ? p.toDouble() : double.tryParse(p.toString());
-            if (val != null) {
-              examScores.putIfAbsent(eId, () => []).add(val);
-            }
-          }
-        }
-
-        double totalScoreSum = 0;
-        int totalScoreCount = 0;
-        for (final entry in examScores.entries) {
-          final avg = entry.value.reduce((a, b) => a + b) / entry.value.length;
-          examAvgMap[entry.key] = avg;
-          totalScoreSum += entry.value.reduce((a, b) => a + b);
-          totalScoreCount += entry.value.length;
-        }
-
-        if (totalScoreCount > 0) {
-          groupQuizAvg = totalScoreSum / totalScoreCount;
-        }
-      }
-
-      // 6. Chapter-by-chapter metrics breakdown
-      final List<_ChapterMetricItem> chapterMetrics = [];
-      for (final ch in widget.chapters) {
-        final chLessons =
-            widget.lessons.where((l) => l.chapterId == ch.id).toList();
-        final chLessonIds = chLessons.map((l) => l.id).toSet();
-        final chVideoIds = allVideoIds
-            .where((vid) => chLessonIds.contains(videoIdToLessonId[vid]))
-            .toList();
-
-        int chCompletedStudents = 0;
-        for (final sId in studentsMap.keys) {
-          final completed = studentCompletedVideoIds[sId] ?? {};
-          if (chVideoIds.isNotEmpty &&
-              chVideoIds.every((vid) => completed.contains(vid))) {
-            chCompletedStudents++;
-          }
-        }
-
-        final chRate = totalStudents > 0
-            ? ((chCompletedStudents / totalStudents) * 100).round()
-            : 0;
-
-        final chExamIds = chLessons
-            .expand((l) => [
-                  if (l.associatedExamId != null) l.associatedExamId!,
-                  ...l.attachedExams.map((e) => e.examId),
-                ])
-            .toSet()
-            .toList();
-        double? chAvg;
-        if (chExamIds.isNotEmpty) {
-          final validAvgs = chExamIds
-              .map((id) => examAvgMap[id])
-              .whereType<double>()
-              .toList();
-          if (validAvgs.isNotEmpty) {
-            chAvg = validAvgs.reduce((a, b) => a + b) / validAvgs.length;
-          }
-        }
-
-        chapterMetrics.add(
-          _ChapterMetricItem(
-            chapterId: ch.id,
-            title: ch.title,
-            lessonCount: chLessons.length,
-            completionRate: chRate,
-            quizAvg: chAvg,
-          ),
-        );
-      }
 
       if (mounted) {
         setState(() {
-          _totalActiveStudents = totalStudents;
-          _totalCourseViews = totalViews;
-          _overallCourseProgress = overallProgress;
-          _overallQuizzesAverage = groupQuizAvg;
-          _chapterMetrics = chapterMetrics;
-          _studentsNeedingAttention = attentionList;
+          _totalActiveStudents = analytics.totalStudents;
+          _totalCourseViews = analytics.totalViews;
+          _overallCourseProgress = analytics.overallProgress;
+          _overallQuizzesAverage = analytics.overallQuizzesAverage;
+          _chapterMetrics = analytics.chapterMetrics;
+          _studentsNeedingAttention = analytics.studentsNeedingAttention;
           _isLoading = false;
         });
       }

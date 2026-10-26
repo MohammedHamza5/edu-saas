@@ -3,6 +3,7 @@ import '../../../../core/errors/result.dart';
 import '../../../../core/utils/cache_manager.dart';
 import '../../domain/entities/chapter_entity.dart';
 import '../../domain/entities/content_entity.dart';
+import '../../domain/entities/content_analytics_entity.dart';
 import '../../domain/repositories/content_repository.dart';
 import 'content_state.dart';
 
@@ -795,5 +796,89 @@ class ContentCubit extends Cubit<ContentState> {
         return false;
     }
   }
-}
+  /// Fetches available exams summary for dropdown selectors
+  Future<List<Map<String, dynamic>>> getAvailableExamsSummary() async {
+    final result = await _repository.getAvailableExamsSummary();
+    return result.when(
+      onSuccess: (exams) => exams,
+      onFailure: (_) => [],
+    );
+  }
 
+  /// Fetches the linked exam (id, title) for a specific content item
+  Future<Map<String, String>?> getExamByContentId(String contentId) async {
+    final result = await _repository.getExamByContentId(contentId);
+    return result.when(
+      onSuccess: (exam) => exam,
+      onFailure: (_) => null,
+    );
+  }
+
+  /// Fetches aggregated analytics for a single lesson
+  Future<LessonAnalyticsEntity?> getLessonAnalytics({
+    required String lessonId,
+    required String groupId,
+    String? videoId,
+    String? examId,
+  }) async {
+    final result = await _repository.getLessonAnalytics(
+      lessonId: lessonId,
+      groupId: groupId,
+      videoId: videoId,
+      examId: examId,
+    );
+    return result.when(
+      onSuccess: (data) => data,
+      onFailure: (_) => null,
+    );
+  }
+
+  /// Fetches aggregated analytics for a chapter
+  Future<ChapterAnalyticsEntity?> getChapterAnalytics({
+    required String groupId,
+    required List<String> lessonIds,
+    required List<String> examIds,
+  }) async {
+    final result = await _repository.getChapterAnalytics(
+      groupId: groupId,
+      lessonIds: lessonIds,
+      examIds: examIds,
+    );
+    return result.when(
+      onSuccess: (data) => data,
+      onFailure: (_) => null,
+    );
+  }
+
+  /// Fetches existing group customizations for a specific content item
+  Future<List<Map<String, dynamic>>> getContentGroupCustomizations(String contentId) async {
+    final result = await _repository.getContentGroupCustomizations(contentId);
+    return result.when(
+      onSuccess: (customizations) => customizations,
+      onFailure: (_) => [],
+    );
+  }
+
+  /// Fetches panoramic aggregated group analytics for courses
+  Future<GroupAnalyticsEntity> getGroupAnalytics({
+    required String groupId,
+    required List<ChapterEntity> chapters,
+    required List<ContentEntity> lessons,
+  }) async {
+    final result = await _repository.getGroupAnalytics(
+      groupId: groupId,
+      chapters: chapters,
+      lessons: lessons,
+    );
+    return result.when(
+      onSuccess: (data) => data,
+      onFailure: (_) => const GroupAnalyticsEntity(
+        totalStudents: 0,
+        totalViews: 0,
+        overallProgress: 0,
+        chapterMetrics: [],
+        studentsNeedingAttention: [],
+      ),
+    );
+  }
+}

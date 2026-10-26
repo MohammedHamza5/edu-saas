@@ -103,6 +103,10 @@ abstract interface class ExamsRemoteDataSource {
   Future<MistakePracticeResultModel> submitMistakesPractice(
     List<Map<String, String>> answers,
   );
+  Future<void> updateMistakeReflection({
+    required String mistakeId,
+    required String? reflectionReason,
+  });
   Future<List<Map<String, dynamic>>> getGroupLessons(String groupId);
   Future<void> linkExamToLesson({
     required String examId,
@@ -751,7 +755,7 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
               ),
             );
           }
-          return getExamDetails(examId);
+          return await getExamDetails(examId);
         }
       }
     } on PostgrestException catch (e) {
@@ -1021,7 +1025,7 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
         },
       );
       if (rpcRes != null) {
-        return getExamDetails(examId);
+        return await getExamDetails(examId);
       }
     } on PostgrestException catch (e) {
       if (e.code != 'PGRST202' && e.code != '42883') rethrow;
@@ -1766,6 +1770,20 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
       return MistakePracticeResultModel.fromJson(Map<String, dynamic>.from(response));
     }
     throw const PostgrestException(message: 'Invalid response from submit_mistakes_practice');
+  }
+
+  @override
+  Future<void> updateMistakeReflection({
+    required String mistakeId,
+    required String? reflectionReason,
+  }) async {
+    await _safeClient.rpc<dynamic>(
+      'update_mistake_reflection',
+      params: {
+        'p_mistake_id': mistakeId,
+        'p_reflection_reason': reflectionReason,
+      },
+    );
   }
 
   @override

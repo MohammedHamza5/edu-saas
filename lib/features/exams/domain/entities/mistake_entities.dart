@@ -8,6 +8,11 @@ class MistakeSummaryEntity extends Equatable {
   final int unresolvedSkippedCount;
   final int totalWrongCount;
   final int totalSkippedCount;
+  final int conceptGapCount;
+  final int carelessErrorCount;
+  final int misreadQuestionCount;
+  final int timePressureCount;
+  final int unclassifiedCount;
   final List<MistakeSourceEntity> sources;
 
   const MistakeSummaryEntity({
@@ -18,8 +23,45 @@ class MistakeSummaryEntity extends Equatable {
     this.unresolvedSkippedCount = 0,
     this.totalWrongCount = 0,
     this.totalSkippedCount = 0,
+    this.conceptGapCount = 0,
+    this.carelessErrorCount = 0,
+    this.misreadQuestionCount = 0,
+    this.timePressureCount = 0,
+    this.unclassifiedCount = 0,
     required this.sources,
   });
+
+  MistakeSummaryEntity copyWith({
+    int? totalMistakes,
+    int? unresolvedCount,
+    int? resolvedCount,
+    int? unresolvedWrongCount,
+    int? unresolvedSkippedCount,
+    int? totalWrongCount,
+    int? totalSkippedCount,
+    int? conceptGapCount,
+    int? carelessErrorCount,
+    int? misreadQuestionCount,
+    int? timePressureCount,
+    int? unclassifiedCount,
+    List<MistakeSourceEntity>? sources,
+  }) {
+    return MistakeSummaryEntity(
+      totalMistakes: totalMistakes ?? this.totalMistakes,
+      unresolvedCount: unresolvedCount ?? this.unresolvedCount,
+      resolvedCount: resolvedCount ?? this.resolvedCount,
+      unresolvedWrongCount: unresolvedWrongCount ?? this.unresolvedWrongCount,
+      unresolvedSkippedCount: unresolvedSkippedCount ?? this.unresolvedSkippedCount,
+      totalWrongCount: totalWrongCount ?? this.totalWrongCount,
+      totalSkippedCount: totalSkippedCount ?? this.totalSkippedCount,
+      conceptGapCount: conceptGapCount ?? this.conceptGapCount,
+      carelessErrorCount: carelessErrorCount ?? this.carelessErrorCount,
+      misreadQuestionCount: misreadQuestionCount ?? this.misreadQuestionCount,
+      timePressureCount: timePressureCount ?? this.timePressureCount,
+      unclassifiedCount: unclassifiedCount ?? this.unclassifiedCount,
+      sources: sources ?? this.sources,
+    );
+  }
 
   @override
   List<Object?> get props => [
@@ -30,6 +72,11 @@ class MistakeSummaryEntity extends Equatable {
         unresolvedSkippedCount,
         totalWrongCount,
         totalSkippedCount,
+        conceptGapCount,
+        carelessErrorCount,
+        misreadQuestionCount,
+        timePressureCount,
+        unclassifiedCount,
         sources,
       ];
 }
@@ -91,6 +138,7 @@ class MistakeQuestionEntity extends Equatable {
   final String? lessonTitle;
   final String? lastSelectedOptionId;
   final String? selectedOptionText;
+  final String? reflectionReason;
   final List<MistakeOptionEntity> options;
 
   const MistakeQuestionEntity({
@@ -110,8 +158,51 @@ class MistakeQuestionEntity extends Equatable {
     this.lessonTitle,
     this.lastSelectedOptionId,
     this.selectedOptionText,
+    this.reflectionReason,
     required this.options,
   });
+
+  MistakeQuestionEntity copyWith({
+    String? mistakeId,
+    String? questionId,
+    String? questionText,
+    String? questionType,
+    int? points,
+    int? sortOrder,
+    String? imageUrl,
+    Map<String, dynamic>? imageMeta,
+    bool? isResolved,
+    int? failureCount,
+    DateTime? lastFailedAt,
+    String? sourceExamId,
+    String? sourceExamTitle,
+    String? lessonTitle,
+    String? lastSelectedOptionId,
+    String? selectedOptionText,
+    String? reflectionReason,
+    List<MistakeOptionEntity>? options,
+  }) {
+    return MistakeQuestionEntity(
+      mistakeId: mistakeId ?? this.mistakeId,
+      questionId: questionId ?? this.questionId,
+      questionText: questionText ?? this.questionText,
+      questionType: questionType ?? this.questionType,
+      points: points ?? this.points,
+      sortOrder: sortOrder ?? this.sortOrder,
+      imageUrl: imageUrl ?? this.imageUrl,
+      imageMeta: imageMeta ?? this.imageMeta,
+      isResolved: isResolved ?? this.isResolved,
+      failureCount: failureCount ?? this.failureCount,
+      lastFailedAt: lastFailedAt ?? this.lastFailedAt,
+      sourceExamId: sourceExamId ?? this.sourceExamId,
+      sourceExamTitle: sourceExamTitle ?? this.sourceExamTitle,
+      lessonTitle: lessonTitle ?? this.lessonTitle,
+      lastSelectedOptionId: lastSelectedOptionId ?? this.lastSelectedOptionId,
+      selectedOptionText: selectedOptionText ?? this.selectedOptionText,
+      reflectionReason: reflectionReason ?? this.reflectionReason,
+      options: options ?? this.options,
+    );
+  }
 
   /// Returns true if the student skipped the question without selecting any option.
   bool get isSkipped => lastSelectedOptionId == null || lastSelectedOptionId!.isEmpty;
@@ -137,6 +228,7 @@ class MistakeQuestionEntity extends Equatable {
         lessonTitle,
         lastSelectedOptionId,
         selectedOptionText,
+        reflectionReason,
         options,
       ];
 }

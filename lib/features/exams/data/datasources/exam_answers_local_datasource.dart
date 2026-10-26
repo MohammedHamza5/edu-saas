@@ -1,15 +1,17 @@
 import 'dart:convert';
 import '../../../../core/utils/app_logger.dart';
 import '../../../../core/utils/secure_storage_helper.dart';
+import '../../domain/repositories/exam_answers_storage.dart';
 
 /// Local data source to safely persist student's in-progress answers during an active attempt.
 /// Protects against accidental browser reloads, phone battery drops, or app backgrounding.
 /// Operates client-side with zero database impact and zero risk to existing production workflows.
-class ExamAnswersLocalDataSource {
+class ExamAnswersLocalDataSource implements ExamAnswersStorage {
   static const String _keyPrefix = 'edu_exam_answers_attempt_';
 
   const ExamAnswersLocalDataSource();
 
+  @override
   /// Persists student's selected answers map (questionId -> selectedOptionId).
   Future<void> saveAnswers({
     required String attemptId,
@@ -32,6 +34,7 @@ class ExamAnswersLocalDataSource {
     }
   }
 
+  @override
   /// Retrieves the saved draft answers for the given attemptId, or empty map if none exist.
   Future<Map<String, String>> getAnswers(String attemptId) async {
     try {
@@ -54,6 +57,7 @@ class ExamAnswersLocalDataSource {
     }
   }
 
+  @override
   /// Removes the draft answers when the attempt is successfully submitted.
   Future<void> clearAnswers(String attemptId) async {
     try {

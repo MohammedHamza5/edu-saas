@@ -2,6 +2,7 @@ import '../../../../core/errors/failures.dart';
 import '../../../../core/errors/result.dart';
 import '../../domain/entities/chapter_entity.dart';
 import '../../domain/entities/content_entity.dart';
+import '../../domain/entities/content_analytics_entity.dart';
 import '../../domain/entities/lesson_assignment_entity.dart';
 import '../../domain/repositories/content_repository.dart';
 import '../datasources/content_remote_datasource.dart';
@@ -556,6 +557,104 @@ class ContentRepositoryImpl implements ContentRepository {
     } catch (e) {
       return FailureResult(
         ServerFailure('فشل في إزالة المحاضرة من المجموعة', details: e.toString()),
+      );
+    }
+  }
+
+  @override
+  Future<Result<List<Map<String, dynamic>>>> getAvailableExamsSummary() async {
+    try {
+      final exams = await _remoteDataSource.getAvailableExamsSummary();
+      return Success(exams);
+    } catch (e) {
+      return FailureResult(
+        ServerFailure('فشل في جلب قائمة الامتحانات المتاحة: ${e.toString()}'),
+      );
+    }
+  }
+
+  @override
+  Future<Result<Map<String, String>?>> getExamByContentId(String contentId) async {
+    try {
+      final exam = await _remoteDataSource.getExamByContentId(contentId);
+      return Success(exam);
+    } catch (e) {
+      return FailureResult(
+        ServerFailure('فشل في جلب الامتحان المرتبط بالمحتوى: ${e.toString()}'),
+      );
+    }
+  }
+
+  @override
+  Future<Result<LessonAnalyticsEntity>> getLessonAnalytics({
+    required String lessonId,
+    required String groupId,
+    String? videoId,
+    String? examId,
+  }) async {
+    try {
+      final analytics = await _remoteDataSource.getLessonAnalytics(
+        lessonId: lessonId,
+        groupId: groupId,
+        videoId: videoId,
+        examId: examId,
+      );
+      return Success(analytics);
+    } catch (e) {
+      return FailureResult(
+        ServerFailure('فشل في جلب تحليلات الدرس: ${e.toString()}'),
+      );
+    }
+  }
+
+  @override
+  Future<Result<ChapterAnalyticsEntity>> getChapterAnalytics({
+    required String groupId,
+    required List<String> lessonIds,
+    required List<String> examIds,
+  }) async {
+    try {
+      final analytics = await _remoteDataSource.getChapterAnalytics(
+        groupId: groupId,
+        lessonIds: lessonIds,
+        examIds: examIds,
+      );
+      return Success(analytics);
+    } catch (e) {
+      return FailureResult(
+        ServerFailure('فشل في جلب تحليلات الفصل: ${e.toString()}'),
+      );
+    }
+  }
+
+  @override
+  Future<Result<List<Map<String, dynamic>>>> getContentGroupCustomizations(String contentId) async {
+    try {
+      final list = await _remoteDataSource.getContentGroupCustomizations(contentId);
+      return Success(list);
+    } catch (e) {
+      return FailureResult(
+        ServerFailure('فشل في جلب تخصيصات مجموعات المحتوى: ${e.toString()}'),
+      );
+    }
+  }
+
+  @override
+  Future<Result<GroupAnalyticsEntity>> getGroupAnalytics({
+    required String groupId,
+    required List<ChapterEntity> chapters,
+    required List<ContentEntity> lessons,
+  }) async {
+    try {
+      final analytics = await _remoteDataSource.getGroupAnalytics(
+        groupId: groupId,
+        chapters: chapters,
+        lessons: lessons,
+      );
+      return Success(analytics);
+    } catch (e) {
+      return FailureResult(
+        ServerFailure('فشل في جلب تحليلات المجموعة: ${e.toString()}'),
       );
     }
   }

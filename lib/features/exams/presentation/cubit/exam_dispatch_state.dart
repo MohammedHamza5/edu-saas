@@ -157,6 +157,7 @@ class ExamDispatchLoaded extends ExamDispatchState {
   ExamDispatchLoaded copyWith({
     ExamParentDispatchRosterEntity? roster,
     Set<String>? sentStudentIds,
+    Set<String>? sentAttemptIds,
     ExamDispatchFilter? activeFilter,
     String? searchQuery,
     ExamDispatchSort? activeSort,
@@ -165,6 +166,7 @@ class ExamDispatchLoaded extends ExamDispatchState {
     return ExamDispatchLoaded(
       roster: roster ?? this.roster,
       sentStudentIds: sentStudentIds ?? this.sentStudentIds,
+      sentAttemptIds: sentAttemptIds ?? this.sentAttemptIds,
       activeFilter: activeFilter ?? this.activeFilter,
       searchQuery: searchQuery ?? this.searchQuery,
       activeSort: activeSort ?? this.activeSort,
@@ -176,6 +178,7 @@ class ExamDispatchLoaded extends ExamDispatchState {
   List<Object?> get props => [
         roster,
         sentStudentIds,
+        sentAttemptIds,
         activeFilter,
         searchQuery,
         activeSort,

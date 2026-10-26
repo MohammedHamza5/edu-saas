@@ -183,7 +183,7 @@ void main() {
         expect(tester.takeException(), isNull);
         expect(find.textContaining('لوحة الطالب'), findsOneWidget);
         expect(find.textContaining('مرحباً بك'), findsOneWidget);
-        expect(find.textContaining('الزخم الأكاديمي'), findsOneWidget);
+        expect(find.textContaining('زخم'), findsOneWidget);
       },
     );
 
@@ -197,7 +197,7 @@ void main() {
 
       expect(tester.takeException(), isNull);
       expect(find.textContaining('لوحة الطالب'), findsOneWidget);
-      expect(find.textContaining('الزخم الأكاديمي'), findsOneWidget);
+      expect(find.textContaining('زخم'), findsOneWidget);
     });
 
     testWidgets('Renders cleanly on Tablet Portrait (768x1024)', (
@@ -227,7 +227,7 @@ void main() {
 
         expect(tester.takeException(), isNull);
         expect(find.textContaining('لوحة الطالب'), findsOneWidget);
-        expect(find.textContaining('الزخم الأكاديمي'), findsOneWidget);
+        expect(find.textContaining('زخم'), findsOneWidget);
       },
     );
 

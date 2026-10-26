@@ -11,7 +11,10 @@ import '../../../../core/widgets/app_error_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
 import '../../../question_bank/presentation/widgets/question_display_widgets.dart';
 import '../../domain/entities/exam_entity.dart';
+import '../../domain/entities/saved_question_entity.dart';
+import '../../../../core/utils/app_feedback.dart';
 import '../widgets/exam_image_viewer.dart';
+import '../extensions/exam_ui_extensions.dart';
 
 class ExamReviewPage extends StatefulWidget {
   final String attemptId;
@@ -36,11 +39,13 @@ class _ExamReviewPageState extends State<ExamReviewPage> {
   bool _isLoading = true;
   String? _errorMessage;
   int _currentQuestionIndex = 0;
+  final Set<String> _savedQuestionIds = {};
 
   @override
   void initState() {
     super.initState();
     _currentQuestionIndex = widget.initialQuestionIndex;
+    _initSavedQuestions();
     if (widget.initialAttempt != null &&
         widget.initialAttempt!.questions.isNotEmpty) {
       _attempt = widget.initialAttempt;
@@ -50,6 +55,59 @@ class _ExamReviewPageState extends State<ExamReviewPage> {
       _isLoading = false;
     } else {
       _loadReview();
+    }
+  }
+
+  Future<void> _initSavedQuestions() async {
+    try {
+      final res = await InjectionContainer.savedQuestionsRepository.getSavedQuestions();
+      if (res.isSuccess && res.dataOrNull != null && mounted) {
+        setState(() {
+          _savedQuestionIds.addAll(res.dataOrNull!.map((q) => q.questionId));
+        });
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _toggleSaveQuestionToVault(
+    ExamQuestionEntity question,
+    ExamAnswerEntity? answer,
+    int qIndex,
+  ) async {
+    final isSaved = _savedQuestionIds.contains(question.id);
+    if (isSaved) {
+      setState(() => _savedQuestionIds.remove(question.id));
+      await InjectionContainer.savedQuestionsRepository.removeSavedQuestion(question.id);
+      if (!mounted || !context.mounted) return;
+      AppFeedback.showInfo(context, context.l10n.removedFromVaultSuccess);
+    } else {
+      setState(() => _savedQuestionIds.add(question.id));
+      final correctOpt = question.options.cast<QuestionOptionEntity?>().firstWhere(
+        (QuestionOptionEntity? o) => o?.isCorrect == true,
+        orElse: () => null,
+      );
+      final isMistake = answer?.isCorrect != true;
+
+      final saved = SavedQuestionEntity(
+        id: 'sq_${question.id}',
+        questionId: question.id,
+        examId: widget.exam?.id ?? _attempt?.examId ?? '',
+        examTitle: widget.exam?.title ?? '',
+        questionText: question.questionText,
+        questionImageUrl: question.imageUrl,
+        options: question.options,
+        savedAt: DateTime.now(),
+        userAnswerOptionId: answer?.selectedOptionId,
+        correctOptionId: correctOpt?.id,
+        questionIndex: qIndex + 1,
+        isPdfQuestion: widget.exam?.hasAttachedPdf == true,
+        pdfUrl: widget.exam?.pdfStoragePath,
+        isMastered: !isMistake,
+        difficultyRating: isMistake ? QuestionDifficultyRating.hard : QuestionDifficultyRating.easy,
+      );
+      await InjectionContainer.savedQuestionsRepository.saveQuestion(saved);
+      if (!mounted || !context.mounted) return;
+      AppFeedback.showSuccess(context, context.l10n.savedToMistakeVaultSuccess);
     }
   }
 
@@ -334,32 +392,58 @@ class _ExamReviewPageState extends State<ExamReviewPage> {
                               color: AppColors.primary,
                             ),
                           ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 3,
-                            ),
-                            decoration: BoxDecoration(
-                              color:
-                                  (answer?.isCorrect == true
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: (answer?.isCorrect == true
                                           ? AppColors.success
                                           : AppColors.error)
                                       .withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              context.l10n.pointsEarnedOutOf(
-                                (answer?.pointsEarned ?? 0).toInt(),
-                                question.points,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  context.l10n.pointsEarnedOutOf(
+                                    (answer?.pointsEarned ?? 0).toInt(),
+                                    question.points,
+                                  ),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: answer?.isCorrect == true
+                                        ? AppColors.success
+                                        : AppColors.error,
+                                  ),
+                                ),
                               ),
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: answer?.isCorrect == true
-                                    ? AppColors.success
-                                    : AppColors.error,
+                              const SizedBox(width: AppSpacing.s8),
+                              IconButton(
+                                icon: Icon(
+                                  _savedQuestionIds.contains(question.id)
+                                      ? Icons.bookmark_rounded
+                                      : Icons.bookmark_border_rounded,
+                                  color: _savedQuestionIds.contains(question.id)
+                                      ? AppColors.warning
+                                      : AppColors.textSecondary,
+                                  size: 20,
+                                ),
+                                tooltip: _savedQuestionIds.contains(question.id)
+                                    ? context.l10n.removeFromVault
+                                    : context.l10n.saveToMistakeVaultAction,
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
+                                onPressed: () => _toggleSaveQuestionToVault(
+                                  question,
+                                  answer,
+                                  currentIndex,
+                                ),
                               ),
-                            ),
+                            ],
                           ),
                         ],
                       ),

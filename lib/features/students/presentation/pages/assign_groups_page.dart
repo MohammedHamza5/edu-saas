@@ -5,6 +5,7 @@ import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/utils/app_feedback.dart';
 import '../../../../core/widgets/app_badge.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_empty_view.dart';
@@ -105,12 +106,7 @@ class _AssignGroupsPageState extends State<AssignGroupsPage> {
       body: BlocConsumer<StudentsCubit, StudentsState>(
         listener: (context, state) {
           if (state is StudentsError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: AppColors.error,
-              ),
-            );
+            AppFeedback.showError(context, state.message);
           }
         },
         builder: (context, state) {
@@ -311,57 +307,65 @@ class _AssignGroupsPageState extends State<AssignGroupsPage> {
   }
 
   Future<void> _addGroup(BuildContext context, StudentGroupInfo g) async {
+    final l10n = context.l10n;
+    final cubit = context.read<StudentsCubit>();
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(context.l10n.assignGroupConfirmTitle),
-        content: Text(context.l10n.assignGroupConfirmBody(g.groupName)),
+        title: Text(l10n.assignGroupConfirmTitle),
+        content: Text(l10n.assignGroupConfirmBody(g.groupName)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text(context.l10n.cancel),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text(context.l10n.assignNowAction),
+            child: Text(l10n.assignNowAction),
           ),
         ],
       ),
     );
-    if (ok == true && context.mounted) {
-      await context.read<StudentsCubit>().toggleGroupMembership(
+    if (!context.mounted) return;
+    if (ok == true) {
+      await cubit.toggleGroupMembership(
         studentId: widget.studentId,
         groupId: g.groupId,
         add: true,
       );
+      if (!context.mounted) return;
     }
   }
 
   Future<void> _removeGroup(BuildContext context, StudentGroupInfo g) async {
+    final l10n = context.l10n;
+    final cubit = context.read<StudentsCubit>();
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(context.l10n.unassignGroupConfirmTitle),
-        content: Text(context.l10n.unassignGroupConfirmBody(g.groupName)),
+        title: Text(l10n.unassignGroupConfirmTitle),
+        content: Text(l10n.unassignGroupConfirmBody(g.groupName)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text(context.l10n.cancel),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: AppColors.error),
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text(context.l10n.delete),
+            child: Text(l10n.delete),
           ),
         ],
       ),
     );
-    if (ok == true && context.mounted) {
-      await context.read<StudentsCubit>().toggleGroupMembership(
+    if (!context.mounted) return;
+    if (ok == true) {
+      await cubit.toggleGroupMembership(
         studentId: widget.studentId,
         groupId: g.groupId,
         add: false,
       );
+      if (!context.mounted) return;
     }
   }
 }

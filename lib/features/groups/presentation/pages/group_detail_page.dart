@@ -19,13 +19,18 @@ import '../cubit/groups_state.dart';
 import '../widgets/add_member_dialog.dart';
 import '../widgets/course_settings_dialog.dart';
 import '../widgets/edit_group_dialog.dart';
-import '../../../content/presentation/widgets/student_course_progress_sheet.dart';
 
 class GroupDetailPage extends StatefulWidget {
   final String groupId;
   final GroupEntity? initialGroup;
+  final void Function(BuildContext context, GroupMemberEntity member)? onMemberTap;
 
-  const GroupDetailPage({super.key, required this.groupId, this.initialGroup});
+  const GroupDetailPage({
+    super.key,
+    required this.groupId,
+    this.initialGroup,
+    this.onMemberTap,
+  });
 
   @override
   State<GroupDetailPage> createState() => _GroupDetailPageState();
@@ -91,15 +96,17 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
   }
 
   Future<void> _confirmDeleteGroup(BuildContext context, GroupEntity group) async {
+    final l10n = context.l10n;
+    final cubit = context.read<GroupsCubit>();
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(context.l10n.deleteGroupConfirmTitle),
-        content: Text(context.l10n.deleteGroupConfirmBody(group.name)),
+        title: Text(l10n.deleteGroupConfirmTitle),
+        content: Text(l10n.deleteGroupConfirmBody(group.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(context.l10n.cancel),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -107,16 +114,18 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
               foregroundColor: Colors.white,
             ),
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(context.l10n.deleteGroupAction),
+            child: Text(l10n.deleteGroupAction),
           ),
         ],
       ),
     );
 
-    if (confirmed == true && context.mounted) {
-      final ok = await context.read<GroupsCubit>().deleteGroup(group.id);
-      if (ok && context.mounted) {
-        AppFeedback.showSuccess(context, context.l10n.groupDeletedSuccess);
+    if (!context.mounted) return;
+    if (confirmed == true) {
+      final ok = await cubit.deleteGroup(group.id);
+      if (!context.mounted) return;
+      if (ok) {
+        AppFeedback.showSuccess(context, l10n.groupDeletedSuccess);
         if (context.canPop()) {
           context.pop();
         } else {
@@ -539,13 +548,14 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
                         }
                         final member = members[index];
                         return _MemberRowCard(
-                          member: member,
-                          groupId: widget.groupId,
-                          onRemove: () => _confirmRemoveMember(
-                            member.studentId,
-                            member.studentName,
-                          ),
-                        );
+                    member: member,
+                    groupId: widget.groupId,
+                    onMemberTap: widget.onMemberTap,
+                    onRemove: () => _confirmRemoveMember(
+                      member.studentId,
+                      member.studentName,
+                    ),
+                  );
                       },
                     ),
                 ],
@@ -563,11 +573,13 @@ class _MemberRowCard extends StatefulWidget {
   final GroupMemberEntity member;
   final String groupId;
   final VoidCallback onRemove;
+  final void Function(BuildContext context, GroupMemberEntity member)? onMemberTap;
 
   const _MemberRowCard({
     required this.member,
     required this.groupId,
     required this.onRemove,
+    this.onMemberTap,
   });
 
   @override
@@ -587,12 +599,7 @@ class _MemberRowCardState extends State<_MemberRowCard> {
       onExit: (_) => setState(() => _isHovered = false),
       child: GestureDetector(
         onTap: () {
-          StudentCourseProgressSheet.show(
-            context,
-            groupId: widget.groupId,
-            studentId: member.studentId,
-            studentName: member.studentName,
-          );
+          widget.onMemberTap?.call(context, member);
         },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),

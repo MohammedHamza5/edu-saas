@@ -8,6 +8,7 @@ import '../../../notifications/domain/services/notification_dispatcher.dart';
 import '../../domain/entities/attached_lesson_exam_entity.dart';
 import '../../domain/entities/chapter_entity.dart';
 import '../../domain/entities/content_entity.dart';
+import '../../domain/entities/content_analytics_entity.dart';
 import '../models/content_model.dart';
 import '../models/file_attachment_model.dart';
 
@@ -194,6 +195,37 @@ abstract interface class ContentRemoteDataSource {
   Future<void> removeLessonFromGroup({
     required String contentId,
     required String groupId,
+  });
+
+  /// Fetches summary of available exams (id, title) for lesson exam selectors
+  Future<List<Map<String, dynamic>>> getAvailableExamsSummary();
+
+  /// Fetches the linked exam (id, title) for a specific content item
+  Future<Map<String, String>?> getExamByContentId(String contentId);
+
+  /// Fetches aggregated analytics for a single lesson
+  Future<LessonAnalyticsEntity> getLessonAnalytics({
+    required String lessonId,
+    required String groupId,
+    String? videoId,
+    String? examId,
+  });
+
+  /// Fetches aggregated analytics for a chapter
+  Future<ChapterAnalyticsEntity> getChapterAnalytics({
+    required String groupId,
+    required List<String> lessonIds,
+    required List<String> examIds,
+  });
+
+  /// Fetches existing group customizations for a specific content item
+  Future<List<Map<String, dynamic>>> getContentGroupCustomizations(String contentId);
+
+  /// Fetches panoramic aggregated group analytics for courses
+  Future<GroupAnalyticsEntity> getGroupAnalytics({
+    required String groupId,
+    required List<ChapterEntity> chapters,
+    required List<ContentEntity> lessons,
   });
 }
 
@@ -1387,6 +1419,13 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
           'updated_at': DateTime.now().toUtc().toIso8601String(),
         })
         .eq('id', contentId);
+
+    try {
+      await _safeClient
+          .from('content_groups')
+          .update({'associated_exam_id': examId})
+          .eq('content_id', contentId);
+    } catch (_) {}
   }
 
   @override
@@ -1608,5 +1647,507 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
       'remove_lesson_from_group',
       params: {'p_content_id': contentId, 'p_group_id': resolvedGroupId},
     );
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getAvailableExamsSummary() async {
+    try {
+      final res = await _safeClient
+          .from('exams')
+          .select('id, title, content:content!exams_content_id_fkey(group_id, title)')
+          .order('created_at', ascending: false);
+
+      return (res as List<dynamic>).map((e) {
+        final map = e as Map<String, dynamic>;
+        final contentMap = map['content'] as Map<String, dynamic>?;
+        final title = map['title'] as String? ??
+            contentMap?['title'] as String? ??
+            'بدون عنوان';
+        final gId = contentMap?['group_id'] as String?;
+        return {
+          'id': map['id'] as String,
+          'title': title,
+          if (gId != null) 'group_id': gId,
+        };
+      }).toList();
+    } catch (e, stack) {
+      AppLogger.e('ContentRemoteDataSource', 'Failed to fetch available exams summary', error: e, stackTrace: stack);
+      return [];
+    }
+  }
+
+  @override
+  Future<Map<String, String>?> getExamByContentId(String contentId) async {
+    try {
+      final res = await _safeClient
+          .from('exams')
+          .select('id, title')
+          .eq('content_id', contentId)
+          .maybeSingle();
+      if (res != null && res['id'] != null) {
+        return {
+          'id': res['id'] as String,
+          'title': (res['title'] as String?) ?? 'بدون عنوان',
+        };
+      }
+      return null;
+    } catch (e, stack) {
+      AppLogger.e('ContentRemoteDataSource', 'Failed to fetch exam by contentId', error: e, stackTrace: stack);
+      return null;
+    }
+  }
+
+  @override
+  Future<LessonAnalyticsEntity> getLessonAnalytics({
+    required String lessonId,
+    required String groupId,
+    String? videoId,
+    String? examId,
+  }) async {
+    try {
+      String? vId = videoId;
+      if (vId == null) {
+        final videoRes = await _safeClient
+            .from('videos')
+            .select('id')
+            .eq('content_id', lessonId)
+            .maybeSingle();
+        if (videoRes != null && videoRes['id'] != null) {
+          vId = videoRes['id'] as String;
+        }
+      }
+
+      final membersFuture = _safeClient
+          .from('group_members')
+          .select('id')
+          .eq('group_id', groupId)
+          .eq('status', 'active');
+
+      final videoProgressFuture = vId != null
+          ? _safeClient
+              .from('video_progress')
+              .select('completed, progress_seconds')
+              .eq('video_id', vId)
+          : Future.value(<dynamic>[]);
+
+      final attemptsFuture = examId != null
+          ? _safeClient
+              .from('exam_attempts')
+              .select('percentage')
+              .eq('exam_id', examId)
+              .inFilter('status', const ['submitted', 'completed'])
+          : Future.value(<dynamic>[]);
+
+      final results = await Future.wait<dynamic>([
+        membersFuture,
+        videoProgressFuture,
+        attemptsFuture,
+      ]);
+
+      final countRes = results[0] as List<dynamic>;
+      final total = countRes.length;
+
+      final vpList = results[1] as List<dynamic>;
+      final views = vpList
+          .where((r) => (r['progress_seconds'] as int? ?? 0) > 0)
+          .length;
+      final completed = vpList.where((r) => r['completed'] == true).length;
+
+      double? avgScore;
+      final attempts = results[2] as List<dynamic>;
+      if (attempts.isNotEmpty) {
+        double sum = 0;
+        int validCount = 0;
+        for (final a in attempts) {
+          final p = a['percentage'];
+          if (p != null) {
+            sum += (p is num ? p.toDouble() : double.tryParse(p.toString()) ?? 0);
+            validCount++;
+          }
+        }
+        if (validCount > 0) {
+          avgScore = sum / validCount;
+        }
+      }
+
+      return LessonAnalyticsEntity(
+        totalStudents: total,
+        totalViews: views,
+        completedStudents: completed,
+        averageQuizScore: avgScore,
+      );
+    } catch (e, stack) {
+      AppLogger.e('ContentRemoteDataSource', 'Failed to fetch lesson analytics', error: e, stackTrace: stack);
+      return const LessonAnalyticsEntity(
+        totalStudents: 0,
+        totalViews: 0,
+        completedStudents: 0,
+      );
+    }
+  }
+
+  @override
+  Future<ChapterAnalyticsEntity> getChapterAnalytics({
+    required String groupId,
+    required List<String> lessonIds,
+    required List<String> examIds,
+  }) async {
+    try {
+      final membersRes = await _safeClient
+          .from('group_members')
+          .select('student_id')
+          .eq('group_id', groupId)
+          .eq('status', 'active');
+      final studentIds = (membersRes as List)
+          .map((m) => m['student_id'] as String?)
+          .whereType<String>()
+          .toSet()
+          .toList();
+
+      final totalStudents = studentIds.length;
+
+      final List<String> videoIds = [];
+      if (lessonIds.isNotEmpty) {
+        final videosRes = await _safeClient
+            .from('videos')
+            .select('id, content_id')
+            .inFilter('content_id', lessonIds);
+        for (final v in (videosRes as List)) {
+          if (v['id'] != null) {
+            videoIds.add(v['id'] as String);
+          }
+        }
+      }
+
+      int totalViews = 0;
+      final Map<String, Set<String>> studentCompletedVideos = {};
+      final Map<String, int> studentWatchedCount = {};
+
+      if (videoIds.isNotEmpty) {
+        final vpRes = await _safeClient
+            .from('video_progress')
+            .select('student_id, video_id, completed, progress_seconds')
+            .inFilter('video_id', videoIds);
+
+        for (final row in (vpRes as List)) {
+          final sId = row['student_id'] as String?;
+          final vId = row['video_id'] as String?;
+          final progSec = row['progress_seconds'] as int? ?? 0;
+          final isComp = row['completed'] == true;
+
+          if (progSec > 0) {
+            totalViews++;
+            if (sId != null) {
+              studentWatchedCount[sId] = (studentWatchedCount[sId] ?? 0) + 1;
+            }
+          }
+
+          if (isComp && sId != null && vId != null) {
+            studentCompletedVideos.putIfAbsent(sId, () => <String>{}).add(vId);
+          }
+        }
+      }
+
+      int completedCount = 0;
+      int inProgressCount = 0;
+      int notStartedCount = 0;
+
+      for (final sId in studentIds) {
+        final completedSet = studentCompletedVideos[sId] ?? {};
+        if (videoIds.isNotEmpty && completedSet.length >= videoIds.length) {
+          completedCount++;
+        } else if ((studentWatchedCount[sId] ?? 0) > 0 || completedSet.isNotEmpty) {
+          inProgressCount++;
+        } else {
+          notStartedCount++;
+        }
+      }
+
+      double? avgScore;
+      if (examIds.isNotEmpty) {
+        final attemptsRes = await _safeClient
+            .from('exam_attempts')
+            .select('percentage')
+            .inFilter('exam_id', examIds)
+            .inFilter('status', const ['submitted', 'completed']);
+
+        final attempts = attemptsRes as List;
+        if (attempts.isNotEmpty) {
+          double sum = 0;
+          int validCount = 0;
+          for (final a in attempts) {
+            final p = a['percentage'];
+            if (p != null) {
+              sum += (p is num ? p.toDouble() : double.tryParse(p.toString()) ?? 0);
+              validCount++;
+            }
+          }
+          if (validCount > 0) {
+            avgScore = sum / validCount;
+          }
+        }
+      }
+
+      return ChapterAnalyticsEntity(
+        totalStudents: totalStudents,
+        totalViews: totalViews,
+        completedCount: completedCount,
+        inProgressCount: inProgressCount,
+        notStartedCount: notStartedCount,
+        averageScore: avgScore,
+      );
+    } catch (e, stack) {
+      AppLogger.e('ContentRemoteDataSource', 'Failed to fetch chapter analytics', error: e, stackTrace: stack);
+      return const ChapterAnalyticsEntity(
+        totalStudents: 0,
+        totalViews: 0,
+        completedCount: 0,
+        inProgressCount: 0,
+        notStartedCount: 0,
+      );
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getContentGroupCustomizations(String contentId) async {
+    try {
+      final res = await _safeClient
+          .from('content_groups')
+          .select(
+            'group_id, file_id, associated_exam_id, prerequisite_exam_id, sort_order, passing_score_override, '
+            'file:files!content_groups_file_id_fkey(id, file_name), '
+            'associated_exam:exams!content_groups_associated_exam_id_fkey(id, title), '
+            'prerequisite_exam:exams!content_groups_prerequisite_exam_id_fkey(id, title)',
+          )
+          .eq('content_id', contentId);
+      return List<Map<String, dynamic>>.from(res as List);
+    } catch (e, stack) {
+      AppLogger.e('ContentRemoteDataSource', 'Failed to fetch content group customizations', error: e, stackTrace: stack);
+      return [];
+    }
+  }
+
+  @override
+  Future<GroupAnalyticsEntity> getGroupAnalytics({
+    required String groupId,
+    required List<ChapterEntity> chapters,
+    required List<ContentEntity> lessons,
+  }) async {
+    try {
+      // 1. Fetch active students in this group with user profiles
+      final membersRes = await _safeClient
+          .from('group_members')
+          .select('student_id, users!inner(id, full_name, avatar_url)')
+          .eq('group_id', groupId)
+          .eq('status', 'active');
+
+      final membersList = membersRes as List;
+      final Map<String, Map<String, dynamic>> studentsMap = {};
+      for (final row in membersList) {
+        final sId = row['student_id'] as String?;
+        final userObj = row['users'] as Map<String, dynamic>?;
+        if (sId != null && userObj != null) {
+          studentsMap[sId] = userObj;
+        }
+      }
+
+      final totalStudents = studentsMap.length;
+
+      // 2. Fetch all video IDs for this course's lessons
+      final allLessonIds = lessons.map((l) => l.id).toList();
+      final Map<String, String> videoIdToLessonId = {};
+      final List<String> allVideoIds = [];
+
+      if (allLessonIds.isNotEmpty) {
+        final videosRes = await _safeClient
+            .from('videos')
+            .select('id, content_id')
+            .inFilter('content_id', allLessonIds);
+
+        for (final v in (videosRes as List)) {
+          final vid = v['id'] as String?;
+          final cid = v['content_id'] as String?;
+          if (vid != null && cid != null) {
+            allVideoIds.add(vid);
+            videoIdToLessonId[vid] = cid;
+          }
+        }
+      }
+
+      // 3. Fetch video progress across all course videos
+      int totalViews = 0;
+      final Map<String, Set<String>> studentCompletedVideoIds = {};
+
+      if (allVideoIds.isNotEmpty) {
+        final vpRes = await _safeClient
+            .from('video_progress')
+            .select('student_id, video_id, completed, progress_seconds')
+            .inFilter('video_id', allVideoIds);
+
+        for (final row in (vpRes as List)) {
+          final sId = row['student_id'] as String?;
+          final vId = row['video_id'] as String?;
+          final progSec = row['progress_seconds'] as int? ?? 0;
+          final isComp = row['completed'] == true;
+
+          if (progSec > 0) {
+            totalViews++;
+          }
+          if (isComp && sId != null && vId != null) {
+            studentCompletedVideoIds
+                .putIfAbsent(sId, () => <String>{})
+                .add(vId);
+          }
+        }
+      }
+
+      // 4. Calculate overall completion per student & identify attention list (< 50%)
+      int sumStudentProgress = 0;
+      final List<StudentAttentionItemEntity> attentionList = [];
+      final totalVideosCount = allVideoIds.length;
+
+      for (final entry in studentsMap.entries) {
+        final sId = entry.key;
+        final profile = entry.value;
+        final name = (profile['full_name'] as String?)?.trim();
+        final avatar = profile['avatar_url'] as String?;
+
+        final completedCount = studentCompletedVideoIds[sId]?.length ?? 0;
+        final rate = totalVideosCount > 0
+            ? ((completedCount / totalVideosCount) * 100).round()
+            : 0;
+
+        sumStudentProgress += rate;
+
+        if (rate < 50) {
+          attentionList.add(
+            StudentAttentionItemEntity(
+              id: sId,
+              name: name?.isNotEmpty == true ? name! : 'Student',
+              avatarUrl: avatar,
+              completionPercentage: rate,
+            ),
+          );
+        }
+      }
+
+      final overallProgress = totalStudents > 0
+          ? (sumStudentProgress ~/ totalStudents)
+          : 0;
+
+      // 5. Calculate overall quizzes average
+      final allExamIds = lessons
+          .expand((l) => [
+                if (l.associatedExamId != null) l.associatedExamId!,
+                ...l.attachedExams.map((e) => e.examId),
+              ])
+          .toSet()
+          .toList();
+
+      double? groupQuizAvg;
+      final Map<String, double> examAvgMap = {};
+
+      if (allExamIds.isNotEmpty) {
+        final attemptsRes = await _safeClient
+            .from('exam_attempts')
+            .select('exam_id, percentage')
+            .inFilter('exam_id', allExamIds)
+            .inFilter('status', ['submitted', 'completed']);
+
+        final Map<String, List<double>> examScores = {};
+        for (final row in (attemptsRes as List)) {
+          final eId = row['exam_id'] as String?;
+          final p = row['percentage'];
+          if (eId != null && p != null) {
+            final val = p is num ? p.toDouble() : double.tryParse(p.toString());
+            if (val != null) {
+              examScores.putIfAbsent(eId, () => []).add(val);
+            }
+          }
+        }
+
+        double totalScoreSum = 0;
+        int totalScoreCount = 0;
+        for (final entry in examScores.entries) {
+          final avg = entry.value.reduce((a, b) => a + b) / entry.value.length;
+          examAvgMap[entry.key] = avg;
+          totalScoreSum += entry.value.reduce((a, b) => a + b);
+          totalScoreCount += entry.value.length;
+        }
+
+        if (totalScoreCount > 0) {
+          groupQuizAvg = totalScoreSum / totalScoreCount;
+        }
+      }
+
+      // 6. Chapter-by-chapter metrics breakdown
+      final List<ChapterMetricItemEntity> chapterMetrics = [];
+      for (final ch in chapters) {
+        final chLessons = lessons.where((l) => l.chapterId == ch.id).toList();
+        final chLessonIds = chLessons.map((l) => l.id).toSet();
+        final chVideoIds = allVideoIds
+            .where((vid) => chLessonIds.contains(videoIdToLessonId[vid]))
+            .toList();
+
+        int chCompletedStudents = 0;
+        for (final sId in studentsMap.keys) {
+          final completed = studentCompletedVideoIds[sId] ?? {};
+          if (chVideoIds.isNotEmpty &&
+              chVideoIds.every((vid) => completed.contains(vid))) {
+            chCompletedStudents++;
+          }
+        }
+
+        final chRate = totalStudents > 0
+            ? ((chCompletedStudents / totalStudents) * 100).round()
+            : 0;
+
+        final chExamIds = chLessons
+            .expand((l) => [
+                  if (l.associatedExamId != null) l.associatedExamId!,
+                  ...l.attachedExams.map((e) => e.examId),
+                ])
+            .toSet()
+            .toList();
+        double? chAvg;
+        if (chExamIds.isNotEmpty) {
+          final validAvgs = chExamIds
+              .map((id) => examAvgMap[id])
+              .whereType<double>()
+              .toList();
+          if (validAvgs.isNotEmpty) {
+            chAvg = validAvgs.reduce((a, b) => a + b) / validAvgs.length;
+          }
+        }
+
+        chapterMetrics.add(
+          ChapterMetricItemEntity(
+            chapterId: ch.id,
+            title: ch.title,
+            lessonCount: chLessons.length,
+            completionRate: chRate,
+            quizAvg: chAvg,
+          ),
+        );
+      }
+
+      return GroupAnalyticsEntity(
+        totalStudents: totalStudents,
+        totalViews: totalViews,
+        overallProgress: overallProgress,
+        overallQuizzesAverage: groupQuizAvg,
+        chapterMetrics: chapterMetrics,
+        studentsNeedingAttention: attentionList,
+      );
+    } catch (e, stack) {
+      AppLogger.e('ContentRemoteDataSource', 'Failed to calculate group analytics', error: e, stackTrace: stack);
+      return const GroupAnalyticsEntity(
+        totalStudents: 0,
+        totalViews: 0,
+        overallProgress: 0,
+        chapterMetrics: [],
+        studentsNeedingAttention: [],
+      );
+    }
   }
 }

@@ -1,10 +1,9 @@
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../domain/entities/exam_entity.dart';
+import 'option_image_view.dart';
 
 class QuestionOptionTile extends StatelessWidget {
   final QuestionOptionEntity option;
@@ -13,6 +12,8 @@ class QuestionOptionTile extends StatelessWidget {
   final VoidCallback? onTap;
   final bool? isCorrectReview;
   final bool isWrongReview;
+  final bool isEliminated;
+  final VoidCallback? onEliminate;
 
   const QuestionOptionTile({
     super.key,
@@ -22,6 +23,8 @@ class QuestionOptionTile extends StatelessWidget {
     this.onTap,
     this.isCorrectReview,
     this.isWrongReview = false,
+    this.isEliminated = false,
+    this.onEliminate,
   });
 
   String _getOptionLabel(BuildContext context) {
@@ -60,6 +63,11 @@ class QuestionOptionTile extends StatelessWidget {
       backgroundColor = AppColors.error.withValues(alpha: 0.08);
       indicatorBg = AppColors.error;
       indicatorTextColor = Colors.white;
+    } else if (isEliminated) {
+      borderColor = AppColors.border.withValues(alpha: 0.4);
+      backgroundColor = AppColors.surfaceVariant.withValues(alpha: 0.25);
+      indicatorBg = Colors.grey.withValues(alpha: 0.2);
+      indicatorTextColor = AppColors.textMuted;
     } else if (isSelected) {
       borderColor = AppColors.primary;
       backgroundColor = AppColors.primary.withValues(alpha: 0.06);
@@ -122,68 +130,42 @@ class QuestionOptionTile extends StatelessWidget {
                         fontWeight: isSelected
                             ? FontWeight.w600
                             : FontWeight.normal,
-                        color: AppColors.textPrimary,
+                        color: isEliminated
+                            ? AppColors.textMuted
+                            : AppColors.textPrimary,
+                        decoration: isEliminated
+                            ? TextDecoration.lineThrough
+                            : TextDecoration.none,
                       ),
                     ),
                   if (option.imageUrl != null &&
                       option.imageUrl!.isNotEmpty) ...[
                     if (option.optionText.isNotEmpty) const SizedBox(height: 6),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(
-                        AppSpacing.radiusSmall,
-                      ),
-                      child: kIsWeb
-                          ? Image.network(
-                              option.imageUrl!,
-                              height: 90,
-                              fit: BoxFit.contain,
-                              loadingBuilder: (ctx, child, progress) {
-                                if (progress == null) return child;
-                                return Container(
-                                  height: 90,
-                                  width: 90,
-                                  color: AppColors.surfaceVariant.withValues(
-                                    alpha: 0.3,
-                                  ),
-                                  child: const Center(
-                                    child: SizedBox(
-                                      width: 16,
-                                      height: 16,
-                                      child: CircularProgressIndicator(strokeWidth: 2),
-                                    ),
-                                  ),
-                                );
-                              },
-                              errorBuilder: (ctx, _, __) => const SizedBox.shrink(),
-                            )
-                          : CachedNetworkImage(
-                              imageUrl: option.imageUrl!,
-                              height: 90,
-                              memCacheWidth: 400,
-                              memCacheHeight: 200,
-                              maxWidthDiskCache: 600,
-                              fit: BoxFit.contain,
-                              placeholder: (ctx, _) => Container(
-                                height: 90,
-                                width: 90,
-                                color: AppColors.surfaceVariant.withValues(
-                                  alpha: 0.3,
-                                ),
-                                child: const Center(
-                                  child: SizedBox(
-                                    width: 16,
-                                    height: 16,
-                                    child: CircularProgressIndicator(strokeWidth: 2),
-                                  ),
-                                ),
-                              ),
-                              errorWidget: (ctx, _, __) => const SizedBox.shrink(),
-                            ),
-                    ),
+                    OptionImageView(imageUrl: option.imageUrl!),
                   ],
                 ],
               ),
             ),
+
+            if (onEliminate != null && isCorrectReview == null && !isWrongReview) ...[
+              const SizedBox(width: AppSpacing.s4),
+              InkWell(
+                onTap: onEliminate,
+                borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                child: Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: Icon(
+                    isEliminated
+                        ? Icons.strikethrough_s_rounded
+                        : Icons.close_rounded,
+                    size: 16,
+                    color: isEliminated
+                        ? AppColors.error
+                        : AppColors.textMuted.withValues(alpha: 0.6),
+                  ),
+                ),
+              ),
+            ],
 
             if (isCorrectReview == true) ...[
               const SizedBox(width: AppSpacing.s8),

@@ -279,7 +279,7 @@ class _EditAssignmentDialogState extends State<EditAssignmentDialog> {
                         style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                       ),
                       value: _allowLateSubmission,
-                      activeColor: AppColors.primary,
+                      activeThumbColor: AppColors.primary,
                       contentPadding: EdgeInsets.zero,
                       dense: true,
                       onChanged: (val) => setState(() => _allowLateSubmission = val),

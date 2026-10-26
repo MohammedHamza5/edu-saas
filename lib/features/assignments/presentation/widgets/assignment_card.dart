@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../domain/entities/assignment_entity.dart';
+import '../extensions/submission_status_ui_extensions.dart';
 
 class AssignmentCard extends StatelessWidget {
   final AssignmentEntity assignment;

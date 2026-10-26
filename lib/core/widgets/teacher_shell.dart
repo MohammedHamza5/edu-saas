@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../config/tenant_registry.dart';
+import '../config/tenant_resolver.dart';
 import '../extensions/localized_context_extension.dart';
 import '../network/supabase_service.dart';
 import '../router/app_routes.dart';
@@ -248,7 +249,7 @@ class TeacherShell extends StatelessWidget {
       try {
         return context.watch<TenantThemeCubit>().state;
       } catch (_) {
-        return TenantRegistry.defaultBranding;
+        return TenantResolver.resolveBranding();
       }
     })();
 
@@ -272,7 +273,7 @@ class TeacherShell extends StatelessWidget {
       try {
         return context.watch<TenantThemeCubit>().state;
       } catch (_) {
-        return TenantRegistry.defaultBranding;
+        return TenantResolver.resolveBranding();
       }
     })();
 
@@ -298,7 +299,7 @@ class TeacherShell extends StatelessWidget {
       try {
         return context.watch<TenantThemeCubit>().state;
       } catch (_) {
-        return TenantRegistry.defaultBranding;
+        return TenantResolver.resolveBranding();
       }
     })();
     final teacherName = branding.localizedTeacherName(context);

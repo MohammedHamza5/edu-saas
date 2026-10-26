@@ -1,34 +1,31 @@
 import 'dart:async';
+import 'package:edu_saas/features/groups/domain/entities/group_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../../../auth/presentation/cubit/auth_cubit.dart';
-import '../../../auth/presentation/cubit/auth_state.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/utils/app_feedback.dart';
+import '../../../../core/utils/cache_manager.dart';
 import '../../../../core/utils/group_slug_resolver.dart';
 import '../../../../core/widgets/app_empty_view.dart';
 import '../../../../core/widgets/app_error_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
-import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/responsive_container.dart';
-import 'package:edu_saas/features/groups/domain/entities/group_entity.dart';
-import '../../domain/entities/chapter_entity.dart';
+import '../../../auth/presentation/cubit/auth_cubit.dart';
+import '../../../auth/presentation/cubit/auth_state.dart';
 import '../../domain/entities/content_entity.dart';
-import '../../domain/entities/file_attachment_entity.dart';
 import '../../domain/entities/lesson_assignment_entity.dart';
-import '../../domain/repositories/content_repository.dart';
-import '../../../../core/utils/cache_manager.dart';
-import '../../../exams/presentation/cubit/exams_cubit.dart';
-import '../../../exams/presentation/pages/exam_intro_page.dart';
 import '../cubit/course_progress_cubit.dart';
 import '../cubit/course_progress_state.dart';
-import '../widgets/material_viewer_sheet.dart';
-import '../widgets/student_chapter_accordion_card.dart';
-import '../widgets/student_lesson_tile.dart';
+import '../utils/student_content_navigation_helper.dart';
+import '../utils/student_content_quiz_launcher.dart';
+import '../widgets/student_content_slivers_view.dart';
+import '../widgets/student_content_toolbar.dart';
+import '../widgets/student_group_switcher_bar.dart';
 import '../widgets/student_mission_command_deck.dart';
 
 class StudentContentFeedPage extends StatefulWidget {
@@ -45,32 +42,17 @@ class StudentContentFeedPage extends StatefulWidget {
   State<StudentContentFeedPage> createState() => _StudentContentFeedPageState();
 }
 
-class _ChapterBucket {
-  final String? chapterId;
-  final String title;
-  final int sortOrder;
-  final List<LessonAssignmentEntity> lessons = [];
-
-  _ChapterBucket({
-    required this.chapterId,
-    required this.title,
-    required this.sortOrder,
-  });
-}
-
 class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
   final ScrollController _scrollController = ScrollController();
   late String _activeGroupId;
   late String? _activeGroupName;
   List<GroupEntity> _studentGroups = [];
-
   ContentType? _selectedTypeFilter;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   bool _isRoadmapMode = true;
   bool _isOpeningQuiz = false;
   final Set<String> _expandedChapterIds = {};
-  String? _lastGroupIdForExpansion;
 
   String? get _currentUserId {
     try {
@@ -79,10 +61,7 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
         return authState.user.id;
       }
     } catch (_) {}
-    try {
-      return InjectionContainer.supabaseClient.auth.currentUser?.id;
-    } catch (_) {}
-    return null;
+    return AppCache.currentUserId;
   }
 
   @override
@@ -91,17 +70,15 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
     _activeGroupId = GroupSlugResolver.toId(widget.groupId);
     _activeGroupName = widget.groupName;
     _initializeFeed();
-    _scrollController.addListener(_onScroll);
   }
 
   void _initializeFeed() {
-    // If _activeGroupId is already a valid UUID, load immediately (0ms fast path)
     if (GroupSlugResolver.isUuid(_activeGroupId)) {
       unawaited(
         context.read<CourseProgressCubit>().loadCourseProgress(
-          _activeGroupId,
-          studentId: _currentUserId,
-        ),
+              _activeGroupId,
+              studentId: _currentUserId,
+            ),
       );
     }
     unawaited(_fetchStudentGroups());
@@ -115,11 +92,12 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
         for (final g in groups) {
           GroupSlugResolver.registerGroup(g.id, g.name);
         }
+
         final hadValidUuidBefore = GroupSlugResolver.isUuid(_activeGroupId);
         final previousId = _activeGroupId;
+
         setState(() {
           _studentGroups = groups;
-          // Match by id or by slug or by name
           final match = _studentGroups.where((g) {
             return g.id == _activeGroupId ||
                 g.id == widget.groupId ||
@@ -127,6 +105,7 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                     widget.groupId.toLowerCase() ||
                 g.name.toLowerCase() == widget.groupId.toLowerCase();
           });
+
           if (match.isNotEmpty) {
             _activeGroupId = match.first.id;
             _activeGroupName = match.first.name;
@@ -137,27 +116,24 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
           }
         });
 
-        // If it wasn't loaded because widget.groupId was an unresolved slug,
-        // or if active group changed to a valid UUID, load now
         if (mounted &&
             (!hadValidUuidBefore || _activeGroupId != previousId) &&
             GroupSlugResolver.isUuid(_activeGroupId)) {
           unawaited(
             context.read<CourseProgressCubit>().loadCourseProgress(
-              _activeGroupId,
-              studentId: _currentUserId,
-            ),
+                  _activeGroupId,
+                  studentId: _currentUserId,
+                ),
           );
         }
       }
     } catch (_) {
-      // Safe fallback when groupsRepository is uninitialized in tests or offline
       if (mounted) {
         unawaited(
           context.read<CourseProgressCubit>().loadCourseProgress(
-            _activeGroupId,
-            studentId: _currentUserId,
-          ),
+                _activeGroupId,
+                studentId: _currentUserId,
+              ),
         );
       }
     }
@@ -165,14 +141,9 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
 
   @override
   void dispose() {
-    _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     _searchController.dispose();
     super.dispose();
-  }
-
-  void _onScroll() {
-    // Pagination is not needed for the course progress as it returns the whole sequence
   }
 
   Future<void> _handleContentTap(
@@ -180,292 +151,41 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
     int? index,
     int? totalCount,
   }) async {
-    if (item.isLocked) {
-      final prevIndex = index != null && index > 1
-          ? index - 1
-          : (item.sortOrder > 1 ? item.sortOrder - 1 : 1);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: AppColors.error,
-          content: Text(context.l10n.completeLessonToUnlock(prevIndex)),
-        ),
-      );
-      return;
-    }
+    await StudentContentNavigationHelper.handleContentTap(
+      context: context,
+      item: item,
+      activeGroupId: _activeGroupId,
+      activeGroupName: _activeGroupName,
+      onTakeQuiz: _handleTakeQuiz,
+      index: index,
+      totalCount: totalCount,
+    );
 
-    switch (item.type) {
-      case ContentType.video:
-        final encodedTitle = item.lessonExamTitle != null
-            ? Uri.encodeComponent(item.lessonExamTitle!)
-            : '';
-        final encodedGroupName = _activeGroupName != null
-            ? Uri.encodeComponent(_activeGroupName!)
-            : '';
-        final lIndex = index ?? item.sortOrder;
-        final tLessons = totalCount ?? 1;
-        await context.push(
-          '${AppRoutes.videoPlayer}?id=${item.contentId}&associatedExamId=${item.lessonExamId ?? ''}&associatedExamTitle=$encodedTitle&groupId=$_activeGroupId&groupName=$encodedGroupName&lessonIndex=$lIndex&totalLessons=$tLessons',
-        );
-        break;
-      case ContentType.assignment:
-        await context.push(AppRoutes.studentAssignments);
-        break;
-      case ContentType.exam:
-        if (item.hasLessonExam || (item.lessonExamId != null && item.lessonExamId!.isNotEmpty)) {
-          await _handleTakeQuiz(item);
-        } else if (item.attachedExams.isNotEmpty) {
-          final firstExam = item.attachedExams.first;
-          await _handleTakeQuiz(item.copyWith(
-            lessonExamId: firstExam.examId,
-            lessonExamTitle: firstExam.examTitle,
-          ));
-        } else {
-          try {
-            final res = await InjectionContainer.supabaseClient
-                .from('exams')
-                .select('id, title')
-                .eq('content_id', item.contentId)
-                .maybeSingle();
-            if (res != null && res['id'] != null && mounted) {
-              await _handleTakeQuiz(item.copyWith(
-                lessonExamId: res['id'] as String,
-                lessonExamTitle: res['title'] as String?,
-              ));
-              break;
-            }
-          } catch (_) {}
-          if (mounted) {
-            await context.push(AppRoutes.studentExams);
-          }
-        }
-        break;
-      case ContentType.pdf:
-      case ContentType.image:
-        await MaterialViewerSheet.show(
-          context,
-          content: ContentEntity(
-            id: item.contentId,
-            tenantId: '',
-            groupId: item.groupId,
-            title: item.title,
-            type: item.type,
-            status: ContentStatus.published,
-            createdAt: DateTime.now(),
-            updatedAt: DateTime.now(),
-            file: item.pdfFileId != null
-                ? FileAttachmentEntity(
-                    id: item.pdfFileId!,
-                    tenantId: '',
-                    contentId: item.contentId,
-                    fileName: item.pdfFileName ?? '',
-                    storagePath: item.pdfStoragePath ?? '',
-                    mimeType: '',
-                    fileSize: 0,
-                    createdAt: DateTime.now(),
-                  )
-                : null,
-          ),
-          onGetSignedUrl: (storagePath) => context
-              .read<ContentRepository>()
-              .getSignedFileUrl(storagePath: storagePath)
-              .then((value) => value.dataOrNull ?? ''),
-        );
-        break;
-    }
-
-    // Refresh course progress when returning from any content view
     if (mounted) {
       unawaited(
         context.read<CourseProgressCubit>().loadCourseProgress(
-          _activeGroupId,
-          studentId: InjectionContainer.supabaseClient.auth.currentUser?.id,
-        ),
+              _activeGroupId,
+              studentId: _currentUserId,
+            ),
       );
     }
   }
 
-  Future<void> _handleOpenHandout(LessonAssignmentEntity item) async {
-    if (item.pdfFileId == null) return;
-    await MaterialViewerSheet.show(
-      context,
-      content: ContentEntity(
-        id: item.contentId,
-        tenantId: '',
-        groupId: item.groupId,
-        title: item.title,
-        type: item.type,
-        status: ContentStatus.published,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-        file: FileAttachmentEntity(
-          id: item.pdfFileId!,
-          tenantId: '',
-          contentId: item.contentId,
-          fileName: item.pdfFileName ?? '',
-          storagePath: item.pdfStoragePath ?? '',
-          mimeType: '',
-          fileSize: 0,
-          createdAt: DateTime.now(),
-        ),
-      ),
-      onGetSignedUrl: (storagePath) => context
-          .read<ContentRepository>()
-          .getSignedFileUrl(storagePath: storagePath)
-          .then((value) => value.dataOrNull ?? ''),
-    );
-  }
-
   Future<void> _handleTakeQuiz(LessonAssignmentEntity item) async {
-    if (!item.hasLessonExam || item.lessonExamId == null) return;
     if (_isOpeningQuiz) return;
-
     setState(() => _isOpeningQuiz = true);
-
     try {
-      final result = await InjectionContainer.examsRepository.getExamDetails(
-        item.lessonExamId!,
+      await StudentContentQuizLauncher.takeQuiz(
+        context: context,
+        item: item,
+        activeGroupId: _activeGroupId,
+        currentUserId: _currentUserId,
       );
-
-      if (!mounted) return;
-
-      if (result.isSuccess && result.dataOrNull != null) {
-        final exam = result.dataOrNull!;
-        final questions = exam.activeVersion?.questions ?? const [];
-
-        if (questions.isEmpty) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              backgroundColor: AppColors.warning,
-              content: Text(context.l10n.examUnderPreparationNotice),
-            ),
-          );
-          return;
-        }
-
-        final examsCubit = InjectionContainer.createExamsCubit();
-
-        LessonAssignmentEntity? nextLesson;
-        int? nextLessonIndex;
-        int? totalLessons;
-
-        final state = context.read<CourseProgressCubit>().state;
-        if (state is CourseProgressLoaded) {
-          final allLessons = state.lessons;
-          totalLessons = allLessons.length;
-          final cIdx =
-              allLessons.indexWhere((l) => l.contentId == item.contentId);
-          if (cIdx >= 0 && cIdx < allLessons.length - 1) {
-            nextLesson = allLessons[cIdx + 1];
-            nextLessonIndex = cIdx + 2;
-          }
-        }
-
-        await Navigator.of(context).push<void>(
-          MaterialPageRoute<void>(
-            builder: (_) => BlocProvider<ExamsCubit>.value(
-              value: examsCubit,
-              child: ExamIntroPage(
-                exam: exam,
-                isLectureExam: true,
-                nextLesson: nextLesson,
-                nextLessonIndex: nextLessonIndex,
-                totalLessonsCount: totalLessons,
-              ),
-            ),
-          ),
-        );
-        if (mounted) {
-          AppCache.content.clear();
-          AppCache.exams.clear();
-          unawaited(
-            context.read<CourseProgressCubit>().loadCourseProgress(
-              _activeGroupId,
-              studentId: _currentUserId,
-              forceRefresh: true,
-            ),
-          );
-        }
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: AppColors.error,
-            content: Text(
-              result.failureOrNull?.message ?? context.l10n.errorOccurred,
-            ),
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: AppColors.error,
-            content: Text(e.toString()),
-          ),
-        );
-      }
     } finally {
       if (mounted) {
         setState(() => _isOpeningQuiz = false);
       }
     }
-  }
-
-  List<_ChapterBucket> _buildChapterBuckets(
-    List<LessonAssignmentEntity> items,
-    List<ChapterEntity> allChapters,
-    BuildContext context,
-  ) {
-    final Map<String, _ChapterBucket> map = {};
-
-    // 1. Pre-populate defined course chapters that are published
-    for (final ch in allChapters) {
-      if (!ch.isPublished) continue;
-      map[ch.id] = _ChapterBucket(
-        chapterId: ch.id,
-        title: ch.title,
-        sortOrder: ch.sortOrder,
-      );
-    }
-
-    _ChapterBucket? generalBucket;
-
-    // 2. Distribute lessons into their corresponding chapters
-    for (final item in items) {
-      if (item.chapterId != null && item.chapterId!.isNotEmpty) {
-        final id = item.chapterId!;
-        map
-            .putIfAbsent(
-              id,
-              () => _ChapterBucket(
-                chapterId: id,
-                title: item.chapterTitle ?? context.l10n.chapterPrefix,
-                sortOrder: item.chapterSortOrder ?? 999999,
-              ),
-            )
-            .lessons
-            .add(item);
-      } else {
-        generalBucket ??= _ChapterBucket(
-          chapterId: '__general__',
-          title: context.l10n.generalLessonsTitle,
-          sortOrder: 9999999,
-        );
-        generalBucket.lessons.add(item);
-      }
-    }
-
-    var buckets = map.values.toList()
-      ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
-
-    // Never show empty or WIP chapters to students — only chapters with actual published lessons appear
-    buckets = buckets.where((b) => b.lessons.isNotEmpty).toList();
-
-    if (generalBucket != null) {
-      buckets.add(generalBucket);
-    }
-
-    return buckets;
   }
 
   @override
@@ -508,724 +228,303 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
             tooltip: context.l10n.refreshContent,
-            onPressed: () =>
-                context.read<CourseProgressCubit>().loadCourseProgress(
-                  _activeGroupId,
-                  studentId:
-                      InjectionContainer.supabaseClient.auth.currentUser?.id,
-                ),
+            onPressed: () => context
+                .read<CourseProgressCubit>()
+                .loadCourseProgress(_activeGroupId, studentId: _currentUserId),
           ),
         ],
       ),
       body: Stack(
         children: [
           BlocConsumer<CourseProgressCubit, CourseProgressState>(
-        listener: (context, state) {
-          if (state is CourseProgressError) {
-            final userFriendlyMessage = _isTechnicalError(state.message)
-                ? context.l10n.errorOccurred
-                : state.message;
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(userFriendlyMessage),
-                backgroundColor: AppColors.error,
-              ),
-            );
-          }
-        },
-        builder: (context, state) {
-          if (state is CourseProgressInitial ||
-              state is CourseProgressLoading) {
-            return const AppLoadingView.cardsGrid(count: 4, columns: 2);
-          }
-
-          if (state is CourseProgressError) {
-            final userFriendlyMessage = _isTechnicalError(state.message)
-                ? context.l10n.errorOccurred
-                : state.message;
-            return AppErrorView(
-              message: userFriendlyMessage,
-              onRetry: () async {
-                final cubit = context.read<CourseProgressCubit>();
-                await _fetchStudentGroups();
-                if (!mounted) return;
-                if (GroupSlugResolver.isUuid(_activeGroupId)) {
-                  unawaited(
-                    cubit.loadCourseProgress(
-                      _activeGroupId,
-                      studentId: _currentUserId,
-                    ),
-                  );
-                }
-              },
-            );
-          }
-
-          if (state is CourseProgressLoaded) {
-            // The lectures roadmap represents video lectures only; attached quizzes appear inside the video player
-            final videoLectures = state.lessons
-                .where((i) => i.type == ContentType.video)
-                .toList();
-            final allPublished = videoLectures.isNotEmpty
-                ? videoLectures
-                : state.lessons;
-
-            final completedCount = allPublished
-                .where((i) => i.isEffectivelyCompleted)
-                .length;
-            final totalPublishedCount = allPublished.length;
-            final overallProgressPct = totalPublishedCount > 0
-                ? ((completedCount / totalPublishedCount) * 100).toInt()
-                : 0;
-
-            // Find immediate next mission/lesson
-            LessonAssignmentEntity? nextLesson;
-            int? nextLessonIndex;
-            for (int i = 0; i < allPublished.length; i++) {
-              final it = allPublished[i];
-              if (!it.isEffectivelyCompleted && !it.isLocked) {
-                nextLesson = it;
-                nextLessonIndex = i + 1;
-                break;
+            listener: (context, state) {
+              if (state is CourseProgressError) {
+                AppFeedback.showError(context, state.message);
               }
-            }
-            if (nextLesson == null) {
-              for (int i = 0; i < allPublished.length; i++) {
-                final it = allPublished[i];
-                if (!it.isEffectivelyCompleted) {
-                  nextLesson = it;
-                  nextLessonIndex = i + 1;
-                  break;
-                }
+            },
+            builder: (context, state) {
+              if (state is CourseProgressInitial ||
+                  state is CourseProgressLoading) {
+                return const AppLoadingView.cardsGrid(count: 4, columns: 2);
               }
-            }
 
-            // Filter by type
-            var items = _selectedTypeFilter == null
-                ? allPublished
-                : allPublished
-                      .where((i) => i.type == _selectedTypeFilter)
+              if (state is CourseProgressError) {
+                final userFriendlyMessage = _isTechnicalError(state.message)
+                    ? context.l10n.errorOccurred
+                    : state.message;
+
+                return AppErrorView(
+                  message: userFriendlyMessage,
+                  onRetry: () async {
+                    final cubit = context.read<CourseProgressCubit>();
+                    await _fetchStudentGroups();
+                    if (!mounted) return;
+                    if (GroupSlugResolver.isUuid(_activeGroupId)) {
+                      unawaited(
+                        cubit.loadCourseProgress(
+                          _activeGroupId,
+                          studentId: _currentUserId,
+                        ),
+                      );
+                    }
+                  },
+                );
+              }
+
+              if (state is CourseProgressLoaded) {
+                final videoLectures = state.lessons
+                    .where((i) => i.type == ContentType.video)
+                    .toList();
+                final allPublished = videoLectures.isNotEmpty
+                    ? videoLectures
+                    : state.lessons;
+                final completedCount = allPublished
+                    .where((i) => i.isEffectivelyCompleted)
+                    .length;
+                final totalPublishedCount = allPublished.length;
+                final overallProgressPct = totalPublishedCount > 0
+                    ? ((completedCount / totalPublishedCount) * 100).toInt()
+                    : 0;
+
+                LessonAssignmentEntity? nextLesson;
+                int? nextLessonIndex;
+                for (int i = 0; i < allPublished.length; i++) {
+                  final it = allPublished[i];
+                  if (!it.isEffectivelyCompleted && !it.isLocked) {
+                    nextLesson = it;
+                    nextLessonIndex = i + 1;
+                    break;
+                  }
+                }
+                if (nextLesson == null) {
+                  for (int i = 0; i < allPublished.length; i++) {
+                    final it = allPublished[i];
+                    if (!it.isEffectivelyCompleted) {
+                      nextLesson = it;
+                      nextLessonIndex = i + 1;
+                      break;
+                    }
+                  }
+                }
+
+                var items = _selectedTypeFilter == null
+                    ? allPublished
+                    : allPublished
+                        .where((i) => i.type == _selectedTypeFilter)
+                        .toList();
+
+                if (_searchQuery.isNotEmpty) {
+                  items = items
+                      .where(
+                        (i) =>
+                            i.title.toLowerCase().contains(
+                                  _searchQuery.toLowerCase(),
+                                ) ||
+                            (i.description?.toLowerCase().contains(
+                                  _searchQuery.toLowerCase(),
+                                ) ??
+                                false) ||
+                            (i.pdfFileName?.toLowerCase().contains(
+                                  _searchQuery.toLowerCase(),
+                                ) ??
+                                false),
+                      )
                       .toList();
+                }
 
-            if (_searchQuery.isNotEmpty) {
-              items = items
-                  .where(
-                    (i) =>
-                        i.title.toLowerCase().contains(
-                          _searchQuery.toLowerCase(),
-                        ) ||
-                        (i.description?.toLowerCase().contains(
-                              _searchQuery.toLowerCase(),
-                            ) ??
-                            false) ||
-                        (i.pdfFileName?.toLowerCase().contains(
-                              _searchQuery.toLowerCase(),
-                            ) ??
-                            false),
-                  )
-                  .toList();
-            }
-
-            return ResponsiveContainer(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16),
-                child: RefreshIndicator(
-                  onRefresh: () async =>
-                      context.read<CourseProgressCubit>().loadCourseProgress(
-                        _activeGroupId,
-                        studentId: _currentUserId,
-                      ),
-                  child: CustomScrollView(
-                    controller: _scrollController,
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    slivers: [
-                      // 1. Group Switcher Pills (Only if student has multiple groups)
-                      if (_studentGroups.length > 1)
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: AppSpacing.s12),
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Row(
-                                children: _studentGroups.map((g) {
-                                  final isSelected = g.id == _activeGroupId;
-                                  return Padding(
-                                    padding: const EdgeInsetsDirectional.only(
-                                      end: AppSpacing.s8,
-                                    ),
-                                    child: ChoiceChip(
-                                      avatar: Icon(
-                                        Icons.school_rounded,
-                                        size: 16,
-                                        color: isSelected
-                                            ? Colors.white
-                                            : AppColors.primary,
-                                      ),
-                                      label: Text(g.name),
-                                      selected: isSelected,
-                                      selectedColor: AppColors.primary,
-                                      backgroundColor: AppColors.surfaceVariant,
-                                      labelStyle: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: isSelected
-                                            ? FontWeight.bold
-                                            : FontWeight.w500,
-                                        color: isSelected
-                                            ? Colors.white
-                                            : AppColors.textPrimary,
-                                      ),
-                                      onSelected: (selected) {
-                                        if (selected &&
-                                            _activeGroupId != g.id) {
-                                          setState(() {
-                                            _activeGroupId = g.id;
-                                            _activeGroupName = g.name;
-                                            _selectedTypeFilter = null;
-                                            _searchController.clear();
-                                            _searchQuery = '';
-                                          });
-                                          context
-                                              .read<CourseProgressCubit>()
-                                              .loadCourseProgress(
-                                                g.id,
-                                                studentId: _currentUserId,
-                                              );
-                                        }
-                                      },
-                                    ),
-                                  );
-                                }).toList(),
-                              ),
+                return ResponsiveContainer(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.s16,
+                  ),
+                  child: RefreshIndicator(
+                    onRefresh: () async =>
+                        context.read<CourseProgressCubit>().loadCourseProgress(
+                              _activeGroupId,
+                              studentId: _currentUserId,
                             ),
-                          ),
-                        ),
-
-                      // 1.1 Hero Mission Command Deck
-                      if (allPublished.isNotEmpty)
-                        SliverToBoxAdapter(
-                          child: StudentMissionCommandDeck(
-                            nextLesson: nextLesson,
-                            nextLessonIndex: nextLessonIndex,
-                            completedCount: completedCount,
-                            totalCount: totalPublishedCount,
-                            overallPercentage: overallProgressPct,
-                            groupName: _activeGroupName ?? '',
-                            onResume: nextLesson != null
-                                ? () => _handleContentTap(
-                                    nextLesson!,
-                                    index: nextLessonIndex,
-                                    totalCount: totalPublishedCount,
-                                  )
-                                : null,
-                          ),
-                        ),
-
-                      // 1.2 View Switcher (Roadmap vs Syllabus List)
-                      if (allPublished.isNotEmpty)
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.only(
-                              top: AppSpacing.s4,
-                              bottom: AppSpacing.s8,
-                            ),
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Row(
-                                children: [
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      color: AppColors.surfaceVariant,
-                                      borderRadius: BorderRadius.circular(
-                                        AppSpacing.radiusFull,
-                                      ),
-                                      border: Border.all(
-                                        color: AppColors.border,
-                                      ),
-                                    ),
-                                    padding: const EdgeInsets.all(3),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        _buildViewModeButton(
-                                          icon: Icons.alt_route_rounded,
-                                          label:
-                                              context.l10n.syllabusViewRoadmap,
-                                          isActive: _isRoadmapMode,
-                                          onTap: () => setState(
-                                            () => _isRoadmapMode = true,
-                                          ),
-                                        ),
-                                        _buildViewModeButton(
-                                          icon: Icons
-                                              .format_list_numbered_rounded,
-                                          label: context.l10n.syllabusViewList,
-                                          isActive: !_isRoadmapMode,
-                                          onTap: () => setState(
-                                            () => _isRoadmapMode = false,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-
-                      // 2. Search Bar
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                            top: AppSpacing.s4,
-                            bottom: AppSpacing.s16,
-                          ),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: AppColors.surface,
-                              borderRadius: BorderRadius.circular(
-                                AppSpacing.radiusMedium,
-                              ),
-                              border: Border.all(
-                                color: AppColors.border,
-                                width: 1,
-                              ),
-                            ),
-                            child: AppTextField(
-                              controller: _searchController,
-                              hintText: context.l10n.searchContentPlaceholder,
-                              prefixIcon: const Icon(
-                                Icons.search_rounded,
-                                color: AppColors.primaryLight,
-                                size: 20,
-                              ),
-                              suffixIcon: _searchQuery.isNotEmpty
-                                  ? IconButton(
-                                      icon: const Icon(
-                                        Icons.clear_rounded,
-                                        size: 18,
-                                        color: AppColors.textMuted,
-                                      ),
-                                      onPressed: () {
-                                        _searchController.clear();
-                                        setState(() => _searchQuery = '');
-                                      },
-                                    )
-                                  : null,
-                              onChanged: (val) {
-                                setState(() => _searchQuery = val.trim());
+                    child: CustomScrollView(
+                      controller: _scrollController,
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      slivers: [
+                        if (_studentGroups.length > 1)
+                          SliverToBoxAdapter(
+                            child: StudentGroupSwitcherBar(
+                              groups: _studentGroups,
+                              activeGroupId: _activeGroupId,
+                              onGroupSelected: (g) {
+                                setState(() {
+                                  _activeGroupId = g.id;
+                                  _activeGroupName = g.name;
+                                  _selectedTypeFilter = null;
+                                  _searchController.clear();
+                                  _searchQuery = '';
+                                  _expandedChapterIds.clear();
+                                });
+                                context
+                                    .read<CourseProgressCubit>()
+                                    .loadCourseProgress(
+                                      g.id,
+                                      studentId: _currentUserId,
+                                    );
                               },
                             ),
                           ),
-                        ),
-                      ),
-
-                      // 3. Type Filter Chips Row (Only displayed if multiple media types exist)
-                      if (allPublished.any((i) => i.type == ContentType.pdf) ||
-                          allPublished.any((i) => i.type == ContentType.image))
+                        if (allPublished.isNotEmpty)
+                          SliverToBoxAdapter(
+                            child: StudentMissionCommandDeck(
+                              nextLesson: nextLesson,
+                              nextLessonIndex: nextLessonIndex,
+                              completedCount: completedCount,
+                              totalCount: totalPublishedCount,
+                              overallPercentage: overallProgressPct,
+                              groupName: _activeGroupName ?? '',
+                              onResume: nextLesson != null
+                                  ? () => _handleContentTap(
+                                        nextLesson!,
+                                        index: nextLessonIndex,
+                                        totalCount: totalPublishedCount,
+                                      )
+                                  : null,
+                            ),
+                          ),
                         SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.only(
-                              bottom: AppSpacing.s16,
-                            ),
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Row(
-                                children: [
-                                  _buildFilterChip(
-                                    label: context.l10n.filterAllWithCount(
-                                      allPublished.length,
-                                    ),
-                                    isSelected: _selectedTypeFilter == null,
-                                    onSelected: () => setState(
-                                      () => _selectedTypeFilter = null,
-                                    ),
-                                  ),
-                                  if (allPublished.any(
-                                    (i) => i.type == ContentType.pdf,
-                                  )) ...[
-                                    const SizedBox(width: AppSpacing.s8),
-                                    _buildFilterChip(
-                                      label: context.l10n.filterPdfsWithCount(
-                                        allPublished
-                                            .where(
-                                              (i) => i.type == ContentType.pdf,
-                                            )
-                                            .length,
-                                      ),
-                                      isSelected:
-                                          _selectedTypeFilter ==
-                                          ContentType.pdf,
-                                      onSelected: () => setState(
-                                        () => _selectedTypeFilter =
-                                            ContentType.pdf,
-                                      ),
-                                    ),
-                                  ],
-                                  if (allPublished.any(
-                                    (i) => i.type == ContentType.image,
-                                  )) ...[
-                                    const SizedBox(width: AppSpacing.s8),
-                                    _buildFilterChip(
-                                      label: context.l10n.filterImagesWithCount(
-                                        allPublished
-                                            .where(
-                                              (i) =>
-                                                  i.type == ContentType.image,
-                                            )
-                                            .length,
-                                      ),
-                                      isSelected:
-                                          _selectedTypeFilter ==
-                                          ContentType.image,
-                                      onSelected: () => setState(
-                                        () => _selectedTypeFilter =
-                                            ContentType.image,
-                                      ),
-                                    ),
-                                  ],
-                                  if (allPublished.any(
-                                    (i) => i.type == ContentType.video,
-                                  )) ...[
-                                    const SizedBox(width: AppSpacing.s8),
-                                    _buildFilterChip(
-                                      label: context.l10n.filterVideosWithCount(
-                                        allPublished
-                                            .where(
-                                              (i) =>
-                                                  i.type == ContentType.video,
-                                            )
-                                            .length,
-                                      ),
-                                      isSelected:
-                                          _selectedTypeFilter ==
-                                          ContentType.video,
-                                      onSelected: () => setState(
-                                        () => _selectedTypeFilter =
-                                            ContentType.video,
-                                      ),
-                                    ),
-                                  ],
-                                ],
-                              ),
-                            ),
+                          child: StudentContentToolbar(
+                            isRoadmapMode: _isRoadmapMode,
+                            onToggleViewMode: (val) =>
+                                setState(() => _isRoadmapMode = val),
+                            searchController: _searchController,
+                            searchQuery: _searchQuery,
+                            onSearchChanged: (val) =>
+                                setState(() => _searchQuery = val.trim()),
+                            onClearSearch: () {
+                              _searchController.clear();
+                              setState(() => _searchQuery = '');
+                            },
+                            allPublished: allPublished,
+                            selectedTypeFilter: _selectedTypeFilter,
+                            onSelectTypeFilter: (filter) =>
+                                setState(() => _selectedTypeFilter = filter),
                           ),
                         ),
-
-                      // 4. Content Feed List or Empty State
-                      if (allPublished.isEmpty && state.chapters.isEmpty)
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 48),
-                            child: Center(
-                              child: AppEmptyView(
-                                message: context.l10n.courseBeingPreparedTitle,
-                                subtitle:
-                                    context.l10n.courseBeingPreparedSubtitle,
-                                icon: Icons.school_outlined,
-                              ),
-                            ),
-                          ),
-                        )
-                      else if (items.isEmpty && state.chapters.isEmpty)
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 48),
-                            child: Center(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(
-                                    Icons.search_off_rounded,
-                                    size: 48,
-                                    color: AppColors.textMuted,
-                                  ),
-                                  const SizedBox(height: AppSpacing.s12),
-                                  Text(
-                                    context.l10n.noMatchingContentFound(
-                                      _searchQuery,
-                                    ),
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        )
-                      else ...[
-                        () {
-                          final hasChapters = state.chapters.isNotEmpty ||
-                              items.any(
-                                (i) =>
-                                    i.chapterId != null &&
-                                    i.chapterId!.isNotEmpty,
-                              );
-
-                          if (!hasChapters) {
-                            return SliverPadding(
-                              padding: const EdgeInsets.only(
-                                top: AppSpacing.s4,
-                                bottom: 40,
-                              ),
-                              sliver: SliverList.builder(
-                                itemCount: items.length,
-                                itemBuilder: (context, index) {
-                                  final item = items[index];
-                                  return StudentLessonTile(
-                                    content: item.toContentEntity(),
-                                    lesson: item,
-                                    index: index + 1,
-                                    isLast: index == items.length - 1,
-                                    isRoadmapMode:
-                                        _isRoadmapMode &&
-                                        _selectedTypeFilter == null &&
-                                        _searchQuery.isEmpty,
-                                    onTap: () => _handleContentTap(
-                                      item,
-                                      index: index + 1,
-                                      totalCount: items.length,
-                                    ),
-                                    onOpenHandout: item.pdfFileId != null
-                                        ? () => _handleOpenHandout(item)
-                                        : null,
-                                    onTakeQuiz: item.hasLessonExam
-                                        ? () => _handleTakeQuiz(item)
-                                        : null,
-                                  );
-                                },
-                              ),
-                            );
-                          }
-
-                          // Option 1: Accordion View by Academic Chapters
-                          final buckets = _buildChapterBuckets(
-                            items,
-                            state.chapters,
-                            context,
-                          );
-
-                          if (buckets.isEmpty) {
-                            return SliverToBoxAdapter(
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 48),
-                                child: Center(
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      const Icon(
-                                        Icons.search_off_rounded,
-                                        size: 48,
-                                        color: AppColors.textMuted,
-                                      ),
-                                      const SizedBox(height: AppSpacing.s12),
-                                      Text(
-                                        context.l10n.noMatchingContentFound(
-                                          _searchQuery,
-                                        ),
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColors.textSecondary,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                        if (allPublished.isEmpty && state.chapters.isEmpty)
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 48),
+                              child: Center(
+                                child: AppEmptyView(
+                                  message: context.l10n.courseBeingPreparedTitle,
+                                  subtitle:
+                                      context.l10n.courseBeingPreparedSubtitle,
+                                  icon: Icons.school_outlined,
                                 ),
                               ),
-                            );
-                          }
-
-                          // Manage auto-expansion for active chapter
-                          if (_lastGroupIdForExpansion != _activeGroupId) {
-                            _lastGroupIdForExpansion = _activeGroupId;
-                            _expandedChapterIds.clear();
-                          }
-
-                          if (_expandedChapterIds.isEmpty &&
-                              buckets.isNotEmpty) {
-                            final activeBucket = buckets.firstWhere(
-                              (b) => b.lessons.any(
-                                (l) => !l.isLocked && !l.isEffectivelyCompleted,
-                              ),
-                              orElse: () => buckets.first,
-                            );
-                            _expandedChapterIds.add(
-                              activeBucket.chapterId ?? '__general__',
-                            );
-                          }
-
-                          int calcGlobalIndex(int bucketIndex) {
-                            int count = 1;
-                            for (int i = 0; i < bucketIndex; i++) {
-                              count += buckets[i].lessons.length;
-                            }
-                            return count;
-                          }
-
-                          return SliverPadding(
-                            padding: const EdgeInsets.only(
-                              top: AppSpacing.s4,
-                              bottom: 40,
                             ),
-                            sliver: SliverList.builder(
-                              itemCount: buckets.length,
-                              itemBuilder: (context, bIdx) {
-                                final bucket = buckets[bIdx];
-                                final key = bucket.chapterId ?? '__general__';
-                                final isExpanded =
-                                    _searchQuery.isNotEmpty ||
-                                    _expandedChapterIds.contains(key);
-
-                                return StudentChapterAccordionCard(
-                                  key: ValueKey('chapter_accordion_$key'),
-                                  chapterId: bucket.chapterId,
-                                  chapterTitle: bucket.title,
-                                  chapterIndex: bIdx + 1,
-                                  lessons: bucket.lessons,
-                                  globalStartIndex: calcGlobalIndex(bIdx),
-                                  isExpanded: isExpanded,
-                                  isRoadmapMode:
-                                      _isRoadmapMode &&
-                                      _selectedTypeFilter == null &&
-                                      _searchQuery.isEmpty,
-                                  onToggle: () {
-                                    setState(() {
-                                      if (_expandedChapterIds.contains(key)) {
-                                        _expandedChapterIds.remove(key);
-                                      } else {
-                                        _expandedChapterIds.add(key);
-                                      }
-                                    });
-                                  },
-                                  onLessonTap: (item, globalIndex) =>
-                                      _handleContentTap(
-                                        item,
-                                        index: globalIndex,
-                                        totalCount: items.length,
+                          )
+                        else if (items.isEmpty && state.chapters.isEmpty)
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 48),
+                              child: Center(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.search_off_rounded,
+                                      size: 48,
+                                      color: AppColors.textMuted,
+                                    ),
+                                    const SizedBox(height: AppSpacing.s12),
+                                    Text(
+                                      context.l10n.noMatchingContentFound(
+                                        _searchQuery,
                                       ),
-                                  onOpenHandout: (item) =>
-                                      _handleOpenHandout(item),
-                                  onTakeQuiz: (item) => _handleTakeQuiz(item),
-                                );
-                              },
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
-                          );
-                        }(),
+                          )
+                        else
+                          StudentContentSliversView(
+                            items: items,
+                            chapters: state.chapters,
+                            isRoadmapMode: _isRoadmapMode,
+                            selectedTypeFilter: _selectedTypeFilter,
+                            searchQuery: _searchQuery,
+                            expandedChapterIds: _expandedChapterIds,
+                            onToggleChapter: (key) {
+                              setState(() {
+                                if (_expandedChapterIds.contains(key)) {
+                                  _expandedChapterIds.remove(key);
+                                } else {
+                                  _expandedChapterIds.add(key);
+                                }
+                              });
+                            },
+                            onLessonTap: (item, globalIndex, totalCount) =>
+                                _handleContentTap(
+                              item,
+                              index: globalIndex,
+                              totalCount: totalCount,
+                            ),
+                            onOpenHandout: (item) =>
+                                StudentContentNavigationHelper.openHandout(
+                              context: context,
+                              item: item,
+                            ),
+                            onTakeQuiz: (item) => _handleTakeQuiz(item),
+                          ),
                       ],
-                    ],
+                    ),
                   ),
-                ),
-              );
-          }
+                );
+              }
 
-          return const AppLoadingView.cardsGrid(count: 4, columns: 2);
-        },
-      ),
-      if (_isOpeningQuiz)
-        Positioned.fill(
-          child: Container(
-            color: Colors.black.withValues(alpha: 0.35),
-            child: Center(
-              child: Card(
-                elevation: 6,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.s24,
-                    vertical: AppSpacing.s16,
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2.5),
-                      ),
-                      const SizedBox(width: AppSpacing.s12),
-                      Text(
-                        context.l10n.loading,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+              return const AppLoadingView.cardsGrid(count: 4, columns: 2);
+            },
           ),
-        ),
-    ],
-  ),
-);
-  }
-
-  Widget _buildViewModeButton({
-    required IconData icon,
-    required String label,
-    required bool isActive,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: isActive ? AppColors.primary : Colors.transparent,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-          boxShadow: isActive
-              ? [
-                  BoxShadow(
-                    color: AppColors.primary.withAlpha(50),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
+          if (_isOpeningQuiz)
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withValues(alpha: 0.35),
+                child: Center(
+                  child: Card(
+                    elevation: 6,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.radiusMedium,
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.s24,
+                        vertical: AppSpacing.s16,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2.5),
+                          ),
+                          const SizedBox(width: AppSpacing.s12),
+                          Text(
+                            context.l10n.loading,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                ]
-              : null,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 14,
-              color: isActive ? Colors.white : AppColors.textSecondary,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 11.5,
-                fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
-                color: isActive ? Colors.white : AppColors.textSecondary,
+                ),
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFilterChip({
-    required String label,
-    required bool isSelected,
-    required VoidCallback onSelected,
-  }) {
-    return FilterChip(
-      label: Text(label),
-      selected: isSelected,
-      onSelected: (_) => onSelected(),
-      selectedColor: AppColors.primary.withAlpha(35),
-      checkmarkColor: AppColors.primary,
-      labelStyle: TextStyle(
-        fontSize: 13,
-        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-        color: isSelected ? AppColors.primary : AppColors.textSecondary,
+        ],
       ),
     );
   }

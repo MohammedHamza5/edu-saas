@@ -1,3 +1,4 @@
+import '../../features/content/presentation/widgets/student_course_progress_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -29,7 +30,7 @@ import '../../features/videos/presentation/pages/video_player_page.dart';
 import '../../features/content/presentation/pages/teacher_content_library_page.dart';
 import '../../features/content/presentation/pages/teacher_lesson_details_page.dart';
 import '../../features/content/presentation/pages/teacher_materials_library_page.dart';
-import '../../features/content/presentation/pages/teacher_video_bank_page.dart';
+import '../../features/videos/presentation/pages/teacher_video_bank_page.dart';
 import '../../features/content/presentation/pages/student_content_feed_page.dart';
 import '../../features/content/domain/entities/content_entity.dart';
 import '../../features/assignments/presentation/pages/teacher_assignments_page.dart';
@@ -38,6 +39,8 @@ import '../../features/exams/presentation/pages/teacher_exams_page.dart';
 import '../../features/exams/presentation/pages/student_exams_page.dart';
 import '../../features/exams/presentation/pages/student_mistakes_page.dart';
 import '../../features/exams/presentation/pages/mistakes_practice_page.dart';
+import '../../features/exams/presentation/pages/saved_questions_vault_page.dart';
+import '../../features/exams/presentation/pages/anki_drill_page.dart';
 import '../../features/settings/presentation/pages/teacher_settings_page.dart';
 import '../../features/question_bank/presentation/pages/question_bank_page.dart';
 import '../../features/question_bank/presentation/pages/document_questions_page.dart';
@@ -115,6 +118,8 @@ class AppRouter {
   static const String studentExams = AppRoutes.studentExams;
   static const String studentMistakes = AppRoutes.studentMistakes;
   static const String mistakesPractice = AppRoutes.mistakesPractice;
+  static const String studentSavedQuestions = AppRoutes.studentSavedQuestions;
+  static const String studentAnkiDrill = AppRoutes.studentAnkiDrill;
 
   // Feature: Platform Onboarding
   static const String platformOnboarding = AppRoutes.platformOnboarding;
@@ -315,7 +320,18 @@ class AppRouter {
                   final id = state.pathParameters['id']!;
                   final group = state.extra as GroupEntity?;
                   return NoTransitionPage(
-                    child: GroupDetailPage(groupId: id, initialGroup: group),
+                    child: GroupDetailPage(
+                      groupId: id,
+                      initialGroup: group,
+                      onMemberTap: (ctx, member) {
+                        StudentCourseProgressSheet.show(
+                          ctx,
+                          groupId: id,
+                          studentId: member.studentId,
+                          studentName: member.studentName,
+                        );
+                      },
+                    ),
                   );
                 },
               ),
@@ -699,6 +715,29 @@ class AppRouter {
                 ),
               );
             },
+          ),
+          GoRoute(
+            path: studentSavedQuestions,
+            pageBuilder: (BuildContext context, GoRouterState state) =>
+                NoTransitionPage(
+                  child: MultiBlocProvider(
+                    providers: [
+                      BlocProvider(create: (_) => InjectionContainer.createSavedQuestionsCubit()),
+                      BlocProvider(create: (_) => InjectionContainer.createAnkiDrillCubit()),
+                    ],
+                    child: const SavedQuestionsVaultPage(),
+                  ),
+                ),
+          ),
+          GoRoute(
+            path: studentAnkiDrill,
+            pageBuilder: (BuildContext context, GoRouterState state) =>
+                NoTransitionPage(
+                  child: BlocProvider(
+                    create: (_) => InjectionContainer.createAnkiDrillCubit(),
+                    child: const AnkiDrillPage(),
+                  ),
+                ),
           ),
           GoRoute(
             path: studentAttendance,

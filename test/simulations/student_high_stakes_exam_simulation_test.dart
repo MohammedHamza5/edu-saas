@@ -47,6 +47,9 @@ class SimulatedExamAnswersLocalDataSource implements ExamAnswersLocalDataSource 
 // High-Stakes Exam Realistic Server Repository
 // ---------------------------------------------------------------------------
 class SimulatedHighStakesExamsRepository implements ExamsRepository {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+
   bool networkOnline = true;
   int syncAttemptsCount = 0;
   int submitAttemptsCount = 0;
@@ -294,6 +297,11 @@ class SimulatedHighStakesExamsRepository implements ExamsRepository {
   Future<Result<ExamFolderEntity>> updateExamFolder({required String folderId, required String name, String? color, String? icon, String? description}) async => throw UnimplementedError();
   @override
   Future<Result<bool>> deleteExamFolder(String folderId) async => const Success(true);
+  @override
+  Future<Result<bool>> updateMistakeReflection({
+    required String mistakeId,
+    required String? reflectionReason,
+  }) async => const Success(true);
   @override
   Future<Result<bool>> moveExamToFolder({required String examId, String? folderId}) async => const Success(true);
   @override

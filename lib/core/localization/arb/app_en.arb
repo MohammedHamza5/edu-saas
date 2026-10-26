@@ -855,17 +855,13 @@
     "description": "Create group button"
   },
   "groupNameLabel": "Group Name",
-  "@groupNameLabel": {
-    "description": "Group name label"
-  },
+  "@groupNameLabel": {},
   "groupNameHint": "e.g. SAT Basics - Cohort Alpha",
   "@groupNameHint": {
     "description": "Group name hint"
   },
   "groupDescriptionLabel": "Description",
-  "@groupDescriptionLabel": {
-    "description": "Group description label"
-  },
+  "@groupDescriptionLabel": {},
   "groupGradeLevelLabel": "Academic Level",
   "@groupGradeLevelLabel": {
     "description": "Group grade level"
@@ -890,10 +886,8 @@
   "@groupCreatedSuccess": {
     "description": "Group created toast"
   },
-  "groupUpdatedSuccess": "Group details updated",
-  "@groupUpdatedSuccess": {
-    "description": "Group updated toast"
-  },
+  "groupUpdatedSuccess": "Group details updated successfully",
+  "@groupUpdatedSuccess": {},
   "groupDeleteConfirmTitle": "Delete Study Group",
   "@groupDeleteConfirmTitle": {
     "description": "Group delete title"
@@ -1054,9 +1048,7 @@
     "description": "Create assignment button"
   },
   "assignmentTitleLabel": "Assignment Title",
-  "@assignmentTitleLabel": {
-    "description": "Assignment title label"
-  },
+  "@assignmentTitleLabel": {},
   "assignmentDueDateLabel": "Due Date & Time",
   "@assignmentDueDateLabel": {
     "description": "Due date label"
@@ -1134,13 +1126,9 @@
     "description": "Create exam button"
   },
   "examTitleLabel": "Exam Title",
-  "@examTitleLabel": {
-    "description": "Exam title label"
-  },
-  "examDurationLabel": "Exam Duration",
-  "@examDurationLabel": {
-    "description": "Exam duration label"
-  },
+  "@examTitleLabel": {},
+  "examDurationLabel": "Duration (Minutes)",
+  "@examDurationLabel": {},
   "examDurationMinutes": "{minutes} mins",
   "@examDurationMinutes": {
     "description": "Duration in minutes format",
@@ -1274,10 +1262,8 @@
   "@previousQuestionAction": {
     "description": "Previous question button"
   },
-  "nextQuestionAction": "Next",
-  "@nextQuestionAction": {
-    "description": "Next question button"
-  },
+  "nextQuestionAction": "Next Question",
+  "@nextQuestionAction": {},
   "flagQuestionAction": "Flag for Review",
   "@flagQuestionAction": {
     "description": "Flag button"
@@ -1942,15 +1928,8 @@
   "@createNewGroupNow": {
     "description": "Button"
   },
-  "groupLevelLabel": "Level: {level}",
-  "@groupLevelLabel": {
-    "description": "Group level",
-    "placeholders": {
-      "level": {
-        "type": "String"
-      }
-    }
-  },
+  "groupLevelLabel": "Track / Level",
+  "@groupLevelLabel": {},
   "enterAction": "Enter â†’",
   "@enterAction": {
     "description": "Button"
@@ -4891,10 +4870,8 @@
   "@previousQuestion": {
     "description": "Previous question button"
   },
-  "nextQuestion": "Next",
-  "@nextQuestion": {
-    "description": "Next question button"
-  },
+  "nextQuestion": "Next Question",
+  "@nextQuestion": {},
   "submitExamNow": "Submit Exam Now",
   "@submitExamNow": {
     "description": "Submit exam button"
@@ -5752,10 +5729,8 @@
   "@groupCommitmentRateSubtitle": {
     "description": "Group commitment rate stat card subtitle"
   },
-  "searchStudentOrPhoneHint": "Quick search by student name or phone...",
-  "@searchStudentOrPhoneHint": {
-    "description": "Search student or phone hint"
-  },
+  "searchStudentOrPhoneHint": "Search by student name, phone, or group...",
+  "@searchStudentOrPhoneHint": {},
   "noStudentsMatchFilterMessage": "No students match your search or filter",
   "@noStudentsMatchFilterMessage": {
     "description": "No students match filter message"
@@ -6332,7 +6307,7 @@
   "@overallCourseProgress": {},
   "reviewQuizResultAction": "Review Quiz Score",
   "rewatchLectureAction": "Rewatch Lecture",
-  "startLectureAction": "Watch Lecture",
+  "startLectureAction": "Start Lecture",
   "quizPrefix": "Lecture Quiz",
   "removeQuestionTooltip": "Delete Question",
   "addNewLectureHero": "Add New All-in-One Lecture",
@@ -7669,8 +7644,6 @@
   "@filterWrongAnswersOnly": {},
   "filterSkippedOnly": "Skipped Questions Only",
   "@filterSkippedOnly": {},
-  "filterAllTypes": "All Types",
-  "@filterAllTypes": {},
   "wrongAnswerBadge": "Wrong Answer",
   "@wrongAnswerBadge": {},
   "skippedQuestionBadge": "Skipped Question",
@@ -7717,7 +7690,7 @@
   "@createFolderSubtitle": {},
   "folderName": "Folder Name",
   "@folderName": {},
-  "folderNameHint": "e.g. Algebra Basics",
+  "folderNameHint": "e.g. Unit 1: Algebra, SAT Practice",
   "@folderNameHint": {},
   "folderCreatedSuccess": "Folder created successfully",
   "@folderCreatedSuccess": {},
@@ -8413,10 +8386,6 @@
   "@editExamAction": {},
   "examUpdatedSuccess": "Exam details updated successfully",
   "@examUpdatedSuccess": {},
-  "examTitleLabel": "Exam Title",
-  "@examTitleLabel": {},
-  "examDurationLabel": "Duration (Minutes)",
-  "@examDurationLabel": {},
   "unlimitedDuration": "Untimed (Open)",
   "@unlimitedDuration": {},
   "passingScorePercentLabel": "Passing Score (%)",
@@ -8433,14 +8402,6 @@
   "@editGroupTitle": {},
   "editGroupAction": "Edit Group",
   "@editGroupAction": {},
-  "groupUpdatedSuccess": "Group details updated successfully",
-  "@groupUpdatedSuccess": {},
-  "groupNameLabel": "Group Name",
-  "@groupNameLabel": {},
-  "groupLevelLabel": "Track / Level",
-  "@groupLevelLabel": {},
-  "groupDescriptionLabel": "Description",
-  "@groupDescriptionLabel": {},
   "previousContentAccessLabel": "Previous Content Access for New Students",
   "@previousContentAccessLabel": {},
   "allowPreviousContent": "Allow access to past content",
@@ -8453,8 +8414,6 @@
   "@editAssignmentAction": {},
   "assignmentUpdatedSuccess": "Assignment updated successfully",
   "@assignmentUpdatedSuccess": {},
-  "assignmentTitleLabel": "Assignment Title",
-  "@assignmentTitleLabel": {},
   "assignmentInstructionsLabel": "Instructions",
   "@assignmentInstructionsLabel": {},
   "dueDateLabel": "Due Date",
@@ -8467,29 +8426,36 @@
   "@chapterUpdateFailed": {},
   "deleteExamAction": "Delete Exam",
   "@deleteExamAction": {},
-  "deleteExamDialogTitle": "Delete Exam Permanently?",
+  "deleteExamDialogTitle": "Delete Exam?",
   "@deleteExamDialogTitle": {},
-  "deleteExamDialogBody": "Are you sure you want to delete '{title}'? All questions and options will be permanently removed.",
+  "deleteExamDialogBody": "Are you sure you want to permanently delete '{title}'? This action cannot be undone.",
   "@deleteExamDialogBody": {
     "placeholders": {
-      "title": { "type": "String" }
+      "title": {
+        "type": "String"
+      }
     }
   },
   "deleteExamConfirmButton": "Yes, Delete Exam",
   "@deleteExamConfirmButton": {},
-  "archiveOrDeleteExamDialogTitle": "Archive / Hide Exam",
+  "archiveOrDeleteExamDialogTitle": "Archive Exam (Students Have Attempts)",
   "@archiveOrDeleteExamDialogTitle": {},
-  "archiveOrDeleteExamDialogBody": "This exam has {count} student attempt(s). To protect their academic records, the exam will be archived and hidden from students.",
+  "archiveOrDeleteExamDialogBody": "The exam '{title}' has {count} student attempts. To protect historical grades and student records, it will be safely archived and hidden from all lists instead of permanently destroying data.",
   "@archiveOrDeleteExamDialogBody": {
     "placeholders": {
-      "count": { "type": "int" }
+      "title": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
     }
   },
   "archiveExamConfirmButton": "Archive & Hide Exam",
   "@archiveExamConfirmButton": {},
-  "examDeletedSuccessToast": "Exam deleted successfully",
+  "examDeletedSuccessToast": "Exam deleted permanently",
   "@examDeletedSuccessToast": {},
-  "examArchivedSuccessToast": "Exam archived and hidden successfully",
+  "examArchivedSuccessToast": "Exam safely archived and hidden from view",
   "@examArchivedSuccessToast": {},
   "smartApproveTitle": "Approve & Enroll Student",
   "@smartApproveTitle": {},
@@ -8504,14 +8470,20 @@
   "smartApproveSuccessWithGroupsToast": "Student {name} approved and enrolled in {count} group(s) successfully!",
   "@smartApproveSuccessWithGroupsToast": {
     "placeholders": {
-      "name": { "type": "String" },
-      "count": { "type": "int" }
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
     }
   },
   "smartApproveSuccessNoGroupsToast": "Student {name} approved successfully!",
   "@smartApproveSuccessNoGroupsToast": {
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "skipGroupEnrollment": "Proceed without assigning a group for now",
@@ -8535,7 +8507,9 @@
   "pendingStudentsCountBadge": "{count} students waiting approval",
   "@pendingStudentsCountBadge": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "noPendingStudentsBadge": "No pending requests",
@@ -8555,19 +8529,25 @@
   "examFilterTabAll": "All ({count})",
   "@examFilterTabAll": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "examFilterTabGeneral": "General Exams ({count})",
   "@examFilterTabGeneral": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "examFilterTabLectureQuizzes": "Lecture Quizzes ({count})",
   "@examFilterTabLectureQuizzes": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "examFilterSubAll": "All",
@@ -8575,13 +8555,17 @@
   "examFilterSubLinked": "Linked ({count})",
   "@examFilterSubLinked": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "examFilterSubUnlinked": "Ready to Link ({count})",
   "@examFilterSubUnlinked": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "statTotalExamsTitle": "Total Exams",
@@ -8599,7 +8583,9 @@
   "statUnlinkedAlert": "{count} pending lecture link",
   "@statUnlinkedAlert": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "badgeGeneralExam": "General Exam",
@@ -8609,7 +8595,9 @@
   "linkedToLecturePill": "Linked to lecture: {title}",
   "@linkedToLecturePill": {
     "placeholders": {
-      "title": { "type": "String" }
+      "title": {
+        "type": "String"
+      }
     }
   },
   "unlinkedQuizPill": "Not linked to a lecture yet - Ready to link",
@@ -8637,7 +8625,9 @@
   "currentExamAttachedWarning": "Currently linked to: {title}",
   "@currentExamAttachedWarning": {
     "placeholders": {
-      "title": { "type": "String" }
+      "title": {
+        "type": "String"
+      }
     }
   },
   "lectureFreeForLinking": "Available to link",
@@ -8647,7 +8637,9 @@
   "examLinkedSuccessToast": "Exam linked to lecture '{title}' successfully",
   "@examLinkedSuccessToast": {
     "placeholders": {
-      "title": { "type": "String" }
+      "title": {
+        "type": "String"
+      }
     }
   },
   "examUnlinkedSuccessToast": "Exam unlinked and set as General Exam successfully",
@@ -8659,7 +8651,9 @@
   "confirmUnlinkDialogBody": "Do you want to unlink '{title}' from its lecture and make it a general exam?",
   "@confirmUnlinkDialogBody": {
     "placeholders": {
-      "title": { "type": "String" }
+      "title": {
+        "type": "String"
+      }
     }
   },
   "confirmUnlinkButton": "Yes, Unlink",
@@ -8668,7 +8662,7 @@
   "@draftVersionNotice": {},
   "publishCurrentDraftAction": "Publish This Version Now",
   "@publishCurrentDraftAction": {},
-  "editDraftQuestionsAction": "Edit Questions & Settings",
+  "editDraftQuestionsAction": "Edit Questions & Content",
   "@editDraftQuestionsAction": {},
   "versionPublishedPill": "Published",
   "@versionPublishedPill": {},
@@ -8691,7 +8685,9 @@
   "confirmUnpublishExamBody": "Are you sure you want to unpublish \"{title}\"? It will be reverted to draft and hidden from all students.",
   "@confirmUnpublishExamBody": {
     "placeholders": {
-      "title": { "type": "String" }
+      "title": {
+        "type": "String"
+      }
     }
   },
   "confirmUnpublishButton": "Yes, Unpublish to Draft",
@@ -8701,40 +8697,17 @@
   "newVersionFailedError": "Failed to create new version: {error}",
   "@newVersionFailedError": {
     "placeholders": {
-      "error": { "type": "String" }
+      "error": {
+        "type": "String"
+      }
     }
   },
-  "deleteExamAction": "Delete Exam",
-  "@deleteExamAction": {},
-  "deleteExamDialogTitle": "Delete Exam?",
-  "@deleteExamDialogTitle": {},
-  "deleteExamDialogBody": "Are you sure you want to permanently delete '{title}'? This action cannot be undone.",
-  "@deleteExamDialogBody": {
-    "placeholders": {
-      "title": { "type": "String" }
-    }
-  },
-  "deleteExamConfirmButton": "Yes, Delete Exam",
-  "@deleteExamConfirmButton": {},
-  "archiveOrDeleteExamDialogTitle": "Archive Exam (Students Have Attempts)",
-  "@archiveOrDeleteExamDialogTitle": {},
-  "archiveOrDeleteExamDialogBody": "The exam '{title}' has {count} student attempts. To protect historical grades and student records, it will be safely archived and hidden from all lists instead of permanently destroying data.",
-  "@archiveOrDeleteExamDialogBody": {
-    "placeholders": {
-      "title": { "type": "String" },
-      "count": { "type": "int" }
-    }
-  },
-  "archiveExamConfirmButton": "Archive & Hide Exam",
-  "@archiveExamConfirmButton": {},
-  "examDeletedSuccessToast": "Exam deleted permanently",
-  "@examDeletedSuccessToast": {},
-  "examArchivedSuccessToast": "Exam safely archived and hidden from view",
-  "@examArchivedSuccessToast": {},
   "studentAttemptsGroupCount": "{count} Attempts",
   "@studentAttemptsGroupCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "singleStudentAttemptBadge": "1 Attempt",
@@ -8742,37 +8715,45 @@
   "highestScoreBadge": "Best: {score}",
   "@highestScoreBadge": {
     "placeholders": {
-      "score": { "type": "String" }
+      "score": {
+        "type": "String"
+      }
     }
   },
   "attemptNumberLabel": "Attempt #{number}",
   "@attemptNumberLabel": {
     "placeholders": {
-      "number": { "type": "int" }
+      "number": {
+        "type": "int"
+      }
     }
   },
   "allAttemptsHistoryHeader": "All attempts for this student ({count}):",
   "@allAttemptsHistoryHeader": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "studentsCountSummary": "{count} Students Took Exam",
   "@studentsCountSummary": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "totalAttemptsSummary": "{count} Total Attempts",
   "@totalAttemptsSummary": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "editDraftExamTitle": "Edit Draft Exam",
   "@editDraftExamTitle": {},
-  "editDraftQuestionsAction": "Edit Questions & Content",
-  "@editDraftQuestionsAction": {},
   "editExamSettingsAction": "Quick Settings",
   "@editExamSettingsAction": {},
   "saveExamDraftChanges": "Save Draft Changes",
@@ -8784,7 +8765,9 @@
   "examUpdateFailed": "Failed to update exam: {error}",
   "@examUpdateFailed": {
     "placeholders": {
-      "error": { "type": "String" }
+      "error": {
+        "type": "String"
+      }
     }
   },
   "editQuestionsNow": "Edit Questions Now",
@@ -8812,8 +8795,12 @@
   "examSecurityViolationsCount": "Violation {current} of {max} permitted",
   "@examSecurityViolationsCount": {
     "placeholders": {
-      "current": { "type": "int" },
-      "max": { "type": "int" }
+      "current": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
     }
   },
   "examPrivacyShieldNotice": "Exam questions hidden while window is out of focus to protect test integrity.",
@@ -8827,13 +8814,17 @@
   "videoFileTooLargeForWeb": "The video file ({sizeMb} MB) exceeds browser memory capacity (max 2 GB). Please lower the Bitrate in your editor (CapCut) to keep the file under 1.5 GB for faster upload.",
   "@videoFileTooLargeForWeb": {
     "placeholders": {
-      "sizeMb": { "type": "String" }
+      "sizeMb": {
+        "type": "String"
+      }
     }
   },
   "videoFileMemoryError": "Failed to read video data into browser memory ({sizeMb} MB). The file might be too large for browser RAM. Please export under 1.5 GB.",
   "@videoFileMemoryError": {
     "placeholders": {
-      "sizeMb": { "type": "String" }
+      "sizeMb": {
+        "type": "String"
+      }
     }
   },
   "longVideoExportTip": "💡 Tip for long lectures (> 1 hr): set Bitrate to 2,500 Kbps in video editor to keep file around 1 GB for fast upload and browser stability.",
@@ -8850,6 +8841,12 @@
   "@sendScoreToParentAction": {},
   "resendToParentAction": "Resend",
   "@resendToParentAction": {},
+  "examResultsHiddenSubtitle": "The instructor has temporarily hidden answer keys and question review. It will become accessible once results are officially published.",
+  "@examResultsHiddenSubtitle": {},
+  "examResultsHiddenTitle": "Answers Submitted Successfully",
+  "@examResultsHiddenTitle": {},
+  "sendNewScoreToParentAction": "Send Updated Score",
+  "@sendNewScoreToParentAction": {},
   "dispatchSentBadge": "Sent",
   "@dispatchSentBadge": {},
   "missingParentPhonePrompt": "No parent phone",
@@ -8861,7 +8858,9 @@
   "examStudentScoreLabel": "Score: {score}",
   "@examStudentScoreLabel": {
     "placeholders": {
-      "score": { "type": "String" }
+      "score": {
+        "type": "String"
+      }
     }
   },
   "examStudentNotTakenNotice": "Student has not taken the exam yet",
@@ -8909,7 +8908,9 @@
   "nextStudentInQueueAction": "Next: {studentName} ➡️",
   "@nextStudentInQueueAction": {
     "placeholders": {
-      "studentName": { "type": "String" }
+      "studentName": {
+        "type": "String"
+      }
     }
   },
   "copyRosterSummaryTooltip": "Copy complete roster score sheet",
@@ -8940,48 +8941,60 @@
   "@metricWhatsAppDispatchedTitle": {},
   "notifiedBadgeShort": "Notified",
   "@notifiedBadgeShort": {},
-  "searchStudentOrPhoneHint": "Search by student name, phone, or group...",
-  "@searchStudentOrPhoneHint": {},
   "filterAllRoster": "All ({count})",
   "@filterAllRoster": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "filterSubmittedRoster": "Submitted ({count})",
   "@filterSubmittedRoster": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "filterPassedRoster": "Passed ({count})",
   "@filterPassedRoster": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "filterNeedsAttentionRoster": "Needs Attention ({count})",
   "@filterNeedsAttentionRoster": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "filterNotStartedRoster": "Not Taken ({count})",
   "@filterNotStartedRoster": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "filterUnnotifiedRoster": "Pending WhatsApp ({count})",
   "@filterUnnotifiedRoster": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "filterNotifiedRoster": "Notified ({count})",
   "@filterNotifiedRoster": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "filterMissingPhoneRoster": "Missing Parent Phone",
@@ -8989,7 +9002,9 @@
   "editParentPhoneDialogTitle": "Edit Parent Phone: {studentName}",
   "@editParentPhoneDialogTitle": {
     "placeholders": {
-      "studentName": { "type": "String" }
+      "studentName": {
+        "type": "String"
+      }
     }
   },
   "editParentPhoneDialogBody": "Enter the parent WhatsApp phone number to link it to the student profile for academic reports.",
@@ -9009,7 +9024,9 @@
   "totalCourseDurationSubtitle": "Out of {total} total content",
   "@totalCourseDurationSubtitle": {
     "placeholders": {
-      "total": { "type": "String" }
+      "total": {
+        "type": "String"
+      }
     }
   },
   "completedLecturesStatTitle": "Completed Lectures",
@@ -9017,7 +9034,9 @@
   "remainingLecturesSubtitle": "{count} lectures remaining",
   "@remainingLecturesSubtitle": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "watchCommitmentRateTitle": "Watch Commitment Rate",
@@ -9031,25 +9050,33 @@
   "filterAllLecturesCount": "All ({count})",
   "@filterAllLecturesCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "filterCompletedCount": "Completed ({count})",
   "@filterCompletedCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "filterInProgressCount": "In Progress ({count})",
   "@filterInProgressCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "filterNotStartedCount": "Not Started ({count})",
   "@filterNotStartedCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "filterAllGroups": "All Groups",
@@ -9059,23 +9086,27 @@
   "watchedTimeOutOfTotal": "Watched {watched} of {total}",
   "@watchedTimeOutOfTotal": {
     "placeholders": {
-      "watched": { "type": "String" },
-      "total": { "type": "String" }
+      "watched": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
     }
   },
   "lastWatchedAtLabel": "Last watched: {date}",
   "@lastWatchedAtLabel": {
     "placeholders": {
-      "date": { "type": "String" }
+      "date": {
+        "type": "String"
+      }
     }
   },
   "notWatchedYetLabel": "Not started yet",
   "@notWatchedYetLabel": {},
   "resumeLectureAction": "Continue Watching",
   "@resumeLectureAction": {},
-  "startLectureAction": "Start Lecture",
   "@startLectureAction": {},
-  "rewatchLectureAction": "Rewatch Lecture",
   "@rewatchLectureAction": {},
   "noEngagementLecturesEmpty": "No video lectures published in your enrolled groups yet.",
   "@noEngagementLecturesEmpty": {},
@@ -9110,19 +9141,17 @@
   "confirmDeleteFolderBody": "Are you sure you want to delete folder \"{name}\"? Exams inside will remain available as uncategorized.",
   "@confirmDeleteFolderBody": {
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "folderNameLabel": "Folder Name",
   "@folderNameLabel": {},
-  "folderNameHint": "e.g. Unit 1: Algebra, SAT Practice",
-  "@folderNameHint": {},
   "folderNameRequired": "Please enter a folder name",
   "@folderNameRequired": {},
   "folderColorLabel": "Folder Color",
   "@folderColorLabel": {},
-  "folderCreatedSuccess": "Folder created successfully",
-  "@folderCreatedSuccess": {},
   "folderUpdatedSuccess": "Folder updated successfully",
   "@folderUpdatedSuccess": {},
   "folderDeletedSuccess": "Folder deleted successfully",
@@ -9140,7 +9169,9 @@
   "folderExamCount": "{count} Exams",
   "@folderExamCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "deleteFolderDialogTitle": "Delete Folder?",
@@ -9148,7 +9179,9 @@
   "deleteFolderDialogBody": "Are you sure you want to delete folder \"{name}\"? Exams inside will remain available as uncategorized.",
   "@deleteFolderDialogBody": {
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "confirmDeleteButton": "Delete Folder",
@@ -9180,7 +9213,9 @@
   "optionsAutoFilledSuccess": "Choices auto-filled across {count} questions",
   "@optionsAutoFilledSuccess": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "optimizedWebpBadge": "WebP Fast Load",
@@ -9202,20 +9237,28 @@
   "examQuestionsSolvedProgress": "{solved} of {total} questions solved",
   "@examQuestionsSolvedProgress": {
     "placeholders": {
-      "solved": { "type": "int" },
-      "total": { "type": "int" }
+      "solved": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "examQuestionsAllSolved": "All questions solved ({count}/{count})",
   "@examQuestionsAllSolved": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "examNotStartedYet": "Not started yet (0/{total})",
   "@examNotStartedYet": {
     "placeholders": {
-      "total": { "type": "int" }
+      "total": {
+        "type": "int"
+      }
     }
   },
   "examCompletedCheck": "Completed",
@@ -9241,8 +9284,12 @@
   "examScoreAchieved": "Score: {score}/{max}",
   "@examScoreAchieved": {
     "placeholders": {
-      "score": { "type": "int" },
-      "max": { "type": "int" }
+      "score": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
     }
   },
   "clearSearchTooltip": "Clear search",
@@ -9260,8 +9307,12 @@
   "examDraftFoundNotice": "Unsaved draft found ({count} questions • {time})",
   "@examDraftFoundNotice": {
     "placeholders": {
-      "count": { "type": "int" },
-      "time": { "type": "String" }
+      "count": {
+        "type": "int"
+      },
+      "time": {
+        "type": "String"
+      }
     }
   },
   "restoreExamDraftAction": "Restore Draft",
@@ -9278,7 +9329,7 @@
   "@materialsLibraryTitle": {},
   "materialsLibrarySubtitle": "Manage handouts, worksheets, and lecture PDFs",
   "@materialsLibrarySubtitle": {},
-  "selectFromMaterialsLibrary": "Select from Materials Library",
+  "selectFromMaterialsLibrary": "Choose from Materials Library",
   "@selectFromMaterialsLibrary": {},
   "selectFromMaterialsLibrarySubtitle": "Select an existing file to link directly without re-uploading",
   "@selectFromMaterialsLibrarySubtitle": {},
@@ -9296,8 +9347,6 @@
   "@editFolderName": {},
   "editMaterialAction": "Rename File",
   "@editMaterialAction": {},
-  "deleteFolderAction": "Delete Folder",
-  "@deleteFolderAction": {},
   "deleteMaterialAction": "Delete File",
   "@deleteMaterialAction": {},
   "moveMaterialAction": "Move to Folder",
@@ -9305,7 +9354,9 @@
   "usedInLecturesCount": "Used in {count} lectures",
   "@usedInLecturesCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "unusedMaterial": "Unused",
@@ -9321,17 +9372,13 @@
   "folderFilesCount": "{count} files",
   "@folderFilesCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "rootMaterialsTitle": "Library Root",
   "@rootMaterialsTitle": {},
-  "folderNameLabel": "Folder Name",
-  "@folderNameLabel": {},
-  "folderColorLabel": "Folder Color",
-  "@folderColorLabel": {},
-  "confirmDeleteFolderTitle": "Delete Folder?",
-  "@confirmDeleteFolderTitle": {},
   "confirmDeleteFolderMessage": "Are you sure you want to delete this folder? Files inside it will be moved to root.",
   "@confirmDeleteFolderMessage": {},
   "confirmDeleteMaterialTitle": "Delete File?",
@@ -9359,7 +9406,9 @@
   "folderCount": "{count} folders",
   "@folderCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "submissionReasonStudentSubmitted": "Student Submitted",
@@ -9437,20 +9486,28 @@
   "examScoreSummary": "Scored {score} of {maxScore}",
   "@examScoreSummary": {
     "placeholders": {
-      "score": { "type": "int" },
-      "maxScore": { "type": "int" }
+      "score": {
+        "type": "int"
+      },
+      "maxScore": {
+        "type": "int"
+      }
     }
   },
   "passingThresholdLabel": "Passing Threshold: {score}%",
   "@passingThresholdLabel": {
     "placeholders": {
-      "score": { "type": "int" }
+      "score": {
+        "type": "int"
+      }
     }
   },
   "goToNextLectureSpecific": "Next Lecture: {title}",
   "@goToNextLectureSpecific": {
     "placeholders": {
-      "title": { "type": "String" }
+      "title": {
+        "type": "String"
+      }
     }
   },
   "examPassedSubtitle": "Great job! You achieved the required passing score for this exam.",
@@ -9468,22 +9525,34 @@
   "uploadingFileProgress": "Uploading file {current} of {total}: {fileName}",
   "@uploadingFileProgress": {
     "placeholders": {
-      "current": { "type": "int" },
-      "total": { "type": "int" },
-      "fileName": { "type": "String" }
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "fileName": {
+        "type": "String"
+      }
     }
   },
   "uploadMaterialSuccess": "File \"{fileName}\" uploaded successfully",
   "@uploadMaterialSuccess": {
     "placeholders": {
-      "fileName": { "type": "String" }
+      "fileName": {
+        "type": "String"
+      }
     }
   },
   "uploadMaterialError": "Failed to upload \"{fileName}\": {error}",
   "@uploadMaterialError": {
     "placeholders": {
-      "fileName": { "type": "String" },
-      "error": { "type": "String" }
+      "fileName": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
     }
   },
   "smartBadgePdf": "PDF",
@@ -9501,7 +9570,9 @@
   "selectedVideosBadge": "{count} Selected Videos",
   "@selectedVideosBadge": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "attachedExamPdf": "Attached Exam Booklet (PDF)",
@@ -9534,8 +9605,6 @@
   "@quickPresets": {},
   "overwriteQuestionsWarning": "This will replace current questions with a fresh bubble sheet. Continue?",
   "@overwriteQuestionsWarning": {},
-  "selectFromMaterialsLibrary": "Choose from Materials Library",
-  "@selectFromMaterialsLibrary": {},
   "uploadNewPdfFromDevice": "Upload new PDF from device",
   "@uploadNewPdfFromDevice": {},
   "previewPdfBooklet": "Preview Booklet",
@@ -9567,13 +9636,17 @@
   "practiceModeBadgeQuestions": "{count} Questions",
   "@practiceModeBadgeQuestions": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "practiceModeBadgeMastered": "{count} Mastered",
   "@practiceModeBadgeMastered": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "practiceModeHeaderUnresolved": "Active Mistakes Practice",
@@ -9589,7 +9662,9 @@
   "resolvedAfterAttempts": "Mastered after {count} attempts",
   "@resolvedAfterAttempts": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "startMasteryPractice": "Start Mastery Review",
@@ -9599,5 +9674,467 @@
   "noMasteredMistakesFoundSub": "Solve mistakes in practice mode to move them to your mastered vault",
   "@noMasteredMistakesFoundSub": {},
   "practiceSingleQuestionAction": "Practice Question",
-  "@practiceSingleQuestionAction": {}
+  "@practiceSingleQuestionAction": {},
+  "pacingRadarTitle": "Time & Speed Analysis",
+  "@pacingRadarTitle": {},
+  "pacingRadarSubtitle": "Detailed breakdown of your pacing per question",
+  "@pacingRadarSubtitle": {},
+  "pacingFast": "Fast (< 60s)",
+  "@pacingFast": {},
+  "pacingNormal": "Optimal (60-90s)",
+  "@pacingNormal": {},
+  "pacingSlow": "Time Sink (> 90s)",
+  "@pacingSlow": {},
+  "pacingAvgPerQuestion": "Avg Time per Question: {seconds}s",
+  "@pacingAvgPerQuestion": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "flagAsGuessTooltip": "Mark as uncertain / guess",
+  "@flagAsGuessTooltip": {},
+  "unflagGuessTooltip": "Unmark guess",
+  "@unflagGuessTooltip": {},
+  "guessFlagLabel": "Guess",
+  "@guessFlagLabel": {},
+  "luckyGuessBadge": "Lucky Guess 🍀",
+  "@luckyGuessBadge": {},
+  "luckyGuessNotice": "You answered correctly but marked this as a guess. Review to solidify the concept.",
+  "@luckyGuessNotice": {},
+  "eliminateOptionTooltip": "Cross out option (Elimination)",
+  "@eliminateOptionTooltip": {},
+  "reflectionHeader": "Why did you miss this question?",
+  "@reflectionHeader": {},
+  "reflectionConceptGap": "Concept Gap",
+  "@reflectionConceptGap": {},
+  "reflectionConceptGapDesc": "Did not know the rule or formula",
+  "@reflectionConceptGapDesc": {},
+  "reflectionCarelessError": "Calculation Error",
+  "@reflectionCarelessError": {},
+  "reflectionCarelessErrorDesc": "Arithmetic or sign error",
+  "@reflectionCarelessErrorDesc": {},
+  "reflectionMisreadQuestion": "Misread Wording",
+  "@reflectionMisreadQuestion": {},
+  "reflectionMisreadQuestionDesc": "Missed keyword or solved for wrong variable",
+  "@reflectionMisreadQuestionDesc": {},
+  "reflectionTimePressure": "Time Pressure",
+  "@reflectionTimePressure": {},
+  "reflectionTimePressureDesc": "Ran out of time and had to guess",
+  "@reflectionTimePressureDesc": {},
+  "reflectionUnclassified": "Not Classified",
+  "@reflectionUnclassified": {},
+  "filterByReflectionReason": "Filter by Mistake Reason",
+  "@filterByReflectionReason": {},
+  "reflectionSavedSuccess": "Reflection saved successfully",
+  "@reflectionSavedSuccess": {},
+  "scratchpadPen": "Pen",
+  "@scratchpadPen": {},
+  "scratchpadHighlighter": "Highlighter",
+  "@scratchpadHighlighter": {},
+  "scratchpadEraser": "Eraser",
+  "@scratchpadEraser": {},
+  "scratchpadUndo": "Undo",
+  "@scratchpadUndo": {},
+  "scratchpadClear": "Clear Canvas",
+  "@scratchpadClear": {},
+  "scratchpadGridPaper": "Grid Paper",
+  "@scratchpadGridPaper": {},
+  "scratchpadOverlay": "Transparent Mode",
+  "@scratchpadOverlay": {},
+  "scratchpadClose": "Close Scratchpad",
+  "@scratchpadClose": {},
+  "scratchpadTooltip": "Digital Scratchpad (Pencil)",
+  "@scratchpadTooltip": {},
+  "formulaSheetTooltip": "Formula Reference Sheet",
+  "@formulaSheetTooltip": {},
+  "formulaSheetTitle": "Math Reference Sheet & Desmos",
+  "@formulaSheetTitle": {},
+  "formulaGeometryTab": "SAT Formulas",
+  "@formulaGeometryTab": {},
+  "formulaDesmosTab": "Desmos Hacks",
+  "@formulaDesmosTab": {},
+  "formulaCircleDegrees": "The number of degrees of arc in a circle is 360°",
+  "@formulaCircleDegrees": {},
+  "formulaCircleRadians": "The number of radians of arc in a circle is 2π",
+  "@formulaCircleRadians": {},
+  "formulaTriangleSum": "The sum of the measures of the angles of a triangle is 180°",
+  "@formulaTriangleSum": {},
+  "desmosRegressionTip": "Table Regression: Add table and type y1 ~ mx1 + b to instantly find slope and y-intercept.",
+  "@desmosRegressionTip": {},
+  "desmosIntersectionTip": "Finding Intersections: Graph both equations; tap the gray intersection point to see exact (x, y).",
+  "@desmosIntersectionTip": {},
+  "desmosVertexTip": "Quadratic Vertex: Type y = ax^2 + bx + c; tap the peak or bottom point for vertex coordinates.",
+  "@desmosVertexTip": {},
+  "desmosSlidersTip": "Sliders: Type equations with constants like k and click add slider to test values visually.",
+  "@desmosSlidersTip": {},
+  "gauntletTitle": "Zero-Mistake Gauntlet",
+  "@gauntletTitle": {},
+  "gauntletSubtitle": "Slay your unresolved mistakes and master every concept!",
+  "@gauntletSubtitle": {},
+  "gauntletRemainingLabel": "{count} to Zero",
+  "@gauntletRemainingLabel": {},
+  "gauntletStartBtn": "Start Gauntlet",
+  "@gauntletStartBtn": {},
+  "gauntletCriticalBadge": "{count} Critical",
+  "@gauntletCriticalBadge": {},
+  "sprintTitle": "5-Question Sprint",
+  "@sprintTitle": {},
+  "sprintSubtitle": "Rapid 7-minute challenge",
+  "@sprintSubtitle": {},
+  "sprintStartBtn": "5-Q Sprint",
+  "@sprintStartBtn": {},
+  "sortDefault": "Default",
+  "@sortDefault": {},
+  "sortMostFailed": "Most Failed",
+  "@sortMostFailed": {},
+  "sortNewest": "Newest",
+  "@sortNewest": {},
+  "sortPoints": "Highest Points",
+  "@sortPoints": {},
+  "mistakeSlayedSuccess": "Mistake Slayed! 🎯",
+  "@mistakeSlayedSuccess": {},
+  "@academicMomentumTitle": {},
+  "streakDaysCount": "{count} Day Streak",
+  "@streakDaysCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "streakTodayDone": "Active today! Flame is lit 🔥",
+  "@streakTodayDone": {},
+  "streakTodayPending": "Complete an exam or drill today to extend streak!",
+  "@streakTodayPending": {},
+  "longestStreakRecord": "Best: {count}d",
+  "@longestStreakRecord": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "predictedSatScoreTitle": "Estimated SAT Math Score",
+  "@predictedSatScoreTitle": {},
+  "predictedSatScoreBand": "{low} - {high}",
+  "@predictedSatScoreBand": {
+    "placeholders": {
+      "low": {
+        "type": "int"
+      },
+      "high": {
+        "type": "int"
+      }
+    }
+  },
+  "predictedSatScoreNeedsMore": "Complete 2+ exams to unlock your estimated SAT score range",
+  "@predictedSatScoreNeedsMore": {},
+  "predictedSatScoreSubtitle": "Based on your recent assessment performance",
+  "@predictedSatScoreSubtitle": {},
+  "earnedBadgesTitle": "Mastery Badges",
+  "@earnedBadgesTitle": {},
+  "badgeGauntletSlayer": "Gauntlet Slayer",
+  "@badgeGauntletSlayer": {},
+  "badgeGauntletSlayerDesc": "Eliminated all unresolved mistakes from the Mistakes Bank.",
+  "@badgeGauntletSlayerDesc": {},
+  "badgeConsistencyKing": "Consistency King",
+  "@badgeConsistencyKing": {},
+  "badgeConsistencyKingDesc": "Maintained a 5-day active study streak.",
+  "@badgeConsistencyKingDesc": {},
+  "badgeSpeedDemon": "Speed Demon",
+  "@badgeSpeedDemon": {},
+  "badgeSpeedDemonDesc": "Completed an exam in under 50% time with score ≥ 85%.",
+  "@badgeSpeedDemonDesc": {},
+  "badgeHighAchiever": "High Achiever",
+  "@badgeHighAchiever": {},
+  "badgeHighAchieverDesc": "Maintained an overall average score of 90% or higher.",
+  "@badgeHighAchieverDesc": {},
+  "badgeLockedStatus": "Locked",
+  "@badgeLockedStatus": {},
+  "badgeUnlockedStatus": "Unlocked!",
+  "@badgeUnlockedStatus": {},
+  "viewAllBadges": "View All",
+  "@viewAllBadges": {},
+  "allBadgesDialogTitle": "Academic Badges & Honors",
+  "@allBadgesDialogTitle": {},
+  "dockCalculatorTooltip": "Dock calculator to side panel",
+  "@dockCalculatorTooltip": {
+    "description": "Tooltip to dock calculator to side panel"
+  },
+  "undockCalculatorTooltip": "Float calculator as movable window",
+  "@undockCalculatorTooltip": {
+    "description": "Tooltip to undock calculator into a floating window"
+  },
+  "utilityDockTitle": "Exam Tools",
+  "@utilityDockTitle": {
+    "description": "Title for the exam utility dock"
+  },
+  "collapseToolsTooltip": "Collapse tools panel",
+  "@collapseToolsTooltip": {
+    "description": "Tooltip to collapse tools panel"
+  },
+  "expandToolsTooltip": "Expand tools panel",
+  "@expandToolsTooltip": {
+    "description": "Tooltip to expand tools panel"
+  },
+  "dockTabCalculator": "Calculator",
+  "@dockTabCalculator": {
+    "description": "Tab title for calculator in utility dock"
+  },
+  "dockTabFormulas": "Reference Sheet",
+  "@dockTabFormulas": {
+    "description": "Tab title for formula reference in utility dock"
+  },
+  "savedQuestionsVaultTitle": "Saved Questions Vault",
+  "@savedQuestionsVaultTitle": {},
+  "savedQuestionsVaultSubtitle": "Review and practice bookmarked questions smartly",
+  "@savedQuestionsVaultSubtitle": {},
+  "saveToVault": "Save to Vault",
+  "@saveToVault": {},
+  "removeFromVault": "Remove from Vault",
+  "@removeFromVault": {},
+  "savedToVaultSuccess": "Question saved to your personal vault ⭐",
+  "@savedToVaultSuccess": {},
+  "removedFromVaultSuccess": "Question removed from your vault",
+  "@removedFromVaultSuccess": {},
+  "personalNote": "Personal Note",
+  "@personalNote": {},
+  "addPersonalNote": "Add Personal Note",
+  "@addPersonalNote": {},
+  "editPersonalNote": "Edit Note",
+  "@editPersonalNote": {},
+  "addNoteHint": "Write a quick note or mnemonic for this problem...",
+  "@addNoteHint": {},
+  "saveNote": "Save Note",
+  "@saveNote": {},
+  "difficultyRatingTitle": "How difficult was this question for you?",
+  "@difficultyRatingTitle": {},
+  "difficultyEasy": "Easy",
+  "@difficultyEasy": {},
+  "difficultyMedium": "Medium",
+  "@difficultyMedium": {},
+  "difficultyHard": "Hard",
+  "@difficultyHard": {},
+  "difficultyEasyDesc": "Mastered • Shows less often",
+  "@difficultyEasyDesc": {},
+  "difficultyMediumDesc": "Review later",
+  "@difficultyMediumDesc": {},
+  "difficultyHardDesc": "Repeats this session",
+  "@difficultyHardDesc": {},
+  "startAnkiDrill": "Start Active Recall Drill",
+  "@startAnkiDrill": {},
+  "ankiDrillTitle": "Active Recall Drill",
+  "@ankiDrillTitle": {},
+  "checkAnswer": "Check Answer",
+  "@checkAnswer": {},
+  "ankiDrillCompletedTitle": "Drill Session Completed! 🎯",
+  "@ankiDrillCompletedTitle": {},
+  "ankiDrillCompletedDesc": "You reviewed all questions in your active recall queue.",
+  "@ankiDrillCompletedDesc": {},
+  "drillTotalReviewed": "Questions Reviewed",
+  "@drillTotalReviewed": {},
+  "drillMasteredCount": "Mastered (Easy)",
+  "@drillMasteredCount": {},
+  "drillHardRepeated": "Repeated (Hard)",
+  "@drillHardRepeated": {},
+  "finishDrill": "Finish Drill",
+  "@finishDrill": {},
+  "emptyVaultTitle": "Your Vault is Empty",
+  "@emptyVaultTitle": {},
+  "emptyVaultSubtitle": "Save questions from exams or mistake drills to practice them in active recall mode.",
+  "@emptyVaultSubtitle": {},
+  "bluebookReviewGrid": "Review & Question Grid",
+  "@bluebookReviewGrid": {},
+  "unansweredQuestionsWarning": "Warning: You have {count} unanswered question(s)!",
+  "@unansweredQuestionsWarning": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "unansweredQuestionsDesc": "Are you sure you want to finish the exam without answering them?",
+  "@unansweredQuestionsDesc": {},
+  "flaggedForReview": "Flagged for Review",
+  "@flaggedForReview": {},
+  "answeredStatus": "Answered",
+  "@answeredStatus": {},
+  "unansweredStatus": "Unanswered",
+  "@unansweredStatus": {},
+  "allDifficulties": "All",
+  "@allDifficulties": {},
+  "searchSavedQuestions": "Search in questions or notes...",
+  "@searchSavedQuestions": {},
+  "mistakeVaultTitle": "Tactical Mistake Vault",
+  "@mistakeVaultTitle": {},
+  "saveToMistakeVaultAction": "Save to Mistake Vault",
+  "@saveToMistakeVaultAction": {},
+  "savedToMistakeVaultSuccess": "Saved to your tactical mistake vault",
+  "@savedToMistakeVaultSuccess": {},
+  "smartReattemptAction": "Smart Re-Attempt",
+  "@smartReattemptAction": {},
+  "filterNeedsReview": "Needs Review",
+  "@filterNeedsReview": {},
+  "filterMastered": "Mastered",
+  "@filterMastered": {},
+  "filterAllQuestions": "All Questions",
+  "@filterAllQuestions": {},
+  "markAsMasteredAction": "Mark as Mastered",
+  "@markAsMasteredAction": {},
+  "markedAsMasteredSuccess": "Great job! Marked as mastered",
+  "@markedAsMasteredSuccess": {},
+  "unmarkAsMasteredAction": "Needs Review Again",
+  "@unmarkAsMasteredAction": {},
+  "previousExamMistakeBadge": "Previous Exam Mistake",
+  "@previousExamMistakeBadge": {},
+  "masteredBadge": "Mastered",
+  "@masteredBadge": {},
+  "checkAnswerButton": "Check Answer",
+  "@checkAnswerButton": {},
+  "correctAnswerCelebration": "Brilliant! Your answer is correct 🎉",
+  "@correctAnswerCelebration": {},
+  "wrongAnswerNotice": "Not quite. The correct answer was",
+  "@wrongAnswerNotice": {},
+  "pdfExamQuestionNotice": "Question from PDF Exam",
+  "@pdfExamQuestionNotice": {},
+  "tacticalMistakeVaultSubtitle": "Review and master the questions you got wrong to guarantee a top score.",
+  "@tacticalMistakeVaultSubtitle": {},
+  "startPracticeSession": "Start Practice Session",
+  "@startPracticeSession": {},
+  "practiceSessionTitle": "Smart Practice & Review",
+  "@practiceSessionTitle": {},
+  "questionCounter": "Question {current} of {total}",
+  "@questionCounter": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "finishSession": "Finish Session",
+  "@finishSession": {},
+  "practiceCompleteTitle": "Session Completed! 🎉",
+  "@practiceCompleteTitle": {},
+  "practiceCompleteSubtitle": "You reviewed {count} questions. Keep going to master all your weak spots.",
+  "@practiceCompleteSubtitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "solveQuestionAction": "Solve Question",
+  "@solveQuestionAction": {},
+  "filterDueToday": "Due Today",
+  "@filterDueToday": {},
+  "filterUpcoming": "Upcoming",
+  "@filterUpcoming": {},
+  "startDuePracticeAction": "Start Today's Review ({count})",
+  "@startDuePracticeAction": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "startDuePracticeEmpty": "No Due Reviews Today",
+  "@startDuePracticeEmpty": {},
+  "noDueTodayTitle": "All Caught Up for Today! 🎉",
+  "@noDueTodayTitle": {},
+  "noDueTodaySubtitle": "You've completed all scheduled questions for today. Your next review date is scheduled.",
+  "@noDueTodaySubtitle": {},
+  "leitnerScheduleTitle": "Spaced Repetition Schedule (1-3-6 Days)",
+  "@leitnerScheduleTitle": {},
+  "leitnerBox1Title": "Daily (1 Day)",
+  "@leitnerBox1Title": {},
+  "leitnerBox2Title": "Every 3 Days",
+  "@leitnerBox2Title": {},
+  "leitnerBox3Title": "Every 6 Days",
+  "@leitnerBox3Title": {},
+  "rateDifficultyPrompt": "Schedule Next Review:",
+  "@rateDifficultyPrompt": {},
+  "rateHard1Day": "Hard (Tomorrow - 1d)",
+  "@rateHard1Day": {},
+  "rateMedium3Days": "Medium (3 Days)",
+  "@rateMedium3Days": {},
+  "rateEasy6Days": "Easy (6 Days)",
+  "@rateEasy6Days": {},
+  "reviewDueTodayBadge": "Due Today ⚡",
+  "@reviewDueTodayBadge": {},
+  "reviewDueTomorrowBadge": "Review: Tomorrow",
+  "@reviewDueTomorrowBadge": {},
+  "reviewDueInDaysBadge": "Review in {days}d",
+  "@reviewDueInDaysBadge": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "practiceCompletedDueNotice": "Today's review session complete! All due questions scheduled.",
+  "@practiceCompletedDueNotice": {},
+  "backToVaultAction": "Back to Vault",
+  "@backToVaultAction": {},
+  "demoQuickAccessHeader": "Quick Access • 1-Click Login",
+  "@demoQuickAccessHeader": {},
+  "demoLiveBadge": "LIVE DEMO",
+  "@demoLiveBadge": {},
+  "demoSelectAccountPrompt": "Select an account to log in instantly without typing:",
+  "@demoSelectAccountPrompt": {},
+  "demoTeacherLoginTitle": "Login as Teacher (Dashboard & WhatsApp)",
+  "@demoTeacherLoginTitle": {},
+  "demoTeacherLoginSubtitle": "Create quizzes, Question Bank, WhatsApp parent dispatch",
+  "@demoTeacherLoginSubtitle": {},
+  "demoStudentTestLoginTitle": "Login as Student (Take SAT Exam with Desmos)",
+  "@demoStudentTestLoginTitle": {},
+  "demoStudentTestLoginSubtitle": "Experience embedded Desmos calculator, scratchpad & formulas",
+  "@demoStudentTestLoginSubtitle": {},
+  "demoStudentMistakesLoginTitle": "Login as Student (Mistakes Vault & Anki Drills)",
+  "@demoStudentMistakesLoginTitle": {},
+  "demoStudentMistakesLoginSubtitle": "Explore spaced-repetition practice with flashcards",
+  "@demoStudentMistakesLoginSubtitle": {},
+  "demoBannerTitle": "Interactive VIP Demo • Experience the Future of Teaching",
+  "@demoBannerTitle": {},
+  "demoBannerSubtitle": "Explore real quizzes, Desmos, parent reports, and attendance tracking.",
+  "@demoBannerSubtitle": {},
+  "demoBannerCta": "Book Platform Demo / Contact Us",
+  "@demoBannerCta": {},
+  "newFileBadge": "New",
+  "whatsappGatewayDialogTitle": "Automated WhatsApp Gateway Settings",
+  "@whatsappGatewayDialogTitle": {},
+  "whatsappAutoDispatchToggleTitle": "Auto-Dispatch Exam Results on Submit",
+  "@whatsappAutoDispatchToggleTitle": {},
+  "whatsappAutoDispatchToggleSubtitle": "Instantly send exam report to parent WhatsApp hands-free",
+  "@whatsappAutoDispatchToggleSubtitle": {},
+  "whatsappGatewayConnectedStatus": "Connected & Ready for Auto-Dispatch",
+  "@whatsappGatewayConnectedStatus": {},
+  "whatsappGatewayQrReadyStatus": "Waiting for QR Code Scan",
+  "@whatsappGatewayQrReadyStatus": {},
+  "whatsappGatewayDisconnectedStatus": "Gateway Disconnected",
+  "@whatsappGatewayDisconnectedStatus": {},
+  "whatsappConnectedPhoneLabel": "Connected Phone",
+  "@whatsappConnectedPhoneLabel": {},
+  "whatsappScanQrInstruction": "Open WhatsApp on device > Linked Devices > Scan the QR code below",
+  "@whatsappScanQrInstruction": {},
+  "whatsappQrAutoRefreshNote": "QR code refreshes automatically until pairing completes",
+  "@whatsappQrAutoRefreshNote": {},
+  "whatsappSentTodayMetric": "Sent Today",
+  "@whatsappSentTodayMetric": {},
+  "whatsappPendingQueueMetric": "In Queue",
+  "@whatsappPendingQueueMetric": {},
+  "whatsappFailedMetric": "Failed",
+  "@whatsappFailedMetric": {},
+  "whatsappGatewaySettingsTooltip": "WhatsApp Gateway Auto-Dispatch Settings",
+  "@whatsappGatewaySettingsTooltip": {},
+  "whatsappAutoDispatchActiveBannerTitle": "Parent WhatsApp Auto-Dispatch is Active",
+  "@whatsappAutoDispatchActiveBannerTitle": {},
+  "whatsappAutoDispatchActiveBannerSubtitle": "Upon student exam submission, the report is dispatched to parent WhatsApp automatically",
+  "@whatsappAutoDispatchActiveBannerSubtitle": {},
+  "configureGatewayAction": "Configure Gateway",
+  "@configureGatewayAction": {}
 }

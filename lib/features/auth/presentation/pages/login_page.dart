@@ -15,6 +15,7 @@ import '../../../../core/utils/app_feedback.dart';
 import '../../domain/entities/user_entity.dart';
 import '../cubit/auth_cubit.dart';
 import '../cubit/auth_state.dart';
+import '../widgets/demo_quick_access_card.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -177,7 +178,18 @@ class _LoginPageState extends State<LoginPage> {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                const SizedBox(height: AppSpacing.s28),
+                const SizedBox(height: AppSpacing.s24),
+
+                // ── 3.5 Demo Quick Access Card (Demo Sandbox Mode Only) ──────
+                if (TenantResolver.isDemoMode())
+                  DemoQuickAccessCard(
+                    isLoading: isLoading,
+                    onSelectCredentials: (email, password) {
+                      _emailController.text = email;
+                      _passwordController.text = password;
+                      _handleLogin();
+                    },
+                  ),
 
                 // ── 4. Email Field ───────────────────────────────────────────
                 AppTextField(

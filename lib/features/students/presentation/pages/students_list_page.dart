@@ -7,7 +7,8 @@ import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/app_feedback.dart';
-import '../../../../core/utils/whatsapp_report_generator.dart';
+import '../dialogs/academic_report_dialog.dart';
+
 import '../../../../core/widgets/app_badge.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_empty_view.dart';
@@ -285,7 +286,7 @@ class _StudentsListPageState extends State<StudentsListPage> {
                     }
                     return ListView.separated(
                       controller: _scrollController,
-                      cacheExtent: 350.0,
+                      
                       padding: const EdgeInsets.all(AppSpacing.s16),
                       itemCount:
                           state.students.length + (state.isLoadingMore ? 1 : 0),
@@ -376,7 +377,7 @@ class _StudentsListPageState extends State<StudentsListPage> {
                           onWhatsApp: (student.parentPhone?.isNotEmpty == true ||
                                   student.phone?.isNotEmpty == true)
                               ? () {
-                                  WhatsAppReportGenerator.showAcademicReportDialog(
+                                  AcademicReportDialog.show(
                                     context,
                                     studentId: student.id,
                                     studentName: student.fullName,
@@ -411,28 +412,32 @@ class _StudentsListPageState extends State<StudentsListPage> {
     BuildContext context,
     StudentEntity student,
   ) async {
+    final l10n = context.l10n;
+    final cubit = context.read<StudentsCubit>();
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(context.l10n.deleteStudentConfirmTitle),
-        content: Text(context.l10n.deleteStudentConfirmBody(student.fullName)),
+        title: Text(l10n.deleteStudentConfirmTitle),
+        content: Text(l10n.deleteStudentConfirmBody(student.fullName)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text(context.l10n.cancel),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: AppColors.error),
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text(context.l10n.deleteStudentAction),
+            child: Text(l10n.deleteStudentAction),
           ),
         ],
       ),
     );
-    if (confirmed == true && context.mounted) {
-      final ok = await context.read<StudentsCubit>().deleteStudent(student.id);
-      if (ok && context.mounted) {
-        AppFeedback.showSuccess(context, context.l10n.studentDeletedSuccess);
+    if (!context.mounted) return;
+    if (confirmed == true) {
+      final ok = await cubit.deleteStudent(student.id);
+      if (!context.mounted) return;
+      if (ok) {
+        AppFeedback.showSuccess(context, l10n.studentDeletedSuccess);
       }
     }
   }

@@ -276,6 +276,16 @@ class _FakeContentRepository implements ContentRepository {
     required String contentId,
     required String groupId,
   }) async => const Success(null);
+  @override
+  Future<Result<List<Map<String, dynamic>>>> getAvailableExamsSummary() async =>
+      const Success([]);
+
+  @override
+  Future<Result<Map<String, String>?>> getExamByContentId(String contentId) async =>
+      const Success(null);
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 void main() {

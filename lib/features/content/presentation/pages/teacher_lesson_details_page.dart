@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
-import '../../../../core/network/supabase_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_card.dart';
@@ -120,89 +119,21 @@ class _TeacherLessonDetailsPageState extends State<TeacherLessonDetailsPage>
     if (widget.lessonId == 'new') return;
 
     try {
-      final client = SupabaseService.client;
+      final analytics = await context.read<ContentCubit>().getLessonAnalytics(
+        lessonId: widget.lessonId,
+        groupId: widget.groupId,
+        videoId: _lesson?.videoId,
+        examId: _lesson?.associatedExamId,
+      );
 
-      // 1. Resolve videoId if not already present
-      String? vId = _lesson?.videoId;
-      if (vId == null) {
-        final videoRes = await client
-            .from('videos')
-            .select('id')
-            .eq('content_id', widget.lessonId)
-            .maybeSingle();
-        if (videoRes != null && videoRes['id'] != null) {
-          vId = videoRes['id'] as String;
-        }
+      if (analytics != null && mounted) {
+        setState(() {
+          _totalStudents = analytics.totalStudents;
+          _totalViews = analytics.totalViews;
+          _completedStudents = analytics.completedStudents;
+          _averageQuizScore = analytics.averageQuizScore;
+        });
       }
-
-      final examId = _lesson?.associatedExamId;
-
-      // 2. Fetch all 3 metric streams in parallel (single round-trip)
-      final membersFuture = client
-          .from('group_members')
-          .select('id')
-          .eq('group_id', widget.groupId)
-          .eq('status', 'active');
-
-      final videoProgressFuture = vId != null
-          ? client
-              .from('video_progress')
-              .select('completed, progress_seconds')
-              .eq('video_id', vId)
-          : Future.value(<dynamic>[]);
-
-      final attemptsFuture = examId != null
-          ? client
-              .from('exam_attempts')
-              .select('percentage')
-              .eq('exam_id', examId)
-              .inFilter('status', const ['submitted', 'completed'])
-          : Future.value(<dynamic>[]);
-
-      final results = await Future.wait<dynamic>([
-        membersFuture,
-        videoProgressFuture,
-        attemptsFuture,
-      ]);
-
-      if (!mounted) return;
-
-      final countRes = results[0] as List<dynamic>;
-      final total = countRes.length;
-
-      int views = 0;
-      int completed = 0;
-      final vpList = results[1] as List<dynamic>;
-      views = vpList
-          .where((r) => (r['progress_seconds'] as int? ?? 0) > 0)
-          .length;
-      completed = vpList.where((r) => r['completed'] == true).length;
-
-      double? avgScore;
-      final attempts = results[2] as List<dynamic>;
-      if (attempts.isNotEmpty) {
-        double sum = 0;
-        int validCount = 0;
-        for (final a in attempts) {
-          final p = a['percentage'];
-          if (p != null) {
-            sum += (p is num
-                ? p.toDouble()
-                : double.tryParse(p.toString()) ?? 0);
-            validCount++;
-          }
-        }
-        if (validCount > 0) {
-          avgScore = sum / validCount;
-        }
-      }
-
-      setState(() {
-        _totalStudents = total;
-        _totalViews = views;
-        _completedStudents = completed;
-        _averageQuizScore = avgScore;
-      });
     } catch (_) {}
   }
 

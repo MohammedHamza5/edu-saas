@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../config/tenant_registry.dart';
+import '../config/tenant_resolver.dart';
 import '../utils/app_logger.dart';
 import 'tenant_branding.dart';
 
@@ -9,7 +10,7 @@ import 'tenant_branding.dart';
 /// a tenant is switched, or an authenticated user's tenant is detected.
 class TenantThemeCubit extends Cubit<TenantBranding> {
   TenantThemeCubit({TenantBranding? initialBranding})
-    : super(initialBranding ?? TenantRegistry.defaultBranding) {
+    : super(initialBranding ?? TenantResolver.resolveBranding()) {
     AppLogger.i(
       'TenantThemeCubit',
       'Initialized with tenant: ${state.brandName} (${state.tenantId})',
@@ -39,6 +40,6 @@ class TenantThemeCubit extends Cubit<TenantBranding> {
 
   /// Resets to default platform branding
   void resetToDefault() {
-    emit(TenantRegistry.defaultBranding);
+    emit(TenantResolver.resolveBranding());
   }
 }

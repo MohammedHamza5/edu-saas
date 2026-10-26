@@ -82,23 +82,22 @@ void main() {
       late bool isDesktopVal;
       late String adaptedText;
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Builder(
-            builder: (context) {
-              isMobileVal = context.isMobile;
-              isTabletVal = context.isTablet;
-              isDesktopVal = context.isDesktop;
-              adaptedText = context.responsiveValue(
-                mobile: 'Mobile View',
-                tablet: 'Tablet View',
-                desktop: 'Desktop View',
-              );
-              return Text(adaptedText);
-            },
-          ),
+      final mobileWidget = MaterialApp(
+        home: Builder(
+          builder: (context) {
+            isMobileVal = context.isMobile;
+            isTabletVal = context.isTablet;
+            isDesktopVal = context.isDesktop;
+            adaptedText = context.responsiveValue(
+              mobile: 'Mobile View',
+              tablet: 'Tablet View',
+              desktop: 'Desktop View',
+            );
+            return Text(adaptedText);
+          },
         ),
       );
+      await tester.pumpWidget(mobileWidget);
 
       expect(isMobileVal, isTrue);
       expect(isTabletVal, isFalse);
@@ -108,38 +107,36 @@ void main() {
 
       // Tablet Size (768 x 1024)
       tester.view.physicalSize = const Size(768, 1024);
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Builder(
-            builder: (context) {
-              adaptedText = context.responsiveValue(
-                mobile: 'Mobile View',
-                tablet: 'Tablet View',
-                desktop: 'Desktop View',
-              );
-              return Text(adaptedText);
-            },
-          ),
+      final tabletWidget = MaterialApp(
+        home: Builder(
+          builder: (context) {
+            adaptedText = context.responsiveValue(
+              mobile: 'Mobile View',
+              tablet: 'Tablet View',
+              desktop: 'Desktop View',
+            );
+            return Text(adaptedText);
+          },
         ),
       );
+      await tester.pumpWidget(tabletWidget);
       expect(find.text('Tablet View'), findsOneWidget);
 
       // Desktop Size (1440 x 900)
       tester.view.physicalSize = const Size(1440, 900);
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Builder(
-            builder: (context) {
-              adaptedText = context.responsiveValue(
-                mobile: 'Mobile View',
-                tablet: 'Tablet View',
-                desktop: 'Desktop View',
-              );
-              return Text(adaptedText);
-            },
-          ),
+      final desktopWidget = MaterialApp(
+        home: Builder(
+          builder: (context) {
+            adaptedText = context.responsiveValue(
+              mobile: 'Mobile View',
+              tablet: 'Tablet View',
+              desktop: 'Desktop View',
+            );
+            return Text(adaptedText);
+          },
         ),
       );
+      await tester.pumpWidget(desktopWidget);
       expect(find.text('Desktop View'), findsOneWidget);
     });
 

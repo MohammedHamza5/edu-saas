@@ -3,7 +3,6 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
-import '../../../../core/network/supabase_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_button.dart';
@@ -97,20 +96,12 @@ class _AssignGroupsDialogState extends State<AssignGroupsDialog> {
 
   Future<void> _loadExistingGroupConfigsAndExams() async {
     try {
-      final client = SupabaseService.client;
+      final contentCubit = context.read<ContentCubit>();
 
       // 1. Fetch any existing customization from content_groups
-      final cgRes = await client
-          .from('content_groups')
-          .select(
-            'group_id, file_id, associated_exam_id, prerequisite_exam_id, sort_order, passing_score_override, '
-            'file:files!content_groups_file_id_fkey(id, file_name), '
-            'associated_exam:exams!content_groups_associated_exam_id_fkey(id, title), '
-            'prerequisite_exam:exams!content_groups_prerequisite_exam_id_fkey(id, title)',
-          )
-          .eq('content_id', widget.content.id);
+      final cgList = await contentCubit.getContentGroupCustomizations(widget.content.id);
 
-      for (final row in (cgRes as List<dynamic>)) {
+      for (final row in cgList) {
         final gId = row['group_id'] as String;
         final fObj = row['file'] as Map<String, dynamic>?;
         final aObj = row['associated_exam'] as Map<String, dynamic>?;
@@ -132,20 +123,12 @@ class _AssignGroupsDialogState extends State<AssignGroupsDialog> {
       }
 
       // 2. Fetch available exams for tenant
-      final tenantId = widget.content.tenantId;
-      final examsRes = await client
-          .from('exams')
-          .select('id, title, content:content!exams_content_id_fkey(group_id, title)')
-          .eq('tenant_id', tenantId)
-          .order('created_at', ascending: false);
+      final examsList = await contentCubit.getAvailableExamsSummary();
 
       _allExams.clear();
-      for (final ex in (examsRes as List<dynamic>)) {
-        final contentMap = ex['content'] as Map<String, dynamic>?;
-        final gId = contentMap?['group_id'] as String?;
-        final title = ex['title'] as String? ??
-            contentMap?['title'] as String? ??
-            'بدون عنوان';
+      for (final ex in examsList) {
+        final gId = ex['group_id'] as String?;
+        final title = ex['title'] as String? ?? 'بدون عنوان';
         final item = {
           'id': ex['id'],
           'title': title,

@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../config/tenant_registry.dart';
+import '../config/tenant_resolver.dart';
 import '../di/injection_container.dart';
 import '../network/supabase_service.dart';
 import '../router/app_routes.dart';
@@ -63,7 +63,8 @@ class _StudentShellState extends State<StudentShell> {
     if (path.startsWith('/student/assignments')) return 3;
     if (path.startsWith('/student/exams')) return 4;
     if (path.startsWith('/student/mistakes')) return 5;
-    if (path.startsWith('/student/attendance')) return 6;
+    if (path.startsWith('/student/saved-questions')) return 6;
+    if (path.startsWith('/student/attendance')) return 7;
     return 0;
   }
 
@@ -88,6 +89,9 @@ class _StudentShellState extends State<StudentShell> {
         context.go(AppRoutes.studentMistakes);
         break;
       case 6:
+        context.go(AppRoutes.studentSavedQuestions);
+        break;
+      case 7:
         context.go(AppRoutes.studentAttendance);
         break;
     }
@@ -356,6 +360,13 @@ class _StudentShellState extends State<StudentShell> {
             tooltip: context.l10n.studentNavMistakesBank,
           ),
           AdaptiveDestination(
+            icon: Icons.bookmark_border_rounded,
+            selectedIcon: Icons.bookmark_rounded,
+            label: context.l10n.savedQuestionsVaultTitle,
+            subtitle: context.l10n.savedQuestionsVaultSubtitle,
+            tooltip: context.l10n.savedQuestionsVaultTitle,
+          ),
+          AdaptiveDestination(
             icon: Icons.insights_outlined,
             selectedIcon: Icons.insights_rounded,
             label: context.l10n.studentEngagementNavTitle,
@@ -384,7 +395,7 @@ class _StudentShellState extends State<StudentShell> {
       try {
         return context.watch<TenantThemeCubit>().state;
       } catch (_) {
-        return TenantRegistry.defaultBranding;
+        return TenantResolver.resolveBranding();
       }
     })();
 
@@ -408,7 +419,7 @@ class _StudentShellState extends State<StudentShell> {
       try {
         return context.watch<TenantThemeCubit>().state;
       } catch (_) {
-        return TenantRegistry.defaultBranding;
+        return TenantResolver.resolveBranding();
       }
     })();
 

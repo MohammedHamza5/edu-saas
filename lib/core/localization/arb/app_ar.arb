@@ -769,7 +769,7 @@
   "noExamsInFilterSubtitle": "جرب التبديل لتصنيف آخر لرؤية الامتحانات",
   "noPublishedExams": "لا توجد امتحانات منشورة لمجموعاتك الدراسية حالياً",
   "examRulesAndGuidelines": "تعليمات وقواعد الامتحان",
-  "examDurationLabel": "مدة الامتحان",
+  "examDurationLabel": "المدة (بالدقائق)",
   "maxScoreLabel": "الدرجة العظمى",
   "passingScoreTitle": "درجة النجاح",
   "notSpecified": "غير محددة",
@@ -808,7 +808,7 @@
   "solvedCount": "تم حل: {answered}/{total}",
   "chooseCorrectAnswer": "اختر الإجابة الصحيحة:",
   "previousQuestion": "السابق",
-  "nextQuestion": "التالي",
+  "nextQuestion": "السؤال التالي",
   "submitExamNow": "تسليم الامتحان الآن",
   "referenceSheetTooltip": "ورقة القوانين (Reference Sheet)",
   "calculatorTooltip": "الحاسبة العلمية (Calculator)",
@@ -994,7 +994,7 @@
   "groupCommitmentRateSubtitle": "معدل الالتزام بالمشاهدة",
   "markAllPresentAction": "تحضير الكل حاضر",
   "saveAttendanceAction": "حفظ كشف الحضور",
-  "searchStudentOrPhoneHint": "بحث سريع باسم الطالب أو رقم الهاتف...",
+  "searchStudentOrPhoneHint": "ابحث باسم الطالب أو رقم الهاتف أو المجموعة...",
   "noStudentsMatchFilterMessage": "لا يوجد طلاب يطابقون خيارات البحث أو التصفية",
   "resetFiltersAction": "إعادة ضبط الفلاتر",
   "noteForStudentTitle": "ملاحظة أكاديمية للطالب: {name}",
@@ -1161,7 +1161,7 @@
   "currentGroupsTitle": "المجموعات المسجل بها",
   "overallExamAverage": "المعدل العام للامتحانات",
   "createGroupAction": "إنشاء مجموعة",
-  "groupDescriptionLabel": "الوصف",
+  "groupDescriptionLabel": "وصف المجموعة",
   "groupGradeLevelLabel": "المستوى الأكاديمي",
   "groupTargetExamLabel": "الامتحان المستهدف",
   "groupCapacityLabel": "السعة الاستيعابية (عدد الطلاب)",
@@ -1221,7 +1221,7 @@
   "saveGradeAction": "رصد الدرجة",
   "examsListTitle": "الامتحانات والاختبارات",
   "createExamAction": "إنشاء امتحان",
-  "examTitleLabel": "عنوان الامتحان",
+  "examTitleLabel": "عنوان الاختبار",
   "examDurationMinutes": "{minutes} دقيقة",
   "examPassingScoreLabel": "درجة النجاح (%)",
   "examInstructionsLabel": "إرشادات وتعليمات الامتحان",
@@ -1246,7 +1246,7 @@
   "timeRemainingLabel": "الوقت المتبقي",
   "questionProgressLabel": "السؤال {current} من {total}",
   "previousQuestionAction": "السابق",
-  "nextQuestionAction": "التالي",
+  "nextQuestionAction": "السؤال التالي",
   "flagQuestionAction": "تعليم السؤال للمراجعة",
   "unflagQuestionAction": "إلغاء التعليم",
   "reviewSubmitAction": "تسليم الامتحان",
@@ -1364,7 +1364,7 @@
   "noGroupsCreatedYet": "لم يتم إنشاء أي مجموعة دراسية بعد.",
   "mustCreateGroupFirst": "يجب إنشاء مجموعة دراسية أولاً قبل إضافة الامتحانات والمحتوى.",
   "createNewGroupNow": "إنشاء مجموعة جديدة الآن",
-  "groupLevelLabel": "المستوى: {level}",
+  "groupLevelLabel": "المسار الأكاديمي / المستوى",
   "enterAction": "دخول ←",
   "teacherDashboardHeader": "{brandName} • مركز عمليات المدرس",
   "welcomeTeacherTitle": "مرحباً بك في {brandName} • {teacherName}",
@@ -1481,7 +1481,7 @@
   "quickAccessSubtitle": "انتقل مباشرة إلى مجموعاتك النشطة",
   "myStudyMaterials": "موادي الدراسية",
   "myStudyMaterialsDesc": "الوصول إلى جميع مجموعاتك والمحتوى المخصص لك",
-  "academicMomentumTitle": "الزخم الأكاديمي",
+  "academicMomentumTitle": "زخم الاستمرارية الأكاديمية",
   "statExamAverage": "متوسط درجات الاختبارات",
   "statAssignmentsDone": "الواجبات المنجزة",
   "statVideoProgress": "تقدم مشاهدة الفيديوهات",
@@ -1612,8 +1612,8 @@
   "currentActiveLectureBadge": "المحاضرة الحالية",
   "overallCourseProgress": "نسبة إنجاز المنهج الكلي",
   "reviewQuizResultAction": "مراجعة نتيجة الكويز",
-  "rewatchLectureAction": "إعادة مشاهدة المحاضرة",
-  "startLectureAction": "مشاهدة المحاضرة",
+  "rewatchLectureAction": "إعادة المشاهدة",
+  "startLectureAction": "بدء المشاهدة",
   "quizPrefix": "كويز محاضرة",
   "removeQuestionTooltip": "حذف هذا السؤال",
   "addNewLectureHero": "إضافة محاضرة جديدة (شاملة)",
@@ -1994,7 +1994,7 @@
   "primaryExamFile": "ملف أسئلة الاختبار (PDF)",
   "selectFileAction": "اختيار ملف",
   "selectedFilesCount": "تم اختيار {count} ملفات",
-  "filterAllTypes": "جميع الأنواع",
+  "filterAllTypes": "كافة الأنواع",
   "typeMultipleChoice": "اختيار من متعدد (MCQ)",
   "typeGridIn": "إجابة رقمية (Grid-In)",
   "sortByPriority": "ترتيب حسب الأولوية",
@@ -2252,7 +2252,6 @@
   "mistakesBankSidebarSubtitle": "مراجعة وتثبيت المفاهيم",
   "filterWrongAnswersOnly": "إجابات خاطئة فقط",
   "filterSkippedOnly": "أسئلة متروكة فقط",
-  "filterAllTypes": "كافة الأنواع",
   "wrongAnswerBadge": "إجابة خاطئة",
   "skippedQuestionBadge": "سؤال متروك",
   "previousWrongChoice": "اختيارك السابق: {option}",
@@ -2270,7 +2269,7 @@
   "createFolder": "مجلد جديد",
   "createFolderSubtitle": "نظّم فيديوهاتك في مجلد مخصص لتسهيل الوصول إليها وإضافتها للمحاضرات.",
   "folderName": "اسم المجلد",
-  "folderNameHint": "مثال: أساسيات الجبر وحل المعادلات",
+  "folderNameHint": "مثال: الوحدة الأولى: الجبر، نماذج SAT",
   "folderCreatedSuccess": "تم إنشاء المجلد بنجاح",
   "renameFolder": "إعادة تسمية المجلد",
   "renameFolderSubtitle": "تعديل اسم هذا المجلد في بنك الفيديوهات والمحاضرات المرتبطة.",
@@ -2499,8 +2498,6 @@
   "editExamTitle": "تعديل بيانات الاختبار",
   "editExamAction": "تعديل الاختبار",
   "examUpdatedSuccess": "تم تحديث بيانات الاختبار بنجاح",
-  "examTitleLabel": "عنوان الاختبار",
-  "examDurationLabel": "المدة (بالدقائق)",
   "unlimitedDuration": "غير محدد (مفتوح)",
   "passingScorePercentLabel": "درجة النجاح (%)",
   "shuffleQuestionsLabel": "خلط ترتيب الأسئلة عشوائياً",
@@ -2509,17 +2506,12 @@
   "saveChangesAction": "حفظ التغييرات",
   "editGroupTitle": "تعديل بيانات المجموعة",
   "editGroupAction": "تعديل المجموعة",
-  "groupUpdatedSuccess": "تم تحديث بيانات المجموعة بنجاح",
-  "groupNameLabel": "اسم المجموعة",
-  "groupLevelLabel": "المسار الأكاديمي / المستوى",
-  "groupDescriptionLabel": "وصف المجموعة",
   "previousContentAccessLabel": "سياسة المحتوى القديم للطلاب الجدد",
   "allowPreviousContent": "إتاحة المحتوى السابق لتاريخ الانضمام",
   "denyPreviousContent": "إتاحة المحتوى الجديد فقط من تاريخ الانضمام",
   "editAssignmentTitle": "تعديل بيانات الواجب",
   "editAssignmentAction": "تعديل الواجب",
   "assignmentUpdatedSuccess": "تم تحديث بيانات الواجب بنجاح",
-  "assignmentTitleLabel": "عنوان الواجب",
   "assignmentInstructionsLabel": "تعليمات وإرشادات الواجب",
   "dueDateLabel": "آخر موعد للتسليم",
   "allowLateSubmissionLabel": "السماح بالتسليم بعد انتهاء الموعد",
@@ -2527,23 +2519,30 @@
   "chapterUpdateFailed": "فشل تحديث الشابتر، يرجى المحاولة مرة أخرى.",
   "deleteExamAction": "حذف الاختبار",
   "deleteExamDialogTitle": "حذف الاختبار نهائياً؟",
-  "deleteExamDialogBody": "هل أنت متأكد من حذف اختبار \"{title}\"؟ سيتم حذف جميع الأسئلة والخيارات المرتبطة به نهائياً.",
+  "deleteExamDialogBody": "هل أنت متأكد من رغبتك في حذف اختبار «{title}» نهائياً؟ لا يمكن التراجع عن هذا الإجراء.",
   "@deleteExamDialogBody": {
     "placeholders": {
-      "title": { "type": "String" }
+      "title": {
+        "type": "String"
+      }
     }
   },
-  "deleteExamConfirmButton": "نعم، حذف الاختبار",
-  "archiveOrDeleteExamDialogTitle": "أرشفة / إخفاء الاختبار",
-  "archiveOrDeleteExamDialogBody": "هذا الاختبار يحتوي على {count} محاولة من الطلاب. لحماية سجلاتهم الأكاديمية، سيتم أرشفة الاختبار وإخفاؤه عن الطلاب دون مساس بدرجاتهم.",
+  "deleteExamConfirmButton": "نعم، احذف الاختبار",
+  "archiveOrDeleteExamDialogTitle": "أرشفة الاختبار (يوجد محاولات للطلاب)",
+  "archiveOrDeleteExamDialogBody": "الاختبار «{title}» يحتوي على {count} محاولة مكتملة من الطلاب. لحماية سجلات ودرجات الطلاب، سيتم أرشفته وإخفاؤه تماماً من قوائم المدرس والطلاب بدلاً من تدمير بياناتهم.",
   "@archiveOrDeleteExamDialogBody": {
     "placeholders": {
-      "count": { "type": "int" }
+      "title": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
     }
   },
   "archiveExamConfirmButton": "أرشفة وإخفاء الاختبار",
-  "examDeletedSuccessToast": "تم حذف الاختبار بنجاح",
-  "examArchivedSuccessToast": "تم أرشفة الاختبار وإخفاؤه بنجاح",
+  "examDeletedSuccessToast": "تم حذف الاختبار نهائياً بنجاح",
+  "examArchivedSuccessToast": "تم أرشفة الاختبار وإخفاؤه بنجاح مع الحفاظ على درجات الطلاب",
   "smartApproveTitle": "قبول وتسكين الطالب",
   "smartApproveSelectGroupPrompt": "اختر المجموعة أو المجموعات الدراسية لتسكين الطالب فوراً:",
   "smartApproveEnrollNotice": "بمجرد القبول، سيتم تفعيل حساب الطالب وإتاحة كافة المحاضرات والمحتوى المصرح به للمجموعات المختارة.",
@@ -2552,14 +2551,20 @@
   "smartApproveSuccessWithGroupsToast": "تم قبول الطالب {name} وتسكينه في {count} مجموعة بنجاح!",
   "@smartApproveSuccessWithGroupsToast": {
     "placeholders": {
-      "name": { "type": "String" },
-      "count": { "type": "int" }
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
     }
   },
   "smartApproveSuccessNoGroupsToast": "تم قبول الطالب {name} بنجاح!",
   "@smartApproveSuccessNoGroupsToast": {
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "skipGroupEnrollment": "المتابعة بدون تسكين في مجموعة حالياً",
@@ -2574,7 +2579,9 @@
   "pendingStudentsCountBadge": "{count} طلاب بانتظار الموافقة",
   "@pendingStudentsCountBadge": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "noPendingStudentsBadge": "لا توجد طلبات معلقة",
@@ -2587,32 +2594,42 @@
   "examFilterTabAll": "الكل ({count})",
   "@examFilterTabAll": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "examFilterTabGeneral": "اختبارات عامة ({count})",
   "@examFilterTabGeneral": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "examFilterTabLectureQuizzes": "اختبارات المحاضرات ({count})",
   "@examFilterTabLectureQuizzes": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "examFilterSubAll": "الكل",
   "examFilterSubLinked": "مرتبطة بمحاضرة ({count})",
   "@examFilterSubLinked": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "examFilterSubUnlinked": "بانتظار الربط ({count})",
   "@examFilterSubUnlinked": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "statTotalExamsTitle": "إجمالي الاختبارات",
@@ -2624,7 +2641,9 @@
   "statUnlinkedAlert": "{count} بانتظار الربط بمحاضرة",
   "@statUnlinkedAlert": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "badgeGeneralExam": "اختبار عام",
@@ -2632,7 +2651,9 @@
   "linkedToLecturePill": "مرتبط بمحاضرة: {title}",
   "@linkedToLecturePill": {
     "placeholders": {
-      "title": { "type": "String" }
+      "title": {
+        "type": "String"
+      }
     }
   },
   "unlinkedQuizPill": "غير مرتبط بمحاضرة بعد - جاهز للربط",
@@ -2649,7 +2670,9 @@
   "currentExamAttachedWarning": "مرتبطة حالياً باختبار: {title}",
   "@currentExamAttachedWarning": {
     "placeholders": {
-      "title": { "type": "String" }
+      "title": {
+        "type": "String"
+      }
     }
   },
   "lectureFreeForLinking": "متاحة للربط",
@@ -2657,7 +2680,9 @@
   "examLinkedSuccessToast": "تم ربط الاختبار بمحاضرة «{title}» بنجاح",
   "@examLinkedSuccessToast": {
     "placeholders": {
-      "title": { "type": "String" }
+      "title": {
+        "type": "String"
+      }
     }
   },
   "examUnlinkedSuccessToast": "تم فك ارتباط الاختبار وأصبح اختباراً عاماً بنجاح",
@@ -2666,13 +2691,15 @@
   "confirmUnlinkDialogBody": "هل تريد فك ارتباط «{title}» بالمحاضرة وجعله اختباراً عاماً للطلاب؟",
   "@confirmUnlinkDialogBody": {
     "placeholders": {
-      "title": { "type": "String" }
+      "title": {
+        "type": "String"
+      }
     }
   },
   "confirmUnlinkButton": "نعم، فك الارتباط",
   "draftVersionNotice": "النسخة الحالية مسودة قابلة للتعديل مباشرة دون حاجة لإنشاء نسخ جديدة.",
   "publishCurrentDraftAction": "نشر هذه النسخة الآن",
-  "editDraftQuestionsAction": "تعديل الأسئلة والإعدادات",
+  "editDraftQuestionsAction": "تعديل الأسئلة والمحتوى",
   "versionPublishedPill": "منشورة",
   "versionDraftPill": "مسودة",
   "creatingNewVersionLoading": "جارٍ إنشاء النسخة الجديدة...",
@@ -2685,7 +2712,9 @@
   "confirmUnpublishExamBody": "هل أنت متأكد من رغبتك في إلغاء نشر اختبار «{title}»؟ سيتم تحويله إلى مسودة وإخفاؤه تماماً عن الطلاب.",
   "@confirmUnpublishExamBody": {
     "placeholders": {
-      "title": { "type": "String" }
+      "title": {
+        "type": "String"
+      }
     }
   },
   "confirmUnpublishButton": "نعم، ألغِ النشر وحوّله لمسودة",
@@ -2693,68 +2722,61 @@
   "newVersionFailedError": "تعذر إنشاء نسخة جديدة: {error}",
   "@newVersionFailedError": {
     "placeholders": {
-      "error": { "type": "String" }
+      "error": {
+        "type": "String"
+      }
     }
   },
-  "deleteExamAction": "حذف الاختبار",
-  "deleteExamDialogTitle": "حذف الاختبار نهائياً؟",
-  "deleteExamDialogBody": "هل أنت متأكد من رغبتك في حذف اختبار «{title}» نهائياً؟ لا يمكن التراجع عن هذا الإجراء.",
-  "@deleteExamDialogBody": {
-    "placeholders": {
-      "title": { "type": "String" }
-    }
-  },
-  "deleteExamConfirmButton": "نعم، احذف الاختبار",
-  "archiveOrDeleteExamDialogTitle": "أرشفة الاختبار (يوجد محاولات للطلاب)",
-  "archiveOrDeleteExamDialogBody": "الاختبار «{title}» يحتوي على {count} محاولة مكتملة من الطلاب. لحماية سجلات ودرجات الطلاب، سيتم أرشفته وإخفاؤه تماماً من قوائم المدرس والطلاب بدلاً من تدمير بياناتهم.",
-  "@archiveOrDeleteExamDialogBody": {
-    "placeholders": {
-      "title": { "type": "String" },
-      "count": { "type": "int" }
-    }
-  },
-  "archiveExamConfirmButton": "أرشفة وإخفاء الاختبار",
-  "examDeletedSuccessToast": "تم حذف الاختبار نهائياً بنجاح",
-  "examArchivedSuccessToast": "تم أرشفة الاختبار وإخفاؤه بنجاح مع الحفاظ على درجات الطلاب",
   "studentAttemptsGroupCount": "{count} محاولات",
   "@studentAttemptsGroupCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "singleStudentAttemptBadge": "محاولة واحدة",
   "highestScoreBadge": "الأعلى: {score}",
   "@highestScoreBadge": {
     "placeholders": {
-      "score": { "type": "String" }
+      "score": {
+        "type": "String"
+      }
     }
   },
   "attemptNumberLabel": "محاولة {number}",
   "@attemptNumberLabel": {
     "placeholders": {
-      "number": { "type": "int" }
+      "number": {
+        "type": "int"
+      }
     }
   },
   "allAttemptsHistoryHeader": "سجل محاولات الطالب ({count}):",
   "@allAttemptsHistoryHeader": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "studentsCountSummary": "{count} طالب خاضوا الاختبار",
   "@studentsCountSummary": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "totalAttemptsSummary": "{count} محاولة مسجلة",
   "@totalAttemptsSummary": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "editDraftExamTitle": "تعديل مسودة الاختبار",
-  "editDraftQuestionsAction": "تعديل الأسئلة والمحتوى",
   "editExamSettingsAction": "الإعدادات السريعة",
   "saveExamDraftChanges": "حفظ تعديلات المسودة",
   "examDraftUpdatedSuccess": "تم تحديث مسودة الاختبار وأسئلته بنجاح",
@@ -2762,7 +2784,9 @@
   "examUpdateFailed": "فشل تحديث الاختبار: {error}",
   "@examUpdateFailed": {
     "placeholders": {
-      "error": { "type": "String" }
+      "error": {
+        "type": "String"
+      }
     }
   },
   "editQuestionsNow": "تعديل الأسئلة الآن",
@@ -2779,8 +2803,12 @@
   "examSecurityViolationsCount": "مخالفة رقم {current} من أصل {max} محاولات مسموحة",
   "@examSecurityViolationsCount": {
     "placeholders": {
-      "current": { "type": "int" },
-      "max": { "type": "int" }
+      "current": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
     }
   },
   "examPrivacyShieldNotice": "تم حجب أسئلة الامتحان أثناء عدم التركيز على النافذة لحماية النزاهة ومنع التسريب.",
@@ -2791,13 +2819,17 @@
   "videoFileTooLargeForWeb": "حجم الفيديو ({sizeMb} ميجابايت) يتجاوز الحد الأقصى لذاكرة المتصفح (2 جيجابايت). يُرجى تقليل الـ Bitrate في برنامج المونتاج (CapCut) ليكون حجم الملف أقل من 1.5 جيجابايت وتسريع الرفع.",
   "@videoFileTooLargeForWeb": {
     "placeholders": {
-      "sizeMb": { "type": "String" }
+      "sizeMb": {
+        "type": "String"
+      }
     }
   },
   "videoFileMemoryError": "تعذر قراءة بيانات الفيديو داخل المتصفح ({sizeMb} ميجابايت). قد يكون حجم الملف كبيراً جداً على ذاكرة المتصفح. يُرجى تصدير الفيديو بحجم أصغر من 1.5 جيجابايت.",
   "@videoFileMemoryError": {
     "placeholders": {
-      "sizeMb": { "type": "String" }
+      "sizeMb": {
+        "type": "String"
+      }
     }
   },
   "longVideoExportTip": "💡 للمحاضرات الطويلة (أكثر من ساعة): اضبط Bitrate في برنامج المونتاج على 2,500 Kbps ليكون حجم الملف في حدود 1 جيجابايت لتفادي قيود ذاكرة المتصفح وضمان رفع سريع وسلس.",
@@ -2814,6 +2846,12 @@
   "@sendScoreToParentAction": {},
   "resendToParentAction": "إعادة الإرسال",
   "@resendToParentAction": {},
+  "examResultsHiddenSubtitle": "قام المعلم بحجب مصفوفة الإجابات والحلول النموذجية حالياً، وستتاح مراجعة الأسئلة فور إعلان النتائج رسمياً.",
+  "@examResultsHiddenSubtitle": {},
+  "examResultsHiddenTitle": "تم استلام إجاباتك بنجاح",
+  "@examResultsHiddenTitle": {},
+  "sendNewScoreToParentAction": "إرسال النتيجة المحدثة",
+  "@sendNewScoreToParentAction": {},
   "dispatchSentBadge": "تم الإرسال",
   "@dispatchSentBadge": {},
   "missingParentPhonePrompt": "لا يوجد رقم ولي أمر",
@@ -2825,7 +2863,9 @@
   "examStudentScoreLabel": "النتيجة: {score}",
   "@examStudentScoreLabel": {
     "placeholders": {
-      "score": { "type": "String" }
+      "score": {
+        "type": "String"
+      }
     }
   },
   "examStudentNotTakenNotice": "الطالب لم يؤدِ الاختبار بعد",
@@ -2873,7 +2913,9 @@
   "nextStudentInQueueAction": "التالي: {studentName} ➡️",
   "@nextStudentInQueueAction": {
     "placeholders": {
-      "studentName": { "type": "String" }
+      "studentName": {
+        "type": "String"
+      }
     }
   },
   "copyRosterSummaryTooltip": "نسخ ملخص كشف الدرجات",
@@ -2904,48 +2946,61 @@
   "@metricWhatsAppDispatchedTitle": {},
   "notifiedBadgeShort": "تم إخطارهم",
   "@notifiedBadgeShort": {},
-  "searchStudentOrPhoneHint": "ابحث باسم الطالب أو رقم الهاتف أو المجموعة...",
   "@searchStudentOrPhoneHint": {},
   "filterAllRoster": "الكل ({count})",
   "@filterAllRoster": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "filterSubmittedRoster": "تم التسليم ({count})",
   "@filterSubmittedRoster": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "filterPassedRoster": "اجتاز بنجاح ({count})",
   "@filterPassedRoster": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "filterNeedsAttentionRoster": "يحتاج متابعة ({count})",
   "@filterNeedsAttentionRoster": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "filterNotStartedRoster": "لم يؤدِ الاختبار ({count})",
   "@filterNotStartedRoster": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "filterUnnotifiedRoster": "بانتظار الإرسال ({count})",
   "@filterUnnotifiedRoster": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "filterNotifiedRoster": "تم الإرسال ({count})",
   "@filterNotifiedRoster": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "filterMissingPhoneRoster": "بدون رقم ولي أمر",
@@ -2953,7 +3008,9 @@
   "editParentPhoneDialogTitle": "تعديل رقم ولي أمر الطالب: {studentName}",
   "@editParentPhoneDialogTitle": {
     "placeholders": {
-      "studentName": { "type": "String" }
+      "studentName": {
+        "type": "String"
+      }
     }
   },
   "editParentPhoneDialogBody": "أدخل رقم هاتف ولي الأمر (واتساب) لربطه بحساب الطالب وإرسال التقارير.",
@@ -2973,7 +3030,9 @@
   "totalCourseDurationSubtitle": "من أصل {total} إجمالي المحتوى",
   "@totalCourseDurationSubtitle": {
     "placeholders": {
-      "total": { "type": "String" }
+      "total": {
+        "type": "String"
+      }
     }
   },
   "completedLecturesStatTitle": "المحاضرات المكتملة",
@@ -2981,7 +3040,9 @@
   "remainingLecturesSubtitle": "متبقي {count} للمشاهدة",
   "@remainingLecturesSubtitle": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "watchCommitmentRateTitle": "معدل الالتزام بالمشاهدة",
@@ -2995,25 +3056,33 @@
   "filterAllLecturesCount": "الكل ({count})",
   "@filterAllLecturesCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "filterCompletedCount": "المكتملة ({count})",
   "@filterCompletedCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "filterInProgressCount": "قيد المتابعة ({count})",
   "@filterInProgressCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "filterNotStartedCount": "لم تبدأ بعد ({count})",
   "@filterNotStartedCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "filterAllGroups": "جميع المجموعات",
@@ -3023,23 +3092,27 @@
   "watchedTimeOutOfTotal": "شاهدت {watched} من {total}",
   "@watchedTimeOutOfTotal": {
     "placeholders": {
-      "watched": { "type": "String" },
-      "total": { "type": "String" }
+      "watched": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
     }
   },
   "lastWatchedAtLabel": "آخر مشاهدة: {date}",
   "@lastWatchedAtLabel": {
     "placeholders": {
-      "date": { "type": "String" }
+      "date": {
+        "type": "String"
+      }
     }
   },
   "notWatchedYetLabel": "لم تبدأ المشاهدة بعد",
   "@notWatchedYetLabel": {},
   "resumeLectureAction": "استكمال المشاهدة",
   "@resumeLectureAction": {},
-  "startLectureAction": "بدء المشاهدة",
   "@startLectureAction": {},
-  "rewatchLectureAction": "إعادة المشاهدة",
   "@rewatchLectureAction": {},
   "noEngagementLecturesEmpty": "لم يتم نشر أي محاضرات فيديو في مجموعاتك حتى الآن.",
   "@noEngagementLecturesEmpty": {},
@@ -3074,18 +3147,18 @@
   "confirmDeleteFolderBody": "هل أنت متأكد من حذف مجلد «{name}»؟ لن تُحذف الاختبارات بل ستصبح بدون مجلد.",
   "@confirmDeleteFolderBody": {
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "folderNameLabel": "اسم المجلد",
   "@folderNameLabel": {},
-  "folderNameHint": "مثال: الوحدة الأولى: الجبر، نماذج SAT",
   "@folderNameHint": {},
   "folderNameRequired": "يرجى إدخال اسم المجلد",
   "@folderNameRequired": {},
   "folderColorLabel": "لون المجلد",
   "@folderColorLabel": {},
-  "folderCreatedSuccess": "تم إنشاء المجلد بنجاح",
   "@folderCreatedSuccess": {},
   "folderUpdatedSuccess": "تم تحديث المجلد بنجاح",
   "@folderUpdatedSuccess": {},
@@ -3104,7 +3177,9 @@
   "folderExamCount": "{count} اختبار",
   "@folderExamCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "deleteFolderDialogTitle": "حذف المجلد؟",
@@ -3112,7 +3187,9 @@
   "deleteFolderDialogBody": "هل أنت متأكد من حذف مجلد «{name}»؟ لن تُحذف الاختبارات بل ستصبح بدون مجلد.",
   "@deleteFolderDialogBody": {
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "confirmDeleteButton": "حذف المجلد",
@@ -3144,7 +3221,9 @@
   "optionsAutoFilledSuccess": "تمت تعبئة الخيارات تلقائياً لـ {count} سؤال",
   "@optionsAutoFilledSuccess": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "optimizedWebpBadge": "WebP فائق السرعة",
@@ -3166,20 +3245,28 @@
   "examQuestionsSolvedProgress": "تم حل {solved} من {total} أسئلة",
   "@examQuestionsSolvedProgress": {
     "placeholders": {
-      "solved": { "type": "int" },
-      "total": { "type": "int" }
+      "solved": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "examQuestionsAllSolved": "تم حل جميع الأسئلة ({count}/{count})",
   "@examQuestionsAllSolved": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "examNotStartedYet": "لم يتم البدء بعد (0/{total})",
   "@examNotStartedYet": {
     "placeholders": {
-      "total": { "type": "int" }
+      "total": {
+        "type": "int"
+      }
     }
   },
   "examCompletedCheck": "مكتمل",
@@ -3205,8 +3292,12 @@
   "examScoreAchieved": "الدرجة: {score}/{max}",
   "@examScoreAchieved": {
     "placeholders": {
-      "score": { "type": "int" },
-      "max": { "type": "int" }
+      "score": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
     }
   },
   "clearSearchTooltip": "مسح البحث",
@@ -3224,8 +3315,12 @@
   "examDraftFoundNotice": "توجد مسودة غير محفوظة لهذا الاختبار ({count} أسئلة • {time})",
   "@examDraftFoundNotice": {
     "placeholders": {
-      "count": { "type": "int" },
-      "time": { "type": "String" }
+      "count": {
+        "type": "int"
+      },
+      "time": {
+        "type": "String"
+      }
     }
   },
   "restoreExamDraftAction": "استعادة المسودة",
@@ -3242,7 +3337,7 @@
   "@materialsLibraryTitle": {},
   "materialsLibrarySubtitle": "إدارة الملازم، أوراق العمل، وملفات المحاضرات",
   "@materialsLibrarySubtitle": {},
-  "selectFromMaterialsLibrary": "اختيار من مكتبة الملفات",
+  "selectFromMaterialsLibrary": "اختيار من مكتبة المذكرات",
   "@selectFromMaterialsLibrary": {},
   "selectFromMaterialsLibrarySubtitle": "اختر ملفاً موجوداً مسبقاً لربطه فوراً دون إعادة رفعه",
   "@selectFromMaterialsLibrarySubtitle": {},
@@ -3260,8 +3355,6 @@
   "@editFolderName": {},
   "editMaterialAction": "تعديل اسم الملف",
   "@editMaterialAction": {},
-  "deleteFolderAction": "حذف المجلد",
-  "@deleteFolderAction": {},
   "deleteMaterialAction": "حذف الملف",
   "@deleteMaterialAction": {},
   "moveMaterialAction": "نقل إلى مجلد",
@@ -3269,7 +3362,9 @@
   "usedInLecturesCount": "مستخدم في {count} محاضرات",
   "@usedInLecturesCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "unusedMaterial": "غير مستخدم",
@@ -3285,17 +3380,13 @@
   "folderFilesCount": "{count} ملفات",
   "@folderFilesCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "rootMaterialsTitle": "المكتبة الرئيسية",
   "@rootMaterialsTitle": {},
-  "folderNameLabel": "اسم المجلد",
-  "@folderNameLabel": {},
-  "folderColorLabel": "لون المجلد",
-  "@folderColorLabel": {},
-  "confirmDeleteFolderTitle": "حذف المجلد؟",
-  "@confirmDeleteFolderTitle": {},
   "confirmDeleteFolderMessage": "هل أنت متأكد من حذف هذا المجلد؟ سيتم نقل الملفات بداخله إلى المكتبة الرئيسية.",
   "@confirmDeleteFolderMessage": {},
   "confirmDeleteMaterialTitle": "حذف الملف؟",
@@ -3323,7 +3414,9 @@
   "folderCount": "{count} مجلدات",
   "@folderCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "submissionReasonStudentSubmitted": "تسليم عادي من الطالب",
@@ -3401,20 +3494,28 @@
   "examScoreSummary": "حصلت على {score} من {maxScore}",
   "@examScoreSummary": {
     "placeholders": {
-      "score": { "type": "int" },
-      "maxScore": { "type": "int" }
+      "score": {
+        "type": "int"
+      },
+      "maxScore": {
+        "type": "int"
+      }
     }
   },
   "passingThresholdLabel": "حد النجاح الأدنى: {score}%",
   "@passingThresholdLabel": {
     "placeholders": {
-      "score": { "type": "int" }
+      "score": {
+        "type": "int"
+      }
     }
   },
   "goToNextLectureSpecific": "المحاضرة التالية: {title}",
   "@goToNextLectureSpecific": {
     "placeholders": {
-      "title": { "type": "String" }
+      "title": {
+        "type": "String"
+      }
     }
   },
   "examPassedSubtitle": "أحسنت! لقد حققت متطلبات النجاح في هذا الاختبار بنجاح.",
@@ -3432,22 +3533,34 @@
   "uploadingFileProgress": "جاري رفع الملف {current} من {total}: {fileName}",
   "@uploadingFileProgress": {
     "placeholders": {
-      "current": { "type": "int" },
-      "total": { "type": "int" },
-      "fileName": { "type": "String" }
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "fileName": {
+        "type": "String"
+      }
     }
   },
   "uploadMaterialSuccess": "تم رفع الملف \"{fileName}\" بنجاح",
   "@uploadMaterialSuccess": {
     "placeholders": {
-      "fileName": { "type": "String" }
+      "fileName": {
+        "type": "String"
+      }
     }
   },
   "uploadMaterialError": "فشل رفع الملف \"{fileName}\": {error}",
   "@uploadMaterialError": {
     "placeholders": {
-      "fileName": { "type": "String" },
-      "error": { "type": "String" }
+      "fileName": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
     }
   },
   "smartBadgePdf": "ملزمة",
@@ -3465,7 +3578,9 @@
   "selectedVideosBadge": "{count} محاضرات مختارة",
   "@selectedVideosBadge": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "attachedExamPdf": "كراسة أسئلة الامتحان (PDF)",
@@ -3498,8 +3613,6 @@
   "@quickPresets": {},
   "overwriteQuestionsWarning": "سيتم استبدال الأسئلة الحالية بورقة إجابة جديدة مرقمة. هل تريد المتابعة؟",
   "@overwriteQuestionsWarning": {},
-  "selectFromMaterialsLibrary": "اختيار من مكتبة المذكرات",
-  "@selectFromMaterialsLibrary": {},
   "uploadNewPdfFromDevice": "رفع ملف PDF جديد من الجهاز",
   "@uploadNewPdfFromDevice": {},
   "previewPdfBooklet": "معاينة الكراسة",
@@ -3531,13 +3644,17 @@
   "practiceModeBadgeQuestions": "{count} سؤال",
   "@practiceModeBadgeQuestions": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "practiceModeBadgeMastered": "{count} سؤال متقن",
   "@practiceModeBadgeMastered": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "practiceModeHeaderUnresolved": "تدريب الأخطاء النشطة",
@@ -3553,7 +3670,9 @@
   "resolvedAfterAttempts": "تم إتقانها بعد {count} محاولات",
   "@resolvedAfterAttempts": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "startMasteryPractice": "بدء مراجعة الإتقان",
@@ -3563,5 +3682,343 @@
   "noMasteredMistakesFoundSub": "حل الأخطاء في وضع التدريب لنقلها إلى قائمة الإتقان وتثبيتها",
   "@noMasteredMistakesFoundSub": {},
   "practiceSingleQuestionAction": "تدريب على هذا السؤال",
-  "@practiceSingleQuestionAction": {}
+  "@practiceSingleQuestionAction": {},
+  "pacingRadarTitle": "تحليل الوقت وسرعة الحل",
+  "@pacingRadarTitle": {},
+  "pacingRadarSubtitle": "تحليل تفصيلي لسرعتك في حل كل سؤال",
+  "@pacingRadarSubtitle": {},
+  "pacingFast": "سريع (< 60 ث)",
+  "@pacingFast": {},
+  "pacingNormal": "متوازن (60-90 ث)",
+  "@pacingNormal": {},
+  "pacingSlow": "فخ وقت (> 90 ث)",
+  "@pacingSlow": {},
+  "pacingAvgPerQuestion": "متوسط الوقت لكل سؤال: {seconds} ثانية",
+  "@pacingAvgPerQuestion": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "flagAsGuessTooltip": "تحديد كسؤال غير متأكد منه (تخمين)",
+  "@flagAsGuessTooltip": {},
+  "unflagGuessTooltip": "إلغاء وسم التخمين",
+  "@unflagGuessTooltip": {},
+  "guessFlagLabel": "تخمين",
+  "@guessFlagLabel": {},
+  "luckyGuessBadge": "تخمين صائب 🍀",
+  "@luckyGuessBadge": {},
+  "luckyGuessNotice": "أجبت بشكل صحيح ولكنك علمت السؤال كتخمين. راجعه لتثبيت الفكرة.",
+  "@luckyGuessNotice": {},
+  "eliminateOptionTooltip": "شطب الخيار المستبعد",
+  "@eliminateOptionTooltip": {},
+  "reflectionHeader": "ما سبب الخطأ في هذا السؤال؟",
+  "@reflectionHeader": {},
+  "reflectionConceptGap": "فجوة مفهومية",
+  "@reflectionConceptGap": {},
+  "reflectionConceptGapDesc": "لم أكن أعرف القاعدة الرياضية أو القانون",
+  "@reflectionConceptGapDesc": {},
+  "reflectionCarelessError": "تسرع حسابي",
+  "@reflectionCarelessError": {},
+  "reflectionCarelessErrorDesc": "خطأ في إشارة أو عملية حسابية بسيطة",
+  "@reflectionCarelessErrorDesc": {},
+  "reflectionMisreadQuestion": "سوء قراءة",
+  "@reflectionMisreadQuestion": {},
+  "reflectionMisreadQuestionDesc": "لم أنتبه لكلمة مفتاحية أو حسبت المطلوب الخطأ",
+  "@reflectionMisreadQuestionDesc": {},
+  "reflectionTimePressure": "ضغط الوقت",
+  "@reflectionTimePressure": {},
+  "reflectionTimePressureDesc": "الوقت كان يداهمني واضطررت للتخمين",
+  "@reflectionTimePressureDesc": {},
+  "reflectionUnclassified": "غير مصنف",
+  "@reflectionUnclassified": {},
+  "filterByReflectionReason": "فلترة حسب سبب الخطأ",
+  "@filterByReflectionReason": {},
+  "reflectionSavedSuccess": "تم حفظ سبب الخطأ بنجاح",
+  "@reflectionSavedSuccess": {},
+  "scratchpadPen": "قلم",
+  "@scratchpadPen": {},
+  "scratchpadHighlighter": "قلم تمييز",
+  "@scratchpadHighlighter": {},
+  "scratchpadEraser": "ممحاة",
+  "@scratchpadEraser": {},
+  "scratchpadUndo": "تراجع",
+  "@scratchpadUndo": {},
+  "scratchpadClear": "مسح المسودة",
+  "@scratchpadClear": {},
+  "scratchpadGridPaper": "ورقة رسم بياني",
+  "@scratchpadGridPaper": {},
+  "scratchpadOverlay": "وضع شفاف فوق السؤال",
+  "@scratchpadOverlay": {},
+  "scratchpadClose": "إغلاق المسودة",
+  "@scratchpadClose": {},
+  "scratchpadTooltip": "المسودة ولوحة الرسم الرقمي",
+  "@scratchpadTooltip": {},
+  "formulaSheetTooltip": "قائمة القوانين وحيل الدسموس",
+  "@formulaSheetTooltip": {},
+  "formulaSheetTitle": "مرجع قوانين الماث وحيل الدسموس",
+  "@formulaSheetTitle": {},
+  "formulaGeometryTab": "قوانين الـ SAT",
+  "@formulaGeometryTab": {},
+  "formulaDesmosTab": "حيل الدسموس",
+  "@formulaDesmosTab": {},
+  "formulaCircleDegrees": "مجموع درجات قوس الدائرة = 360°",
+  "@formulaCircleDegrees": {},
+  "formulaCircleRadians": "مجموع الراديان لقوس الدائرة = 2π",
+  "@formulaCircleRadians": {},
+  "formulaTriangleSum": "مجموع قياسات زوايا المثلث = 180°",
+  "@formulaTriangleSum": {},
+  "desmosRegressionTip": "الانحدار الخطي: أضف جدولاً واكتب y1 ~ mx1 + b لإيجاد الميل ونقطة التقاطع الصادي فوراً.",
+  "@desmosRegressionTip": {},
+  "desmosIntersectionTip": "نقاط التقاطع: ارسم المعادلتين واضغط على النقطة الرمادية لإظهار إحداثيات (x, y) فوراً.",
+  "@desmosIntersectionTip": {},
+  "desmosVertexTip": "رأس القطع المكافئ: ارسم y = ax^2 + bx + c واضغط على القمة/القاع لإظهار إحداثيات الرأس والقيمة العظمى/الصغرى.",
+  "@desmosVertexTip": {},
+  "desmosSlidersTip": "منزلقات المتغيرات: اكتب معادلة بمتغير مثل k واضغط add slider لتجربة الخيارات بصرياً.",
+  "@desmosSlidersTip": {},
+  "gauntletTitle": "تحدي تصفير الأخطاء",
+  "@gauntletTitle": {},
+  "gauntletSubtitle": "اقضِ على أخطائك المتراكمة وثبّت مفاهيمك للوصول للإتقان!",
+  "@gauntletSubtitle": {},
+  "gauntletRemainingLabel": "متبقي {count} أخطاء للتصفير",
+  "@gauntletRemainingLabel": {},
+  "gauntletStartBtn": "بدء التحدي",
+  "@gauntletStartBtn": {},
+  "gauntletCriticalBadge": "{count} أخطاء حرجة",
+  "@gauntletCriticalBadge": {},
+  "sprintTitle": "سبرنت سريع (5 أسئلة)",
+  "@sprintTitle": {},
+  "sprintSubtitle": "جلسة تدريب سريعة في 7 دقائق",
+  "@sprintSubtitle": {},
+  "sprintStartBtn": "سبرنت 5 أسئلة",
+  "@sprintStartBtn": {},
+  "sortDefault": "الافتراضي",
+  "@sortDefault": {},
+  "sortMostFailed": "الأكثر تكراراً",
+  "@sortMostFailed": {},
+  "sortNewest": "الأحدث",
+  "@sortNewest": {},
+  "sortPoints": "النقاط",
+  "@sortPoints": {},
+  "mistakeSlayedSuccess": "تم القضاء على الخطأ بنجاح! 🎯",
+  "@mistakeSlayedSuccess": {},
+  "@academicMomentumTitle": {},
+  "streakDaysCount": "توالي {count} أيام",
+  "@streakDaysCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "streakTodayDone": "مكتمل اليوم! الشعلة مستمرة 🔥",
+  "@streakTodayDone": {},
+  "streakTodayPending": "أكمل نشاطاً أو امتحاناً اليوم لتمديد سلسلتك!",
+  "@streakTodayPending": {},
+  "longestStreakRecord": "الأفضل: {count}ي",
+  "@longestStreakRecord": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "predictedSatScoreTitle": "الدرجة التقديرية (SAT Math)",
+  "@predictedSatScoreTitle": {},
+  "predictedSatScoreBand": "{low} - {high}",
+  "@predictedSatScoreBand": {
+    "placeholders": {
+      "low": {
+        "type": "int"
+      },
+      "high": {
+        "type": "int"
+      }
+    }
+  },
+  "predictedSatScoreNeedsMore": "أدِّ امتحانين على الأقل لإظهار نطاق درجاتك المتوقعة",
+  "@predictedSatScoreNeedsMore": {},
+  "predictedSatScoreSubtitle": "مبنية على أدائك في أحدث التقييمات",
+  "@predictedSatScoreSubtitle": {},
+  "earnedBadgesTitle": "شارات الإتقان",
+  "@earnedBadgesTitle": {},
+  "badgeGauntletSlayer": "قاهر الأخطاء",
+  "@badgeGauntletSlayer": {},
+  "badgeGauntletSlayerDesc": "صفّر جميع الأخطاء غير المحلولة في بنك الأخطاء.",
+  "@badgeGauntletSlayerDesc": {},
+  "badgeConsistencyKing": "بطل الاستمرارية",
+  "@badgeConsistencyKing": {},
+  "badgeConsistencyKingDesc": "حافظ على سلسلة مذاكرة متواصلة لمدة 5 أيام.",
+  "@badgeConsistencyKingDesc": {},
+  "badgeSpeedDemon": "الفارس السريع",
+  "@badgeSpeedDemon": {},
+  "badgeSpeedDemonDesc": "أنهى امتحاناً كاملاً في أقل من نصف الوقت بدرجة ≥ 85%.",
+  "@badgeSpeedDemonDesc": {},
+  "badgeHighAchiever": "النخبة الأكاديمية",
+  "@badgeHighAchiever": {},
+  "badgeHighAchieverDesc": "حقق متوسط درجات إجمالي بنسبة 90% أو أعلى.",
+  "@badgeHighAchieverDesc": {},
+  "badgeLockedStatus": "مقفلة",
+  "@badgeLockedStatus": {},
+  "badgeUnlockedStatus": "مستحقة!",
+  "@badgeUnlockedStatus": {},
+  "viewAllBadges": "عرض الكل",
+  "@viewAllBadges": {},
+  "allBadgesDialogTitle": "أوسمة وشارات الإتقان الأكاديمية",
+  "@allBadgesDialogTitle": {},
+  "dockCalculatorTooltip": "تثبيت الآلة الحاسبة في اللوحة الجانبية",
+  "undockCalculatorTooltip": "فك التثبيت وجعلها نافذة حرة عائمة",
+  "utilityDockTitle": "أدوات الاختبار",
+  "collapseToolsTooltip": "طي لوحة الأدوات",
+  "expandToolsTooltip": "فتح لوحة الأدوات",
+  "dockTabCalculator": "الآلة الحاسبة",
+  "dockTabFormulas": "ورقة القوانين",
+  "savedQuestionsVaultTitle": "خزنة الأسئلة المفضلة",
+  "savedQuestionsVaultSubtitle": "مراجعة وحل الأسئلة المميزة والمثبتة بذكاء",
+  "saveToVault": "حفظ في الخزنة",
+  "removeFromVault": "إزالة من الخزنة",
+  "savedToVaultSuccess": "تم حفظ السؤال في خزنتك الشخصية ⭐",
+  "removedFromVaultSuccess": "تمت إزالة السؤال من الخزنة",
+  "personalNote": "ملاحظتي الشخصية",
+  "addPersonalNote": "إضافة ملاحظة شخصية",
+  "editPersonalNote": "تعديل الملاحظة",
+  "addNoteHint": "اكتب تذكيراً أو حيلة خاصة لحل هذه المسألة...",
+  "saveNote": "حفظ الملاحظة",
+  "difficultyRatingTitle": "ما مدى صعوبة السؤال بالنسبة لك؟",
+  "difficultyEasy": "سهل",
+  "difficultyMedium": "متوسط",
+  "difficultyHard": "صعب",
+  "difficultyEasyDesc": "متقن • يتباعد موعد ظهوره",
+  "difficultyMediumDesc": "يُراجع لاحقاً",
+  "difficultyHardDesc": "يتكرر في نفس الجلسة",
+  "startAnkiDrill": "بدء تدريب الاستدعاء النشط",
+  "ankiDrillTitle": "تدريب الاستدعاء النشط",
+  "checkAnswer": "تحقق من الإجابة",
+  "ankiDrillCompletedTitle": "اكتملت جلسة التدريب بنجاح! 🎯",
+  "ankiDrillCompletedDesc": "أتممت مراجعة كافة الأسئلة في قائمة التكرار المتباعد.",
+  "drillTotalReviewed": "الأسئلة المُراجعة",
+  "drillMasteredCount": "المتقنة (سهل)",
+  "drillHardRepeated": "المُعادة (صعب)",
+  "finishDrill": "إنهاء التدريب",
+  "emptyVaultTitle": "خزنتك فارغة حالياً",
+  "emptyVaultSubtitle": "احفظ أي سؤال يعجبك أو تجده صعباً أثناء الامتحانات للتدريب عليه بنمط Anki.",
+  "bluebookReviewGrid": "شبكة مراجعة الأسئلة",
+  "unansweredQuestionsWarning": "تنبيه: لديك {count} سؤال بدون إجابة!",
+  "@unansweredQuestionsWarning": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "unansweredQuestionsDesc": "هل أنت متأكد من رغبتك في تسليم الامتحان دون الإجابة عليها؟",
+  "flaggedForReview": "مُعلَّم للمراجعة",
+  "answeredStatus": "تمت إجابته",
+  "unansweredStatus": "فارغ لم يُجب",
+  "allDifficulties": "الكل",
+  "searchSavedQuestions": "ابحث في الأسئلة أو الملاحظات...",
+  "mistakeVaultTitle": "دفتر الأخطاء التكتيكي",
+  "saveToMistakeVaultAction": "حفظ في دفتر الأخطاء",
+  "savedToMistakeVaultSuccess": "تم الحفظ في دفتر الأخطاء التكتيكي",
+  "smartReattemptAction": "إعادة الحل الذكي",
+  "filterNeedsReview": "بحاجة لمراجعة",
+  "filterMastered": "تم إتقانها",
+  "filterAllQuestions": "جميع الأسئلة",
+  "markAsMasteredAction": "أتقنت السؤال",
+  "markedAsMasteredSuccess": "رائع! تم تحديد السؤال كـ متقن",
+  "unmarkAsMasteredAction": "إعادة للمراجعة",
+  "previousExamMistakeBadge": "خطأ في الامتحان السابق",
+  "masteredBadge": "تم الإتقان",
+  "checkAnswerButton": "تحقق من الإجابة",
+  "correctAnswerCelebration": "رائع جداً! إجابتك صحيحة 🎉",
+  "wrongAnswerNotice": "إجابة غير صحيحة. الإجابة الصحيحة كانت",
+  "pdfExamQuestionNotice": "مسألة رياضية من اختبار PDF",
+  "tacticalMistakeVaultSubtitle": "راجع وثبّت الأسئلة التي تعثرت بها لتضمن الدرجة النهائية.",
+  "startPracticeSession": "بدء جلسة التدريب",
+  "practiceSessionTitle": "جلسة التدريب والمراجعة",
+  "questionCounter": "السؤال {current} من {total}",
+  "@questionCounter": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "finishSession": "إنهاء الجلسة",
+  "practiceCompleteTitle": "اكتملت جلسة التدريب! 🎉",
+  "practiceCompleteSubtitle": "راجعت {count} أسئلة بنجاح. استمر في التدريب لتثبيت كل أفكار الامتحان.",
+  "@practiceCompleteSubtitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "solveQuestionAction": "حل المسألة",
+  "filterDueToday": "مستحق اليوم",
+  "filterUpcoming": "مجدول لاحقاً",
+  "startDuePracticeAction": "بدء مراجعات اليوم ({count})",
+  "@startDuePracticeAction": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "startDuePracticeEmpty": "لا توجد مراجعات مستحقة اليوم",
+  "noDueTodayTitle": "أحسنت! لا توجد مراجعات مستحقة اليوم 🎉",
+  "noDueTodaySubtitle": "أنجزت جميع الأسئلة المستحقة لهذا اليوم. راحة تامة، وموعدك القادم مجدول تلقائياً.",
+  "leitnerScheduleTitle": "جدول التكرار المتباعد (1 - 3 - 6 أيام)",
+  "leitnerBox1Title": "يومي (1 يوم)",
+  "leitnerBox2Title": "كل 3 أيام",
+  "leitnerBox3Title": "كل 6 أيام",
+  "rateDifficultyPrompt": "حدد موعد المراجعة القادمة:",
+  "rateHard1Day": "صعب (غداً - يوم 1)",
+  "rateMedium3Days": "متوسط (بعد 3 أيام)",
+  "rateEasy6Days": "سهل (بعد 6 أيام)",
+  "reviewDueTodayBadge": "مستحق اليوم ⚡",
+  "reviewDueTomorrowBadge": "المراجعة: غداً",
+  "reviewDueInDaysBadge": "المراجعة: بعد {days} أيام",
+  "@reviewDueInDaysBadge": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "practiceCompletedDueNotice": "تم إنهاء مراجعات اليوم بنجاح! تم جدولة المواعيد القادمة.",
+  "backToVaultAction": "العودة للحقيبة",
+  "demoQuickAccessHeader": "المعاينة السريعة • الدخول بضغطة زر",
+  "demoLiveBadge": "LIVE DEMO",
+  "demoSelectAccountPrompt": "اختر الحساب لتسجيل الدخول الفوري دون كتابة بيانات:",
+  "demoTeacherLoginTitle": "دخول كـ مدرس (لوحة التحكم والواتساب)",
+  "demoTeacherLoginSubtitle": "إنشاء كويزات، بنك الأسئلة، إرسال الدرجات لواتساب ولي الأمر",
+  "demoStudentTestLoginTitle": "دخول كـ طالب (حل امتحان الـ SAT بـ Desmos)",
+  "demoStudentTestLoginSubtitle": "تجربة حاسبة Desmos المدمجة والمسودة وورقة القوانين",
+  "demoStudentMistakesLoginTitle": "دخول كـ طالب (دفتر الأخطاء والـ Anki Drills)",
+  "demoStudentMistakesLoginSubtitle": "استكشاف التمرن على المسائل السابقة بنظام الفلاش كاردز",
+  "demoBannerTitle": "وضع المعاينة التفاعلية للمدرسين • VIP Live Demo",
+  "demoBannerSubtitle": "استكشف بيئة الامتحانات المتقدمة، حاسبة Desmos، بنك الأسئلة، وتقارير أولياء الأمور.",
+  "demoBannerCta": "تفعيل نسختك الخاصة • تواصل معنا",
+  "newFileBadge": "جديد",
+  "whatsappGatewayDialogTitle": "إعدادات بوابة واتساب الآلية",
+  "whatsappAutoDispatchToggleTitle": "الإرسال التلقائي للنتائج فور التسليم",
+  "whatsappAutoDispatchToggleSubtitle": "إرسال كشف الدرجات لواتساب ولي الأمر فوراً بدون تدخل يدوي",
+  "whatsappGatewayConnectedStatus": "متصل وجاهز للإرسال التلقائي",
+  "whatsappGatewayQrReadyStatus": "بانتظار مسح رمز الاستجابة (QR)",
+  "whatsappGatewayDisconnectedStatus": "البوابة غير متصلة",
+  "whatsappConnectedPhoneLabel": "الرقم المتصل",
+  "whatsappScanQrInstruction": "افتح واتساب على الهاتف المخصص > الأجهزة المرتبطة > امسح الرمز أدناه للربط",
+  "whatsappQrAutoRefreshNote": "يتم تحديث الرمز دورياً حتى إتمام الربط بنجاح",
+  "whatsappSentTodayMetric": "أُرسل اليوم",
+  "whatsappPendingQueueMetric": "في الانتظار",
+  "whatsappFailedMetric": "أخطاء الإرسال",
+  "whatsappGatewaySettingsTooltip": "إعدادات بوابة واتساب للإرسال التلقائي",
+  "whatsappAutoDispatchActiveBannerTitle": "الإرسال التلقائي لواتساب ولي الأمر نشط",
+  "whatsappAutoDispatchActiveBannerSubtitle": "فور تسليم الطالب لاختباره، يُرسل تقرير الدرجات لواتساب ولي الأمر مباشرة دون الحاجة لأي تدخل يدوي",
+  "configureGatewayAction": "إعدادات البوابة"
 }

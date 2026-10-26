@@ -45,8 +45,11 @@ class TenantResolver {
     // 2. Check host and subdomain
     final host = uri.host.toLowerCase();
 
-    // Isolated Testing / Sandbox Environment (e.g. antounios-test.web.app)
-    if (host.contains('antounios-test') || host.contains('staging')) {
+    // Isolated Testing / Sandbox Environment (e.g. demo.edsentre.com, antounios-test.web.app)
+    if (host.contains('demo') ||
+        host.contains('antounios-test') ||
+        host.contains('staging') ||
+        host.contains('sandbox')) {
       return testTenantId;
     }
 
@@ -73,5 +76,11 @@ class TenantResolver {
     }
     final resolvedId = resolveTenantId(currentUri: currentUri);
     return TenantRegistry.resolve(resolvedId);
+  }
+
+  /// Checks whether the active domain or request is running in Demo Sandbox mode
+  static bool isDemoMode({Uri? currentUri}) {
+    final id = resolveTenantId(currentUri: currentUri);
+    return id == testTenantId;
   }
 }

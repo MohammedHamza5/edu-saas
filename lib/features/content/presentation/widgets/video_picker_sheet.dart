@@ -198,7 +198,8 @@ class _VideoPickerSheetState extends State<VideoPickerSheet> {
                       currentGroupId: widget.currentGroupId,
                       currentGroupName: widget.currentGroupName,
                     );
-                    if (picked != null && context.mounted) {
+                    if (!context.mounted) return;
+        if (picked != null) {
                       final mapped = ContentEntity(
                         id: picked.id,
                         tenantId: picked.tenantId,
@@ -330,7 +331,8 @@ class _VideoPickerSheetState extends State<VideoPickerSheet> {
                                 currentGroupId: widget.currentGroupId,
                                 currentGroupName: widget.currentGroupName,
                               );
-                              if (picked != null && context.mounted) {
+                              if (!context.mounted) return;
+        if (picked != null) {
                                 final mapped = ContentEntity(
                                   id: picked.id,
                                   tenantId: picked.tenantId,

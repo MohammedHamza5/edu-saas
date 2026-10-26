@@ -4,7 +4,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
-import '../../../videos/presentation/utils/folder_color_palette.dart';
+import '../../../../core/theme/folder_color_palette.dart';
 import '../../domain/entities/material_folder_entity.dart';
 
 class MaterialFolderResult {

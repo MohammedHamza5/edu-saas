@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../domain/entities/notification_entity.dart';
+import '../extensions/notification_ui_extensions.dart';
 
 class NotificationTile extends StatefulWidget {
   final NotificationEntity notification;

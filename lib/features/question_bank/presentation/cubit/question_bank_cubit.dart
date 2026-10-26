@@ -690,4 +690,9 @@ class QuestionBankCubit extends Cubit<QuestionBankState> {
       emit(cur.copyWith(clearExtractionResult: true));
     }
   }
+
+  /// Fetches active groups for exam deployment/assignment
+  Future<List<Map<String, dynamic>>> getActiveGroups() async {
+    return repository.getActiveGroups();
+  }
 }

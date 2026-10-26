@@ -289,4 +289,92 @@ class AppFeedback {
       ),
     );
   }
+
+  /// Shows an informational feedback banner.
+  static void showInfo(
+    BuildContext context,
+    String message, {
+    String? title,
+    Duration duration = const Duration(seconds: 3),
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.hideCurrentSnackBar();
+
+    messenger.showSnackBar(
+      SnackBar(
+        elevation: 6,
+        behavior: SnackBarBehavior.floating,
+        duration: duration,
+        margin: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.s16,
+          vertical: AppSpacing.s16,
+        ),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.s16,
+          vertical: AppSpacing.s12,
+        ),
+        backgroundColor: isDark ? const Color(0xFF27272A) : Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+          side: BorderSide(
+            color: isDark
+                ? const Color(0xFF3B82F6).withValues(alpha: 0.5)
+                : const Color(0xFF93C5FD),
+            width: 1.2,
+          ),
+        ),
+        content: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.s6),
+              decoration: BoxDecoration(
+                color: const Color(0xFF3B82F6).withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.info_outline_rounded,
+                color: Color(0xFF3B82F6),
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.s12),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (title != null) ...[
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: isDark ? Colors.white : AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                  ],
+                  Text(
+                    message,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 12,
+                      height: 1.35,
+                      color: isDark
+                          ? AppColors.textSecondaryDark
+                          : AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

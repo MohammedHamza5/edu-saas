@@ -169,16 +169,16 @@ class _MaterialViewerSheetState extends State<MaterialViewerSheet> {
 
   Future<void> _copyUrl() async {
     if (_signedUrl == null) return;
+    final l10n = context.l10n;
     await Clipboard.setData(ClipboardData(text: _signedUrl!));
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: AppColors.success,
-          content: Text(context.l10n.secureUrlCopied),
-          duration: const Duration(seconds: 2),
-        ),
-      );
-    }
+    if (!mounted || !context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: AppColors.success,
+        content: Text(l10n.secureUrlCopied),
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   String _resolveWatermarkText() {

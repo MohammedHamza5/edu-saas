@@ -1,11 +1,18 @@
-import '../../../../core/di/injection_container.dart';
 import '../../../../core/utils/app_logger.dart';
 import '../entities/notification_entity.dart';
+import '../repositories/notifications_repository.dart';
 
 /// Central domain service to dispatch automatic event-driven notifications
 /// to students and parents across the application without coupling UI logic.
 class NotificationDispatcher {
   const NotificationDispatcher._();
+
+  static NotificationsRepository? _repository;
+
+  /// Injects the notification repository at composition root without circular dependencies.
+  static void initialize(NotificationsRepository repository) {
+    _repository = repository;
+  }
 
   /// 1. Notify students when a new lecture / video / lesson is published
   static Future<void> notifyNewLecture({
@@ -15,7 +22,11 @@ class NotificationDispatcher {
     String? contentType,
   }) async {
     try {
-      final notifRepo = InjectionContainer.notificationsRepository;
+      final notifRepo = _repository;
+      if (notifRepo == null) {
+        AppLogger.w('NotificationDispatcher', 'Repository not initialized');
+        return;
+      }
       await notifRepo.dispatchNotification(
         title: 'محاضرة جديدة: $title',
         body: 'تمت إضافة محاضرة جديدة "$title" إلى مادتك الدراسية. يمكنك الآن مشاهدة الشرح وحل التدريبات.',
@@ -41,7 +52,11 @@ class NotificationDispatcher {
     int? durationMinutes,
   }) async {
     try {
-      final notifRepo = InjectionContainer.notificationsRepository;
+      final notifRepo = _repository;
+      if (notifRepo == null) {
+        AppLogger.w('NotificationDispatcher', 'Repository not initialized');
+        return;
+      }
       await notifRepo.dispatchNotification(
         title: 'اختبار جديد: $title',
         body: 'تم نشر اختبار جديد "$title". تفضل بالدخول للاختبار وأداء الأسئلة في الوقت المحدد.',
@@ -68,7 +83,11 @@ class NotificationDispatcher {
     int? maxScore,
   }) async {
     try {
-      final notifRepo = InjectionContainer.notificationsRepository;
+      final notifRepo = _repository;
+      if (notifRepo == null) {
+        AppLogger.w('NotificationDispatcher', 'Repository not initialized');
+        return;
+      }
       final dueStr = dueAt != null ? ' قبل ${dueAt.day}/${dueAt.month}' : '';
       await notifRepo.dispatchNotification(
         title: 'واجب جديد: $title',
@@ -98,7 +117,11 @@ class NotificationDispatcher {
     required String assignmentId,
   }) async {
     try {
-      final notifRepo = InjectionContainer.notificationsRepository;
+      final notifRepo = _repository;
+      if (notifRepo == null) {
+        AppLogger.w('NotificationDispatcher', 'Repository not initialized');
+        return;
+      }
       final feedbackStr = feedback != null && feedback.trim().isNotEmpty
           ? '\nملاحظات المعلم: ${feedback.trim()}'
           : '';
@@ -127,7 +150,11 @@ class NotificationDispatcher {
     required String groupId,
   }) async {
     try {
-      final notifRepo = InjectionContainer.notificationsRepository;
+      final notifRepo = _repository;
+      if (notifRepo == null) {
+        AppLogger.w('NotificationDispatcher', 'Repository not initialized');
+        return;
+      }
       await notifRepo.dispatchNotification(
         title: 'رصد الحضور — $sessionDate',
         body: 'تم تسجيل حالة حضورك لمحاضرة ($sessionDate) كـ "$statusLabel".',
@@ -155,7 +182,11 @@ class NotificationDispatcher {
     required String examId,
   }) async {
     try {
-      final notifRepo = InjectionContainer.notificationsRepository;
+      final notifRepo = _repository;
+      if (notifRepo == null) {
+        AppLogger.w('NotificationDispatcher', 'Repository not initialized');
+        return;
+      }
       await notifRepo.dispatchNotification(
         title: 'نتيجة الاختبار: $examTitle',
         body: 'تم رصد نتيجتك في اختبار "$examTitle": $score من $maxScore ($percentage%). تفقد نموذج الإجابة للمراجعة.',

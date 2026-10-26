@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/config/app_config.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_error_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
-import '../../domain/entities/question_revision_entity.dart';
-import '../../domain/entities/validation_issue_entity.dart';
 import '../cubit/question_bank_cubit.dart';
 import '../cubit/question_bank_state.dart';
+import '../dialogs/review_console_dialogs.dart';
 import '../widgets/math_content_view.dart';
 import '../widgets/question_display_widgets.dart';
+import '../widgets/review_action_bar.dart';
+import '../widgets/review_evidence_pane.dart';
+import '../widgets/review_history_metadata_section.dart';
 
 class ReviewConsolePage extends StatefulWidget {
   final String questionId;
@@ -145,10 +145,10 @@ class _ReviewConsolePageState extends State<ReviewConsolePage> {
                 ),
 
                 // Bottom Collapsible Section: History & Confidence
-                _buildHistoryAndMetadataSection(context, state),
+                ReviewHistoryMetadataSection(state: state),
 
                 // Bottom Action Bar
-                _buildActionBar(context, state),
+                ReviewActionBar(state: state),
               ],
             ),
           );
@@ -377,7 +377,11 @@ class _ReviewConsolePageState extends State<ReviewConsolePage> {
                     decoration: isAcked ? TextDecoration.lineThrough : null,
                   ),
                 ),
-                onPressed: () => _showIssueAcknowledgmentDialog(context, issue),
+                onPressed: () =>
+                    ReviewConsoleDialogs.showIssueAcknowledgmentDialog(
+                  context,
+                  issue,
+                ),
               );
             }).toList(),
           ),
@@ -398,7 +402,13 @@ class _ReviewConsolePageState extends State<ReviewConsolePage> {
             return Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(flex: 5, child: _buildEvidencePane(context, state)),
+                Expanded(
+                  flex: 5,
+                  child: ReviewEvidencePane(
+                    state: state,
+                    resolveStorageUrl: _resolveStorageUrl,
+                  ),
+                ),
                 VerticalDivider(
                   width: 1,
                   color: theme.colorScheme.outlineVariant,
@@ -412,7 +422,10 @@ class _ReviewConsolePageState extends State<ReviewConsolePage> {
               children: [
                 _buildPreviewPane(context, state),
                 const Divider(height: 32),
-                _buildEvidencePane(context, state),
+                ReviewEvidencePane(
+                  state: state,
+                  resolveStorageUrl: _resolveStorageUrl,
+                ),
               ],
             );
           }
@@ -470,192 +483,6 @@ class _ReviewConsolePageState extends State<ReviewConsolePage> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildEvidencePane(
-    BuildContext context,
-    QuestionBankReviewLoaded state,
-  ) {
-    final theme = Theme.of(context);
-    final l10n = context.l10n;
-    final rev = state.revision;
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppSpacing.s20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l10n.questionDetailsAndSource,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.s12),
-
-          // High-level human readable details
-          _buildInfoTile(l10n.questionSourceLabel, state.question.sourceLabel),
-          _buildInfoTile(
-            l10n.questionTypeLabel,
-            state.question.questionType == 'multiple_choice'
-                ? l10n.typeMultipleChoice
-                : l10n.typeGridIn,
-          ),
-          _buildInfoTile(
-            l10n.questionStatusLabel,
-            _getLocalizedStatus(context, state.question.status),
-          ),
-          if (rev != null) ...[
-            _buildInfoTile(l10n.answerKeyLabel, rev.answerKey ?? 'N/A'),
-            _buildInfoTile(
-              l10n.answerStatusLabel,
-              _getLocalizedAnswerStatus(context, rev.answerStatus),
-            ),
-            Builder(
-              builder: (context) {
-                String? rawCrop =
-                    rev.provenance['crop_url']?.toString() ??
-                    rev.provenance['image_url']?.toString();
-
-                if (rawCrop == null || rawCrop.isEmpty) {
-                  for (final block in rev.stemBlocks) {
-                    final type = block['type']?.toString();
-                    if (type == 'asset' || type == 'image') {
-                      final val = block['crop_asset'] ??
-                          block['path'] ??
-                          block['url'] ??
-                          block['value'];
-                      if (val != null && val.toString().isNotEmpty) {
-                        rawCrop = val.toString();
-                        break;
-                      }
-                    } else if (QuestionStemView.isImageUrl(block['value']?.toString() ?? '')) {
-                      rawCrop = block['value'].toString();
-                      break;
-                    }
-                  }
-                }
-
-                if ((rawCrop == null || rawCrop.isEmpty) &&
-                    QuestionStemView.isImageUrl(rev.stemText.trim())) {
-                  rawCrop = rev.stemText.trim();
-                }
-
-                final cropUrl = _resolveStorageUrl(rawCrop);
-                if (cropUrl == null || cropUrl.isEmpty) {
-                  return const SizedBox.shrink();
-                }
-
-                return Padding(
-                  padding: const EdgeInsets.only(
-                    top: AppSpacing.s16,
-                    bottom: AppSpacing.s16,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.picture_as_pdf_outlined,
-                            size: 16,
-                            color: theme.colorScheme.primary,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            l10n.originalEvidence,
-                            style: theme.textTheme.labelLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: theme.colorScheme.primary,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: AppSpacing.s8),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                        child: Container(
-                          width: double.infinity,
-                          constraints: const BoxConstraints(maxHeight: 320),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                            border: Border.all(color: theme.colorScheme.outlineVariant),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withAlpha(12),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: CachedNetworkImage(
-                            imageUrl: cropUrl,
-                            memCacheWidth: 800,
-                            memCacheHeight: 800,
-                            maxWidthDiskCache: 1200,
-                            fit: BoxFit.contain,
-                            placeholder: (_, __) => const Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(24),
-                                child: CircularProgressIndicator(strokeWidth: 2),
-                              ),
-                            ),
-                            errorWidget: (_, __, ___) => Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.broken_image_outlined, color: AppColors.error),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      l10n.imageNotAccessible,
-                                      style: const TextStyle(color: AppColors.error, fontSize: 12),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-
-            // Collapsible technical details for developers/auditors
-            Theme(
-              data: theme.copyWith(dividerColor: Colors.transparent),
-              child: ExpansionTile(
-                tilePadding: EdgeInsets.zero,
-                title: Text(
-                  l10n.technicalAuditDetails,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                children: [
-                  _buildInfoTile(l10n.questionIdLabel, state.question.id),
-                  _buildInfoTile(
-                    l10n.activeRevisionLabel,
-                    'v${rev.revNo} (${rev.createdVia ?? 'pipeline'})',
-                  ),
-                  _buildInfoTile(l10n.contentHashLabel, rev.contentHash),
-                  if (rev.sourceRefs.isNotEmpty)
-                    _buildInfoTile(
-                      l10n.sourceRefsLabel,
-                      rev.sourceRefs.join(', '),
-                    ),
-                ],
-              ),
-            ),
-          ],
-        ],
       ),
     );
   }
@@ -954,7 +781,8 @@ class _ReviewConsolePageState extends State<ReviewConsolePage> {
                 Align(
                   alignment: AlignmentDirectional.centerEnd,
                   child: TextButton.icon(
-                    onPressed: () => _showStemEditDialog(context, rev),
+                    onPressed: () =>
+                        ReviewConsoleDialogs.showStemEditDialog(context, rev),
                     icon: const Icon(Icons.edit_outlined, size: 14),
                     label: Text(l10n.editStemAction),
                     style: TextButton.styleFrom(
@@ -995,272 +823,6 @@ class _ReviewConsolePageState extends State<ReviewConsolePage> {
     );
   }
 
-  /// ديالوج تعديل نص السؤال كاملاً
-  void _showStemEditDialog(
-    BuildContext context,
-    QuestionRevisionEntity rev,
-  ) {
-    // نجمع كل blocks نصية في controller واحد للتعديل السريع
-    final allText = rev.stemBlocks
-        .where((Map<String, dynamic> b) => (b['type'] ?? 'text') == 'text')
-        .map((Map<String, dynamic> b) => b['value']?.toString() ?? '')
-        .join('\n')
-        .trim();
-
-    final firstBlock = rev.stemBlocks.isNotEmpty
-        ? rev.stemBlocks[0]['id']?.toString() ?? 'stem_1'
-        : 'stem_1';
-
-    _showBlockEditDialog(context, firstBlock, allText);
-  }
-
-  Widget _buildHistoryAndMetadataSection(
-    BuildContext context,
-    QuestionBankReviewLoaded state,
-  ) {
-    final theme = Theme.of(context);
-    final l10n = context.l10n;
-
-    if (state.revisionHistory.isEmpty) return const SizedBox.shrink();
-
-    return Container(
-      height: 70,
-      color: theme.colorScheme.surfaceContainerHighest.withAlpha(30),
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.s16,
-        vertical: AppSpacing.s8,
-      ),
-      child: Row(
-        children: [
-          Text(
-            l10n.revisionHistoryTitle,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-          ),
-          const SizedBox(width: AppSpacing.s12),
-          Expanded(
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: state.revisionHistory.length,
-              itemBuilder: (context, index) {
-                final rev = state.revisionHistory[index];
-                final isCurrent = rev.id == state.revision?.id;
-
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: ActionChip(
-                    avatar: CircleAvatar(
-                      radius: 8,
-                      backgroundColor: isCurrent
-                          ? AppColors.primary
-                          : Colors.grey,
-                      child: Text(
-                        '${rev.revNo}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 9,
-                        ),
-                      ),
-                    ),
-                    label: Text(
-                      'v${rev.revNo} ${rev.createdVia ?? ''}',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: isCurrent
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                      ),
-                    ),
-                    onPressed: isCurrent
-                        ? null
-                        : () => context
-                              .read<QuestionBankCubit>()
-                              .restoreRevision(rev.id),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoTile(String title, String value) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.s4),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-          SelectableText(
-            value,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _getLocalizedStatus(BuildContext context, String status) {
-    final l10n = context.l10n;
-    switch (status) {
-      case 'published':
-        return l10n.statusPublished;
-      case 'approved':
-        return l10n.statusApproved;
-      case 'review_required':
-        return l10n.statusReviewRequired;
-      case 'quarantined':
-        return l10n.statusQuarantined;
-      default:
-        return l10n.statusExtracted;
-    }
-  }
-
-  String _getLocalizedAnswerStatus(BuildContext context, String? answerStatus) {
-    final l10n = context.l10n;
-    switch (answerStatus) {
-      case 'teacher_confirmed':
-        return l10n.teacherConfirmedStatus;
-      case 'solver_verified':
-        return l10n.solverVerifiedStatus;
-      case 'source_extracted':
-        return l10n.sourceExtractedStatus;
-      default:
-        return answerStatus ?? 'N/A';
-    }
-  }
-
-  Widget _buildActionBar(BuildContext context, QuestionBankReviewLoaded state) {
-    final l10n = context.l10n;
-    final rev = state.revision;
-    final isApproved = state.question.isApproved || state.question.isPublished;
-    final isPublished = state.question.isPublished;
-
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.s16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha(10),
-            offset: const Offset(0, -2),
-            blurRadius: 4,
-          ),
-        ],
-      ),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final isStacked = constraints.maxWidth < 780;
-
-          final structuralActions = Wrap(
-            spacing: AppSpacing.s8,
-            runSpacing: AppSpacing.s8,
-            children: [
-              OutlinedButton.icon(
-                onPressed: () => _confirmMerge(context),
-                icon: const Icon(Icons.merge_type, size: 16),
-                label: Text(l10n.mergeWithNextAction),
-              ),
-              const SizedBox(width: AppSpacing.s8),
-              OutlinedButton.icon(
-                onPressed: () => _confirmSplit(context),
-                icon: const Icon(Icons.call_split, size: 16),
-                label: Text(l10n.splitQuestionAction),
-              ),
-              const SizedBox(width: AppSpacing.s8),
-              OutlinedButton.icon(
-                onPressed: () => _confirmMarkUnreadable(context),
-                icon: const Icon(Icons.visibility_off, size: 16),
-                label: Text(l10n.markUnreadableAction),
-              ),
-            ],
-          );
-
-          final primaryActions = Wrap(
-            spacing: AppSpacing.s12,
-            runSpacing: AppSpacing.s8,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              if (!isApproved) ...[
-                AppButton(
-                  text: l10n.approveRevision,
-                  icon: Icons.thumb_up,
-                  isLoading: state.isActionLoading,
-                  onPressed: state.hasBlockers || rev == null
-                      ? null
-                      : () {
-                          context.read<QuestionBankCubit>().approveRevision(
-                            revisionId: rev.id,
-                            contentHash: rev.contentHash,
-                          );
-                        },
-                ),
-              ],
-              if (!isPublished) ...[
-                AppButton(
-                  text: l10n.publishToStudents,
-                  icon: Icons.send,
-                  isLoading: state.isActionLoading,
-                  onPressed: !isApproved || state.hasBlockers || rev == null
-                      ? null
-                      : () {
-                          context.read<QuestionBankCubit>().publishRevision(
-                            revisionId: rev.id,
-                          );
-                        },
-                ),
-              ] else ...[
-                Chip(
-                  avatar: const Icon(
-                    Icons.check,
-                    color: AppColors.success,
-                    size: 18,
-                  ),
-                  label: Text(
-                    l10n.statusPublished,
-                    style: const TextStyle(
-                      color: AppColors.success,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  backgroundColor: AppColors.successLight,
-                ),
-              ],
-            ],
-          );
-
-          if (isStacked) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                primaryActions,
-                const SizedBox(height: AppSpacing.s12),
-                structuralActions,
-              ],
-            );
-          }
-
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              structuralActions,
-              primaryActions,
-            ],
-          );
-        },
-      ),
-    );
-  }
-
   String? _resolveStorageUrl(String? raw) {
     if (raw == null || raw.isEmpty) return null;
     if (raw.startsWith('http://') || raw.startsWith('https://')) return raw;
@@ -1280,204 +842,4 @@ class _ReviewConsolePageState extends State<ReviewConsolePage> {
 
     return '${AppConfig.supabaseUrl}/storage/v1/object/public/qb-documents/$clean';
   }
-
-  void _showIssueAcknowledgmentDialog(
-    BuildContext context,
-    ValidationIssueEntity issue,
-  ) {
-    final l10n = context.l10n;
-    final locale = Localizations.localeOf(context).languageCode;
-
-    showDialog<void>(
-      context: context,
-      builder: (dialogCtx) => AlertDialog(
-        title: Text('${l10n.confirmIssueDialogTitle}: ${issue.ruleId}'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(issue.getLocalizedMessage(locale)),
-            const SizedBox(height: 12),
-            Text(
-              l10n.confirmIssuePrompt,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogCtx),
-            child: Text(l10n.cancelAction),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(dialogCtx);
-              context.read<QuestionBankCubit>().acknowledgeIssue(issue.id);
-            },
-            child: Text(l10n.acknowledgeIssueAction),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showBlockEditDialog(
-    BuildContext context,
-    String blockId,
-    String initialValue,
-  ) {
-    final l10n = context.l10n;
-    final isCropPath = initialValue.startsWith('crops/');
-    final textController = TextEditingController(
-      text: isCropPath ? '' : initialValue,
-    );
-    String selectedReason = 'ocr_error';
-
-    showDialog<void>(
-      context: context,
-      builder: (dialogCtx) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: Text('${l10n.editBlockDialogTitle} [$blockId]'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextField(
-                controller: textController,
-                maxLines: 4,
-                decoration: InputDecoration(
-                  border: const OutlineInputBorder(),
-                  labelText: l10n.blockContentLabel,
-                ),
-              ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                value: selectedReason,
-                decoration: InputDecoration(
-                  labelText: l10n.editReasonLabel,
-                  border: const OutlineInputBorder(),
-                ),
-                items: [
-                  DropdownMenuItem(
-                    value: 'ocr_error',
-                    child: Text(l10n.ocrErrorCorrection),
-                  ),
-                  DropdownMenuItem(
-                    value: 'source_image_correction',
-                    child: Text(l10n.sourceImageCorrection),
-                  ),
-                  DropdownMenuItem(
-                    value: 'source_typo_fix',
-                    child: Text(l10n.sourceTypoFix),
-                  ),
-                  DropdownMenuItem(
-                    value: 'teacher_answer_confirmation',
-                    child: Text(l10n.teacherAnswerConfirmation),
-                  ),
-                ],
-                onChanged: (val) {
-                  if (val != null) {
-                    setDialogState(() => selectedReason = val);
-                  }
-                },
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogCtx),
-              child: Text(l10n.cancelAction),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                final text = textController.text.trim();
-                Navigator.pop(dialogCtx);
-                context.read<QuestionBankCubit>().editBlock(
-                  blockId: blockId,
-                  newValue: text,
-                  reason: selectedReason,
-                );
-              },
-              child: Text(l10n.saveNewRevision),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _confirmMerge(BuildContext context) {
-    final l10n = context.l10n;
-    showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.confirmMergeDialogTitle),
-        content: Text(l10n.confirmMergeDialogBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(l10n.cancelAction),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              context.read<QuestionBankCubit>().mergeWithNext();
-            },
-            child: Text(l10n.mergeAction),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _confirmSplit(BuildContext context) {
-    final l10n = context.l10n;
-    showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.confirmSplitDialogTitle),
-        content: Text(l10n.confirmSplitDialogBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(l10n.cancelAction),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              context.read<QuestionBankCubit>().splitQuestion(splitIndex: 1);
-            },
-            child: Text(l10n.splitAction),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _confirmMarkUnreadable(BuildContext context) {
-    final l10n = context.l10n;
-    showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.confirmUnreadableDialogTitle),
-        content: Text(l10n.confirmUnreadableDialogBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(l10n.cancelAction),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              context.read<QuestionBankCubit>().markSourceUnreadable(
-                reason: 'Source unreadable/truncated',
-              );
-            },
-            child: Text(l10n.quarantineAction),
-          ),
-        ],
-      ),
-    );
-  }
-
 }

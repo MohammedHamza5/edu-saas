@@ -61,7 +61,6 @@ flutter:
   uses-material-design: true
   generate: true
   assets:
-    - .env
     - assets/images/
   fonts:
     - family: Cairo

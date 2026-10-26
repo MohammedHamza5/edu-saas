@@ -10,6 +10,7 @@ import '../../../../core/widgets/app_text_field.dart';
 import '../../domain/entities/assignment_entity.dart';
 import '../cubit/assignments_cubit.dart';
 import '../cubit/assignments_state.dart';
+import '../extensions/submission_status_ui_extensions.dart';
 
 class GradeSubmissionPage extends StatefulWidget {
   final AssignmentEntity assignment;

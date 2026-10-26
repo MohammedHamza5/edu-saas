@@ -14,6 +14,9 @@ import '../../domain/entities/mistake_entities.dart';
 import '../cubit/mistakes_cubit.dart';
 import '../cubit/mistakes_state.dart';
 import '../widgets/mistake_practice_mode_dialog.dart';
+import '../widgets/student_mistake_question_card.dart';
+import '../widgets/mistake_sort_bar.dart';
+import '../widgets/zero_mistake_gauntlet_card.dart';
 
 class StudentMistakesPage extends StatefulWidget {
   const StudentMistakesPage({super.key});
@@ -123,12 +126,23 @@ class _StudentMistakesPageState extends State<StudentMistakesPage> {
                       ),
                       const SizedBox(height: AppSpacing.s20),
 
+                      // Zero-Mistake Gauntlet Hero Card (Pillar 3.2 & 3.1)
+                      ZeroMistakeGauntletCard(state: state),
+                      const SizedBox(height: AppSpacing.s20),
+
                       // Stats Row
                       _buildStatsRow(context, state),
                       const SizedBox(height: AppSpacing.s24),
 
                       // Filter Bar (Type, Status, Search, Source)
                       _buildFilterBar(context, state),
+                      const SizedBox(height: AppSpacing.s16),
+
+                      // Mistake Sort Bar (Pillar 3.3)
+                      MistakeSortBar(
+                        activeSort: state.sortOrder,
+                        onSortChanged: (sort) => context.read<MistakesCubit>().setSortOrder(sort),
+                      ),
                       const SizedBox(height: AppSpacing.s16),
 
                       // Questions List or Empty State
@@ -153,7 +167,11 @@ class _StudentMistakesPageState extends State<StudentMistakesPage> {
                               const SizedBox(height: AppSpacing.s16),
                           itemBuilder: (context, index) {
                             final q = questions[index];
-                            return _buildQuestionCard(context, q, index + 1);
+                            return StudentMistakeQuestionCard(
+                              question: q,
+                              index: index + 1,
+                              onOpenImage: (url) => _openImageDialog(context, url),
+                            );
                           },
                         ),
                       ],
@@ -602,6 +620,53 @@ class _StudentMistakesPageState extends State<StudentMistakesPage> {
             ),
           ],
         ),
+        const SizedBox(height: AppSpacing.s8),
+
+        // Reflection Reason Filter Chips
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              FilterChip(
+                label: Text(l10n.filterAllTypes),
+                selected: state.reasonFilter == MistakeReasonFilter.all,
+                onSelected: (_) => cubit.setReasonFilter(MistakeReasonFilter.all),
+              ),
+              const SizedBox(width: AppSpacing.s6),
+              FilterChip(
+                avatar: const Icon(Icons.psychology_outlined, size: 15, color: Color(0xFF7C3AED)),
+                label: Text(l10n.reflectionConceptGap),
+                selected: state.reasonFilter == MistakeReasonFilter.conceptGap,
+                selectedColor: const Color(0xFF7C3AED).withValues(alpha: 0.15),
+                onSelected: (_) => cubit.setReasonFilter(MistakeReasonFilter.conceptGap),
+              ),
+              const SizedBox(width: AppSpacing.s6),
+              FilterChip(
+                avatar: const Icon(Icons.bolt_outlined, size: 15, color: AppColors.error),
+                label: Text(l10n.reflectionCarelessError),
+                selected: state.reasonFilter == MistakeReasonFilter.carelessError,
+                selectedColor: AppColors.error.withValues(alpha: 0.15),
+                onSelected: (_) => cubit.setReasonFilter(MistakeReasonFilter.carelessError),
+              ),
+              const SizedBox(width: AppSpacing.s6),
+              FilterChip(
+                avatar: const Icon(Icons.menu_book_outlined, size: 15, color: Color(0xFF0284C7)),
+                label: Text(l10n.reflectionMisreadQuestion),
+                selected: state.reasonFilter == MistakeReasonFilter.misreadQuestion,
+                selectedColor: const Color(0xFF0284C7).withValues(alpha: 0.15),
+                onSelected: (_) => cubit.setReasonFilter(MistakeReasonFilter.misreadQuestion),
+              ),
+              const SizedBox(width: AppSpacing.s6),
+              FilterChip(
+                avatar: const Icon(Icons.hourglass_top_outlined, size: 15, color: AppColors.warning),
+                label: Text(l10n.reflectionTimePressure),
+                selected: state.reasonFilter == MistakeReasonFilter.timePressure,
+                selectedColor: AppColors.warning.withValues(alpha: 0.15),
+                onSelected: (_) => cubit.setReasonFilter(MistakeReasonFilter.timePressure),
+              ),
+            ],
+          ),
+        ),
 
         // 3. Exam Sources Dropdown (if multiple sources exist)
         if (summary.sources.length > 1) ...[
@@ -703,343 +768,6 @@ class _StudentMistakesPageState extends State<StudentMistakesPage> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildQuestionCard(
-    BuildContext context,
-    MistakeQuestionEntity q,
-    int index,
-  ) {
-    final l10n = context.l10n;
-    final theme = Theme.of(context);
-    final lastDate = q.lastFailedAt != null
-        ? '${q.lastFailedAt!.year}-${q.lastFailedAt!.month.toString().padLeft(2, '0')}-${q.lastFailedAt!.day.toString().padLeft(2, '0')}'
-        : '-';
-
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.s16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-        border: Border.all(
-          color: q.isResolved
-              ? AppColors.success.withValues(alpha: 0.3)
-              : q.isSkipped
-                  ? AppColors.warning.withValues(alpha: 0.35)
-                  : AppColors.error.withValues(alpha: 0.3),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header: Exam Title & Badges
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      q.sourceExamTitle,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.primary,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (q.lessonTitle != null && q.lessonTitle!.isNotEmpty)
-                      Text(
-                        q.lessonTitle!,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: AppSpacing.s8),
-
-              // Distinctive Type Badge
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.s8,
-                  vertical: 3,
-                ),
-                decoration: BoxDecoration(
-                  color: q.isSkipped
-                      ? AppColors.warning.withValues(alpha: 0.12)
-                      : AppColors.error.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                  border: Border.all(
-                    color: q.isSkipped
-                        ? AppColors.warning.withValues(alpha: 0.35)
-                        : AppColors.error.withValues(alpha: 0.35),
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      q.isSkipped
-                          ? Icons.pause_circle_outline_rounded
-                          : Icons.cancel_outlined,
-                      size: 13,
-                      color: q.isSkipped ? AppColors.warning : AppColors.error,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      q.isSkipped
-                          ? l10n.skippedQuestionBadge
-                          : l10n.wrongAnswerBadge,
-                      style: TextStyle(
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.bold,
-                        color: q.isSkipped ? AppColors.warning : AppColors.error,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: AppSpacing.s6),
-
-              // Status Badge (Mastered vs Needs Review)
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.s8,
-                  vertical: 3,
-                ),
-                decoration: BoxDecoration(
-                  color: q.isResolved
-                      ? AppColors.success.withValues(alpha: 0.12)
-                      : AppColors.warning.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      q.isResolved
-                          ? Icons.check_circle_rounded
-                          : Icons.pending_actions_rounded,
-                      size: 13,
-                      color: q.isResolved ? AppColors.success : AppColors.warning,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      q.isResolved ? l10n.badgeMastered : l10n.badgeNeedsPractice,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: q.isResolved ? AppColors.success : AppColors.warning,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 11,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.s8),
-
-          // Metadata row: failure count, last attempt date
-          Row(
-            children: [
-              Text(
-                l10n.timesFailedLabel(q.failureCount),
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.s16),
-              Text(
-                l10n.lastMistakeDate(lastDate),
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.s10),
-
-          // Detailed Context Notice Banner
-          if (q.isSkipped)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: AppColors.warning.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                border: Border.all(color: AppColors.warning.withValues(alpha: 0.2)),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.info_outline_rounded, size: 15, color: AppColors.warning),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      l10n.questionWasSkippedNotice,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.warning,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            )
-          else
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: AppColors.error.withValues(alpha: 0.06),
-                borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                border: Border.all(color: AppColors.error.withValues(alpha: 0.2)),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.cancel_outlined, size: 15, color: AppColors.error),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      q.selectedOptionText != null && q.selectedOptionText!.isNotEmpty
-                          ? l10n.previousWrongChoice(q.selectedOptionText!)
-                          : l10n.wrongAnswerBadge,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.error,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-          const Divider(height: AppSpacing.s16),
-
-          // Question Stem
-          if (q.questionText.isNotEmpty) ...[
-            Text(
-              q.questionText,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                height: 1.45,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.s8),
-          ],
-
-          // Question Image (if any)
-          if (q.imageUrl != null && q.imageUrl!.isNotEmpty) ...[
-            GestureDetector(
-              onTap: () => _openImageDialog(context, q.imageUrl!),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                child: Container(
-                  constraints: const BoxConstraints(maxHeight: 200),
-                  width: double.infinity,
-                  color: Colors.black.withValues(alpha: 0.04),
-                  child: CachedNetworkImage(
-                    imageUrl: q.imageUrl!,
-                    memCacheWidth: 600,
-                    memCacheHeight: 600,
-                    maxWidthDiskCache: 800,
-                    fit: BoxFit.contain,
-                    placeholder: (_, __) => const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(AppSpacing.s16),
-                        child: CircularProgressIndicator(),
-                      ),
-                    ),
-                    errorWidget: (_, __, ___) => const Padding(
-                      padding: EdgeInsets.all(AppSpacing.s16),
-                      child: Icon(Icons.broken_image, color: Colors.grey),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.s8),
-          ],
-
-          // Options List with subtle previous selection indicator
-          ...q.options.map((opt) {
-            final wasChosen = opt.id == q.lastSelectedOptionId;
-            return Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.s6),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                decoration: BoxDecoration(
-                  color: wasChosen
-                      ? AppColors.error.withValues(alpha: 0.05)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                  border: wasChosen
-                      ? Border.all(color: AppColors.error.withValues(alpha: 0.3))
-                      : null,
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      wasChosen
-                          ? Icons.cancel_rounded
-                          : Icons.radio_button_unchecked,
-                      size: 16,
-                      color: wasChosen ? AppColors.error : Colors.grey,
-                    ),
-                    const SizedBox(width: AppSpacing.s6),
-                    Expanded(
-                      child: Text(
-                        opt.optionText,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: wasChosen ? FontWeight.bold : FontWeight.normal,
-                          color: wasChosen ? AppColors.error : null,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }),
-
-          const SizedBox(height: AppSpacing.s8),
-
-          // Individual Question Practice Button
-          Align(
-            alignment: AlignmentDirectional.centerEnd,
-            child: OutlinedButton.icon(
-              onPressed: () {
-                final modeParam = q.isResolved ? 'resolved' : 'unresolved';
-                context.push('${AppRoutes.mistakesPractice}?examId=${q.sourceExamId}&mode=$modeParam');
-              },
-              icon: Icon(
-                q.isResolved ? Icons.restart_alt_rounded : Icons.fitness_center_rounded,
-                size: 16,
-              ),
-              label: Text(
-                q.isResolved
-                    ? l10n.practiceSingleQuestionAction
-                    : l10n.practiceThisQuestion,
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-              ),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: q.isResolved ? AppColors.success : theme.colorScheme.primary,
-                side: BorderSide(
-                  color: (q.isResolved ? AppColors.success : theme.colorScheme.primary).withValues(alpha: 0.5),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                visualDensity: VisualDensity.compact,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
