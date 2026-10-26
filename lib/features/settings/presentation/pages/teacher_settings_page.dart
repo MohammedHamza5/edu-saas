@@ -17,6 +17,7 @@ import '../widgets/academy_profile_settings_section.dart';
 import '../widgets/language_settings_section.dart';
 import '../widgets/streaming_provider_settings_section.dart';
 import '../widgets/teacher_account_security_section.dart';
+import '../widgets/whatsapp_gateway_settings_section.dart';
 
 /// صفحة إعدادات المنصة والأكاديمية للمعلم (Teacher & Academy Settings)
 /// مخصصة لإدارة بيانات الأكاديمية، لغة المنصة، وبيانات حساب المعلم.
@@ -218,6 +219,10 @@ class _TeacherSettingsPageState extends State<TeacherSettingsPage> {
 
             // 3. Section: Video Streaming Provider (Bunny Stream vs YouTube)
             const StreamingProviderSettingsSection(),
+            const SizedBox(height: AppSpacing.s24),
+
+            // 4. Section: WhatsApp Auto-Dispatch Gateway
+            const WhatsAppGatewaySettingsSection(),
             const SizedBox(height: AppSpacing.s24),
 
             // 4. Section: Language Preference (Arabic / English)
