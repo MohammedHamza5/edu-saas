@@ -63,10 +63,11 @@ export async function usePostgresAuthState(
       }
       return data;
     },
-    set: async (data) => {
-      for (const category in data) {
-        for (const id in data[category]) {
-          const value = data[category][id];
+    set: async (data: any) => {
+      const dataObj = data as Record<string, Record<string, any>>;
+      for (const category in dataObj) {
+        for (const id in dataObj[category]) {
+          const value = dataObj[category][id];
           const key = `${category}-${id}`;
           if (value) {
             keysStore[key] = value;
