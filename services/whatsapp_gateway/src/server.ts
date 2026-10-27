@@ -27,8 +27,8 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
   }
 });
 
-const baileysClient = new BaileysGatewayClient(supabase, SESSION_ID, TENANT_ID);
-const queueWorker = new QueueWorker(supabase, baileysClient, 5000);
+let baileysClient: BaileysGatewayClient;
+let queueWorker: QueueWorker;
 
 // Simple API Key Guard
 const authMiddleware = (req: Request, res: Response, next: Function) => {
@@ -44,7 +44,7 @@ app.get('/health', (_req: Request, res: Response) => {
   res.json({
     status: 'ok',
     uptime: process.uptime(),
-    connected: baileysClient.isConnected(),
+    connected: baileysClient ? baileysClient.isConnected() : false,
     timestamp: new Date().toISOString()
   });
 });
@@ -185,6 +185,27 @@ if (KEEP_ALIVE_URL) {
 
 // Start application
 const startServer = async () => {
+  let activeTenantId = TENANT_ID;
+  if (!activeTenantId) {
+    try {
+      const { data: tenant } = await supabase.from('tenants').select('id').limit(1).maybeSingle();
+      if (tenant?.id) {
+        activeTenantId = tenant.id;
+        console.log(`[Server] Auto-resolved active Tenant ID: ${activeTenantId}`);
+        // Backfill any unassociated session
+        await supabase
+          .from('whatsapp_auth_sessions')
+          .update({ tenant_id: activeTenantId })
+          .is('tenant_id', null);
+      }
+    } catch (e) {
+      console.warn('[Server] Failed to auto-resolve tenant:', (e as Error).message);
+    }
+  }
+
+  baileysClient = new BaileysGatewayClient(supabase, SESSION_ID, activeTenantId);
+  queueWorker = new QueueWorker(supabase, baileysClient, 5000);
+
   app.listen(PORT, () => {
     console.log(`[Server] WhatsApp Gateway running on port ${PORT}`);
   });

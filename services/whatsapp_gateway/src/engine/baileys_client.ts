@@ -78,6 +78,7 @@ export class BaileysGatewayClient {
               .update({
                 status: 'qr_ready',
                 qr_code: qrDataUrl,
+                tenant_id: this.tenantId || null,
                 updated_at: new Date().toISOString()
               })
               .eq('id', this.sessionId);
@@ -114,16 +115,17 @@ export class BaileysGatewayClient {
 
           console.warn(`[BaileysClient] Connection closed. Status Code: ${statusCode}, Reconnecting: ${shouldReconnect}`);
 
-          await this.supabase
-            .from('whatsapp_auth_sessions')
-            .update({
-              status: 'disconnected',
-              qr_code: null,
-              updated_at: new Date().toISOString()
-            })
-            .eq('id', this.sessionId);
-
           if (shouldReconnect) {
+            // Keep status as qr_ready and preserve existing QR code while reconnecting
+            await this.supabase
+              .from('whatsapp_auth_sessions')
+              .update({
+                status: 'qr_ready',
+                tenant_id: this.tenantId || null,
+                updated_at: new Date().toISOString()
+              })
+              .eq('id', this.sessionId);
+
             console.log('[BaileysClient] Attempting automatic reconnection in 5 seconds...');
             setTimeout(() => this.initialize(), 5000);
           } else {
@@ -136,7 +138,9 @@ export class BaileysGatewayClient {
                 keys: {},
                 status: 'disconnected',
                 connected_phone: null,
-                qr_code: null
+                qr_code: null,
+                tenant_id: this.tenantId || null,
+                updated_at: new Date().toISOString()
               })
               .eq('id', this.sessionId);
             setTimeout(() => this.initialize(), 3000);
