@@ -52,6 +52,25 @@ export async function usePostgresAuthState(
     });
   }
 
+  let keysSaveTimeout: NodeJS.Timeout | null = null;
+  const debouncedSaveKeys = () => {
+    if (keysSaveTimeout) clearTimeout(keysSaveTimeout);
+    keysSaveTimeout = setTimeout(async () => {
+      try {
+        const serializedKeys = JSON.parse(JSON.stringify(keysStore, BufferJSON.replacer));
+        await supabase
+          .from('whatsapp_auth_sessions')
+          .update({
+            keys: serializedKeys,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', sessionId);
+      } catch (err) {
+        console.warn('[PostgresAuth] Debounced save warning:', (err as Error).message);
+      }
+    }, 2000);
+  };
+
   const keys: SignalKeyStore = {
     get: async (type, ids) => {
       const data: Record<string, any> = {};
@@ -76,28 +95,26 @@ export async function usePostgresAuthState(
           }
         }
       }
-
-      // Persist keys to Postgres
-      const serializedKeys = JSON.parse(JSON.stringify(keysStore, BufferJSON.replacer));
-      await supabase
-        .from('whatsapp_auth_sessions')
-        .update({
-          keys: serializedKeys,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', sessionId);
+      debouncedSaveKeys();
     }
   };
 
   const saveCreds = async () => {
-    const serializedCreds = JSON.parse(JSON.stringify(creds, BufferJSON.replacer));
-    await supabase
-      .from('whatsapp_auth_sessions')
-      .update({
-        creds: serializedCreds,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', sessionId);
+    try {
+      if (keysSaveTimeout) clearTimeout(keysSaveTimeout);
+      const serializedCreds = JSON.parse(JSON.stringify(creds, BufferJSON.replacer));
+      const serializedKeys = JSON.parse(JSON.stringify(keysStore, BufferJSON.replacer));
+      await supabase
+        .from('whatsapp_auth_sessions')
+        .update({
+          creds: serializedCreds,
+          keys: serializedKeys,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', sessionId);
+    } catch (err) {
+      console.error('[PostgresAuth] Error saving creds & keys:', err);
+    }
   };
 
   return {

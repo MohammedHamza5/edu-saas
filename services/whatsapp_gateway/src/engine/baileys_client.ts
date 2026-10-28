@@ -118,31 +118,11 @@ export class BaileysGatewayClient {
           this.isConnecting = false;
           const statusCode = (lastDisconnect?.error as Boom)?.output?.statusCode;
           const isLoggedOut = statusCode === DisconnectReason.loggedOut;
-          const isConnected = this.isConnected();
 
-          console.warn(`[BaileysClient] Connection closed. Status Code: ${statusCode}, isConnected: ${isConnected}`);
+          console.warn(`[BaileysClient] Connection closed. Status Code: ${statusCode}`);
 
-          if (!isConnected) {
-            // Pairing was not finished or QR expired. Wipe stale unauthenticated creds so next QR has fresh crypto handshake
-            console.log('[BaileysClient] Resetting stale creds for fresh pairing QR...');
-            await this.supabase
-              .from('whatsapp_auth_sessions')
-              .update({
-                creds: {},
-                keys: {},
-                status: 'disconnected',
-                qr_code: null,
-                tenant_id: this.tenantId || null,
-                updated_at: new Date().toISOString()
-              })
-              .eq('id', this.sessionId);
-
-            setTimeout(() => this.initialize(), 2000);
-          } else if (!isLoggedOut) {
-            console.log('[BaileysClient] Attempting automatic reconnection in 5 seconds...');
-            setTimeout(() => this.initialize(), 5000);
-          } else {
-            console.error('[BaileysClient] ❌ Device was logged out.');
+          if (isLoggedOut) {
+            console.error('[BaileysClient] ❌ Device was logged out. A new QR code scan is required.');
             await this.supabase
               .from('whatsapp_auth_sessions')
               .update({
@@ -156,6 +136,12 @@ export class BaileysGatewayClient {
               })
               .eq('id', this.sessionId);
             setTimeout(() => this.initialize(), 3000);
+          } else {
+            // WhatsApp often requests a restart (515: restartRequired) during initial pairing to finalize crypto keys!
+            // NEVER wipe creds here! Reconnect with the received creds so pairing completes.
+            const reconnectDelay = statusCode === DisconnectReason.restartRequired ? 1000 : 3000;
+            console.log(`[BaileysClient] Reconnecting in ${reconnectDelay}ms to finalize/maintain connection (Status: ${statusCode})...`);
+            setTimeout(() => this.initialize(), reconnectDelay);
           }
         }
       });

@@ -94,15 +94,6 @@ app.get('/api/live-qr', async (req: Request, res: Response) => {
 
   const { data: session } = await query.order('updated_at', { ascending: false }).limit(1).maybeSingle();
 
-  // If QR code exists but is older than 40 seconds, trigger a background refresh to keep it live
-  if (session?.status === 'qr_ready' && session?.updated_at && baileysClient && !baileysClient.isConnected()) {
-    const ageSeconds = (Date.now() - new Date(session.updated_at).getTime()) / 1000;
-    if (ageSeconds > 40) {
-      console.log(`[Server] Stale QR detected (age: ${Math.round(ageSeconds)}s). Triggering auto-refresh...`);
-      baileysClient.forceRefreshSession().catch(() => {});
-    }
-  }
-
   return res.json({
     connected: baileysClient ? baileysClient.isConnected() : false,
     status: session?.status || 'disconnected',
