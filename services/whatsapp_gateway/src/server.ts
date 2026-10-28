@@ -9,6 +9,17 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
+// Enable CORS for Flutter Web Frontend
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, x-api-key');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
 const PORT = process.env.PORT || 3000;
 const SUPABASE_URL = process.env.SUPABASE_URL || '';
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || '';
@@ -58,12 +69,38 @@ app.get('/api/status', authMiddleware, async (_req: Request, res: Response) => {
     .maybeSingle();
 
   res.json({
-    connected: baileysClient.isConnected(),
+    connected: baileysClient ? baileysClient.isConnected() : false,
     sessionStatus: session?.status || 'disconnected',
     connectedPhone: session?.connected_phone || null,
     connectedName: session?.connected_name || null,
     autoDispatchEnabled: session?.auto_dispatch_enabled ?? true,
     lastHeartbeat: session?.last_heartbeat_at || null
+  });
+});
+
+// 2.1 Direct Live QR endpoint for Flutter Frontend
+app.get('/api/live-qr', async (req: Request, res: Response) => {
+  const requestedTenantId = req.query.tenantId as string | undefined;
+
+  let query = supabase
+    .from('whatsapp_auth_sessions')
+    .select('status, qr_code, connected_phone, connected_name, auto_dispatch_enabled');
+
+  if (requestedTenantId) {
+    query = query.or(`tenant_id.eq.${requestedTenantId},id.eq.${SESSION_ID}`);
+  } else {
+    query = query.eq('id', SESSION_ID);
+  }
+
+  const { data: session } = await query.order('updated_at', { ascending: false }).limit(1).maybeSingle();
+
+  return res.json({
+    connected: baileysClient ? baileysClient.isConnected() : false,
+    status: session?.status || 'disconnected',
+    qrCode: session?.qr_code || null,
+    connectedPhone: session?.connected_phone || null,
+    connectedName: session?.connected_name || null,
+    autoDispatchEnabled: session?.auto_dispatch_enabled ?? true
   });
 });
 
