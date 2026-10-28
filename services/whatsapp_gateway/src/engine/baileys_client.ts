@@ -1,7 +1,8 @@
 import makeWASocket, {
   DisconnectReason,
   WASocket,
-  fetchLatestBaileysVersion
+  fetchLatestBaileysVersion,
+  Browsers
 } from '@whiskeysockets/baileys';
 import { Boom } from '@hapi/boom';
 import { SupabaseClient } from '@supabase/supabase-js';
@@ -56,7 +57,7 @@ export class BaileysGatewayClient {
         logger: pino({ level: 'silent' }),
         printQRInTerminal: true,
         auth: state,
-        browser: ['EduSaaS Academic Portal', 'Chrome', '124.0.0'],
+        browser: Browsers.ubuntu('Chrome'),
         syncFullHistory: false,
         generateHighQualityLinkPreview: false,
         markOnlineOnConnect: true,
@@ -72,7 +73,12 @@ export class BaileysGatewayClient {
         if (qr) {
           console.log('[BaileysClient] New QR code generated. Updating Postgres session record...');
           try {
-            const qrDataUrl = await QRCode.toDataURL(qr);
+            const qrDataUrl = await QRCode.toDataURL(qr, {
+              width: 600,
+              margin: 2,
+              errorCorrectionLevel: 'M',
+              scale: 10
+            });
             await this.supabase
               .from('whatsapp_auth_sessions')
               .update({
@@ -111,26 +117,32 @@ export class BaileysGatewayClient {
         if (connection === 'close') {
           this.isConnecting = false;
           const statusCode = (lastDisconnect?.error as Boom)?.output?.statusCode;
-          const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
+          const isLoggedOut = statusCode === DisconnectReason.loggedOut;
+          const isConnected = this.isConnected();
 
-          console.warn(`[BaileysClient] Connection closed. Status Code: ${statusCode}, Reconnecting: ${shouldReconnect}`);
+          console.warn(`[BaileysClient] Connection closed. Status Code: ${statusCode}, isConnected: ${isConnected}`);
 
-          if (shouldReconnect) {
-            // Keep status as qr_ready and preserve existing QR code while reconnecting
+          if (!isConnected) {
+            // Pairing was not finished or QR expired. Wipe stale unauthenticated creds so next QR has fresh crypto handshake
+            console.log('[BaileysClient] Resetting stale creds for fresh pairing QR...');
             await this.supabase
               .from('whatsapp_auth_sessions')
               .update({
-                status: 'qr_ready',
+                creds: {},
+                keys: {},
+                status: 'disconnected',
+                qr_code: null,
                 tenant_id: this.tenantId || null,
                 updated_at: new Date().toISOString()
               })
               .eq('id', this.sessionId);
 
+            setTimeout(() => this.initialize(), 2000);
+          } else if (!isLoggedOut) {
             console.log('[BaileysClient] Attempting automatic reconnection in 5 seconds...');
             setTimeout(() => this.initialize(), 5000);
           } else {
-            console.error('[BaileysClient] ❌ Device was logged out. A new QR code scan is required.');
-            // Clear creds in DB to generate fresh QR on next start
+            console.error('[BaileysClient] ❌ Device was logged out.');
             await this.supabase
               .from('whatsapp_auth_sessions')
               .update({
@@ -203,6 +215,39 @@ export class BaileysGatewayClient {
           last_heartbeat_at: new Date().toISOString()
         })
         .eq('id', this.sessionId);
+    }
+  }
+
+  /**
+   * Wipe any stale unauthenticated state and force a brand new QR generation
+   */
+  public async forceRefreshSession(): Promise<void> {
+    try {
+      this.isConnecting = false;
+      if (this.sock) {
+        try {
+          this.sock.ev.removeAllListeners('connection.update');
+          this.sock.ev.removeAllListeners('creds.update');
+          this.sock.end(undefined);
+        } catch (_) {}
+        this.sock = null;
+      }
+
+      await this.supabase
+        .from('whatsapp_auth_sessions')
+        .update({
+          creds: {},
+          keys: {},
+          status: 'disconnected',
+          qr_code: null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', this.sessionId);
+
+      console.log('[BaileysClient] Forced refresh requested. Restarting socket with clean state...');
+      await this.initialize();
+    } catch (e) {
+      console.error('[BaileysClient] Error in forceRefreshSession:', e);
     }
   }
 }

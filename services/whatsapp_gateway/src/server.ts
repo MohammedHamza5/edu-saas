@@ -84,7 +84,7 @@ app.get('/api/live-qr', async (req: Request, res: Response) => {
 
   let query = supabase
     .from('whatsapp_auth_sessions')
-    .select('status, qr_code, connected_phone, connected_name, auto_dispatch_enabled');
+    .select('status, qr_code, connected_phone, connected_name, auto_dispatch_enabled, updated_at');
 
   if (requestedTenantId) {
     query = query.or(`tenant_id.eq.${requestedTenantId},id.eq.${SESSION_ID}`);
@@ -94,6 +94,15 @@ app.get('/api/live-qr', async (req: Request, res: Response) => {
 
   const { data: session } = await query.order('updated_at', { ascending: false }).limit(1).maybeSingle();
 
+  // If QR code exists but is older than 40 seconds, trigger a background refresh to keep it live
+  if (session?.status === 'qr_ready' && session?.updated_at && baileysClient && !baileysClient.isConnected()) {
+    const ageSeconds = (Date.now() - new Date(session.updated_at).getTime()) / 1000;
+    if (ageSeconds > 40) {
+      console.log(`[Server] Stale QR detected (age: ${Math.round(ageSeconds)}s). Triggering auto-refresh...`);
+      baileysClient.forceRefreshSession().catch(() => {});
+    }
+  }
+
   return res.json({
     connected: baileysClient ? baileysClient.isConnected() : false,
     status: session?.status || 'disconnected',
@@ -102,6 +111,15 @@ app.get('/api/live-qr', async (req: Request, res: Response) => {
     connectedName: session?.connected_name || null,
     autoDispatchEnabled: session?.auto_dispatch_enabled ?? true
   });
+});
+
+// 2.2 Force Refresh QR Endpoint
+app.get('/api/refresh-qr', async (_req: Request, res: Response) => {
+  if (baileysClient && !baileysClient.isConnected()) {
+    console.log('[Server] /api/refresh-qr called by client. Refreshing session...');
+    await baileysClient.forceRefreshSession();
+  }
+  return res.json({ success: true, message: 'Session refreshed' });
 });
 
 // 3. Web View for QR Code Pairing
