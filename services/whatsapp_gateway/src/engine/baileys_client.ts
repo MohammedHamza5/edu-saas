@@ -117,12 +117,21 @@ export class BaileysGatewayClient {
 
           // 2. Fallback: Query Supabase outbox queue
           try {
-            const { data: row } = await this.supabase
+            const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(key.id);
+            let query = this.supabase
               .from('whatsapp_outbox_queue')
-              .select('message_body')
-              .or(`metadata->>message_id.eq.${key.id},id.eq.${key.id}`)
-              .limit(1)
-              .maybeSingle();
+              .select('message_body');
+
+            if (isUuid) {
+              query = query.or(`metadata->>message_id.eq.${key.id},id.eq.${key.id}`);
+            } else {
+              query = query.eq('metadata->>message_id', key.id);
+            }
+
+            const { data: row, error: queryErr } = await query.limit(1).maybeSingle();
+            if (queryErr) {
+              console.warn('[BaileysClient] getMessage DB query warning:', queryErr.message);
+            }
 
             if (row?.message_body) {
               console.log(`[BaileysClient] 🔄 Fulfilled E2EE retry request from DB for message ID: ${key.id}`);
@@ -302,17 +311,26 @@ export class BaileysGatewayClient {
         // Link message ID in database queue metadata for cross-restart E2EE fulfillment
         if (queueItemId) {
           try {
+            const { data: currentItem } = await this.supabase
+              .from('whatsapp_outbox_queue')
+              .select('metadata')
+              .eq('id', queueItemId)
+              .maybeSingle();
+
+            const mergedMetadata = {
+              ...(currentItem?.metadata || {}),
+              message_id: msgId,
+              target_jid: targetJid,
+              sent_at: new Date().toISOString()
+            };
+
             await this.supabase
               .from('whatsapp_outbox_queue')
-              .update({
-                metadata: {
-                  message_id: msgId,
-                  target_jid: targetJid,
-                  sent_at: new Date().toISOString()
-                }
-              })
+              .update({ metadata: mergedMetadata })
               .eq('id', queueItemId);
-          } catch (_) {}
+          } catch (metaErr) {
+            console.warn('[BaileysClient] Failed to link message ID to queue row:', (metaErr as Error).message);
+          }
         }
 
         return { success: true, messageId: msgId };
