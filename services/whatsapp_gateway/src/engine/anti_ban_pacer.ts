@@ -83,12 +83,13 @@ export class AntiBanPacer {
    */
   public humanizeMessage(originalBody: string): string {
     const timeFormatted = new Date().toLocaleTimeString('ar-EG', {
+      timeZone: 'Africa/Cairo',
       hour: '2-digit',
       minute: '2-digit',
       hour12: true
     });
 
-    // Invisible non-breaking space / subtle stamp for unique hash
+    // Subtle time stamp in Cairo timezone for uniqueness & traceability
     return `${originalBody.trim()}\n\n⏱️ [${timeFormatted}]`;
   }
 

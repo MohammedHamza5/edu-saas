@@ -68,7 +68,7 @@ export async function usePostgresAuthState(
       } catch (err) {
         console.warn('[PostgresAuth] Debounced save warning:', (err as Error).message);
       }
-    }, 2000);
+    }, 400);
   };
 
   const keys: SignalKeyStore = {

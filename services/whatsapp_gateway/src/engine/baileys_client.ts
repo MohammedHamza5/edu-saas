@@ -4,7 +4,8 @@ import makeWASocket, {
   fetchLatestBaileysVersion,
   Browsers,
   proto,
-  WAMessageKey
+  WAMessageKey,
+  makeCacheableSignalKeyStore
 } from '@whiskeysockets/baileys';
 import { Boom } from '@hapi/boom';
 import { SupabaseClient } from '@supabase/supabase-js';
@@ -87,7 +88,10 @@ export class BaileysGatewayClient {
         version,
         logger: pino({ level: 'info' }),
         printQRInTerminal: true,
-        auth: state,
+        auth: {
+          creds: state.creds,
+          keys: makeCacheableSignalKeyStore(state.keys, pino({ level: 'silent' }))
+        },
         browser: Browsers.ubuntu('Chrome'),
         syncFullHistory: false,
         generateHighQualityLinkPreview: false,
@@ -120,7 +124,7 @@ export class BaileysGatewayClient {
             const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(key.id);
             let query = this.supabase
               .from('whatsapp_outbox_queue')
-              .select('message_body');
+              .select('message_body, metadata');
 
             if (isUuid) {
               query = query.or(`metadata->>message_id.eq.${key.id},id.eq.${key.id}`);
@@ -133,10 +137,16 @@ export class BaileysGatewayClient {
               console.warn('[BaileysClient] getMessage DB query warning:', queryErr.message);
             }
 
+            // Return exact cryptographic raw proto message if persisted
+            if (row?.metadata?.raw_message) {
+              console.log(`[BaileysClient] 🔄 Fulfilled E2EE retry from DB raw_message for ID: ${key.id}`);
+              return row.metadata.raw_message as proto.IMessage;
+            }
+
+            // Clean fallback for plain text
             if (row?.message_body) {
-              console.log(`[BaileysClient] 🔄 Fulfilled E2EE retry request from DB for message ID: ${key.id}`);
+              console.log(`[BaileysClient] 🔄 Fulfilled E2EE retry fallback for message ID: ${key.id}`);
               return {
-                conversation: row.message_body,
                 extendedTextMessage: {
                   text: row.message_body
                 }
@@ -321,7 +331,8 @@ export class BaileysGatewayClient {
               ...(currentItem?.metadata || {}),
               message_id: msgId,
               target_jid: targetJid,
-              sent_at: new Date().toISOString()
+              sent_at: new Date().toISOString(),
+              raw_message: result.message
             };
 
             await this.supabase
