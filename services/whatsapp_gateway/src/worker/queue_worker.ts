@@ -86,7 +86,7 @@ export class QueueWorker {
         try {
           console.log(`[QueueWorker] Dispatching exam result to ${item.recipient_phone} (Student: ${item.student_name})...`);
           
-          await this.client.sendTextMessage(item.recipient_phone, item.message_body);
+          await this.client.sendTextMessage(item.recipient_phone, item.message_body, item.id);
 
           // 3. Mark as sent
           await this.supabase.rpc('update_whatsapp_queue_status', {

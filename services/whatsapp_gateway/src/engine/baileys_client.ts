@@ -2,7 +2,9 @@ import makeWASocket, {
   DisconnectReason,
   WASocket,
   fetchLatestBaileysVersion,
-  Browsers
+  Browsers,
+  proto,
+  WAMessageKey
 } from '@whiskeysockets/baileys';
 import { Boom } from '@hapi/boom';
 import { SupabaseClient } from '@supabase/supabase-js';
@@ -11,6 +13,33 @@ import QRCode from 'qrcode';
 import { usePostgresAuthState } from '../auth/postgres_auth';
 import { AntiBanPacer } from './anti_ban_pacer';
 
+/**
+ * In-memory CacheStore to handle message retry counters without infinite loops
+ */
+class SimpleCacheStore {
+  private cache = new Map<string, any>();
+
+  get<T>(key: string): T | undefined {
+    return this.cache.get(key);
+  }
+
+  set(key: string, value: any): void {
+    this.cache.set(key, value);
+    if (this.cache.size > 2000) {
+      const first = this.cache.keys().next().value;
+      if (first) this.cache.delete(first);
+    }
+  }
+
+  del(key: string): void {
+    this.cache.delete(key);
+  }
+
+  flushAll(): void {
+    this.cache.clear();
+  }
+}
+
 export class BaileysGatewayClient {
   private sock: WASocket | null = null;
   private supabase: SupabaseClient;
@@ -18,6 +47,8 @@ export class BaileysGatewayClient {
   private tenantId?: string;
   private pacer: AntiBanPacer;
   private isConnecting: boolean = false;
+  private messageStore: Map<string, proto.IMessage> = new Map();
+  private retryCache: SimpleCacheStore = new SimpleCacheStore();
 
   constructor(supabase: SupabaseClient, sessionId: string = 'session_default', tenantId?: string) {
     this.supabase = supabase;
@@ -54,7 +85,7 @@ export class BaileysGatewayClient {
 
       this.sock = makeWASocket({
         version,
-        logger: pino({ level: 'silent' }),
+        logger: pino({ level: 'info' }),
         printQRInTerminal: true,
         auth: state,
         browser: Browsers.ubuntu('Chrome'),
@@ -62,10 +93,61 @@ export class BaileysGatewayClient {
         generateHighQualityLinkPreview: false,
         markOnlineOnConnect: true,
         connectTimeoutMs: 60000,
-        keepAliveIntervalMs: 25000
+        keepAliveIntervalMs: 25000,
+        msgRetryCounterCache: this.retryCache as any,
+        getMessage: async (key: WAMessageKey): Promise<proto.IMessage | undefined> => {
+          if (!key.id) return undefined;
+
+          // 1. Check in-memory message store
+          const inMem =
+            this.messageStore.get(key.id) ||
+            (key.remoteJid ? this.messageStore.get(`${key.remoteJid}:${key.id}`) : undefined);
+          if (inMem) {
+            console.log(`[BaileysClient] 🔄 Fulfilled E2EE retry request from memory for message ID: ${key.id}`);
+            return inMem;
+          }
+
+          // 2. Fallback: Query Supabase outbox queue
+          try {
+            const { data: row } = await this.supabase
+              .from('whatsapp_outbox_queue')
+              .select('message_body')
+              .or(`metadata->>message_id.eq.${key.id},id.eq.${key.id}`)
+              .limit(1)
+              .maybeSingle();
+
+            if (row?.message_body) {
+              console.log(`[BaileysClient] 🔄 Fulfilled E2EE retry request from DB for message ID: ${key.id}`);
+              return {
+                conversation: row.message_body
+              };
+            }
+          } catch (e) {
+            console.warn('[BaileysClient] getMessage DB fallback warning:', (e as Error).message);
+          }
+
+          return undefined;
+        }
       });
 
+      // Save credentials on update
       this.sock.ev.on('creds.update', saveCreds);
+
+      // Cache incoming & outgoing messages to handle retries seamlessly
+      this.sock.ev.on('messages.upsert', async ({ messages }) => {
+        for (const msg of messages) {
+          if (msg.key?.id && msg.message) {
+            this.messageStore.set(msg.key.id, msg.message);
+            if (msg.key.remoteJid) {
+              this.messageStore.set(`${msg.key.remoteJid}:${msg.key.id}`, msg.message);
+            }
+            if (this.messageStore.size > 3000) {
+              const first = this.messageStore.keys().next().value;
+              if (first) this.messageStore.delete(first);
+            }
+          }
+        }
+      });
 
       this.sock.ev.on('connection.update', async (update) => {
         const { connection, lastDisconnect, qr } = update;
@@ -108,6 +190,7 @@ export class BaileysGatewayClient {
               connected_phone: phone,
               connected_name: name,
               qr_code: null,
+              tenant_id: this.tenantId || null,
               last_heartbeat_at: new Date().toISOString(),
               updated_at: new Date().toISOString()
             })
@@ -119,10 +202,10 @@ export class BaileysGatewayClient {
           const statusCode = (lastDisconnect?.error as Boom)?.output?.statusCode;
           const isLoggedOut = statusCode === DisconnectReason.loggedOut;
 
-          console.warn(`[BaileysClient] Connection closed. Status Code: ${statusCode}`);
+          console.warn(`[BaileysClient] Connection closed with status: ${statusCode}, loggedOut: ${isLoggedOut}`);
 
           if (isLoggedOut) {
-            console.error('[BaileysClient] ❌ Device was logged out. A new QR code scan is required.');
+            console.warn('[BaileysClient] WhatsApp session logged out. Wiping session state in DB...');
             await this.supabase
               .from('whatsapp_auth_sessions')
               .update({
@@ -137,10 +220,9 @@ export class BaileysGatewayClient {
               .eq('id', this.sessionId);
             setTimeout(() => this.initialize(), 3000);
           } else {
-            // WhatsApp often requests a restart (515: restartRequired) during initial pairing to finalize crypto keys!
-            // NEVER wipe creds here! Reconnect with the received creds so pairing completes.
+            // Reconnect without wiping credentials
             const reconnectDelay = statusCode === DisconnectReason.restartRequired ? 1000 : 3000;
-            console.log(`[BaileysClient] Reconnecting in ${reconnectDelay}ms to finalize/maintain connection (Status: ${statusCode})...`);
+            console.log(`[BaileysClient] Reconnecting in ${reconnectDelay}ms (Status: ${statusCode})...`);
             setTimeout(() => this.initialize(), reconnectDelay);
           }
         }
@@ -153,9 +235,13 @@ export class BaileysGatewayClient {
   }
 
   /**
-   * Send a WhatsApp message to a recipient with full anti-ban pacing and presence simulation.
+   * Send a WhatsApp message to a recipient with full anti-ban pacing and E2EE retry fulfillment.
    */
-  public async sendTextMessage(phone: string, text: string): Promise<boolean> {
+  public async sendTextMessage(
+    phone: string,
+    text: string,
+    queueItemId?: string
+  ): Promise<{ success: boolean; messageId?: string }> {
     if (!this.sock || !this.isConnected()) {
       throw new Error('WhatsApp gateway is not connected. Message queued.');
     }
@@ -164,28 +250,63 @@ export class BaileysGatewayClient {
       throw new Error('Circuit breaker tripped. Queue temporarily paused.');
     }
 
-    // Format JID: e.g. 201012345678@s.whatsapp.net
+    // Format phone digits
     const cleanDigits = phone.replace(/\D/g, '');
-    const jid = `${cleanDigits}@s.whatsapp.net`;
+    let targetJid = `${cleanDigits}@s.whatsapp.net`;
 
-    // 1. Humanize message text
+    // 1. Verify recipient on WhatsApp & get canonical JID to ensure correct Signal session keys
+    try {
+      const waResults = await this.sock.onWhatsApp(cleanDigits);
+      if (waResults && waResults.length > 0 && waResults[0].exists && waResults[0].jid) {
+        targetJid = waResults[0].jid;
+        console.log(`[BaileysClient] Verified recipient on WhatsApp: ${targetJid}`);
+      }
+    } catch (checkErr) {
+      console.warn('[BaileysClient] onWhatsApp lookup warning:', (checkErr as Error).message);
+    }
+
+    // 2. Humanize message text
     const messageToSend = this.pacer.humanizeMessage(text);
 
-    // 2. Pace & simulate human typing
-    await this.pacer.paceAndSimulatePresence(this.sock, jid);
+    // 3. Pace & simulate human typing
+    await this.pacer.paceAndSimulatePresence(this.sock, targetJid);
 
-    // 3. Dispatch message
+    // 4. Dispatch message
     try {
-      const result = await this.sock.sendMessage(jid, { text: messageToSend });
-      if (result && result.key) {
+      const result = await this.sock.sendMessage(targetJid, { text: messageToSend });
+      if (result && result.key && result.key.id) {
         this.pacer.recordSuccess();
-        console.log(`[BaileysClient] ✅ Message dispatched successfully to ${jid}`);
-        return true;
+        const msgId = result.key.id;
+        console.log(`[BaileysClient] ✅ Message dispatched successfully to ${targetJid} (ID: ${msgId})`);
+
+        // Cache message for E2EE retry fulfillment
+        if (result.message) {
+          this.messageStore.set(msgId, result.message);
+          this.messageStore.set(`${targetJid}:${msgId}`, result.message);
+        }
+
+        // Link message ID in database queue metadata for cross-restart E2EE fulfillment
+        if (queueItemId) {
+          try {
+            await this.supabase
+              .from('whatsapp_outbox_queue')
+              .update({
+                metadata: {
+                  message_id: msgId,
+                  target_jid: targetJid,
+                  sent_at: new Date().toISOString()
+                }
+              })
+              .eq('id', queueItemId);
+          } catch (_) {}
+        }
+
+        return { success: true, messageId: msgId };
       }
-      return false;
+      return { success: false };
     } catch (err) {
       this.pacer.recordFailure();
-      console.error(`[BaileysClient] ❌ Failed to dispatch message to ${jid}:`, (err as Error).message);
+      console.error(`[BaileysClient] ❌ Failed to dispatch message to ${targetJid}:`, (err as Error).message);
       throw err;
     }
   }
@@ -226,6 +347,7 @@ export class BaileysGatewayClient {
           keys: {},
           status: 'disconnected',
           qr_code: null,
+          tenant_id: this.tenantId || null,
           updated_at: new Date().toISOString()
         })
         .eq('id', this.sessionId);
