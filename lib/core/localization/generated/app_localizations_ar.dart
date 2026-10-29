@@ -1214,7 +1214,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get pleaseEnterParentPhone => 'يرجى إدخال رقم هاتف ولي الأمر (واتساب)';
 
   @override
-  String get studentPhoneLabel => 'هاتف الطالب';
+  String get studentPhoneLabel => 'هاتف الطالب (واتساب)';
 
   @override
   String get pleaseEnterValidPhone =>
@@ -9755,4 +9755,251 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get configureGatewayAction => 'إعدادات البوابة';
+
+  @override
+  String get studentProfileAndSettingsTitle => 'الملف الشخصي والإعدادات';
+
+  @override
+  String get studentProfileSubtitle =>
+      'إدارة هويتك الأكاديمية، أرقام التواصل، وأمان حسابك';
+
+  @override
+  String get studentAcademicIdentityTitle => 'الهوية الأكاديمية';
+
+  @override
+  String get studentEnrolledGroups => 'المجموعات المشترك بها';
+
+  @override
+  String get studentNoGroupsJoined => 'لا توجد مجموعات دراسية مرتبطة حالياً';
+
+  @override
+  String get studentContactDetailsTitle => 'بيانات الاتصال وولي الأمر';
+
+  @override
+  String get studentFullNameLabel => 'اسم الطالب بالكامل';
+
+  @override
+  String get studentNameNotice =>
+      'هذا الاسم يظهر على الشهادات وكشوف الدرجات والامتحانات الرسمية';
+
+  @override
+  String get studentNameRequired => 'يرجى كتابة الاسم بالكامل';
+
+  @override
+  String get studentNameTooShort => 'يجب أن يتكون الاسم من 3 أحرف على الأقل';
+
+  @override
+  String get studentParentPhoneLabel => 'هاتف ولي الأمر (واتساب)';
+
+  @override
+  String get studentParentPhoneNotice =>
+      'تنبيه هام: كافة تقارير درجات الامتحانات والواجبات وإشعارات الواتساب الأكاديمية تُرسل آلياً إلى هذا الرقم.';
+
+  @override
+  String get studentEmailReadOnlyLabel => 'البريد الإلكتروني الأكاديمي';
+
+  @override
+  String get studentEmailReadOnlyNote =>
+      'البريد الإلكتروني مرتبط بحسابك الأكاديمي ومخصص للقراءة فقط ولا يمكن تعديله.';
+
+  @override
+  String get studentSaveProfileBtn => 'حفظ التعديلات';
+
+  @override
+  String get studentConfirmParentPhoneDialogTitle =>
+      'تأكيد تغيير رقم ولي الأمر';
+
+  @override
+  String get studentConfirmParentPhoneDialogMessage =>
+      'هل أنت متأكد من تغيير رقم هاتف ولي الأمر؟ سيتم إرسال كافة تقارير الامتحانات القادمة وكشوف الدرجات وإشعارات الواتساب الآلية مباشرة إلى هذا الرقم الجديد.';
+
+  @override
+  String get studentConfirmParentPhoneConfirmBtn => 'نعم، تأكيد التحديث';
+
+  @override
+  String get studentSecurityTitle => 'أمان الحساب وكلمة المرور';
+
+  @override
+  String get studentSecuritySubtitle =>
+      'تحديث كلمة المرور الخاصة بتسجيل الدخول بأمان';
+
+  @override
+  String get studentNewPasswordLabel => 'كلمة المرور الجديدة';
+
+  @override
+  String get studentConfirmPasswordLabel => 'تأكيد كلمة المرور الجديدة';
+
+  @override
+  String get studentChangePasswordBtn => 'تحديث كلمة المرور';
+
+  @override
+  String get studentPasswordRequired => 'يرجى إدخال كلمة المرور';
+
+  @override
+  String get studentPasswordTooShort => 'يجب أن لا تقل كلمة المرور عن 6 أحرف';
+
+  @override
+  String get studentPasswordMismatch => 'كلمتا المرور غير متطابقتين';
+
+  @override
+  String get studentPreferencesTitle => 'تفضيلات التطبيق والنظام';
+
+  @override
+  String get studentPreferencesSubtitle => 'تخصيص لغة الواجهة وإعدادات الجلسة';
+
+  @override
+  String get studentLanguageLabel => 'لغة الواجهة';
+
+  @override
+  String get studentProfileUpdatedSuccess =>
+      'تم حفظ وتحديث بيانات الملف الشخصي بنجاح';
+
+  @override
+  String get studentPasswordUpdatedSuccess => 'تم تحديث كلمة المرور بنجاح';
+
+  @override
+  String get studentAvatarUpdatedSuccess => 'تم تحديث الصورة الشخصية بنجاح';
+
+  @override
+  String get whatsappRefreshQrAction => 'تحديث رمز الـ QR';
+
+  @override
+  String get whatsappQrHighResNotice =>
+      'إذا تعذر المسح، اضغط تحديث الرمز لمسح رمز جديد نشط فوراً';
+
+  @override
+  String get whatsappStudioTitle => 'استوديو واتساب الأكاديمي';
+
+  @override
+  String get whatsappStudioSubtitle =>
+      'تخصيص صياغة التقارير، عبارات التقييم الديناميكية، وسياسات المستلمين';
+
+  @override
+  String get whatsappStudioOpenButton => 'استوديو قوالب ورسائل واتساب 🎨';
+
+  @override
+  String get whatsappStudioTabTemplates => 'صياغة التقرير والعبارات';
+
+  @override
+  String get whatsappStudioTabTiers => 'شروط وعبارات التقييم';
+
+  @override
+  String get whatsappStudioTabPolicies => 'المستلمون وموعد الإرسال';
+
+  @override
+  String get whatsappStudioLivePreviewTitle => 'معاينة واتساب الحية 📱';
+
+  @override
+  String get whatsappStudioLivePreviewSubtitle =>
+      'يحاكي شاشة هاتف ولي الأمر لحظياً كما ستصله الرسالة';
+
+  @override
+  String get whatsappStudioResetDefaults => 'استعادة الضبط الذكي';
+
+  @override
+  String get whatsappStudioResetConfirm =>
+      'هل تريد استعادة جميع القوالب والسياسات إلى الضبط الأكاديمي القياسي؟';
+
+  @override
+  String get whatsappStudioSaveSuccess => 'تم حفظ قوالب وسياسات واتساب بنجاح';
+
+  @override
+  String get whatsappStudioHeaderLabel => 'مقدمة التقرير والترحيب';
+
+  @override
+  String get whatsappStudioBodyLabel => 'فقرة النتيجة والدرجات';
+
+  @override
+  String get whatsappStudioFooterLabel => 'خاتمة التقرير وتوقيع المدرس';
+
+  @override
+  String get whatsappStudioTagsLabel =>
+      'الشارات الديناميكية (انقر لإدراجها في مكان المؤشر)';
+
+  @override
+  String get whatsappStudioTagStudentName => 'اسم الطالب';
+
+  @override
+  String get whatsappStudioTagExamTitle => 'اسم الاختبار';
+
+  @override
+  String get whatsappStudioTagScore => 'الدرجة';
+
+  @override
+  String get whatsappStudioTagMaxScore => 'الدرجة الكلية';
+
+  @override
+  String get whatsappStudioTagPercentage => 'النسبة %';
+
+  @override
+  String get whatsappStudioTagGroupName => 'المجموعة';
+
+  @override
+  String get whatsappStudioTagTeacherName => 'اسم المدرس';
+
+  @override
+  String get whatsappStudioTagEvaluation => 'عبارة التقييم';
+
+  @override
+  String get whatsappStudioTierExcellentLabel => '🌟 أداء ممتاز (≥ 90%)';
+
+  @override
+  String get whatsappStudioTierGoodLabel => '👏 جيد جداً (75% - 89%)';
+
+  @override
+  String get whatsappStudioTierPassLabel => '👍 أداء مقبول (60% - 74%)';
+
+  @override
+  String get whatsappStudioTierNeedsImprovementLabel =>
+      '💡 يحتاج تركيز ومتابعة (< 60%)';
+
+  @override
+  String get whatsappStudioRecipientTargetLabel =>
+      'لمن يتم إرسال نتيجة الاختبار؟';
+
+  @override
+  String get whatsappStudioRecipientParentOnly => 'ولي الأمر فقط (الموصى به)';
+
+  @override
+  String get whatsappStudioRecipientParentOnlyDesc =>
+      'يُرسل إلى رقم ولي الأمر مباشرة لتشجيع الرقابة والمتابعة الأبوية';
+
+  @override
+  String get whatsappStudioRecipientStudentOnly => 'الطالب فقط';
+
+  @override
+  String get whatsappStudioRecipientStudentOnlyDesc =>
+      'يُرسل إلى رقم الطالب الشخصي مباشرة';
+
+  @override
+  String get whatsappStudioRecipientBoth => 'كلاهما معاً (ولي الأمر + الطالب)';
+
+  @override
+  String get whatsappStudioRecipientBothDesc =>
+      'يُرسل نسختين منفصلتين لرقم ولي الأمر ورقم الطالب';
+
+  @override
+  String get whatsappStudioDispatchTimingLabel => 'توقيت إطلاق الرسالة';
+
+  @override
+  String get whatsappStudioDispatchTimingInstant =>
+      'فور التسليم لحظياً (مباشر)';
+
+  @override
+  String get whatsappStudioDispatchTimingInstantDesc =>
+      'تخرج الرسالة في نفس الثانية بمجرد ضغط الطالب على تسليم';
+
+  @override
+  String get whatsappStudioDispatchTimingExamEnd =>
+      'بعد انتهاء موعد الاختبار بالكامل';
+
+  @override
+  String get whatsappStudioDispatchTimingExamEndDesc =>
+      'يؤجل الإرسال لحين انتهاء وقت الامتحان العام منعاً لتسريب الإجابات';
+
+  @override
+  String get whatsappStudioSimulatorTestTier => 'محاكاة الدرجة في المعاينة:';
+
+  @override
+  String get whatsappStudioSaveAction => 'حفظ إعدادات الاستوديو';
 }

@@ -1218,7 +1218,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Please enter parent WhatsApp phone number';
 
   @override
-  String get studentPhoneLabel => 'Student Phone';
+  String get studentPhoneLabel => 'Student Mobile / WhatsApp';
 
   @override
   String get pleaseEnterValidPhone =>
@@ -9805,4 +9805,252 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get configureGatewayAction => 'Configure Gateway';
+
+  @override
+  String get studentProfileAndSettingsTitle => 'Profile & Settings';
+
+  @override
+  String get studentProfileSubtitle =>
+      'Manage your academic identity, contact numbers, and security preferences';
+
+  @override
+  String get studentAcademicIdentityTitle => 'Academic Identity';
+
+  @override
+  String get studentEnrolledGroups => 'Enrolled Cohorts & Groups';
+
+  @override
+  String get studentNoGroupsJoined =>
+      'No active group cohorts currently linked';
+
+  @override
+  String get studentContactDetailsTitle => 'Contact Information & Parent Info';
+
+  @override
+  String get studentFullNameLabel => 'Student Full Name';
+
+  @override
+  String get studentNameNotice =>
+      'This name appears on official exam records and certificates';
+
+  @override
+  String get studentNameRequired => 'Please enter your full name';
+
+  @override
+  String get studentNameTooShort => 'Name must be at least 3 characters';
+
+  @override
+  String get studentParentPhoneLabel => 'Parent Mobile / WhatsApp';
+
+  @override
+  String get studentParentPhoneNotice =>
+      'Important: Official exam grades, progress cards, and WhatsApp dispatch notifications are automatically routed to this number.';
+
+  @override
+  String get studentEmailReadOnlyLabel => 'Registered Academic Email';
+
+  @override
+  String get studentEmailReadOnlyNote =>
+      'Email address is permanently bound to your academic record and is read-only.';
+
+  @override
+  String get studentSaveProfileBtn => 'Save Changes';
+
+  @override
+  String get studentConfirmParentPhoneDialogTitle =>
+      'Confirm Parent Number Change';
+
+  @override
+  String get studentConfirmParentPhoneDialogMessage =>
+      'Are you sure you want to update your parent\'s phone number? All future academic exam reports, automated WhatsApp results, and grade alerts will be dispatched directly to this new number.';
+
+  @override
+  String get studentConfirmParentPhoneConfirmBtn => 'Yes, Update Number';
+
+  @override
+  String get studentSecurityTitle => 'Account Security & Password';
+
+  @override
+  String get studentSecuritySubtitle =>
+      'Update your account login password securely';
+
+  @override
+  String get studentNewPasswordLabel => 'New Password';
+
+  @override
+  String get studentConfirmPasswordLabel => 'Confirm New Password';
+
+  @override
+  String get studentChangePasswordBtn => 'Update Password';
+
+  @override
+  String get studentPasswordRequired => 'Please enter a password';
+
+  @override
+  String get studentPasswordTooShort =>
+      'Password must be at least 6 characters';
+
+  @override
+  String get studentPasswordMismatch => 'Passwords do not match';
+
+  @override
+  String get studentPreferencesTitle => 'System & App Preferences';
+
+  @override
+  String get studentPreferencesSubtitle =>
+      'Customize language, regional display, and session settings';
+
+  @override
+  String get studentLanguageLabel => 'Display Language';
+
+  @override
+  String get studentProfileUpdatedSuccess =>
+      'Profile details updated successfully';
+
+  @override
+  String get studentPasswordUpdatedSuccess =>
+      'Account password changed successfully';
+
+  @override
+  String get studentAvatarUpdatedSuccess => 'Avatar updated successfully';
+
+  @override
+  String get whatsappRefreshQrAction => 'Refresh QR Code';
+
+  @override
+  String get whatsappQrHighResNotice =>
+      'If scan fails, click refresh to generate a fresh active QR code instantly';
+
+  @override
+  String get whatsappStudioTitle => 'WhatsApp Academic Studio';
+
+  @override
+  String get whatsappStudioSubtitle =>
+      'Customize report templates, dynamic evaluation tiers, and recipient policies';
+
+  @override
+  String get whatsappStudioOpenButton => 'Customize Templates & Messages 🎨';
+
+  @override
+  String get whatsappStudioTabTemplates => 'Report Template & Phrases';
+
+  @override
+  String get whatsappStudioTabTiers => 'Evaluation Tiers';
+
+  @override
+  String get whatsappStudioTabPolicies => 'Recipients & Timing';
+
+  @override
+  String get whatsappStudioLivePreviewTitle => 'Live WhatsApp Preview';
+
+  @override
+  String get whatsappStudioLivePreviewSubtitle =>
+      'Shows exactly what the parent receives in real-time';
+
+  @override
+  String get whatsappStudioResetDefaults => 'Reset to Smart Defaults';
+
+  @override
+  String get whatsappStudioResetConfirm =>
+      'Reset all templates and policies to the default academic standard?';
+
+  @override
+  String get whatsappStudioSaveSuccess =>
+      'WhatsApp templates and policies saved successfully';
+
+  @override
+  String get whatsappStudioHeaderLabel => 'Opening Greeting & Introduction';
+
+  @override
+  String get whatsappStudioBodyLabel => 'Main Results Block';
+
+  @override
+  String get whatsappStudioFooterLabel => 'Sign-off & Teacher Signature';
+
+  @override
+  String get whatsappStudioTagsLabel => 'Dynamic Insert Tags (Click to Insert)';
+
+  @override
+  String get whatsappStudioTagStudentName => 'Student Name';
+
+  @override
+  String get whatsappStudioTagExamTitle => 'Exam Title';
+
+  @override
+  String get whatsappStudioTagScore => 'Score';
+
+  @override
+  String get whatsappStudioTagMaxScore => 'Total Score';
+
+  @override
+  String get whatsappStudioTagPercentage => 'Percentage %';
+
+  @override
+  String get whatsappStudioTagGroupName => 'Group';
+
+  @override
+  String get whatsappStudioTagTeacherName => 'Teacher Name';
+
+  @override
+  String get whatsappStudioTagEvaluation => 'Evaluation Phrase';
+
+  @override
+  String get whatsappStudioTierExcellentLabel => '🌟 Excellent (≥ 90%)';
+
+  @override
+  String get whatsappStudioTierGoodLabel => '👏 Very Good (75% - 89%)';
+
+  @override
+  String get whatsappStudioTierPassLabel => '👍 Passed (60% - 74%)';
+
+  @override
+  String get whatsappStudioTierNeedsImprovementLabel =>
+      '💡 Needs Improvement (< 60%)';
+
+  @override
+  String get whatsappStudioRecipientTargetLabel => 'Who Receives the Result?';
+
+  @override
+  String get whatsappStudioRecipientParentOnly => 'Parent Only (Recommended)';
+
+  @override
+  String get whatsappStudioRecipientParentOnlyDesc =>
+      'Sends to parent phone to maintain academic oversight';
+
+  @override
+  String get whatsappStudioRecipientStudentOnly => 'Student Only';
+
+  @override
+  String get whatsappStudioRecipientStudentOnlyDesc =>
+      'Sends directly to the student phone number';
+
+  @override
+  String get whatsappStudioRecipientBoth => 'Both (Parent + Student)';
+
+  @override
+  String get whatsappStudioRecipientBothDesc =>
+      'Dispatches two separate reports to both numbers';
+
+  @override
+  String get whatsappStudioDispatchTimingLabel => 'Dispatch Timing';
+
+  @override
+  String get whatsappStudioDispatchTimingInstant => 'Instant (Upon Submission)';
+
+  @override
+  String get whatsappStudioDispatchTimingInstantDesc =>
+      'Sends immediately as soon as the student presses submit';
+
+  @override
+  String get whatsappStudioDispatchTimingExamEnd => 'After Exam Period Ends';
+
+  @override
+  String get whatsappStudioDispatchTimingExamEndDesc =>
+      'Holds dispatch until the exam window closes for all students';
+
+  @override
+  String get whatsappStudioSimulatorTestTier => 'Preview Simulation Score:';
+
+  @override
+  String get whatsappStudioSaveAction => 'Save Studio Preferences';
 }

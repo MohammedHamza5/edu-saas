@@ -1,0 +1,429 @@
+import 'package:flutter/material.dart';
+import '../../../../../core/extensions/localized_context_extension.dart';
+import '../../../../../core/localization/generated/app_localizations.dart';
+import '../../../../../core/theme/app_colors.dart';
+import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/utils/app_feedback.dart';
+import '../../../data/datasources/whatsapp_gateway_remote_datasource.dart';
+import '../../../domain/entities/whatsapp_dispatch_config_entity.dart';
+import 'whatsapp_evaluation_tiers_section.dart';
+import 'whatsapp_live_bubble_preview.dart';
+import 'whatsapp_recipient_policy_section.dart';
+import 'whatsapp_template_fields_section.dart';
+
+class WhatsAppTemplateStudioDialog extends StatefulWidget {
+  final WhatsAppGatewayRemoteDataSource dataSource;
+
+  const WhatsAppTemplateStudioDialog({
+    super.key,
+    required this.dataSource,
+  });
+
+  static Future<bool?> show(
+    BuildContext context, {
+    required WhatsAppGatewayRemoteDataSource dataSource,
+  }) {
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => WhatsAppTemplateStudioDialog(dataSource: dataSource),
+    );
+  }
+
+  @override
+  State<WhatsAppTemplateStudioDialog> createState() =>
+      _WhatsAppTemplateStudioDialogState();
+}
+
+class _WhatsAppTemplateStudioDialogState
+    extends State<WhatsAppTemplateStudioDialog>
+    with SingleTickerProviderStateMixin {
+  late final TabController _tabController;
+
+  final TextEditingController _headerController = TextEditingController();
+  final TextEditingController _bodyController = TextEditingController();
+  final TextEditingController _footerController = TextEditingController();
+  final TextEditingController _excellentController = TextEditingController();
+  final TextEditingController _goodController = TextEditingController();
+  final TextEditingController _passController = TextEditingController();
+  final TextEditingController _needsImprovementController =
+      TextEditingController();
+
+  WhatsAppRecipientTarget _recipientTarget = WhatsAppRecipientTarget.parentOnly;
+  WhatsAppDispatchTiming _dispatchTiming = WhatsAppDispatchTiming.instant;
+
+  bool _isLoading = true;
+  bool _isSaving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+    _loadConfig();
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    _headerController.dispose();
+    _bodyController.dispose();
+    _footerController.dispose();
+    _excellentController.dispose();
+    _goodController.dispose();
+    _passController.dispose();
+    _needsImprovementController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadConfig() async {
+    setState(() => _isLoading = true);
+    final config = await widget.dataSource.getDispatchConfig();
+    if (!mounted) return;
+
+    _applyConfigToControllers(config);
+    setState(() => _isLoading = false);
+  }
+
+  void _applyConfigToControllers(WhatsAppDispatchConfigEntity config) {
+    _headerController.text = config.headerTemplate;
+    _bodyController.text = config.bodyTemplate;
+    _footerController.text = config.footerTemplate;
+    _excellentController.text = config.tierExcellentText;
+    _goodController.text = config.tierGoodText;
+    _passController.text = config.tierPassText;
+    _needsImprovementController.text = config.tierNeedsImprovementText;
+    _recipientTarget = config.recipientTarget;
+    _dispatchTiming = config.dispatchTiming;
+  }
+
+  WhatsAppDispatchConfigEntity _buildCurrentConfig() {
+    return WhatsAppDispatchConfigEntity(
+      recipientTarget: _recipientTarget,
+      dispatchTiming: _dispatchTiming,
+      headerTemplate: _headerController.text.trim(),
+      bodyTemplate: _bodyController.text.trim(),
+      footerTemplate: _footerController.text.trim(),
+      tierExcellentText: _excellentController.text.trim(),
+      tierGoodText: _goodController.text.trim(),
+      tierPassText: _passController.text.trim(),
+      tierNeedsImprovementText: _needsImprovementController.text.trim(),
+    );
+  }
+
+  void _insertTag(String tag) {
+    // Insert into bodyController if empty or active
+    final controller = _bodyController;
+    final text = controller.text;
+    final selection = controller.selection;
+
+    if (selection.isValid && selection.start >= 0) {
+      final newText = text.replaceRange(selection.start, selection.end, tag);
+      controller.value = TextEditingValue(
+        text: newText,
+        selection: TextSelection.collapsed(offset: selection.start + tag.length),
+      );
+    } else {
+      controller.text = '$text $tag';
+    }
+    setState(() {});
+  }
+
+  Future<void> _resetToSmartDefaults() async {
+    final l10n = context.l10n;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.whatsappStudioResetDefaults),
+        content: Text(l10n.whatsappStudioResetConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cancel),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+            ),
+            child: Text(l10n.whatsappStudioResetDefaults),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      _applyConfigToControllers(
+        WhatsAppDispatchConfigEntity.defaultConfiguration,
+      );
+      setState(() {});
+    }
+  }
+
+  Future<void> _saveConfig() async {
+    setState(() => _isSaving = true);
+    final config = _buildCurrentConfig();
+    final success = await widget.dataSource.saveDispatchConfig(config);
+
+    if (!mounted) return;
+    setState(() => _isSaving = false);
+
+    if (success) {
+      AppFeedback.showSuccess(
+        context,
+        context.l10n.whatsappStudioSaveSuccess,
+      );
+      Navigator.pop(context, true);
+    } else {
+      AppFeedback.showError(
+        context,
+        'تعذر حفظ إعدادات الاستوديو، يرجى المحاولة لاحقاً',
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final size = MediaQuery.of(context).size;
+    final isWide = size.width > 920;
+
+    return Dialog(
+      insetPadding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.s16,
+        vertical: AppSpacing.s24,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLarge),
+      ),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: isWide ? 1040 : 560,
+          maxHeight: size.height * 0.9,
+        ),
+        child: _isLoading
+            ? const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(AppSpacing.s32),
+                  child: CircularProgressIndicator(),
+                ),
+              )
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Header Bar
+                  _buildHeaderBar(l10n),
+
+                  // Tabs Header
+                  _buildTabBar(l10n),
+
+                  // Body (Split on Wide, Single on Narrow)
+                  Expanded(
+                    child: isWide
+                        ? Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              // Left/Right: Configuration Editor
+                              Expanded(
+                                flex: 6,
+                                child: _buildTabContent(),
+                              ),
+                              const VerticalDivider(
+                                width: 1,
+                                thickness: 1,
+                                color: AppColors.border,
+                              ),
+                              // Live Simulator Preview
+                              Expanded(
+                                flex: 5,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(AppSpacing.s16),
+                                  child: WhatsAppLiveBubblePreview(
+                                    config: _buildCurrentConfig(),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
+                        : _buildTabContent(),
+                  ),
+
+                  // Footer Actions
+                  _buildFooterBar(l10n),
+                ],
+              ),
+      ),
+    );
+  }
+
+  Widget _buildHeaderBar(AppLocalizations l10n) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.s20,
+        vertical: AppSpacing.s14,
+      ),
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        border: Border(bottom: BorderSide(color: AppColors.border)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(AppSpacing.s8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF25D366).withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+            ),
+            child: const Icon(
+              Icons.auto_awesome_rounded,
+              color: Color(0xFF25D366),
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.s12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.whatsappStudioTitle,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                Text(
+                  l10n.whatsappStudioSubtitle,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textMuted,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            onPressed: () => Navigator.pop(context),
+            icon: const Icon(Icons.close_rounded),
+            color: AppColors.textMuted,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTabBar(AppLocalizations l10n) {
+    return Container(
+      color: AppColors.surfaceVariant.withValues(alpha: 0.3),
+      child: TabBar(
+        controller: _tabController,
+        labelColor: AppColors.primary,
+        unselectedLabelColor: AppColors.textMuted,
+        indicatorColor: AppColors.primary,
+        indicatorWeight: 2.5,
+        labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+        tabs: [
+          Tab(
+            icon: const Icon(Icons.edit_note_rounded, size: 18),
+            text: l10n.whatsappStudioTabTemplates,
+          ),
+          Tab(
+            icon: const Icon(Icons.military_tech_outlined, size: 18),
+            text: l10n.whatsappStudioTabTiers,
+          ),
+          Tab(
+            icon: const Icon(Icons.tune_rounded, size: 18),
+            text: l10n.whatsappStudioTabPolicies,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTabContent() {
+    return TabBarView(
+      controller: _tabController,
+      children: [
+        WhatsAppTemplateFieldsSection(
+          headerController: _headerController,
+          bodyController: _bodyController,
+          footerController: _footerController,
+          onChanged: () => setState(() {}),
+          onTagSelected: _insertTag,
+        ),
+        SingleChildScrollView(
+          padding: const EdgeInsets.all(AppSpacing.s16),
+          child: WhatsAppEvaluationTiersSection(
+            excellentController: _excellentController,
+            goodController: _goodController,
+            passController: _passController,
+            needsImprovementController: _needsImprovementController,
+            onChanged: () => setState(() {}),
+          ),
+        ),
+        WhatsAppRecipientPolicySection(
+          recipientTarget: _recipientTarget,
+          dispatchTiming: _dispatchTiming,
+          onTargetChanged: (t) => setState(() => _recipientTarget = t),
+          onTimingChanged: (t) => setState(() => _dispatchTiming = t),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFooterBar(AppLocalizations l10n) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.s20,
+        vertical: AppSpacing.s14,
+      ),
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        border: Border(top: BorderSide(color: AppColors.border)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          TextButton.icon(
+            onPressed: _isSaving ? null : _resetToSmartDefaults,
+            icon: const Icon(Icons.restart_alt_rounded, size: 18),
+            label: Text(l10n.whatsappStudioResetDefaults),
+            style: TextButton.styleFrom(foregroundColor: AppColors.textMuted),
+          ),
+          Row(
+            children: [
+              TextButton(
+                onPressed: _isSaving ? null : () => Navigator.pop(context),
+                child: Text(l10n.cancel),
+              ),
+              const SizedBox(width: AppSpacing.s12),
+              ElevatedButton.icon(
+                onPressed: _isSaving ? null : _saveConfig,
+                icon: _isSaving
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Icon(Icons.check_rounded, size: 18),
+                label: Text(l10n.whatsappStudioSaveAction),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF25D366),
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}

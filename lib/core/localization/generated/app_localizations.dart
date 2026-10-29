@@ -2390,10 +2390,10 @@ abstract class AppLocalizations {
   /// **'Please enter parent WhatsApp phone number'**
   String get pleaseEnterParentPhone;
 
-  /// Student phone label
+  /// No description provided for @studentPhoneLabel.
   ///
   /// In en, this message translates to:
-  /// **'Student Phone'**
+  /// **'Student Mobile / WhatsApp'**
   String get studentPhoneLabel;
 
   /// Validation error
@@ -17298,6 +17298,456 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Configure Gateway'**
   String get configureGatewayAction;
+
+  /// No description provided for @studentProfileAndSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile & Settings'**
+  String get studentProfileAndSettingsTitle;
+
+  /// No description provided for @studentProfileSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage your academic identity, contact numbers, and security preferences'**
+  String get studentProfileSubtitle;
+
+  /// No description provided for @studentAcademicIdentityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Academic Identity'**
+  String get studentAcademicIdentityTitle;
+
+  /// No description provided for @studentEnrolledGroups.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrolled Cohorts & Groups'**
+  String get studentEnrolledGroups;
+
+  /// No description provided for @studentNoGroupsJoined.
+  ///
+  /// In en, this message translates to:
+  /// **'No active group cohorts currently linked'**
+  String get studentNoGroupsJoined;
+
+  /// No description provided for @studentContactDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact Information & Parent Info'**
+  String get studentContactDetailsTitle;
+
+  /// No description provided for @studentFullNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Student Full Name'**
+  String get studentFullNameLabel;
+
+  /// No description provided for @studentNameNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'This name appears on official exam records and certificates'**
+  String get studentNameNotice;
+
+  /// No description provided for @studentNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your full name'**
+  String get studentNameRequired;
+
+  /// No description provided for @studentNameTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Name must be at least 3 characters'**
+  String get studentNameTooShort;
+
+  /// No description provided for @studentParentPhoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Parent Mobile / WhatsApp'**
+  String get studentParentPhoneLabel;
+
+  /// No description provided for @studentParentPhoneNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Important: Official exam grades, progress cards, and WhatsApp dispatch notifications are automatically routed to this number.'**
+  String get studentParentPhoneNotice;
+
+  /// No description provided for @studentEmailReadOnlyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Registered Academic Email'**
+  String get studentEmailReadOnlyLabel;
+
+  /// No description provided for @studentEmailReadOnlyNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Email address is permanently bound to your academic record and is read-only.'**
+  String get studentEmailReadOnlyNote;
+
+  /// No description provided for @studentSaveProfileBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Changes'**
+  String get studentSaveProfileBtn;
+
+  /// No description provided for @studentConfirmParentPhoneDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Parent Number Change'**
+  String get studentConfirmParentPhoneDialogTitle;
+
+  /// No description provided for @studentConfirmParentPhoneDialogMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to update your parent\'s phone number? All future academic exam reports, automated WhatsApp results, and grade alerts will be dispatched directly to this new number.'**
+  String get studentConfirmParentPhoneDialogMessage;
+
+  /// No description provided for @studentConfirmParentPhoneConfirmBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, Update Number'**
+  String get studentConfirmParentPhoneConfirmBtn;
+
+  /// No description provided for @studentSecurityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Security & Password'**
+  String get studentSecurityTitle;
+
+  /// No description provided for @studentSecuritySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Update your account login password securely'**
+  String get studentSecuritySubtitle;
+
+  /// No description provided for @studentNewPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'New Password'**
+  String get studentNewPasswordLabel;
+
+  /// No description provided for @studentConfirmPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm New Password'**
+  String get studentConfirmPasswordLabel;
+
+  /// No description provided for @studentChangePasswordBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Password'**
+  String get studentChangePasswordBtn;
+
+  /// No description provided for @studentPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a password'**
+  String get studentPasswordRequired;
+
+  /// No description provided for @studentPasswordTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 6 characters'**
+  String get studentPasswordTooShort;
+
+  /// No description provided for @studentPasswordMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get studentPasswordMismatch;
+
+  /// No description provided for @studentPreferencesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'System & App Preferences'**
+  String get studentPreferencesTitle;
+
+  /// No description provided for @studentPreferencesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Customize language, regional display, and session settings'**
+  String get studentPreferencesSubtitle;
+
+  /// No description provided for @studentLanguageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Display Language'**
+  String get studentLanguageLabel;
+
+  /// No description provided for @studentProfileUpdatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile details updated successfully'**
+  String get studentProfileUpdatedSuccess;
+
+  /// No description provided for @studentPasswordUpdatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Account password changed successfully'**
+  String get studentPasswordUpdatedSuccess;
+
+  /// No description provided for @studentAvatarUpdatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Avatar updated successfully'**
+  String get studentAvatarUpdatedSuccess;
+
+  /// No description provided for @whatsappRefreshQrAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh QR Code'**
+  String get whatsappRefreshQrAction;
+
+  /// No description provided for @whatsappQrHighResNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'If scan fails, click refresh to generate a fresh active QR code instantly'**
+  String get whatsappQrHighResNotice;
+
+  /// No description provided for @whatsappStudioTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'WhatsApp Academic Studio'**
+  String get whatsappStudioTitle;
+
+  /// No description provided for @whatsappStudioSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Customize report templates, dynamic evaluation tiers, and recipient policies'**
+  String get whatsappStudioSubtitle;
+
+  /// No description provided for @whatsappStudioOpenButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Customize Templates & Messages 🎨'**
+  String get whatsappStudioOpenButton;
+
+  /// No description provided for @whatsappStudioTabTemplates.
+  ///
+  /// In en, this message translates to:
+  /// **'Report Template & Phrases'**
+  String get whatsappStudioTabTemplates;
+
+  /// No description provided for @whatsappStudioTabTiers.
+  ///
+  /// In en, this message translates to:
+  /// **'Evaluation Tiers'**
+  String get whatsappStudioTabTiers;
+
+  /// No description provided for @whatsappStudioTabPolicies.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipients & Timing'**
+  String get whatsappStudioTabPolicies;
+
+  /// No description provided for @whatsappStudioLivePreviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Live WhatsApp Preview'**
+  String get whatsappStudioLivePreviewTitle;
+
+  /// No description provided for @whatsappStudioLivePreviewSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shows exactly what the parent receives in real-time'**
+  String get whatsappStudioLivePreviewSubtitle;
+
+  /// No description provided for @whatsappStudioResetDefaults.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset to Smart Defaults'**
+  String get whatsappStudioResetDefaults;
+
+  /// No description provided for @whatsappStudioResetConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset all templates and policies to the default academic standard?'**
+  String get whatsappStudioResetConfirm;
+
+  /// No description provided for @whatsappStudioSaveSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'WhatsApp templates and policies saved successfully'**
+  String get whatsappStudioSaveSuccess;
+
+  /// No description provided for @whatsappStudioHeaderLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening Greeting & Introduction'**
+  String get whatsappStudioHeaderLabel;
+
+  /// No description provided for @whatsappStudioBodyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Main Results Block'**
+  String get whatsappStudioBodyLabel;
+
+  /// No description provided for @whatsappStudioFooterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-off & Teacher Signature'**
+  String get whatsappStudioFooterLabel;
+
+  /// No description provided for @whatsappStudioTagsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Dynamic Insert Tags (Click to Insert)'**
+  String get whatsappStudioTagsLabel;
+
+  /// No description provided for @whatsappStudioTagStudentName.
+  ///
+  /// In en, this message translates to:
+  /// **'Student Name'**
+  String get whatsappStudioTagStudentName;
+
+  /// No description provided for @whatsappStudioTagExamTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam Title'**
+  String get whatsappStudioTagExamTitle;
+
+  /// No description provided for @whatsappStudioTagScore.
+  ///
+  /// In en, this message translates to:
+  /// **'Score'**
+  String get whatsappStudioTagScore;
+
+  /// No description provided for @whatsappStudioTagMaxScore.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Score'**
+  String get whatsappStudioTagMaxScore;
+
+  /// No description provided for @whatsappStudioTagPercentage.
+  ///
+  /// In en, this message translates to:
+  /// **'Percentage %'**
+  String get whatsappStudioTagPercentage;
+
+  /// No description provided for @whatsappStudioTagGroupName.
+  ///
+  /// In en, this message translates to:
+  /// **'Group'**
+  String get whatsappStudioTagGroupName;
+
+  /// No description provided for @whatsappStudioTagTeacherName.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher Name'**
+  String get whatsappStudioTagTeacherName;
+
+  /// No description provided for @whatsappStudioTagEvaluation.
+  ///
+  /// In en, this message translates to:
+  /// **'Evaluation Phrase'**
+  String get whatsappStudioTagEvaluation;
+
+  /// No description provided for @whatsappStudioTierExcellentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'🌟 Excellent (≥ 90%)'**
+  String get whatsappStudioTierExcellentLabel;
+
+  /// No description provided for @whatsappStudioTierGoodLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'👏 Very Good (75% - 89%)'**
+  String get whatsappStudioTierGoodLabel;
+
+  /// No description provided for @whatsappStudioTierPassLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'👍 Passed (60% - 74%)'**
+  String get whatsappStudioTierPassLabel;
+
+  /// No description provided for @whatsappStudioTierNeedsImprovementLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'💡 Needs Improvement (< 60%)'**
+  String get whatsappStudioTierNeedsImprovementLabel;
+
+  /// No description provided for @whatsappStudioRecipientTargetLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Who Receives the Result?'**
+  String get whatsappStudioRecipientTargetLabel;
+
+  /// No description provided for @whatsappStudioRecipientParentOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Parent Only (Recommended)'**
+  String get whatsappStudioRecipientParentOnly;
+
+  /// No description provided for @whatsappStudioRecipientParentOnlyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Sends to parent phone to maintain academic oversight'**
+  String get whatsappStudioRecipientParentOnlyDesc;
+
+  /// No description provided for @whatsappStudioRecipientStudentOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Student Only'**
+  String get whatsappStudioRecipientStudentOnly;
+
+  /// No description provided for @whatsappStudioRecipientStudentOnlyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Sends directly to the student phone number'**
+  String get whatsappStudioRecipientStudentOnlyDesc;
+
+  /// No description provided for @whatsappStudioRecipientBoth.
+  ///
+  /// In en, this message translates to:
+  /// **'Both (Parent + Student)'**
+  String get whatsappStudioRecipientBoth;
+
+  /// No description provided for @whatsappStudioRecipientBothDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Dispatches two separate reports to both numbers'**
+  String get whatsappStudioRecipientBothDesc;
+
+  /// No description provided for @whatsappStudioDispatchTimingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Dispatch Timing'**
+  String get whatsappStudioDispatchTimingLabel;
+
+  /// No description provided for @whatsappStudioDispatchTimingInstant.
+  ///
+  /// In en, this message translates to:
+  /// **'Instant (Upon Submission)'**
+  String get whatsappStudioDispatchTimingInstant;
+
+  /// No description provided for @whatsappStudioDispatchTimingInstantDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Sends immediately as soon as the student presses submit'**
+  String get whatsappStudioDispatchTimingInstantDesc;
+
+  /// No description provided for @whatsappStudioDispatchTimingExamEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'After Exam Period Ends'**
+  String get whatsappStudioDispatchTimingExamEnd;
+
+  /// No description provided for @whatsappStudioDispatchTimingExamEndDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Holds dispatch until the exam window closes for all students'**
+  String get whatsappStudioDispatchTimingExamEndDesc;
+
+  /// No description provided for @whatsappStudioSimulatorTestTier.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview Simulation Score:'**
+  String get whatsappStudioSimulatorTestTier;
+
+  /// No description provided for @whatsappStudioSaveAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Studio Preferences'**
+  String get whatsappStudioSaveAction;
 }
 
 class _AppLocalizationsDelegate
