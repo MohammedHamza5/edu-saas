@@ -94,7 +94,15 @@ export class BaileysGatewayClient {
         markOnlineOnConnect: true,
         connectTimeoutMs: 60000,
         keepAliveIntervalMs: 25000,
+        retryRequestDelayMs: 250,
+        maxMsgRetryCount: 5,
         msgRetryCounterCache: this.retryCache as any,
+        patchMessageBeforeSending: async (message) => {
+          try {
+            await this.sock?.uploadPreKeysToServerIfRequired();
+          } catch (_) {}
+          return message;
+        },
         getMessage: async (key: WAMessageKey): Promise<proto.IMessage | undefined> => {
           if (!key.id) return undefined;
 
@@ -119,7 +127,10 @@ export class BaileysGatewayClient {
             if (row?.message_body) {
               console.log(`[BaileysClient] 🔄 Fulfilled E2EE retry request from DB for message ID: ${key.id}`);
               return {
-                conversation: row.message_body
+                conversation: row.message_body,
+                extendedTextMessage: {
+                  text: row.message_body
+                }
               };
             }
           } catch (e) {
@@ -258,7 +269,10 @@ export class BaileysGatewayClient {
     try {
       const waResults = await this.sock.onWhatsApp(cleanDigits);
       if (waResults && waResults.length > 0 && waResults[0].exists && waResults[0].jid) {
-        targetJid = waResults[0].jid;
+        // Enforce standard phone number JID (@s.whatsapp.net), never route through raw @lid
+        if (waResults[0].jid.endsWith('@s.whatsapp.net')) {
+          targetJid = waResults[0].jid;
+        }
         console.log(`[BaileysClient] Verified recipient on WhatsApp: ${targetJid}`);
       }
     } catch (checkErr) {
