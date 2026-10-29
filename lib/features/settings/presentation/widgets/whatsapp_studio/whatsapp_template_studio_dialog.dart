@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../../../core/extensions/localized_context_extension.dart';
-import '../../../../../core/localization/generated/app_localizations.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/utils/app_feedback.dart';
@@ -23,10 +22,11 @@ class WhatsAppTemplateStudioDialog extends StatefulWidget {
     BuildContext context, {
     required WhatsAppGatewayRemoteDataSource dataSource,
   }) {
-    return showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => WhatsAppTemplateStudioDialog(dataSource: dataSource),
+    return Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (_) => WhatsAppTemplateStudioDialog(dataSource: dataSource),
+      ),
     );
   }
 
@@ -54,6 +54,7 @@ class _WhatsAppTemplateStudioDialogState
 
   bool _isLoading = true;
   bool _isSaving = false;
+  bool _showMobilePreview = false;
 
   @override
   void initState() {
@@ -111,7 +112,6 @@ class _WhatsAppTemplateStudioDialogState
   }
 
   void _insertTag(String tag) {
-    // Insert into bodyController if empty or active
     final controller = _bodyController;
     final text = controller.text;
     final selection = controller.selection;
@@ -143,7 +143,7 @@ class _WhatsAppTemplateStudioDialogState
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
+              backgroundColor: const Color(0xFF25D366),
               foregroundColor: Colors.white,
             ),
             child: Text(l10n.whatsappStudioResetDefaults),
@@ -186,104 +186,36 @@ class _WhatsAppTemplateStudioDialogState
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final size = MediaQuery.of(context).size;
-    final isWide = size.width > 920;
+    final isWide = size.width > 960;
 
-    return Dialog(
-      insetPadding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.s16,
-        vertical: AppSpacing.s24,
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppSpacing.radiusLarge),
-      ),
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-          maxWidth: isWide ? 1040 : 560,
-          maxHeight: size.height * 0.9,
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: AppColors.surface,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.close_rounded),
+          tooltip: l10n.cancel,
+          onPressed: () => Navigator.of(context).pop(),
         ),
-        child: _isLoading
-            ? const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(AppSpacing.s32),
-                  child: CircularProgressIndicator(),
-                ),
-              )
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Header Bar
-                  _buildHeaderBar(l10n),
-
-                  // Tabs Header
-                  _buildTabBar(l10n),
-
-                  // Body (Split on Wide, Single on Narrow)
-                  Expanded(
-                    child: isWide
-                        ? Row(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              // Left/Right: Configuration Editor
-                              Expanded(
-                                flex: 6,
-                                child: _buildTabContent(),
-                              ),
-                              const VerticalDivider(
-                                width: 1,
-                                thickness: 1,
-                                color: AppColors.border,
-                              ),
-                              // Live Simulator Preview
-                              Expanded(
-                                flex: 5,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(AppSpacing.s16),
-                                  child: WhatsAppLiveBubblePreview(
-                                    config: _buildCurrentConfig(),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          )
-                        : _buildTabContent(),
-                  ),
-
-                  // Footer Actions
-                  _buildFooterBar(l10n),
-                ],
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.s8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF25D366).withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
               ),
-      ),
-    );
-  }
-
-  Widget _buildHeaderBar(AppLocalizations l10n) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.s20,
-        vertical: AppSpacing.s14,
-      ),
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        border: Border(bottom: BorderSide(color: AppColors.border)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.s8),
-            decoration: BoxDecoration(
-              color: const Color(0xFF25D366).withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+              child: const Icon(
+                Icons.auto_awesome_rounded,
+                color: Color(0xFF25D366),
+                size: 20,
+              ),
             ),
-            child: const Icon(
-              Icons.auto_awesome_rounded,
-              color: Color(0xFF25D366),
-              size: 22,
-            ),
-          ),
-          const SizedBox(width: AppSpacing.s12),
-          Expanded(
-            child: Column(
+            const SizedBox(width: AppSpacing.s12),
+            Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   l10n.whatsappStudioTitle,
@@ -296,48 +228,143 @@ class _WhatsAppTemplateStudioDialogState
                 Text(
                   l10n.whatsappStudioSubtitle,
                   style: const TextStyle(
-                    fontSize: 12,
+                    fontSize: 11,
                     color: AppColors.textMuted,
                   ),
                 ),
               ],
             ),
+          ],
+        ),
+        actions: [
+          TextButton.icon(
+            onPressed: _isSaving ? null : _resetToSmartDefaults,
+            icon: const Icon(Icons.restart_alt_rounded, size: 18),
+            label: Text(l10n.whatsappStudioResetDefaults),
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.textMuted,
+            ),
           ),
-          IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.close_rounded),
-            color: AppColors.textMuted,
+          const SizedBox(width: AppSpacing.s12),
+          Padding(
+            padding: const EdgeInsetsDirectional.only(end: AppSpacing.s16),
+            child: ElevatedButton.icon(
+              onPressed: _isSaving ? null : _saveConfig,
+              icon: _isSaving
+                  ? const SizedBox(
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Icon(Icons.check_rounded, size: 16),
+              label: Text(l10n.whatsappStudioSaveAction),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF25D366),
+                foregroundColor: Colors.white,
+                elevation: 1,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.s16,
+                  vertical: AppSpacing.s10,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                ),
+              ),
+            ),
           ),
         ],
+        bottom: TabBar(
+          controller: _tabController,
+          labelColor: const Color(0xFF25D366),
+          unselectedLabelColor: AppColors.textMuted,
+          indicatorColor: const Color(0xFF25D366),
+          indicatorWeight: 3,
+          labelStyle: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+          ),
+          tabs: [
+            Tab(
+              icon: const Icon(Icons.edit_note_rounded, size: 18),
+              text: l10n.whatsappStudioTabTemplates,
+            ),
+            Tab(
+              icon: const Icon(Icons.military_tech_outlined, size: 18),
+              text: l10n.whatsappStudioTabTiers,
+            ),
+            Tab(
+              icon: const Icon(Icons.tune_rounded, size: 18),
+              text: l10n.whatsappStudioTabPolicies,
+            ),
+          ],
+        ),
       ),
-    );
-  }
-
-  Widget _buildTabBar(AppLocalizations l10n) {
-    return Container(
-      color: AppColors.surfaceVariant.withValues(alpha: 0.3),
-      child: TabBar(
-        controller: _tabController,
-        labelColor: AppColors.primary,
-        unselectedLabelColor: AppColors.textMuted,
-        indicatorColor: AppColors.primary,
-        indicatorWeight: 2.5,
-        labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-        tabs: [
-          Tab(
-            icon: const Icon(Icons.edit_note_rounded, size: 18),
-            text: l10n.whatsappStudioTabTemplates,
-          ),
-          Tab(
-            icon: const Icon(Icons.military_tech_outlined, size: 18),
-            text: l10n.whatsappStudioTabTiers,
-          ),
-          Tab(
-            icon: const Icon(Icons.tune_rounded, size: 18),
-            text: l10n.whatsappStudioTabPolicies,
-          ),
-        ],
-      ),
+      floatingActionButton: isWide
+          ? null
+          : FloatingActionButton.extended(
+              onPressed: () =>
+                  setState(() => _showMobilePreview = !_showMobilePreview),
+              icon: Icon(
+                _showMobilePreview
+                    ? Icons.edit_note_rounded
+                    : Icons.phone_android_rounded,
+              ),
+              label: Text(
+                _showMobilePreview ? 'العودة للمحرر' : 'معاينة واتساب 📱',
+              ),
+              backgroundColor: const Color(0xFF25D366),
+              foregroundColor: Colors.white,
+            ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : isWide
+              ? Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Left Editor Panel (55%)
+                    Expanded(
+                      flex: 11,
+                      child: _buildTabContent(),
+                    ),
+                    const VerticalDivider(
+                      width: 1,
+                      thickness: 1,
+                      color: AppColors.border,
+                    ),
+                    // Right Live Preview Simulator Panel (45%)
+                    Expanded(
+                      flex: 9,
+                      child: Container(
+                        color: AppColors.surface,
+                        padding: const EdgeInsets.all(AppSpacing.s20),
+                        child: Center(
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 480),
+                            child: WhatsAppLiveBubblePreview(
+                              config: _buildCurrentConfig(),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              : _showMobilePreview
+                  ? Padding(
+                      padding: const EdgeInsets.all(AppSpacing.s16),
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 480),
+                          child: WhatsAppLiveBubblePreview(
+                            config: _buildCurrentConfig(),
+                          ),
+                        ),
+                      ),
+                    )
+                  : _buildTabContent(),
     );
   }
 
@@ -353,7 +380,7 @@ class _WhatsAppTemplateStudioDialogState
           onTagSelected: _insertTag,
         ),
         SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.s16),
+          padding: const EdgeInsets.all(AppSpacing.s20),
           child: WhatsAppEvaluationTiersSection(
             excellentController: _excellentController,
             goodController: _goodController,
@@ -369,61 +396,6 @@ class _WhatsAppTemplateStudioDialogState
           onTimingChanged: (t) => setState(() => _dispatchTiming = t),
         ),
       ],
-    );
-  }
-
-  Widget _buildFooterBar(AppLocalizations l10n) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.s20,
-        vertical: AppSpacing.s14,
-      ),
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        border: Border(top: BorderSide(color: AppColors.border)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          TextButton.icon(
-            onPressed: _isSaving ? null : _resetToSmartDefaults,
-            icon: const Icon(Icons.restart_alt_rounded, size: 18),
-            label: Text(l10n.whatsappStudioResetDefaults),
-            style: TextButton.styleFrom(foregroundColor: AppColors.textMuted),
-          ),
-          Row(
-            children: [
-              TextButton(
-                onPressed: _isSaving ? null : () => Navigator.pop(context),
-                child: Text(l10n.cancel),
-              ),
-              const SizedBox(width: AppSpacing.s12),
-              ElevatedButton.icon(
-                onPressed: _isSaving ? null : _saveConfig,
-                icon: _isSaving
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Icon(Icons.check_rounded, size: 18),
-                label: Text(l10n.whatsappStudioSaveAction),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF25D366),
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
     );
   }
 }

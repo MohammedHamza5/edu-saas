@@ -7,6 +7,7 @@ import '../../../exams/presentation/widgets/whatsapp_gateway_connect_dialog.dart
 import '../../data/datasources/whatsapp_gateway_remote_datasource.dart';
 import '../../domain/entities/whatsapp_gateway_status_entity.dart';
 import 'settings_section_card.dart';
+import 'whatsapp_studio/whatsapp_studio_launcher_card.dart';
 import 'whatsapp_studio/whatsapp_template_studio_dialog.dart';
 
 class WhatsAppGatewaySettingsSection extends StatefulWidget {
@@ -168,74 +169,12 @@ class _WhatsAppGatewaySettingsSectionState
                   ),
                 ),
 
-                // WhatsApp Academic Studio Launcher
-                const SizedBox(height: AppSpacing.s12),
-                InkWell(
-                  onTap: () => WhatsAppTemplateStudioDialog.show(
+                // WhatsApp Academic Studio Launcher (High Contrast)
+                const SizedBox(height: AppSpacing.s16),
+                WhatsAppStudioLauncherCard(
+                  onOpen: () => WhatsAppTemplateStudioDialog.show(
                     context,
                     dataSource: _dataSource,
-                  ),
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.s16,
-                      vertical: AppSpacing.s12,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF25D366).withValues(alpha: 0.06),
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusSmall),
-                      border: Border.all(
-                        color: const Color(0xFF25D366).withValues(alpha: 0.25),
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(AppSpacing.s8),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF25D366)
-                                .withValues(alpha: 0.12),
-                            borderRadius:
-                                BorderRadius.circular(AppSpacing.radiusSmall),
-                          ),
-                          child: const Icon(
-                            Icons.auto_awesome_rounded,
-                            color: Color(0xFF25D366),
-                            size: 20,
-                          ),
-                        ),
-                        const SizedBox(width: AppSpacing.s12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                l10n.whatsappStudioOpenButton,
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.textPrimary,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                l10n.whatsappStudioSubtitle,
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  color: AppColors.textMuted,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const Icon(
-                          Icons.arrow_forward_ios_rounded,
-                          size: 14,
-                          color: AppColors.textMuted,
-                        ),
-                      ],
-                    ),
                   ),
                 ),
 

@@ -68,11 +68,11 @@ class WhatsAppDispatchConfigEntity extends Equatable {
     this.recipientTarget = WhatsAppRecipientTarget.parentOnly,
     this.dispatchTiming = WhatsAppDispatchTiming.instant,
     this.headerTemplate =
-        'أهلاً بحضرتك يا فندم 🌸\nحبينا نطمن حضرتك على نتيجة اختبار نجلك الطالب/ {student_name} ({group_name}):',
+        'أهلاً بحضرتك يا فندم 🌸\nحبينا نطمن حضرتك على نتيجة اختبار نجلك الطالب/ *{student_name}* ({group_name}):',
     this.bodyTemplate =
-        '📝 الاختبار: {exam_title}\n🎯 الدرجة: {score} من {max_score} ({percentage}%)\n\n{evaluation_text}',
+        '📝 *الاختبار:* {exam_title}\n🎯 *الدرجة:* {score} من {max_score} ({percentage}%)\n\n{evaluation_text}',
     this.footerTemplate =
-        'نسأل الله له دوام التوفيق والتميز، ومع حضرتك في أي وقت لأي استفسار 🌸\n{teacher_name}',
+        'نسأل الله له دوام التوفيق والتميز، ومع حضرتك في أي وقت لأي استفسار 🌸\n*{teacher_name}*',
     this.tierExcellentText =
         '🌟 أداء ممتاز ومستوى استثنائي مشرف، نسأل الله له دوام التوفيق والتفوق!',
     this.tierGoodText =
@@ -171,13 +171,17 @@ class WhatsAppDispatchConfigEntity extends Equatable {
     final fullMessage =
         '$headerTemplate\n\n$bodyTemplate\n\n$footerTemplate';
 
+    // Isolate bidirectional text segments with RLM/LRM to protect parentheses and colons
+    final safeGroupName = '\u200E$groupName\u200E\u200F';
+    final safeExamTitle = '\u200E$examTitle\u200E\u200F';
+
     return fullMessage
         .replaceAll('{student_name}', studentName)
-        .replaceAll('{exam_title}', examTitle)
+        .replaceAll('{exam_title}', safeExamTitle)
         .replaceAll('{score}', '$score')
         .replaceAll('{max_score}', '$maxScore')
         .replaceAll('{percentage}', percentage.toStringAsFixed(1))
-        .replaceAll('{group_name}', groupName)
+        .replaceAll('{group_name}', safeGroupName)
         .replaceAll('{teacher_name}', teacherName)
         .replaceAll('{evaluation_text}', eval);
   }
