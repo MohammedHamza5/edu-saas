@@ -215,6 +215,40 @@ app.post('/api/send', authMiddleware, async (req: Request, res: Response) => {
   }
 });
 
+// 6. Reset Signal E2EE Session for a Specific Phone (Surgically purges stale ratchets)
+app.post('/api/reset-contact-session', authMiddleware, async (req: Request, res: Response) => {
+  const { phone } = req.body;
+  if (!phone) {
+    return res.status(400).json({ error: 'Missing phone number' });
+  }
+  const cleanDigits = phone.replace(/\D/g, '');
+  try {
+    const { data: sessionRow } = await supabase
+      .from('whatsapp_auth_sessions')
+      .select('keys')
+      .eq('id', SESSION_ID)
+      .maybeSingle();
+
+    if (sessionRow?.keys) {
+      const keys = sessionRow.keys;
+      const toDelete = Object.keys(keys).filter(k => k.includes(cleanDigits));
+      for (const k of toDelete) {
+        delete keys[k];
+      }
+      await supabase
+        .from('whatsapp_auth_sessions')
+        .update({ keys, updated_at: new Date().toISOString() })
+        .eq('id', SESSION_ID);
+
+      console.log(`[Server] Reset Signal session for ${cleanDigits}. Purged keys:`, toDelete);
+      return res.json({ success: true, purgedKeys: toDelete });
+    }
+    return res.json({ success: true, purgedKeys: [] });
+  } catch (err) {
+    return res.status(500).json({ error: (err as Error).message });
+  }
+});
+
 // Self-KeepAlive for Free Cloud Instances (e.g. Render / Always-On)
 const KEEP_ALIVE_URL = process.env.RENDER_EXTERNAL_URL || process.env.KEEP_ALIVE_URL;
 if (KEEP_ALIVE_URL) {

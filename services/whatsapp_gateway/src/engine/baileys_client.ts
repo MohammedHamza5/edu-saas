@@ -307,7 +307,22 @@ export class BaileysGatewayClient {
 
     // 4. Dispatch message
     try {
-      const result = await this.sock.sendMessage(targetJid, { text: messageToSend });
+      // Proactively assert fresh Signal session before dispatching.
+      // This forces WhatsApp servers to provide the latest pre-key bundle for the recipient's
+      // current active device, permanently eliminating the "Waiting for this message" E2EE deadlock
+      // when a student/parent changes phones, reinstalls WhatsApp, or switches devices.
+      try {
+        await (this.sock as any)?.assertSessions?.([targetJid], true);
+        console.log(`[BaileysClient] 🔑 Asserted fresh Signal session for ${targetJid}`);
+      } catch (assertErr) {
+        console.warn('[BaileysClient] assertSessions warning (non-fatal):', (assertErr as Error).message);
+      }
+
+      const result = await this.sock.sendMessage(
+        targetJid,
+        { text: messageToSend },
+        { useUserDevicesCache: false } as any
+      );
       if (result && result.key && result.key.id) {
         this.pacer.recordSuccess();
         const msgId = result.key.id;
