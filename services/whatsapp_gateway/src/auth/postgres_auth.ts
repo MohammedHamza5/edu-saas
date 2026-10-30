@@ -53,23 +53,27 @@ export async function usePostgresAuthState(
   }
 
   /**
-   * Flush all in-memory keys to Supabase immediately (synchronous write).
-   * Called without debounce for cryptographically critical key categories.
+   * Strictly sequential write queue to ensure Signal keys are persisted in exact chronological order.
+   * Eliminates concurrent write races on Supabase.
    */
-  const flushKeys = async (): Promise<void> => {
-    try {
-      const serializedKeys = JSON.parse(JSON.stringify(keysStore, BufferJSON.replacer));
-      await supabase
-        .from('whatsapp_auth_sessions')
-        .update({
-          keys: serializedKeys,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', sessionId);
-      console.log('[PostgresAuth] ✅ Critical Signal keys flushed to DB immediately.');
-    } catch (err) {
-      console.warn('[PostgresAuth] flushKeys error:', (err as Error).message);
-    }
+  let flushQueue: Promise<void> = Promise.resolve();
+  const flushKeys = (): Promise<void> => {
+    flushQueue = flushQueue.then(async () => {
+      try {
+        const serializedKeys = JSON.parse(JSON.stringify(keysStore, BufferJSON.replacer));
+        await supabase
+          .from('whatsapp_auth_sessions')
+          .update({
+            keys: serializedKeys,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', sessionId);
+        console.log('[PostgresAuth] ✅ Critical Signal keys flushed to DB (ordered).');
+      } catch (err) {
+        console.warn('[PostgresAuth] flushKeys error:', (err as Error).message);
+      }
+    });
+    return flushQueue;
   };
 
   let keysSaveTimeout: NodeJS.Timeout | null = null;

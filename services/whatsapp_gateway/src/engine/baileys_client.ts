@@ -101,12 +101,6 @@ export class BaileysGatewayClient {
         retryRequestDelayMs: 250,
         maxMsgRetryCount: 5,
         msgRetryCounterCache: this.retryCache as any,
-        patchMessageBeforeSending: async (message) => {
-          try {
-            await this.sock?.uploadPreKeysToServerIfRequired();
-          } catch (_) {}
-          return message;
-        },
         getMessage: async (key: WAMessageKey): Promise<proto.IMessage | undefined> => {
           console.log('[BaileysClient] 🔔 getMessage invoked for:', JSON.stringify(key));
           if (!key.id) return undefined;
@@ -239,8 +233,14 @@ export class BaileysGatewayClient {
           this.isConnecting = false;
           const statusCode = (lastDisconnect?.error as Boom)?.output?.statusCode;
           const isLoggedOut = statusCode === DisconnectReason.loggedOut;
+          const isConnectionReplaced = statusCode === DisconnectReason.connectionReplaced;
 
           console.warn(`[BaileysClient] Connection closed with status: ${statusCode}, loggedOut: ${isLoggedOut}`);
+
+          if (isConnectionReplaced) {
+            console.warn('[BaileysClient] ⚠️ Connection replaced by another session (status 440). Halting auto-reconnect to avoid collision.');
+            return;
+          }
 
           if (isLoggedOut) {
             console.warn('[BaileysClient] WhatsApp session logged out. Wiping session state in DB...');

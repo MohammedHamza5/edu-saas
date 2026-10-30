@@ -9,8 +9,8 @@
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts"
   },
   "dependencies": {
-    "@whiskeysockets/baileys": "^6.7.19",
     "@supabase/supabase-js": "^2.49.1",
+    "@whiskeysockets/baileys": "^7.0.0-rc14",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "pino": "^9.6.0",
