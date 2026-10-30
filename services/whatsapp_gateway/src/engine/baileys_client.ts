@@ -108,6 +108,7 @@ export class BaileysGatewayClient {
           return message;
         },
         getMessage: async (key: WAMessageKey): Promise<proto.IMessage | undefined> => {
+          console.log('[BaileysClient] 🔔 getMessage invoked for:', JSON.stringify(key));
           if (!key.id) return undefined;
 
           // 1. Check in-memory message store
@@ -176,6 +177,13 @@ export class BaileysGatewayClient {
               if (first) this.messageStore.delete(first);
             }
           }
+        }
+      });
+
+      // Track receipts (e.g. delivery, read, retry)
+      this.sock.ev.on('message-receipt.update', (events) => {
+        for (const ev of events) {
+          console.log(`[BaileysClient] 📥 Receipt: key=${ev.key.id} type=${(ev as any).receipt?.type || 'delivery'}`);
         }
       });
 

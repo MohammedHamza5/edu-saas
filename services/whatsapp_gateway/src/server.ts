@@ -6,6 +6,30 @@ import { QueueWorker } from './worker/queue_worker';
 
 dotenv.config();
 
+// In-memory debug log buffer (last 200 log messages)
+const logBuffer: string[] = [];
+export const pushLog = (msg: string) => {
+  logBuffer.push(`[${new Date().toISOString()}] ${msg}`);
+  if (logBuffer.length > 200) logBuffer.shift();
+};
+
+const origLog = console.log;
+const origWarn = console.warn;
+const origErr = console.error;
+
+console.log = (...args: any[]) => {
+  pushLog(args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' '));
+  origLog(...args);
+};
+console.warn = (...args: any[]) => {
+  pushLog('[WARN] ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' '));
+  origWarn(...args);
+};
+console.error = (...args: any[]) => {
+  pushLog('[ERR] ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' '));
+  origErr(...args);
+};
+
 const app = express();
 app.use(express.json());
 
@@ -58,6 +82,11 @@ app.get('/health', (_req: Request, res: Response) => {
     connected: baileysClient ? baileysClient.isConnected() : false,
     timestamp: new Date().toISOString()
   });
+});
+
+// 1.1 Live Diagnostic Logs endpoint
+app.get('/api/debug-logs', (_req: Request, res: Response) => {
+  res.type('text/plain').send(logBuffer.join('\n'));
 });
 
 // 2. Gateway Status

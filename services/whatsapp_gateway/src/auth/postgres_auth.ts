@@ -1,4 +1,4 @@
-import { AuthenticationCreds, AuthenticationState, BufferJSON, initAuthCreds, SignalKeyStore } from '@whiskeysockets/baileys';
+import { AuthenticationCreds, AuthenticationState, BufferJSON, initAuthCreds, SignalKeyStore, proto } from '@whiskeysockets/baileys';
 import { SupabaseClient } from '@supabase/supabase-js';
 
 /**
@@ -102,8 +102,12 @@ export async function usePostgresAuthState(
       const data: Record<string, any> = {};
       for (const id of ids) {
         const key = `${type}-${id}`;
-        if (keysStore[key]) {
-          data[id] = keysStore[key];
+        let value = keysStore[key];
+        if (type === 'app-state-sync-key' && value) {
+          value = proto.Message.AppStateSyncKeyData.fromObject(value);
+        }
+        if (value) {
+          data[id] = value;
         }
       }
       return data;
