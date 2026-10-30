@@ -52,6 +52,26 @@ export async function usePostgresAuthState(
     });
   }
 
+  /**
+   * Flush all in-memory keys to Supabase immediately (synchronous write).
+   * Called without debounce for cryptographically critical key categories.
+   */
+  const flushKeys = async (): Promise<void> => {
+    try {
+      const serializedKeys = JSON.parse(JSON.stringify(keysStore, BufferJSON.replacer));
+      await supabase
+        .from('whatsapp_auth_sessions')
+        .update({
+          keys: serializedKeys,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', sessionId);
+      console.log('[PostgresAuth] ✅ Critical Signal keys flushed to DB immediately.');
+    } catch (err) {
+      console.warn('[PostgresAuth] flushKeys error:', (err as Error).message);
+    }
+  };
+
   let keysSaveTimeout: NodeJS.Timeout | null = null;
   const debouncedSaveKeys = () => {
     if (keysSaveTimeout) clearTimeout(keysSaveTimeout);
@@ -71,6 +91,12 @@ export async function usePostgresAuthState(
     }, 400);
   };
 
+  /**
+   * Critical key categories that must be persisted immediately (no debounce).
+   * These are used during E2EE session establishment and replay protection.
+   */
+  const CRITICAL_KEY_CATEGORIES = new Set(['session', 'pre-key', 'signed-pre-key', 'sender-key', 'sender-key-memory']);
+
   const keys: SignalKeyStore = {
     get: async (type, ids) => {
       const data: Record<string, any> = {};
@@ -84,7 +110,10 @@ export async function usePostgresAuthState(
     },
     set: async (data: any) => {
       const dataObj = data as Record<string, Record<string, any>>;
+      let hasCriticalCategory = false;
+
       for (const category in dataObj) {
+        if (CRITICAL_KEY_CATEGORIES.has(category)) hasCriticalCategory = true;
         for (const id in dataObj[category]) {
           const value = dataObj[category][id];
           const key = `${category}-${id}`;
@@ -95,7 +124,13 @@ export async function usePostgresAuthState(
           }
         }
       }
-      debouncedSaveKeys();
+
+      // Persist critical E2EE keys immediately to prevent session loss across restarts
+      if (hasCriticalCategory) {
+        await flushKeys();
+      } else {
+        debouncedSaveKeys();
+      }
     }
   };
 

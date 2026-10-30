@@ -287,6 +287,7 @@ export class BaileysGatewayClient {
     // 1. Verify recipient on WhatsApp & get canonical JID to ensure correct Signal session keys
     try {
       const waResults = await this.sock.onWhatsApp(cleanDigits);
+      console.log(`[BaileysClient] onWhatsApp raw results for ${cleanDigits}:`, JSON.stringify(waResults));
       if (waResults && waResults.length > 0 && waResults[0].exists && waResults[0].jid) {
         // Enforce standard phone number JID (@s.whatsapp.net), never route through raw @lid
         if (waResults[0].jid.endsWith('@s.whatsapp.net')) {

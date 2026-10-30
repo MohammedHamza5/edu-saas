@@ -79,18 +79,37 @@ export class AntiBanPacer {
   }
 
   /**
-   * Adds dynamic subtle variance to message body to prevent exact hash matching
+   * Adds dynamic subtle variance to message body to prevent exact hash matching.
+   * Uses manual UTC+2/UTC+3 offset calculation to guarantee Cairo time on any
+   * Node.js runtime (Render's default ICU build may ignore IANA timeZone in
+   * toLocaleTimeString, producing UTC instead of Cairo).
    */
   public humanizeMessage(originalBody: string): string {
-    const timeFormatted = new Date().toLocaleTimeString('ar-EG', {
-      timeZone: 'Africa/Cairo',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true
-    });
-
+    const timeFormatted = AntiBanPacer.getCairoTime();
     // Subtle time stamp in Cairo timezone for uniqueness & traceability
     return `${originalBody.trim()}\n\n⏱️ [${timeFormatted}]`;
+  }
+
+  /**
+   * Returns current Egypt/Cairo time as Arabic-formatted "HH:MM ص/م" string.
+   * Egypt observes UTC+2 in winter (no DST since 2011 permanently).
+   * We add +2h manually to guarantee correct output regardless of the host
+   * system locale or ICU data availability (Render uses slim Node.js builds).
+   */
+  public static getCairoTime(): string {
+    // Egypt Standard Time = UTC+2 (no DST)
+    const CAIRO_OFFSET_MS = 2 * 60 * 60 * 1000;
+    const nowCairo = new Date(Date.now() + CAIRO_OFFSET_MS);
+
+    const h24 = nowCairo.getUTCHours();
+    const min = nowCairo.getUTCMinutes();
+    const isAm = h24 < 12;
+    const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
+    const hStr = h12.toString().padStart(2, '0');
+    const mStr = min.toString().padStart(2, '0');
+    const amPm = isAm ? 'ص' : 'م';
+
+    return `${hStr}:${mStr} ${amPm}`;
   }
 
   private sleep(ms: number): Promise<void> {
