@@ -7,39 +7,11 @@ import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/app_logger.dart';
+import 'crop_aspect_ratio.dart';
+import 'crop_toolbar.dart';
+import 'interactive_crop_canvas.dart';
 
-enum CropAspectRatio {
-  free,
-  ratio16x9,
-  ratio4x3,
-  ratio1x1;
-
-  double? get value {
-    switch (this) {
-      case CropAspectRatio.free:
-        return null;
-      case CropAspectRatio.ratio16x9:
-        return 16 / 9;
-      case CropAspectRatio.ratio4x3:
-        return 4 / 3;
-      case CropAspectRatio.ratio1x1:
-        return 1.0;
-    }
-  }
-
-  String label(BuildContext context) {
-    switch (this) {
-      case CropAspectRatio.free:
-        return context.l10n.cropRatioFree;
-      case CropAspectRatio.ratio16x9:
-        return '16:9';
-      case CropAspectRatio.ratio4x3:
-        return '4:3';
-      case CropAspectRatio.ratio1x1:
-        return '1:1';
-    }
-  }
-}
+export 'crop_aspect_ratio.dart';
 
 class AppImageCropperDialog extends StatefulWidget {
   final Uint8List imageBytes;
@@ -131,6 +103,14 @@ class _AppImageCropperDialogState extends State<AppImageCropperDialog> {
     AppLogger.d('CropperDialog', '📐 Ratio selected: $ratio');
   }
 
+  void _selectAll() {
+    setState(() {
+      _selectedRatio = CropAspectRatio.free;
+      _cropRectNormalized = const Rect.fromLTWH(0.0, 0.0, 1.0, 1.0);
+    });
+    AppLogger.d('CropperDialog', '🔄 Reset crop rect to full image (100%)');
+  }
+
   Future<void> _applyCropAndReturn() async {
     if (_decodedImage == null || _isProcessing) {
       AppLogger.w('CropperDialog', '⚠️ _applyCropAndReturn called but _decodedImage is null or already processing');
@@ -142,8 +122,6 @@ class _AppImageCropperDialogState extends State<AppImageCropperDialog> {
 
     final totalStopwatch = Stopwatch()..start();
     AppLogger.i('CropperDialog', 'PERF_TRACE: ✂️ [_applyCropAndReturn] Applying crop started...');
-
-    AppLogger.i('CropperDialog', '✂️ [_applyCropAndReturn] Applying crop...');
 
     try {
       final img = _decodedImage!;
@@ -160,13 +138,13 @@ class _AppImageCropperDialogState extends State<AppImageCropperDialog> {
       final cropY = _cropRectNormalized.top * srcH;
       final cropW = (_cropRectNormalized.width * srcW).clamp(1.0, srcW);
       final cropH = (_cropRectNormalized.height * srcH).clamp(1.0, srcH);
-      
+
       // Downscale for Web performance. Large PNG encoding blocks the JS main thread completely.
       const double maxOutputDimension = 800.0;
       double scale = 1.0;
       if (cropW > maxOutputDimension || cropH > maxOutputDimension) {
-        scale = cropW > cropH 
-            ? maxOutputDimension / cropW 
+        scale = cropW > cropH
+            ? maxOutputDimension / cropW
             : maxOutputDimension / cropH;
       }
 
@@ -178,7 +156,7 @@ class _AppImageCropperDialogState extends State<AppImageCropperDialog> {
       canvas.save();
       // 1. Scale down the entire canvas drawing to match the output size
       canvas.scale(scale);
-      
+
       // 2. Translate crop to origin
       canvas.translate(-cropX, -cropY);
 
@@ -192,19 +170,14 @@ class _AppImageCropperDialogState extends State<AppImageCropperDialog> {
       canvas.restore();
 
       final picture = recorder.endRecording();
-      
+
       final toImageStopwatch = Stopwatch()..start();
-      AppLogger.d('CropperDialog', 'PERF_TRACE: ⏳ picture.toImage ($outW x $outH) started...');
       final croppedUiImage = await picture.toImage(outW, outH);
       toImageStopwatch.stop();
-      AppLogger.d('CropperDialog', 'PERF_TRACE: ✅ picture.toImage took ${toImageStopwatch.elapsedMilliseconds}ms');
-      
+
       final toByteDataStopwatch = Stopwatch()..start();
-      AppLogger.d('CropperDialog', 'PERF_TRACE: ⏳ Converting croppedUiImage to PNG ByteData started (this blocks JS!)...');
-      // This step blocks the UI thread on Web. Downscaling above minimizes the freeze time.
       final byteData = await croppedUiImage.toByteData(format: ui.ImageByteFormat.png);
       toByteDataStopwatch.stop();
-      AppLogger.d('CropperDialog', 'PERF_TRACE: ✅ toByteData(png) took ${toByteDataStopwatch.elapsedMilliseconds}ms');
 
       // Dispose CanvasKit native objects to prevent memory leaks (critical on Web!)
       croppedUiImage.dispose();
@@ -215,13 +188,12 @@ class _AppImageCropperDialogState extends State<AppImageCropperDialog> {
         return;
       }
       if (byteData != null) {
-        // Deep copy the bytes so they don't depend on CanvasKit's WASM memory buffer, 
-        // which can be garbage collected and cause TypeErrors in async HTTP requests.
+        // Deep copy the bytes so they don't depend on CanvasKit's WASM memory buffer
         final originalBytes = byteData.buffer.asUint8List();
         final resultBytes = Uint8List.fromList(originalBytes);
-        
+
         totalStopwatch.stop();
-        AppLogger.s('CropperDialog', 'PERF_TRACE: 🎉 Crop success! Output PNG size: ${resultBytes.length} bytes. Total _applyCropAndReturn took ${totalStopwatch.elapsedMilliseconds}ms');
+        AppLogger.s('CropperDialog', 'PERF_TRACE: 🎉 Crop success! Output PNG size: ${resultBytes.length} bytes.');
         Navigator.of(context).pop(resultBytes);
       } else {
         AppLogger.w('CropperDialog', '⚠️ byteData was null, falling back to original imageBytes');
@@ -296,516 +268,32 @@ class _AppImageCropperDialogState extends State<AppImageCropperDialog> {
                     ? const Center(
                         child: CircularProgressIndicator(color: Colors.white),
                       )
-                    : LayoutBuilder(
-                        builder: (ctx, constraints) {
-                          return _buildCropCanvas(constraints);
+                    : InteractiveCropCanvas(
+                        decodedImage: _decodedImage!,
+                        imageBytes: widget.imageBytes,
+                        rotationDegrees: _rotationDegrees,
+                        cropRectNormalized: _cropRectNormalized,
+                        selectedRatio: _selectedRatio,
+                        onCropRectChanged: (newRect) {
+                          setState(() => _cropRectNormalized = newRect);
                         },
                       ),
               ),
             ),
 
             // ── Toolbar: Ratios, Rotate, Cancel, Apply ───────────────────────
-            Padding(
-              padding: const EdgeInsets.all(AppSpacing.s16),
-              child: Column(
-                children: [
-                  // Aspect Ratios, Rotate, and Select All Buttons
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      ...CropAspectRatio.values.map((ratio) {
-                        final isSelected = _selectedRatio == ratio;
-                        return ChoiceChip(
-                          label: Text(ratio.label(context)),
-                          selected: isSelected,
-                          selectedColor: AppColors.primary,
-                          labelStyle: TextStyle(
-                            color: isSelected ? Colors.white : AppColors.textPrimary,
-                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                            fontSize: 12,
-                          ),
-                          onSelected: (_) => _onRatioSelected(ratio),
-                        );
-                      }),
-                      const SizedBox(width: 4),
-                      OutlinedButton.icon(
-                        onPressed: _selectAll,
-                        icon: const Icon(Icons.select_all_rounded, size: 18),
-                        label: Text(context.l10n.resetCropAction),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      OutlinedButton.icon(
-                        onPressed: _rotateClockwise,
-                        icon: const Icon(Icons.rotate_right_rounded, size: 18),
-                        label: Text(context.l10n.rotate90Action),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.s16),
-
-                  // Actions: Cancel / Confirm
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: _isProcessing ? null : () => Navigator.of(context).pop(null),
-                        child: Text(context.l10n.cancel),
-                      ),
-                      const SizedBox(width: AppSpacing.s12),
-                      ElevatedButton.icon(
-                        onPressed: _isProcessing ? null : _applyCropAndReturn,
-                        icon: _isProcessing
-                            ? const SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Icon(Icons.check_rounded, size: 18),
-                        label: Text(context.l10n.applyCropAction),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.s20,
-                            vertical: 12,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+            CropToolbar(
+              selectedRatio: _selectedRatio,
+              onRatioSelected: _onRatioSelected,
+              onSelectAll: _selectAll,
+              onRotateClockwise: _rotateClockwise,
+              onCancel: () => Navigator.of(context).pop(null),
+              onApply: _applyCropAndReturn,
+              isProcessing: _isProcessing,
             ),
           ],
         ),
       ),
     );
   }
-
-  static const double _minNormalizedSize = 0.04;
-
-  void _selectAll() {
-    setState(() {
-      _selectedRatio = CropAspectRatio.free;
-      _cropRectNormalized = const Rect.fromLTWH(0.0, 0.0, 1.0, 1.0);
-    });
-    AppLogger.d('CropperDialog', '🔄 Reset crop rect to full image (100%)');
-  }
-
-  void _onPanMove(DragUpdateDetails details, double displayedW, double displayedH) {
-    setState(() {
-      final dxNorm = details.delta.dx / displayedW;
-      final dyNorm = details.delta.dy / displayedH;
-      final newLeft = (_cropRectNormalized.left + dxNorm)
-          .clamp(0.0, 1.0 - _cropRectNormalized.width);
-      final newTop = (_cropRectNormalized.top + dyNorm)
-          .clamp(0.0, 1.0 - _cropRectNormalized.height);
-
-      _cropRectNormalized = Rect.fromLTWH(
-        newLeft,
-        newTop,
-        _cropRectNormalized.width,
-        _cropRectNormalized.height,
-      );
-    });
-  }
-
-  void _onResizeTopLeft(DragUpdateDetails details, double displayedW, double displayedH) {
-    setState(() {
-      final dxNorm = details.delta.dx / displayedW;
-      final dyNorm = details.delta.dy / displayedH;
-
-      final currentRight = _cropRectNormalized.right;
-      final currentBottom = _cropRectNormalized.bottom;
-
-      double newLeft = (_cropRectNormalized.left + dxNorm).clamp(0.0, currentRight - _minNormalizedSize);
-      double newTop = (_cropRectNormalized.top + dyNorm).clamp(0.0, currentBottom - _minNormalizedSize);
-
-      final ratio = _selectedRatio.value;
-      if (ratio != null) {
-        final targetW = (currentBottom - newTop) * ratio;
-        newLeft = (currentRight - targetW).clamp(0.0, currentRight - _minNormalizedSize);
-      }
-
-      _cropRectNormalized = Rect.fromLTRB(newLeft, newTop, currentRight, currentBottom);
-    });
-  }
-
-  void _onResizeTopRight(DragUpdateDetails details, double displayedW, double displayedH) {
-    setState(() {
-      final dxNorm = details.delta.dx / displayedW;
-      final dyNorm = details.delta.dy / displayedH;
-
-      final currentLeft = _cropRectNormalized.left;
-      final currentBottom = _cropRectNormalized.bottom;
-
-      double newRight = (_cropRectNormalized.right + dxNorm).clamp(currentLeft + _minNormalizedSize, 1.0);
-      double newTop = (_cropRectNormalized.top + dyNorm).clamp(0.0, currentBottom - _minNormalizedSize);
-
-      final ratio = _selectedRatio.value;
-      if (ratio != null) {
-        final targetW = (currentBottom - newTop) * ratio;
-        newRight = (currentLeft + targetW).clamp(currentLeft + _minNormalizedSize, 1.0);
-      }
-
-      _cropRectNormalized = Rect.fromLTRB(currentLeft, newTop, newRight, currentBottom);
-    });
-  }
-
-  void _onResizeBottomLeft(DragUpdateDetails details, double displayedW, double displayedH) {
-    setState(() {
-      final dxNorm = details.delta.dx / displayedW;
-      final dyNorm = details.delta.dy / displayedH;
-
-      final currentRight = _cropRectNormalized.right;
-      final currentTop = _cropRectNormalized.top;
-
-      double newLeft = (_cropRectNormalized.left + dxNorm).clamp(0.0, currentRight - _minNormalizedSize);
-      double newBottom = (_cropRectNormalized.bottom + dyNorm).clamp(currentTop + _minNormalizedSize, 1.0);
-
-      final ratio = _selectedRatio.value;
-      if (ratio != null) {
-        final targetW = (newBottom - currentTop) * ratio;
-        newLeft = (currentRight - targetW).clamp(0.0, currentRight - _minNormalizedSize);
-      }
-
-      _cropRectNormalized = Rect.fromLTRB(newLeft, currentTop, currentRight, newBottom);
-    });
-  }
-
-  void _onResizeBottomRight(DragUpdateDetails details, double displayedW, double displayedH) {
-    setState(() {
-      final dxNorm = details.delta.dx / displayedW;
-      final dyNorm = details.delta.dy / displayedH;
-
-      final currentLeft = _cropRectNormalized.left;
-      final currentTop = _cropRectNormalized.top;
-
-      double newRight = (_cropRectNormalized.right + dxNorm).clamp(currentLeft + _minNormalizedSize, 1.0);
-      double newBottom = (_cropRectNormalized.bottom + dyNorm).clamp(currentTop + _minNormalizedSize, 1.0);
-
-      final ratio = _selectedRatio.value;
-      if (ratio != null) {
-        final targetW = (newBottom - currentTop) * ratio;
-        newRight = (currentLeft + targetW).clamp(currentLeft + _minNormalizedSize, 1.0);
-      }
-
-      _cropRectNormalized = Rect.fromLTRB(currentLeft, currentTop, newRight, newBottom);
-    });
-  }
-
-  void _onResizeTop(DragUpdateDetails details, double displayedW, double displayedH) {
-    if (_selectedRatio.value != null) return;
-    setState(() {
-      final dyNorm = details.delta.dy / displayedH;
-      final currentBottom = _cropRectNormalized.bottom;
-      final newTop = (_cropRectNormalized.top + dyNorm).clamp(0.0, currentBottom - _minNormalizedSize);
-      _cropRectNormalized = Rect.fromLTRB(_cropRectNormalized.left, newTop, _cropRectNormalized.right, currentBottom);
-    });
-  }
-
-  void _onResizeBottom(DragUpdateDetails details, double displayedW, double displayedH) {
-    if (_selectedRatio.value != null) return;
-    setState(() {
-      final dyNorm = details.delta.dy / displayedH;
-      final currentTop = _cropRectNormalized.top;
-      final newBottom = (_cropRectNormalized.bottom + dyNorm).clamp(currentTop + _minNormalizedSize, 1.0);
-      _cropRectNormalized = Rect.fromLTRB(_cropRectNormalized.left, currentTop, _cropRectNormalized.right, newBottom);
-    });
-  }
-
-  void _onResizeLeft(DragUpdateDetails details, double displayedW, double displayedH) {
-    if (_selectedRatio.value != null) return;
-    setState(() {
-      final dxNorm = details.delta.dx / displayedW;
-      final currentRight = _cropRectNormalized.right;
-      final newLeft = (_cropRectNormalized.left + dxNorm).clamp(0.0, currentRight - _minNormalizedSize);
-      _cropRectNormalized = Rect.fromLTRB(newLeft, _cropRectNormalized.top, currentRight, _cropRectNormalized.bottom);
-    });
-  }
-
-  void _onResizeRight(DragUpdateDetails details, double displayedW, double displayedH) {
-    if (_selectedRatio.value != null) return;
-    setState(() {
-      final dxNorm = details.delta.dx / displayedW;
-      final currentLeft = _cropRectNormalized.left;
-      final newRight = (_cropRectNormalized.right + dxNorm).clamp(currentLeft + _minNormalizedSize, 1.0);
-      _cropRectNormalized = Rect.fromLTRB(currentLeft, _cropRectNormalized.top, newRight, _cropRectNormalized.bottom);
-    });
-  }
-
-  Widget _buildCropCanvas(BoxConstraints constraints) {
-    final img = _decodedImage!;
-    final isRotated = (_rotationDegrees == 90 || _rotationDegrees == 270);
-    final w = isRotated ? img.height.toDouble() : img.width.toDouble();
-    final h = isRotated ? img.width.toDouble() : img.height.toDouble();
-
-    final scale = math.min(constraints.maxWidth / w, constraints.maxHeight / h);
-    final displayedW = w * scale;
-    final displayedH = h * scale;
-
-    final boxL = _cropRectNormalized.left * displayedW;
-    final boxT = _cropRectNormalized.top * displayedH;
-    final boxW = _cropRectNormalized.width * displayedW;
-    final boxH = _cropRectNormalized.height * displayedH;
-
-    return Center(
-      child: SizedBox(
-        width: displayedW,
-        height: displayedH,
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            // The Image with rotation
-            Positioned.fill(
-              child: RotatedBox(
-                quarterTurns: _rotationDegrees ~/ 90,
-                child: Image.memory(
-                  widget.imageBytes,
-                  fit: BoxFit.fill,
-                  filterQuality: FilterQuality.high,
-                ),
-              ),
-            ),
-
-            // Shading overlay outside crop rect
-            Positioned.fill(
-              child: CustomPaint(
-                painter: _CropOverlayPainter(
-                  cropRect: Rect.fromLTWH(boxL, boxT, boxW, boxH),
-                ),
-              ),
-            ),
-
-            // Fully interactive Crop Box
-            Positioned(
-              left: boxL,
-              top: boxT,
-              width: boxW,
-              height: boxH,
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  // Center drag body (translates the crop box)
-                  Positioned.fill(
-                    child: MouseRegion(
-                      cursor: SystemMouseCursors.move,
-                      child: GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onPanUpdate: (d) => _onPanMove(d, displayedW, displayedH),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.white, width: 2),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.3),
-                                blurRadius: 4,
-                              ),
-                            ],
-                          ),
-                          child: CustomPaint(
-                            size: Size.infinite,
-                            painter: _RuleOfThirdsPainter(),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  // Edge Resizers (available in free ratio)
-                  if (_selectedRatio.value == null) ...[
-                    // Top Edge
-                    Positioned(
-                      top: -6,
-                      left: 14,
-                      right: 14,
-                      height: 14,
-                      child: MouseRegion(
-                        cursor: SystemMouseCursors.resizeUpDown,
-                        child: GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onPanUpdate: (d) => _onResizeTop(d, displayedW, displayedH),
-                        ),
-                      ),
-                    ),
-                    // Bottom Edge
-                    Positioned(
-                      bottom: -6,
-                      left: 14,
-                      right: 14,
-                      height: 14,
-                      child: MouseRegion(
-                        cursor: SystemMouseCursors.resizeUpDown,
-                        child: GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onPanUpdate: (d) => _onResizeBottom(d, displayedW, displayedH),
-                        ),
-                      ),
-                    ),
-                    // Left Edge
-                    Positioned(
-                      left: -6,
-                      top: 14,
-                      bottom: 14,
-                      width: 14,
-                      child: MouseRegion(
-                        cursor: SystemMouseCursors.resizeLeftRight,
-                        child: GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onPanUpdate: (d) => _onResizeLeft(d, displayedW, displayedH),
-                        ),
-                      ),
-                    ),
-                    // Right Edge
-                    Positioned(
-                      right: -6,
-                      top: 14,
-                      bottom: 14,
-                      width: 14,
-                      child: MouseRegion(
-                        cursor: SystemMouseCursors.resizeLeftRight,
-                        child: GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onPanUpdate: (d) => _onResizeRight(d, displayedW, displayedH),
-                        ),
-                      ),
-                    ),
-                  ],
-
-                  // 4 Corner Handles with precise grab areas
-                  Positioned(
-                    top: -14,
-                    left: -14,
-                    child: _buildInteractiveHandle(
-                      SystemMouseCursors.resizeUpLeftDownRight,
-                      (d) => _onResizeTopLeft(d, displayedW, displayedH),
-                    ),
-                  ),
-                  Positioned(
-                    top: -14,
-                    right: -14,
-                    child: _buildInteractiveHandle(
-                      SystemMouseCursors.resizeUpRightDownLeft,
-                      (d) => _onResizeTopRight(d, displayedW, displayedH),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: -14,
-                    left: -14,
-                    child: _buildInteractiveHandle(
-                      SystemMouseCursors.resizeUpRightDownLeft,
-                      (d) => _onResizeBottomLeft(d, displayedW, displayedH),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: -14,
-                    right: -14,
-                    child: _buildInteractiveHandle(
-                      SystemMouseCursors.resizeUpLeftDownRight,
-                      (d) => _onResizeBottomRight(d, displayedW, displayedH),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInteractiveHandle(
-    MouseCursor cursor,
-    GestureDragUpdateCallback onPanUpdate,
-  ) {
-    return MouseRegion(
-      cursor: cursor,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onPanUpdate: onPanUpdate,
-        child: Container(
-          width: 28,
-          height: 28,
-          alignment: Alignment.center,
-          color: Colors.transparent, // Ensure hit test works over transparent padding
-          child: Container(
-            width: 14,
-            height: 14,
-            decoration: BoxDecoration(
-              color: AppColors.primary,
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.white, width: 2),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.35),
-                  blurRadius: 3,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }
-
-class _CropOverlayPainter extends CustomPainter {
-  final Rect cropRect;
-
-  _CropOverlayPainter({required this.cropRect});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.black.withValues(alpha: 0.6)
-      ..style = PaintingStyle.fill;
-
-    final fullRect = Rect.fromLTWH(0, 0, size.width, size.height);
-    final path = Path()
-      ..addRect(fullRect)
-      ..addRect(cropRect)
-      ..fillType = PathFillType.evenOdd;
-
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(_CropOverlayPainter old) => old.cropRect != cropRect;
-}
-
-class _RuleOfThirdsPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.3)
-      ..strokeWidth = 1;
-
-    final oneThirdW = size.width / 3;
-    final twoThirdW = size.width * 2 / 3;
-    final oneThirdH = size.height / 3;
-    final twoThirdH = size.height * 2 / 3;
-
-    canvas.drawLine(Offset(oneThirdW, 0), Offset(oneThirdW, size.height), paint);
-    canvas.drawLine(Offset(twoThirdW, 0), Offset(twoThirdW, size.height), paint);
-    canvas.drawLine(Offset(0, oneThirdH), Offset(size.width, oneThirdH), paint);
-    canvas.drawLine(Offset(0, twoThirdH), Offset(size.width, twoThirdH), paint);
-  }
-
-  @override
-  bool shouldRepaint(_RuleOfThirdsPainter old) => false;
-}
-

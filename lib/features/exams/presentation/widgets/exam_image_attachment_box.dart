@@ -1,15 +1,17 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../../../core/di/injection_container.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/app_logger.dart';
-import '../../../../core/widgets/app_badge.dart';
-import '../../../../core/di/injection_container.dart';
 import 'app_image_cropper_dialog.dart';
+import 'exam_image_attachment_controls_bar.dart';
+import 'exam_image_attachment_empty_zone.dart';
+import 'exam_image_attachment_preview.dart';
 
+/// Question image attachment box supporting instant local preview, cropping, cloud upload, and alignment/width metadata.
 class ExamImageAttachmentBox extends StatefulWidget {
   final String? initialImageUrl;
   final Uint8List? initialLocalBytes;
@@ -18,8 +20,12 @@ class ExamImageAttachmentBox extends StatefulWidget {
   final String? uploadError;
   final VoidCallback? onRetryUpload;
   final void Function(Uint8List bytes, String filename)? onBytesSelected;
-  final ValueChanged<({String? imageUrl, Map<String, dynamic>? imageMeta, Uint8List? localBytes})>
-  onChanged;
+  final ValueChanged<
+      ({
+        String? imageUrl,
+        Map<String, dynamic>? imageMeta,
+        Uint8List? localBytes
+      })> onChanged;
 
   const ExamImageAttachmentBox({
     super.key,
@@ -34,11 +40,11 @@ class ExamImageAttachmentBox extends StatefulWidget {
   });
 
   @override
-  State<ExamImageAttachmentBox> createState() => _ExamImageAttachmentBoxState();
+  State<ExamImageAttachmentBox> createState() =>
+      _ExamImageAttachmentBoxState();
 }
 
 class _ExamImageAttachmentBoxState extends State<ExamImageAttachmentBox> {
-
   String? _imageUrl;
   Uint8List? _localBytes;
   late Map<String, dynamic> _imageMeta;
@@ -128,7 +134,8 @@ class _ExamImageAttachmentBoxState extends State<ExamImageAttachmentBox> {
     setState(() => _internalIsUploading = true);
     try {
       final uploadBytes = Uint8List.fromList(safeBytes);
-      final uploadedUrl = await InjectionContainer.examsRepository.uploadExamImage(
+      final uploadedUrl =
+          await InjectionContainer.examsRepository.uploadExamImage(
         bytes: uploadBytes,
         fileName: filename,
         mimeType: 'image/png',
@@ -145,7 +152,8 @@ class _ExamImageAttachmentBoxState extends State<ExamImageAttachmentBox> {
         _notifyChange();
       }
     } catch (e, st) {
-      AppLogger.e('ExamImageBox', '❌ Error uploading image: $e', error: e, stackTrace: st);
+      AppLogger.e('ExamImageBox', '❌ Error uploading image: $e',
+          error: e, stackTrace: st);
       if (mounted) {
         setState(() {
           _internalIsUploading = false;
@@ -249,11 +257,13 @@ class _ExamImageAttachmentBoxState extends State<ExamImageAttachmentBox> {
 
   @override
   Widget build(BuildContext context) {
-    final hasImage = _localBytes != null || (_imageUrl != null && _imageUrl!.isNotEmpty);
+    final hasImage =
+        _localBytes != null || (_imageUrl != null && _imageUrl!.isNotEmpty);
 
     if (hasImage) {
       final alignment = _imageMeta['alignment'] as String? ?? 'center';
-      final widthPercent = (_imageMeta['width_percent'] as num?)?.toInt() ?? 75;
+      final widthPercent =
+          (_imageMeta['width_percent'] as num?)?.toInt() ?? 75;
 
       return Container(
         decoration: BoxDecoration(
@@ -265,213 +275,28 @@ class _ExamImageAttachmentBoxState extends State<ExamImageAttachmentBox> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Preview container with chosen width & alignment (Instant memory image or network image)
-            LayoutBuilder(
-              builder: (ctx, constraints) {
-                final displayW = constraints.maxWidth * (widthPercent / 100);
-                Alignment align = Alignment.center;
-                if (alignment == 'right') align = Alignment.centerRight;
-                if (alignment == 'left') align = Alignment.centerLeft;
-
-                return Align(
-                  alignment: align,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                    child: Container(
-                      constraints: const BoxConstraints(maxHeight: 280),
-                      width: displayW,
-                      child: _localBytes != null
-                          ? Image.memory(
-                              _localBytes!,
-                              fit: BoxFit.contain,
-                            )
-                          : CachedNetworkImage(
-                              imageUrl: _imageUrl!,
-                              memCacheWidth: 600,
-                              memCacheHeight: 600,
-                              maxWidthDiskCache: 800,
-                              fit: BoxFit.contain,
-                              placeholder: (ctx, _) => Container(
-                                height: 140,
-                                color: AppColors.surfaceVariant,
-                                child: const Center(
-                                  child: CircularProgressIndicator(strokeWidth: 2),
-                                ),
-                              ),
-                              errorWidget: (ctx, _, __) => Container(
-                                height: 100,
-                                color: AppColors.error.withValues(alpha: 0.1),
-                                child: Center(
-                                  child: Text(
-                                    context.l10n.failedToLoadImage,
-                                    style: const TextStyle(
-                                      color: AppColors.error,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                    ),
-                  ),
-                );
-              },
+            // Preview container with chosen width & alignment
+            ExamImageAttachmentPreview(
+              localBytes: _localBytes,
+              imageUrl: _imageUrl,
+              alignment: alignment,
+              widthPercent: widthPercent,
             ),
             const SizedBox(height: AppSpacing.s12),
             const Divider(height: 1, color: AppColors.border),
             const SizedBox(height: AppSpacing.s8),
 
             // Controls Bar: Status Badges + Alignment + Width Selector + Delete
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      // 1. Sync / Status Badges
-                      if (_effectiveIsUploading) ...[
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                            border: Border.all(color: AppColors.primary.withValues(alpha: 0.25)),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const SizedBox(
-                                width: 12,
-                                height: 12,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                context.l10n.syncingImageInBackground,
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.primary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ] else if (_imageUrl != null && _imageUrl!.isNotEmpty) ...[
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: AppColors.success.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                            border: Border.all(color: AppColors.success.withValues(alpha: 0.25)),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.cloud_done_rounded, size: 14, color: AppColors.success),
-                              const SizedBox(width: 4),
-                              Text(
-                                context.l10n.imageSavedToCloud,
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.success,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ] else if (_effectiveError != null) ...[
-                        InkWell(
-                          onTap: widget.onRetryUpload,
-                          borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: AppColors.error.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                              border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(Icons.refresh_rounded, size: 14, color: AppColors.error),
-                                const SizedBox(width: 4),
-                                Text(
-                                  context.l10n.retryUpload,
-                                  style: const TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.error,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                      if (_imageUrl != null && _imageUrl!.contains('.webp')) ...[
-                        AppBadge(
-                          label: context.l10n.optimizedWebpBadge,
-                          variant: AppBadgeVariant.active,
-                          icon: Icons.bolt_rounded,
-                        ),
-                      ],
-                      Text(
-                        context.l10n.imageAlignmentLabel,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                      _buildAlignButton(
-                        'right',
-                        Icons.format_align_right_rounded,
-                        alignment,
-                      ),
-                      _buildAlignButton(
-                        'center',
-                        Icons.format_align_center_rounded,
-                        alignment,
-                      ),
-                      _buildAlignButton(
-                        'left',
-                        Icons.format_align_left_rounded,
-                        alignment,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        context.l10n.imageWidthLabel,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                      _buildWidthChip(30, '30%', widthPercent),
-                      _buildWidthChip(50, '50%', widthPercent),
-                      _buildWidthChip(75, '75%', widthPercent),
-                      _buildWidthChip(100, '100%', widthPercent),
-                    ],
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(
-                    Icons.delete_outline_rounded,
-                    color: AppColors.error,
-                    size: 20,
-                  ),
-                  tooltip: context.l10n.removeImageAction,
-                  onPressed: _removeImage,
-                ),
-              ],
+            ExamImageAttachmentControlsBar(
+              isUploading: _effectiveIsUploading,
+              imageUrl: _imageUrl,
+              uploadError: _effectiveError,
+              onRetryUpload: widget.onRetryUpload,
+              alignment: alignment,
+              widthPercent: widthPercent,
+              onAlignmentChanged: _setAlignment,
+              onWidthPercentChanged: _setWidthPercent,
+              onRemoveImage: _removeImage,
             ),
           ],
         ),
@@ -479,214 +304,9 @@ class _ExamImageAttachmentBoxState extends State<ExamImageAttachmentBox> {
     }
 
     // Empty Attachment Box (Drop Zone / Paste Box)
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final isCompact = constraints.maxWidth < 480;
-        return InkWell(
-          onTap: _pickFile,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-            decoration: BoxDecoration(
-              color: AppColors.surfaceVariant.withValues(alpha: 0.25),
-              borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-              border: Border.all(
-                color: AppColors.border,
-                style: BorderStyle.solid,
-                width: 1.2,
-              ),
-            ),
-            child: isCompact
-                ? _buildCompactLayout(context)
-                : _buildFullLayout(context),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildCompactLayout(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.add_photo_alternate_outlined,
-                color: AppColors.primary,
-                size: 22,
-              ),
-            ),
-            const SizedBox(width: AppSpacing.s12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    context.l10n.attachImageOrScreenshotTitle,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    context.l10n.attachImageOrScreenshotSubtitle,
-                    style: const TextStyle(
-                      fontSize: 11,
-                      color: AppColors.textMuted,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.s16),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            ElevatedButton.icon(
-              onPressed: _pickFile,
-              icon: const Icon(Icons.upload_file_rounded, size: 16),
-              label: Text(context.l10n.browseAction),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildFullLayout(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: AppColors.primary.withValues(alpha: 0.1),
-            shape: BoxShape.circle,
-          ),
-          child: const Icon(
-            Icons.add_photo_alternate_outlined,
-            color: AppColors.primary,
-            size: 22,
-          ),
-        ),
-        const SizedBox(width: AppSpacing.s12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                context.l10n.attachImageOrScreenshotTitle,
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                context.l10n.attachImageOrScreenshotSubtitle,
-                style: const TextStyle(
-                  fontSize: 11,
-                  color: AppColors.textMuted,
-                ),
-              ),
-            ],
-          ),
-        ),
-        OutlinedButton.icon(
-          onPressed: _handlePaste,
-          icon: const Icon(Icons.content_paste_rounded, size: 16),
-          label: const Text('Ctrl+V'),
-          style: OutlinedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-          ),
-        ),
-        const SizedBox(width: 8),
-        ElevatedButton.icon(
-          onPressed: _pickFile,
-          icon: const Icon(Icons.upload_file_rounded, size: 16),
-          label: Text(context.l10n.browseAction),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primary,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAlignButton(
-    String alignKey,
-    IconData icon,
-    String currentAlign,
-  ) {
-    final isSelected = alignKey == currentAlign;
-    return InkWell(
-      onTap: () => _setAlignment(alignKey),
-      borderRadius: BorderRadius.circular(4),
-      child: Container(
-        padding: const EdgeInsets.all(4),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.primary.withValues(alpha: 0.15)
-              : Colors.transparent,
-          border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.border,
-          ),
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: Icon(
-          icon,
-          size: 18,
-          color: isSelected ? AppColors.primary : AppColors.textSecondary,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildWidthChip(int percent, String label, int currentPercent) {
-    final isSelected = percent == currentPercent;
-    return InkWell(
-      onTap: () => _setWidthPercent(percent),
-      borderRadius: BorderRadius.circular(4),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : Colors.transparent,
-          border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.border,
-          ),
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            color: isSelected ? Colors.white : AppColors.textPrimary,
-          ),
-        ),
-      ),
+    return ExamImageAttachmentEmptyZone(
+      onPickFile: _pickFile,
+      onHandlePaste: _handlePaste,
     );
   }
 }

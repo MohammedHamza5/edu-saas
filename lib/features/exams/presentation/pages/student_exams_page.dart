@@ -11,11 +11,11 @@ import '../../../../core/widgets/app_loading_view.dart';
 import '../../../../core/widgets/responsive_container.dart';
 import '../../domain/entities/academic_momentum_entity.dart';
 import '../../domain/entities/exam_entity.dart';
-import '../../domain/entities/exam_folder_entity.dart';
 import '../cubit/exams_cubit.dart';
 import '../cubit/exams_state.dart';
 import '../cubit/mistakes_cubit.dart';
 import '../cubit/mistakes_state.dart';
+import '../utils/student_exams_filter_helper.dart';
 import '../widgets/exam_folders_bar.dart';
 import '../widgets/momentum/student_academic_momentum_card.dart';
 import '../widgets/student_exams_filter_bar.dart';
@@ -103,68 +103,6 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
     }
   }
 
-  bool _isLessonQuiz(ExamEntity exam) {
-    if (exam.isLectureExam) return true;
-    if (exam.linkedLessonId != null && exam.linkedLessonId!.isNotEmpty) {
-      return true;
-    }
-    final lower = exam.title.toLowerCase();
-    return lower.contains('كويز') ||
-        lower.contains('quiz') ||
-        lower.contains('درس') ||
-        lower.contains('محاضرة') ||
-        lower.contains('lesson');
-  }
-
-  List<ExamEntity> _filterExams(
-    List<ExamEntity> list,
-    String? selectedFolderId,
-  ) {
-    List<ExamEntity> filtered = list;
-
-    if (selectedFolderId != null) {
-      if (selectedFolderId == 'uncategorized') {
-        filtered = filtered
-            .where((e) => e.folderId == null || e.folderId!.trim().isEmpty)
-            .toList();
-      } else {
-        filtered =
-            filtered.where((e) => e.folderId == selectedFolderId).toList();
-      }
-    }
-
-    switch (_activeFilter) {
-      case StudentExamFilter.all:
-        break;
-      case StudentExamFilter.available:
-        filtered = filtered
-            .where((e) =>
-                !e.hasAttempted || (!e.isFullyCompleted && !e.hasActiveAttempt))
-            .toList();
-        break;
-      case StudentExamFilter.inProgress:
-        filtered = filtered.where((e) => e.hasActiveAttempt).toList();
-        break;
-      case StudentExamFilter.completed:
-        filtered = filtered.where((e) => e.isFullyCompleted).toList();
-        break;
-    }
-
-    if (_searchQuery.trim().isNotEmpty) {
-      final query = _searchQuery.trim().toLowerCase();
-      filtered = filtered.where((e) {
-        final title = e.title.toLowerCase();
-        final group = (e.groupName ?? '').toLowerCase();
-        final folder = (e.folderName ?? '').toLowerCase();
-        return title.contains(query) ||
-            group.contains(query) ||
-            folder.contains(query);
-      }).toList();
-    }
-
-    return filtered;
-  }
-
   void _openExamResult(ExamEntity exam) async {
     final attempt = exam.myLatestAttempt ??
         (exam.hasAttempted || exam.myBestScore != null
@@ -183,7 +121,8 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
               )
             : null);
     if (attempt == null) return;
-    final isLecture = _isLessonQuiz(exam) || exam.isUntimed;
+    final isLecture =
+        StudentExamsFilterHelper.isLessonQuiz(exam) || exam.isUntimed;
     final cubit = context.read<ExamsCubit>();
     await Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
@@ -211,7 +150,8 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
     }
 
     final cubit = context.read<ExamsCubit>();
-    final isLecture = _isLessonQuiz(exam) || exam.isUntimed;
+    final isLecture =
+        StudentExamsFilterHelper.isLessonQuiz(exam) || exam.isUntimed;
     await Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
         builder: (_) => BlocProvider.value(
@@ -297,15 +237,37 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
                 const StudentMistakesBankBanner(),
                 const SizedBox(height: AppSpacing.s12),
 
-                // 2. Exams Section via BlocBuilder
-                BlocBuilder<ExamsCubit, ExamsState>(
+                // 2. Exams Section via BlocConsumer
+                BlocConsumer<ExamsCubit, ExamsState>(
+                  listenWhen: (prev, curr) =>
+                      prev is ExamTakingState && curr is! ExamTakingState,
+                  listener: (context, state) {
+                    try {
+                      context
+                          .read<MistakesCubit>()
+                          .loadMistakes(forceRefresh: true);
+                    } catch (_) {}
+                  },
                   buildWhen: (prev, curr) {
                     return curr is StudentExamsLoaded ||
                         curr is ExamsLoading ||
                         curr is ExamsError ||
-                        curr is ExamsEmpty;
+                        curr is ExamsEmpty ||
+                        curr is ExamsInitial;
                   },
                   builder: (context, state) {
+                    if (state is ExamsInitial) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (mounted) {
+                          _loadAll();
+                        }
+                      });
+                      return const Padding(
+                        padding: EdgeInsets.all(AppSpacing.s16),
+                        child: AppLoadingView.cardsGrid(count: 2, columns: 2),
+                      );
+                    }
+
                     if (state is ExamsLoading) {
                       return const Padding(
                         padding: EdgeInsets.all(AppSpacing.s16),
@@ -323,21 +285,11 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
                       );
                     }
 
-                    final List<ExamEntity> allExams =
-                        state is StudentExamsLoaded
-                            ? state.exams
-                                .where((e) => !_isLessonQuiz(e))
-                                .toList()
-                            : [];
-
-                    if (state is ExamsEmpty ||
-                        (state is StudentExamsLoaded && allExams.isEmpty)) {
+                    if (state is ExamsEmpty) {
                       return Padding(
                         padding: const EdgeInsets.all(AppSpacing.s24),
                         child: AppEmptyView(
-                          message: state is ExamsEmpty
-                              ? state.message
-                              : context.l10n.noPublishedExams,
+                          message: state.message,
                           subtitle: context.l10n.noPublishedExams,
                           icon: Icons.quiz_outlined,
                         ),
@@ -345,72 +297,34 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
                     }
 
                     if (state is StudentExamsLoaded) {
-                      final Map<String, ExamFolderEntity> folderMap = {};
-                      for (final exam in allExams) {
-                        if (exam.folderId != null &&
-                            exam.folderId!.trim().isNotEmpty) {
-                          final fid = exam.folderId!.trim();
-                          if (!folderMap.containsKey(fid)) {
-                            folderMap[fid] = ExamFolderEntity(
-                              id: fid,
-                              tenantId: exam.tenantId,
-                              groupId: exam.groupId,
-                              name: exam.folderName ?? '',
-                              color: exam.folderColor ?? '#5B4FE0',
-                              examCount: 1,
-                              createdAt: exam.createdAt,
-                              updatedAt: exam.updatedAt,
-                            );
-                          } else {
-                            final existing = folderMap[fid]!;
-                            folderMap[fid] = existing.copyWith(
-                              examCount: existing.examCount + 1,
-                            );
-                          }
-                        }
-                      }
-                      final studentFolders = folderMap.values.toList()
-                        ..sort((a, b) => a.name.compareTo(b.name));
-
-                      final uncategorizedCount = allExams
-                          .where(
-                            (e) =>
-                                e.folderId == null ||
-                                e.folderId!.trim().isEmpty,
-                          )
-                          .length;
-
-                      final filtered = _filterExams(
-                        allExams,
-                        state.selectedFolderId,
+                      final summary = StudentExamsFilterHelper.computeSummary(
+                        rawExams: state.exams,
+                        selectedFolderId: state.selectedFolderId,
+                        activeFilter: _activeFilter,
+                        searchQuery: _searchQuery,
                       );
 
-                      final folderScopedExams = state.selectedFolderId == null
-                          ? allExams
-                          : state.selectedFolderId == 'uncategorized'
-                              ? allExams
-                                  .where(
-                                    (e) =>
-                                        e.folderId == null ||
-                                        e.folderId!.trim().isEmpty,
-                                  )
-                                  .toList()
-                              : allExams
-                                  .where(
-                                    (e) => e.folderId == state.selectedFolderId,
-                                  )
-                                  .toList();
+                      if (summary.allExams.isEmpty) {
+                        return Padding(
+                          padding: const EdgeInsets.all(AppSpacing.s24),
+                          child: AppEmptyView(
+                            message: context.l10n.noPublishedExams,
+                            subtitle: context.l10n.noPublishedExams,
+                            icon: Icons.quiz_outlined,
+                          ),
+                        );
+                      }
 
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           // 0. Academic Momentum Card
-                          _buildAcademicMomentumCard(context, allExams),
+                          _buildAcademicMomentumCard(context, summary.allExams),
                           const SizedBox(height: AppSpacing.s12),
 
                           // 1. Overview Hub / Summary KPI Banner
                           StudentExamsOverviewHub(
-                            allExams: allExams,
+                            allExams: summary.allExams,
                             activeFilter: _activeFilter,
                             onFilterChanged: (filter) =>
                                 setState(() => _activeFilter = filter),
@@ -418,12 +332,12 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
                           const SizedBox(height: AppSpacing.s12),
 
                           // 2. Exam Folders Bar
-                          if (studentFolders.isNotEmpty) ...[
+                          if (summary.studentFolders.isNotEmpty) ...[
                             ExamFoldersBar(
-                              folders: studentFolders,
+                              folders: summary.studentFolders,
                               selectedFolderId: state.selectedFolderId,
-                              totalExamsCount: allExams.length,
-                              uncategorizedCount: uncategorizedCount,
+                              totalExamsCount: summary.allExams.length,
+                              uncategorizedCount: summary.uncategorizedCount,
                               onSelectFolder: (String? fId) => context
                                   .read<ExamsCubit>()
                                   .selectStudentFolder(fId),
@@ -441,7 +355,7 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
                               _searchController.clear();
                               setState(() => _searchQuery = '');
                             },
-                            folderScopedExams: folderScopedExams,
+                            folderScopedExams: summary.folderScopedExams,
                             activeFilter: _activeFilter,
                             onFilterChanged: (filter) =>
                                 setState(() => _activeFilter = filter),
@@ -449,7 +363,7 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
                           const SizedBox(height: AppSpacing.s12),
 
                           // 4. Exams list or filtered empty state
-                          if (filtered.isEmpty) ...[
+                          if (summary.filteredExams.isEmpty) ...[
                             Padding(
                               padding: const EdgeInsets.symmetric(
                                 vertical: AppSpacing.s32,
@@ -471,7 +385,7 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
                                 horizontal: AppSpacing.s16,
                               ),
                               child: StudentExamsGridView(
-                                exams: filtered,
+                                exams: summary.filteredExams,
                                 onTapExam: _openExamIntro,
                                 onReviewExam: _openExamResult,
                               ),

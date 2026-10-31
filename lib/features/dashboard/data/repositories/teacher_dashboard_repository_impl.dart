@@ -1,6 +1,7 @@
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/errors/result.dart';
+import '../../../../core/network/retry_helper.dart';
 import '../../domain/entities/teacher_radar_alerts.dart';
 import '../../domain/repositories/teacher_dashboard_repository.dart';
 import '../datasources/teacher_dashboard_remote_datasource.dart';
@@ -32,7 +33,9 @@ class TeacherDashboardRepositoryImpl implements TeacherDashboardRepository {
         return Result.success(_cachedAlerts!);
       }
 
-      final alerts = await remoteDataSource.getTeacherRadarAlerts(teacherId);
+      final alerts = await retryTransient(
+        () => remoteDataSource.getTeacherRadarAlerts(teacherId),
+      );
       _cachedAlerts = alerts;
       _cachedTeacherId = teacherId;
       _cachedAt = now;

@@ -140,14 +140,18 @@ class WhatsAppTemplateFieldsSection extends StatelessWidget {
             controller: controller,
             maxLines: maxLines,
             onChanged: (_) => onChanged(),
-            style: const TextStyle(fontSize: 13, height: 1.4),
+            style: const TextStyle(
+              fontSize: 13.5,
+              height: 1.5,
+              color: AppColors.textPrimary,
+            ),
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: const TextStyle(
-                fontSize: 12,
+                fontSize: 12.5,
                 color: AppColors.textMuted,
               ),
-              contentPadding: const EdgeInsets.all(AppSpacing.s12),
+              contentPadding: const EdgeInsets.all(AppSpacing.s14),
               filled: true,
               fillColor: AppColors.surfaceVariant.withValues(alpha: 0.35),
               border: OutlineInputBorder(

@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/errors/result.dart';
+import '../../../../core/network/retry_helper.dart';
 import '../../domain/entities/student_360_entity.dart';
 import '../../domain/entities/student_academic_report_entity.dart';
 import '../../domain/entities/student_entity.dart';
@@ -21,11 +22,13 @@ class StudentsRepositoryImpl implements StudentsRepository {
     int pageSize = 25,
   }) async {
     try {
-      final students = await _remoteDataSource.getStudents(
-        status: status,
-        searchQuery: searchQuery,
-        page: page,
-        pageSize: pageSize,
+      final students = await retryTransient(
+        () => _remoteDataSource.getStudents(
+          status: status,
+          searchQuery: searchQuery,
+          page: page,
+          pageSize: pageSize,
+        ),
       );
       return Success(students);
     } on PostgrestException catch (e) {
@@ -41,9 +44,11 @@ class StudentsRepositoryImpl implements StudentsRepository {
     int pageSize = 20,
   }) async {
     try {
-      final students = await _remoteDataSource.getPendingStudents(
-        page: page,
-        pageSize: pageSize,
+      final students = await retryTransient(
+        () => _remoteDataSource.getPendingStudents(
+          page: page,
+          pageSize: pageSize,
+        ),
       );
       return Success(students);
     } on PostgrestException catch (e) {
@@ -74,7 +79,9 @@ class StudentsRepositoryImpl implements StudentsRepository {
   @override
   Future<Result<Student360Entity>> getStudent360(String studentId) async {
     try {
-      final stats = await _remoteDataSource.getStudent360(studentId);
+      final stats = await retryTransient(
+        () => _remoteDataSource.getStudent360(studentId),
+      );
       return Success(stats);
     } on PostgrestException catch (e) {
       return FailureResult(ServerFailure(e.message, code: e.code));
@@ -86,7 +93,9 @@ class StudentsRepositoryImpl implements StudentsRepository {
   @override
   Future<Result<StudentEntity>> getStudent(String studentId) async {
     try {
-      final student = await _remoteDataSource.getStudent(studentId);
+      final student = await retryTransient(
+        () => _remoteDataSource.getStudent(studentId),
+      );
       return Success(student);
     } on PostgrestException catch (e) {
       return FailureResult(ServerFailure(e.message, code: e.code));
@@ -102,10 +111,12 @@ class StudentsRepositoryImpl implements StudentsRepository {
     required bool add,
   }) async {
     try {
-      await _remoteDataSource.assignStudentToGroup(
-        studentId: studentId,
-        groupId: groupId,
-        add: add,
+      await retryTransient(
+        () => _remoteDataSource.assignStudentToGroup(
+          studentId: studentId,
+          groupId: groupId,
+          add: add,
+        ),
       );
       return const Success(null);
     } on PostgrestException catch (e) {
@@ -120,8 +131,8 @@ class StudentsRepositoryImpl implements StudentsRepository {
     String studentId,
   ) async {
     try {
-      final groups = await _remoteDataSource.getAvailableGroupsForStudent(
-        studentId,
+      final groups = await retryTransient(
+        () => _remoteDataSource.getAvailableGroupsForStudent(studentId),
       );
       return Success(groups);
     } on PostgrestException catch (e) {
@@ -149,9 +160,11 @@ class StudentsRepositoryImpl implements StudentsRepository {
     int? days,
   }) async {
     try {
-      final report = await _remoteDataSource.getStudentAcademicReport(
-        studentId,
-        days: days,
+      final report = await retryTransient(
+        () => _remoteDataSource.getStudentAcademicReport(
+          studentId,
+          days: days,
+        ),
       );
       return Success(report);
     } on PostgrestException catch (e) {

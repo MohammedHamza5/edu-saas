@@ -6,7 +6,6 @@ import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/app_feedback.dart';
-import '../../../../core/widgets/app_badge.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_empty_view.dart';
 import '../../../../core/widgets/app_error_view.dart';
@@ -14,6 +13,7 @@ import '../../../../core/widgets/responsive_container.dart';
 import '../../domain/entities/student_360_entity.dart';
 import '../cubit/students_cubit.dart';
 import '../cubit/students_state.dart';
+import '../widgets/assign_group_tile.dart';
 
 /// T-05 — Assign Groups to Student (Teacher)
 /// Separate step from approval — student can belong to multiple groups.
@@ -225,7 +225,7 @@ class _AssignGroupsPageState extends State<AssignGroupsPage> {
                       )
                     else
                       ...state.currentGroups.map(
-                        (g) => _GroupTile(
+                        (g) => AssignGroupTile(
                           group: g,
                           isAssigned: true,
                           onToggle: () => _removeGroup(context, g),
@@ -288,7 +288,7 @@ class _AssignGroupsPageState extends State<AssignGroupsPage> {
                       )
                     else
                       ...availableFiltered.map(
-                        (g) => _GroupTile(
+                        (g) => AssignGroupTile(
                           group: g,
                           isAssigned: false,
                           onToggle: () => _addGroup(context, g),
@@ -328,12 +328,15 @@ class _AssignGroupsPageState extends State<AssignGroupsPage> {
     );
     if (!context.mounted) return;
     if (ok == true) {
-      await cubit.toggleGroupMembership(
+      final success = await cubit.toggleGroupMembership(
         studentId: widget.studentId,
         groupId: g.groupId,
         add: true,
       );
       if (!context.mounted) return;
+      if (!success) {
+        AppFeedback.showError(context, l10n.errorOccurred);
+      }
     }
   }
 
@@ -360,12 +363,15 @@ class _AssignGroupsPageState extends State<AssignGroupsPage> {
     );
     if (!context.mounted) return;
     if (ok == true) {
-      await cubit.toggleGroupMembership(
+      final success = await cubit.toggleGroupMembership(
         studentId: widget.studentId,
         groupId: g.groupId,
         add: false,
       );
       if (!context.mounted) return;
+      if (!success) {
+        AppFeedback.showError(context, l10n.errorOccurred);
+      }
     }
   }
 }
@@ -409,93 +415,4 @@ class _SectionHeader extends StatelessWidget {
       ),
     ],
   );
-}
-
-class _GroupTile extends StatelessWidget {
-  final StudentGroupInfo group;
-  final bool isAssigned;
-  final VoidCallback onToggle;
-
-  const _GroupTile({
-    required this.group,
-    required this.isAssigned,
-    required this.onToggle,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.s8),
-      child: AppCard(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.s16,
-          vertical: AppSpacing.s12,
-        ),
-        child: Row(
-          children: [
-            Icon(
-              isAssigned
-                  ? Icons.check_circle_rounded
-                  : Icons.add_circle_outline_rounded,
-              color: isAssigned ? AppColors.success : AppColors.primary,
-              size: 20,
-            ),
-            const SizedBox(width: AppSpacing.s12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    group.groupName,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  if (isAssigned)
-                    Text(
-                      context.l10n.joinedDateLabel(
-                        '${group.joinedAt.day}/${group.joinedAt.month}/${group.joinedAt.year}',
-                      ),
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: AppColors.textMuted,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            AppBadge(label: group.groupLevel, variant: AppBadgeVariant.active),
-            const SizedBox(width: AppSpacing.s8),
-            OutlinedButton(
-              style: OutlinedButton.styleFrom(
-                foregroundColor: isAssigned
-                    ? AppColors.error
-                    : AppColors.primary,
-                side: BorderSide(
-                  color: isAssigned
-                      ? AppColors.error.withValues(alpha: 0.4)
-                      : AppColors.primary.withValues(alpha: 0.4),
-                ),
-                minimumSize: const Size(64, 32),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.s12,
-                  vertical: 0,
-                ),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              onPressed: onToggle,
-              child: Text(
-                isAssigned
-                    ? context.l10n.unassignAction
-                    : context.l10n.assignActionPlus,
-                style: const TextStyle(fontSize: 12),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }

@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/errors/result.dart';
+import '../../../../core/network/retry_helper.dart';
 import '../../domain/entities/attendance_entity.dart';
 import '../../domain/repositories/attendance_repository.dart';
 import '../datasources/attendance_remote_datasource.dart';
@@ -18,10 +19,12 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
     String? lectureContentId,
   }) async {
     try {
-      final items = await _remoteDataSource.getGroupStudentsWithAttendance(
-        groupId: groupId,
-        date: date,
-        lectureContentId: lectureContentId,
+      final items = await retryTransient(
+        () => _remoteDataSource.getGroupStudentsWithAttendance(
+          groupId: groupId,
+          date: date,
+          lectureContentId: lectureContentId,
+        ),
       );
       return Success(items);
     } on PostgrestException catch (e) {
@@ -63,11 +66,13 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
     int? pageSize,
   }) async {
     try {
-      final history = await _remoteDataSource.getStudentAttendanceHistory(
-        studentId: studentId,
-        groupId: groupId,
-        page: page,
-        pageSize: pageSize,
+      final history = await retryTransient(
+        () => _remoteDataSource.getStudentAttendanceHistory(
+          studentId: studentId,
+          groupId: groupId,
+          page: page,
+          pageSize: pageSize,
+        ),
       );
       return Success(history);
     } on PostgrestException catch (e) {

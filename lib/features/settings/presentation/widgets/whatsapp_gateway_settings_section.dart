@@ -196,10 +196,10 @@ class _WhatsAppGatewaySettingsSectionState
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: Text(
-                        '💡 يتم ربط الهاتف مرة واحدة فقط للمدرس، ويعمل مع واتساب العادي أو الأعمال تلقائياً.',
-                        style: TextStyle(
+                        context.l10n.whatsappGatewayDevicePairingTip,
+                        style: const TextStyle(
                           fontSize: 11,
                           color: AppColors.textMuted,
                         ),
@@ -275,9 +275,9 @@ class _WhatsAppGatewaySettingsSectionState
                 ],
                 if (!isConnected && !isQrReady) ...[
                   const SizedBox(height: 4),
-                  const Text(
-                    '⚠️ الجلسة غير متصلة أو انتهت صلاحيتها. يرجى إعادة مسح الرمز لاستئناف الإرسال التلقائي.',
-                    style: TextStyle(
+                  Text(
+                    context.l10n.whatsappGatewayDisconnectedWarning,
+                    style: const TextStyle(
                       fontSize: 11,
                       color: AppColors.error,
                       fontWeight: FontWeight.w500,

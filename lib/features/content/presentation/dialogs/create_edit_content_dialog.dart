@@ -7,9 +7,11 @@ import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_button.dart';
-import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../domain/entities/content_entity.dart';
+import '../widgets/content_attachment_section.dart';
+import '../widgets/content_sequential_learning_section.dart';
+import '../widgets/content_type_status_selector.dart';
 
 class CreateEditContentDialog extends StatefulWidget {
   final String groupId;
@@ -294,407 +296,39 @@ class _CreateEditContentDialogState extends State<CreateEditContentDialog> {
 
                     const SizedBox(height: AppSpacing.s16),
 
-                    // Type Selection
-                    Text(
-                      context.l10n.materialTypeLabel,
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.s6),
-                    Wrap(
-                      spacing: AppSpacing.s8,
-                      runSpacing: AppSpacing.s6,
-                      children: ContentType.values.map((type) {
-                        final isSelected = _selectedType == type;
-                        return ChoiceChip(
-                          label: Text(type.localizedLabel(context)),
-                          selected: isSelected,
-                          selectedColor: AppColors.primary.withAlpha(30),
-                          onSelected: (selected) {
-                            if (selected) setState(() => _selectedType = type);
-                          },
-                          labelStyle: TextStyle(
-                            fontSize: 12,
-                            fontWeight: isSelected
-                                ? FontWeight.bold
-                                : FontWeight.normal,
-                            color: isSelected
-                                ? AppColors.primary
-                                : AppColors.textSecondary,
-                          ),
-                        );
-                      }).toList(),
+                    // 1. Type & Status Selectors
+                    ContentTypeStatusSelector(
+                      selectedType: _selectedType,
+                      selectedStatus: _selectedStatus,
+                      onTypeChanged: (type) =>
+                          setState(() => _selectedType = type),
+                      onStatusChanged: (status) =>
+                          setState(() => _selectedStatus = status),
                     ),
 
-                    const SizedBox(height: AppSpacing.s16),
-
-                    // Publication Status Selection
-                    Text(
-                      context.l10n.publicationStatusLabel,
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.s6),
-                    Wrap(
-                      spacing: AppSpacing.s8,
-                      runSpacing: AppSpacing.s6,
-                      children: [
-                        ChoiceChip(
-                          label: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.edit_note_rounded,
-                                size: 14,
-                                color: AppColors.warning,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(context.l10n.draftPrivateNotice),
-                            ],
-                          ),
-                          selected: _selectedStatus == ContentStatus.draft,
-                          selectedColor: AppColors.warning.withAlpha(30),
-                          onSelected: (selected) {
-                            if (selected) {
-                              setState(
-                                () => _selectedStatus = ContentStatus.draft,
-                              );
-                            }
-                          },
-                        ),
-                        ChoiceChip(
-                          label: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.check_circle_rounded,
-                                size: 14,
-                                color: AppColors.success,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(context.l10n.publishImmediateNotice),
-                            ],
-                          ),
-                          selected: _selectedStatus == ContentStatus.published,
-                          selectedColor: AppColors.success.withAlpha(30),
-                          onSelected: (selected) {
-                            if (selected) {
-                              setState(
-                                () => _selectedStatus = ContentStatus.published,
-                              );
-                            }
-                          },
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: AppSpacing.s16),
-
-                    if (_selectedType == ContentType.video) ...[
-                      Container(
-                        padding: const EdgeInsets.all(AppSpacing.s12),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withAlpha(15),
-                          borderRadius: BorderRadius.circular(
-                            AppSpacing.radiusSmall,
-                          ),
-                          border: Border.all(
-                            color: AppColors.primary.withAlpha(40),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.info_outline_rounded,
-                              size: 20,
-                              color: AppColors.primary,
-                            ),
-                            const SizedBox(width: AppSpacing.s10),
-                            Expanded(
-                              child: Text(
-                                context.l10n.videoStreamingNotice,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: AppColors.textSecondary,
-                                  height: 1.4,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.s12),
-                    ],
-
-                    // Attachment Section (for all materials, including video lesson notes)
-                    AppCard(
-                      variant: AppCardVariant.standard,
-                      padding: const EdgeInsets.all(AppSpacing.s12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          CheckboxListTile(
-                            title: Text(
-                              _selectedType == ContentType.video
-                                  ? context.l10n.attachVideoMaterialNotice
-                                  : context.l10n.attachMaterialFile,
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            subtitle: _selectedType == ContentType.video
-                                ? Text(
-                                    context.l10n.attachVideoMaterialHint,
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  )
-                                : null,
-                            value: _hasAttachment,
-                            activeColor: AppColors.primary,
-                            contentPadding: EdgeInsets.zero,
-                            onChanged: (val) {
-                              setState(() => _hasAttachment = val ?? false);
-                            },
-                          ),
-                          if (_hasAttachment) ...[
-                            const SizedBox(height: AppSpacing.s6),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: AppTextField(
-                                    controller: _fileNameController,
-                                    labelText:
-                                        context.l10n.attachedFileNameLabel,
-                                    hintText: context.l10n.attachedFileNameHint,
-                                    prefixIcon: const Icon(
-                                      Icons.attach_file_rounded,
-                                    ),
-                                    validator: (val) {
-                                      if (_hasAttachment &&
-                                          (val == null || val.trim().isEmpty)) {
-                                        return context.l10n.fileNameRequired;
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                                const SizedBox(width: AppSpacing.s8),
-                                SizedBox(
-                                  height: 48,
-                                  child: ElevatedButton.icon(
-                                    onPressed: _pickFile,
-                                    icon: const Icon(
-                                      Icons.file_upload_outlined,
-                                      size: 18,
-                                    ),
-                                    label: Text(context.l10n.browseFileAction),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: AppColors.surfaceVariant,
-                                      foregroundColor: AppColors.textPrimary,
-                                      elevation: 0,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(
-                                          AppSpacing.radiusSmall,
-                                        ),
-                                        side: const BorderSide(
-                                          color: AppColors.border,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ],
-                      ),
+                    // 2. Attachment Section
+                    ContentAttachmentSection(
+                      selectedType: _selectedType,
+                      hasAttachment: _hasAttachment,
+                      fileNameController: _fileNameController,
+                      isLoading: _isLoading,
+                      onAttachmentChanged: (val) =>
+                          setState(() => _hasAttachment = val),
+                      onPickFile: _pickFile,
                     ),
 
                     const SizedBox(height: AppSpacing.s24),
 
-                    if (_isLoading) ...[
-                      Container(
-                        padding: const EdgeInsets.all(AppSpacing.s12),
-                        decoration: BoxDecoration(
-                          color: AppColors.warning.withAlpha(20),
-                          borderRadius: BorderRadius.circular(
-                            AppSpacing.radiusSmall,
-                          ),
-                          border: Border.all(
-                            color: AppColors.warning.withAlpha(80),
-                          ),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Icon(
-                              Icons.warning_amber_rounded,
-                              size: 20,
-                              color: AppColors.warning,
-                            ),
-                            const SizedBox(width: AppSpacing.s10),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    context.l10n.uploadingFileKeepPageOpen,
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.textPrimary,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    context.l10n.doNotClosePageWarning,
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      color: AppColors.textSecondary,
-                                      height: 1.4,
-                                    ),
-                                  ),
-                                  const SizedBox(height: AppSpacing.s8),
-                                  const LinearProgressIndicator(
-                                    minHeight: 4,
-                                    backgroundColor: AppColors.surfaceVariant,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      AppColors.primary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.s16),
-                    ],
-                    // Sequential Learning Section
-                    AppCard(
-                      variant: AppCardVariant.standard,
-                      padding: const EdgeInsets.all(AppSpacing.s12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(
-                            context.l10n.sequentialLearningSectionTitle,
-                            style: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: AppSpacing.s12),
-
-                          // Associated Exam
-                          if (_isLoadingExams)
-                            const Center(
-                              child: SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              ),
-                            )
-                          else
-                            DropdownButtonFormField<String?>(
-                              value:
-                                  _availableExams.any(
-                                    (e) => e['id'] == _selectedAssociatedExamId,
-                                  )
-                                  ? _selectedAssociatedExamId
-                                  : null,
-                              isExpanded: true,
-                              decoration: InputDecoration(
-                                labelText: context.l10n.associatedExamLabel,
-                                border: const OutlineInputBorder(),
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: AppSpacing.s12,
-                                ),
-                              ),
-                              items: [
-                                DropdownMenuItem(
-                                  value: null,
-                                  child: Text(
-                                    context.l10n.noneOption,
-                                    style: const TextStyle(
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                ),
-                                ..._availableExams.map((exam) {
-                                  return DropdownMenuItem(
-                                    value: exam['id'] as String,
-                                    child: Text(
-                                      exam['title'] as String,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  );
-                                }),
-                              ],
-                              onChanged: (val) {
-                                setState(() => _selectedAssociatedExamId = val);
-                              },
-                            ),
-
-                          const SizedBox(height: AppSpacing.s12),
-
-                          // Prerequisite Exam
-                          if (!_isLoadingExams)
-                            DropdownButtonFormField<String?>(
-                              value:
-                                  _availableExams.any(
-                                    (e) =>
-                                        e['id'] == _selectedPrerequisiteExamId,
-                                  )
-                                  ? _selectedPrerequisiteExamId
-                                  : null,
-                              isExpanded: true,
-                              decoration: InputDecoration(
-                                labelText: context.l10n.prerequisiteExamLabel,
-                                border: const OutlineInputBorder(),
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: AppSpacing.s12,
-                                ),
-                              ),
-                              items: [
-                                DropdownMenuItem(
-                                  value: null,
-                                  child: Text(
-                                    context.l10n.noneOption,
-                                    style: const TextStyle(
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                ),
-                                ..._availableExams.map((exam) {
-                                  return DropdownMenuItem(
-                                    value: exam['id'] as String,
-                                    child: Text(
-                                      exam['title'] as String,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  );
-                                }),
-                              ],
-                              onChanged: (val) {
-                                setState(
-                                  () => _selectedPrerequisiteExamId = val,
-                                );
-                              },
-                            ),
-                        ],
-                      ),
+                    // 3. Sequential Learning Section
+                    ContentSequentialLearningSection(
+                      isLoadingExams: _isLoadingExams,
+                      availableExams: _availableExams,
+                      selectedAssociatedExamId: _selectedAssociatedExamId,
+                      selectedPrerequisiteExamId: _selectedPrerequisiteExamId,
+                      onAssociatedExamChanged: (val) =>
+                          setState(() => _selectedAssociatedExamId = val),
+                      onPrerequisiteExamChanged: (val) =>
+                          setState(() => _selectedPrerequisiteExamId = val),
                     ),
                     const SizedBox(height: AppSpacing.s24),
 

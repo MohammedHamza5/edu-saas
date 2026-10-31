@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../../../core/extensions/localized_context_extension.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_spacing.dart';
+import '../../../../../core/extensions/localized_context_extension.dart';
+import '../../../../../core/theme/app_colors.dart';
+import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/widgets/app_button.dart';
+import '../../../../../core/widgets/app_card.dart';
+import '../../../../../core/widgets/app_text_field.dart';
 import '../../../domain/entities/student_profile_entity.dart';
 import '../dialogs/confirm_parent_phone_dialog.dart';
 
@@ -91,16 +94,9 @@ class _StudentContactInfoSectionState extends State<StudentContactInfoSection> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Container(
-      width: double.infinity,
+    return AppCard(
+      variant: AppCardVariant.standard,
       padding: const EdgeInsets.all(AppSpacing.s20),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusLarge),
-        border: Border.all(
-          color: const Color(0xFFE2E8F0),
-        ),
-      ),
       child: Form(
         key: _formKey,
         child: Column(
@@ -108,12 +104,19 @@ class _StudentContactInfoSectionState extends State<StudentContactInfoSection> {
           children: [
             Row(
               children: [
-                const Icon(
-                  Icons.person_pin_rounded,
-                  color: AppColors.primary,
-                  size: 22,
+                Container(
+                  padding: const EdgeInsets.all(AppSpacing.s8),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.badge_outlined,
+                    color: AppColors.primaryLight,
+                    size: 20,
+                  ),
                 ),
-                const SizedBox(width: AppSpacing.s8),
+                const SizedBox(width: AppSpacing.s12),
                 Text(
                   context.l10n.studentContactDetailsTitle,
                   style: theme.textTheme.titleMedium?.copyWith(
@@ -124,47 +127,41 @@ class _StudentContactInfoSectionState extends State<StudentContactInfoSection> {
               ],
             ),
             const SizedBox(height: AppSpacing.s16),
+            const Divider(color: AppColors.border),
+            const SizedBox(height: AppSpacing.s16),
 
             // 1. Full Name
-            Text(
-              context.l10n.studentFullNameLabel,
-              style: theme.textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.s6),
-            TextFormField(
+            AppTextField(
               controller: _nameController,
-              decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.badge_outlined, size: 20),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.s14,
-                  vertical: AppSpacing.s12,
-                ),
+              label: context.l10n.studentFullNameLabel,
+              prefixIcon: const Icon(
+                Icons.person_outline_rounded,
+                size: 20,
+                color: AppColors.textMuted,
               ),
               validator: (val) {
                 if (val == null || val.trim().isEmpty) {
-                  return context.l10n.validationRequiredField;
+                  return context.l10n.studentNameRequired;
                 }
                 if (val.trim().length < 3) {
-                  return context.l10n.validationMinLength(3);
+                  return context.l10n.studentNameTooShort;
                 }
                 return null;
               },
             ),
-            const SizedBox(height: AppSpacing.s6),
+            const SizedBox(height: 6),
             Row(
               children: [
-                const Icon(Icons.info_outline_rounded, size: 14, color: AppColors.textSecondary),
+                const Icon(
+                  Icons.info_outline_rounded,
+                  size: 14,
+                  color: AppColors.textMuted,
+                ),
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
                     context.l10n.studentNameNotice,
-                    style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                    style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
                   ),
                 ),
               ],
@@ -172,70 +169,47 @@ class _StudentContactInfoSectionState extends State<StudentContactInfoSection> {
             const SizedBox(height: AppSpacing.s16),
 
             // 2. Student Phone
-            Text(
-              context.l10n.studentPhoneLabel,
-              style: theme.textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.s6),
-            TextFormField(
+            AppTextField(
               controller: _phoneController,
+              label: context.l10n.studentPhoneLabel,
               keyboardType: TextInputType.phone,
-              decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.phone_rounded, size: 20),
-                hintText: '01xxxxxxxxx',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.s14,
-                  vertical: AppSpacing.s12,
-                ),
+              hintText: '01xxxxxxxxx',
+              prefixIcon: const Icon(
+                Icons.phone_iphone_rounded,
+                size: 20,
+                color: AppColors.textMuted,
               ),
             ),
             const SizedBox(height: AppSpacing.s16),
 
             // 3. Parent Phone
-            Text(
-              context.l10n.studentParentPhoneLabel,
-              style: theme.textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.s6),
-            TextFormField(
+            AppTextField(
               controller: _parentPhoneController,
+              label: context.l10n.studentParentPhoneLabel,
               keyboardType: TextInputType.phone,
-              decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.contact_phone_rounded, size: 20),
-                hintText: '01xxxxxxxxx',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.s14,
-                  vertical: AppSpacing.s12,
-                ),
+              hintText: '01xxxxxxxxx',
+              prefixIcon: const Icon(
+                Icons.contact_phone_outlined,
+                size: 20,
+                color: AppColors.textMuted,
               ),
             ),
-            const SizedBox(height: AppSpacing.s6),
+            const SizedBox(height: 8),
             Container(
-              padding: const EdgeInsets.all(AppSpacing.s10),
+              padding: const EdgeInsets.all(AppSpacing.s12),
               decoration: BoxDecoration(
-                color: AppColors.warning.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                color: AppColors.warning.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
                 border: Border.all(
                   color: AppColors.warning.withValues(alpha: 0.25),
                 ),
               ),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Icon(
                     Icons.warning_amber_rounded,
-                    size: 16,
+                    size: 18,
                     color: AppColors.warning,
                   ),
                   const SizedBox(width: AppSpacing.s8),
@@ -243,9 +217,9 @@ class _StudentContactInfoSectionState extends State<StudentContactInfoSection> {
                     child: Text(
                       context.l10n.studentParentPhoneNotice,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: AppColors.textPrimary,
-                        fontSize: 11,
-                        height: 1.35,
+                        color: AppColors.textSecondary,
+                        fontSize: 12,
+                        height: 1.4,
                       ),
                     ),
                   ),
@@ -255,24 +229,35 @@ class _StudentContactInfoSectionState extends State<StudentContactInfoSection> {
             const SizedBox(height: AppSpacing.s16),
 
             // 4. Email (Read-Only)
-            Text(
-              context.l10n.studentEmailReadOnlyLabel,
-              style: theme.textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.s6),
             TextFormField(
               initialValue: widget.profile.email,
               readOnly: true,
               enabled: false,
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
               decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.lock_outline_rounded, size: 20),
+                labelText: context.l10n.studentEmailReadOnlyLabel,
+                prefixIcon: const Icon(
+                  Icons.lock_outline_rounded,
+                  size: 20,
+                  color: AppColors.textMuted,
+                ),
                 filled: true,
-                fillColor: const Color(0xFFF1F5F9),
+                fillColor: AppColors.surfaceVariant.withValues(alpha: 0.45),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                  borderSide: const BorderSide(color: AppColors.border),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                  borderSide: const BorderSide(color: AppColors.border),
+                ),
+                disabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                  borderSide: const BorderSide(color: AppColors.border),
                 ),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.s14,
@@ -280,43 +265,21 @@ class _StudentContactInfoSectionState extends State<StudentContactInfoSection> {
                 ),
               ),
             ),
-            const SizedBox(height: AppSpacing.s4),
+            const SizedBox(height: 6),
             Text(
               context.l10n.studentEmailReadOnlyNote,
-              style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+              style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
             ),
-            const SizedBox(height: AppSpacing.s20),
+            const SizedBox(height: AppSpacing.s24),
 
             // Submit Button
             Align(
               alignment: AlignmentDirectional.centerEnd,
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.s24,
-                    vertical: AppSpacing.s12,
-                  ),
-                ),
+              child: AppButton(
+                text: context.l10n.studentSaveProfileBtn,
+                icon: Icons.check_circle_outline_rounded,
+                isLoading: widget.isSaving,
                 onPressed: widget.isSaving ? null : _handleSave,
-                icon: widget.isSaving
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Icon(Icons.check_circle_outline_rounded, size: 18),
-                label: Text(
-                  context.l10n.studentSaveProfileBtn,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
               ),
             ),
           ],

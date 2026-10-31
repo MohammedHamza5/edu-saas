@@ -5,9 +5,6 @@ import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/math_tokens.dart';
-import '../../../../core/widgets/app_badge.dart';
-import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_empty_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
 import '../../../../core/widgets/responsive_container.dart';
@@ -19,11 +16,17 @@ import '../cubit/groups_state.dart';
 import '../widgets/add_member_dialog.dart';
 import '../widgets/course_settings_dialog.dart';
 import '../widgets/edit_group_dialog.dart';
+import '../widgets/group_hero_banner_card.dart';
+import '../widgets/group_member_row_card.dart';
+import '../widgets/group_members_header_bar.dart';
+import '../widgets/group_services_action_bar.dart';
 
+/// Group Detail Page coordinator displaying cohort overview, quick operations, and enrolled member roster.
 class GroupDetailPage extends StatefulWidget {
   final String groupId;
   final GroupEntity? initialGroup;
-  final void Function(BuildContext context, GroupMemberEntity member)? onMemberTap;
+  final void Function(BuildContext context, GroupMemberEntity member)?
+      onMemberTap;
 
   const GroupDetailPage({
     super.key,
@@ -84,9 +87,9 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
             onPressed: () {
               Navigator.of(ctx).pop();
               context.read<GroupsCubit>().removeMember(
-                groupId: widget.groupId,
-                studentId: studentId,
-              );
+                    groupId: widget.groupId,
+                    studentId: studentId,
+                  );
             },
             child: Text(context.l10n.removeStudentConfirmAction),
           ),
@@ -95,7 +98,8 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
     );
   }
 
-  Future<void> _confirmDeleteGroup(BuildContext context, GroupEntity group) async {
+  Future<void> _confirmDeleteGroup(
+      BuildContext context, GroupEntity group) async {
     final l10n = context.l10n;
     final cubit = context.read<GroupsCubit>();
     final confirmed = await showDialog<bool>(
@@ -147,9 +151,6 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    final mathTokens =
-        Theme.of(context).extension<MathTokens>() ?? MathTokens.light;
-
     return BlocBuilder<GroupsCubit, GroupsState>(
       builder: (context, state) {
         if (state is GroupsLoading) {
@@ -157,9 +158,8 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
         }
 
         GroupEntity? group = widget.initialGroup;
-        final List<GroupMemberEntity> allMembers = state is GroupsLoaded
-            ? state.groupMembers
-            : const [];
+        final List<GroupMemberEntity> allMembers =
+            state is GroupsLoaded ? state.groupMembers : const [];
 
         if (state is GroupsLoaded && state.selectedGroup != null) {
           group = state.selectedGroup;
@@ -197,8 +197,9 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
               IconButton(
                 icon: const Icon(Icons.refresh_rounded),
                 tooltip: context.l10n.refresh,
-                onPressed: () =>
-                    context.read<GroupsCubit>().loadGroupDetail(widget.groupId),
+                onPressed: () => context
+                    .read<GroupsCubit>()
+                    .loadGroupDetail(widget.groupId),
               ),
               IconButton(
                 icon: const Icon(Icons.edit_outlined),
@@ -228,245 +229,27 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // Hero Academic Group Banner Card
-                  RepaintBoundary(
-                    child: AppCard(
-                      padding: EdgeInsets.zero,
-                      child: Stack(
-                        children: [
-                          // Background subtle watermark glyph
-                          PositionedDirectional(
-                            top: -10,
-                            end: -8,
-                            child: IgnorePointer(
-                              child: Opacity(
-                                opacity: mathTokens.formulaSymbolOpacity,
-                                child: Text(
-                                  mathSymbol,
-                                  style: const TextStyle(
-                                    fontSize: 84,
-                                    fontWeight: FontWeight.w900,
-                                    fontStyle: FontStyle.italic,
-                                    color: AppColors.primary,
-                                    height: 1.0,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-
-                          Padding(
-                            padding: const EdgeInsets.all(AppSpacing.s16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        group.name,
-                                        style: const TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.w800,
-                                          color: AppColors.textPrimary,
-                                          letterSpacing: -0.3,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: AppSpacing.s8),
-                                    AppBadge(
-                                      label: group.level,
-                                      variant: AppBadgeVariant.active,
-                                    ),
-                                  ],
-                                ),
-                                if (group.description != null &&
-                                    group.description!.isNotEmpty) ...[
-                                  const SizedBox(height: AppSpacing.s12),
-                                  Text(
-                                    group.description!,
-                                    style: const TextStyle(
-                                      fontSize: 13,
-                                      color: AppColors.textSecondary,
-                                      height: 1.5,
-                                    ),
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                  GroupHeroBannerCard(
+                    group: group,
+                    mathSymbol: mathSymbol,
                   ),
 
                   const SizedBox(height: AppSpacing.s16),
 
                   // Group Operations Quick Action Bar
-                  AppCard(
-                    variant: AppCardVariant.standard,
-                    padding: const EdgeInsets.all(AppSpacing.s12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.dashboard_customize_rounded,
-                              size: 18,
-                              color: AppColors.primary,
-                            ),
-                            const SizedBox(width: AppSpacing.s8),
-                            Expanded(
-                              child: Text(
-                                context.l10n.groupServicesAndTools,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.textPrimary,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: AppSpacing.s12),
-                        Wrap(
-                          spacing: AppSpacing.s8,
-                          runSpacing: AppSpacing.s8,
-                          children: [
-                            ElevatedButton.icon(
-                              icon: const Icon(
-                                Icons.folder_shared_rounded,
-                                size: 16,
-                              ),
-                              label: Text(context.l10n.manageLessons),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.primary,
-                                foregroundColor: Colors.white,
-                              ),
-                              onPressed: () => context.go(
-                                '${AppRoutes.teacherGroupContent.replaceAll(':groupId', widget.groupId)}?name=${Uri.encodeComponent(groupName)}',
-                              ),
-                            ),
-                            ElevatedButton.icon(
-                              icon: const Icon(
-                                Icons.assignment_rounded,
-                                size: 16,
-                              ),
-                              label: Text(
-                                context.l10n.assignmentsAndSubmissions,
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.warning,
-                                foregroundColor: Colors.white,
-                              ),
-                              onPressed: () => context.go(
-                                '${AppRoutes.teacherGroupAssignments.replaceAll(':groupId', widget.groupId)}?name=${Uri.encodeComponent(groupName)}',
-                              ),
-                            ),
-                            ElevatedButton.icon(
-                              icon: const Icon(Icons.quiz_rounded, size: 16),
-                              label: Text(context.l10n.examsBank),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF6366F1),
-                                foregroundColor: Colors.white,
-                              ),
-                              onPressed: () => context.go(
-                                '${AppRoutes.teacherGroupExams.replaceAll(':groupId', widget.groupId)}?name=${Uri.encodeComponent(groupName)}',
-                              ),
-                            ),
-                            OutlinedButton.icon(
-                              icon: const Icon(
-                                Icons.campaign_rounded,
-                                size: 16,
-                              ),
-                              label: Text(context.l10n.sendGroupAnnouncement),
-                              onPressed: () => context.go(
-                                '${AppRoutes.sendAnnouncement}?groupId=${widget.groupId}',
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                  GroupServicesActionBar(
+                    groupId: widget.groupId,
+                    groupName: groupName,
                   ),
 
                   const SizedBox(height: AppSpacing.s24),
 
                   // Members Header with Action Buttons
-                  Wrap(
-                    alignment: WrapAlignment.spaceBetween,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    spacing: AppSpacing.s12,
-                    runSpacing: AppSpacing.s8,
-                    children: [
-                      ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 250),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.people_alt_rounded,
-                              size: 20,
-                              color: AppColors.primary,
-                            ),
-                            const SizedBox(width: AppSpacing.s8),
-                            Flexible(
-                              child: Text(
-                                context.l10n.groupMembersCountHeader(
-                                  allMembers.length,
-                                ),
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.textPrimary,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      OutlinedButton.icon(
-                        icon: const Icon(
-                          Icons.person_add_alt_1_rounded,
-                          size: 16,
-                        ),
-                        label: Text(context.l10n.addMemberAction),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.primary,
-                          side: const BorderSide(color: AppColors.primary),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                              AppSpacing.radiusSmall,
-                            ),
-                          ),
-                        ),
-                        onPressed: () => AddMemberDialog.show(
-                          context,
-                          widget.groupId,
-                          existingMemberIds: allMembers
-                              .map((m) => m.studentId)
-                              .toSet(),
-                        ),
-                      ),
-                      ElevatedButton.icon(
-                        icon: const Icon(Icons.fact_check_rounded, size: 16),
-                        label: Text(context.l10n.recordAttendanceAction),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                              AppSpacing.radiusSmall,
-                            ),
-                          ),
-                        ),
-                        onPressed: () => context.push(
-                          '${AppRoutes.teacherAttendance}?groupId=${widget.groupId}',
-                        ),
-                      ),
-                    ],
+                  GroupMembersHeaderBar(
+                    totalMembersCount: allMembers.length,
+                    groupId: widget.groupId,
+                    existingMemberIds:
+                        allMembers.map((m) => m.studentId).toSet(),
                   ),
 
                   const SizedBox(height: AppSpacing.s16),
@@ -510,9 +293,8 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
                       onAction: () => AddMemberDialog.show(
                         context,
                         widget.groupId,
-                        existingMemberIds: allMembers
-                            .map((m) => m.studentId)
-                            .toSet(),
+                        existingMemberIds:
+                            allMembers.map((m) => m.studentId).toSet(),
                       ),
                     )
                   else if (members.isEmpty)
@@ -547,15 +329,15 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
                           );
                         }
                         final member = members[index];
-                        return _MemberRowCard(
-                    member: member,
-                    groupId: widget.groupId,
-                    onMemberTap: widget.onMemberTap,
-                    onRemove: () => _confirmRemoveMember(
-                      member.studentId,
-                      member.studentName,
-                    ),
-                  );
+                        return GroupMemberRowCard(
+                          member: member,
+                          groupId: widget.groupId,
+                          onMemberTap: widget.onMemberTap,
+                          onRemove: () => _confirmRemoveMember(
+                            member.studentId,
+                            member.studentName,
+                          ),
+                        );
                       },
                     ),
                 ],
@@ -564,128 +346,6 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
           ),
         );
       },
-    );
-  }
-}
-
-/// Interactive Member Row Card with smooth hover physics & tactile remove
-class _MemberRowCard extends StatefulWidget {
-  final GroupMemberEntity member;
-  final String groupId;
-  final VoidCallback onRemove;
-  final void Function(BuildContext context, GroupMemberEntity member)? onMemberTap;
-
-  const _MemberRowCard({
-    required this.member,
-    required this.groupId,
-    required this.onRemove,
-    this.onMemberTap,
-  });
-
-  @override
-  State<_MemberRowCard> createState() => _MemberRowCardState();
-}
-
-class _MemberRowCardState extends State<_MemberRowCard> {
-  bool _isHovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final member = widget.member;
-
-    return MouseRegion(
-      cursor: MouseCursor.defer,
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
-      child: GestureDetector(
-        onTap: () {
-          widget.onMemberTap?.call(context, member);
-        },
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          curve: Curves.easeOutCubic,
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-            border: Border.all(
-              color: _isHovered
-                  ? AppColors.primary.withValues(alpha: 0.3)
-                  : AppColors.border,
-              width: _isHovered ? 1.5 : 1.0,
-            ),
-            boxShadow: _isHovered
-                ? [
-                    const BoxShadow(
-                      color: Color(0x080F172A),
-                      blurRadius: 10,
-                      offset: Offset(0, 3),
-                    ),
-                  ]
-                : const [],
-          ),
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.s16,
-            vertical: AppSpacing.s12,
-          ),
-          child: Row(
-            children: [
-              CircleAvatar(
-                radius: 18,
-                backgroundColor: AppColors.primaryLight.withValues(alpha: 0.18),
-                child: Text(
-                  member.studentName.isNotEmpty ? member.studentName[0] : 'S',
-                  style: const TextStyle(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.s12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      member.studentName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    if (member.studentEmail != null) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        member.studentEmail!,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              Tooltip(
-                message: context.l10n.removeFromGroupTooltip,
-                child: IconButton(
-                  icon: const Icon(
-                    Icons.person_remove_outlined,
-                    color: AppColors.error,
-                    size: 20,
-                  ),
-                  onPressed: widget.onRemove,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

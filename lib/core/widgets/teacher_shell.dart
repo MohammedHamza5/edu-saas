@@ -5,7 +5,7 @@ import '../config/tenant_registry.dart';
 import '../config/tenant_resolver.dart';
 import '../extensions/localized_context_extension.dart';
 import '../network/supabase_service.dart';
-import '../router/app_routes.dart';
+import '../router/app_router.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 import '../theme/tenant_theme_cubit.dart';

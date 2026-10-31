@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/folder_color_palette.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
-import '../../../../core/theme/folder_color_palette.dart';
-import '../../domain/entities/material_folder_entity.dart';
+
+export 'move_material_dialog.dart';
+export 'rename_material_dialog.dart';
 
 class MaterialFolderResult {
   final String name;
@@ -14,6 +17,7 @@ class MaterialFolderResult {
   const MaterialFolderResult({required this.name, this.color});
 }
 
+/// Modal dialog for creating or editing an academic material folder.
 class CreateMaterialFolderDialog extends StatefulWidget {
   final String? initialName;
   final String? initialColor;
@@ -26,6 +30,7 @@ class CreateMaterialFolderDialog extends StatefulWidget {
     this.isEditing = false,
   });
 
+  /// Displays the create/edit folder dialog and returns the user's input.
   static Future<MaterialFolderResult?> show(
     BuildContext context, {
     String? initialName,
@@ -102,7 +107,7 @@ class _CreateMaterialFolderDialogState
                     Container(
                       padding: const EdgeInsets.all(AppSpacing.s8),
                       decoration: BoxDecoration(
-                        color: activeColor.withValues(alpha: 0.15),
+                        color: activeColor.withValues(alpha: 0.12),
                         borderRadius:
                             BorderRadius.circular(AppSpacing.radiusMedium),
                       ),
@@ -118,22 +123,23 @@ class _CreateMaterialFolderDialogState
                     Expanded(
                       child: Text(
                         widget.isEditing
-                            ? l10n.editFolderName
+                            ? l10n.editFolderAction
                             : l10n.createNewFolderAction,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: AppSpacing.s20),
 
+                // Folder Name input
                 AppTextField(
                   controller: _controller,
                   labelText: l10n.folderNameLabel,
-                  hintText: l10n.folderNameLabel,
-                  prefixIcon: const Icon(Icons.folder_outlined, size: 20),
+                  hintText: l10n.materialsSearchHint,
                   autofocus: true,
                   validator: (v) {
                     if (v == null || v.trim().isEmpty) {
@@ -144,6 +150,7 @@ class _CreateMaterialFolderDialogState
                 ),
                 const SizedBox(height: AppSpacing.s16),
 
+                // Color Picker section
                 Text(
                   l10n.folderColorLabel,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -158,7 +165,8 @@ class _CreateMaterialFolderDialogState
                   runSpacing: 10,
                   children: FolderColorPalette.items.map((item) {
                     final isSelected =
-                        _selectedColorHex?.toUpperCase() == item.hex.toUpperCase();
+                        _selectedColorHex?.toUpperCase() ==
+                        item.hex.toUpperCase();
                     return InkWell(
                       onTap: () {
                         setState(() {
@@ -173,7 +181,8 @@ class _CreateMaterialFolderDialogState
                           color: item.color,
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: isSelected ? Colors.white : Colors.transparent,
+                            color:
+                                isSelected ? Colors.white : Colors.transparent,
                             width: 2.5,
                           ),
                           boxShadow: isSelected
@@ -217,291 +226,6 @@ class _CreateMaterialFolderDialogState
                 ),
               ],
             ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class RenameMaterialDialog extends StatefulWidget {
-  final String currentTitle;
-
-  const RenameMaterialDialog({super.key, required this.currentTitle});
-
-  static Future<String?> show(
-    BuildContext context, {
-    required String currentTitle,
-  }) {
-    return showDialog<String>(
-      context: context,
-      barrierDismissible: true,
-      builder: (ctx) => RenameMaterialDialog(currentTitle: currentTitle),
-    );
-  }
-
-  @override
-  State<RenameMaterialDialog> createState() => _RenameMaterialDialogState();
-}
-
-class _RenameMaterialDialogState extends State<RenameMaterialDialog> {
-  late final TextEditingController _controller;
-  final _formKey = GlobalKey<FormState>();
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = TextEditingController(text: widget.currentTitle);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _submit() {
-    if (_formKey.currentState!.validate()) {
-      Navigator.of(context).pop(_controller.text.trim());
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-
-    return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppSpacing.radiusLarge),
-      ),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 440),
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.s24),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(AppSpacing.s8),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.12),
-                        borderRadius:
-                            BorderRadius.circular(AppSpacing.radiusMedium),
-                      ),
-                      child: const Icon(
-                        Icons.edit_note_rounded,
-                        color: AppColors.primary,
-                        size: 24,
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.s12),
-                    Expanded(
-                      child: Text(
-                        l10n.editMaterialAction,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.s20),
-                AppTextField(
-                  controller: _controller,
-                  labelText: l10n.editMaterialAction,
-                  hintText: l10n.materialsSearchHint,
-                  autofocus: true,
-                  validator: (v) {
-                    if (v == null || v.trim().isEmpty) {
-                      return l10n.requiredField;
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: AppSpacing.s24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: Text(l10n.cancelAction),
-                    ),
-                    const SizedBox(width: AppSpacing.s8),
-                    AppButton(
-                      text: l10n.saveChangesAction,
-                      onPressed: _submit,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class MoveMaterialDialog extends StatefulWidget {
-  final String? currentFolderId;
-  final List<MaterialFolderEntity> folders;
-
-  const MoveMaterialDialog({
-    super.key,
-    this.currentFolderId,
-    required this.folders,
-  });
-
-  static Future<String?> show(
-    BuildContext context, {
-    String? currentFolderId,
-    required List<MaterialFolderEntity> folders,
-  }) {
-    return showDialog<String>(
-      context: context,
-      barrierDismissible: true,
-      builder: (ctx) => MoveMaterialDialog(
-        currentFolderId: currentFolderId,
-        folders: folders,
-      ),
-    );
-  }
-
-  @override
-  State<MoveMaterialDialog> createState() => _MoveMaterialDialogState();
-}
-
-class _MoveMaterialDialogState extends State<MoveMaterialDialog> {
-  String? _selectedFolderId;
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedFolderId = widget.currentFolderId;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-
-    return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppSpacing.radiusLarge),
-      ),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 440, maxHeight: 480),
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.s24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(AppSpacing.s8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFEA580C).withValues(alpha: 0.12),
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusMedium),
-                    ),
-                    child: const Icon(
-                      Icons.drive_file_move_rounded,
-                      color: Color(0xFFEA580C),
-                      size: 24,
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.s12),
-                  Expanded(
-                    child: Text(
-                      l10n.moveMaterialAction,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.s16),
-              Expanded(
-                child: ListView(
-                  children: [
-                    // Root
-                    ListTile(
-                      leading: const Icon(
-                        Icons.home_outlined,
-                        color: Color(0xFFEA580C),
-                      ),
-                      title: Text(l10n.rootMaterialsTitle),
-                      trailing: _selectedFolderId == null
-                          ? const Icon(
-                              Icons.check_circle_rounded,
-                              color: Color(0xFFEA580C),
-                            )
-                          : null,
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(AppSpacing.radiusSmall),
-                      ),
-                      selected: _selectedFolderId == null,
-                      onTap: () {
-                        setState(() {
-                          _selectedFolderId = null;
-                        });
-                      },
-                    ),
-                    const Divider(),
-                    ...widget.folders.map((f) {
-                      final isSelected = _selectedFolderId == f.id;
-                      final fColor =
-                          FolderColorPalette.getFolderColor(f.color);
-                      return ListTile(
-                        leading: Icon(
-                          Icons.folder_rounded,
-                          color: fColor,
-                        ),
-                        title: Text(f.name),
-                        trailing: isSelected
-                            ? Icon(Icons.check_circle_rounded, color: fColor)
-                            : null,
-                        shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(AppSpacing.radiusSmall),
-                        ),
-                        selected: isSelected,
-                        onTap: () {
-                          setState(() {
-                            _selectedFolderId = f.id;
-                          });
-                        },
-                      );
-                    }),
-                  ],
-                ),
-              ),
-              const SizedBox(height: AppSpacing.s16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: Text(l10n.cancelAction),
-                  ),
-                  const SizedBox(width: AppSpacing.s8),
-                  AppButton(
-                    text: l10n.moveMaterialAction,
-                    onPressed: () {
-                      Navigator.of(context).pop(_selectedFolderId ?? '');
-                    },
-                  ),
-                ],
-              ),
-            ],
           ),
         ),
       ),

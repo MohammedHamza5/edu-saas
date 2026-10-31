@@ -14,6 +14,7 @@ import '../../../../core/utils/cache_manager.dart';
 import '../../../../core/utils/group_slug_resolver.dart';
 import '../../../../core/widgets/academic_hero_banner.dart';
 import '../../../../core/widgets/app_loading_view.dart';
+import '../../../../core/widgets/app_state_switcher.dart';
 import '../../../../core/widgets/responsive_container.dart';
 import '../../../auth/presentation/cubit/auth_cubit.dart';
 import '../../../auth/presentation/cubit/auth_state.dart';
@@ -249,103 +250,120 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
           child: BlocBuilder<StudentDashboardCubit, StudentDashboardState>(
             buildWhen: (previous, current) => previous != current,
             builder: (context, dashboardState) {
-              if (dashboardState is StudentDashboardInitial) {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (mounted) _triggerInitialLoads();
-                });
-                return const Center(child: AppLoadingView.signature());
-              }
-
-              if (dashboardState is StudentDashboardLoading) {
-                return const Center(child: AppLoadingView.signature());
-              }
-
-              if (dashboardState is StudentDashboardError) {
-                return Center(
-                  child: Text(
-                    dashboardState.message,
-                    style: const TextStyle(color: AppColors.error),
-                  ),
-                );
-              }
-
-              final stats = (dashboardState as StudentDashboardLoaded).stats;
-
-              return RefreshIndicator(
-                onRefresh: () async {
-                  final authState = context.read<AuthCubit>().state;
-                  final dashboardCubit = context.read<StudentDashboardCubit>();
-                  if (authState is AuthAuthenticated) {
-                    await Future.wait([
-                      dashboardCubit.loadDashboardStats(
-                        authState.user.id,
-                        forceRefresh: true,
-                      ),
-                      _loadEnrolledCourses(),
-                    ]);
+              return AppStateSwitcher(
+                child: () {
+                  if (dashboardState is StudentDashboardInitial) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted) _triggerInitialLoads();
+                    });
+                    return const Center(
+                      key: ValueKey('dash_loading'),
+                      child: AppLoadingView.signature(),
+                    );
                   }
-                },
-                child: SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  padding: context.responsivePagePadding,
-                  child: ResponsiveContainer(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // 1. Academic Hero Banner
-                        AcademicHeroBanner(
-                          title: context.l10n.welcomeStudentHeader(
-                            branding.localizedBrandName(context),
+
+                  if (dashboardState is StudentDashboardLoading) {
+                    return const Center(
+                      key: ValueKey('dash_loading'),
+                      child: AppLoadingView.signature(),
+                    );
+                  }
+
+                  if (dashboardState is StudentDashboardError) {
+                    return Center(
+                      key: const ValueKey('dash_error'),
+                      child: Text(
+                        dashboardState.message,
+                        style: const TextStyle(color: AppColors.error),
+                      ),
+                    );
+                  }
+
+                  final stats =
+                      (dashboardState as StudentDashboardLoaded).stats;
+
+                  return KeyedSubtree(
+                    key: const ValueKey('dash_loaded'),
+                    child: RefreshIndicator(
+                      onRefresh: () async {
+                        final authState = context.read<AuthCubit>().state;
+                        final dashboardCubit = context
+                            .read<StudentDashboardCubit>();
+                        if (authState is AuthAuthenticated) {
+                          await Future.wait([
+                            dashboardCubit.loadDashboardStats(
+                              authState.user.id,
+                              forceRefresh: true,
+                            ),
+                            _loadEnrolledCourses(),
+                          ]);
+                        }
+                      },
+                      child: SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: context.responsivePagePadding,
+                        child: ResponsiveContainer(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // 1. Academic Hero Banner
+                              AcademicHeroBanner(
+                                title: context.l10n.welcomeStudentHeader(
+                                  branding.localizedBrandName(context),
+                                ),
+                                subtitle: context.l10n.studentHeroSubtitle(
+                                  branding.localizedTeacherName(context),
+                                  branding.localizedAcademicTrack(context),
+                                ),
+                                academicTrack: branding.localizedAcademicTrack(
+                                  context,
+                                ),
+                                badgeText:
+                                    stats.activeGroupName != 'No Active Group'
+                                    ? stats.activeGroupName
+                                    : context.l10n.americanMathAcademy,
+                              ),
+                              const SizedBox(height: AppSpacing.s16),
+
+                              // 2. Continue Learning Hero Card (If student has a lecture in progress)
+                              if (stats.continueLearningItem != null) ...[
+                                ContinueLearningCard(
+                                  item: stats.continueLearningItem!,
+                                ),
+                                const SizedBox(height: AppSpacing.s16),
+                              ],
+
+                              // 3. Urgent Tasks & Deadlines Radar
+                              UrgentTasksRadarCard(tasks: stats.urgentTasks),
+                              const SizedBox(height: AppSpacing.s16),
+
+                              // 4. Academic Performance Summary (Sigma Badge)
+                              AcademicPerformanceCard(stats: stats),
+                              const SizedBox(height: AppSpacing.s20),
+
+                              // 5. My Lectures & Groups Section
+                              StudentEnrolledCoursesSection(
+                                courses: _enrolledCourses.isNotEmpty
+                                    ? _enrolledCourses
+                                    : stats.enrolledGroups,
+                                isLoading: _isLoadingCourses,
+                              ),
+                              const SizedBox(height: AppSpacing.s20),
+
+                              // 6. Fast Navigation Hub (Quick Study Cards)
+                              StudentQuickStudyHub(
+                                onOpenLectures: () => _handleOpenContent(
+                                  context,
+                                  stats.enrolledGroups,
+                                ),
+                              ),
+                            ],
                           ),
-                          subtitle: context.l10n.studentHeroSubtitle(
-                            branding.localizedTeacherName(context),
-                            branding.localizedAcademicTrack(context),
-                          ),
-                          academicTrack: branding.localizedAcademicTrack(
-                            context,
-                          ),
-                          badgeText: stats.activeGroupName != 'No Active Group'
-                              ? stats.activeGroupName
-                              : context.l10n.americanMathAcademy,
                         ),
-                        const SizedBox(height: AppSpacing.s16),
-
-                        // 2. Continue Learning Hero Card (If student has a lecture in progress)
-                        if (stats.continueLearningItem != null) ...[
-                          ContinueLearningCard(
-                            item: stats.continueLearningItem!,
-                          ),
-                          const SizedBox(height: AppSpacing.s16),
-                        ],
-
-                        // 3. Urgent Tasks & Deadlines Radar
-                        UrgentTasksRadarCard(tasks: stats.urgentTasks),
-                        const SizedBox(height: AppSpacing.s16),
-
-                        // 4. Academic Performance Summary (Sigma Badge)
-                        AcademicPerformanceCard(stats: stats),
-                        const SizedBox(height: AppSpacing.s20),
-
-                        // 5. My Lectures & Groups Section
-                        StudentEnrolledCoursesSection(
-                          courses: _enrolledCourses.isNotEmpty
-                              ? _enrolledCourses
-                              : stats.enrolledGroups,
-                          isLoading: _isLoadingCourses,
-                        ),
-                        const SizedBox(height: AppSpacing.s20),
-
-                        // 6. Fast Navigation Hub (Quick Study Cards)
-                        StudentQuickStudyHub(
-                          onOpenLectures: () => _handleOpenContent(
-                            context,
-                            stats.enrolledGroups,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
+                  );
+                }(),
               );
             },
           ),

@@ -2,26 +2,22 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import '../../../../core/di/injection_container.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/youtube_url_parser.dart';
 import '../../../../core/widgets/app_button.dart';
-import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_loading_view.dart';
-import '../../../../core/widgets/app_text_field.dart';
 import '../../../exams/domain/entities/exam_entity.dart';
 import '../../../videos/domain/entities/library_video_entity.dart';
 import '../../../videos/presentation/dialogs/select_video_from_bank_dialog.dart';
-import 'package:crypto/crypto.dart';
-import '../../domain/entities/content_entity.dart';
 import '../../domain/entities/library_material_entity.dart';
-import 'select_material_from_library_dialog.dart';
-
+import '../widgets/all_in_one_basic_info_section.dart';
 import '../widgets/inline_quiz_builder_section.dart';
 import '../widgets/lecture_pdf_handout_section.dart';
 import '../widgets/lecture_video_source_section.dart';
+import 'all_in_one_lecture_orchestrator.dart';
+import 'select_material_from_library_dialog.dart';
 
 class AllInOneLectureDialog extends StatefulWidget {
   final String groupId;
@@ -86,7 +82,6 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
   @override
   void initState() {
     super.initState();
-    // Start with 1 default question
     _addQuestion(QuestionType.multipleChoice);
   }
 
@@ -163,43 +158,29 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
       );
       if (res != null && res.files.isNotEmpty) {
         final file = res.files.first;
-        final bytes = file.bytes;
+        final duplicate =
+            await AllInOneLectureOrchestrator.checkHandoutDuplicate(file);
 
-        if (bytes != null) {
-          // 1. Calculate SHA-256 Hash for smart deduplication check
-          final computedHash = sha256.convert(bytes).toString();
-
-          // 2. Check if this exact file is already present in teacher's library
-          final dupRes = await InjectionContainer.materialsLibraryRepository
-              .checkDuplicate(
-            fileHash: computedHash,
-            fileName: file.name,
-            fileSize: file.size,
+        if (duplicate != null && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: AppColors.success,
+              content: Text(context.l10n.materialDuplicateNotice),
+              duration: const Duration(seconds: 4),
+            ),
           );
-
-          final duplicate = dupRes.dataOrNull;
-          if (duplicate != null && mounted) {
-            // Smart deduplication: reuse existing library file directly!
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                backgroundColor: AppColors.success,
-                content: Text(context.l10n.materialDuplicateNotice),
-                duration: const Duration(seconds: 4),
-              ),
-            );
-            setState(() {
-              _selectedLibraryMaterial = duplicate;
-              _pickedHandoutFile = null;
-              _handoutFileBytes = null;
-            });
-            return;
-          }
+          setState(() {
+            _selectedLibraryMaterial = duplicate;
+            _pickedHandoutFile = null;
+            _handoutFileBytes = null;
+          });
+          return;
         }
 
         setState(() {
           _selectedLibraryMaterial = null;
           _pickedHandoutFile = file;
-          _handoutFileBytes = bytes;
+          _handoutFileBytes = file.bytes;
         });
       }
     } catch (_) {}
@@ -207,64 +188,22 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+    final l10n = context.l10n;
 
-    if (_selectedSource == VideoSourceType.youtube) {
-      final url = _youtubeUrlController.text.trim();
-      final id = YouTubeUrlParser.extractVideoId(url);
-      if (id == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: AppColors.error,
-            content: Text(context.l10n.invalidYoutubeUrl),
-          ),
-        );
-        return;
-      }
-    }
+    final validationError = AllInOneLectureOrchestrator.validateSubmission(
+      selectedSource: _selectedSource,
+      youtubeUrl: _youtubeUrlController.text.trim(),
+      selectedBankVideo: _selectedBankVideo,
+      isQuizEnabled: _isQuizEnabled,
+      questions: _questions,
+      l10n: l10n,
+    );
 
-    if (_isQuizEnabled) {
-      if (_questions.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: AppColors.error,
-            content: Text(context.l10n.quizRulesAtLeastOneQuestion),
-          ),
-        );
-        return;
-      }
-      for (int i = 0; i < _questions.length; i++) {
-        final q = _questions[i];
-        if (q.questionController.text.trim().isEmpty) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              backgroundColor: AppColors.error,
-              content: Text(context.l10n.questionTextRequired),
-            ),
-          );
-          return;
-        }
-        if (q.type == QuestionType.multipleChoice) {
-          if (q.optA.text.trim().isEmpty ||
-              q.optB.text.trim().isEmpty ||
-              q.optC.text.trim().isEmpty ||
-              q.optD.text.trim().isEmpty) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                backgroundColor: AppColors.error,
-                content: Text(context.l10n.fillAllOptionsNotice),
-              ),
-            );
-            return;
-          }
-        }
-      }
-    }
-
-    if (_selectedSource == VideoSourceType.bank && _selectedBankVideo == null) {
+    if (validationError != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: AppColors.error,
-          content: Text(context.l10n.selectFromBank),
+          content: Text(validationError),
         ),
       );
       return;
@@ -272,234 +211,38 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
 
     setState(() {
       _isLoading = true;
-      _loadingMessage = context.l10n.creatingContent;
+      _loadingMessage = l10n.creatingContent;
     });
 
     try {
-      final title = _titleController.text.trim();
-      final description = _descriptionController.text.trim();
-      final hasVideo = _selectedSource != VideoSourceType.none;
+      final passingScore =
+          int.tryParse(_passingScoreController.text.trim()) ?? 60;
 
-      // 1. Create content record
-      final contentRes = await InjectionContainer.contentRepository
-          .createContent(
-            groupId: widget.groupId,
-            title: title,
-            description: description.isNotEmpty ? description : null,
-            type: hasVideo ? ContentType.video : ContentType.pdf,
-            status: ContentStatus.published,
-            sortOrder: widget.nextSortOrder,
-          );
+      final payload = AllInOneLecturePayload(
+        groupId: widget.groupId,
+        nextSortOrder: widget.nextSortOrder,
+        title: _titleController.text.trim(),
+        description: _descriptionController.text.trim(),
+        selectedSource: _selectedSource,
+        selectedBankVideo: _selectedBankVideo,
+        youtubeUrl: _youtubeUrlController.text.trim(),
+        pickedBunnyFile: _pickedBunnyFile,
+        bunnyFileBytes: _bunnyFileBytes,
+        selectedLibraryMaterial: _selectedLibraryMaterial,
+        pickedHandoutFile: _pickedHandoutFile,
+        handoutFileBytes: _handoutFileBytes,
+        isQuizEnabled: _isQuizEnabled,
+        questions: _questions,
+        passingScore: passingScore,
+      );
 
-      if (!contentRes.isSuccess || contentRes.dataOrNull == null) {
-        throw Exception(
-          contentRes.failureOrNull?.message ?? 'Failed to create lecture',
-        );
-      }
-
-      final content = contentRes.dataOrNull!;
-      final contentId = content.id;
-
-      // 2. Video linking
-      if (_selectedSource == VideoSourceType.bank && _selectedBankVideo != null) {
-        setState(() => _loadingMessage = context.l10n.savingChanges);
-        final bankRes = await InjectionContainer.videoBankRepository
-            .linkToLectureContent(
-              libraryVideoId: _selectedBankVideo!.id,
-              contentId: contentId,
-              title: title,
-            );
-        if (!bankRes.isSuccess) {
-          throw Exception(
-            bankRes.failureOrNull?.message ?? 'Failed to link video from bank',
-          );
-        }
-      } else if (_selectedSource == VideoSourceType.youtube) {
-        setState(() => _loadingMessage = context.l10n.linkingYoutubeVideo);
-        final yRes = await InjectionContainer.videosRepository.linkYouTubeVideo(
-          contentId: contentId,
-          youtubeUrl: _youtubeUrlController.text.trim(),
-          title: title,
-        );
-        if (!yRes.isSuccess) {
-          throw Exception(
-            yRes.failureOrNull?.message ?? 'Failed to link YouTube video',
-          );
-        }
-      } else if (_selectedSource == VideoSourceType.bunny &&
-          _bunnyFileBytes != null) {
-        setState(() => _loadingMessage = context.l10n.uploadingVideoNotice);
-        final bRes = await InjectionContainer.videosRepository
-            .createAndUploadVideo(
-              contentId: contentId,
-              title: title,
-              videoBytes: _bunnyFileBytes!,
-              fileName: _pickedBunnyFile?.name ?? 'video.mp4',
-            );
-        if (!bRes.isSuccess) {
-          throw Exception(
-            bRes.failureOrNull?.message ?? 'Failed to upload video',
-          );
-        }
-      }
-
-      // 3. PDF Handout Linking / Upload
-      if (_selectedLibraryMaterial != null) {
-        setState(() => _loadingMessage = context.l10n.savingChanges);
-        final linkRes = await InjectionContainer.materialsLibraryRepository
-            .linkToLecture(
-          libraryMaterialId: _selectedLibraryMaterial!.id,
-          contentId: contentId,
-          tenantId: content.tenantId,
-        );
-        if (!linkRes.isSuccess) {
-          throw Exception(
-            linkRes.failureOrNull?.message ?? 'Failed to link handout from library',
-          );
-        }
-      } else if (_pickedHandoutFile != null && _handoutFileBytes != null) {
-        setState(() => _loadingMessage = context.l10n.uploadingMaterialNotice);
-        final cleanTitle = _pickedHandoutFile!.name.replaceAll(
-          RegExp(r'\.pdf$', caseSensitive: false),
-          '',
-        );
-
-        final uploadRes = await InjectionContainer.materialsLibraryRepository
-            .uploadMaterial(
-          title: cleanTitle,
-          fileName: _pickedHandoutFile!.name,
-          fileBytes: _handoutFileBytes!,
-          mimeType: 'application/pdf',
-        );
-
-        if (!uploadRes.isSuccess || uploadRes.dataOrNull == null) {
-          throw Exception(
-            uploadRes.failureOrNull?.message ?? 'Failed to upload handout',
-          );
-        }
-
-        final uploadedMat = uploadRes.dataOrNull!;
-        final linkRes = await InjectionContainer.materialsLibraryRepository
-            .linkToLecture(
-          libraryMaterialId: uploadedMat.id,
-          contentId: contentId,
-          tenantId: content.tenantId,
-        );
-
-        if (!linkRes.isSuccess) {
-          throw Exception(
-            linkRes.failureOrNull?.message ?? 'Failed to link uploaded handout',
-          );
-        }
-      }
-
-      // 4. Create and Link Inline Quiz
-      if (_isQuizEnabled && _questions.isNotEmpty) {
-        setState(() => _loadingMessage = context.l10n.creatingExam);
-
-        final questionsPayload = <ExamQuestionEntity>[];
-        for (int i = 0; i < _questions.length; i++) {
-          final q = _questions[i];
-          final pts = int.tryParse(q.pointsController.text.trim()) ?? 1;
-
-          if (q.type == QuestionType.multipleChoice) {
-            questionsPayload.add(
-              ExamQuestionEntity(
-                id: '',
-                examVersionId: '',
-                questionText: q.questionController.text.trim(),
-                questionType: QuestionType.multipleChoice,
-                points: pts,
-                sortOrder: i + 1,
-                options: [
-                  QuestionOptionEntity(
-                    id: '',
-                    questionId: '',
-                    optionText: q.optA.text.trim(),
-                    sortOrder: 1,
-                    isCorrect: q.correctIndex == 0,
-                  ),
-                  QuestionOptionEntity(
-                    id: '',
-                    questionId: '',
-                    optionText: q.optB.text.trim(),
-                    sortOrder: 2,
-                    isCorrect: q.correctIndex == 1,
-                  ),
-                  QuestionOptionEntity(
-                    id: '',
-                    questionId: '',
-                    optionText: q.optC.text.trim(),
-                    sortOrder: 3,
-                    isCorrect: q.correctIndex == 2,
-                  ),
-                  QuestionOptionEntity(
-                    id: '',
-                    questionId: '',
-                    optionText: q.optD.text.trim(),
-                    sortOrder: 4,
-                    isCorrect: q.correctIndex == 3,
-                  ),
-                ],
-              ),
-            );
-          } else {
-            questionsPayload.add(
-              ExamQuestionEntity(
-                id: '',
-                examVersionId: '',
-                questionText: q.questionController.text.trim(),
-                questionType: QuestionType.trueFalse,
-                points: pts,
-                sortOrder: i + 1,
-                options: [
-                  QuestionOptionEntity(
-                    id: '',
-                    questionId: '',
-                    optionText: 'True',
-                    sortOrder: 1,
-                    isCorrect: q.isTrueCorrect,
-                  ),
-                  QuestionOptionEntity(
-                    id: '',
-                    questionId: '',
-                    optionText: 'False',
-                    sortOrder: 2,
-                    isCorrect: !q.isTrueCorrect,
-                  ),
-                ],
-              ),
-            );
-          }
-        }
-
-        final totalScore = questionsPayload.fold<int>(
-          0,
-          (sum, q) => sum + q.points,
-        );
-        final passingScore =
-            int.tryParse(_passingScoreController.text.trim()) ?? 60;
-
-        final examRes = await InjectionContainer.examsRepository.createExam(
-          groupId: widget.groupId,
-          title: '$title Quiz',
-          durationMinutes: 30,
-          maxScore: totalScore > 0 ? totalScore : 100,
-          passingScore: passingScore,
-          allowRetake: true,
-          showResult: true,
-          isPublished: true,
-          initialQuestions: questionsPayload,
-        );
-
-        if (examRes.isSuccess && examRes.dataOrNull != null) {
-          final examId = examRes.dataOrNull!.id;
-          await InjectionContainer.contentRepository.linkLessonExam(
-            contentId: contentId,
-            examId: examId,
-          );
-        }
-      }
+      await AllInOneLectureOrchestrator.createAndPublishLecture(
+        payload: payload,
+        l10n: l10n,
+        onProgress: (msg) {
+          if (mounted) setState(() => _loadingMessage = msg);
+        },
+      );
 
       if (mounted) {
         Navigator.of(context).pop(true);
@@ -558,7 +301,7 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
                 key: _formKey,
                 child: Column(
                   children: [
-                    // ── Header ─────────────────────────────────────────────
+                    // Header
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: AppSpacing.s24,
@@ -616,7 +359,7 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
                       ),
                     ),
 
-                    // ── Body ───────────────────────────────────────────────
+                    // Body
                     Expanded(
                       child: SingleChildScrollView(
                         padding: const EdgeInsets.all(AppSpacing.s24),
@@ -624,7 +367,10 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             // 1. Basic Info
-                            _buildBasicInfoSection(),
+                            AllInOneBasicInfoSection(
+                              titleController: _titleController,
+                              descriptionController: _descriptionController,
+                            ),
                             const SizedBox(height: AppSpacing.s20),
 
                             // 2. Video Source
@@ -635,14 +381,18 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
                               selectedBankVideo: _selectedBankVideo,
                               onSelectFromBank: () async {
                                 final picked =
-                                    await SelectVideoFromBankDialog.show(context);
+                                    await SelectVideoFromBankDialog.show(
+                                  context,
+                                );
                                 if (picked != null) {
                                   setState(() {
                                     _selectedBankVideo = picked;
                                     if (_titleController.text.trim().isEmpty) {
                                       _titleController.text = picked.title;
                                     }
-                                    if (_descriptionController.text.trim().isEmpty &&
+                                    if (_descriptionController.text
+                                            .trim()
+                                            .isEmpty &&
                                         picked.description != null) {
                                       _descriptionController.text =
                                           picked.description!;
@@ -652,7 +402,9 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
                               },
                               onChangeBankVideo: () async {
                                 final picked =
-                                    await SelectVideoFromBankDialog.show(context);
+                                    await SelectVideoFromBankDialog.show(
+                                  context,
+                                );
                                 if (picked != null) {
                                   setState(() => _selectedBankVideo = picked);
                                 }
@@ -669,10 +421,12 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
                             LecturePdfHandoutSection(
                               selectedLibraryMaterial: _selectedLibraryMaterial,
                               pickedHandoutFile: _pickedHandoutFile,
-                              onPickFromMaterialsLibrary: _pickFromMaterialsLibrary,
+                              onPickFromMaterialsLibrary:
+                                  _pickFromMaterialsLibrary,
                               onPickHandoutPdf: _pickHandoutPdf,
-                              onClearLibraryMaterial: () =>
-                                  setState(() => _selectedLibraryMaterial = null),
+                              onClearLibraryMaterial: () => setState(
+                                () => _selectedLibraryMaterial = null,
+                              ),
                               onClearPickedHandoutFile: () => setState(() {
                                 _pickedHandoutFile = null;
                                 _handoutFileBytes = null;
@@ -699,7 +453,7 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
                       ),
                     ),
 
-                    // ── Footer ─────────────────────────────────────────────
+                    // Footer
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: AppSpacing.s24,
@@ -730,54 +484,6 @@ class _AllInOneLectureDialogState extends State<AllInOneLectureDialog> {
                   ],
                 ),
               ),
-      ),
-    );
-  }
-
-  Widget _buildBasicInfoSection() {
-    return AppCard(
-      variant: AppCardVariant.elevated,
-      padding: const EdgeInsets.all(AppSpacing.s16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(
-                Icons.info_outline_rounded,
-                size: 18,
-                color: AppColors.primary,
-              ),
-              const SizedBox(width: AppSpacing.s8),
-              Text(
-                context.l10n.lectureDetailsSection,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.s12),
-          AppTextField(
-            controller: _titleController,
-            label: context.l10n.lectureTitleLabel,
-            hintText: context.l10n.lectureTitleHint,
-            validator: (v) {
-              if (v == null || v.trim().isEmpty) {
-                return context.l10n.contentTitleRequired;
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: AppSpacing.s12),
-          AppTextField(
-            controller: _descriptionController,
-            label: context.l10n.lectureDescLabel,
-            hintText: context.l10n.lectureDescHint,
-            maxLines: 2,
-          ),
-        ],
       ),
     );
   }

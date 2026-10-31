@@ -9796,6 +9796,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'WhatsApp Gateway Auto-Dispatch Settings';
 
   @override
+  String get whatsappGatewayDevicePairingTip =>
+      '💡 Link the device once for the teacher (works with personal WhatsApp or regular WhatsApp Business; please avoid numbers connected to Cloud API for 100% instant decryption).';
+
+  @override
+  String get whatsappGatewayDisconnectedWarning =>
+      '⚠️ Session is disconnected or expired. Please scan the QR code again to resume automatic dispatch.';
+
+  @override
   String get whatsappAutoDispatchActiveBannerTitle =>
       'Parent WhatsApp Auto-Dispatch is Active';
 

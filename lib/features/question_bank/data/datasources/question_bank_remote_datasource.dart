@@ -2,11 +2,9 @@ import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
 
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 
-import 'package:http_parser/http_parser.dart';
-
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' hide MultipartFile;
 
 import '../../../../core/config/app_config.dart';
 
@@ -1586,59 +1584,41 @@ class QuestionBankRemoteDataSourceImpl implements QuestionBankRemoteDataSource {
 
     //    (لا polling، لا job queue — كل شيء synchronous داخل الـ Edge Function)
 
-    final request = http.MultipartRequest('POST', Uri.parse(edgeFunctionUrl))
+    final formData = FormData.fromMap({
+      'file': MultipartFile.fromBytes(
+        bytes,
+        filename: filename,
+      ),
+      'rights_note':
+          rightsAttestation['uploader_note']?.toString() ?? 'Teacher attested',
+      if (answerKeyFilename != null)
+        'answer_key_filename': answerKeyFilename,
+    });
 
-      ..headers['Authorization'] = 'Bearer $jwt'
-
-      ..files.add(
-
-        http.MultipartFile.fromBytes(
-
-          'file',
-
-          bytes,
-
-          filename: filename,
-
-          contentType: MediaType(
-
-            'application',
-
-            filename.toLowerCase().endsWith('.pdf') ? 'pdf' : 'octet-stream',
-
-          ),
-
-        ),
-
-      )
-
-      ..fields['rights_note'] =
-
-          rightsAttestation['uploader_note']?.toString() ?? 'Teacher attested';
-
-
-
-    if (answerKeyFilename != null) {
-
-      request.fields['answer_key_filename'] = answerKeyFilename;
-
-    }
-
-
-
-    // timeout: 5 دقائق كافية للاستخراج المباشر بـ Gemini
-
-    final streamedResponse = await request.send().timeout(
-
-      const Duration(minutes: 5),
-
+    final dio = Dio(
+      BaseOptions(
+        connectTimeout: const Duration(minutes: 5),
+        receiveTimeout: const Duration(minutes: 5),
+        sendTimeout: const Duration(minutes: 5),
+        headers: {
+          'Authorization': 'Bearer $jwt',
+        },
+      ),
     );
 
-    final responseBody = await streamedResponse.stream.bytesToString();
+    final response = await dio.post<String>(
+      edgeFunctionUrl,
+      data: formData,
+      options: Options(
+        responseType: ResponseType.plain,
+        validateStatus: (status) => true,
+      ),
+    );
 
+    final statusCode = response.statusCode ?? 500;
+    final responseBody = response.data ?? '';
 
-
-    if (streamedResponse.statusCode != 200) {
+    if (statusCode != 200) {
 
       final Map<String, dynamic> err;
 

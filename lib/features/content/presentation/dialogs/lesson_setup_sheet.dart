@@ -8,6 +8,10 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../domain/entities/content_entity.dart';
+import '../widgets/lesson_setup_material_section.dart';
+import '../widgets/lesson_setup_passing_score_section.dart';
+import '../widgets/lesson_setup_quiz_section.dart';
+import '../widgets/lesson_setup_video_preview_card.dart';
 
 /// The canonical Lesson Setup sheet — used both when adding a new lesson
 /// and when editing an existing lesson.
@@ -332,56 +336,7 @@ class _LessonSetupSheetState extends State<LessonSetupSheet> {
             const SizedBox(height: AppSpacing.s8),
 
             // Video thumbnail & name (read-only)
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.s12),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceVariant.withValues(alpha: 0.4),
-                borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                border: Border.all(color: AppColors.border),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 48,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: const Icon(
-                      Icons.play_circle_fill_rounded,
-                      color: AppColors.primary,
-                      size: 22,
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.s12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.video.title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        Text(
-                          widget.video.videoProvider == 'youtube'
-                              ? context.l10n.videoSourceYoutube
-                              : context.l10n.videoSourceBunny,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSecondary,
-                            fontSize: 11,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            LessonSetupVideoPreviewCard(video: widget.video),
             const SizedBox(height: AppSpacing.s20),
 
             // Lesson Title
@@ -393,219 +348,33 @@ class _LessonSetupSheetState extends State<LessonSetupSheet> {
             const SizedBox(height: AppSpacing.s20),
 
             // Study Material (PDF)
-            _buildSectionLabel(
-              l10n.studyMaterial,
-              Icons.picture_as_pdf_rounded,
-              const Color(0xFFEA580C),
+            LessonSetupMaterialSection(
+              hasPdf: hasPdf,
+              pdfName: pdfName,
+              onPickPdf: _pickPdf,
+              onRemovePdf: () => setState(() {
+                _removePdf = true;
+                _pickedFile = null;
+                _pickedFileBytes = null;
+              }),
             ),
-            const SizedBox(height: AppSpacing.s8),
-            if (hasPdf) ...[
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.s12),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFEA580C).withValues(alpha: 0.06),
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                  border: Border.all(
-                    color: const Color(0xFFEA580C).withValues(alpha: 0.3),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.picture_as_pdf_rounded,
-                      color: Color(0xFFEA580C),
-                      size: 20,
-                    ),
-                    const SizedBox(width: AppSpacing.s8),
-                    Expanded(
-                      child: Text(
-                        pdfName ?? 'document.pdf',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: _pickPdf,
-                      child: Text(
-                        l10n.replacePdf,
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () => setState(() {
-                        _removePdf = true;
-                        _pickedFile = null;
-                        _pickedFileBytes = null;
-                      }),
-                      style: TextButton.styleFrom(
-                        foregroundColor: AppColors.error,
-                      ),
-                      child: Text(
-                        l10n.removePdf,
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ] else ...[
-              OutlinedButton.icon(
-                icon: const Icon(Icons.upload_file_rounded, size: 18),
-                label: Text(l10n.uploadPdf),
-                onPressed: _pickPdf,
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFFEA580C),
-                  side: const BorderSide(color: Color(0xFFEA580C), width: 1.2),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                ),
-              ),
-            ],
             const SizedBox(height: AppSpacing.s20),
 
             // Lesson Quiz
-            _buildSectionLabel(
-              l10n.lessonQuizLabel,
-              Icons.quiz_rounded,
-              AppColors.primary,
+            LessonSetupQuizSection(
+              isLoadingExams: _isLoadingExams,
+              selectedExamId: _selectedExamId,
+              availableExams: _availableExams,
+              onExamChanged: (val) => setState(() => _selectedExamId = val),
             ),
-            const SizedBox(height: AppSpacing.s8),
-            if (_isLoadingExams)
-              const LinearProgressIndicator()
-            else ...[
-              DropdownButtonFormField<String>(
-                value: _selectedExamId,
-                decoration: InputDecoration(
-                  hintText: l10n.lessonQuizHint,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(
-                      AppSpacing.radiusMedium,
-                    ),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 12,
-                  ),
-                ),
-                items: [
-                  DropdownMenuItem<String>(
-                    value: null,
-                    child: Text(
-                      l10n.lessonQuizHint,
-                      style: const TextStyle(color: AppColors.textSecondary),
-                    ),
-                  ),
-                  ..._availableExams.map((exam) {
-                    return DropdownMenuItem<String>(
-                      value: exam['id'] as String,
-                      child: Text(
-                        exam['title'] as String? ?? '',
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    );
-                  }),
-                ],
-                onChanged: (val) {
-                  setState(() {
-                    _selectedExamId = val;
-                  });
-                },
-              ),
-              if (_selectedExamId != null) ...[
-                const SizedBox(height: AppSpacing.s8),
-                Container(
-                  padding: const EdgeInsets.all(AppSpacing.s10),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.05),
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                    border: Border.all(
-                      color: AppColors.primary.withValues(alpha: 0.2),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.info_outline_rounded,
-                        size: 14,
-                        color: AppColors.primary,
-                      ),
-                      const SizedBox(width: AppSpacing.s8),
-                      Expanded(
-                        child: Text(
-                          l10n.lessonQuizSequentialRequirement,
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ],
             const SizedBox(height: AppSpacing.s20),
 
             // Passing Score
-            _buildSectionLabel(
-              l10n.passingScoreLabel,
-              Icons.percent_rounded,
-              AppColors.success,
-            ),
-            const SizedBox(height: AppSpacing.s8),
-            Column(
-              children: [
-                RadioListTile<bool>(
-                  value: false,
-                  groupValue: _useCustomScore,
-                  onChanged: (v) => setState(() => _useCustomScore = false),
-                  title: Text(
-                    l10n.useCourseDefault(widget.defaultPassingScore),
-                    style: const TextStyle(fontSize: 14),
-                  ),
-                  contentPadding: EdgeInsets.zero,
-                  dense: true,
-                  activeColor: AppColors.primary,
-                ),
-                RadioListTile<bool>(
-                  value: true,
-                  groupValue: _useCustomScore,
-                  onChanged: (v) => setState(() => _useCustomScore = true),
-                  title: Row(
-                    children: [
-                      Text(
-                        l10n.customPassingScore,
-                        style: const TextStyle(fontSize: 14),
-                      ),
-                      if (_useCustomScore) ...[
-                        const SizedBox(width: AppSpacing.s12),
-                        SizedBox(
-                          width: 80,
-                          child: TextFormField(
-                            controller: _customScoreController,
-                            keyboardType: TextInputType.number,
-                            decoration: const InputDecoration(
-                              suffixText: '%',
-                              isDense: true,
-                              border: OutlineInputBorder(),
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 8,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                  contentPadding: EdgeInsets.zero,
-                  dense: true,
-                  activeColor: AppColors.primary,
-                ),
-              ],
+            LessonSetupPassingScoreSection(
+              useCustomScore: _useCustomScore,
+              defaultPassingScore: widget.defaultPassingScore,
+              customScoreController: _customScoreController,
+              onToggleCustomScore: (val) => setState(() => _useCustomScore = val),
             ),
             const SizedBox(height: AppSpacing.s24),
 
@@ -640,23 +409,6 @@ class _LessonSetupSheetState extends State<LessonSetupSheet> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildSectionLabel(String label, IconData icon, Color color) {
-    return Row(
-      children: [
-        Icon(icon, size: 16, color: color),
-        const SizedBox(width: AppSpacing.s8),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
-          ),
-        ),
-      ],
     );
   }
 }

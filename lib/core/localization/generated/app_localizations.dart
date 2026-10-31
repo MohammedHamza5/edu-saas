@@ -17281,6 +17281,18 @@ abstract class AppLocalizations {
   /// **'WhatsApp Gateway Auto-Dispatch Settings'**
   String get whatsappGatewaySettingsTooltip;
 
+  /// No description provided for @whatsappGatewayDevicePairingTip.
+  ///
+  /// In en, this message translates to:
+  /// **'💡 Link the device once for the teacher (works with personal WhatsApp or regular WhatsApp Business; please avoid numbers connected to Cloud API for 100% instant decryption).'**
+  String get whatsappGatewayDevicePairingTip;
+
+  /// No description provided for @whatsappGatewayDisconnectedWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'⚠️ Session is disconnected or expired. Please scan the QR code again to resume automatic dispatch.'**
+  String get whatsappGatewayDisconnectedWarning;
+
   /// No description provided for @whatsappAutoDispatchActiveBannerTitle.
   ///
   /// In en, this message translates to:

@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/network/supabase_service.dart';
@@ -389,16 +389,20 @@ class MaterialsLibraryRemoteDataSourceImpl
               r2Path != null &&
               uploadUrl.isNotEmpty &&
               r2Path.isNotEmpty) {
-            final uploadResponse = await http.put(
-              Uri.parse(uploadUrl),
-              headers: {
-                'Content-Type': mimeType,
-              },
-              body: fileBytes,
+            final dio = Dio();
+            final uploadResponse = await dio.put<void>(
+              uploadUrl,
+              data: Stream.fromIterable([fileBytes]),
+              options: Options(
+                headers: {
+                  'Content-Type': mimeType,
+                  'Content-Length': fileBytes.length,
+                },
+              ),
             );
 
-            if (uploadResponse.statusCode >= 200 &&
-                uploadResponse.statusCode < 300) {
+            final statusCode = uploadResponse.statusCode ?? 0;
+            if (statusCode >= 200 && statusCode < 300) {
               storagePath = r2Path;
               storageProvider = 'r2';
               AppLogger.s(
@@ -407,7 +411,7 @@ class MaterialsLibraryRemoteDataSourceImpl
               );
             } else {
               throw Exception(
-                'Cloudflare R2 PUT returned HTTP ${uploadResponse.statusCode}',
+                'Cloudflare R2 PUT returned HTTP $statusCode',
               );
             }
           } else {

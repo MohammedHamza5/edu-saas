@@ -6,7 +6,9 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../domain/entities/chapter_entity.dart';
 import '../../domain/entities/content_entity.dart';
 import '../cubit/content_cubit.dart';
+import '../dialogs/chapter_edit_dialog.dart';
 import '../dialogs/move_lesson_to_chapter_dialog.dart';
+import '../dialogs/quick_create_chapter_dialog.dart';
 
 /// Helper coordinating confirmation dialogs and mutations for course lessons and chapters.
 class TeacherCourseActionsHelper {
@@ -196,5 +198,144 @@ class TeacherCourseActionsHelper {
         );
       }
     }
+  }
+
+  /// Opens the create chapter dialog and displays a toast upon success.
+  static Future<void> handleCreateChapter({
+    required BuildContext context,
+    required String groupId,
+  }) async {
+    final created = await QuickCreateChapterDialog.show(
+      context,
+      groupId: groupId,
+    );
+    if (created != null && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.chapterCreatedSuccess),
+          backgroundColor: AppColors.success,
+        ),
+      );
+    }
+  }
+
+  /// Opens the edit chapter dialog and displays a toast upon success.
+  static Future<void> handleEditChapter({
+    required BuildContext context,
+    required ChapterEntity chapter,
+  }) async {
+    final confirmed = await ChapterEditDialog.show(
+      context,
+      chapter: chapter,
+    );
+    if (confirmed == true && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.chapterUpdatedSuccess),
+          backgroundColor: AppColors.success,
+        ),
+      );
+    }
+  }
+
+  /// Toggles visibility for a single chapter with feedback.
+  static Future<void> handleToggleChapterVisibility({
+    required BuildContext context,
+    required ContentCubit cubit,
+    required ChapterEntity chapter,
+  }) async {
+    final l10n = context.l10n;
+    final success = await cubit.toggleChapterVisibility(
+      chapterId: chapter.id,
+      isPublished: !chapter.isPublished,
+    );
+    if (success && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            !chapter.isPublished
+                ? l10n.chapterPublishedToast
+                : l10n.chapterHiddenToast,
+          ),
+          backgroundColor:
+              !chapter.isPublished ? AppColors.success : AppColors.warning,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  /// Toggles visibility for a single lesson with feedback.
+  static Future<void> handleToggleLessonVisibility({
+    required BuildContext context,
+    required ContentCubit cubit,
+    required String groupId,
+    required ContentEntity lesson,
+  }) async {
+    final success = await cubit.toggleLessonVisibility(
+      contentId: lesson.id,
+      groupId: groupId,
+      isPublished: !lesson.isPublished,
+    );
+    if (success && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.lessonVisibilityUpdatedToast),
+          backgroundColor: AppColors.primary,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  /// Reorders chapters within a course by a given delta.
+  static Future<void> moveChapter({
+    required ContentCubit cubit,
+    required String groupId,
+    required List<ChapterEntity> allChapters,
+    required int currentIndex,
+    required int delta,
+  }) async {
+    final newIndex = currentIndex + delta;
+    if (newIndex < 0 || newIndex >= allChapters.length) return;
+
+    final reordered = List<ChapterEntity>.from(allChapters);
+    final movedItem = reordered.removeAt(currentIndex);
+    reordered.insert(newIndex, movedItem);
+
+    final idsInOrder = reordered.map((c) => c.id).toList();
+    await cubit.reorderCourseChapters(
+      groupId: groupId,
+      chapterIdsInOrder: idsInOrder,
+    );
+  }
+
+  /// Reorders lessons within a chapter via drag and drop.
+  static Future<void> reorderLessonsInChapter({
+    required ContentCubit cubit,
+    required String groupId,
+    required List<ContentEntity> chapterLessons,
+    required int oldIndex,
+    required int newIndex,
+  }) async {
+    var targetIndex = newIndex;
+    if (oldIndex < targetIndex) {
+      targetIndex -= 1;
+    }
+    if (oldIndex < 0 ||
+        oldIndex >= chapterLessons.length ||
+        targetIndex < 0 ||
+        targetIndex >= chapterLessons.length ||
+        oldIndex == targetIndex) {
+      return;
+    }
+    final reordered = List<ContentEntity>.from(chapterLessons);
+    final moved = reordered.removeAt(oldIndex);
+    reordered.insert(targetIndex, moved);
+
+    await cubit.reorderChapterLessons(
+      groupId: groupId,
+      contentIdsInOrder: reordered.map((l) => l.id).toList(),
+    );
   }
 }

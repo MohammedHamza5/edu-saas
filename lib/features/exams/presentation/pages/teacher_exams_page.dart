@@ -18,10 +18,7 @@ import '../cubit/exams_cubit.dart';
 import '../cubit/exams_state.dart';
 import '../pages/create_exam_page.dart';
 import '../utils/teacher_exams_actions_coordinator.dart';
-import '../widgets/exam_folders_bar.dart';
-import '../widgets/teacher_exams_filter_bar.dart';
-import '../widgets/teacher_exams_grid_view.dart';
-import '../widgets/teacher_exams_stats_banner.dart';
+import '../widgets/teacher_exams_loaded_view.dart';
 
 class TeacherExamsPage extends StatefulWidget {
   final String? groupId;
@@ -248,57 +245,6 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
 
         if (state is TeacherExamsLoaded) {
           final allExams = state.exams;
-          final cubit = context.read<ExamsCubit>();
-
-          // Categorized Counts
-          final generalCount = allExams.where((e) => e.isGeneralExam).length;
-          final lectureCount = allExams.where((e) => e.isLectureExam).length;
-          final linkedLectureCount =
-              allExams.where((e) => e.isLectureExam && e.isLinkedToLesson).length;
-          final unlinkedLectureCount =
-              allExams.where((e) => e.isLectureExam && !e.isLinkedToLesson).length;
-          final publishedCount = allExams.where((e) => e.isPublished).length;
-          final draftCount = allExams.where((e) => !e.isPublished).length;
-
-          // Multi-dimensional Filtering
-          var filteredExams = state.filteredExams;
-
-          if (_activeTypeFilter == 'general') {
-            filteredExams = filteredExams.where((e) => e.isGeneralExam).toList();
-          } else if (_activeTypeFilter == 'lecture') {
-            filteredExams = filteredExams.where((e) => e.isLectureExam).toList();
-            if (_activeLectureSubFilter == 'linked') {
-              filteredExams =
-                  filteredExams.where((e) => e.isLinkedToLesson).toList();
-            } else if (_activeLectureSubFilter == 'unlinked') {
-              filteredExams =
-                  filteredExams.where((e) => !e.isLinkedToLesson).toList();
-            }
-          }
-
-          if (_activeStatusFilter == 'published') {
-            filteredExams =
-                filteredExams.where((e) => e.isPublished).toList();
-          } else if (_activeStatusFilter == 'draft') {
-            filteredExams =
-                filteredExams.where((e) => !e.isPublished).toList();
-          }
-
-          if (_searchQuery.isNotEmpty) {
-            final q = _searchQuery.toLowerCase();
-            filteredExams = filteredExams.where((e) {
-              final titleMatch = e.title.toLowerCase().contains(q);
-              final lessonMatch =
-                  (e.linkedLessonTitle ?? '').toLowerCase().contains(q);
-              return titleMatch || lessonMatch;
-            }).toList();
-          }
-
-          final hasActiveFilters = _searchQuery.isNotEmpty ||
-              _activeStatusFilter != 'all' ||
-              _activeTypeFilter != 'all' ||
-              _activeLectureSubFilter != 'all' ||
-              state.selectedFolderId != null;
 
           if (allExams.isEmpty) {
             return Column(
@@ -338,224 +284,53 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
             );
           }
 
-          return RefreshIndicator(
+          return TeacherExamsLoadedView(
+            state: state,
+            scrollController: _scrollController,
+            selectedGroupId: _selectedGroupId,
+            activeTypeFilter: _activeTypeFilter,
+            activeLectureSubFilter: _activeLectureSubFilter,
+            activeStatusFilter: _activeStatusFilter,
+            searchQuery: _searchQuery,
+            searchController: _searchController,
+            onTypeFilterChanged: (filter) {
+              setState(() {
+                _activeTypeFilter = filter;
+              });
+            },
+            onLectureSubFilterChanged: (subFilter) {
+              setState(() {
+                _activeLectureSubFilter = subFilter;
+              });
+            },
+            onStatusFilterChanged: (status) {
+              setState(() {
+                _activeStatusFilter = status;
+              });
+            },
+            onSearchChanged: (query) {
+              setState(() {
+                _searchQuery = query;
+              });
+            },
+            onClearSearch: () {
+              _searchController.clear();
+              setState(() {
+                _searchQuery = '';
+              });
+            },
+            onResetAllFilters: () {
+              _searchController.clear();
+              setState(() {
+                _activeStatusFilter = 'all';
+                _activeTypeFilter = 'all';
+                _activeLectureSubFilter = 'all';
+                _searchQuery = '';
+              });
+            },
             onRefresh: () => _loadExams(forceRefresh: true),
-            child: SingleChildScrollView(
-              controller: _scrollController,
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.only(bottom: 96),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  groupFilterBar,
-                  const SizedBox(height: AppSpacing.s16),
-
-                  // 1. Stats Banner
-                  TeacherExamsStatsBanner(
-                    totalCount: allExams.length,
-                    generalCount: generalCount,
-                    lectureCount: lectureCount,
-                    unlinkedLectureCount: unlinkedLectureCount,
-                    activeTypeFilter: _activeTypeFilter,
-                    onSelectFilter: (filter) {
-                      setState(() {
-                        _activeTypeFilter = filter;
-                        _activeLectureSubFilter = 'all';
-                      });
-                    },
-                    onAlertTap: unlinkedLectureCount > 0
-                        ? () {
-                            setState(() {
-                              _activeTypeFilter = 'lecture';
-                              _activeLectureSubFilter = 'unlinked';
-                            });
-                          }
-                        : null,
-                  ),
-                  const SizedBox(height: AppSpacing.s12),
-
-                  // 2. Exam Folders Bar
-                  ExamFoldersBar(
-                    folders: state.folders,
-                    selectedFolderId: state.selectedFolderId,
-                    totalExamsCount: allExams.length,
-                    uncategorizedCount: allExams
-                        .where((e) => e.folderId == null || e.folderId!.isEmpty)
-                        .length,
-                    onSelectFolder: (fId) =>
-                        cubit.selectFolder(fId),
-                    onCreateFolder: () =>
-                        TeacherExamsActionsCoordinator.showCreateFolderDialog(
-                      context: context,
-                      cubit: cubit,
-                      selectedGroupId: _selectedGroupId,
-                    ),
-                    onEditFolder: (f) =>
-                        TeacherExamsActionsCoordinator.showEditFolderDialog(
-                      context: context,
-                      folder: f,
-                      cubit: cubit,
-                    ),
-                    onDeleteFolder: (f) =>
-                        TeacherExamsActionsCoordinator.confirmDeleteFolder(
-                      context: context,
-                      folder: f,
-                      cubit: cubit,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.s12),
-
-                  // 3. Filter Bar
-                  TeacherExamsFilterBar(
-                    totalCount: allExams.length,
-                    generalCount: generalCount,
-                    lectureCount: lectureCount,
-                    linkedLectureCount: linkedLectureCount,
-                    unlinkedLectureCount: unlinkedLectureCount,
-                    publishedCount: publishedCount,
-                    draftCount: draftCount,
-                    activeTypeFilter: _activeTypeFilter,
-                    activeLectureSubFilter: _activeLectureSubFilter,
-                    activeStatusFilter: _activeStatusFilter,
-                    searchQuery: _searchQuery,
-                    hasActiveFilters: hasActiveFilters,
-                    searchController: _searchController,
-                    onTypeFilterChanged: (filter) {
-                      setState(() {
-                        _activeTypeFilter = filter;
-                        _activeLectureSubFilter = 'all';
-                      });
-                    },
-                    onLectureSubFilterChanged: (subFilter) {
-                      setState(() {
-                        _activeLectureSubFilter = subFilter;
-                      });
-                    },
-                    onStatusFilterChanged: (status) {
-                      setState(() {
-                        _activeStatusFilter = status;
-                      });
-                    },
-                    onSearchChanged: (query) {
-                      setState(() {
-                        _searchQuery = query;
-                      });
-                    },
-                    onClearSearch: () {
-                      _searchController.clear();
-                      setState(() {
-                        _searchQuery = '';
-                      });
-                    },
-                    onResetAllFilters: () {
-                      _searchController.clear();
-                      setState(() {
-                        _activeStatusFilter = 'all';
-                        _activeTypeFilter = 'all';
-                        _activeLectureSubFilter = 'all';
-                        _searchQuery = '';
-                      });
-                    },
-                  ),
-                  const SizedBox(height: AppSpacing.s16),
-
-                  // 4. Exams Grid
-                  TeacherExamsGridView(
-                    filteredExams: filteredExams,
-                    selectedFolderId: state.selectedFolderId,
-                    isLoadingMore: state.isLoadingMore,
-                    onClearFilters: () {
-                      cubit.selectFolder(null);
-                      setState(() {
-                        _searchController.clear();
-                        _searchQuery = '';
-                        _activeStatusFilter = 'all';
-                        _activeTypeFilter = 'all';
-                        _activeLectureSubFilter = 'all';
-                      });
-                    },
-                    onTapExam: (exam) => _openExamDetails(exam),
-                    onEditQuestions: (exam) =>
-                        TeacherExamsActionsCoordinator.openEditDraftExam(
-                      context: context,
-                      exam: exam,
-                      cubit: cubit,
-                      selectedGroupId: _selectedGroupId,
-                      onReload: () => _loadExams(forceRefresh: true),
-                    ),
-                    onLinkLecture: (exam) {
-                      if (_selectedGroupId != null) {
-                        TeacherExamsActionsCoordinator.showLinkExamDialog(
-                          context: context,
-                          exam: exam,
-                          groupId: _selectedGroupId!,
-                          cubit: cubit,
-                        );
-                      }
-                    },
-                    onUnlinkLecture: (exam) {
-                      if (_selectedGroupId != null) {
-                        TeacherExamsActionsCoordinator.confirmUnlinkExam(
-                          context: context,
-                          exam: exam,
-                          groupId: _selectedGroupId!,
-                          cubit: cubit,
-                        );
-                      }
-                    },
-                    onConvertToLecture: (exam) {
-                      if (_selectedGroupId != null) {
-                        TeacherExamsActionsCoordinator.convertToLectureExam(
-                          context: context,
-                          exam: exam,
-                          groupId: _selectedGroupId!,
-                          cubit: cubit,
-                        );
-                      }
-                    },
-                    onConvertToGeneral: (exam) {
-                      if (_selectedGroupId != null) {
-                        TeacherExamsActionsCoordinator.confirmUnlinkExam(
-                          context: context,
-                          exam: exam,
-                          groupId: _selectedGroupId!,
-                          cubit: cubit,
-                        );
-                      }
-                    },
-                    onPublish: (exam) =>
-                        TeacherExamsActionsCoordinator.publishExam(
-                      context: context,
-                      exam: exam,
-                      cubit: cubit,
-                    ),
-                    onUnpublish: (exam) =>
-                        TeacherExamsActionsCoordinator.confirmUnpublish(
-                      context: context,
-                      exam: exam,
-                      cubit: cubit,
-                    ),
-                    onDelete: (exam) =>
-                        TeacherExamsActionsCoordinator.handleDeleteExam(
-                      context: context,
-                      exam: exam,
-                      cubit: cubit,
-                    ),
-                    onDispatchResults: (exam) =>
-                        TeacherExamsActionsCoordinator.openParentDispatch(
-                      context: context,
-                      exam: exam,
-                    ),
-                    onMoveToFolder: (exam) =>
-                        TeacherExamsActionsCoordinator.showMoveExamFolderDialog(
-                      context: context,
-                      exam: exam,
-                      cubit: cubit,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            onOpenExamDetails: _openExamDetails,
+            groupFilterBar: groupFilterBar,
           );
         }
 

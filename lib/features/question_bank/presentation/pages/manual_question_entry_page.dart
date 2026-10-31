@@ -2,27 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../../exams/presentation/widgets/exam_image_attachment_box.dart';
 import '../cubit/question_bank_cubit.dart';
-
-class _DraftOption {
-  final TextEditingController controller;
-  bool isCorrect;
-
-  _DraftOption({
-    String text = '',
-    this.isCorrect = false,
-  }) : controller = TextEditingController(text: text);
-
-  void dispose() {
-    controller.dispose();
-  }
-}
+import '../widgets/manual_question_options_section.dart';
 
 class ManualQuestionEntryPage extends StatefulWidget {
   const ManualQuestionEntryPage({super.key});
@@ -45,16 +31,16 @@ class _ManualQuestionEntryPageState extends State<ManualQuestionEntryPage> {
   String? _imageUrl;
   Map<String, dynamic>? _imageMeta;
 
-  late List<_DraftOption> _options;
+  late List<DraftOption> _options;
 
   @override
   void initState() {
     super.initState();
     _options = [
-      _DraftOption(isCorrect: true),
-      _DraftOption(isCorrect: false),
-      _DraftOption(isCorrect: false),
-      _DraftOption(isCorrect: false),
+      DraftOption(isCorrect: true),
+      DraftOption(isCorrect: false),
+      DraftOption(isCorrect: false),
+      DraftOption(isCorrect: false),
     ];
   }
 
@@ -71,7 +57,7 @@ class _ManualQuestionEntryPageState extends State<ManualQuestionEntryPage> {
   void _addOption() {
     if (_options.length < 6) {
       setState(() {
-        _options.add(_DraftOption(isCorrect: false));
+        _options.add(DraftOption(isCorrect: false));
       });
     }
   }
@@ -189,7 +175,7 @@ class _ManualQuestionEntryPageState extends State<ManualQuestionEntryPage> {
                             Expanded(
                               flex: 2,
                               child: DropdownButtonFormField<String>(
-                                value: _questionType,
+                                initialValue: _questionType,
                                 decoration: InputDecoration(
                                   labelText: l10n.questionType,
                                   border: OutlineInputBorder(
@@ -266,226 +252,22 @@ class _ManualQuestionEntryPageState extends State<ManualQuestionEntryPage> {
                   const SizedBox(height: AppSpacing.s20),
 
                   // Options Section
-                  AppCard(
-                    padding: const EdgeInsets.all(AppSpacing.s20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (_questionType == 'multiple_choice') ...[
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                l10n.optionsLabel,
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              if (_options.length < 6)
-                                TextButton.icon(
-                                  onPressed: _addOption,
-                                  icon: const Icon(Icons.add_rounded, size: 18),
-                                  label: Text(l10n.addOption),
-                                ),
-                            ],
-                          ),
-                          const SizedBox(height: AppSpacing.s8),
-                          Text(
-                            l10n.tapToSelectAnswer,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                          const SizedBox(height: AppSpacing.s16),
-                          ..._options.asMap().entries.map((entry) {
-                            final idx = entry.key;
-                            final opt = entry.value;
-                            final key = String.fromCharCode(65 + idx);
-
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: AppSpacing.s12),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  // Radio button for correct answer
-                                  IconButton(
-                                    icon: Icon(
-                                      opt.isCorrect
-                                          ? Icons.radio_button_checked_rounded
-                                          : Icons.radio_button_off_rounded,
-                                      color: opt.isCorrect
-                                          ? AppColors.primary
-                                          : AppColors.textMuted,
-                                    ),
-                                    onPressed: () {
-                                      setState(() {
-                                        for (final o in _options) {
-                                          o.isCorrect = false;
-                                        }
-                                        opt.isCorrect = true;
-                                      });
-                                    },
-                                  ),
-                                  // Option letter badge
-                                  Container(
-                                    width: 32,
-                                    height: 32,
-                                    alignment: Alignment.center,
-                                    decoration: BoxDecoration(
-                                      color: opt.isCorrect
-                                          ? AppColors.primary.withValues(alpha: 0.12)
-                                          : AppColors.surfaceVariant,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Text(
-                                      key,
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: opt.isCorrect
-                                            ? AppColors.primary
-                                            : AppColors.textPrimary,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: AppSpacing.s12),
-                                  // Option text input
-                                  Expanded(
-                                    child: TextFormField(
-                                      controller: opt.controller,
-                                      decoration: InputDecoration(
-                                        hintText: l10n.optionLetter(key),
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                      ),
-                                      validator: (v) =>
-                                          (v == null || v.trim().isEmpty)
-                                              ? 'Required'
-                                              : null,
-                                    ),
-                                  ),
-                                  if (_options.length > 2)
-                                    IconButton(
-                                      icon: const Icon(
-                                        Icons.delete_outline_rounded,
-                                        color: AppColors.error,
-                                        size: 20,
-                                      ),
-                                      onPressed: () => _removeOption(idx),
-                                    ),
-                                ],
-                              ),
-                            );
-                          }),
-                        ] else if (_questionType == 'true_false') ...[
-                          Text(
-                            l10n.correctAnswer,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: AppSpacing.s16),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: InkWell(
-                                  onTap: () => setState(() => _trueFalseAnswer = true),
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: AppSpacing.s16,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: _trueFalseAnswer
-                                          ? AppColors.primary.withValues(alpha: 0.1)
-                                          : AppColors.surfaceVariant,
-                                      border: Border.all(
-                                        color: _trueFalseAnswer
-                                            ? AppColors.primary
-                                            : AppColors.border,
-                                        width: _trueFalseAnswer ? 2 : 1,
-                                      ),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          _trueFalseAnswer
-                                              ? Icons.check_circle_rounded
-                                              : Icons.circle_outlined,
-                                          color: _trueFalseAnswer
-                                              ? AppColors.primary
-                                              : AppColors.textMuted,
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          l10n.optionTrue,
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color: _trueFalseAnswer
-                                                ? AppColors.primary
-                                                : AppColors.textPrimary,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: AppSpacing.s16),
-                              Expanded(
-                                child: InkWell(
-                                  onTap: () => setState(() => _trueFalseAnswer = false),
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: AppSpacing.s16,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: !_trueFalseAnswer
-                                          ? AppColors.primary.withValues(alpha: 0.1)
-                                          : AppColors.surfaceVariant,
-                                      border: Border.all(
-                                        color: !_trueFalseAnswer
-                                            ? AppColors.primary
-                                            : AppColors.border,
-                                        width: !_trueFalseAnswer ? 2 : 1,
-                                      ),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          !_trueFalseAnswer
-                                              ? Icons.check_circle_rounded
-                                              : Icons.circle_outlined,
-                                          color: !_trueFalseAnswer
-                                              ? AppColors.primary
-                                              : AppColors.textMuted,
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          l10n.optionFalse,
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color: !_trueFalseAnswer
-                                                ? AppColors.primary
-                                                : AppColors.textPrimary,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ],
-                    ),
+                  ManualQuestionOptionsSection(
+                    questionType: _questionType,
+                    options: _options,
+                    trueFalseAnswer: _trueFalseAnswer,
+                    onAddOption: _addOption,
+                    onRemoveOption: _removeOption,
+                    onSelectCorrectOption: (idx) {
+                      setState(() {
+                        for (final o in _options) {
+                          o.isCorrect = false;
+                        }
+                        _options[idx].isCorrect = true;
+                      });
+                    },
+                    onSelectTrueFalse: (val) =>
+                        setState(() => _trueFalseAnswer = val),
                   ),
 
                   const SizedBox(height: AppSpacing.s20),

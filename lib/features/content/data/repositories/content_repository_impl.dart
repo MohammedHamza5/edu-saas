@@ -1,5 +1,6 @@
 import '../../../../core/errors/failures.dart';
 import '../../../../core/errors/result.dart';
+import '../../../../core/network/retry_helper.dart';
 import '../../domain/entities/chapter_entity.dart';
 import '../../domain/entities/content_entity.dart';
 import '../../domain/entities/content_analytics_entity.dart';
@@ -30,11 +31,13 @@ class ContentRepositoryImpl implements ContentRepository {
     int pageSize = 20,
   }) async {
     try {
-      final models = await _remoteDataSource.getGroupContent(
-        groupId: groupId,
-        statusFilter: statusFilter?.value,
-        page: page,
-        pageSize: pageSize,
+      final models = await retryTransient(
+        () => _remoteDataSource.getGroupContent(
+          groupId: groupId,
+          statusFilter: statusFilter?.value,
+          page: page,
+          pageSize: pageSize,
+        ),
       );
       return Success(models);
     } catch (e) {
@@ -410,7 +413,9 @@ class ContentRepositoryImpl implements ContentRepository {
   @override
   Future<Result<List<ChapterEntity>>> getGroupChapters(String groupId) async {
     try {
-      final chapters = await _remoteDataSource.getGroupChapters(groupId);
+      final chapters = await retryTransient(
+        () => _remoteDataSource.getGroupChapters(groupId),
+      );
       return Success(chapters);
     } catch (e) {
       return FailureResult(

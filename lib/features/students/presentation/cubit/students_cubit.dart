@@ -533,6 +533,47 @@ class StudentsCubit extends Cubit<StudentsState> {
     required String groupId,
     required bool add,
   }) async {
+    final previousState = state;
+
+    // 1. Optimistic Local State Update (O(1) in-memory transition)
+    if (previousState is AssignGroupsLoaded) {
+      if (add) {
+        final match =
+            previousState.availableGroups.where((g) => g.groupId == groupId);
+        if (match.isNotEmpty) {
+          final target = match.first;
+          final newCurrent = [...previousState.currentGroups, target];
+          final newAvailable = previousState.availableGroups
+              .where((g) => g.groupId != groupId)
+              .toList();
+          emit(
+            AssignGroupsLoaded(
+              student: previousState.student,
+              currentGroups: newCurrent,
+              availableGroups: newAvailable,
+            ),
+          );
+        }
+      } else {
+        final match =
+            previousState.currentGroups.where((g) => g.groupId == groupId);
+        if (match.isNotEmpty) {
+          final target = match.first;
+          final newCurrent = previousState.currentGroups
+              .where((g) => g.groupId != groupId)
+              .toList();
+          final newAvailable = [...previousState.availableGroups, target];
+          emit(
+            AssignGroupsLoaded(
+              student: previousState.student,
+              currentGroups: newCurrent,
+              availableGroups: newAvailable,
+            ),
+          );
+        }
+      }
+    }
+
     final result = await _repository.assignStudentToGroup(
       studentId: studentId,
       groupId: groupId,
@@ -544,16 +585,21 @@ class StudentsCubit extends Cubit<StudentsState> {
     return result.when(
       onSuccess: (_) {
         if (!isClosed) {
-          // Invalidate caches
+          // Invalidate repository caches without destructive full-screen reload
           AppCache.students.clear();
           AppCache.groups.clear();
-          // Reload assign groups screen
-          loadAssignGroups(studentId);
         }
         return true;
       },
       onFailure: (f) {
-        if (!isClosed) emit(StudentsError(f.message));
+        if (!isClosed) {
+          // Rollback to previous state on failure to maintain UI integrity
+          if (previousState is AssignGroupsLoaded) {
+            emit(previousState);
+          } else {
+            emit(StudentsError(f.message));
+          }
+        }
         return false;
       },
     );

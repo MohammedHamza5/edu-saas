@@ -1,18 +1,16 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/services/student_activity_tracker.dart';
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_loading_view.dart';
 import '../../../../core/widgets/forensic_watermark_overlay.dart';
-import 'bunny_embed_player.dart';
-import 'youtube_embed_player.dart';
-import 'app_video_player_controls.dart';
-import 'video_security_pause_overlay.dart';
+import '../utils/video_player_controller_helper.dart';
+import 'video_embed_player_view.dart';
+import 'video_player_error_box.dart';
+import 'video_player_keyboard_shortcuts.dart';
+import 'video_player_stack_surface.dart';
 
 class AppVideoPlayer extends StatefulWidget {
   final String streamUrl;
@@ -82,14 +80,7 @@ class _AppVideoPlayerState extends State<AppVideoPlayer>
   Timer? _watchHeartbeatTimer;
   bool _completionFired = false;
 
-  bool get _isYouTubeEmbed =>
-      kIsWeb &&
-      (widget.streamUrl.contains('youtube') ||
-          widget.streamUrl.contains('youtu.be'));
-
-  bool get _isBunnyEmbed => kIsWeb && !_isYouTubeEmbed;
-
-  bool get _isEmbedPlayer => _isYouTubeEmbed || _isBunnyEmbed;
+  bool get _isEmbedPlayer => VideoEmbedPlayerView.isEmbed(widget.streamUrl);
 
   @override
   void initState() {
@@ -252,26 +243,13 @@ class _AppVideoPlayerState extends State<AppVideoPlayer>
 
   void _seekRelative(int seconds) {
     if (_controller == null || !_isInitialized) return;
-    final current = _controller!.value.position;
-    final target = current + Duration(seconds: seconds);
-    final maxDuration = _controller!.value.duration;
-
-    if (target < Duration.zero) {
-      _controller!.seekTo(Duration.zero);
-    } else if (maxDuration > Duration.zero && target > maxDuration) {
-      _controller!.seekTo(maxDuration);
-    } else if (maxDuration == Duration.zero &&
-        widget.totalDurationSeconds != null &&
-        widget.totalDurationSeconds! > 0) {
-      final fallbackMax = Duration(seconds: widget.totalDurationSeconds!);
-      if (target > fallbackMax) {
-        _controller!.seekTo(fallbackMax);
-      } else {
-        _controller!.seekTo(target);
-      }
-    } else {
-      _controller!.seekTo(target);
-    }
+    final target = VideoPlayerControllerHelper.calculateSeekTarget(
+      currentPosition: _controller!.value.position,
+      videoDuration: _controller!.value.duration,
+      totalDurationSeconds: widget.totalDurationSeconds,
+      seekSeconds: seconds,
+    );
+    _controller!.seekTo(target);
 
     final isAr = Localizations.maybeLocaleOf(context)?.languageCode == 'ar';
     final unit = isAr ? 'ث' : 's';
@@ -359,16 +337,6 @@ class _AppVideoPlayerState extends State<AppVideoPlayer>
     _startHideControlsTimer();
   }
 
-  String _formatDuration(Duration duration) {
-    final minutes = duration.inMinutes.remainder(60).toString().padLeft(2, '0');
-    final seconds = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
-    if (duration.inHours > 0) {
-      final hours = duration.inHours.toString().padLeft(2, '0');
-      return '$hours:$minutes:$seconds';
-    }
-    return '$minutes:$seconds';
-  }
-
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
@@ -407,22 +375,9 @@ class _AppVideoPlayerState extends State<AppVideoPlayer>
 
   @override
   Widget build(BuildContext context) {
-    if (_isYouTubeEmbed) {
-      return buildYouTubeEmbedPlayer(
-        embedUrl: widget.streamUrl,
-        initialProgressSeconds: widget.initialProgressSeconds,
-        onProgress: widget.onProgress,
-        onMetricsProgress: widget.onMetricsProgress,
-        onCompleted: widget.onCompleted,
-        onSeekReady: widget.onSeekReady,
-        onPlaybackControlsReady: widget.onPlaybackControlsReady,
-        onFullscreenChanged: widget.onFullscreenChanged,
-      );
-    }
-
-    if (_isBunnyEmbed) {
-      return buildBunnyEmbedPlayer(
-        embedUrl: widget.streamUrl,
+    if (_isEmbedPlayer) {
+      return VideoEmbedPlayerView(
+        streamUrl: widget.streamUrl,
         initialProgressSeconds: widget.initialProgressSeconds,
         totalDurationSeconds: widget.totalDurationSeconds,
         onProgress: widget.onProgress,
@@ -435,47 +390,14 @@ class _AppVideoPlayerState extends State<AppVideoPlayer>
     }
 
     if (_hasError) {
-      return Container(
-        height: 220,
-        decoration: BoxDecoration(
-          color: Colors.black,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-        ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.error_outline_rounded,
-                color: AppColors.error,
-                size: 44,
-              ),
-              const SizedBox(height: AppSpacing.s12),
-              Text(
-                _errorMessage.isNotEmpty
-                    ? _errorMessage
-                    : context.l10n.videoPlaybackError,
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.white, fontSize: 13),
-              ),
-              const SizedBox(height: AppSpacing.s16),
-              OutlinedButton.icon(
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  side: const BorderSide(color: Colors.white54),
-                ),
-                onPressed: () {
-                  setState(() {
-                    _hasError = false;
-                  });
-                  _initializePlayer();
-                },
-                icon: const Icon(Icons.refresh_rounded, size: 16),
-                label: Text(context.l10n.retryAction),
-              ),
-            ],
-          ),
-        ),
+      return VideoPlayerErrorBox(
+        errorMessage: _errorMessage,
+        onRetry: () {
+          setState(() {
+            _hasError = false;
+          });
+          _initializePlayer();
+        },
       );
     }
 
@@ -494,265 +416,58 @@ class _AppVideoPlayerState extends State<AppVideoPlayer>
 
     final isPlaying = _controller!.value.isPlaying;
     return ForensicWatermarkOverlay(
-      child: CallbackShortcuts(
-        bindings: <ShortcutActivator, VoidCallback>{
-          const SingleActivator(LogicalKeyboardKey.space): _togglePlayPause,
-          const SingleActivator(LogicalKeyboardKey.keyK): _togglePlayPause,
-          const SingleActivator(LogicalKeyboardKey.keyM): _toggleMute,
-          const SingleActivator(LogicalKeyboardKey.arrowLeft): () =>
-              _seekRelative(-10),
-          const SingleActivator(LogicalKeyboardKey.arrowRight): () =>
-              _seekRelative(10),
-          const SingleActivator(LogicalKeyboardKey.keyJ): () =>
-              _seekRelative(-10),
-          const SingleActivator(LogicalKeyboardKey.keyL): () =>
-              _seekRelative(10),
-          const SingleActivator(LogicalKeyboardKey.arrowUp): () =>
-              _changeVolume(_volume + 0.1),
-          const SingleActivator(LogicalKeyboardKey.arrowDown): () =>
-              _changeVolume(_volume - 0.1),
-          const SingleActivator(LogicalKeyboardKey.keyF): _toggleFullscreen,
-          const SingleActivator(LogicalKeyboardKey.escape): () {
-            if (_isFullscreen) _toggleFullscreen();
+      child: VideoPlayerKeyboardShortcuts(
+        onTogglePlayPause: _togglePlayPause,
+        onToggleMute: _toggleMute,
+        onSeekRelative: _seekRelative,
+        onVolumeChange: _changeVolume,
+        currentVolume: _volume,
+        onToggleFullscreen: _toggleFullscreen,
+        isFullscreen: _isFullscreen,
+        child: MouseRegion(
+          cursor: (!isPlaying || _showControls)
+              ? SystemMouseCursors.basic
+              : SystemMouseCursors.none,
+          onHover: (_) {
+            if (!_showControls) {
+              _resetControlsTimer();
+            } else {
+              _startHideControlsTimer();
+            }
           },
-        },
-        child: Focus(
-          autofocus: true,
-          child: MouseRegion(
-            cursor: (!isPlaying || _showControls)
-                ? SystemMouseCursors.basic
-                : SystemMouseCursors.none,
-            onHover: (_) {
-              if (!_showControls) {
-                _resetControlsTimer();
-              } else {
-                _startHideControlsTimer();
-              }
-            },
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(
-                _isFullscreen ? 0 : AppSpacing.radiusMedium,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(
+              _isFullscreen ? 0 : AppSpacing.radiusMedium,
+            ),
+            child: VideoPlayerStackSurface(
+              controller: _controller!,
+              aspectRatio: _aspectRatio,
+              showControls: _showControls,
+              videoTitle: widget.videoTitle,
+              isPlaying: isPlaying,
+              onTogglePlayPause: _togglePlayPause,
+              onResetControlsTimer: _resetControlsTimer,
+              onToggleFullscreen: _toggleFullscreen,
+              onSeekRelative: _seekRelative,
+              seekFeedbackText: _seekFeedbackText,
+              showResumeBanner: _showResumeBanner,
+              resumeFormattedTime:
+                  VideoPlayerControllerHelper.formatDuration(
+                Duration(seconds: widget.initialProgressSeconds),
               ),
-              child: Container(
-                color: Colors.black,
-                child: AspectRatio(
-                  aspectRatio: _aspectRatio,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      // ── 1. Centered LTR Video Surface ─────────────────
-                      Positioned.fill(
-                        child: Directionality(
-                          textDirection: TextDirection.ltr,
-                          child: Center(
-                            child: AspectRatio(
-                              aspectRatio: _aspectRatio,
-                              child: VideoPlayer(_controller!),
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      // ── 2. Full-surface Transparent Event Shield ──────
-                      Positioned.fill(
-                        child: GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onTap: () {
-                            if (_showControls) {
-                              _togglePlayPause();
-                            } else {
-                              _resetControlsTimer();
-                            }
-                          },
-                          onDoubleTap: _toggleFullscreen,
-                        ),
-                      ),
-
-                      // ── 3. Touch Double-Tap Seek Zones ────────────────
-                      Positioned.fill(
-                        child: Row(
-                          children: [
-                            Expanded(
-                              flex: 3,
-                              child: GestureDetector(
-                                behavior: HitTestBehavior.translucent,
-                                onDoubleTap: () => _seekRelative(-10),
-                                onTap: () {
-                                  if (_showControls) {
-                                    _togglePlayPause();
-                                  } else {
-                                    _resetControlsTimer();
-                                  }
-                                },
-                              ),
-                            ),
-                            const Expanded(flex: 4, child: SizedBox.shrink()),
-                            Expanded(
-                              flex: 3,
-                              child: GestureDetector(
-                                behavior: HitTestBehavior.translucent,
-                                onDoubleTap: () => _seekRelative(10),
-                                onTap: () {
-                                  if (_showControls) {
-                                    _togglePlayPause();
-                                  } else {
-                                    _resetControlsTimer();
-                                  }
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // ── 4. Seek Feedback Bubble (+10s / -10s) ─────────
-                      if (_seekFeedbackText != null)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 12,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.black87,
-                            borderRadius: BorderRadius.circular(
-                              AppSpacing.radiusFull,
-                            ),
-                            border: Border.all(
-                              color: AppColors.primaryLight.withAlpha(100),
-                            ),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Colors.black54,
-                                blurRadius: 16,
-                                spreadRadius: 2,
-                              ),
-                            ],
-                          ),
-                          child: Text(
-                            _seekFeedbackText!,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ),
-
-                      // ── 5. Buffering Indicator ────────────────────────
-                      if (_controller!.value.isBuffering)
-                        const AppLoadingView.compact(
-                          size: 38,
-                          color: Colors.white,
-                        ),
-
-                      // ── 6. Resume Banner ──────────────────────────────
-                      if (_showResumeBanner && _showControls)
-                        Positioned(
-                          top: AppSpacing.s16,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppSpacing.s16,
-                              vertical: AppSpacing.s8,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.black87,
-                              borderRadius: BorderRadius.circular(
-                                AppSpacing.radiusFull,
-                              ),
-                              border: Border.all(
-                                color: AppColors.primaryLight.withAlpha(120),
-                              ),
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Colors.black45,
-                                  blurRadius: 10,
-                                  offset: Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(
-                                  Icons.history_rounded,
-                                  color: AppColors.primaryLight,
-                                  size: 16,
-                                ),
-                                const SizedBox(width: AppSpacing.s8),
-                                Text(
-                                  context.l10n.resumeFromMinute(
-                                    _formatDuration(
-                                      Duration(
-                                        seconds: widget.initialProgressSeconds,
-                                      ),
-                                    ),
-                                  ),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                const SizedBox(width: AppSpacing.s12),
-                                TextButton(
-                                  style: TextButton.styleFrom(
-                                    foregroundColor: AppColors.primaryLight,
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 4,
-                                    ),
-                                    minimumSize: Size.zero,
-                                  ),
-                                  onPressed: _resumeFromSavedProgress,
-                                  child: Text(
-                                    context.l10n.resumeAction,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.close_rounded,
-                                    color: Colors.white70,
-                                    size: 14,
-                                  ),
-                                  onPressed: () =>
-                                      setState(() => _showResumeBanner = false),
-                                  padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-
-                      // ── 7. Cinematic Controls Overlay ─────────────────
-                      AppVideoPlayerControls(
-                        showControls: _showControls,
-                        videoTitle: widget.videoTitle,
-                        isPlaying: isPlaying,
-                        onTogglePlayPause: _togglePlayPause,
-                        controller: _controller!,
-                        isMuted: _isMuted,
-                        volume: _volume,
-                        onVolumeChanged: _changeVolume,
-                        onToggleMute: _toggleMute,
-                        onSeekRelative: _seekRelative,
-                        playbackSpeed: _playbackSpeed,
-                        onSpeedChanged: _changeSpeed,
-                        isFullscreen: _isFullscreen,
-                        onToggleFullscreen: _toggleFullscreen,
-                        totalDurationSeconds: widget.totalDurationSeconds,
-                      ),
-                      if (_isSecurityPaused)
-                        VideoSecurityPauseOverlay(
-                          onResume: _resumeFromSecurityPause,
-                        ),
-                    ],
-                  ),
-                ),
-              ),
+              onResumeFromSaved: _resumeFromSavedProgress,
+              onDismissResumeBanner: () =>
+                  setState(() => _showResumeBanner = false),
+              isMuted: _isMuted,
+              volume: _volume,
+              onVolumeChanged: _changeVolume,
+              onToggleMute: _toggleMute,
+              playbackSpeed: _playbackSpeed,
+              onSpeedChanged: _changeSpeed,
+              isFullscreen: _isFullscreen,
+              totalDurationSeconds: widget.totalDurationSeconds,
+              isSecurityPaused: _isSecurityPaused,
+              onResumeSecurityPause: _resumeFromSecurityPause,
             ),
           ),
         ),

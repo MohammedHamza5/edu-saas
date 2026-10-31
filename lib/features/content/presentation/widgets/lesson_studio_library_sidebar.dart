@@ -7,6 +7,8 @@ import '../../../videos/domain/entities/library_video_entity.dart';
 import '../../../videos/domain/entities/video_folder_entity.dart';
 import '../../../videos/presentation/dialogs/upload_video_to_bank_dialog.dart';
 import '../models/lesson_studio_models.dart';
+import 'lesson_studio_library_folder_item.dart';
+import 'lesson_studio_library_video_row.dart';
 
 /// Left sidebar for browsing the video library and selecting videos into
 /// the Lesson Studio staging workspace.
@@ -182,7 +184,6 @@ class _LessonStudioLibrarySidebarState
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
           child: Row(
             children: [
-              // Filter chip: Unused only
               FilterChip(
                 selected: _showOnlyUnused,
                 onSelected: (val) => setState(() => _showOnlyUnused = val),
@@ -263,7 +264,6 @@ class _LessonStudioLibrarySidebarState
   }
 
   Widget _buildFolderTreeItem(BuildContext context, VideoFolderEntity folder) {
-    final l10n = context.l10n;
     final isExpanded = _expandedFolderIds.contains(folder.id);
     final isLoading = widget.loadingFolderIds.contains(folder.id);
     final videos = widget.folderVideosCache[folder.id] ?? [];
@@ -288,121 +288,33 @@ class _LessonStudioLibrarySidebarState
 
     final triState = _getFolderCheckboxState(folder);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        InkWell(
-          onTap: () {
-            setState(() {
-              if (isExpanded) {
-                _expandedFolderIds.remove(folder.id);
-              } else {
-                _expandedFolderIds.add(folder.id);
-                unawaited(widget.onLoadVideosForFolder(folder.id));
-              }
-            });
-          },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            child: Row(
-              children: [
-                // Expand Icon
-                Icon(
-                  isExpanded
-                      ? Icons.keyboard_arrow_down_rounded
-                      : Icons.keyboard_arrow_right_rounded,
-                  size: 20,
-                  color: AppColors.textSecondary,
-                ),
-                const SizedBox(width: 4),
-
-                // Folder Tri-State Checkbox
-                Checkbox(
-                  value: triState,
-                  tristate: true,
-                  visualDensity: VisualDensity.compact,
-                  onChanged: (_) {
-                    if (!widget.folderVideosCache.containsKey(folder.id)) {
-                      widget.onLoadVideosForFolder(folder.id).then((_) {
-                        widget.onToggleFolderSelection(folder);
-                      });
-                    } else {
-                      widget.onToggleFolderSelection(folder);
-                    }
-                  },
-                ),
-                const SizedBox(width: 4),
-
-                // Folder Color Dot / Icon
-                Icon(
-                  Icons.folder_rounded,
-                  size: 18,
-                  color: folder.color != null
-                      ? Color(
-                          int.parse(folder.color!.replaceFirst('#', '0xFF')),
-                        )
-                      : AppColors.primary,
-                ),
-                const SizedBox(width: 8),
-
-                // Folder Name + Count
-                Expanded(
-                  child: Text(
-                    folder.name,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                if (isLoading)
-                  const SizedBox(
-                    width: 14,
-                    height: 14,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                else
-                  Text(
-                    '${videos.length}',
-                    style: const TextStyle(
-                      fontSize: 11,
-                      color: AppColors.textSecondary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
-
-        // Subtree (Videos in folder)
-        if (isExpanded)
-          Padding(
-            padding: const EdgeInsets.only(left: 20, right: 8),
-            child: videos.isEmpty && !isLoading
-                ? Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: Center(
-                      child: Text(
-                        l10n.noVideosInFolder,
-                        style: const TextStyle(
-                          fontSize: 11,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ),
-                  )
-                : Column(
-                    children: [
-                      for (final video in filteredVideos)
-                        _buildVideoRow(context, video),
-                    ],
-                  ),
-          ),
-      ],
+    return LessonStudioLibraryFolderItem(
+      folder: folder,
+      isExpanded: isExpanded,
+      isLoading: isLoading,
+      triState: triState,
+      filteredVideos: filteredVideos,
+      totalVideosCount: videos.length,
+      onToggleExpand: () {
+        setState(() {
+          if (isExpanded) {
+            _expandedFolderIds.remove(folder.id);
+          } else {
+            _expandedFolderIds.add(folder.id);
+            unawaited(widget.onLoadVideosForFolder(folder.id));
+          }
+        });
+      },
+      onToggleCheckbox: () {
+        if (!widget.folderVideosCache.containsKey(folder.id)) {
+          widget.onLoadVideosForFolder(folder.id).then((_) {
+            widget.onToggleFolderSelection(folder);
+          });
+        } else {
+          widget.onToggleFolderSelection(folder);
+        }
+      },
+      videoRowBuilder: _buildVideoRow,
     );
   }
 
@@ -508,151 +420,13 @@ class _LessonStudioLibrarySidebarState
     final isSelected = widget.selectedVideos.containsKey(video.id);
     final isAlreadyAdded = widget.isVideoAlreadyInCourse(video);
     final staged = widget.stagedLectures[video.id];
-    final hasPdf = staged != null && staged.hasPdf;
-    final hasExam = staged != null && staged.hasExam;
 
-    return InkWell(
-      onTap: () => widget.onToggleVideoSelection(video),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.primary.withValues(alpha: 0.08)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: Row(
-          children: [
-            Checkbox(
-              value: isSelected,
-              visualDensity: VisualDensity.compact,
-              onChanged: (_) => widget.onToggleVideoSelection(video),
-            ),
-            const SizedBox(width: 4),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceVariant,
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                video.formattedDuration,
-                style: const TextStyle(
-                  fontSize: 10,
-                  fontFamily: 'monospace',
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    video.title,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight:
-                          isSelected ? FontWeight.bold : FontWeight.normal,
-                      color: AppColors.textPrimary,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Row(
-                    children: [
-                      if (isAlreadyAdded) ...[
-                        Text(
-                          context.l10n.alreadyAddedBadge,
-                          style: const TextStyle(
-                            fontSize: 9.5,
-                            color: AppColors.success,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                      ],
-                      if (hasPdf) ...[
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 4,
-                            vertical: 1,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFEA580C)
-                                .withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(4),
-                            border: Border.all(
-                              color: const Color(0xFFEA580C)
-                                  .withValues(alpha: 0.4),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.picture_as_pdf_rounded,
-                                size: 9,
-                                color: Color(0xFFEA580C),
-                              ),
-                              const SizedBox(width: 2),
-                              Text(
-                                context.l10n.smartBadgePdf,
-                                style: const TextStyle(
-                                  fontSize: 8.5,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFFEA580C),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                      ],
-                      if (hasExam) ...[
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 4,
-                            vertical: 1,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(4),
-                            border: Border.all(
-                              color:
-                                  AppColors.primary.withValues(alpha: 0.4),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.quiz_rounded,
-                                size: 9,
-                                color: AppColors.primary,
-                              ),
-                              const SizedBox(width: 2),
-                              Text(
-                                context.l10n.smartBadgeExam,
-                                style: const TextStyle(
-                                  fontSize: 8.5,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.primary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
+    return LessonStudioLibraryVideoRow(
+      video: video,
+      isSelected: isSelected,
+      isAlreadyAdded: isAlreadyAdded,
+      staged: staged,
+      onToggle: widget.onToggleVideoSelection,
     );
   }
 }

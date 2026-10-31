@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
+import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/app_feedback.dart';
+import '../../../../core/widgets/academic_hero_banner.dart';
 import '../../../../core/widgets/app_error_view.dart';
 import '../cubit/student_profile_cubit.dart';
 import '../cubit/student_profile_state.dart';
@@ -49,34 +52,78 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
     }
   }
 
+  Widget _buildLoadingSkeleton() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.s16,
+        vertical: AppSpacing.s20,
+      ),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 860),
+          child: Column(
+            children: [
+              Container(
+                height: 110,
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceVariant.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusLarge),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.s20),
+              Container(
+                height: 140,
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceVariant.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusLarge),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.s20),
+              Container(
+                height: 280,
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceVariant.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusLarge),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           context.l10n.studentProfileAndSettingsTitle,
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
-          ),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
-        backgroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_rounded),
+          tooltip: isAr ? 'رجوع' : 'Back',
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go(AppRoutes.studentDashboard);
+            }
+          },
+        ),
         elevation: 0,
-        centerTitle: false,
-        shape: const Border(
-          bottom: BorderSide(color: Color(0xFFE2E8F0)),
-        ),
+        backgroundColor: Colors.transparent,
       ),
       body: BlocConsumer<StudentProfileCubit, StudentProfileState>(
         listener: _handleStateListeners,
         builder: (context, state) {
           return switch (state) {
-            StudentProfileInitial() || StudentProfileLoading() => const Center(
-                child: CircularProgressIndicator(),
-              ),
+            StudentProfileInitial() || StudentProfileLoading() => _buildLoadingSkeleton(),
             StudentProfileError(:final message) => AppErrorView(
                 message: message,
                 onRetry: () => context.read<StudentProfileCubit>().loadProfile(),
@@ -88,19 +135,41 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
                   physics: const AlwaysScrollableScrollPhysics(),
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.s16,
-                    vertical: AppSpacing.s20,
+                    vertical: AppSpacing.s16,
                   ),
                   child: Center(
                     child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 800),
+                      constraints: const BoxConstraints(maxWidth: 860),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          // 1. Header Card (Avatar, Status, Enrolled Groups)
+                          // 1. Prestigious Academic Hero Banner
+                          AcademicHeroBanner(
+                            title: context.l10n.studentProfileAndSettingsTitle,
+                            subtitle: context.l10n.studentProfileSubtitle,
+                            trailing: Container(
+                              padding: const EdgeInsets.all(AppSpacing.s12),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: Colors.white.withValues(alpha: 0.25),
+                                ),
+                              ),
+                              child: const Icon(
+                                Icons.manage_accounts_rounded,
+                                color: Colors.white,
+                                size: 30,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.s20),
+
+                          // 2. Header Card (Avatar, Status, Enrolled Groups)
                           StudentProfileHeaderCard(profile: profile),
                           const SizedBox(height: AppSpacing.s20),
 
-                          // 2. Contact Information & Name (With Parent Phone Dialog)
+                          // 3. Contact Information & Name (With Parent Phone Dialog)
                           StudentContactInfoSection(
                             profile: profile,
                             isSaving: isSaving,
@@ -118,7 +187,7 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
                           ),
                           const SizedBox(height: AppSpacing.s20),
 
-                          // 3. Security (Password change)
+                          // 4. Security (Password change)
                           StudentSecuritySection(
                             isChangingPassword: isChangingPassword,
                             onChangePassword: ({required newPassword}) async {
@@ -129,7 +198,7 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
                           ),
                           const SizedBox(height: AppSpacing.s20),
 
-                          // 4. Preferences (Language, Logout)
+                          // 5. Preferences (Language, Logout)
                           const StudentPreferencesSection(),
                           const SizedBox(height: AppSpacing.s32),
                         ],

@@ -7,17 +7,17 @@ import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/app_feedback.dart';
-import '../dialogs/academic_report_dialog.dart';
-
-import '../../../../core/widgets/app_badge.dart';
-import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_empty_view.dart';
 import '../../../../core/widgets/app_error_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
+import '../../../../core/widgets/app_state_switcher.dart';
 import '../../../../core/widgets/responsive_container.dart';
 import '../../domain/entities/student_entity.dart';
 import '../cubit/students_cubit.dart';
 import '../cubit/students_state.dart';
+import '../dialogs/academic_report_dialog.dart';
+import '../widgets/student_card.dart';
+import '../widgets/students_filter_bar.dart';
 
 /// T-02 — Students List (Teacher)
 /// Features: search / filter by status / pagination 25 / approve-reject-suspend shortcuts
@@ -33,16 +33,6 @@ class _StudentsListPageState extends State<StudentsListPage> {
   final _scrollController = ScrollController();
   String? _selectedStatus; // null = all
   Timer? _debounceTimer;
-
-  List<({String label, String? value})> _getStatusFilters(
-    BuildContext context,
-  ) => [
-    (label: context.l10n.all, value: null),
-    (label: context.l10n.active, value: 'active'),
-    (label: context.l10n.pending, value: 'pending'),
-    (label: context.l10n.rejected, value: 'rejected'),
-    (label: context.l10n.suspended, value: 'suspended'),
-  ];
 
   @override
   void initState() {
@@ -86,8 +76,6 @@ class _StudentsListPageState extends State<StudentsListPage> {
 
   @override
   Widget build(BuildContext context) {
-    final statusFilters = _getStatusFilters(context);
-
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -143,86 +131,17 @@ class _StudentsListPageState extends State<StudentsListPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // ── Search bar ─────────────────────────────────────────────────
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.s16,
-                AppSpacing.s12,
-                AppSpacing.s16,
-                0,
-              ),
-              child: TextField(
-                controller: _searchController,
-                onChanged: _onSearch,
-                textInputAction: TextInputAction.search,
-                decoration: InputDecoration(
-                  hintText: context.l10n.searchStudentsHint,
-                  prefixIcon: const Icon(Icons.search_rounded, size: 20),
-                  suffixIcon: _searchController.text.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.close_rounded, size: 18),
-                          onPressed: () {
-                            _searchController.clear();
-                            _onSearch('');
-                            setState(() {});
-                          },
-                        )
-                      : null,
-                  isDense: true,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.s16,
-                    vertical: AppSpacing.s12,
-                  ),
-                  filled: true,
-                  fillColor: AppColors.surfaceVariant,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(
-                      AppSpacing.radiusMedium,
-                    ),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
+            StudentsFilterBar(
+              searchController: _searchController,
+              selectedStatus: _selectedStatus,
+              onSearch: _onSearch,
+              onClearSearch: () {
+                _searchController.clear();
+                _onSearch('');
+                setState(() {});
+              },
+              onFilterTap: _onFilterTap,
             ),
-
-            // ── Status filter chips ────────────────────────────────────────
-            SizedBox(
-              height: 52,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.s16,
-                  vertical: AppSpacing.s8,
-                ),
-                itemCount: statusFilters.length,
-                separatorBuilder: (_, __) =>
-                    const SizedBox(width: AppSpacing.s8),
-                itemBuilder: (context, i) {
-                  final f = statusFilters[i];
-                  final selected = _selectedStatus == f.value;
-                  return FilterChip(
-                    label: Text(f.label),
-                    selected: selected,
-                    selectedColor: AppColors.primaryLight.withValues(
-                      alpha: 0.2,
-                    ),
-                    checkmarkColor: AppColors.primary,
-                    labelStyle: TextStyle(
-                      color: selected
-                          ? AppColors.primary
-                          : AppColors.textSecondary,
-                      fontWeight: selected
-                          ? FontWeight.bold
-                          : FontWeight.normal,
-                      fontSize: 12,
-                    ),
-                    onSelected: (_) => _onFilterTap(f.value),
-                  );
-                },
-              ),
-            ),
-
-            const Divider(height: 1),
 
             // ── List ────────────────────────────────────────────────────────
             Expanded(
@@ -249,44 +168,60 @@ class _StudentsListPageState extends State<StudentsListPage> {
                   }
                 },
                 builder: (context, state) {
-                  if (state is StudentsLoading) {
-                    return _buildSkeletonLoading();
-                  }
-                  if (state is StudentsError) {
-                    return AppErrorView(
-                      message: state.message,
-                      onRetry: () => context.read<StudentsCubit>().loadStudents(
-                        status: _selectedStatus,
-                        refresh: true,
-                      ),
-                    );
-                  }
-                  if (state is StudentsLoaded) {
-                    if (state.students.isEmpty) {
-                      if (_searchController.text.trim().isNotEmpty) {
-                        return AppEmptyView(
-                          icon: Icons.search_off_rounded,
-                          message: context.l10n.noStudentsMatchingSearch(
-                            _searchController.text.trim(),
-                          ),
-                          actionText: context.l10n.clearSearch,
-                          onAction: () {
-                            _searchController.clear();
-                            _onSearch('');
-                            setState(() {});
-                          },
+                  return AppStateSwitcher(
+                    child: () {
+                      if (state is StudentsLoading) {
+                        return KeyedSubtree(
+                          key: const ValueKey('students_loading'),
+                          child: _buildSkeletonLoading(),
                         );
                       }
-                      return AppEmptyView(
-                        icon: Icons.people_outline_rounded,
-                        message: _selectedStatus != null
-                            ? context.l10n.noStudentsWithStatus
-                            : context.l10n.noStudentsRegistered,
-                      );
-                    }
-                    return ListView.separated(
+                      if (state is StudentsError) {
+                        return KeyedSubtree(
+                          key: const ValueKey('students_error'),
+                          child: AppErrorView(
+                            message: state.message,
+                            onRetry: () =>
+                                context.read<StudentsCubit>().loadStudents(
+                                      status: _selectedStatus,
+                                      refresh: true,
+                                    ),
+                          ),
+                        );
+                      }
+                      if (state is StudentsLoaded) {
+                        if (state.students.isEmpty) {
+                          final emptyWidget = _searchController.text
+                                  .trim()
+                                  .isNotEmpty
+                              ? AppEmptyView(
+                                  icon: Icons.search_off_rounded,
+                                  message: context.l10n.noStudentsMatchingSearch(
+                                    _searchController.text.trim(),
+                                  ),
+                                  actionText: context.l10n.clearSearch,
+                                  onAction: () {
+                                    _searchController.clear();
+                                    _onSearch('');
+                                    setState(() {});
+                                  },
+                                )
+                              : AppEmptyView(
+                                  icon: Icons.people_outline_rounded,
+                                  message: _selectedStatus != null
+                                      ? context.l10n.noStudentsWithStatus
+                                      : context.l10n.noStudentsRegistered,
+                                );
+                          return KeyedSubtree(
+                            key: ValueKey(
+                                'students_empty_${_searchController.text.trim()}'),
+                            child: emptyWidget,
+                          );
+                        }
+                        return KeyedSubtree(
+                          key: const ValueKey('students_loaded_list'),
+                          child: ListView.separated(
                       controller: _scrollController,
-                      
                       padding: const EdgeInsets.all(AppSpacing.s16),
                       itemCount:
                           state.students.length + (state.isLoadingMore ? 1 : 0),
@@ -302,7 +237,7 @@ class _StudentsListPageState extends State<StudentsListPage> {
                           );
                         }
                         final student = state.students[index];
-                        return _StudentCard(
+                        return StudentCard(
                           student: student,
                           onTap: () => context.go(
                             '${AppRoutes.student360}?id=${student.id}',
@@ -388,18 +323,24 @@ class _StudentsListPageState extends State<StudentsListPage> {
                               : null,
                         );
                       },
-                    );
+                    ),
+                  );
+                }
+                // Resilient auto-recovery: If cubit is in an unexpected state, reload students
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted) {
+                    context.read<StudentsCubit>().loadStudents(
+                          status: _selectedStatus,
+                        );
                   }
-                  // Resilient auto-recovery: If cubit is in an unexpected state, reload students
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (mounted) {
-                      context.read<StudentsCubit>().loadStudents(
-                        status: _selectedStatus,
-                      );
-                    }
-                  });
-                  return _buildSkeletonLoading();
-                },
+                });
+                return KeyedSubtree(
+                  key: const ValueKey('students_fallback'),
+                  child: _buildSkeletonLoading(),
+                );
+              }(),
+            );
+          },
               ),
             ),
           ],
@@ -475,283 +416,5 @@ class _StudentsListPageState extends State<StudentsListPage> {
         action: action,
       );
     }
-  }
-}
-
-// ── Student card widget ───────────────────────────────────────────────────
-
-class _StudentCard extends StatelessWidget {
-  final StudentEntity student;
-  final VoidCallback onTap;
-  final VoidCallback? onAssignGroups;
-  final VoidCallback? onApprove;
-  final VoidCallback? onReject;
-  final VoidCallback? onSuspend;
-  final VoidCallback? onActivate;
-  final VoidCallback? onDelete;
-  final VoidCallback? onWhatsApp;
-
-  const _StudentCard({
-    required this.student,
-    required this.onTap,
-    this.onAssignGroups,
-    this.onApprove,
-    this.onReject,
-    this.onSuspend,
-    this.onActivate,
-    this.onDelete,
-    this.onWhatsApp,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final badgeVariant = switch (student.status) {
-      'active' => AppBadgeVariant.active,
-      'pending' => AppBadgeVariant.pending,
-      'suspended' => AppBadgeVariant.suspended,
-      _ => AppBadgeVariant.neutral,
-    };
-
-    final statusLabel = switch (student.status) {
-      'active' => context.l10n.active,
-      'pending' => context.l10n.pendingApproval,
-      'rejected' => context.l10n.rejected,
-      'suspended' => context.l10n.suspended,
-      _ => student.status,
-    };
-
-    return AppCard(
-      onTap: onTap,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              // Avatar
-              CircleAvatar(
-                radius: 22,
-                backgroundColor: AppColors.primaryLight.withValues(alpha: 0.15),
-                backgroundImage: student.avatarUrl != null
-                    ? NetworkImage(student.avatarUrl!)
-                    : null,
-                child: student.avatarUrl == null
-                    ? Text(
-                        student.initials,
-                        style: const TextStyle(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                      )
-                    : null,
-              ),
-              const SizedBox(width: AppSpacing.s12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      student.fullName,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 15,
-                        color: AppColors.textPrimary,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 2),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.email_outlined,
-                          size: 13,
-                          color: AppColors.textSecondary,
-                        ),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            student.email,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: AppColors.textSecondary,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                    if (student.phone != null && student.phone!.isNotEmpty) ...[
-                      const SizedBox(height: 2),
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.phone_outlined,
-                            size: 13,
-                            color: AppColors.textSecondary,
-                          ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              student.phone!,
-                              style: const TextStyle(
-                                fontSize: 11,
-                                color: AppColors.textSecondary,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                    if (student.parentPhone != null &&
-                        student.parentPhone!.isNotEmpty) ...[
-                      const SizedBox(height: 2),
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.family_restroom_rounded,
-                            size: 13,
-                            color: AppColors.primary,
-                          ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              '${context.l10n.parentPhoneLabel}: ${student.parentPhone!}',
-                              style: const TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w500,
-                                color: AppColors.textSecondary,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              AppBadge(label: statusLabel, variant: badgeVariant),
-            ],
-          ),
-
-          // Action buttons — only shown when relevant
-          if (onApprove != null ||
-              onReject != null ||
-              onSuspend != null ||
-              onActivate != null ||
-              onAssignGroups != null ||
-              onWhatsApp != null ||
-              onDelete != null) ...[
-            const SizedBox(height: AppSpacing.s12),
-            const Divider(height: 1),
-            const SizedBox(height: AppSpacing.s8),
-            Wrap(
-              spacing: AppSpacing.s8,
-              runSpacing: AppSpacing.s8,
-              alignment: WrapAlignment.spaceBetween,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                Wrap(
-                  spacing: AppSpacing.s8,
-                  runSpacing: AppSpacing.s8,
-                  children: [
-                    if (onAssignGroups != null)
-                      _ActionBtn(
-                        label: context.l10n.assignGroupsAction,
-                        icon: Icons.group_add_rounded,
-                        color: AppColors.primary,
-                        onPressed: onAssignGroups!,
-                      ),
-                    if (onWhatsApp != null)
-                      _ActionBtn(
-                        label: context.l10n.whatsappQuickActionTooltip,
-                        icon: Icons.mark_chat_read_rounded,
-                        color: const Color(0xFF25D366),
-                        onPressed: onWhatsApp!,
-                      ),
-                  ],
-                ),
-                Wrap(
-                  spacing: AppSpacing.s8,
-                  runSpacing: AppSpacing.s8,
-                  children: [
-                    if (onReject != null)
-                      _ActionBtn(
-                        label: context.l10n.rejectStudentAction,
-                        icon: Icons.close_rounded,
-                        color: AppColors.error,
-                        onPressed: onReject!,
-                      ),
-                    if (onApprove != null)
-                      _ActionBtn(
-                        label: context.l10n.approveStudentAction,
-                        icon: Icons.check_rounded,
-                        color: AppColors.success,
-                        onPressed: onApprove!,
-                      ),
-                    if (onSuspend != null)
-                      _ActionBtn(
-                        label: context.l10n.suspendStudentAction,
-                        icon: Icons.pause_circle_outline_rounded,
-                        color: AppColors.warning,
-                        onPressed: onSuspend!,
-                      ),
-                    if (onActivate != null)
-                      _ActionBtn(
-                        label: context.l10n.activateStudentAction,
-                        icon: Icons.play_circle_outline_rounded,
-                        color: AppColors.success,
-                        onPressed: onActivate!,
-                      ),
-                    if (onDelete != null)
-                      _ActionBtn(
-                        label: context.l10n.deleteStudentAction,
-                        icon: Icons.delete_outline_rounded,
-                        color: AppColors.error,
-                        onPressed: onDelete!,
-                      ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _ActionBtn extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final Color color;
-  final VoidCallback onPressed;
-
-  const _ActionBtn({
-    required this.label,
-    required this.icon,
-    required this.color,
-    required this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return OutlinedButton.icon(
-      style: OutlinedButton.styleFrom(
-        foregroundColor: color,
-        side: BorderSide(color: color.withValues(alpha: 0.5)),
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.s12,
-          vertical: AppSpacing.s6,
-        ),
-        minimumSize: Size.zero,
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      ),
-      onPressed: onPressed,
-      icon: Icon(icon, size: 14),
-      label: Text(label, style: const TextStyle(fontSize: 12)),
-    );
   }
 }

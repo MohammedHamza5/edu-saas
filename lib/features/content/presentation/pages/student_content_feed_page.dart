@@ -11,7 +11,6 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/app_feedback.dart';
 import '../../../../core/utils/cache_manager.dart';
 import '../../../../core/utils/group_slug_resolver.dart';
-import '../../../../core/widgets/app_empty_view.dart';
 import '../../../../core/widgets/app_error_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
 import '../../../../core/widgets/responsive_container.dart';
@@ -21,12 +20,15 @@ import '../../domain/entities/content_entity.dart';
 import '../../domain/entities/lesson_assignment_entity.dart';
 import '../cubit/course_progress_cubit.dart';
 import '../cubit/course_progress_state.dart';
+import '../utils/student_content_filter_helper.dart';
 import '../utils/student_content_navigation_helper.dart';
 import '../utils/student_content_quiz_launcher.dart';
+import '../widgets/student_content_empty_state.dart';
 import '../widgets/student_content_slivers_view.dart';
 import '../widgets/student_content_toolbar.dart';
 import '../widgets/student_group_switcher_bar.dart';
 import '../widgets/student_mission_command_deck.dart';
+import '../widgets/student_quiz_loading_overlay.dart';
 
 class StudentContentFeedPage extends StatefulWidget {
   final String groupId;
@@ -272,65 +274,11 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
               }
 
               if (state is CourseProgressLoaded) {
-                final videoLectures = state.lessons
-                    .where((i) => i.type == ContentType.video)
-                    .toList();
-                final allPublished = videoLectures.isNotEmpty
-                    ? videoLectures
-                    : state.lessons;
-                final completedCount = allPublished
-                    .where((i) => i.isEffectivelyCompleted)
-                    .length;
-                final totalPublishedCount = allPublished.length;
-                final overallProgressPct = totalPublishedCount > 0
-                    ? ((completedCount / totalPublishedCount) * 100).toInt()
-                    : 0;
-
-                LessonAssignmentEntity? nextLesson;
-                int? nextLessonIndex;
-                for (int i = 0; i < allPublished.length; i++) {
-                  final it = allPublished[i];
-                  if (!it.isEffectivelyCompleted && !it.isLocked) {
-                    nextLesson = it;
-                    nextLessonIndex = i + 1;
-                    break;
-                  }
-                }
-                if (nextLesson == null) {
-                  for (int i = 0; i < allPublished.length; i++) {
-                    final it = allPublished[i];
-                    if (!it.isEffectivelyCompleted) {
-                      nextLesson = it;
-                      nextLessonIndex = i + 1;
-                      break;
-                    }
-                  }
-                }
-
-                var items = _selectedTypeFilter == null
-                    ? allPublished
-                    : allPublished
-                        .where((i) => i.type == _selectedTypeFilter)
-                        .toList();
-
-                if (_searchQuery.isNotEmpty) {
-                  items = items
-                      .where(
-                        (i) =>
-                            i.title.toLowerCase().contains(
-                                  _searchQuery.toLowerCase(),
-                                ) ||
-                            (i.description?.toLowerCase().contains(
-                                  _searchQuery.toLowerCase(),
-                                ) ??
-                                false) ||
-                            (i.pdfFileName?.toLowerCase().contains(
-                                  _searchQuery.toLowerCase(),
-                                ) ??
-                                false),
-                      )
-                      .toList();
-                }
+                final summary = StudentContentFilterHelper.calculate(
+                  lessons: state.lessons,
+                  selectedTypeFilter: _selectedTypeFilter,
+                  searchQuery: _searchQuery,
+                );
 
                 return ResponsiveContainer(
                   padding: const EdgeInsets.symmetric(
@@ -369,20 +317,20 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                               },
                             ),
                           ),
-                        if (allPublished.isNotEmpty)
+                        if (summary.allPublished.isNotEmpty)
                           SliverToBoxAdapter(
                             child: StudentMissionCommandDeck(
-                              nextLesson: nextLesson,
-                              nextLessonIndex: nextLessonIndex,
-                              completedCount: completedCount,
-                              totalCount: totalPublishedCount,
-                              overallPercentage: overallProgressPct,
+                              nextLesson: summary.nextLesson,
+                              nextLessonIndex: summary.nextLessonIndex,
+                              completedCount: summary.completedCount,
+                              totalCount: summary.totalCount,
+                              overallPercentage: summary.overallPercentage,
                               groupName: _activeGroupName ?? '',
-                              onResume: nextLesson != null
+                              onResume: summary.nextLesson != null
                                   ? () => _handleContentTap(
-                                        nextLesson!,
-                                        index: nextLessonIndex,
-                                        totalCount: totalPublishedCount,
+                                        summary.nextLesson!,
+                                        index: summary.nextLessonIndex,
+                                        totalCount: summary.totalCount,
                                       )
                                   : null,
                             ),
@@ -400,57 +348,31 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
                               _searchController.clear();
                               setState(() => _searchQuery = '');
                             },
-                            allPublished: allPublished,
+                            allPublished: summary.allPublished,
                             selectedTypeFilter: _selectedTypeFilter,
                             onSelectTypeFilter: (filter) =>
                                 setState(() => _selectedTypeFilter = filter),
                           ),
                         ),
-                        if (allPublished.isEmpty && state.chapters.isEmpty)
+                        if (summary.allPublished.isEmpty &&
+                            state.chapters.isEmpty)
                           SliverToBoxAdapter(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 48),
-                              child: Center(
-                                child: AppEmptyView(
-                                  message: context.l10n.courseBeingPreparedTitle,
-                                  subtitle:
-                                      context.l10n.courseBeingPreparedSubtitle,
-                                  icon: Icons.school_outlined,
-                                ),
-                              ),
+                            child: StudentContentEmptyState(
+                              isSearchEmpty: false,
+                              searchQuery: _searchQuery,
                             ),
                           )
-                        else if (items.isEmpty && state.chapters.isEmpty)
+                        else if (summary.filteredItems.isEmpty &&
+                            state.chapters.isEmpty)
                           SliverToBoxAdapter(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 48),
-                              child: Center(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(
-                                      Icons.search_off_rounded,
-                                      size: 48,
-                                      color: AppColors.textMuted,
-                                    ),
-                                    const SizedBox(height: AppSpacing.s12),
-                                    Text(
-                                      context.l10n.noMatchingContentFound(
-                                        _searchQuery,
-                                      ),
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.textSecondary,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
+                            child: StudentContentEmptyState(
+                              isSearchEmpty: true,
+                              searchQuery: _searchQuery,
                             ),
                           )
                         else
                           StudentContentSliversView(
-                            items: items,
+                            items: summary.filteredItems,
                             chapters: state.chapters,
                             isRoadmapMode: _isRoadmapMode,
                             selectedTypeFilter: _selectedTypeFilter,
@@ -487,43 +409,7 @@ class _StudentContentFeedPageState extends State<StudentContentFeedPage> {
               return const AppLoadingView.cardsGrid(count: 4, columns: 2);
             },
           ),
-          if (_isOpeningQuiz)
-            Positioned.fill(
-              child: Container(
-                color: Colors.black.withValues(alpha: 0.35),
-                child: Center(
-                  child: Card(
-                    elevation: 6,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                        AppSpacing.radiusMedium,
-                      ),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.s24,
-                        vertical: AppSpacing.s16,
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2.5),
-                          ),
-                          const SizedBox(width: AppSpacing.s12),
-                          Text(
-                            context.l10n.loading,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
+          if (_isOpeningQuiz) const StudentQuizLoadingOverlay(),
         ],
       ),
     );

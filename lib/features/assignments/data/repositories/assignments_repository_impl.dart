@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/errors/result.dart';
+import '../../../../core/network/retry_helper.dart';
 import '../../domain/entities/assignment_entity.dart';
 import '../../domain/repositories/assignments_repository.dart';
 import '../datasources/assignments_remote_datasource.dart';
@@ -18,10 +19,12 @@ class AssignmentsRepositoryImpl implements AssignmentsRepository {
     int pageSize = 15,
   }) async {
     try {
-      final assignments = await _remoteDataSource.getGroupAssignments(
-        groupId,
-        page: page,
-        pageSize: pageSize,
+      final assignments = await retryTransient(
+        () => _remoteDataSource.getGroupAssignments(
+          groupId,
+          page: page,
+          pageSize: pageSize,
+        ),
       );
       return Success(assignments);
     } on PostgrestException catch (e) {
@@ -39,9 +42,11 @@ class AssignmentsRepositoryImpl implements AssignmentsRepository {
     int pageSize = 15,
   }) async {
     try {
-      final assignments = await _remoteDataSource.getStudentAssignments(
-        page: page,
-        pageSize: pageSize,
+      final assignments = await retryTransient(
+        () => _remoteDataSource.getStudentAssignments(
+          page: page,
+          pageSize: pageSize,
+        ),
       );
       return Success(assignments);
     } on PostgrestException catch (e) {
@@ -58,8 +63,8 @@ class AssignmentsRepositoryImpl implements AssignmentsRepository {
     String assignmentId,
   ) async {
     try {
-      final assignment = await _remoteDataSource.getAssignmentDetails(
-        assignmentId,
+      final assignment = await retryTransient(
+        () => _remoteDataSource.getAssignmentDetails(assignmentId),
       );
       return Success(assignment);
     } on PostgrestException catch (e) {

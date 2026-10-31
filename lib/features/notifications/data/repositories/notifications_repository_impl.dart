@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/errors/result.dart';
+import '../../../../core/network/retry_helper.dart';
 import '../../domain/entities/notification_entity.dart';
 import '../../domain/repositories/notifications_repository.dart';
 import '../datasources/notifications_remote_datasource.dart';
@@ -18,9 +19,11 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
     int offset = 0,
   }) async {
     try {
-      final items = await _remoteDataSource.getMyNotifications(
-        limit: limit,
-        offset: offset,
+      final items = await retryTransient(
+        () => _remoteDataSource.getMyNotifications(
+          limit: limit,
+          offset: offset,
+        ),
       );
       return Success(items);
     } on PostgrestException catch (e) {
@@ -33,7 +36,9 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
   @override
   Future<Result<int>> getUnreadCount() async {
     try {
-      final count = await _remoteDataSource.getUnreadCount();
+      final count = await retryTransient(
+        () => _remoteDataSource.getUnreadCount(),
+      );
       return Success(count);
     } on PostgrestException catch (e) {
       return FailureResult(ServerFailure(e.message, code: e.code));

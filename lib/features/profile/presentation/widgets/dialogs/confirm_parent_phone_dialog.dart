@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../../core/extensions/localized_context_extension.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_spacing.dart';
+import '../../../../../core/extensions/localized_context_extension.dart';
+import '../../../../../core/theme/app_colors.dart';
+import '../../../../../core/theme/app_spacing.dart';
 
 class ConfirmParentPhoneDialog extends StatelessWidget {
   final String newParentPhone;
@@ -116,7 +116,7 @@ class ConfirmParentPhoneDialog extends StatelessWidget {
               borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
             ),
             padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.s18,
+              horizontal: AppSpacing.s16,
               vertical: AppSpacing.s10,
             ),
           ),

@@ -9,19 +9,16 @@ import '../../../../core/utils/exam_security_util.dart';
 import '../../../../core/widgets/app_loading_view.dart';
 import '../../../content/domain/entities/lesson_assignment_entity.dart';
 import '../../domain/entities/exam_entity.dart';
-import '../../domain/entities/saved_question_entity.dart';
 import '../cubit/exams_cubit.dart';
 import '../cubit/exams_state.dart';
 import '../utils/exam_asset_preloader.dart';
-import '../widgets/bluebook/bluebook_review_grid_modal.dart';
+import '../utils/exam_taking_vault_helper.dart';
 import '../widgets/desmos_embed_view.dart';
-import '../widgets/dock/exam_adaptive_tools_pane.dart';
 import '../widgets/dock/exam_dock_state.dart';
 import '../widgets/exam_taking_app_bar.dart';
 import '../widgets/exam_taking_overlays.dart';
-import '../widgets/exam_taking_pdf_booklet.dart';
-import '../widgets/exam_taking_questions_view.dart';
 import '../widgets/exam_taking_submission_dialogs.dart';
+import '../widgets/exam_taking_workspace.dart';
 import '../widgets/scratchpad/exam_scratchpad_overlay.dart';
 import 'exam_result_page.dart';
 
@@ -192,58 +189,19 @@ class _ExamTakingPageState extends State<ExamTakingPage>
   Future<void> _toggleCurrentQuestionVault(
     BuildContext context,
     ExamTakingState state,
-  ) async {
-    final q = state.currentQuestion;
-    final isSaved = _savedQuestionIds.contains(q.id);
-
-    if (isSaved) {
-      setState(() => _savedQuestionIds.remove(q.id));
-      await InjectionContainer.savedQuestionsRepository.removeSavedQuestion(q.id);
-      if (context.mounted) {
-        AppFeedback.showInfo(context, context.l10n.removedFromVaultSuccess);
-      }
-    } else {
-      setState(() => _savedQuestionIds.add(q.id));
-      final saved = SavedQuestionEntity(
-        id: 'sq_${q.id}',
-        questionId: q.id,
-        examId: state.exam.id,
-        examTitle: state.exam.title,
-        questionText: q.questionText,
-        questionImageUrl: q.imageUrl,
-        options: q.options,
-        savedAt: DateTime.now(),
-        questionIndex: state.currentQuestionIndex + 1,
-        isPdfQuestion: state.exam.hasAttachedPdf,
-        pdfUrl: state.exam.pdfStoragePath,
-      );
-      await InjectionContainer.savedQuestionsRepository.saveQuestion(saved);
-      if (context.mounted) {
-        AppFeedback.showSuccess(context, context.l10n.savedToVaultSuccess);
-      }
-    }
+  ) {
+    return ExamTakingVaultHelper.toggleQuestionVault(
+      context: context,
+      state: state,
+      savedQuestionIds: _savedQuestionIds,
+      onStateChanged: () => setState(() {}),
+    );
   }
 
   void _openBluebookReviewGrid(BuildContext context, ExamTakingState state) {
-    if (state.isSubmitting) return;
-    final answeredIndices = <int>{};
-    final flaggedIndices = <int>{};
-    for (int i = 0; i < state.questions.length; i++) {
-      final qId = state.questions[i].id;
-      if (state.answers.containsKey(qId)) {
-        answeredIndices.add(i);
-      }
-      if (state.flaggedGuesses.contains(qId)) {
-        flaggedIndices.add(i);
-      }
-    }
-
-    BluebookReviewGridModal.show(
+    ExamTakingSubmissionDialogs.openBluebookReviewGrid(
       context,
-      totalQuestions: state.questions.length,
-      currentQuestionIndex: state.currentQuestionIndex,
-      answeredIndices: answeredIndices,
-      flaggedIndices: flaggedIndices,
+      state: state,
       onQuestionSelected: (idx) {
         context.read<ExamsCubit>().goToQuestion(idx);
       },
@@ -251,42 +209,38 @@ class _ExamTakingPageState extends State<ExamTakingPage>
     );
   }
 
-  Widget _buildQuestionsViewWidget(
-    BuildContext context,
-    ExamTakingState state,
-    int qIndex,
-    ExamQuestionEntity question, {
-    required bool isDesktop,
-  }) {
-    return ExamTakingQuestionsView(
-      state: state,
-      questionIndex: qIndex,
-      question: question,
-      isDesktop: isDesktop,
-      showDesktopPdfPane: _showDesktopPdfPane,
-      onOpenPdfBooklet: () {
-        setState(() {
-          if (isDesktop) {
-            _showDesktopPdfPane = true;
-          } else {
-            _showMobilePdfOverlay = true;
-          }
-        });
-      },
-      onToggleFlagGuess: () =>
-          context.read<ExamsCubit>().toggleFlagGuess(question.id),
-      onToggleVault: () => _toggleCurrentQuestionVault(context, state),
-      onSelectOption: (optionId) {
-        context.read<ExamsCubit>().selectAnswer(question.id, optionId);
-      },
-      onToggleEliminateOption: (optionId) {
-        context.read<ExamsCubit>().toggleEliminateOption(question.id, optionId);
-      },
-      onPrevious: () => context.read<ExamsCubit>().goToQuestion(qIndex - 1),
-      onNext: () => context.read<ExamsCubit>().goToQuestion(qIndex + 1),
-      onReviewGrid: () => _openBluebookReviewGrid(context, state),
-      onSubmit: () => _confirmSubmit(context, state),
-    );
+  void _togglePdf(bool isDesktop) {
+    setState(() {
+      if (isDesktop) {
+        _showDesktopPdfPane = !_showDesktopPdfPane;
+      } else {
+        _showMobilePdfOverlay = !_showMobilePdfOverlay;
+      }
+    });
+  }
+
+  void _toggleFormula(bool isDesktop) {
+    setState(() {
+      _hasOpenedToolsEver = true;
+      if (_dockMode.isVisible && _dockTab.isFormulas) {
+        _dockMode = ExamDockMode.hidden;
+      } else {
+        _dockMode = isDesktop ? ExamDockMode.docked : ExamDockMode.floating;
+        _dockTab = ExamDockTab.formulas;
+      }
+    });
+  }
+
+  void _toggleCalculator(bool isDesktop) {
+    setState(() {
+      _hasOpenedToolsEver = true;
+      if (_dockMode.isVisible && _dockTab.isCalculator) {
+        _dockMode = ExamDockMode.hidden;
+      } else {
+        _dockMode = isDesktop ? ExamDockMode.docked : ExamDockMode.floating;
+        _dockTab = ExamDockTab.calculator;
+      }
+    });
   }
 
   @override
@@ -310,38 +264,13 @@ class _ExamTakingPageState extends State<ExamTakingPage>
             currentIndex: state.currentQuestionIndex,
           );
           if (state.submitSuccess && state.submitResult != null) {
-            Navigator.of(context).pushReplacement<void, void>(
-              MaterialPageRoute<void>(
-                builder: (_) => BlocProvider.value(
-                  value: context.read<ExamsCubit>(),
-                  child: ExamResultPage(
-                    exam: state.exam,
-                    attempt: state.submitResult!.copyWith(
-                      questions: state.questions,
-                      answers: state.submitResult!.answers.isNotEmpty
-                          ? state.submitResult!.answers
-                          : state.answers.entries
-                              .map(
-                                (e) => ExamAnswerEntity(
-                                  id: '',
-                                  attemptId: state.submitResult!.id,
-                                  questionId: e.key,
-                                  selectedOptionId: e.value,
-                                  answeredAt: DateTime.now(),
-                                ),
-                              )
-                              .toList(),
-                    ),
-                    isLectureExam:
-                        widget.isLectureExam ||
-                        state.exam.isLectureExam ||
-                        state.exam.isLinkedToLesson,
-                    nextLesson: widget.nextLesson,
-                    nextLessonIndex: widget.nextLessonIndex,
-                    totalLessonsCount: widget.totalLessonsCount,
-                  ),
-                ),
-              ),
+            ExamTakingSubmissionDialogs.navigateToResult(
+              context,
+              state: state,
+              isLectureExam: widget.isLectureExam,
+              nextLesson: widget.nextLesson,
+              nextLessonIndex: widget.nextLessonIndex,
+              totalLessonsCount: widget.totalLessonsCount,
             );
           } else if (state.errorMessage != null) {
             AppFeedback.showError(context, state.errorMessage!);
@@ -428,49 +357,17 @@ class _ExamTakingPageState extends State<ExamTakingPage>
               title: state.exam.title,
               hasAttachedPdf: state.exam.hasAttachedPdf,
               isPdfActive: _showMobilePdfOverlay || _showDesktopPdfPane,
-              onTogglePdf: () {
-                final isDesktop = MediaQuery.of(context).size.width >= 900;
-                setState(() {
-                  if (isDesktop) {
-                    _showDesktopPdfPane = !_showDesktopPdfPane;
-                  } else {
-                    _showMobilePdfOverlay = !_showMobilePdfOverlay;
-                  }
-                });
-              },
+              onTogglePdf: () =>
+                  _togglePdf(MediaQuery.of(context).size.width >= 900),
               isScratchpadOpen: state.isScratchpadOpen,
               onToggleScratchpad: () =>
                   context.read<ExamsCubit>().toggleScratchpad(),
               isFormulaActive: _dockMode.isVisible && _dockTab.isFormulas,
-              onToggleFormula: () {
-                final isDesktop = MediaQuery.of(context).size.width >= 900;
-                setState(() {
-                  _hasOpenedToolsEver = true;
-                  if (_dockMode.isVisible && _dockTab.isFormulas) {
-                    _dockMode = ExamDockMode.hidden;
-                  } else {
-                    _dockMode = isDesktop
-                        ? ExamDockMode.docked
-                        : ExamDockMode.floating;
-                    _dockTab = ExamDockTab.formulas;
-                  }
-                });
-              },
+              onToggleFormula: () =>
+                  _toggleFormula(MediaQuery.of(context).size.width >= 900),
               isCalculatorActive: _dockMode.isVisible && _dockTab.isCalculator,
-              onToggleCalculator: () {
-                final isDesktop = MediaQuery.of(context).size.width >= 900;
-                setState(() {
-                  _hasOpenedToolsEver = true;
-                  if (_dockMode.isVisible && _dockTab.isCalculator) {
-                    _dockMode = ExamDockMode.hidden;
-                  } else {
-                    _dockMode = isDesktop
-                        ? ExamDockMode.docked
-                        : ExamDockMode.floating;
-                    _dockTab = ExamDockTab.calculator;
-                  }
-                });
-              },
+              onToggleCalculator: () =>
+                  _toggleCalculator(MediaQuery.of(context).size.width >= 900),
               isQuestionSaved: _savedQuestionIds.contains(state.currentQuestion.id),
               isSubmitting: state.isSubmitting,
               onToggleVault: () => _toggleCurrentQuestionVault(context, state),
@@ -495,200 +392,62 @@ class _ExamTakingPageState extends State<ExamTakingPage>
             body: Stack(
               fit: StackFit.expand,
               children: [
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    final isDesktop = constraints.maxWidth >= 900;
-                    final defaultDockWidth =
-                        (constraints.maxWidth * 0.38).clamp(380.0, 560.0);
-                    const minDockWidth = 320.0;
-                    final maxDockWidth = constraints.maxWidth * 0.65;
-                    final dockWidth = (_customDockWidth ?? defaultDockWidth)
-                        .clamp(minDockWidth, maxDockWidth);
-                    final isDocked = isDesktop && _dockMode.isDocked;
-                    final rightPadding = isDocked ? dockWidth : 0.0;
-
-                    Widget mainContent;
-                    if (isDesktop &&
-                        state.exam.hasAttachedPdf &&
-                        _showDesktopPdfPane) {
-                      mainContent = Row(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Expanded(
-                            flex: 52,
-                            child: Column(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: AppSpacing.s16,
-                                    vertical: AppSpacing.s8,
-                                  ),
-                                  decoration: const BoxDecoration(
-                                    color: AppColors.surface,
-                                    border: Border(
-                                      bottom:
-                                          BorderSide(color: AppColors.border),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.picture_as_pdf_rounded,
-                                        size: 18,
-                                        color: AppColors.primary,
-                                      ),
-                                      const SizedBox(width: AppSpacing.s8),
-                                      Expanded(
-                                        child: Text(
-                                          state.exam.pdfFileName ??
-                                              state.exam.title,
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 13,
-                                          ),
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                      IconButton(
-                                        icon: const Icon(
-                                          Icons.close_fullscreen_rounded,
-                                          size: 18,
-                                        ),
-                                        tooltip: context.l10n.hideExamBooklet,
-                                        onPressed: () {
-                                          setState(() {
-                                            _showDesktopPdfPane = false;
-                                          });
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Expanded(
-                                  child: ExamTakingPdfBooklet(
-                                    exam: state.exam,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Container(width: 1, color: AppColors.border),
-                          Expanded(
-                            flex: 48,
-                            child: _buildQuestionsViewWidget(
-                              context,
-                              state,
-                              qIndex,
-                              question,
-                              isDesktop: true,
-                            ),
-                          ),
-                        ],
-                      );
-                    } else {
-                      mainContent = Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          _buildQuestionsViewWidget(
-                            context,
-                            state,
-                            qIndex,
-                            question,
-                            isDesktop: isDesktop,
-                          ),
-                          if (!isDesktop &&
-                              state.exam.hasAttachedPdf &&
-                              _showMobilePdfOverlay)
-                            ExamTakingPdfBooklet(
-                              exam: state.exam,
-                              isMobileOverlay: true,
-                              currentQuestionIndex: qIndex,
-                              totalQuestions: state.totalQuestions,
-                              onCloseMobileOverlay: () {
-                                setState(() {
-                                  _showMobilePdfOverlay = false;
-                                });
-                              },
-                            ),
-                        ],
-                      );
-                    }
-
-                    return Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        Positioned(
-                          left: 0,
-                          top: 0,
-                          bottom: 0,
-                          right: rightPadding,
-                          child: mainContent,
-                        ),
-                        if (_hasOpenedToolsEver)
-                          ExamAdaptiveToolsPane(
-                            dockMode: _dockMode,
-                            activeTab: _dockTab,
-                            desmosMode: _desmosMode,
-                            onDockModeChanged: (mode) =>
-                                setState(() => _dockMode = mode),
-                            onTabChanged: (tab) =>
-                                setState(() => _dockTab = tab),
-                            onDesmosModeChanged: (mode) =>
-                                setState(() => _desmosMode = mode),
-                            dockWidth: dockWidth,
-                            isDesktop: isDesktop,
-                            parentSize: Size(
-                              constraints.maxWidth,
-                              constraints.maxHeight,
-                            ),
-                          ),
-                        if (isDocked)
-                          Positioned(
-                            right: dockWidth - 6,
-                            top: 0,
-                            bottom: 0,
-                            width: 12,
-                            child: MouseRegion(
-                              cursor: SystemMouseCursors.resizeColumn,
-                              child: GestureDetector(
-                                behavior: HitTestBehavior.translucent,
-                                onHorizontalDragStart: (_) => setState(
-                                    () => _isDraggingDockSplitter = true),
-                                onHorizontalDragEnd: (_) => setState(
-                                    () => _isDraggingDockSplitter = false),
-                                onHorizontalDragCancel: () => setState(
-                                    () => _isDraggingDockSplitter = false),
-                                onHorizontalDragUpdate: (details) {
-                                  setState(() {
-                                    final cur =
-                                        _customDockWidth ?? defaultDockWidth;
-                                    _customDockWidth = (cur - details.delta.dx)
-                                        .clamp(minDockWidth, maxDockWidth);
-                                  });
-                                },
-                                child: Container(
-                                  color: Colors.transparent,
-                                  child: Center(
-                                    child: AnimatedContainer(
-                                      duration:
-                                          const Duration(milliseconds: 100),
-                                      width: _isDraggingDockSplitter ? 4 : 2,
-                                      decoration: BoxDecoration(
-                                        color: _isDraggingDockSplitter
-                                            ? AppColors.primary
-                                            : AppColors.border
-                                                .withValues(alpha: 0.8),
-                                        borderRadius: BorderRadius.circular(2),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                      ],
-                    );
+                ExamTakingWorkspace(
+                  state: state,
+                  dockMode: _dockMode,
+                  dockTab: _dockTab,
+                  desmosMode: _desmosMode,
+                  hasOpenedToolsEver: _hasOpenedToolsEver,
+                  showDesktopPdfPane: _showDesktopPdfPane,
+                  showMobilePdfOverlay: _showMobilePdfOverlay,
+                  customDockWidth: _customDockWidth,
+                  isDraggingDockSplitter: _isDraggingDockSplitter,
+                  onDockModeChanged: (mode) =>
+                      setState(() => _dockMode = mode),
+                  onDockTabChanged: (tab) =>
+                      setState(() => _dockTab = tab),
+                  onDesmosModeChanged: (mode) =>
+                      setState(() => _desmosMode = mode),
+                  onToggleDesktopPdfPane: (show) =>
+                      setState(() => _showDesktopPdfPane = show),
+                  onCloseMobilePdfOverlay: () =>
+                      setState(() => _showMobilePdfOverlay = false),
+                  onOpenPdfBooklet: () {
+                    final isDesktop = MediaQuery.of(context).size.width >= 900;
+                    setState(() {
+                      if (isDesktop) {
+                        _showDesktopPdfPane = true;
+                      } else {
+                        _showMobilePdfOverlay = true;
+                      }
+                    });
                   },
+                  onCustomDockWidthChanged: (w) =>
+                      setState(() => _customDockWidth = w),
+                  onDraggingDockSplitterChanged: (dragging) =>
+                      setState(() => _isDraggingDockSplitter = dragging),
+                  onToggleFlagGuess: () =>
+                      context.read<ExamsCubit>().toggleFlagGuess(question.id),
+                  onToggleVault: () =>
+                      _toggleCurrentQuestionVault(context, state),
+                  onSelectOption: (optionId) {
+                    context.read<ExamsCubit>().selectAnswer(
+                          question.id,
+                          optionId,
+                        );
+                  },
+                  onToggleEliminateOption: (optionId) {
+                    context.read<ExamsCubit>().toggleEliminateOption(
+                          question.id,
+                          optionId,
+                        );
+                  },
+                  onPrevious: () =>
+                      context.read<ExamsCubit>().goToQuestion(qIndex - 1),
+                  onNext: () =>
+                      context.read<ExamsCubit>().goToQuestion(qIndex + 1),
+                  onReviewGrid: () => _openBluebookReviewGrid(context, state),
+                  onSubmit: () => _confirmSubmit(context, state),
                 ),
                 // Digital Scratchpad Overlay (Transparent or Grid paper canvas)
                 const ExamScratchpadOverlay(),

@@ -1,6 +1,7 @@
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/errors/result.dart';
+import '../../../../core/network/retry_helper.dart';
 import '../../../../core/utils/cache_manager.dart';
 import '../../domain/entities/student_dashboard_stats.dart';
 import '../../domain/repositories/student_dashboard_repository.dart';
@@ -33,7 +34,9 @@ class StudentDashboardRepositoryImpl implements StudentDashboardRepository {
         return Result.success(_cachedStats!);
       }
 
-      final stats = await remoteDataSource.getStudentDashboardStats(studentId);
+      final stats = await retryTransient(
+        () => remoteDataSource.getStudentDashboardStats(studentId),
+      );
       _cachedStats = stats;
       _cachedStudentId = studentId;
       _cachedAt = now;

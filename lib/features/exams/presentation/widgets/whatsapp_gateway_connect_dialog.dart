@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
@@ -34,11 +35,28 @@ class _WhatsAppGatewayConnectDialogState
   WhatsAppGatewayStatusEntity? _status;
   bool _isLoading = true;
   bool _isToggling = false;
+  bool _isRefreshing = false;
+  Timer? _pollTimer;
 
   @override
   void initState() {
     super.initState();
     _fetchStatus();
+    _startPolling();
+  }
+
+  void _startPolling() {
+    _pollTimer = Timer.periodic(const Duration(seconds: 4), (_) {
+      if (mounted && (_status == null || !_status!.isConnected)) {
+        _fetchStatusSilent();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _pollTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> _fetchStatus() async {
@@ -49,6 +67,31 @@ class _WhatsAppGatewayConnectDialogState
         _status = status;
         _isLoading = false;
       });
+    }
+  }
+
+  Future<void> _fetchStatusSilent() async {
+    final status = await widget.dataSource.getGatewayStatus();
+    if (mounted) {
+      if (_status?.isConnected != status.isConnected ||
+          _status?.status != status.status ||
+          _status?.qrCode != status.qrCode ||
+          _status?.connectedPhone != status.connectedPhone) {
+        setState(() {
+          _status = status;
+        });
+      }
+    }
+  }
+
+  Future<void> _refreshQr() async {
+    if (_isRefreshing) return;
+    setState(() => _isRefreshing = true);
+    await widget.dataSource.refreshQrCode();
+    await Future<void>.delayed(const Duration(milliseconds: 1500));
+    await _fetchStatus();
+    if (mounted) {
+      setState(() => _isRefreshing = false);
     }
   }
 
@@ -111,7 +154,7 @@ class _WhatsAppGatewayConnectDialogState
         ],
       ),
       content: SizedBox(
-        width: 440,
+        width: 480,
         child: _isLoading
             ? const Padding(
                 padding: EdgeInsets.symmetric(vertical: AppSpacing.s32),
@@ -175,10 +218,16 @@ class _WhatsAppGatewayConnectDialogState
                     ),
                   ),
 
-                  // QR Code Section (if ready)
-                  if (status != null && status.isQrReady) ...[
+                  // QR Code Section (if not connected)
+                  if (status != null &&
+                      !status.isConnected &&
+                      status.qrCode != null &&
+                      status.qrCode!.isNotEmpty) ...[
                     const SizedBox(height: AppSpacing.s16),
                     _buildQrCodeSection(status.qrCode!),
+                  ] else if (status != null && !status.isConnected) ...[
+                    const SizedBox(height: AppSpacing.s16),
+                    _buildLoadingQrSection(),
                   ],
 
                   // Queue Stats Row
@@ -274,6 +323,37 @@ class _WhatsAppGatewayConnectDialogState
     );
   }
 
+  Widget _buildLoadingQrSection() {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.s16,
+        vertical: AppSpacing.s24,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: const Column(
+        children: [
+          SizedBox(
+            width: 28,
+            height: 28,
+            child: CircularProgressIndicator(strokeWidth: 2.5),
+          ),
+          SizedBox(height: AppSpacing.s12),
+          Text(
+            'جاري الاتصال بالسيرفر وتجهيز رمز الـ QR...',
+            style: TextStyle(
+              fontSize: 12,
+              color: AppColors.textMuted,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildQrCodeSection(String rawQrData) {
     ImageProvider? imageProvider;
     try {
@@ -287,10 +367,10 @@ class _WhatsAppGatewayConnectDialogState
     }
 
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.s16),
+      padding: const EdgeInsets.all(AppSpacing.s20),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
         border: Border.all(color: AppColors.border),
       ),
       child: Column(
@@ -298,21 +378,78 @@ class _WhatsAppGatewayConnectDialogState
           Text(
             context.l10n.whatsappScanQrInstruction,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.s16),
+          // High-contrast, pure-white frame for maximum optical readability
+          Container(
+            padding: const EdgeInsets.all(AppSpacing.s12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+              border: Border.all(color: const Color(0xFFE2E8F0), width: 1.5),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.06),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: imageProvider != null
+                ? Image(
+                    image: imageProvider,
+                    width: 280,
+                    height: 280,
+                    fit: BoxFit.contain,
+                    filterQuality: FilterQuality.high,
+                  )
+                : const SizedBox(
+                    width: 280,
+                    height: 280,
+                    child: Center(
+                      child: Icon(Icons.qr_code_2_rounded,
+                          size: 180, color: AppColors.textMuted),
+                    ),
+                  ),
+          ),
+          const SizedBox(height: AppSpacing.s16),
+          Text(
+            context.l10n.whatsappQrHighResNotice,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
           ),
           const SizedBox(height: AppSpacing.s12),
-          if (imageProvider != null)
-            ClipRRect(
-              borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-              child: Image(
-                image: imageProvider,
-                width: 200,
-                height: 200,
-                fit: BoxFit.contain,
+          // Manual Refresh Button
+          OutlinedButton.icon(
+            onPressed: _isRefreshing ? null : _refreshQr,
+            icon: _isRefreshing
+                ? const SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.refresh_rounded, size: 16),
+            label: Text(
+              context.l10n.whatsappRefreshQrAction,
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+            ),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.s16,
+                vertical: AppSpacing.s8,
               ),
-            )
-          else
-            const Icon(Icons.qr_code_2_rounded, size: 160, color: AppColors.textMuted),
+              side: const BorderSide(color: Color(0xFF25D366)),
+              foregroundColor: const Color(0xFF25D366),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+              ),
+            ),
+          ),
           const SizedBox(height: AppSpacing.s8),
           Text(
             context.l10n.whatsappQrAutoRefreshNote,

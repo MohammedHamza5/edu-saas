@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import 'desmos_calculator_title_bar.dart';
 import 'desmos_embed_view.dart';
 
 /// Floating, draggable, resizable Desmos calculator simulating the CollegeBoard Digital SAT Bluebook environment.
@@ -162,266 +163,87 @@ class _FloatingDesmosCalculatorState extends State<FloatingDesmosCalculator> {
                     left: 0,
                     right: 0,
                     height: 48,
-                    child: Container(
-                      height: 48,
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      decoration: const BoxDecoration(
-                        color: AppColors.primary,
-                        border: Border(
-                          bottom: BorderSide(
-                            color: Color(0x33000000),
-                          ),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          // Draggable Handle & Title (Double tap maximizes/restores)
-                          Expanded(
-                            child: GestureDetector(
-                              behavior: HitTestBehavior.opaque,
-                              onDoubleTap: () {
-                                setState(() {
-                                  if (!_isMaximized) {
-                                    _savedNormalPosition = _currentPosition;
-                                    _isMaximized = true;
-                                  } else {
-                                    _isMaximized = false;
-                                    _currentPosition = _savedNormalPosition;
-                                  }
-                                });
-                              },
-                              onPanStart: (_) {
-                                if (_isMaximized) return;
-                                widget.onInteractionStart?.call();
-                                setState(() {
-                                  _isDragging = true;
-                                });
-                              },
-                              onPanUpdate: (details) {
-                                if (_isMaximized) return;
-                                final maxX = math.max(
-                                  0.0,
-                                  screenSize.width -
-                                      (_isMinimized ? 320.0 : effectiveWidth),
-                                );
-                                final maxY = math.max(
-                                  0.0,
-                                  screenSize.height -
-                                      (_isMinimized ? 51.0 : effectiveHeight) -
-                                      36.0,
-                                );
+                    child: DesmosCalculatorTitleBar(
+                      mode: _mode,
+                      isMinimized: _isMinimized,
+                      isMaximized: _isMaximized,
+                      isCompact: isCompact,
+                      onClose: widget.onClose,
+                      onDock: widget.onDock,
+                      onToggleMinimize: () {
+                        setState(() {
+                          _isMinimized = !_isMinimized;
+                        });
+                      },
+                      onToggleMaximize: () {
+                        setState(() {
+                          if (!_isMaximized) {
+                            _savedNormalPosition = _currentPosition;
+                            _isMaximized = true;
+                          } else {
+                            _isMaximized = false;
+                            _currentPosition = _savedNormalPosition;
+                          }
+                        });
+                      },
+                      onModeChanged: (newMode) {
+                        setState(() {
+                          _mode = newMode;
+                        });
+                      },
+                      onDoubleTap: () {
+                        setState(() {
+                          if (!_isMaximized) {
+                            _savedNormalPosition = _currentPosition;
+                            _isMaximized = true;
+                          } else {
+                            _isMaximized = false;
+                            _currentPosition = _savedNormalPosition;
+                          }
+                        });
+                      },
+                      onPanStart: (_) {
+                        if (_isMaximized) return;
+                        widget.onInteractionStart?.call();
+                        setState(() {
+                          _isDragging = true;
+                        });
+                      },
+                      onPanUpdate: (details) {
+                        if (_isMaximized) return;
+                        final maxX = math.max(
+                          0.0,
+                          screenSize.width -
+                              (_isMinimized ? 320.0 : effectiveWidth),
+                        );
+                        final maxY = math.max(
+                          0.0,
+                          screenSize.height -
+                              (_isMinimized ? 51.0 : effectiveHeight) -
+                              36.0,
+                        );
 
-                                final newDx =
-                                    (effectivePosition.dx + details.delta.dx)
-                                        .clamp(0.0, maxX);
-                                final newDy =
-                                    (effectivePosition.dy + details.delta.dy)
-                                        .clamp(0.0, maxY);
+                        final newDx =
+                            (effectivePosition.dx + details.delta.dx)
+                                .clamp(0.0, maxX);
+                        final newDy =
+                            (effectivePosition.dy + details.delta.dy)
+                                .clamp(0.0, maxY);
 
-                                setState(() {
-                                  _currentPosition = Offset(newDx, newDy);
-                                });
-                              },
-                              onPanEnd: (_) {
-                                setState(() {
-                                  _isDragging = false;
-                                });
-                              },
-                              onPanCancel: () {
-                                setState(() {
-                                  _isDragging = false;
-                                });
-                              },
-                              child: Row(
-                                children: [
-                                  Tooltip(
-                                    message: l10n.desmosDragHandleTooltip,
-                                    child: const Icon(
-                                      Icons.drag_indicator_rounded,
-                                      color: Colors.white70,
-                                      size: 19,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      _mode == DesmosCalculatorMode.graphing
-                                          ? l10n.desmosGraphingCalculator
-                                          : l10n.desmosScientificCalculator,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-
-                          // Action Buttons (Direct touch, no gesture conflicts)
-                          if (!_isMinimized) ...[
-                            if (!isCompact)
-                              Container(
-                                padding: const EdgeInsets.all(2.5),
-                                decoration: BoxDecoration(
-                                  color: Colors.black.withValues(alpha: 0.25),
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    _buildModeButton(
-                                      title: l10n.desmosModeGraphing,
-                                      isSelected:
-                                          _mode == DesmosCalculatorMode.graphing,
-                                      onTap: () {
-                                        if (_mode !=
-                                            DesmosCalculatorMode.graphing) {
-                                          setState(() {
-                                            _mode =
-                                                DesmosCalculatorMode.graphing;
-                                          });
-                                        }
-                                      },
-                                    ),
-                                    _buildModeButton(
-                                      title: l10n.desmosModeScientific,
-                                      isSelected:
-                                          _mode ==
-                                          DesmosCalculatorMode.scientific,
-                                      onTap: () {
-                                        if (_mode !=
-                                            DesmosCalculatorMode.scientific) {
-                                          setState(() {
-                                            _mode =
-                                                DesmosCalculatorMode.scientific;
-                                          });
-                                        }
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              )
-                            else
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.swap_horiz_rounded,
-                                  color: Colors.white,
-                                  size: 18,
-                                ),
-                                tooltip: _mode == DesmosCalculatorMode.graphing
-                                    ? l10n.desmosModeScientific
-                                    : l10n.desmosModeGraphing,
-                                padding: EdgeInsets.zero,
-                                constraints: const BoxConstraints(
-                                  minWidth: 28,
-                                  minHeight: 28,
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    _mode = _mode == DesmosCalculatorMode.graphing
-                                        ? DesmosCalculatorMode.scientific
-                                        : DesmosCalculatorMode.graphing;
-                                  });
-                                },
-                              ),
-                            const SizedBox(width: 4),
-                          ],
-
-                          // Re-dock to Side Pane (if onDock callback provided)
-                          if (widget.onDock != null)
-                            IconButton(
-                              icon: const Icon(
-                                Icons.vertical_split_rounded,
-                                color: Colors.white,
-                                size: 18,
-                              ),
-                              tooltip: l10n.dockCalculatorTooltip,
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(
-                                minWidth: 28,
-                                minHeight: 28,
-                              ),
-                              onPressed: widget.onDock,
-                            ),
-
-                          // Maximize / Restore Toggle
-                          if (!_isMinimized)
-                            IconButton(
-                              icon: Icon(
-                                _isMaximized
-                                    ? Icons.fullscreen_exit_rounded
-                                    : Icons.fullscreen_rounded,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                              tooltip: _isMaximized
-                                  ? l10n.desmosRestoreTooltip
-                                  : l10n.desmosMaximizeTooltip,
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(
-                                minWidth: 30,
-                                minHeight: 30,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  if (!_isMaximized) {
-                                    _savedNormalPosition = _currentPosition;
-                                    _isMaximized = true;
-                                  } else {
-                                    _isMaximized = false;
-                                    _currentPosition = _savedNormalPosition;
-                                  }
-                                });
-                              },
-                            ),
-
-                          // Minimize / Expand Toggle
-                          IconButton(
-                            icon: Icon(
-                              _isMinimized
-                                  ? Icons.unfold_more_rounded
-                                  : Icons.unfold_less_rounded,
-                              color: Colors.white,
-                              size: 19,
-                            ),
-                            tooltip: _isMinimized
-                                ? l10n.desmosExpandTooltip
-                                : l10n.desmosMinimizeTooltip,
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(
-                              minWidth: 30,
-                              minHeight: 30,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _isMinimized = !_isMinimized;
-                              });
-                            },
-                          ),
-
-                          // Close Button
-                          IconButton(
-                            icon: const Icon(
-                              Icons.close_rounded,
-                              color: Colors.white,
-                              size: 19,
-                            ),
-                            tooltip: l10n.desmosCloseTooltip,
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(
-                              minWidth: 30,
-                              minHeight: 30,
-                            ),
-                            onPressed: widget.onClose,
-                          ),
-                        ],
-                      ),
+                        setState(() {
+                          _currentPosition = Offset(newDx, newDy);
+                        });
+                      },
+                      onPanEnd: (_) {
+                        setState(() {
+                          _isDragging = false;
+                        });
+                      },
+                      onPanCancel: () {
+                        setState(() {
+                          _isDragging = false;
+                        });
+                      },
                     ),
                   ),
 
@@ -498,32 +320,6 @@ class _FloatingDesmosCalculatorState extends State<FloatingDesmosCalculator> {
                 ],
               ),
             ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildModeButton({
-    required String title,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(4),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3.5),
-        decoration: BoxDecoration(
-          color: isSelected ? Colors.white : Colors.transparent,
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: Text(
-          title,
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            color: isSelected ? AppColors.primary : Colors.white70,
           ),
         ),
       ),

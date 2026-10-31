@@ -74,37 +74,68 @@ void main() {
     });
 
     testWidgets(
-      'shows AppErrorView on download failure and retries successfully',
+      'recovers silently without showing AppErrorView when initial attempt fails but retry succeeds',
       (tester) async {
         var attemptCount = 0;
-        final retryCompleter = Completer<void>();
 
         Future<void> loadLibrary() async {
           attemptCount++;
           if (attemptCount == 1) {
-            throw Exception('Failed to fetch script chunk');
+            throw Exception('Transient socket error');
           }
-          return retryCompleter.future;
         }
 
         await tester.pumpWidget(
           buildHarness(
             loadLibrary: loadLibrary,
-            builder: () => const Text('Recovered Screen'),
+            builder: () => const Text('Silently Recovered Screen'),
           ),
         );
-        await tester.pumpAndSettle();
 
-        // Should show AppErrorView
+        // Allow retry timer to fire and settle
+        await tester.pumpAndSettle(const Duration(milliseconds: 500));
+
+        // User should NEVER see AppErrorView because retry recovered silently
+        expect(find.byType(AppErrorView), findsNothing);
+        expect(find.text('Silently Recovered Screen'), findsOneWidget);
+        expect(attemptCount, 2);
+      },
+    );
+
+    testWidgets(
+      'shows AppErrorView when all 3 retries are exhausted, then recovers on manual retry',
+      (tester) async {
+        var attemptCount = 0;
+        final manualRetryCompleter = Completer<void>();
+
+        Future<void> loadLibrary() async {
+          attemptCount++;
+          if (attemptCount <= 3) {
+            throw Exception('Persistent fetch error');
+          }
+          return manualRetryCompleter.future;
+        }
+
+        await tester.pumpWidget(
+          buildHarness(
+            loadLibrary: loadLibrary,
+            builder: () => const Text('Recovered After Manual Retry'),
+          ),
+        );
+
+        // Allow all 3 automated retries to elapse with backoff
+        await tester.pumpAndSettle(const Duration(seconds: 3));
+
+        // After 3 failed attempts, AppErrorView MUST be displayed
         expect(find.byType(AppErrorView), findsOneWidget);
-        expect(find.text('Recovered Screen'), findsNothing);
+        expect(find.text('Recovered After Manual Retry'), findsNothing);
+        expect(attemptCount, 3);
 
-        // Tap retry
+        // Tap manual retry
         final retryBtn = find.text('إعادة المحاولة');
         if (retryBtn.evaluate().isNotEmpty) {
           await tester.tap(retryBtn);
         } else {
-          // Fallback find button by icon or type
           final anyRetry = find.byType(ElevatedButton);
           if (anyRetry.evaluate().isNotEmpty) {
             await tester.tap(anyRetry.first);
@@ -112,13 +143,14 @@ void main() {
         }
         await tester.pump();
 
-        // Now attemptCount is 2, completer completes
-        expect(attemptCount, 2);
-        retryCompleter.complete();
+        // Attempt 4 is made, manualRetryCompleter completes
+        expect(attemptCount, 4);
+        manualRetryCompleter.complete();
         await tester.pumpAndSettle();
 
         // Target screen is now visible
-        expect(find.text('Recovered Screen'), findsOneWidget);
+        expect(find.byType(AppErrorView), findsNothing);
+        expect(find.text('Recovered After Manual Retry'), findsOneWidget);
       },
     );
   });

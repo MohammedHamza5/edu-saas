@@ -2,27 +2,25 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import '../../../../core/di/injection_container.dart';
+import '../../../../core/network/supabase_service.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/utils/cache_manager.dart';
-import '../../../../core/widgets/app_button.dart';
-import '../../../../core/widgets/app_card.dart';
 import '../../../content/domain/entities/content_entity.dart';
-import '../../../content/domain/entities/file_attachment_entity.dart';
 import '../../../content/domain/entities/lesson_assignment_entity.dart';
-import '../../../content/presentation/widgets/material_viewer_sheet.dart';
 import '../../domain/entities/exam_entity.dart';
 import '../cubit/exams_cubit.dart';
 import '../cubit/exams_state.dart';
+import '../utils/exam_result_coordinator.dart';
 import '../widgets/exam_pacing_radar_card.dart';
+import '../widgets/exam_result_action_bar.dart';
 import '../widgets/exam_result_hero_card.dart';
+import '../widgets/exam_result_performance_kpis_grid.dart';
 import '../widgets/exam_result_questions_matrix.dart';
+import '../widgets/exam_result_submission_reason_card.dart';
 import 'exam_review_page.dart';
-import '../extensions/exam_ui_extensions.dart';
 
 class ExamResultPage extends StatefulWidget {
   final ExamEntity exam;
@@ -152,78 +150,40 @@ class _ExamResultPageState extends State<ExamResultPage> {
 
   Future<void> _fetchNextLesson() async {
     setState(() => _isLoadingNextLesson = true);
-    try {
-      final res = await InjectionContainer.contentRepository
-          .getGroupCourseProgress(
-            groupId: widget.exam.groupId,
-            studentId: InjectionContainer.supabaseClient.auth.currentUser?.id,
-          );
-      if (!mounted) return;
-      if (res.isSuccess && res.dataOrNull != null) {
-        final allLessons = res.dataOrNull!;
-        // Filter strictly to video lectures so exams never appear as lectures
-        final videoLessons = allLessons
-            .where((l) => l.type == ContentType.video)
-            .toList();
-        if (videoLessons.isNotEmpty) {
-          final cIdx = videoLessons.indexWhere(
-            (l) =>
-                (widget.exam.linkedLessonId != null &&
-                    l.contentId == widget.exam.linkedLessonId) ||
-                l.lessonExamId == widget.exam.id ||
-                l.attachedExams.any((e) => e.examId == widget.exam.id),
-          );
-          if (cIdx >= 0 && cIdx < videoLessons.length - 1) {
-            final next = videoLessons[cIdx + 1];
-            if (next.contentId != widget.exam.linkedLessonId &&
-                next.lessonExamId != widget.exam.id &&
-                !next.attachedExams.any((e) => e.examId == widget.exam.id)) {
-              setState(() {
-                _nextLesson = next;
-                _nextLessonIndex = cIdx + 2;
-                _totalLessonsCount = videoLessons.length;
-                _isLoadingNextLesson = false;
-              });
-              return;
-            }
-          }
-        }
-      }
-    } catch (_) {}
-    if (mounted) {
+    final info = await ExamResultCoordinator.fetchNextLesson(
+      exam: widget.exam,
+      studentId: SupabaseService.currentUserId,
+    );
+    if (!mounted) return;
+    if (info != null) {
+      setState(() {
+        _nextLesson = info.nextLesson;
+        _nextLessonIndex = info.nextLessonIndex;
+        _totalLessonsCount = info.totalLessonsCount;
+        _isLoadingNextLesson = false;
+      });
+    } else {
       setState(() => _isLoadingNextLesson = false);
     }
   }
 
   void _goToNextLesson(LessonAssignmentEntity nextLesson) {
-    AppCache.content.clear();
-    AppCache.exams.clear();
-    _examsCubit?.exitExamTaking();
-
-    final encodedTitle = nextLesson.lessonExamTitle != null
-        ? Uri.encodeComponent(nextLesson.lessonExamTitle!)
-        : '';
-    final encodedGroupName = widget.exam.groupName != null
-        ? Uri.encodeComponent(widget.exam.groupName!)
-        : '';
-    final lIdx = _nextLessonIndex ?? nextLesson.sortOrder;
-    final tLessons = _totalLessonsCount ?? 1;
-
-    context.go(
-      '${AppRoutes.videoPlayer}?id=${nextLesson.contentId}&associatedExamId=${nextLesson.lessonExamId ?? ''}&associatedExamTitle=$encodedTitle&groupId=${widget.exam.groupId}&groupName=$encodedGroupName&lessonIndex=$lIdx&totalLessons=$tLessons',
+    ExamResultCoordinator.goToNextLesson(
+      context,
+      nextLesson: nextLesson,
+      exam: widget.exam,
+      nextLessonIndex: _nextLessonIndex,
+      totalLessonsCount: _totalLessonsCount,
+      examsCubit: _examsCubit,
     );
   }
 
   void _goToLecturesScreen() {
-    AppCache.content.clear();
-    AppCache.exams.clear();
-    _examsCubit?.exitExamTaking();
-
-    if (widget.exam.groupId.isNotEmpty) {
-      context.go('/student/groups/${widget.exam.groupId}/content');
-    } else {
-      context.go(AppRoutes.studentDashboard);
-    }
+    ExamResultCoordinator.goToLecturesScreen(
+      context,
+      exam: widget.exam,
+      examsCubit: _examsCubit,
+    );
   }
 
   Future<void> _handleRetake() async {
@@ -308,101 +268,17 @@ class _ExamResultPageState extends State<ExamResultPage> {
   }
 
   void _openPdfBooklet() {
-    if (!widget.exam.hasAttachedPdf) return;
-    final file = FileAttachmentEntity(
-      id: widget.exam.pdfFileId ?? '',
-      tenantId: widget.exam.tenantId,
-      contentId: widget.exam.id,
-      storagePath: widget.exam.pdfStoragePath!,
-      fileName: widget.exam.pdfFileName ?? 'exam_booklet.pdf',
-      mimeType: 'application/pdf',
-      fileSize: widget.exam.pdfFileSize ?? 0,
-      createdAt: DateTime.now(),
-    );
-    final content = ContentEntity(
-      id: widget.exam.id,
-      tenantId: widget.exam.tenantId,
-      title: widget.exam.pdfFileName ?? widget.exam.title,
-      type: ContentType.pdf,
-      status: ContentStatus.published,
-      sortOrder: 0,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-      file: file,
-    );
-
-    MaterialViewerSheet.show(
-      context,
-      content: content,
-      onGetSignedUrl: (path) => context.read<ExamsCubit>().getSignedPdfUrl(
-            path,
-            storageProvider: widget.exam.pdfStorageProvider,
-          ),
-    );
-  }
-
-  String _formatDuration(Duration d) {
-    final minutes = d.inMinutes;
-    final seconds = d.inSeconds % 60;
-    if (d.inHours > 0) {
-      final hours = d.inHours;
-      return '${hours.toString().padLeft(2, '0')}:${(minutes % 60).toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-    }
-    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-  }
-
-  String _getSubmissionExplanation(
-    BuildContext context,
-    ExamSubmissionReason reason,
-  ) {
-    switch (reason) {
-      case ExamSubmissionReason.studentSubmitted:
-        return context.l10n.submissionExplanationStudent;
-      case ExamSubmissionReason.timeExpired:
-        return context.l10n.submissionExplanationTimeout;
-      case ExamSubmissionReason.forcedExit:
-        return context.l10n.submissionExplanationForcedExit;
-      case ExamSubmissionReason.securityViolations:
-        return context.l10n.submissionExplanationViolations;
-      case ExamSubmissionReason.tabClosed:
-        return context.l10n.submissionExplanationTabClosed;
-      case ExamSubmissionReason.systemTimeout:
-        return context.l10n.submissionExplanationSystem;
-    }
+    ExamResultCoordinator.openPdfBooklet(context, exam: widget.exam);
   }
 
   @override
   Widget build(BuildContext context) {
     final isLecture = widget.isLectureExam ??
         (widget.exam.isLectureExam || widget.exam.isLinkedToLesson);
-    final score = _attempt.score ?? 0;
-    final maxScore = widget.exam.maxScore > 0 ? widget.exam.maxScore : 100;
-    final passingScore = widget.exam.passingScore;
-    final isPassed = _attempt.isPassed(passingScore);
-
-    final percentage = _attempt.percentage ??
-        (maxScore > 0 ? (score / maxScore) * 100 : 0.0);
-
-    final questions = _attempt.questions;
-    final answers = _attempt.answers;
-    final totalQuestions = questions.isNotEmpty
-        ? questions.length
-        : (widget.exam.totalQuestions > 0
-            ? widget.exam.totalQuestions
-            : _attempt.answeredCount);
-
-    final correctCount = answers.where((a) => a.isCorrect == true).length;
-    final incorrectCount =
-        answers.where((a) => a.selectedOptionId != null && a.isCorrect == false).length;
-    final answeredCount =
-        answers.where((a) => a.selectedOptionId != null).length;
-    final skippedCount = (totalQuestions > answeredCount)
-        ? (totalQuestions - answeredCount)
-        : 0;
-
-    final duration = _attempt.submittedAt?.difference(_attempt.startedAt);
-
-    final dateFormat = DateFormat('yyyy/MM/dd - hh:mm a');
+    final stats = ExamResultStats.calculate(
+      exam: widget.exam,
+      attempt: _attempt,
+    );
 
     return PopScope(
       canPop: false,
@@ -461,199 +337,29 @@ class _ExamResultPageState extends State<ExamResultPage> {
               // 1. Hero Performance & Verdict Card
               ExamResultHeroCard(
                 examTitle: widget.exam.title,
-                score: score,
-                maxScore: maxScore,
-                percentage: percentage,
-                isPassed: isPassed,
-                passingScore: passingScore,
+                score: stats.score,
+                maxScore: stats.maxScore,
+                percentage: stats.percentage,
+                isPassed: stats.isPassed,
+                passingScore: stats.passingScore,
               ),
 
               const SizedBox(height: AppSpacing.s16),
 
               // 2. Submission Details & Reason Banner
-              AppCard(
-                padding: const EdgeInsets.all(AppSpacing.s16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(AppSpacing.s8),
-                          decoration: BoxDecoration(
-                            color: _attempt.submissionReason.color
-                                .withValues(alpha: 0.12),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            _attempt.submissionReason.icon,
-                            color: _attempt.submissionReason.color,
-                            size: 18,
-                          ),
-                        ),
-                        const SizedBox(width: AppSpacing.s10),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                context.l10n.submissionReasonLabel,
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  color: AppColors.textMuted,
-                                ),
-                              ),
-                              Text(
-                                _attempt.submissionReason
-                                    .localizedLabel(context),
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.bold,
-                                  color: _attempt.submissionReason.color,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.s8,
-                            vertical: AppSpacing.s4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: _attempt.status.color.withValues(alpha: 0.1),
-                            borderRadius:
-                                BorderRadius.circular(AppSpacing.radiusSmall),
-                          ),
-                          child: Text(
-                            _attempt.status.localizedLabel(context),
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              color: _attempt.status.color,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.s10),
-                    Text(
-                      _getSubmissionExplanation(
-                        context,
-                        _attempt.submissionReason,
-                      ),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppColors.textSecondary,
-                        height: 1.35,
-                      ),
-                    ),
-                    const Divider(
-                      height: AppSpacing.s20,
-                      color: AppColors.border,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          context.l10n.examSubmissionDateTitle,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: AppColors.textMuted,
-                          ),
-                        ),
-                        Text(
-                          _attempt.submittedAt != null
-                              ? dateFormat.format(_attempt.submittedAt!)
-                              : context.l10n.justNow,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+              ExamResultSubmissionReasonCard(
+                attempt: _attempt,
               ),
 
               const SizedBox(height: AppSpacing.s16),
 
               // 3. Performance Micro-KPIs Grid
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: Text(
-                      context.l10n.detailedPerformanceAnalytics,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.s8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildKpiCard(
-                          context,
-                          title: context.l10n.correctAnswersMetric,
-                          value: '$correctCount',
-                          subtitle: context.l10n.questions,
-                          color: AppColors.success,
-                          icon: Icons.check_circle_outline_rounded,
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.s8),
-                      Expanded(
-                        child: _buildKpiCard(
-                          context,
-                          title: context.l10n.incorrectAnswersMetric,
-                          value: '$incorrectCount',
-                          subtitle: context.l10n.questions,
-                          color: AppColors.error,
-                          icon: Icons.cancel_outlined,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.s8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildKpiCard(
-                          context,
-                          title: context.l10n.skippedAnswersMetric,
-                          value: '$skippedCount',
-                          subtitle: context.l10n.questions,
-                          color: AppColors.warning,
-                          icon: Icons.pause_circle_outline_rounded,
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.s8),
-                      Expanded(
-                        child: _buildKpiCard(
-                          context,
-                          title: context.l10n.timeSpentMetric,
-                          value: duration != null
-                              ? _formatDuration(duration)
-                              : '--:--',
-                          subtitle: widget.exam.isUntimed
-                              ? context.l10n.unlimitedTime
-                              : context.l10n.minutesDuration(
-                                  widget.exam.durationMinutes,
-                                ),
-                          color: AppColors.primary,
-                          icon: Icons.timer_outlined,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+              ExamResultPerformanceKpisGrid(
+                correctCount: stats.correctCount,
+                incorrectCount: stats.incorrectCount,
+                skippedCount: stats.skippedCount,
+                duration: stats.duration,
+                exam: widget.exam,
               ),
 
               // Pacing & Time Radar Analysis
@@ -662,7 +368,7 @@ class _ExamResultPageState extends State<ExamResultPage> {
                 ExamPacingRadarCard(
                   questionTimes: _attempt.questionTimes,
                   flaggedGuesses: _attempt.flaggedGuesses,
-                  totalQuestions: totalQuestions,
+                  totalQuestions: stats.totalQuestions,
                 ),
               ],
 
@@ -670,8 +376,8 @@ class _ExamResultPageState extends State<ExamResultPage> {
 
               // 4. Interactive Answer Sheet Matrix
               ExamResultQuestionsMatrix(
-                questions: questions,
-                answers: answers,
+                questions: _attempt.questions,
+                answers: _attempt.answers,
                 attemptId: _attempt.id,
                 isLoadingDetails: _isLoadingDetails,
                 hasAttachedPdf: widget.exam.hasAttachedPdf,
@@ -682,207 +388,34 @@ class _ExamResultPageState extends State<ExamResultPage> {
               const SizedBox(height: AppSpacing.s24),
 
               // 5. Contextual Action Bar
-              if (isLecture) ...[
-                if (isPassed) ...[
-                  if (_nextLesson != null) ...[
-                    AppButton(
-                      text: context.l10n.goToNextLectureSpecific(
-                        _nextLesson!.title,
-                      ),
-                      icon: Icons.play_circle_outline_rounded,
-                      isLoading: _isLoadingNextLesson,
-                      onPressed: () => _goToNextLesson(_nextLesson!),
-                    ),
-                    const SizedBox(height: AppSpacing.s10),
-                  ],
-                  if (widget.exam.hasAttachedPdf) ...[
-                    AppButton(
-                      text: context.l10n.viewExamBooklet,
-                      icon: Icons.picture_as_pdf_rounded,
-                      variant: AppButtonVariant.secondary,
-                      onPressed: _openPdfBooklet,
-                    ),
-                    const SizedBox(height: AppSpacing.s10),
-                  ],
-                  AppButton(
-                    text: context.l10n.reviewAllQuestionsAction,
-                    icon: Icons.fact_check_outlined,
-                    variant: _nextLesson != null
-                        ? AppButtonVariant.secondary
-                        : AppButtonVariant.primary,
-                    onPressed: () => _openReview(),
-                  ),
-                  const SizedBox(height: AppSpacing.s10),
-                  AppButton(
-                    text: context.l10n.backToLecturesList,
-                    icon: Icons.menu_book_rounded,
-                    variant: AppButtonVariant.secondary,
-                    onPressed: _goToLecturesScreen,
-                  ),
-                  if (widget.exam.allowRetake) ...[
-                    const SizedBox(height: AppSpacing.s8),
-                    TextButton.icon(
-                      icon: const Icon(Icons.refresh_rounded, size: 16),
-                      label: Text(
-                        context.l10n.retakeToImproveScore,
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                      onPressed: _handleRetake,
-                    ),
-                  ],
-                ] else ...[
-                  // Lecture exam failed: Prominent Retry button!
-                  AppButton(
-                    text: context.l10n.tryAgainExamAction,
-                    icon: Icons.replay_rounded,
-                    isLoading: _isRetaking,
-                    onPressed: _handleRetake,
-                  ),
-                  const SizedBox(height: AppSpacing.s10),
-                  if (widget.exam.hasAttachedPdf) ...[
-                    AppButton(
-                      text: context.l10n.viewExamBooklet,
-                      icon: Icons.picture_as_pdf_rounded,
-                      variant: AppButtonVariant.secondary,
-                      onPressed: _openPdfBooklet,
-                    ),
-                    const SizedBox(height: AppSpacing.s10),
-                  ],
-                  AppButton(
-                    text: context.l10n.reviewAllQuestionsAction,
-                    icon: Icons.fact_check_outlined,
-                    variant: AppButtonVariant.secondary,
-                    onPressed: () => _openReview(),
-                  ),
-                  const SizedBox(height: AppSpacing.s10),
-                  AppButton(
-                    text: context.l10n.backToLecturesList,
-                    icon: Icons.menu_book_rounded,
-                    variant: AppButtonVariant.secondary,
-                    onPressed: _goToLecturesScreen,
-                  ),
-                ],
-              ] else ...[
-                // Non-lecture exam (general course exam)
-                if (widget.exam.hasAttachedPdf) ...[
-                  AppButton(
-                    text: context.l10n.viewExamBooklet,
-                    icon: Icons.picture_as_pdf_rounded,
-                    variant: AppButtonVariant.secondary,
-                    onPressed: _openPdfBooklet,
-                  ),
-                  const SizedBox(height: AppSpacing.s10),
-                ],
-                AppButton(
-                  text: context.l10n.reviewAllQuestionsAction,
-                  icon: Icons.fact_check_outlined,
-                  onPressed: () => _openReview(),
-                ),
-                if (widget.exam.allowRetake) ...[
-                  const SizedBox(height: AppSpacing.s10),
-                  AppButton(
-                    text: context.l10n.retakeToImproveScore,
-                    icon: Icons.replay_rounded,
-                    variant: AppButtonVariant.secondary,
-                    isLoading: _isRetaking,
-                    onPressed: _handleRetake,
-                  ),
-                ],
-                const SizedBox(height: AppSpacing.s10),
-                AppButton(
-                  text: context.l10n.backToExamsList,
-                  icon: Icons.home_outlined,
-                  variant: AppButtonVariant.secondary,
-                  onPressed: () {
-                    _examsCubit?.exitExamTaking();
+              ExamResultActionBar(
+                isLecture: isLecture,
+                isPassed: stats.isPassed,
+                hasAttachedPdf: widget.exam.hasAttachedPdf,
+                allowRetake: widget.exam.allowRetake,
+                isLoadingNextLesson: _isLoadingNextLesson,
+                isRetaking: _isRetaking,
+                nextLesson: _nextLesson,
+                onNextLesson: () => _goToNextLesson(_nextLesson!),
+                onOpenPdfBooklet: _openPdfBooklet,
+                onReview: () => _openReview(),
+                onRetake: _handleRetake,
+                onBack: () {
+                  _examsCubit?.exitExamTaking();
+                  if (isLecture) {
+                    _goToLecturesScreen();
+                  } else {
                     if (Navigator.of(context).canPop()) {
                       Navigator.of(context).pop();
                     } else {
                       context.go(AppRoutes.studentExams);
                     }
-                  },
-                ),
-              ],
+                  }
+                },
+              ),
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildKpiCard(
-    BuildContext context, {
-    required String title,
-    required String value,
-    required String subtitle,
-    required Color color,
-    required IconData icon,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.s12,
-        vertical: AppSpacing.s10,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.s8),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-            ),
-            child: Icon(icon, color: color, size: 18),
-          ),
-          const SizedBox(width: AppSpacing.s10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: AppColors.textMuted,
-                  ),
-                ),
-                const SizedBox(height: 1),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.baseline,
-                  textBaseline: TextBaseline.alphabetic,
-                  children: [
-                    Text(
-                      value,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: color,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        subtitle,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 10,
-                          color: AppColors.textMuted,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }

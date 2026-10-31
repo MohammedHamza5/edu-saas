@@ -398,11 +398,15 @@
   }
   </script>
 
-  <!-- Preconnect & Preload High-Performance Web Fonts (Cairo: Arabic Typeface, Inter: Academic Math & Figures) -->
+  <!-- Critical CDN Preconnect & DNS-Prefetch for Fast Streaming & Assets -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="dns-prefetch" href="https://iframe.mediadelivery.net">
+  <link rel="preconnect" href="https://iframe.mediadelivery.net" crossorigin>
+
+  <!-- High-Performance Typography: Inter for Academic Figures/Math (Cairo is bundled locally for 0ms font blocking) -->
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 
   <!-- hls.js: Enables HLS (.m3u8) video playback on Chrome / Firefox / Edge.
        Bundled locally for zero CDN latency, offline resiliency and instant start. -->

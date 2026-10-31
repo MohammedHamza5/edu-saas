@@ -292,7 +292,8 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
           'associated_exam:exams!content_associated_exam_id_fkey(id, title), '
           'prerequisite_exam:exams!content_prerequisite_exam_id_fkey(id, title, passing_score)',
         )
-        .neq('type', 'exam');
+        .neq('type', 'exam')
+        .neq('type', 'assignment');
 
     if (junctionIds.isEmpty) {
       query = query.eq('group_id', resolvedGroupId);
@@ -365,6 +366,10 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     final list = response;
     final models = list
         .map((json) => ContentModel.fromJson(json as Map<String, dynamic>))
+        .where(
+          (m) =>
+              m.type != ContentType.exam && m.type != ContentType.assignment,
+        )
         .toList();
 
     // Apply group-specific customizations from content_groups junction
@@ -749,6 +754,8 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
           .from('content')
           .select('sort_order')
           .eq('group_id', groupId)
+          .neq('type', 'exam')
+          .neq('type', 'assignment')
           .order('sort_order', ascending: false)
           .limit(1);
       final existingContentList = existingContent as List<dynamic>;

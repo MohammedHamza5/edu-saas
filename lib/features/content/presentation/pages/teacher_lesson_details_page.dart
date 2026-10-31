@@ -5,13 +5,12 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/widgets/app_card.dart';
-import '../../../../core/widgets/app_empty_view.dart';
 import '../../domain/entities/content_entity.dart';
 import '../cubit/content_cubit.dart';
 import '../cubit/content_state.dart';
 import '../widgets/lesson_editor_pane.dart';
 import '../widgets/lesson_studio_workspace.dart';
+import '../widgets/teacher_lesson_analytics_section.dart';
 
 /// Full-page dedicated workspace for a single Lesson/Lecture in the Course Builder.
 ///
@@ -340,184 +339,17 @@ class _TeacherLessonDetailsPageState extends State<TeacherLessonDetailsPage>
                 ),
 
                 // Tab 2: Analytics & Student Progress (100% Real Supabase Data)
-                _buildAnalyticsTab(),
+                TeacherLessonAnalyticsSection(
+                  lesson: _lesson,
+                  totalStudents: _totalStudents,
+                  totalViews: _totalViews,
+                  completedStudents: _completedStudents,
+                  averageQuizScore: _averageQuizScore,
+                ),
               ],
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  // --- TAB 2: ANALYTICS & STUDENT PROGRESS (REAL SUPABASE DATA) ---
-  Widget _buildAnalyticsTab() {
-    final l10n = context.l10n;
-    final theme = Theme.of(context);
-
-    if (widget.lessonId == 'new' || _lesson == null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.s32),
-          child: AppEmptyView(
-            message: l10n.analyticsAvailableAfterPublish,
-            icon: Icons.analytics_outlined,
-          ),
-        ),
-      );
-    }
-
-    final quizScoreText = _averageQuizScore != null
-        ? '${_averageQuizScore!.toStringAsFixed(1)}%'
-        : l10n.noDataDash;
-
-    final quizSubtitle = _lesson?.associatedExamId == null
-        ? l10n.noAssociatedQuiz
-        : (_averageQuizScore == null ? l10n.noAttemptsYet : null);
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppSpacing.s24),
-      child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Stats Row
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildMetricCard(
-                      title: l10n.totalViews,
-                      value: '$_totalViews',
-                      icon: Icons.visibility_rounded,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.s16),
-                  Expanded(
-                    child: _buildMetricCard(
-                      title: l10n.completedLesson,
-                      value: '$_completedStudents / $_totalStudents',
-                      icon: Icons.check_circle_rounded,
-                      color: AppColors.success,
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.s16),
-                  Expanded(
-                    child: _buildMetricCard(
-                      title: l10n.averageQuizScore,
-                      value: quizScoreText,
-                      subtitle: quizSubtitle,
-                      icon: Icons.emoji_events_rounded,
-                      color: const Color(0xFFF59E0B),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.s24),
-              AppCard(
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.s20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.studentLessonProgressStats,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.s12),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: LinearProgressIndicator(
-                          value: _totalStudents > 0
-                              ? _completedStudents / _totalStudents
-                              : 0.0,
-                          minHeight: 10,
-                          backgroundColor: AppColors.border,
-                          valueColor: const AlwaysStoppedAnimation(
-                            AppColors.primary,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.s8),
-                      Text(
-                        l10n.overallCompletionRate(
-                          _totalStudents > 0
-                              ? ((_completedStudents / _totalStudents) * 100)
-                                    .toInt()
-                              : 0,
-                        ),
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-  }
-
-  Widget _buildMetricCard({
-    required String title,
-    required String value,
-    String? subtitle,
-    required IconData icon,
-    required Color color,
-  }) {
-    return AppCard(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.s16),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(icon, color: color, size: 22),
-            ),
-            const SizedBox(width: AppSpacing.s12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 11,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    value,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: color,
-                    ),
-                  ),
-                  if (subtitle != null) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: const TextStyle(
-                        fontSize: 10,
-                        color: AppColors.textMuted,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

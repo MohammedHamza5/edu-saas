@@ -3,6 +3,8 @@ import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../domain/entities/content_entity.dart';
+import 'course_lesson_action_buttons.dart';
+import 'course_lesson_chips_wrap.dart';
 
 /// Teacher-side draggable lesson row inside the Course Builder.
 ///
@@ -273,285 +275,28 @@ class _CourseLessonTileState extends State<CourseLessonTile> {
                           ),
                         ],
                         const SizedBox(height: AppSpacing.s6),
-                        // Chips row
-                        Wrap(
-                          spacing: AppSpacing.s6,
-                          runSpacing: AppSpacing.s4,
-                          children: [
-                            // Visibility status chip
-                            _buildMiniChip(
-                              icon: widget.content.isPublished
-                                  ? Icons.visibility_rounded
-                                  : Icons.visibility_off_rounded,
-                              label: widget.content.isPublished
-                                  ? l10n.publishedCountLabel
-                                  : l10n.draftCountLabel,
-                              color: widget.content.isPublished
-                                  ? AppColors.success
-                                  : AppColors.warning,
-                            ),
-
-                            // Content type chip
-                            () {
-                              final (typeLabel, typeIcon, typeColor) = switch (widget.content.type) {
-                                ContentType.video => (
-                                  l10n.contentTypeVideo,
-                                  Icons.play_circle_outline_rounded,
-                                  AppColors.primary,
-                                ),
-                                ContentType.exam => (
-                                  l10n.contentTypeExam,
-                                  Icons.quiz_outlined,
-                                  AppColors.success,
-                                ),
-                                ContentType.assignment => (
-                                  l10n.contentTypeAssignment,
-                                  Icons.assignment_outlined,
-                                  AppColors.warning,
-                                ),
-                                ContentType.pdf => (
-                                  l10n.contentTypePdf,
-                                  Icons.picture_as_pdf_outlined,
-                                  const Color(0xFFEA580C),
-                                ),
-                                ContentType.image => (
-                                  l10n.contentTypeImage,
-                                  Icons.image_outlined,
-                                  Colors.purple,
-                                ),
-                              };
-                              return _buildMiniChip(
-                                icon: typeIcon,
-                                label: typeLabel,
-                                color: typeColor,
-                              );
-                            }(),
-
-                            // PDF chip
-                            if (widget.hasPdf)
-                              _buildMiniChip(
-                                icon: Icons.picture_as_pdf_rounded,
-                                label: l10n.hasStudyMaterial,
-                                color: const Color(0xFFEA580C),
-                              ),
-
-                            // Chapter chip
-                            if (widget.content.chapterTitle != null &&
-                                widget.content.chapterTitle!.isNotEmpty)
-                              _buildMiniChip(
-                                icon: Icons.folder_special_rounded,
-                                label: widget.content.chapterTitle!,
-                                color: AppColors.info,
-                              ),
-
-                            // Quiz chip
-                            if (widget.quizTitle != null)
-                              _buildMiniChip(
-                                icon: Icons.quiz_rounded,
-                                label: l10n.hasLessonQuiz,
-                                color: AppColors.success,
-                              ),
-                          ],
+                        CourseLessonChipsWrap(
+                          content: widget.content,
+                          hasPdf: widget.hasPdf,
+                          quizTitle: widget.quizTitle,
                         ),
                       ],
                     ),
                   ),
 
-                  // Action Buttons (Visibility, Edit and Delete)
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (widget.onToggleVisibility != null) ...[
-                        _buildActionButton(
-                          icon: widget.content.isPublished
-                              ? Icons.visibility_rounded
-                              : Icons.visibility_off_rounded,
-                          color: widget.content.isPublished
-                              ? AppColors.success
-                              : AppColors.warning,
-                          tooltip: widget.content.isPublished
-                              ? l10n.hideLessonTooltip
-                              : l10n.publishLessonTooltip,
-                          onTap: widget.onToggleVisibility,
-                          isCompact: isCompact,
-                        ),
-                        SizedBox(width: isCompact ? 4 : AppSpacing.s6),
-                      ],
-                      if (!isCompact && widget.onViewAnalytics != null) ...[
-                        _buildActionButton(
-                          icon: Icons.insights_rounded,
-                          color: const Color(0xFF0284C7),
-                          tooltip: l10n.lessonAnalytics,
-                          onTap: widget.onViewAnalytics,
-                          isCompact: isCompact,
-                        ),
-                        SizedBox(width: isCompact ? 4 : AppSpacing.s6),
-                      ],
-                      _buildActionButton(
-                        icon: Icons.edit_rounded,
-                        color: AppColors.primary,
-                        tooltip: l10n.editLesson,
-                        onTap: widget.onEdit ?? widget.onTap,
-                        isCompact: isCompact,
-                      ),
-                      if (!isCompact && widget.onMoveToChapter != null) ...[
-                        SizedBox(width: isCompact ? 4 : AppSpacing.s6),
-                        _buildActionButton(
-                          icon: Icons.drive_file_move_outlined,
-                          color: const Color(0xFF6366F1),
-                          tooltip: l10n.moveLectureToChapter,
-                          onTap: widget.onMoveToChapter,
-                          isCompact: isCompact,
-                        ),
-                      ],
-                      if (!isCompact && widget.onDelete != null) ...[
-                        SizedBox(width: isCompact ? 4 : AppSpacing.s6),
-                        _buildActionButton(
-                          icon: Icons.delete_outline_rounded,
-                          color: AppColors.error,
-                          tooltip: l10n.deleteLesson,
-                          onTap: widget.onDelete,
-                          isCompact: isCompact,
-                        ),
-                      ],
-                      if (isCompact) ...[
-                        SizedBox(width: isCompact ? 2 : AppSpacing.s6),
-                        PopupMenuButton<String>(
-                          icon: const Icon(
-                            Icons.more_vert_rounded,
-                            size: 16,
-                            color: AppColors.textSecondary,
-                          ),
-                          padding: EdgeInsets.zero,
-                          itemBuilder: (context) => [
-                            if (widget.onViewAnalytics != null)
-                              PopupMenuItem(
-                                value: 'analytics',
-                                child: Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.insights_rounded,
-                                      size: 16,
-                                      color: Color(0xFF0284C7),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(l10n.lessonAnalytics),
-                                  ],
-                                ),
-                              ),
-                            if (widget.onMoveToChapter != null)
-                              PopupMenuItem(
-                                value: 'move',
-                                child: Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.drive_file_move_outlined,
-                                      size: 16,
-                                      color: Color(0xFF6366F1),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(l10n.moveLectureToChapter),
-                                  ],
-                                ),
-                              ),
-                            if (widget.onDelete != null)
-                              PopupMenuItem(
-                                value: 'delete',
-                                child: Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.delete_outline_rounded,
-                                      size: 16,
-                                      color: AppColors.error,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(l10n.deleteLesson),
-                                  ],
-                                ),
-                              ),
-                          ],
-                          onSelected: (val) {
-                            if (val == 'analytics') {
-                              widget.onViewAnalytics?.call();
-                            } else if (val == 'move') {
-                              widget.onMoveToChapter?.call();
-                            } else if (val == 'delete') {
-                              widget.onDelete?.call();
-                            }
-                          },
-                        ),
-                      ],
-                    ],
+                  // Action Buttons (Visibility, Edit, Move, Analytics, Delete)
+                  CourseLessonActionButtons(
+                    content: widget.content,
+                    isCompact: isCompact,
+                    onToggleVisibility: widget.onToggleVisibility,
+                    onViewAnalytics: widget.onViewAnalytics,
+                    onEdit: widget.onEdit ?? widget.onTap,
+                    onMoveToChapter: widget.onMoveToChapter,
+                    onDelete: widget.onDelete,
                   ),
                 ],
               ),
             ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMiniChip({
-    required IconData icon,
-    required String label,
-    required Color color,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(5),
-        border: Border.all(color: color.withValues(alpha: 0.32)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 11, color: color),
-          const SizedBox(width: 4),
-          Flexible(
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 10.5,
-                fontWeight: FontWeight.w700,
-                color: color,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActionButton({
-    required IconData icon,
-    required Color color,
-    required String tooltip,
-    VoidCallback? onTap,
-    bool isCompact = false,
-  }) {
-    return Tooltip(
-      message: tooltip,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(8),
-          hoverColor: color.withValues(alpha: 0.20),
-          child: Container(
-            padding: EdgeInsets.all(isCompact ? 5.5 : 7.5),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.10),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: color.withValues(alpha: 0.30),
-                width: 1,
-              ),
-            ),
-            child: Icon(icon, size: isCompact ? 14 : 16, color: color),
           ),
         ),
       ),

@@ -1,34 +1,26 @@
 import 'dart:async';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/errors/result.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/widgets/app_card.dart';
-import '../../../../core/widgets/app_loading_view.dart';
 import '../../../videos/domain/entities/library_video_entity.dart';
 import '../../../videos/domain/entities/video_folder_entity.dart';
 import '../../../videos/domain/repositories/video_bank_repository.dart';
 import '../../domain/entities/chapter_entity.dart';
-import '../../domain/entities/library_material_entity.dart';
+import '../../domain/entities/content_entity.dart';
 import '../../domain/repositories/content_repository.dart';
 import '../cubit/content_cubit.dart';
 import '../cubit/content_state.dart';
-import '../dialogs/select_material_from_library_dialog.dart';
-import '../dialogs/quick_create_chapter_dialog.dart';
 import '../models/lesson_studio_models.dart';
+import '../utils/lesson_studio_data_loader.dart';
+import '../utils/lesson_studio_prepopulator.dart';
 import '../utils/lesson_studio_save_coordinator.dart';
+import 'lesson_studio_deck_coordinator.dart';
 import 'lesson_studio_header.dart';
-import 'lesson_studio_lecture_card.dart';
-import 'lesson_studio_no_videos_placeholder.dart';
-import 'lesson_studio_staging_deck.dart';
 import 'lesson_studio_library_sidebar.dart';
-
-typedef _StudioAttachedExam = StudioAttachedExam;
-typedef _StagedLecture = StagedLecture;
+import 'lesson_studio_progress_overlay.dart';
 
 class LessonStudioWorkspace extends StatefulWidget {
   final String groupId;
@@ -62,7 +54,7 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
 
   // Selection & Search State (Unified Single Source of Truth)
   final Map<String, LibraryVideoEntity> _selectedVideos = {};
-  final Map<String, _StagedLecture> _stagedLectures = {};
+  final Map<String, StagedLecture> _stagedLectures = {};
   final List<String> _stagedOrder = [];
   bool _isSidebarCollapsed = false;
 
@@ -73,9 +65,6 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
   // Global Batch Controls
   String? _batchGlobalChapterId;
   bool _batchGlobalPublished = true;
-
-  // Active Inspecting Target for Detail Drawer
-  _StagedLecture? _inspectingLecture;
 
   // Available Chapters & Exams Cache
   List<ChapterEntity> _chapters = [];
@@ -96,18 +85,11 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
   }
 
   void _initCourseVideoSet() {
-    _courseVideoIds.clear();
-    _courseVideoProviderIds.clear();
-    final cubit = context.read<ContentCubit>();
-    if (cubit.state is ContentLoaded) {
-      for (final item in (cubit.state as ContentLoaded).items) {
-        if (item.id.isNotEmpty) _courseVideoIds.add(item.id);
-        if (item.videoId != null) _courseVideoIds.add(item.videoId!);
-        if (item.videoProviderId != null) {
-          _courseVideoProviderIds.add(item.videoProviderId!);
-        }
-      }
-    }
+    LessonStudioDataLoader.populateCourseVideoIds(
+      context: context,
+      courseVideoIds: _courseVideoIds,
+      courseVideoProviderIds: _courseVideoProviderIds,
+    );
   }
 
   @override
@@ -161,27 +143,24 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
   Future<void> _loadLibraryData() async {
     setState(() => _isLoadingLibrary = true);
     try {
-      final foldersRes = await _videoRepo.getAllFolders();
-      if (foldersRes.isSuccess) {
-        _allFolders = foldersRes.data;
-      }
-      // Pre-load root / unassigned videos
-      final rootVideosRes = await _videoRepo.getVideos(folderId: null);
-      if (rootVideosRes.isSuccess) {
-        _folderVideosCache[null] = rootVideosRes.data;
-      }
+      final initial =
+          await LessonStudioDataLoader.loadInitialLibrary(_videoRepo);
       if (mounted) {
-        setState(() => _isLoadingLibrary = false);
+        setState(() {
+          _allFolders = initial.folders;
+          _folderVideosCache[null] = initial.rootVideos;
+          _isLoadingLibrary = false;
+        });
       }
-      // Immediately prefetch all folder videos in parallel in the background!
       if (_allFolders.isNotEmpty) {
         unawaited(
           Future.wait(
             _allFolders.map((f) async {
-              final res = await _videoRepo.getVideos(folderId: f.id);
-              if (res.isSuccess) {
-                _folderVideosCache[f.id] = res.data;
-              }
+              final videos = await LessonStudioDataLoader.loadVideosForFolder(
+                repo: _videoRepo,
+                folderId: f.id,
+              );
+              _folderVideosCache[f.id] = videos;
             }),
           ).then((_) {
             if (mounted) setState(() {});
@@ -189,9 +168,7 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
         );
       }
     } catch (_) {
-      if (mounted) {
-        setState(() => _isLoadingLibrary = false);
-      }
+      if (mounted) setState(() => _isLoadingLibrary = false);
     }
   }
 
@@ -203,10 +180,13 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
     }
     setState(() => _loadingFolderIds.add(loadingKey));
     try {
-      final res = await _videoRepo.getVideos(folderId: folderId);
-      if (res.isSuccess && mounted) {
+      final videos = await LessonStudioDataLoader.loadVideosForFolder(
+        repo: _videoRepo,
+        folderId: folderId,
+      );
+      if (mounted) {
         setState(() {
-          _folderVideosCache[folderId] = res.data;
+          _folderVideosCache[folderId] = videos;
           _loadingFolderIds.remove(loadingKey);
         });
       }
@@ -216,17 +196,12 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
   }
 
   bool _isVideoAlreadyInCourse(LibraryVideoEntity video) {
-    if (_courseVideoIds.contains(video.id) ||
-        (video.providerVideoId != null &&
-            _courseVideoProviderIds.contains(video.providerVideoId))) {
-      return true;
-    }
-    for (final name in video.assignedGroupNames) {
-      if (name.trim().toLowerCase() == widget.groupName.trim().toLowerCase()) {
-        return true;
-      }
-    }
-    return false;
+    return LessonStudioDataLoader.isVideoAlreadyInCourse(
+      video: video,
+      groupName: widget.groupName,
+      courseVideoIds: _courseVideoIds,
+      courseVideoProviderIds: _courseVideoProviderIds,
+    );
   }
 
   void _toggleVideoSelection(LibraryVideoEntity video) {
@@ -235,77 +210,20 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
         _selectedVideos.remove(video.id);
         _stagedLectures.remove(video.id)?.dispose();
         _stagedOrder.remove(video.id);
-        if (_inspectingLecture?.video.id == video.id) {
-          _inspectingLecture = null;
-        }
       } else {
         _selectedVideos[video.id] = video;
         _stagedOrder.add(video.id);
 
-        // Pre-fill existing configuration if video is already part of this course
-        String initialTitle = video.title;
-        String? initialChapter =
-            _batchGlobalChapterId ?? widget.initialChapterId;
-        bool isPublished = _batchGlobalPublished;
-        LibraryMaterialEntity? initialMaterial;
-        List<_StudioAttachedExam>? initialExams;
-
         final cubit = context.read<ContentCubit>();
-        if (cubit.state is ContentLoaded) {
-          final items = (cubit.state as ContentLoaded).items;
-          final existing = items
-              .where(
-                (item) =>
-                    item.id == video.id ||
-                    item.videoId == video.id ||
-                    item.videoProviderId == video.providerVideoId,
-              )
-              .firstOrNull;
-          if (existing != null) {
-            initialTitle = existing.title;
-            isPublished = existing.isPublishedInGroup;
-            if (existing.chapterId != null) {
-              initialChapter = existing.chapterId;
-            }
-            if (existing.attachedExams.isNotEmpty) {
-              initialExams = existing.attachedExams
-                  .map(
-                    (e) => _StudioAttachedExam(
-                      examId: e.examId,
-                      examTitle: e.examTitle,
-                      isRequired: e.isRequired,
-                    ),
-                  )
-                  .toList();
-            }
-            if (existing.file != null) {
-              final f = existing.file!;
-              initialMaterial = LibraryMaterialEntity(
-                id: f.id,
-                tenantId: f.tenantId,
-                title: f.fileName.replaceAll(
-                  RegExp(r'\.pdf$', caseSensitive: false),
-                  '',
-                ),
-                fileName: f.fileName,
-                storagePath: f.storagePath,
-                fileSize: f.fileSize,
-                mimeType: f.mimeType,
-                storageProvider: f.storageProvider,
-                createdAt: f.createdAt,
-                updatedAt: f.createdAt,
-              );
-            }
-          }
-        }
+        final existingItems = cubit.state is ContentLoaded
+            ? (cubit.state as ContentLoaded).items
+            : <ContentEntity>[];
 
-        _stagedLectures[video.id] = _StagedLecture(
+        _stagedLectures[video.id] = LessonStudioPrepopulator.createStagedLecture(
           video: video,
-          initialTitle: initialTitle,
-          chapterId: initialChapter,
-          isPublished: isPublished,
-          initialExams: initialExams,
-          libraryMaterial: initialMaterial,
+          existingItems: existingItems,
+          defaultChapterId: _batchGlobalChapterId ?? widget.initialChapterId,
+          defaultPublished: _batchGlobalPublished,
         );
       }
     });
@@ -313,36 +231,15 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
 
   void _toggleFolderSelection(VideoFolderEntity folder) {
     final videos = _folderVideosCache[folder.id] ?? [];
-    if (videos.isEmpty) return;
-
-    final allSelected = videos.every((v) => _selectedVideos.containsKey(v.id));
-
     setState(() {
-      if (allSelected) {
-        // Deselect all
-        for (final v in videos) {
-          _selectedVideos.remove(v.id);
-          _stagedLectures.remove(v.id)?.dispose();
-          _stagedOrder.remove(v.id);
-          if (_inspectingLecture?.video.id == v.id) {
-            _inspectingLecture = null;
-          }
-        }
-      } else {
-        // Select all in folder
-        for (final v in videos) {
-          if (!_selectedVideos.containsKey(v.id)) {
-            _selectedVideos[v.id] = v;
-            _stagedOrder.add(v.id);
-            _stagedLectures[v.id] = _StagedLecture(
-              video: v,
-              initialTitle: v.title,
-              chapterId: _batchGlobalChapterId ?? widget.initialChapterId,
-              isPublished: _batchGlobalPublished,
-            );
-          }
-        }
-      }
+      LessonStudioDataLoader.toggleFolderSelection(
+        videos: videos,
+        selectedVideos: _selectedVideos,
+        stagedLectures: _stagedLectures,
+        stagedOrder: _stagedOrder,
+        batchGlobalChapterId: _batchGlobalChapterId ?? widget.initialChapterId,
+        batchGlobalPublished: _batchGlobalPublished,
+      );
     });
   }
 
@@ -355,13 +252,11 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
   }
 
   Future<void> _showQuickCreateChapterDialog(BuildContext context) async {
-    final l10n = context.l10n;
-    final messenger = ScaffoldMessenger.of(context);
-    final createdChapter = await QuickCreateChapterDialog.show(
+    final createdChapter =
+        await LessonStudioDataLoader.showQuickCreateChapterDialog(
       context,
-      groupId: widget.groupId,
+      widget.groupId,
     );
-
     if (createdChapter != null && mounted) {
       setState(() {
         if (!_chapters.any((c) => c.id == createdChapter.id)) {
@@ -372,39 +267,17 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
           staged.chapterId = createdChapter.id;
         }
       });
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(l10n.chapterCreatedSuccess),
-          backgroundColor: AppColors.success,
-        ),
-      );
     }
   }
 
-  Future<void> _pickPdf(_StagedLecture staged) async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['pdf'],
-      withData: true,
-    );
-    if (result != null && result.files.isNotEmpty) {
-      setState(() {
-        staged.pdfFile = result.files.first;
-        staged.pdfBytes = result.files.first.bytes;
-        staged.libraryMaterial = null;
-      });
-    }
+  Future<void> _pickPdf(StagedLecture staged) async {
+    await LessonStudioDataLoader.pickPdf(staged);
+    if (mounted) setState(() {});
   }
 
-  Future<void> _pickFromLibrary(_StagedLecture staged) async {
-    final selected = await SelectMaterialFromLibraryDialog.show(context);
-    if (selected != null && mounted) {
-      setState(() {
-        staged.libraryMaterial = selected;
-        staged.pdfFile = null;
-        staged.pdfBytes = null;
-      });
-    }
+  Future<void> _pickFromLibrary(StagedLecture staged) async {
+    await LessonStudioDataLoader.pickMaterialFromLibrary(context, staged);
+    if (mounted) setState(() {});
   }
 
   Future<void> _handleSaveUnified() async {
@@ -458,7 +331,6 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
     final isDesktop = MediaQuery.of(context).size.width >= 960;
 
     return Stack(
@@ -466,7 +338,7 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // ── Top Studio Command Header ──────────────────────────────────
+            // Top Studio Command Header
             LessonStudioHeader(
               groupName: widget.groupName,
               selectedVideosCount: _selectedVideos.length,
@@ -475,12 +347,12 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
               onSave: _handleSaveUnified,
             ),
 
-            // ── Main Workspace Body: Split View ────────────────────────────
+            // Main Workspace Body: Split View
             Expanded(
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // ── Left 1/3 Panel: Collapsible Video Bank Tree ───────────
+                  // Left Panel: Collapsible Video Bank Tree
                   AnimatedContainer(
                     duration: const Duration(milliseconds: 250),
                     curve: Curves.easeInOut,
@@ -518,11 +390,86 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
                     ),
                   ),
 
-                  // ── Right 2/3 Panel: Lecture Staging / Configuration Deck ─
+                  // Right Panel: Lecture Staging / Configuration Deck
                   Expanded(
                     child: Container(
                       color: AppColors.background,
-                      child: _buildRightWorkspace(context),
+                      child: LessonStudioDeckCoordinator(
+                        chapters: _getEffectiveChapters(context),
+                        stagedOrder: _stagedOrder,
+                        stagedLectures: _stagedLectures,
+                        batchGlobalChapterId: _batchGlobalChapterId,
+                        batchGlobalPublished: _batchGlobalPublished,
+                        isSaving: _isSaving,
+                        hasFolders: _allFolders.isNotEmpty,
+                        availableExams: _availableExams,
+                        onSelectFirstFolder: () {
+                          if (_allFolders.isNotEmpty) {
+                            _toggleFolderSelection(_allFolders.first);
+                          }
+                        },
+                        onClearSelection: () {
+                          setState(() {
+                            for (final s in _stagedLectures.values) {
+                              s.dispose();
+                            }
+                            _stagedLectures.clear();
+                            _stagedOrder.clear();
+                            _selectedVideos.clear();
+                          });
+                        },
+                        onBatchChapterChanged: (val) {
+                          setState(() {
+                            _batchGlobalChapterId = val;
+                            for (final s in _stagedLectures.values) {
+                              s.chapterId = val;
+                            }
+                          });
+                        },
+                        onQuickCreateChapter: () =>
+                            _showQuickCreateChapterDialog(context),
+                        onBatchPublishChanged: (val) {
+                          setState(() {
+                            _batchGlobalPublished = val;
+                            for (final s in _stagedLectures.values) {
+                              s.isPublished = val;
+                            }
+                          });
+                        },
+                        onReorder: _onReorder,
+                        onSaveUnified: _handleSaveUnified,
+                        onRemoveVideo: (staged) =>
+                            _toggleVideoSelection(staged.video),
+                        onPickFromLibrary: _pickFromLibrary,
+                        onPickPdf: _pickPdf,
+                        onChapterChanged: (staged, val) =>
+                            setState(() => staged.chapterId = val),
+                        onPublishChanged: (staged, val) =>
+                            setState(() => staged.isPublished = val),
+                        onAddExam: (staged, examId, examTitle) {
+                          setState(() {
+                            staged.attachedExams.add(
+                              StudioAttachedExam(
+                                examId: examId,
+                                examTitle: examTitle,
+                                isRequired: true,
+                              ),
+                            );
+                          });
+                        },
+                        onRemoveExam: (staged, examIndex) {
+                          setState(() {
+                            staged.attachedExams.removeAt(examIndex);
+                          });
+                        },
+                        onRemovePdf: (staged) {
+                          setState(() {
+                            staged.libraryMaterial = null;
+                            staged.pdfFile = null;
+                            staged.pdfBytes = null;
+                          });
+                        },
+                      ),
                     ),
                   ),
                 ],
@@ -532,146 +479,11 @@ class _LessonStudioWorkspaceState extends State<LessonStudioWorkspace> {
         ),
 
         // Progress Modal Overlay when saving
-        if (_isSaving)
-          Container(
-            color: Colors.black.withValues(alpha: 0.6),
-            child: Center(
-              child: AppCard(
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.s32),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const AppLoadingView.signature(),
-                      const SizedBox(height: AppSpacing.s20),
-                      Text(
-                        _savingProgressMessage ?? l10n.savingChanges,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
+        LessonStudioProgressOverlay(
+          isSaving: _isSaving,
+          savingProgressMessage: _savingProgressMessage,
+        ),
       ],
-    );
-  }
-
-  // ── Collapsed Sidebar View ───────────────────────────────────────────────
-  Widget _buildRightWorkspace(BuildContext context) {
-    if (_stagedOrder.isEmpty) {
-      return _buildNoVideosPlaceholder(context);
-    }
-    return _buildUnifiedStagingDeck(context);
-  }
-
-  // ── Placeholder when 0 videos selected ───────────────────────────────────
-  Widget _buildNoVideosPlaceholder(BuildContext context) {
-    return LessonStudioNoVideosPlaceholder(
-      hasFolders: _allFolders.isNotEmpty,
-      onSelectFirstFolder: () {
-        if (_allFolders.isNotEmpty) {
-          _toggleFolderSelection(_allFolders.first);
-        }
-      },
-    );
-  }
-
-  // ── Unified Staging Deck ────────────────────────────────────────────────
-  Widget _buildUnifiedStagingDeck(BuildContext context) {
-    return LessonStudioStagingDeck(
-      chapters: _getEffectiveChapters(context),
-      stagedOrder: _stagedOrder,
-      stagedLectures: _stagedLectures,
-      batchGlobalChapterId: _batchGlobalChapterId,
-      batchGlobalPublished: _batchGlobalPublished,
-      isSaving: _isSaving,
-      onClearSelection: () {
-        setState(() {
-          for (final s in _stagedLectures.values) {
-            s.dispose();
-          }
-          _stagedLectures.clear();
-          _stagedOrder.clear();
-          _selectedVideos.clear();
-        });
-      },
-      onBatchChapterChanged: (val) {
-        setState(() {
-          _batchGlobalChapterId = val;
-          for (final s in _stagedLectures.values) {
-            s.chapterId = val;
-          }
-        });
-      },
-      onQuickCreateChapter: () => _showQuickCreateChapterDialog(context),
-      onBatchPublishChanged: (val) {
-        setState(() {
-          _batchGlobalPublished = val;
-          for (final s in _stagedLectures.values) {
-            s.isPublished = val;
-          }
-        });
-      },
-      onReorder: _onReorder,
-      onSaveUnified: _handleSaveUnified,
-      cardBuilder: (ctx, staged, index, isOnlyOne) => _buildUnifiedLectureCard(
-        ctx,
-        staged,
-        index,
-        _getEffectiveChapters(context),
-        isOnlyOne: isOnlyOne,
-      ),
-    );
-  }
-
-  // ── Unified Lecture Card (Single & Multi Mode) ───────────────────────────
-  Widget _buildUnifiedLectureCard(
-    BuildContext context,
-    _StagedLecture staged,
-    int index,
-    List<ChapterEntity> chapters, {
-    required bool isOnlyOne,
-  }) {
-    return LessonStudioLectureCard(
-      staged: staged,
-      index: index,
-      chapters: chapters,
-      isOnlyOne: isOnlyOne,
-      availableExams: _availableExams,
-      onRemoveVideo: () => _toggleVideoSelection(staged.video),
-      onPickFromLibrary: () => _pickFromLibrary(staged),
-      onPickPdf: () => _pickPdf(staged),
-      onChapterChanged: (val) => setState(() => staged.chapterId = val),
-      onPublishChanged: (val) => setState(() => staged.isPublished = val),
-      onAddExam: (examId, examTitle) {
-        setState(() {
-          staged.attachedExams.add(
-            StudioAttachedExam(
-              examId: examId,
-              examTitle: examTitle,
-              isRequired: true,
-            ),
-          );
-        });
-      },
-      onRemoveExam: (examIndex) {
-        setState(() {
-          staged.attachedExams.removeAt(examIndex);
-        });
-      },
-      onRemovePdf: () {
-        setState(() {
-          staged.libraryMaterial = null;
-          staged.pdfFile = null;
-          staged.pdfBytes = null;
-        });
-      },
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import '../../domain/repositories/exams_repository.dart';
+import '../models/create_exam_draft_models.dart';
 
 /// Coordinates debounced auto-saving, retrieving, and clearing of exam creation drafts.
 class CreateExamDraftCoordinator {
@@ -74,5 +75,34 @@ class CreateExamDraftCoordinator {
   void dispose() {
     _debounceTimer?.cancel();
     _debounceTimer = null;
+  }
+
+  /// Evaluates whether the current form state contains any meaningful user inputs.
+  static bool hasMeaningfulContent({
+    required String title,
+    required List<CreateExamDraftQuestion> questions,
+  }) {
+    final hasTitle = title.trim().isNotEmpty;
+    final hasAnyQuestionText = questions.any((q) =>
+        q.textController.text.trim().isNotEmpty ||
+        q.imageUrl != null ||
+        q.options.any((o) => o.controller.text.trim().isNotEmpty));
+    return hasTitle || hasAnyQuestionText || questions.length > 1;
+  }
+
+  /// Disposes existing draft questions and repopulates the list with restored questions.
+  static void restoreQuestions({
+    required List<CreateExamDraftQuestion> targetQuestions,
+    required List<CreateExamDraftQuestion> newQuestions,
+    required void Function(CreateExamDraftQuestion) onBindListeners,
+  }) {
+    for (final q in targetQuestions) {
+      q.dispose();
+    }
+    targetQuestions.clear();
+    for (final q in newQuestions) {
+      onBindListeners(q);
+      targetQuestions.add(q);
+    }
   }
 }

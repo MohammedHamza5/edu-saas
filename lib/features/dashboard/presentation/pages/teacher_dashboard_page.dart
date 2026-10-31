@@ -1,25 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
+
 import '../../../../core/config/tenant_registry.dart';
-import '../../../../core/utils/cache_manager.dart';
-import '../../../auth/presentation/cubit/auth_cubit.dart';
-import '../../../auth/presentation/cubit/auth_state.dart';
+import '../../../../core/config/tenant_resolver.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/extensions/responsive_context_extension.dart';
-import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/app_typography.dart';
 import '../../../../core/theme/tenant_theme_cubit.dart';
+import '../../../../core/utils/cache_manager.dart';
 import '../../../../core/widgets/academic_hero_banner.dart';
-import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/responsive_container.dart';
-import '../../../../core/widgets/responsive_grid.dart';
+import '../../../auth/presentation/cubit/auth_cubit.dart';
+import '../../../auth/presentation/cubit/auth_state.dart';
 import '../../../groups/presentation/cubit/groups_cubit.dart';
 import '../../../groups/presentation/cubit/groups_state.dart';
-import '../../../groups/presentation/widgets/create_group_dialog.dart';
-import '../../../groups/presentation/widgets/interactive_group_card.dart';
 import '../../../notifications/presentation/cubit/notifications_cubit.dart';
 import '../../../notifications/presentation/cubit/notifications_state.dart';
 import '../../../students/presentation/cubit/students_cubit.dart';
@@ -28,9 +23,10 @@ import '../cubit/teacher_dashboard_cubit.dart';
 import '../cubit/teacher_dashboard_state.dart';
 import '../widgets/demo_sandbox_banner.dart';
 import '../widgets/teacher_action_radar_cards.dart';
+import '../widgets/teacher_dashboard_groups_section.dart';
 import '../widgets/teacher_dashboard_quick_actions_hub.dart';
 import '../widgets/teacher_dashboard_services_grid.dart';
-import '../../../../core/config/tenant_resolver.dart';
+import '../widgets/teacher_dashboard_stats_grid.dart';
 
 class TeacherDashboardPage extends StatefulWidget {
   const TeacherDashboardPage({super.key});
@@ -169,8 +165,6 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                 badgeText: branding.localizedTagline(context),
               ),
 
-              const SizedBox(height: AppSpacing.s12),
-
               const SizedBox(height: AppSpacing.s16),
 
               // Daily Quick Actions Hub (High Priority Actions)
@@ -200,247 +194,12 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
               ),
               const SizedBox(height: AppSpacing.s16),
 
-              // 4. Responsive Stat Cards Grid (Connected to Cubits)
-              ResponsiveGrid(
-                mobileColumns: 2,
-                tabletColumns: 2,
-                desktopColumns: 4,
-                spacing: AppSpacing.s16,
-                runSpacing: AppSpacing.s16,
-                children: [
-                  // Card 1: Total Students
-                  AppCard(
-                    variant: AppCardVariant.elevated,
-                    padding: const EdgeInsets.all(AppSpacing.s12),
-                    onTap: () => context.go(AppRoutes.studentsList),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Container(
-                              width: 32,
-                              height: 32,
-                              decoration: BoxDecoration(
-                                color: AppColors.primaryLight.withValues(
-                                  alpha: 0.15,
-                                ),
-                                borderRadius: BorderRadius.circular(
-                                  AppSpacing.radiusSmall,
-                                ),
-                              ),
-                              child: const Icon(
-                                Icons.people_alt_rounded,
-                                color: AppColors.primary,
-                                size: 18,
-                              ),
-                            ),
-                            Flexible(
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: pendingStudentsCount > 0
-                                      ? AppColors.warningLight
-                                      : AppColors.successLight,
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: Text(
-                                  pendingStudentsCount > 0
-                                      ? context.l10n.pendingLabel(
-                                          pendingStudentsCount,
-                                        )
-                                      : context.l10n.allActive,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                    color: pendingStudentsCount > 0
-                                        ? AppColors.warning
-                                        : AppColors.success,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: AppSpacing.s12),
-                        Text(
-                          context.l10n.totalStudents,
-                          style: const TextStyle(
-                            color: AppColors.textSecondary,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.s4),
-                        Text(
-                          totalStudents,
-                          style: AppTypography.statFigureLarge,
-                        ),
-                        const SizedBox(height: AppSpacing.s4),
-                        Text(
-                          context.l10n.viewStudentsAndApprovals,
-                          style: const TextStyle(
-                            color: Color(0xFF38BDF8),
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Card 2: Active Groups
-                  AppCard(
-                    variant: AppCardVariant.elevated,
-                    padding: const EdgeInsets.all(AppSpacing.s12),
-                    onTap: () => context.go(AppRoutes.groupsList),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Container(
-                              width: 32,
-                              height: 32,
-                              decoration: BoxDecoration(
-                                color: AppColors.primaryLight.withValues(
-                                  alpha: 0.15,
-                                ),
-                                borderRadius: BorderRadius.circular(
-                                  AppSpacing.radiusSmall,
-                                ),
-                              ),
-                              child: const Icon(
-                                Icons.category_rounded,
-                                color: AppColors.primary,
-                                size: 18,
-                              ),
-                            ),
-                            Flexible(
-                              child: Text(
-                                groupsTracks,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.primary,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: AppSpacing.s12),
-                        Text(
-                          context.l10n.activeGroups,
-                          style: const TextStyle(
-                            color: AppColors.textSecondary,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.s4),
-                        Text(totalGroups, style: AppTypography.statFigureLarge),
-                        const SizedBox(height: AppSpacing.s4),
-                        Text(
-                          context.l10n.clickToManageAndControl,
-                          style: const TextStyle(
-                            color: Color(0xFF38BDF8),
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Card 3: Attendance
-                  AppCard(
-                    variant: AppCardVariant.elevated,
-                    padding: const EdgeInsets.all(AppSpacing.s12),
-                    onTap: () => context.go(AppRoutes.teacherAttendance),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Container(
-                              width: 32,
-                              height: 32,
-                              decoration: BoxDecoration(
-                                color: AppColors.successLight,
-                                borderRadius: BorderRadius.circular(
-                                  AppSpacing.radiusSmall,
-                                ),
-                              ),
-                              child: const Icon(
-                                Icons.verified_rounded,
-                                color: AppColors.success,
-                                size: 18,
-                              ),
-                            ),
-                            Flexible(
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.successLight,
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: Text(
-                                  context.l10n.excellentStatus,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.success,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: AppSpacing.s12),
-                        Text(
-                          context.l10n.cumulativeAttendanceRate,
-                          style: const TextStyle(
-                            color: AppColors.textSecondary,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.s4),
-                        Text(
-                          context.l10n.tapToView,
-                          style: AppTypography.statFigureLarge,
-                        ),
-                        const SizedBox(height: AppSpacing.s4),
-                        Text(
-                          context.l10n.lectureWatchingAnalytics,
-                          style: const TextStyle(
-                            color: Color(0xFF38BDF8),
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Card 4: Notifications Center (Isolated Rebuild Card)
-                  const TeacherNotificationsStatCard(),
-                ],
+              // 4. Responsive Stat Cards Grid
+              TeacherDashboardStatsGrid(
+                totalStudents: totalStudents,
+                pendingStudentsCount: pendingStudentsCount,
+                totalGroups: totalGroups,
+                groupsTracks: groupsTracks,
               ),
 
               const SizedBox(height: AppSpacing.s32),
@@ -449,107 +208,10 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
               const TeacherDashboardServicesGrid(),
 
               // 6. Section: Active Groups List & Fast Navigation
-              if (groupsState is GroupsLoaded &&
-                  groupsState.groups.isNotEmpty) ...[
-                const SizedBox(height: AppSpacing.s32),
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    final isNarrow = constraints.maxWidth < 450;
-                    if (isNarrow) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.layers_rounded,
-                                color: AppColors.primary,
-                                size: 22,
-                              ),
-                              const SizedBox(width: AppSpacing.s8),
-                              Expanded(
-                                child: Text(
-                                  context.l10n.currentlyActiveStudyGroups,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w800,
-                                    color: AppColors.textPrimary,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: AppSpacing.s8),
-                          Align(
-                            alignment: AlignmentDirectional.centerEnd,
-                            child: TextButton.icon(
-                              icon: const Icon(Icons.add_rounded, size: 16),
-                              label: Text(context.l10n.addGroup),
-                              onPressed: () => CreateGroupDialog.show(context),
-                            ),
-                          ),
-                        ],
-                      );
-                    }
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.layers_rounded,
-                                color: AppColors.primary,
-                                size: 22,
-                              ),
-                              const SizedBox(width: AppSpacing.s8),
-                              Expanded(
-                                child: Text(
-                                  context.l10n.currentlyActiveStudyGroups,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w800,
-                                    color: AppColors.textPrimary,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: AppSpacing.s12),
-                        TextButton.icon(
-                          icon: const Icon(Icons.add_rounded, size: 16),
-                          label: Text(context.l10n.addGroup),
-                          onPressed: () => CreateGroupDialog.show(context),
-                        ),
-                      ],
-                    );
-                  },
+              if (groupsState is GroupsLoaded)
+                TeacherDashboardGroupsSection(
+                  groups: groupsState.groups,
                 ),
-                const SizedBox(height: AppSpacing.s12),
-                ResponsiveGrid(
-                  mobileColumns: 1,
-                  tabletColumns: 2,
-                  desktopColumns: 3,
-                  spacing: AppSpacing.s16,
-                  runSpacing: AppSpacing.s16,
-                  children: groupsState.groups
-                      .map(
-                        (group) => InteractiveGroupCard(
-                          group: group,
-                          onTap: () => context.push(
-                            '${AppRoutes.groupsList}/${group.id}',
-                            extra: group,
-                          ),
-                        ),
-                      )
-                      .toList(),
-                ),
-              ],
 
               const SizedBox(height: AppSpacing.s48),
             ],
@@ -559,4 +221,3 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
     );
   }
 }
-

@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
-import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_badge.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../domain/entities/content_entity.dart';
+import 'content_item_card_attachments_view.dart';
 import 'content_item_card_helpers.dart';
+import 'content_item_card_locked_banner.dart';
+import 'content_item_card_menu.dart';
+import 'content_item_card_reorder_controls.dart';
 
+/// Card widget displaying a single learning material / content item.
 class ContentItemCard extends StatelessWidget {
   final ContentEntity content;
   final bool isTeacher;
@@ -56,9 +59,7 @@ class ContentItemCard extends StatelessWidget {
   Color get _typeColor {
     return switch (content.type) {
       ContentType.video => AppColors.primary,
-      ContentType.pdf => const Color(
-        0xFFEA580C,
-      ), // Deep Orange / Academic Math Red
+      ContentType.pdf => const Color(0xFFEA580C),
       ContentType.image => Colors.purple,
       ContentType.assignment => AppColors.warning,
       ContentType.exam => AppColors.success,
@@ -76,8 +77,7 @@ class ContentItemCard extends StatelessWidget {
     return AppCard(
       variant: AppCardVariant.elevated,
       padding: const EdgeInsets.all(AppSpacing.s16),
-      onTap:
-          onTap ??
+      onTap: onTap ??
           (hasFile && onOpenFile != null
               ? () => onOpenFile!(content.file!.storagePath)
               : null),
@@ -86,52 +86,12 @@ class ContentItemCard extends StatelessWidget {
         children: [
           // Reordering controls for Teacher
           if (isTeacher && index != null) ...[
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ReorderableDragStartListener(
-                  index: index!,
-                  child: const Padding(
-                    padding: EdgeInsetsDirectional.only(
-                      end: AppSpacing.s4,
-                      top: 4,
-                      bottom: 2,
-                    ),
-                    child: Icon(
-                      Icons.drag_indicator_rounded,
-                      color: AppColors.textMuted,
-                      size: 20,
-                    ),
-                  ),
-                ),
-                if (canMoveUp || canMoveDown) ...[
-                  IconButton(
-                    icon: const Icon(Icons.keyboard_arrow_up_rounded, size: 18),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(
-                      minWidth: 24,
-                      minHeight: 22,
-                    ),
-                    visualDensity: VisualDensity.compact,
-                    tooltip: context.l10n.moveUpAction,
-                    onPressed: canMoveUp ? onMoveUp : null,
-                  ),
-                  IconButton(
-                    icon: const Icon(
-                      Icons.keyboard_arrow_down_rounded,
-                      size: 18,
-                    ),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(
-                      minWidth: 24,
-                      minHeight: 22,
-                    ),
-                    visualDensity: VisualDensity.compact,
-                    tooltip: context.l10n.moveDownAction,
-                    onPressed: canMoveDown ? onMoveDown : null,
-                  ),
-                ],
-              ],
+            ContentItemCardReorderControls(
+              index: index!,
+              canMoveUp: canMoveUp,
+              canMoveDown: canMoveDown,
+              onMoveUp: onMoveUp,
+              onMoveDown: onMoveDown,
             ),
           ],
 
@@ -251,64 +211,7 @@ class ContentItemCard extends StatelessWidget {
                 // Prerequisite Locked Notification Banner
                 if (!isTeacher && content.isLocked) ...[
                   const SizedBox(height: AppSpacing.s8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.error.withValues(alpha: 0.08),
-                      border: Border.all(
-                        color: AppColors.error.withValues(alpha: 0.3),
-                      ),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.lock_rounded,
-                          size: 16,
-                          color: AppColors.error,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            context.l10n.mustPassExamToUnlock(
-                              content.prerequisiteExamTitle ??
-                                  context.l10n.prerequisiteExamBadge,
-                              content.prerequisitePassingScore ?? 60,
-                            ),
-                            style: const TextStyle(
-                              fontSize: 11,
-                              color: AppColors.error,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                        if (content.prerequisiteExamId != null)
-                          TextButton(
-                            onPressed: () =>
-                                context.push(AppRoutes.studentExams),
-                            style: TextButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 2,
-                              ),
-                              minimumSize: Size.zero,
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            ),
-                            child: Text(
-                              context.l10n.takeRequiredExamAction,
-                              style: const TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.error,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
+                  ContentItemCardLockedBanner(content: content),
                 ],
 
                 // Associated Lesson Quiz Gating Banner
@@ -381,157 +284,18 @@ class ContentItemCard extends StatelessWidget {
 
                 const SizedBox(height: AppSpacing.s10),
 
-                // Attachment File Link (if attached for document/image)
-                if (hasFile) ...[
-                  const SizedBox(height: AppSpacing.s6),
-                  InkWell(
-                    onTap: onOpenFile != null
-                        ? () => onOpenFile!(content.file!.storagePath)
-                        : null,
-                    borderRadius: BorderRadius.circular(4),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 2),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.attach_file_rounded,
-                            size: 14,
-                            color: AppColors.primary,
-                          ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              '${content.file!.fileName} (${content.file!.formattedFileSize})',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.primary,
-                                decoration: TextDecoration.underline,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-
-                // Supplementary PDF Material (for Video lessons)
-                if (content.type == ContentType.video &&
-                    content.file != null) ...[
-                  const SizedBox(height: AppSpacing.s8),
-                  InkWell(
-                    onTap: onOpenFile != null
-                        ? () => onOpenFile!(content.file!.storagePath)
-                        : null,
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.s8,
-                        vertical: 5,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withAlpha(12),
-                        borderRadius: BorderRadius.circular(
-                          AppSpacing.radiusSmall,
-                        ),
-                        border: Border.all(
-                          color: AppColors.primary.withAlpha(40),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.picture_as_pdf_rounded,
-                            size: 14,
-                            color: Color(0xFFEA580C),
-                          ),
-                          const SizedBox(width: 5),
-                          Flexible(
-                            child: Text(
-                              '${context.l10n.videoMaterialPdfBadge}: ${content.file!.fileName} (${content.file!.formattedFileSize})',
-                              style: const TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.primary,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          if (onOpenFile != null) ...[
-                            const SizedBox(width: 4),
-                            const Icon(
-                              Icons.open_in_new_rounded,
-                              size: 12,
-                              color: AppColors.primary,
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-
-                // Video Status / Upload Action for Teacher
-                if (isTeacher && content.type == ContentType.video) ...[
-                  const SizedBox(height: AppSpacing.s8),
-                  // Case A: video already uploaded → show status badge
-                  if (content.hasVideo)
-                    ContentVideoStatusBadge(
-                      status: content.videoStatus ?? 'uploading',
-                      onReplace: onUploadVideo,
-                    )
-                  // Case B: no video yet → show upload button
-                  else if (onUploadVideo != null)
-                    InkWell(
-                      onTap: onUploadVideo,
-                      borderRadius: BorderRadius.circular(
-                        AppSpacing.radiusSmall,
-                      ),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withAlpha(20),
-                          borderRadius: BorderRadius.circular(
-                            AppSpacing.radiusSmall,
-                          ),
-                          border: Border.all(
-                            color: AppColors.primary.withAlpha(60),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.cloud_upload_rounded,
-                              size: 16,
-                              color: AppColors.primary,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              context.l10n.uploadVideoAction,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.primary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                ],
+                // File Attachments / Supplementary PDF / Video Status View
+                ContentItemCardAttachmentsView(
+                  content: content,
+                  isTeacher: isTeacher,
+                  hasFile: hasFile,
+                  onOpenFile: onOpenFile,
+                  onUploadVideo: onUploadVideo,
+                ),
 
                 const SizedBox(height: AppSpacing.s8),
 
-                // Footer Row: Clean Date on left, 3-dots Menu on right (No eye icon, no crushing)
+                // Footer Row: Clean Date on left, 3-dots Menu or Preview on right
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -554,135 +318,17 @@ class ContentItemCard extends StatelessWidget {
                       ),
                     ),
 
-                    // Actions: Only the 3-dots menu (Clean & uncluttered)
+                    // Actions: Only the 3-dots menu for Teacher, or Preview for Student
                     if (isTeacher)
-                      PopupMenuButton<String>(
-                        icon: const Icon(
-                          Icons.more_vert_rounded,
-                          size: 20,
-                          color: AppColors.textSecondary,
-                        ),
-                        onSelected: (value) {
-                          switch (value) {
-                            case 'upload_video':
-                              onUploadVideo?.call();
-                            case 'edit':
-                              onEdit?.call();
-                            case 'toggle_publish':
-                              onTogglePublish?.call();
-                            case 'toggle_archive':
-                              onToggleArchive?.call();
-                            case 'open_file':
-                              if (hasFile && onOpenFile != null) {
-                                onOpenFile!(content.file!.storagePath);
-                              }
-                            case 'delete':
-                              onDelete?.call();
-                          }
-                        },
-                        itemBuilder: (ctx) => [
-                          if (content.type == ContentType.video &&
-                              onUploadVideo != null)
-                            PopupMenuItem(
-                              value: 'upload_video',
-                              child: Row(
-                                children: [
-                                  const Icon(
-                                    Icons.cloud_upload_rounded,
-                                    size: 16,
-                                    color: AppColors.primary,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    ctx.l10n.uploadUpdateLectureVideo,
-                                    style: const TextStyle(
-                                      color: AppColors.primary,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          if (hasFile)
-                            PopupMenuItem(
-                              value: 'open_file',
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.download_rounded, size: 16),
-                                  const SizedBox(width: 8),
-                                  Text(ctx.l10n.downloadOrOpenAction),
-                                ],
-                              ),
-                            ),
-                          PopupMenuItem(
-                            value: 'edit',
-                            child: Row(
-                              children: [
-                                const Icon(Icons.edit_outlined, size: 16),
-                                const SizedBox(width: 8),
-                                Text(ctx.l10n.editMetadataAction),
-                              ],
-                            ),
-                          ),
-                          PopupMenuItem(
-                            value: 'toggle_publish',
-                            child: Row(
-                              children: [
-                                Icon(
-                                  content.isPublished
-                                      ? Icons.visibility_off_outlined
-                                      : Icons.visibility_outlined,
-                                  size: 16,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  content.isPublished
-                                      ? ctx.l10n.convertToDraft
-                                      : ctx.l10n.publishToStudents,
-                                ),
-                              ],
-                            ),
-                          ),
-                          PopupMenuItem(
-                            value: 'toggle_archive',
-                            child: Row(
-                              children: [
-                                Icon(
-                                  content.isArchived
-                                      ? Icons.unarchive_outlined
-                                      : Icons.archive_outlined,
-                                  size: 16,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  content.isArchived
-                                      ? ctx.l10n.unarchiveMaterial
-                                      : ctx.l10n.archiveMaterial,
-                                ),
-                              ],
-                            ),
-                          ),
-                          const PopupMenuDivider(),
-                          PopupMenuItem(
-                            value: 'delete',
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  Icons.delete_outline,
-                                  size: 16,
-                                  color: AppColors.error,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  ctx.l10n.permanentDelete,
-                                  style: const TextStyle(
-                                    color: AppColors.error,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
+                      ContentItemCardMenu(
+                        content: content,
+                        hasFile: hasFile,
+                        onUploadVideo: onUploadVideo,
+                        onEdit: onEdit,
+                        onTogglePublish: onTogglePublish,
+                        onToggleArchive: onToggleArchive,
+                        onOpenFile: onOpenFile,
+                        onDelete: onDelete,
                       )
                     else if (hasFile)
                       IconButton(
@@ -705,5 +351,4 @@ class ContentItemCard extends StatelessWidget {
       ),
     );
   }
-
 }

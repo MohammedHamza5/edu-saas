@@ -1,19 +1,16 @@
 import 'dart:math' as math;
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
+import '../../../../core/network/supabase_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/network/supabase_service.dart';
-import '../../../../core/widgets/app_badge.dart';
-import '../../../../core/widgets/app_button.dart';
-import '../../../../core/widgets/app_card.dart';
-import '../../../../core/widgets/app_loading_view.dart';
 import '../../../../core/widgets/forensic_watermark_overlay.dart';
-import '../../../../core/utils/pdf_launcher_helper.dart';
 import '../../domain/entities/content_entity.dart';
-import 'secure_pdf_viewer.dart';
+import 'material_viewer_content_body.dart';
+import 'material_viewer_header.dart';
+import 'material_viewer_metadata_card.dart';
+import 'material_viewer_security_notice.dart';
 import 'video_pointer_events_helper.dart';
 
 /// An academic, highly polished modal sheet or dialog to view and download
@@ -255,453 +252,49 @@ class _MaterialViewerSheetState extends State<MaterialViewerSheet> {
                   ),
                 ),
 
-            // Header
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: color.withAlpha(25),
-                    borderRadius: BorderRadius.circular(
-                      AppSpacing.radiusMedium,
-                    ),
-                    border: Border.all(color: color.withAlpha(60)),
-                  ),
-                  child: Icon(icon, color: color, size: 28),
-                ),
-                const SizedBox(width: AppSpacing.s12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.content.title,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: AppSpacing.s4),
-                      Wrap(
-                        spacing: AppSpacing.s6,
-                        runSpacing: AppSpacing.s4,
-                        children: [
-                          AppBadge(
-                            label: widget.content.type.localizedLabel(context),
-                            variant: AppBadgeVariant.neutral,
-                          ),
-                          if (file != null && file.fileSize > 0)
-                            AppBadge(
-                              label: file.formattedFileSize,
-                              variant: AppBadgeVariant.neutral,
-                            ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                if (isPdf && _signedUrl != null) ...[
-                  IconButton(
-                    icon: const Icon(Icons.open_in_new_rounded, size: 20),
-                    onPressed: () => PdfLauncherHelper.launchPdfUrl(_signedUrl!, context: context),
-                    tooltip: context.l10n.openPdfInNewTabTooltip,
-                  ),
-                ],
-                if (isTeacher && isPdf && _signedUrl != null) ...[
-                  IconButton(
-                    icon: const Icon(Icons.copy_rounded, size: 18),
-                    onPressed: _copyUrl,
-                    tooltip: context.l10n.copySecureUrlAction,
-                  ),
-                ],
-                Container(
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceContainerHighest.withAlpha(140),
-                    shape: BoxShape.circle,
-                  ),
-                  child: IconButton(
-                    icon: const Icon(Icons.close_rounded),
-                    onPressed: () => Navigator.of(context).pop(),
-                    tooltip: context.l10n.closeTooltip,
-                    padding: const EdgeInsets.all(AppSpacing.s8),
-                    constraints: const BoxConstraints(
-                      minWidth: 44,
-                      minHeight: 44,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              // 1. Header
+              MaterialViewerHeader(
+                content: widget.content,
+                color: color,
+                icon: icon,
+                isPdf: isPdf,
+                isTeacher: isTeacher,
+                signedUrl: _signedUrl,
+                onCopyUrl: _copyUrl,
+                onClose: () => Navigator.of(context).pop(),
+              ),
 
-            if (widget.content.description != null &&
-                widget.content.description!.isNotEmpty) ...[
+              // 2. Metadata Cards (Description + File details)
+              MaterialViewerMetadataCard(
+                description: widget.content.description,
+                file: file,
+                color: color,
+                isPdf: isPdf,
+                isImage: isImage,
+              ),
+
+              const SizedBox(height: AppSpacing.s16),
+
+              // 3. Content Body (Loading / Error / Image / PDF / Actions)
+              MaterialViewerContentBody(
+                isLoadingUrl: _isLoadingUrl,
+                errorMessage: _errorMessage,
+                signedUrl: _signedUrl,
+                isDesktop: isDesktop,
+                isPdf: isPdf,
+                isImage: isImage,
+                isTeacher: isTeacher,
+                docTitle: widget.content.title,
+                watermarkText: _resolveWatermarkText(),
+                onRetry: _fetchUrl,
+                onCopyUrl: _copyUrl,
+              ),
+
               const SizedBox(height: AppSpacing.s12),
-              AppCard(
-                variant: AppCardVariant.standard,
-                padding: const EdgeInsets.all(AppSpacing.s12),
-                child: Text(
-                  widget.content.description!,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: AppColors.textSecondary,
-                    height: 1.5,
-                  ),
-                ),
-              ),
+
+              // 4. Academic security notice
+              MaterialViewerSecurityNotice(isTeacher: isTeacher),
             ],
-
-            const SizedBox(height: AppSpacing.s16),
-
-            // File metadata card
-            if (file != null) ...[
-              AppCard(
-                variant: AppCardVariant.standard,
-                padding: const EdgeInsets.all(AppSpacing.s12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          isPdf
-                              ? Icons.description_rounded
-                              : isImage
-                              ? Icons.photo_library_rounded
-                              : Icons.file_present_rounded,
-                          color: color,
-                          size: 20,
-                        ),
-                        const SizedBox(width: AppSpacing.s8),
-                        Expanded(
-                          child: Text(
-                            file.fileName,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 13,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                    if (file.fileSize > 0) ...[
-                      const Divider(height: AppSpacing.s16),
-                      Wrap(
-                        alignment: WrapAlignment.spaceBetween,
-                        spacing: AppSpacing.s12,
-                        runSpacing: 4,
-                        children: [
-                          Text(
-                            context.l10n.fileSizeLabel(file.formattedFileSize),
-                            style: const TextStyle(
-                              fontSize: 11,
-                              color: AppColors.textMuted,
-                            ),
-                          ),
-                          Text(
-                            context.l10n.fileTypeLabel(
-                              file.mimeType.split('/').last.toUpperCase(),
-                            ),
-                            style: const TextStyle(
-                              fontSize: 11,
-                              color: AppColors.textMuted,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ],
-
-            const SizedBox(height: AppSpacing.s16),
-
-            // State of URL loading or action
-            if (_isLoadingUrl) ...[
-              Container(
-                height: isDesktop ? 340 : 200,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceVariant.withAlpha(20),
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                  border: Border.all(color: AppColors.border.withAlpha(60)),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const AppLoadingView.compact(size: 28),
-                    const SizedBox(height: AppSpacing.s12),
-                    Text(
-                      context.l10n.preparingSecureUrl,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: AppColors.textSecondary,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: AppSpacing.s12),
-            ] else if (_errorMessage != null) ...[
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.s8),
-                decoration: BoxDecoration(
-                  color: AppColors.error.withAlpha(20),
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.error_outline_rounded,
-                      color: AppColors.error,
-                      size: 18,
-                    ),
-                    const SizedBox(width: AppSpacing.s8),
-                    Expanded(
-                      child: Text(
-                        _errorMessage!,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: AppColors.error,
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.refresh_rounded, size: 18),
-                      onPressed: _fetchUrl,
-                      tooltip: context.l10n.retryAction,
-                    ),
-                  ],
-                ),
-              ),
-            ] else if (_signedUrl != null) ...[
-              if (isImage) ...[
-                Container(
-                  margin: const EdgeInsets.only(bottom: AppSpacing.s16),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(
-                      AppSpacing.radiusMedium,
-                    ),
-                    border: Border.all(color: AppColors.border),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(
-                      AppSpacing.radiusMedium,
-                    ),
-                    child: CachedNetworkImage(
-                      imageUrl: _signedUrl!,
-                      fit: BoxFit.contain,
-                      maxHeightDiskCache: 1000,
-                      placeholder: (_, __) => const SizedBox(
-                        height: 180,
-                        child: Center(child: AppLoadingView.compact()),
-                      ),
-                      errorWidget: (_, __, ___) => const SizedBox(
-                        height: 120,
-                        child: Center(
-                          child: Icon(
-                            Icons.broken_image_rounded,
-                            size: 36,
-                            color: AppColors.textMuted,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-              if (isPdf) ...[
-                if (_signedUrl != null) ...[
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: AppSpacing.s10),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.s12,
-                        vertical: AppSpacing.s8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withAlpha(16),
-                        borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                        border: Border.all(color: AppColors.primary.withAlpha(45)),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.rocket_launch_rounded,
-                            size: 18,
-                            color: AppColors.primary,
-                          ),
-                          const SizedBox(width: AppSpacing.s8),
-                          Expanded(
-                            child: Text(
-                              context.l10n.openPdfInNewTabTooltip,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                                color: AppColors.textPrimary,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          const SizedBox(width: AppSpacing.s8),
-                          AppButton(
-                            text: context.l10n.openPdfInNewTab,
-                            icon: Icons.open_in_new_rounded,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppSpacing.s12,
-                              vertical: AppSpacing.s6,
-                            ),
-                            onPressed: () => PdfLauncherHelper.launchPdfUrl(
-                              _signedUrl!,
-                              context: context,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: AppSpacing.s12),
-                    child: buildSecurePdfViewer(
-                      pdfUrl: _signedUrl!,
-                      watermarkText: _resolveWatermarkText(),
-                      docTitle: widget.content.title,
-                    ),
-                  ),
-                ),
-              ],
-              if (isTeacher) ...[
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    final isVeryNarrow = constraints.maxWidth < 340;
-                    if (isVeryNarrow) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          AppButton(
-                            text: context.l10n.downloadOrOpenFile,
-                            icon: Icons.open_in_new_rounded,
-                            onPressed: _signedUrl != null
-                                ? () => PdfLauncherHelper.launchPdfUrl(
-                                      _signedUrl!,
-                                      context: context,
-                                    )
-                                : _copyUrl,
-                          ),
-                          const SizedBox(height: AppSpacing.s8),
-                          AppButton(
-                            text: context.l10n.copySecureUrlAction,
-                            icon: Icons.copy_rounded,
-                            variant: AppButtonVariant.secondary,
-                            onPressed: _copyUrl,
-                          ),
-                        ],
-                      );
-                    }
-                    return Row(
-                      children: [
-                        Expanded(
-                          child: AppButton(
-                            text: context.l10n.copySecureUrlAction,
-                            icon: Icons.copy_rounded,
-                            variant: AppButtonVariant.secondary,
-                            onPressed: _copyUrl,
-                          ),
-                        ),
-                        const SizedBox(width: AppSpacing.s12),
-                        Expanded(
-                          child: AppButton(
-                            text: context.l10n.downloadOrOpenFile,
-                            icon: Icons.open_in_new_rounded,
-                            onPressed: _signedUrl != null
-                                ? () => PdfLauncherHelper.launchPdfUrl(
-                                      _signedUrl!,
-                                      context: context,
-                                    )
-                                : _copyUrl,
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-              ],
-            ] else ...[
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.s16),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceVariant.withAlpha(20),
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.info_outline_rounded,
-                      size: 20,
-                      color: AppColors.textMuted,
-                    ),
-                    const SizedBox(width: AppSpacing.s8),
-                    Expanded(
-                      child: Text(
-                        context.l10n.emptyData,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-
-            const SizedBox(height: AppSpacing.s12),
-
-            // Academic security notice
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.s10,
-                vertical: AppSpacing.s6,
-              ),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withAlpha(10),
-                borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                border: Border.all(color: AppColors.primary.withAlpha(25)),
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.shield_outlined,
-                    size: 14,
-                    color: AppColors.primary,
-                  ),
-                  const SizedBox(width: AppSpacing.s6),
-                  Expanded(
-                    child: Text(
-                      isTeacher
-                          ? context.l10n.contentSecurityDisclaimer
-                          : context.l10n.contentSecurityDisclaimerStudent,
-                      style: const TextStyle(
-                        fontSize: 10,
-                        color: AppColors.primary,
-                        height: 1.3,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
         ),
       ),
     ),

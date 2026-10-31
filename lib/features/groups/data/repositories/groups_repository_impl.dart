@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/errors/result.dart';
+import '../../../../core/network/retry_helper.dart';
 import '../../../../core/utils/cache_manager.dart';
 import '../../../../core/utils/group_slug_resolver.dart';
 import '../../domain/entities/group_entity.dart';
@@ -26,7 +27,7 @@ class GroupsRepositoryImpl implements GroupsRepository {
     }
 
     try {
-      final groups = await _remoteDataSource.getGroups();
+      final groups = await retryTransient(() => _remoteDataSource.getGroups());
       final entities = List<GroupEntity>.from(groups);
       AppCache.groups.put(_cacheKeyGroups, entities);
       for (final g in entities) {
@@ -105,10 +106,12 @@ class GroupsRepositoryImpl implements GroupsRepository {
     int pageSize = 25,
   }) async {
     try {
-      final members = await _remoteDataSource.getGroupMembers(
-        groupId,
-        page: page,
-        pageSize: pageSize,
+      final members = await retryTransient(
+        () => _remoteDataSource.getGroupMembers(
+          groupId,
+          page: page,
+          pageSize: pageSize,
+        ),
       );
       return Success(members);
     } on PostgrestException catch (e) {

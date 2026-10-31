@@ -8,11 +8,12 @@ import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/responsive_container.dart';
-import '../../../groups/domain/entities/group_entity.dart';
 import '../../../groups/presentation/cubit/groups_cubit.dart';
-import '../../../groups/presentation/cubit/groups_state.dart';
 import '../cubit/notifications_cubit.dart';
 import '../cubit/notifications_state.dart';
+import '../widgets/announcement_audience_selector.dart';
+import '../widgets/announcement_live_preview_card.dart';
+import '../widgets/announcement_quick_templates_bar.dart';
 
 class SendAnnouncementPage extends StatefulWidget {
   final String? initialGroupId;
@@ -28,31 +29,6 @@ class _SendAnnouncementPageState extends State<SendAnnouncementPage> {
   final _bodyController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   String? _selectedGroupId;
-
-  List<({String label, String title, String body})> _getTemplates(
-    BuildContext context,
-  ) => [
-    (
-      label: context.l10n.templateSessionReminderLabel,
-      title: context.l10n.templateSessionReminderTitle,
-      body: context.l10n.templateSessionReminderBody,
-    ),
-    (
-      label: context.l10n.templateAssignmentReminderLabel,
-      title: context.l10n.templateAssignmentReminderTitle,
-      body: context.l10n.templateAssignmentReminderBody,
-    ),
-    (
-      label: context.l10n.templateExamAlertLabel,
-      title: context.l10n.templateExamAlertTitle,
-      body: context.l10n.templateExamAlertBody,
-    ),
-    (
-      label: context.l10n.templateExcellencePraiseLabel,
-      title: context.l10n.templateExcellencePraiseTitle,
-      body: context.l10n.templateExcellencePraiseBody,
-    ),
-  ];
 
   @override
   void initState() {
@@ -186,164 +162,19 @@ class _SendAnnouncementPageState extends State<SendAnnouncementPage> {
                     const SizedBox(height: AppSpacing.s20),
 
                     // Target Audience Dropdown & Audience Details
-                    BlocBuilder<GroupsCubit, GroupsState>(
-                      builder: (context, groupsState) {
-                        final List<GroupEntity> groups =
-                            groupsState is GroupsLoaded
-                            ? groupsState.groups
-                            : <GroupEntity>[];
-
-                        GroupEntity? selectedGroup;
-                        if (_selectedGroupId != null && groups.isNotEmpty) {
-                          try {
-                            selectedGroup = groups.firstWhere(
-                              (g) => g.id == _selectedGroupId,
-                            );
-                          } catch (_) {}
-                        }
-
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            DropdownButtonFormField<String?>(
-                              value: _selectedGroupId,
-                              decoration: InputDecoration(
-                                labelText: context.l10n.targetAudienceLabel,
-                                prefixIcon: const Icon(
-                                  Icons.group_rounded,
-                                  color: AppColors.primary,
-                                ),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(
-                                    AppSpacing.radiusMedium,
-                                  ),
-                                ),
-                              ),
-                              items: [
-                                DropdownMenuItem<String?>(
-                                  value: null,
-                                  child: Text(
-                                    context.l10n.allPlatformStudents,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.primary,
-                                    ),
-                                  ),
-                                ),
-                                ...groups.map((g) {
-                                  return DropdownMenuItem<String?>(
-                                    value: g.id,
-                                    child: Text('${g.name} (${g.level})'),
-                                  );
-                                }),
-                              ],
-                              onChanged: (val) {
-                                setState(() {
-                                  _selectedGroupId = val;
-                                });
-                              },
-                            ),
-                            const SizedBox(height: AppSpacing.s8),
-                            // Audience indicator pill
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: AppSpacing.s10,
-                                vertical: AppSpacing.s4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppColors.surface,
-                                borderRadius: BorderRadius.circular(
-                                  AppSpacing.radiusSmall,
-                                ),
-                                border: Border.all(color: AppColors.border),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    _selectedGroupId == null
-                                        ? Icons.public_rounded
-                                        : Icons.groups_rounded,
-                                    size: 14,
-                                    color: AppColors.primary,
-                                  ),
-                                  const SizedBox(width: AppSpacing.s6),
-                                  Text(
-                                    _selectedGroupId == null
-                                        ? context.l10n.audienceScopeGeneral
-                                        : context.l10n.audienceScopeGroup(
-                                            selectedGroup?.name ?? '',
-                                            selectedGroup?.membersCount ?? 0,
-                                          ),
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w600,
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        );
+                    AnnouncementAudienceSelector(
+                      selectedGroupId: _selectedGroupId,
+                      onGroupChanged: (val) {
+                        setState(() {
+                          _selectedGroupId = val;
+                        });
                       },
                     ),
                     const SizedBox(height: AppSpacing.s20),
 
                     // Quick Template Starters
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.bolt_rounded,
-                              size: 16,
-                              color: AppColors.warning,
-                            ),
-                            const SizedBox(width: AppSpacing.s4),
-                            Text(
-                              context.l10n.quickTemplatesTitle,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: AppSpacing.s8),
-                        Wrap(
-                          spacing: AppSpacing.s8,
-                          runSpacing: AppSpacing.s8,
-                          children: _getTemplates(context).map((tpl) {
-                            return ActionChip(
-                              avatar: const Icon(
-                                Icons.touch_app_rounded,
-                                size: 14,
-                                color: AppColors.primary,
-                              ),
-                              label: Text(
-                                tpl.label,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.textPrimary,
-                                ),
-                              ),
-                              backgroundColor: AppColors.surface,
-                              side: const BorderSide(color: AppColors.border),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(
-                                  AppSpacing.radiusSmall,
-                                ),
-                              ),
-                              onPressed: () =>
-                                  _applyTemplate(tpl.title, tpl.body),
-                            );
-                          }).toList(),
-                        ),
-                      ],
+                    AnnouncementQuickTemplatesBar(
+                      onApplyTemplate: _applyTemplate,
                     ),
                     const SizedBox(height: AppSpacing.s20),
 
@@ -415,144 +246,9 @@ class _SendAnnouncementPageState extends State<SendAnnouncementPage> {
                     const SizedBox(height: AppSpacing.s20),
 
                     // Live Student Preview Card (معاينة حية لما يراه الطالب)
-                    Container(
-                      padding: const EdgeInsets.all(AppSpacing.s16),
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(
-                          AppSpacing.radiusMedium,
-                        ),
-                        border: Border.all(
-                          color: AppColors.primaryLight.withValues(alpha: 0.5),
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.visibility_rounded,
-                                size: 16,
-                                color: AppColors.primary,
-                              ),
-                              const SizedBox(width: AppSpacing.s6),
-                              Text(
-                                context.l10n.liveNotificationPreview,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.primary,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: AppSpacing.s10),
-                          Container(
-                            padding: const EdgeInsets.all(AppSpacing.s12),
-                            decoration: BoxDecoration(
-                              color: AppColors.background,
-                              borderRadius: BorderRadius.circular(
-                                AppSpacing.radiusSmall,
-                              ),
-                              border: Border.all(color: AppColors.border),
-                            ),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  width: 36,
-                                  height: 36,
-                                  decoration: BoxDecoration(
-                                    color: AppColors.primary.withValues(
-                                      alpha: 0.12,
-                                    ),
-                                    borderRadius: BorderRadius.circular(
-                                      AppSpacing.radiusSmall,
-                                    ),
-                                  ),
-                                  child: const Icon(
-                                    Icons.campaign_rounded,
-                                    color: AppColors.primary,
-                                    size: 20,
-                                  ),
-                                ),
-                                const SizedBox(width: AppSpacing.s10),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              _titleController.text
-                                                      .trim()
-                                                      .isEmpty
-                                                  ? context
-                                                        .l10n
-                                                        .previewTitlePlaceholder
-                                                  : _titleController.text
-                                                        .trim(),
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                                color:
-                                                    _titleController.text
-                                                        .trim()
-                                                        .isEmpty
-                                                    ? AppColors.textSecondary
-                                                    : AppColors.textPrimary,
-                                                fontStyle:
-                                                    _titleController.text
-                                                        .trim()
-                                                        .isEmpty
-                                                    ? FontStyle.italic
-                                                    : FontStyle.normal,
-                                              ),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                          Text(
-                                            context.l10n.justNow,
-                                            style: const TextStyle(
-                                              fontSize: 11,
-                                              color: AppColors.textSecondary,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        _bodyController.text.trim().isEmpty
-                                            ? context
-                                                  .l10n
-                                                  .previewBodyPlaceholder
-                                            : _bodyController.text.trim(),
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color:
-                                              _bodyController.text
-                                                  .trim()
-                                                  .isEmpty
-                                              ? AppColors.textSecondary
-                                                    .withValues(alpha: 0.6)
-                                              : AppColors.textSecondary,
-                                          height: 1.4,
-                                        ),
-                                        maxLines: 3,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+                    AnnouncementLivePreviewCard(
+                      title: _titleController.text.trim(),
+                      body: _bodyController.text.trim(),
                     ),
                     const SizedBox(height: AppSpacing.s24),
 

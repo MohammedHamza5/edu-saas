@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/errors/result.dart';
+import '../../../../core/network/retry_helper.dart';
 import '../../domain/entities/exam_entity.dart';
 import '../../domain/entities/exam_parent_dispatch_entity.dart';
 import '../../domain/entities/mistake_entities.dart';
@@ -34,10 +35,12 @@ class ExamsRepositoryImpl implements ExamsRepository {
     int pageSize = 15,
   }) async {
     try {
-      final exams = await _remoteDataSource.getGroupExams(
-        groupId,
-        page: page,
-        pageSize: pageSize,
+      final exams = await retryTransient(
+        () => _remoteDataSource.getGroupExams(
+          groupId,
+          page: page,
+          pageSize: pageSize,
+        ),
       );
       return Success(exams);
     } on PostgrestException catch (e) {
@@ -55,9 +58,11 @@ class ExamsRepositoryImpl implements ExamsRepository {
     int pageSize = 15,
   }) async {
     try {
-      final exams = await _remoteDataSource.getStudentExams(
-        page: page,
-        pageSize: pageSize,
+      final exams = await retryTransient(
+        () => _remoteDataSource.getStudentExams(
+          page: page,
+          pageSize: pageSize,
+        ),
       );
       return Success(exams);
     } on PostgrestException catch (e) {
@@ -72,7 +77,9 @@ class ExamsRepositoryImpl implements ExamsRepository {
   @override
   Future<Result<ExamEntity>> getExamDetails(String examId) async {
     try {
-      final exam = await _remoteDataSource.getExamDetails(examId);
+      final exam = await retryTransient(
+        () => _remoteDataSource.getExamDetails(examId),
+      );
       return Success(exam);
     } on PostgrestException catch (e) {
       return FailureResult(ServerFailure(e.message, code: e.code));

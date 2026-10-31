@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injection_container.dart';
@@ -10,6 +9,9 @@ import '../../domain/entities/content_entity.dart';
 import '../cubit/content_cubit.dart';
 import '../cubit/content_state.dart';
 import '../../../videos/presentation/dialogs/select_video_from_bank_dialog.dart';
+import 'video_picker_bottom_bar.dart';
+import 'video_picker_empty_view.dart';
+import 'video_picker_item_tile.dart';
 
 /// A bottom sheet that shows all videos in the central Video Bank,
 /// allowing the teacher to pick one for adding as a lesson.
@@ -149,6 +151,33 @@ class _VideoPickerSheetState extends State<VideoPickerSheet> {
         .toList();
   }
 
+  Future<void> _openSelectFromBank(BuildContext context) async {
+    final picked = await SelectVideoFromBankDialog.show(
+      context,
+      currentGroupId: widget.currentGroupId,
+      currentGroupName: widget.currentGroupName,
+    );
+    if (!context.mounted) return;
+    if (picked != null) {
+      final mapped = ContentEntity(
+        id: picked.id,
+        tenantId: picked.tenantId,
+        title: picked.title,
+        description: picked.description,
+        type: ContentType.video,
+        status: ContentStatus.published,
+        videoProvider: picked.provider,
+        videoProviderId: picked.providerVideoId,
+        videoId: picked.id,
+        videoStatus: picked.status.name,
+        createdAt: picked.createdAt,
+        updatedAt: picked.updatedAt,
+        assignedGroupNames: picked.assignedGroupNames,
+      );
+      Navigator.of(context).pop(mapped);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -192,32 +221,7 @@ class _VideoPickerSheetState extends State<VideoPickerSheet> {
                   ),
                 ),
                 OutlinedButton.icon(
-                  onPressed: () async {
-                    final picked = await SelectVideoFromBankDialog.show(
-                      context,
-                      currentGroupId: widget.currentGroupId,
-                      currentGroupName: widget.currentGroupName,
-                    );
-                    if (!context.mounted) return;
-        if (picked != null) {
-                      final mapped = ContentEntity(
-                        id: picked.id,
-                        tenantId: picked.tenantId,
-                        title: picked.title,
-                        description: picked.description,
-                        type: ContentType.video,
-                        status: ContentStatus.published,
-                        videoProvider: picked.provider,
-                        videoProviderId: picked.providerVideoId,
-                        videoId: picked.id,
-                        videoStatus: picked.status.name,
-                        createdAt: picked.createdAt,
-                        updatedAt: picked.updatedAt,
-                        assignedGroupNames: picked.assignedGroupNames,
-                      );
-                      Navigator.of(context).pop(mapped);
-                    }
-                  },
+                  onPressed: () => _openSelectFromBank(context),
                   icon: const Icon(Icons.folder_open_rounded, size: 16),
                   label: Text(l10n.selectFromBank),
                   style: OutlinedButton.styleFrom(
@@ -296,70 +300,8 @@ class _VideoPickerSheetState extends State<VideoPickerSheet> {
                 final filtered = _filter(all);
 
                 if (all.isEmpty) {
-                  return Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(AppSpacing.s24),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.video_library_outlined,
-                            size: 48,
-                            color: AppColors.textMuted,
-                          ),
-                          const SizedBox(height: AppSpacing.s12),
-                          Text(
-                            l10n.videoLibraryEmpty,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: AppSpacing.s4),
-                          Text(
-                            l10n.videoLibraryEmptySubtitle,
-                            textAlign: TextAlign.center,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                          const SizedBox(height: AppSpacing.s16),
-                          OutlinedButton.icon(
-                            onPressed: () async {
-                              final picked =
-                                  await SelectVideoFromBankDialog.show(
-                                context,
-                                currentGroupId: widget.currentGroupId,
-                                currentGroupName: widget.currentGroupName,
-                              );
-                              if (!context.mounted) return;
-        if (picked != null) {
-                                final mapped = ContentEntity(
-                                  id: picked.id,
-                                  tenantId: picked.tenantId,
-                                  title: picked.title,
-                                  description: picked.description,
-                                  type: ContentType.video,
-                                  status: ContentStatus.published,
-                                  videoProvider: picked.provider,
-                                  videoProviderId: picked.providerVideoId,
-                                  videoId: picked.id,
-                                  videoStatus: picked.status.name,
-                                  createdAt: picked.createdAt,
-                                  updatedAt: picked.updatedAt,
-                                  assignedGroupNames: picked.assignedGroupNames,
-                                );
-                                Navigator.of(context).pop(mapped);
-                              }
-                            },
-                            icon: const Icon(
-                              Icons.folder_open_rounded,
-                              size: 18,
-                            ),
-                            label: Text(l10n.selectFromBank),
-                          ),
-                        ],
-                      ),
-                    ),
+                  return VideoPickerEmptyView(
+                    onSelectFromBank: () => _openSelectFromBank(context),
                   );
                 }
                 if (filtered.isEmpty) {
@@ -385,185 +327,14 @@ class _VideoPickerSheetState extends State<VideoPickerSheet> {
                     final video = filtered[index];
                     final isSelected = _selected?.id == video.id;
                     final isAlreadyAdded = _isAlreadyAddedToCurrentGroup(video);
-                    final youtubeId = video.videoProviderId;
-                    final thumbUrl = (youtubeId != null && youtubeId.isNotEmpty)
-                        ? 'https://img.youtube.com/vi/$youtubeId/mqdefault.jpg'
-                        : null;
 
-                    return InkWell(
+                    return VideoPickerItemTile(
+                      video: video,
+                      isSelected: isSelected,
+                      isAlreadyAdded: isAlreadyAdded,
                       onTap: () => setState(() {
                         _selected = isSelected ? null : video;
                       }),
-                      borderRadius: BorderRadius.circular(10),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 150),
-                        padding: const EdgeInsets.all(AppSpacing.s12),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? AppColors.primary.withValues(alpha: 0.08)
-                              : isAlreadyAdded
-                              ? AppColors.success.withValues(alpha: 0.04)
-                              : Colors.transparent,
-                          border: Border.all(
-                            color: isSelected
-                                ? AppColors.primary.withValues(alpha: 0.5)
-                                : isAlreadyAdded
-                                ? AppColors.success.withValues(alpha: 0.35)
-                                : AppColors.border.withValues(alpha: 0.5),
-                            width: isSelected ? 1.5 : 1,
-                          ),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Row(
-                          children: [
-                            // Thumbnail
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(6),
-                              child: Container(
-                                width: 72,
-                                height: 48,
-                                color: isAlreadyAdded
-                                    ? AppColors.success.withValues(alpha: 0.08)
-                                    : AppColors.primary.withValues(alpha: 0.08),
-                                child: thumbUrl != null
-                                    ? CachedNetworkImage(
-                                        imageUrl: thumbUrl,
-                                        fit: BoxFit.cover,
-                                        errorWidget: (_, __, ___) =>
-                                            const Center(
-                                          child: Icon(
-                                            Icons.play_circle_fill_rounded,
-                                            color: AppColors.primary,
-                                            size: 24,
-                                          ),
-                                        ),
-                                      )
-                                    : Center(
-                                        child: Icon(
-                                          isAlreadyAdded
-                                              ? Icons.task_alt_rounded
-                                              : Icons.play_circle_fill_rounded,
-                                          color: isAlreadyAdded
-                                              ? AppColors.success
-                                              : AppColors.primary,
-                                          size: 24,
-                                        ),
-                                      ),
-                              ),
-                            ),
-                            const SizedBox(width: AppSpacing.s12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    video.title,
-                                    style: theme.textTheme.bodyMedium
-                                        ?.copyWith(
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    video.videoProvider == 'youtube'
-                                        ? context.l10n.videoSourceYoutube
-                                        : context.l10n.videoSourceBunny,
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: AppColors.textSecondary,
-                                      fontSize: 11,
-                                    ),
-                                  ),
-                                  if (isAlreadyAdded) ...[
-                                    const SizedBox(height: 6),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 3,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.success.withValues(
-                                          alpha: 0.12,
-                                        ),
-                                        borderRadius: BorderRadius.circular(6),
-                                        border: Border.all(
-                                          color: AppColors.success.withValues(
-                                            alpha: 0.35,
-                                          ),
-                                        ),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          const Icon(
-                                            Icons.check_circle_rounded,
-                                            size: 13,
-                                            color: AppColors.success,
-                                          ),
-                                          const SizedBox(width: 4),
-                                          Flexible(
-                                            child: Text(
-                                              context
-                                                  .l10n
-                                                  .videoAlreadyAddedToThisGroup,
-                                              style: const TextStyle(
-                                                color: AppColors.success,
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 11,
-                                              ),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ] else if (video
-                                      .assignedGroupNames
-                                      .isNotEmpty) ...[
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      context.l10n.videoAddedToGroups(
-                                        video.assignedGroupNames.join('، '),
-                                      ),
-                                      style: theme.textTheme.bodySmall
-                                          ?.copyWith(
-                                            color: AppColors.textSecondary,
-                                            fontSize: 11,
-                                          ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ] else ...[
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      context.l10n.videoNotAddedToAnyGroup,
-                                      style: theme.textTheme.bodySmall
-                                          ?.copyWith(
-                                            color: AppColors.textSecondary,
-                                            fontSize: 11,
-                                          ),
-                                    ),
-                                  ],
-                                ],
-                              ),
-                            ),
-                            if (isSelected)
-                              const Icon(
-                                Icons.check_circle_rounded,
-                                color: AppColors.primary,
-                                size: 22,
-                              )
-                            else
-                              const Icon(
-                                Icons.radio_button_unchecked_rounded,
-                                color: AppColors.border,
-                                size: 22,
-                              ),
-                          ],
-                        ),
-                      ),
                     );
                   },
                 );
@@ -574,80 +345,11 @@ class _VideoPickerSheetState extends State<VideoPickerSheet> {
           const Divider(height: 1),
 
           // Bottom action
-          Padding(
-            padding: EdgeInsets.only(
-              left: AppSpacing.s24,
-              right: AppSpacing.s24,
-              top: AppSpacing.s16,
-              bottom:
-                  MediaQuery.of(context).viewInsets.bottom + AppSpacing.s24,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (_selected != null &&
-                    _isAlreadyAddedToCurrentGroup(_selected!)) ...[
-                  Container(
-                    margin: const EdgeInsets.only(bottom: AppSpacing.s12),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.warning.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: AppColors.warning.withValues(alpha: 0.4),
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.info_outline_rounded,
-                          size: 16,
-                          color: AppColors.warning,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            l10n.videoAlreadyAddedNotice,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: AppColors.warning,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        child: Text(l10n.cancel),
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.s12),
-                    Expanded(
-                      flex: 2,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
-                        ),
-                        onPressed: _selected == null
-                            ? null
-                            : () => Navigator.of(context).pop(_selected),
-                        child: Text(l10n.save),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+          VideoPickerBottomBar(
+            selected: _selected,
+            isAlreadyAdded: _selected != null && _isAlreadyAddedToCurrentGroup(_selected!),
+            onCancel: () => Navigator.of(context).pop(),
+            onSave: () => Navigator.of(context).pop(_selected),
           ),
         ],
       ),

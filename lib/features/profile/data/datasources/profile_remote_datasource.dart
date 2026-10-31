@@ -82,7 +82,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
           (parentPhone != null && parentPhone.trim().isNotEmpty) ? parentPhone.trim() : null;
 
       // 1. Update public.users
-      final updatedUser = await _safeClient
+      await _safeClient
           .from('users')
           .update({
             'full_name': cleanName,
@@ -110,7 +110,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       }
 
       // 3. Return fresh profile
-      return getStudentProfile(userId);
+      return await getStudentProfile(userId);
     } catch (e, stack) {
       AppLogger.e('ProfileRemoteDataSource', 'updateStudentProfile failed', error: e, stackTrace: stack);
       rethrow;

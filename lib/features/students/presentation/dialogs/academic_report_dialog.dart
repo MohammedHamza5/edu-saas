@@ -8,6 +8,9 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/whatsapp_report_generator.dart';
 import '../../domain/entities/student_academic_report_entity.dart';
 import '../cubit/students_cubit.dart';
+import '../widgets/academic_report_decision_chips.dart';
+import '../widgets/academic_report_period_selector.dart';
+import '../widgets/academic_report_stats_bar.dart';
 
 /// Dialog for verified, period-aware, and customizable student academic progress reports
 class AcademicReportDialog extends StatefulWidget {
@@ -274,190 +277,17 @@ class _AcademicReportDialogState extends State<AcademicReportDialog> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 1. Period Selector Chips
-              Text(
-                l10n.whatsappPeriodLabel,
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.s6),
-              Wrap(
-                spacing: AppSpacing.s6,
-                runSpacing: AppSpacing.s6,
-                children: [
-                  ChoiceChip(
-                    avatar: Icon(
-                      Icons.flash_on_rounded,
-                      size: 14,
-                      color: _selectedPeriodDays == 7
-                          ? Colors.white
-                          : AppColors.primary,
-                    ),
-                    label: Text(
-                      l10n.whatsappPeriod7Days,
-                      style: const TextStyle(fontSize: 11),
-                    ),
-                    selected: _selectedPeriodDays == 7,
-                    selectedColor: AppColors.primary,
-                    labelStyle: TextStyle(
-                      color: _selectedPeriodDays == 7
-                          ? Colors.white
-                          : AppColors.textPrimary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    onSelected: (selected) {
-                      if (selected) _fetchReport(7);
-                    },
-                  ),
-                  ChoiceChip(
-                    avatar: Icon(
-                      Icons.timer_outlined,
-                      size: 14,
-                      color: _selectedPeriodDays == 14
-                          ? Colors.white
-                          : AppColors.primary,
-                    ),
-                    label: Text(
-                      l10n.whatsappPeriod14Days,
-                      style: const TextStyle(fontSize: 11),
-                    ),
-                    selected: _selectedPeriodDays == 14,
-                    selectedColor: AppColors.primary,
-                    labelStyle: TextStyle(
-                      color: _selectedPeriodDays == 14
-                          ? Colors.white
-                          : AppColors.textPrimary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    onSelected: (selected) {
-                      if (selected) _fetchReport(14);
-                    },
-                  ),
-                  ChoiceChip(
-                    avatar: Icon(
-                      Icons.calendar_month_rounded,
-                      size: 14,
-                      color: _selectedPeriodDays == 30
-                          ? Colors.white
-                          : AppColors.primary,
-                    ),
-                    label: Text(
-                      l10n.whatsappPeriod30Days,
-                      style: const TextStyle(fontSize: 11),
-                    ),
-                    selected: _selectedPeriodDays == 30,
-                    selectedColor: AppColors.primary,
-                    labelStyle: TextStyle(
-                      color: _selectedPeriodDays == 30
-                          ? Colors.white
-                          : AppColors.textPrimary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    onSelected: (selected) {
-                      if (selected) _fetchReport(30);
-                    },
-                  ),
-                  ChoiceChip(
-                    avatar: Icon(
-                      Icons.all_inclusive_rounded,
-                      size: 14,
-                      color: _selectedPeriodDays == null
-                          ? Colors.white
-                          : AppColors.primary,
-                    ),
-                    label: Text(
-                      l10n.whatsappPeriodAllTime,
-                      style: const TextStyle(fontSize: 11),
-                    ),
-                    selected: _selectedPeriodDays == null,
-                    selectedColor: AppColors.primary,
-                    labelStyle: TextStyle(
-                      color: _selectedPeriodDays == null
-                          ? Colors.white
-                          : AppColors.textPrimary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    onSelected: (selected) {
-                      if (selected) _fetchReport(null);
-                    },
-                  ),
-                ],
+              AcademicReportPeriodSelector(
+                selectedPeriodDays: _selectedPeriodDays,
+                onPeriodSelected: _fetchReport,
               ),
               const SizedBox(height: AppSpacing.s12),
 
               // 2. Real Telemetry Quick Stats Badge Bar
-              if (_isLoading)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: AppSpacing.s8,
-                    horizontal: AppSpacing.s12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.surfaceVariant.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                  ),
-                  child: Row(
-                    children: [
-                      const SizedBox(
-                        width: 14,
-                        height: 14,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
-                      const SizedBox(width: AppSpacing.s8),
-                      Text(
-                        l10n.whatsappFetchingData,
-                        style: const TextStyle(
-                          fontSize: 11,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              else if (_reportData != null)
-                Container(
-                  padding: const EdgeInsets.all(AppSpacing.s10),
-                  decoration: BoxDecoration(
-                    color: AppColors.surfaceVariant.withValues(alpha: 0.4),
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                    border: Border.all(
-                      color: AppColors.border.withValues(alpha: 0.6),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _StatBadge(
-                        icon: Icons.ondemand_video_rounded,
-                        label: l10n.whatsappLecturesStat,
-                        value:
-                            '${_reportData!.videosWatched}/${_reportData!.totalAssignedVideos}',
-                        color: AppColors.info,
-                      ),
-                      _StatBadge(
-                        icon: Icons.assignment_outlined,
-                        label: l10n.whatsappAssignmentsStat,
-                        value:
-                            '${_reportData!.assignmentsSubmitted}/${_reportData!.totalAssignedAssignments}',
-                        color: AppColors.warning,
-                      ),
-                      _StatBadge(
-                        icon: Icons.quiz_outlined,
-                        label: l10n.whatsappExamsStat,
-                        value: '${_reportData!.avgExamPercentage.round()}%',
-                        color: AppColors.primary,
-                      ),
-                      _StatBadge(
-                        icon: Icons.schedule_rounded,
-                        label: l10n.whatsappStudyTimeStat,
-                        value: '${_reportData!.activeStudyMinutes}m',
-                        color: AppColors.success,
-                      ),
-                    ],
-                  ),
-                ),
+              AcademicReportStatsBar(
+                isLoading: _isLoading,
+                reportData: _reportData,
+              ),
               const SizedBox(height: AppSpacing.s12),
 
               // 3. Target Phone Selector
@@ -559,85 +389,8 @@ class _AcademicReportDialogState extends State<AcademicReportDialog> {
               ],
 
               // 4. Academic Directives / Quick Decision Chips
-              Text(
-                l10n.whatsappDecisionsTitle,
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.s6),
-              Wrap(
-                spacing: AppSpacing.s6,
-                runSpacing: AppSpacing.s6,
-                children: [
-                  ActionChip(
-                    avatar: const Icon(
-                      Icons.star_rounded,
-                      size: 14,
-                      color: Color(0xFFF59E0B),
-                    ),
-                    label: Text(
-                      l10n.whatsappChipConsistent,
-                      style: const TextStyle(fontSize: 11),
-                    ),
-                    onPressed: () =>
-                        _applyDecision(l10n.whatsappDecisionConsistent),
-                  ),
-                  ActionChip(
-                    avatar: const Icon(
-                      Icons.trending_up_rounded,
-                      size: 14,
-                      color: AppColors.success,
-                    ),
-                    label: Text(
-                      l10n.whatsappChipImproving,
-                      style: const TextStyle(fontSize: 11),
-                    ),
-                    onPressed: () =>
-                        _applyDecision(l10n.whatsappDecisionImproving),
-                  ),
-                  ActionChip(
-                    avatar: const Icon(
-                      Icons.fact_check_outlined,
-                      size: 14,
-                      color: AppColors.warning,
-                    ),
-                    label: Text(
-                      l10n.whatsappChipNeedsDrills,
-                      style: const TextStyle(fontSize: 11),
-                    ),
-                    onPressed: () =>
-                        _applyDecision(l10n.whatsappDecisionNeedsDrills),
-                  ),
-                  ActionChip(
-                    avatar: const Icon(
-                      Icons.hourglass_top_rounded,
-                      size: 14,
-                      color: AppColors.info,
-                    ),
-                    label: Text(
-                      l10n.whatsappChipCatchUp,
-                      style: const TextStyle(fontSize: 11),
-                    ),
-                    onPressed: () =>
-                        _applyDecision(l10n.whatsappDecisionCatchUp),
-                  ),
-                  ActionChip(
-                    avatar: const Icon(
-                      Icons.notification_important_outlined,
-                      size: 14,
-                      color: AppColors.error,
-                    ),
-                    label: Text(
-                      l10n.whatsappChipNeglect,
-                      style: const TextStyle(fontSize: 11),
-                    ),
-                    onPressed: () =>
-                        _applyDecision(l10n.whatsappDecisionNeglect),
-                  ),
-                ],
+              AcademicReportDecisionChips(
+                onDecisionSelected: _applyDecision,
               ),
               const SizedBox(height: AppSpacing.s12),
 
@@ -703,47 +456,3 @@ class _AcademicReportDialogState extends State<AcademicReportDialog> {
     );
   }
 }
-
-class _StatBadge extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final Color color;
-
-  const _StatBadge({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 13, color: color),
-            const SizedBox(width: 4),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: const TextStyle(fontSize: 10, color: AppColors.textSecondary),
-        ),
-      ],
-    );
-  }
-}
-

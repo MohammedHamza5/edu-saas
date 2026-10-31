@@ -324,9 +324,9 @@ class _WhatsAppTemplateStudioDialogState
               ? Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Left Editor Panel (55%)
+                    // Left Editor Panel (48%)
                     Expanded(
-                      flex: 11,
+                      flex: 10,
                       child: _buildTabContent(),
                     ),
                     const VerticalDivider(
@@ -334,17 +334,19 @@ class _WhatsAppTemplateStudioDialogState
                       thickness: 1,
                       color: AppColors.border,
                     ),
-                    // Right Live Preview Simulator Panel (45%)
+                    // Right Live Preview Simulator Panel (52% - Spacious & Prominent)
                     Expanded(
-                      flex: 9,
+                      flex: 11,
                       child: Container(
                         color: AppColors.surface,
                         padding: const EdgeInsets.all(AppSpacing.s20),
                         child: Center(
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 480),
-                            child: WhatsAppLiveBubblePreview(
-                              config: _buildCurrentConfig(),
+                          child: SingleChildScrollView(
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 680),
+                              child: WhatsAppLiveBubblePreview(
+                                config: _buildCurrentConfig(),
+                              ),
                             ),
                           ),
                         ),
@@ -356,10 +358,12 @@ class _WhatsAppTemplateStudioDialogState
                   ? Padding(
                       padding: const EdgeInsets.all(AppSpacing.s16),
                       child: Center(
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 480),
-                          child: WhatsAppLiveBubblePreview(
-                            config: _buildCurrentConfig(),
+                        child: SingleChildScrollView(
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 600),
+                            child: WhatsAppLiveBubblePreview(
+                              config: _buildCurrentConfig(),
+                            ),
                           ),
                         ),
                       ),

@@ -1551,6 +1551,10 @@ void main() {
         await tester.tap(find.text('امتحان الجبر والتفاضل'));
         await tester.pumpAndSettle();
 
+        // Scroll the attempts list inside details sheet to reveal student card
+        await tester.drag(find.byType(ListView).last, const Offset(0, -300));
+        await tester.pumpAndSettle();
+
         // Verify the details sheet opened with student attempt, NOT an error widget
         expect(find.text('محمود سامي'), findsOneWidget);
         expect(find.text('An error occurred displaying content'), findsNothing);

@@ -743,6 +743,7 @@ class ExamsCubit extends Cubit<ExamsState> {
       }
       // Stale cache displayed immediately, then continue to network fetch in background to guarantee fresh updates
     } else {
+      if (isClosed) return;
       emit(const ExamsLoading());
     }
 
@@ -751,8 +752,11 @@ class ExamsCubit extends Cubit<ExamsState> {
       pageSize: _pageSize,
     );
 
+    if (isClosed) return;
+
     result.when(
       onSuccess: (exams) {
+        if (isClosed) return;
         // Double check state hasn't transitioned to an active ExamTakingState while waiting for network
         if (state is ExamTakingState && !(state as ExamTakingState).submitSuccess) return;
 
@@ -775,6 +779,7 @@ class ExamsCubit extends Cubit<ExamsState> {
         }
       },
       onFailure: (failure) {
+        if (isClosed) return;
         if (state is! StudentExamsLoaded &&
             (state is! ExamTakingState || (state as ExamTakingState).submitSuccess)) {
           emit(ExamsError(failure.message));
@@ -1206,6 +1211,11 @@ class ExamsCubit extends Cubit<ExamsState> {
     _syncAnswersDebounce = null;
     if (state is ExamTakingState) {
       emit(const ExamsInitial());
+      Future.microtask(() {
+        if (!isClosed) {
+          loadStudentExams(forceRefresh: true);
+        }
+      });
     }
   }
 

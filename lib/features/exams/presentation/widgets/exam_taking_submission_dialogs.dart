@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../content/domain/entities/lesson_assignment_entity.dart';
+import '../../domain/entities/exam_entity.dart';
+import '../cubit/exams_cubit.dart';
 import '../cubit/exams_state.dart';
+import '../pages/exam_result_page.dart';
+import 'bluebook/bluebook_review_grid_modal.dart';
 
 /// Confirmation dialogs for forced exit and exam submission during test taking
 abstract final class ExamTakingSubmissionDialogs {
@@ -144,6 +150,80 @@ abstract final class ExamTakingSubmissionDialogs {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// Displays the interactive Bluebook review grid modal.
+  static void openBluebookReviewGrid(
+    BuildContext context, {
+    required ExamTakingState state,
+    required ValueChanged<int> onQuestionSelected,
+    required VoidCallback onConfirmFinish,
+  }) {
+    if (state.isSubmitting) return;
+    final answeredIndices = <int>{};
+    final flaggedIndices = <int>{};
+    for (int i = 0; i < state.questions.length; i++) {
+      final qId = state.questions[i].id;
+      if (state.answers.containsKey(qId)) {
+        answeredIndices.add(i);
+      }
+      if (state.flaggedGuesses.contains(qId)) {
+        flaggedIndices.add(i);
+      }
+    }
+
+    BluebookReviewGridModal.show(
+      context,
+      totalQuestions: state.questions.length,
+      currentQuestionIndex: state.currentQuestionIndex,
+      answeredIndices: answeredIndices,
+      flaggedIndices: flaggedIndices,
+      onQuestionSelected: onQuestionSelected,
+      onConfirmFinish: onConfirmFinish,
+    );
+  }
+
+  /// Navigates to the exam result page upon successful submission.
+  static void navigateToResult(
+    BuildContext context, {
+    required ExamTakingState state,
+    required bool isLectureExam,
+    LessonAssignmentEntity? nextLesson,
+    int? nextLessonIndex,
+    int? totalLessonsCount,
+  }) {
+    Navigator.of(context).pushReplacement<void, void>(
+      MaterialPageRoute<void>(
+        builder: (_) => BlocProvider.value(
+          value: context.read<ExamsCubit>(),
+          child: ExamResultPage(
+            exam: state.exam,
+            attempt: state.submitResult!.copyWith(
+              questions: state.questions,
+              answers: state.submitResult!.answers.isNotEmpty
+                  ? state.submitResult!.answers
+                  : state.answers.entries
+                      .map(
+                        (e) => ExamAnswerEntity(
+                          id: '',
+                          attemptId: state.submitResult!.id,
+                          questionId: e.key,
+                          selectedOptionId: e.value,
+                          answeredAt: DateTime.now(),
+                        ),
+                      )
+                      .toList(),
+            ),
+            isLectureExam: isLectureExam ||
+                state.exam.isLectureExam ||
+                state.exam.isLinkedToLesson,
+            nextLesson: nextLesson,
+            nextLessonIndex: nextLessonIndex,
+            totalLessonsCount: totalLessonsCount,
+          ),
+        ),
       ),
     );
   }

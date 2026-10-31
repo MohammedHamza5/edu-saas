@@ -9746,6 +9746,14 @@ class AppLocalizationsAr extends AppLocalizations {
       'إعدادات بوابة واتساب للإرسال التلقائي';
 
   @override
+  String get whatsappGatewayDevicePairingTip =>
+      '💡 قم بربط الهاتف مرة واحدة فقط للمدرس (يعمل مع واتساب العادي أو الأعمال العادي، ويُرجى عدم استخدام أرقام مرتبطة بـ Cloud API لضمان فك التشفير اللحظي بنسبة 100%).';
+
+  @override
+  String get whatsappGatewayDisconnectedWarning =>
+      '⚠️ الجلسة غير متصلة أو انتهت صلاحيتها. يرجى إعادة مسح الرمز لاستئناف الإرسال التلقائي.';
+
+  @override
   String get whatsappAutoDispatchActiveBannerTitle =>
       'الإرسال التلقائي لواتساب ولي الأمر نشط';
 

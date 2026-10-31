@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/utils/app_logger.dart';
-import '../../domain/entities/student_profile_entity.dart';
 import '../../domain/repositories/profile_repository.dart';
 import 'student_profile_state.dart';
 

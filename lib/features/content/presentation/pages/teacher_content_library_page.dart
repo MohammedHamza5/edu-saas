@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
-import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_error_view.dart';
@@ -17,13 +16,11 @@ import '../../domain/entities/chapter_entity.dart';
 import '../../domain/entities/content_entity.dart';
 import '../cubit/content_cubit.dart';
 import '../cubit/content_state.dart';
-import '../dialogs/chapter_edit_dialog.dart';
-import '../dialogs/quick_create_chapter_dialog.dart';
 import '../utils/teacher_course_actions_helper.dart';
 import '../widgets/chapter_analytics_sheet.dart';
 import '../widgets/group_analytics_sheet.dart';
-import '../widgets/teacher_course_overview_section.dart';
-import '../widgets/teacher_course_syllabus_view.dart';
+import '../widgets/teacher_course_app_bar.dart';
+import '../widgets/teacher_course_loaded_view.dart';
 
 /// The Course Builder page (formerly TeacherContentLibraryPage).
 ///
@@ -78,20 +75,15 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
     List<ChapterEntity> allChapters,
     int currentIndex,
     int delta,
-  ) async {
-    if (_selectedGroupId == null) return;
-    final newIndex = currentIndex + delta;
-    if (newIndex < 0 || newIndex >= allChapters.length) return;
-
-    final reordered = List<ChapterEntity>.from(allChapters);
-    final movedItem = reordered.removeAt(currentIndex);
-    reordered.insert(newIndex, movedItem);
-
-    final idsInOrder = reordered.map((c) => c.id).toList();
-    await context.read<ContentCubit>().reorderCourseChapters(
-          groupId: _selectedGroupId!,
-          chapterIdsInOrder: idsInOrder,
-        );
+  ) {
+    if (_selectedGroupId == null) return Future.value();
+    return TeacherCourseActionsHelper.moveChapter(
+      cubit: context.read<ContentCubit>(),
+      groupId: _selectedGroupId!,
+      allChapters: allChapters,
+      currentIndex: currentIndex,
+      delta: delta,
+    );
   }
 
   void _openChapterAnalytics(
@@ -241,24 +233,14 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
     );
   }
 
-  Future<void> _handleToggleVisibility(ContentEntity lesson) async {
-    if (_selectedGroupId == null) return;
-    final newVisibility = !lesson.isPublished;
-    final cubit = context.read<ContentCubit>();
-    final success = await cubit.toggleLessonVisibility(
-      contentId: lesson.id,
+  Future<void> _handleToggleVisibility(ContentEntity lesson) {
+    if (_selectedGroupId == null) return Future.value();
+    return TeacherCourseActionsHelper.handleToggleLessonVisibility(
+      context: context,
+      cubit: context.read<ContentCubit>(),
       groupId: _selectedGroupId!,
-      isPublished: newVisibility,
+      lesson: lesson,
     );
-    if (success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.lessonVisibilityUpdatedToast),
-          backgroundColor: AppColors.primary,
-          duration: const Duration(seconds: 2),
-        ),
-      );
-    }
   }
 
   Future<void> _handleBulkVisibility(bool isPublished) {
@@ -275,18 +257,10 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
     if (_selectedGroupId == null || _isCreatingChapter) return;
     _isCreatingChapter = true;
     try {
-      final created = await QuickCreateChapterDialog.show(
-        context,
+      await TeacherCourseActionsHelper.handleCreateChapter(
+        context: context,
         groupId: _selectedGroupId!,
       );
-      if (created != null && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(context.l10n.chapterCreatedSuccess),
-            backgroundColor: AppColors.success,
-          ),
-        );
-      }
     } finally {
       _isCreatingChapter = false;
     }
@@ -296,18 +270,10 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
     if (_isEditingChapter) return;
     _isEditingChapter = true;
     try {
-      final confirmed = await ChapterEditDialog.show(
-        context,
+      await TeacherCourseActionsHelper.handleEditChapter(
+        context: context,
         chapter: chapter,
       );
-      if (confirmed == true && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(context.l10n.chapterUpdatedSuccess),
-            backgroundColor: AppColors.success,
-          ),
-        );
-      }
     } finally {
       _isEditingChapter = false;
     }
@@ -339,99 +305,32 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
     List<ContentEntity> chapterLessons,
     int oldIndex,
     int newIndex,
-  ) async {
-    if (_selectedGroupId == null) return;
-    if (oldIndex < newIndex) {
-      newIndex -= 1;
-    }
-    if (oldIndex < 0 ||
-        oldIndex >= chapterLessons.length ||
-        newIndex < 0 ||
-        newIndex >= chapterLessons.length ||
-        oldIndex == newIndex) {
-      return;
-    }
-    final reordered = List<ContentEntity>.from(chapterLessons);
-    final moved = reordered.removeAt(oldIndex);
-    reordered.insert(newIndex, moved);
-
-    await context.read<ContentCubit>().reorderChapterLessons(
+  ) {
+    if (_selectedGroupId == null) return Future.value();
+    return TeacherCourseActionsHelper.reorderLessonsInChapter(
+      cubit: context.read<ContentCubit>(),
       groupId: _selectedGroupId!,
-      contentIdsInOrder: reordered.map((l) => l.id).toList(),
+      chapterLessons: chapterLessons,
+      oldIndex: oldIndex,
+      newIndex: newIndex,
     );
   }
 
-  Future<void> _handleToggleChapterVisibility(ChapterEntity chapter) async {
-    final messenger = ScaffoldMessenger.of(context);
-    final l10n = context.l10n;
-    final success = await context.read<ContentCubit>().toggleChapterVisibility(
-      chapterId: chapter.id,
-      isPublished: !chapter.isPublished,
+  Future<void> _handleToggleChapterVisibility(ChapterEntity chapter) {
+    return TeacherCourseActionsHelper.handleToggleChapterVisibility(
+      context: context,
+      cubit: context.read<ContentCubit>(),
+      chapter: chapter,
     );
-    if (success && mounted) {
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(
-            !chapter.isPublished
-                ? l10n.chapterPublishedToast
-                : l10n.chapterHiddenToast,
-          ),
-          backgroundColor:
-              !chapter.isPublished ? AppColors.success : AppColors.warning,
-          duration: const Duration(seconds: 2),
-        ),
-      );
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final title = _selectedGroupName != null
-        ? context.l10n.groupContentPrefix(_selectedGroupName!)
-        : context.l10n.courseBuilderTitle;
-
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded),
-          tooltip: context.l10n.backTooltip,
-          onPressed: () {
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              context.go(AppRoutes.teacherDashboard);
-            }
-          },
-        ),
-        title: Row(
-          children: [
-            const Icon(
-              Icons.school_rounded,
-              size: 20,
-              color: AppColors.primary,
-            ),
-            const SizedBox(width: AppSpacing.s8),
-            Expanded(
-              child: Text(
-                title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh_rounded),
-            tooltip: context.l10n.refreshTooltip,
-            onPressed: () => _loadContent(forceRefresh: true),
-          ),
-        ],
+      appBar: TeacherCourseAppBar(
+        selectedGroupName: _selectedGroupName,
+        onRefresh: () => _loadContent(forceRefresh: true),
       ),
       floatingActionButton:
           (_selectedGroupId == null || MediaQuery.of(context).size.width >= 960)
@@ -500,69 +399,50 @@ class _TeacherContentLibraryPageState extends State<TeacherContentLibraryPage> {
                       }
 
                       if (state is ContentLoaded) {
-                        final lessons = state.items;
-                        final chapters = state.chapters;
-
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            // Course Overview Banner Card
-                            TeacherCourseOverviewSection(
-                              selectedGroupName: _selectedGroupName,
-                              lessons: lessons,
-                              chapters: chapters,
-                              isAllCollapsed: _collapsedChapterIds.length >=
-                                  chapters.length,
-                              onToggleAllChaptersCollapse: () =>
-                                  _toggleAllChaptersCollapse(chapters),
-                              onBulkVisibility: _handleBulkVisibility,
-                              onOpenGroupAnalytics: () =>
-                                  _openGroupAnalytics(chapters, lessons),
-                              onAddNewChapter: _handleCreateChapter,
-                              onAddLesson: _handleAddLesson,
-                            ),
-
-                            // Content Area: Clean, full-width course syllabus
-                            Expanded(
-                              child: TeacherCourseSyllabusView(
-                                scrollController: _scrollController,
-                                onRefresh: () =>
-                                    _loadContent(forceRefresh: true),
-                                chapters: chapters,
-                                lessons: lessons,
-                                collapsedChapterIds: _collapsedChapterIds,
-                                isLoadingMore: state.isLoadingMore,
-                                onAddLesson: _handleAddLesson,
-                                onToggleChapterCollapse:
-                                    _toggleChapterCollapse,
-                                onMoveChapter: (idx, delta) =>
-                                    _moveChapter(chapters, idx, delta),
-                                onChapterAnalytics: _openChapterAnalytics,
-                                onAddLessonToChapter: _handleAddLesson,
-                                onToggleChapterVisibility:
-                                    _handleToggleChapterVisibility,
-                                onEditChapter: _handleEditChapter,
-                                onDeleteChapter: _handleDeleteChapter,
-                                onOpenEditLesson: _openEditLessonPage,
-                                onReorderLesson:
-                                    _handleReorderLessonsInChapter,
-                                onMoveLessonToChapter: (lesson) =>
-                                    _handleMoveLessonToChapter(
-                                      lesson,
-                                      chapters,
-                                    ),
-                                onLessonAnalytics: _openLessonAnalytics,
-                                onDeleteLesson: _confirmDelete,
-                                onToggleLessonVisibility:
-                                    _handleToggleVisibility,
-                              ),
-                            ),
-                          ],
+                        return TeacherCourseLoadedView(
+                          selectedGroupName: _selectedGroupName,
+                          lessons: state.items,
+                          chapters: state.chapters,
+                          collapsedChapterIds: _collapsedChapterIds,
+                          isLoadingMore: state.isLoadingMore,
+                          scrollController: _scrollController,
+                          onRefresh: () => _loadContent(forceRefresh: true),
+                          onAddLesson: _handleAddLesson,
+                          onToggleChapterCollapse: _toggleChapterCollapse,
+                          onToggleAllChaptersCollapse: () =>
+                              _toggleAllChaptersCollapse(state.chapters),
+                          onMoveChapter: (idx, delta) =>
+                              _moveChapter(state.chapters, idx, delta),
+                          onChapterAnalytics: _openChapterAnalytics,
+                          onToggleChapterVisibility:
+                              _handleToggleChapterVisibility,
+                          onEditChapter: _handleEditChapter,
+                          onDeleteChapter: _handleDeleteChapter,
+                          onOpenEditLesson: _openEditLessonPage,
+                          onReorderLesson: _handleReorderLessonsInChapter,
+                          onMoveLessonToChapter: (lesson) =>
+                              _handleMoveLessonToChapter(
+                            lesson,
+                            state.chapters,
+                          ),
+                          onLessonAnalytics: _openLessonAnalytics,
+                          onDeleteLesson: _confirmDelete,
+                          onToggleLessonVisibility: _handleToggleVisibility,
+                          onBulkVisibility: _handleBulkVisibility,
+                          onOpenGroupAnalytics: () =>
+                              _openGroupAnalytics(state.chapters, state.items),
+                          onAddNewChapter: _handleCreateChapter,
                         );
                       }
 
-                      // Default empty
-                      return const SizedBox.shrink();
+                      // Default loading skeleton while resolving group
+                      return const Padding(
+                        padding: EdgeInsets.only(top: AppSpacing.s12),
+                        child: AppLoadingView.cardsGrid(
+                          count: 4,
+                          columns: 1,
+                        ),
+                      );
                     },
                   );
 

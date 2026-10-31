@@ -4018,6 +4018,8 @@
   "whatsappPendingQueueMetric": "في الانتظار",
   "whatsappFailedMetric": "أخطاء الإرسال",
   "whatsappGatewaySettingsTooltip": "إعدادات بوابة واتساب للإرسال التلقائي",
+  "whatsappGatewayDevicePairingTip": "💡 قم بربط الهاتف مرة واحدة فقط للمدرس (يعمل مع واتساب العادي أو الأعمال العادي، ويُرجى عدم استخدام أرقام مرتبطة بـ Cloud API لضمان فك التشفير اللحظي بنسبة 100%).",
+  "whatsappGatewayDisconnectedWarning": "⚠️ الجلسة غير متصلة أو انتهت صلاحيتها. يرجى إعادة مسح الرمز لاستئناف الإرسال التلقائي.",
   "whatsappAutoDispatchActiveBannerTitle": "الإرسال التلقائي لواتساب ولي الأمر نشط",
   "whatsappAutoDispatchActiveBannerSubtitle": "فور تسليم الطالب لاختباره، يُرسل تقرير الدرجات لواتساب ولي الأمر مباشرة دون الحاجة لأي تدخل يدوي",
   "configureGatewayAction": "إعدادات البوابة",

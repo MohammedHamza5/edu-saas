@@ -10,6 +10,9 @@ import '../../../content/domain/entities/file_attachment_entity.dart';
 import '../../../content/presentation/dialogs/select_material_from_library_dialog.dart';
 import '../../../content/presentation/widgets/material_viewer_sheet.dart';
 import '../cubit/exams_cubit.dart';
+import '../dialogs/quick_bubble_sheet_dialog.dart';
+import '../models/create_exam_draft_models.dart';
+import 'create_exam_builder_helpers.dart';
 
 /// Value object representing an attached PDF booklet file.
 class AttachedPdfResult {
@@ -147,5 +150,45 @@ class CreateExamPdfHelper {
       onGetSignedUrl: (path) =>
           context.read<ExamsCubit>().getSignedPdfUrl(path),
     );
+  }
+
+  /// Opens the Quick Bubble Sheet creation dialog.
+  static Future<QuickBubbleSheetResult?> showQuickBubbleSheetDialog({
+    required BuildContext context,
+    required int initialPoints,
+    required bool hasExistingQuestions,
+  }) {
+    return showDialog<QuickBubbleSheetResult>(
+      context: context,
+      builder: (ctx) => QuickBubbleSheetDialog(
+        initialPoints: initialPoints,
+        hasExistingQuestions: hasExistingQuestions,
+      ),
+    );
+  }
+
+  /// Replaces the active question list with freshly generated bubble-sheet draft questions.
+  static int applyQuickBubbleSheetResult({
+    required QuickBubbleSheetResult result,
+    required List<CreateExamDraftQuestion> questions,
+    required void Function(CreateExamDraftQuestion) onBindListeners,
+  }) {
+    for (final q in questions) {
+      q.dispose();
+    }
+    questions.clear();
+
+    final bubbleQuestions =
+        CreateExamBuilderHelpers.generateBubbleSheetDraftQuestions(
+      questionCount: result.questionCount,
+      optionsCount: result.optionsCount,
+      points: result.points,
+    );
+    for (final dq in bubbleQuestions) {
+      onBindListeners(dq);
+      questions.add(dq);
+    }
+
+    return result.questionCount * result.points;
   }
 }

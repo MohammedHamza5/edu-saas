@@ -2,6 +2,7 @@ import 'package:edu_saas/core/errors/result.dart';
 import 'package:edu_saas/core/utils/cache_manager.dart';
 import 'package:edu_saas/features/content/domain/entities/attached_lesson_exam_entity.dart';
 import 'package:edu_saas/features/content/domain/entities/chapter_entity.dart';
+import 'package:edu_saas/features/content/domain/entities/content_analytics_entity.dart';
 import 'package:edu_saas/features/content/domain/entities/content_entity.dart';
 import 'package:edu_saas/features/content/domain/entities/lesson_assignment_entity.dart';
 import 'package:edu_saas/features/content/domain/repositories/content_repository.dart';
@@ -317,6 +318,32 @@ class _SimulatedContentRepo implements ContentRepository {
   @override
   Future<Result<Map<String, String>?>> getExamByContentId(String contentId) async =>
       const Success(null);
+
+  @override
+  Future<Result<LessonAnalyticsEntity>> getLessonAnalytics({
+    required String lessonId,
+    required String groupId,
+    String? videoId,
+    String? examId,
+  }) async => throw UnimplementedError();
+
+  @override
+  Future<Result<ChapterAnalyticsEntity>> getChapterAnalytics({
+    required String groupId,
+    required List<String> lessonIds,
+    required List<String> examIds,
+  }) async => throw UnimplementedError();
+
+  @override
+  Future<Result<List<Map<String, dynamic>>>> getContentGroupCustomizations(String contentId) async =>
+      const Success([]);
+
+  @override
+  Future<Result<GroupAnalyticsEntity>> getGroupAnalytics({
+    required String groupId,
+    required List<ChapterEntity> chapters,
+    required List<ContentEntity> lessons,
+  }) async => throw UnimplementedError();
 
 }
 

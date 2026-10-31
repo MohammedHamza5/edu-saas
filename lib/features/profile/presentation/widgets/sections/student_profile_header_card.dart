@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../../core/extensions/localized_context_extension.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_spacing.dart';
+import '../../../../../core/extensions/localized_context_extension.dart';
+import '../../../../../core/theme/app_colors.dart';
+import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/widgets/app_card.dart';
 import '../../../domain/entities/student_profile_entity.dart';
 
 class StudentProfileHeaderCard extends StatelessWidget {
@@ -16,44 +17,40 @@ class StudentProfileHeaderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Container(
-      width: double.infinity,
+    return AppCard(
+      variant: AppCardVariant.standard,
       padding: const EdgeInsets.all(AppSpacing.s20),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusLarge),
-        border: Border.all(
-          color: AppColors.primary.withValues(alpha: 0.12),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              // Avatar
-              CircleAvatar(
-                radius: 36,
-                backgroundColor: AppColors.primaryLight,
-                backgroundImage: profile.avatarUrl != null && profile.avatarUrl!.isNotEmpty
-                    ? NetworkImage(profile.avatarUrl!)
-                    : null,
-                child: profile.avatarUrl == null || profile.avatarUrl!.isEmpty
-                    ? Text(
-                        profile.initials,
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      )
-                    : null,
+              // Avatar with glowing ring
+              Container(
+                padding: const EdgeInsets.all(3),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: AppColors.primaryLight.withValues(alpha: 0.4),
+                    width: 2,
+                  ),
+                ),
+                child: CircleAvatar(
+                  radius: 34,
+                  backgroundColor: AppColors.primaryLight.withValues(alpha: 0.15),
+                  backgroundImage: profile.avatarUrl != null && profile.avatarUrl!.isNotEmpty
+                      ? NetworkImage(profile.avatarUrl!)
+                      : null,
+                  child: profile.avatarUrl == null || profile.avatarUrl!.isEmpty
+                      ? Text(
+                          profile.initials,
+                          style: theme.textTheme.headlineSmall?.copyWith(
+                            color: AppColors.primaryLight,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        )
+                      : null,
+                ),
               ),
               const SizedBox(width: AppSpacing.s16),
               // Name, email, and active badge
@@ -84,7 +81,7 @@ class StudentProfileHeaderCard extends StatelessWidget {
                             color: AppColors.success.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
                             border: Border.all(
-                              color: AppColors.success.withValues(alpha: 0.25),
+                              color: AppColors.success.withValues(alpha: 0.3),
                             ),
                           ),
                           child: Row(
@@ -100,7 +97,7 @@ class StudentProfileHeaderCard extends StatelessWidget {
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                context.l10n.statusActive,
+                                context.l10n.active,
                                 style: const TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.bold,
@@ -116,7 +113,7 @@ class StudentProfileHeaderCard extends StatelessWidget {
                     Text(
                       profile.email,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondary,
+                        color: AppColors.textMuted,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -127,7 +124,7 @@ class StudentProfileHeaderCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.s16),
-          const Divider(height: 1, color: Color(0xFFE2E8F0)),
+          const Divider(height: 1, color: AppColors.border),
           const SizedBox(height: AppSpacing.s14),
           // Enrolled Groups
           Row(
@@ -136,7 +133,7 @@ class StudentProfileHeaderCard extends StatelessWidget {
               const Icon(
                 Icons.groups_rounded,
                 size: 18,
-                color: AppColors.primary,
+                color: AppColors.primaryLight,
               ),
               const SizedBox(width: AppSpacing.s8),
               Text(
@@ -152,33 +149,44 @@ class StudentProfileHeaderCard extends StatelessWidget {
                     ? Text(
                         context.l10n.studentNoGroupsJoined,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
+                          color: AppColors.textMuted,
                           fontStyle: FontStyle.italic,
                         ),
                       )
                     : Wrap(
-                        spacing: 6,
-                        runSpacing: 6,
+                        spacing: 8,
+                        runSpacing: 8,
                         children: profile.enrolledGroups.map((group) {
                           return Container(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: AppSpacing.s10,
-                              vertical: 3,
+                              horizontal: AppSpacing.s12,
+                              vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: AppColors.primaryLight.withValues(alpha: 0.15),
+                              color: AppColors.primary.withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
                               border: Border.all(
-                                color: AppColors.primary.withValues(alpha: 0.2),
+                                color: AppColors.primary.withValues(alpha: 0.25),
                               ),
                             ),
-                            child: Text(
-                              '${group.name} (${group.level})',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.primary,
-                              ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.school_outlined,
+                                  size: 13,
+                                  color: AppColors.primaryLight,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '${group.name} (${group.level})',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
                             ),
                           );
                         }).toList(),
