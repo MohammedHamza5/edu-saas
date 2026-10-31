@@ -133,19 +133,19 @@ app.get('/api/live-qr', async (req: Request, res: Response) => {
   });
 });
 
-// 2.2 Force Refresh / Reset QR Endpoint (Secured)
-app.all('/api/refresh-qr', authMiddleware, async (req: Request, res: Response) => {
+// 2.2 Force Refresh / Reset QR Endpoint (Accessible for Frontend Pairing)
+app.all('/api/refresh-qr', async (req: Request, res: Response) => {
   const force = req.query.force === 'true' || req.body?.force === true;
-  if (baileysClient && (!baileysClient.isConnected() || force)) {
+  if (baileysClient) {
     console.log('[Server] /api/refresh-qr called. Forcing fresh session & QR generation...');
     await baileysClient.forceRefreshSession();
     return res.json({ success: true, message: 'Session refreshed and clean QR generated' });
   }
-  return res.json({ success: true, message: 'Session already connected. Pass ?force=true to reset.' });
+  return res.json({ success: false, message: 'Baileys client not initialized' });
 });
 
 // 2.3 Unlink / Logout WhatsApp Session
-app.all('/api/logout', authMiddleware, async (_req: Request, res: Response) => {
+app.all('/api/logout', async (_req: Request, res: Response) => {
   if (baileysClient) {
     console.log('[Server] /api/logout called. Wiping credentials and generating fresh QR...');
     await baileysClient.forceRefreshSession();

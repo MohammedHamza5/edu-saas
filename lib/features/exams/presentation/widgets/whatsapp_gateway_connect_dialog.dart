@@ -43,6 +43,8 @@ class _WhatsAppGatewayConnectDialogState
     super.initState();
     _fetchStatus();
     _startPolling();
+    // Proactively request fresh QR code from gateway
+    _refreshQr();
   }
 
   void _startPolling() {
@@ -334,19 +336,28 @@ class _WhatsAppGatewayConnectDialogState
         borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
         border: Border.all(color: AppColors.border),
       ),
-      child: const Column(
+      child: Column(
         children: [
-          SizedBox(
+          const SizedBox(
             width: 28,
             height: 28,
             child: CircularProgressIndicator(strokeWidth: 2.5),
           ),
-          SizedBox(height: AppSpacing.s12),
-          Text(
+          const SizedBox(height: AppSpacing.s12),
+          const Text(
             'جاري الاتصال بالسيرفر وتجهيز رمز الـ QR...',
             style: TextStyle(
               fontSize: 12,
               color: AppColors.textMuted,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.s12),
+          TextButton.icon(
+            onPressed: _isRefreshing ? null : _refreshQr,
+            icon: const Icon(Icons.refresh_rounded, size: 16),
+            label: Text(
+              _isRefreshing ? 'جاري طلب الرمز...' : 'توليد الرمز مجدداً',
+              style: const TextStyle(fontSize: 12),
             ),
           ),
         ],
