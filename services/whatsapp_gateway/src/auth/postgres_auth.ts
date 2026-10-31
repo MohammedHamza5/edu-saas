@@ -18,7 +18,8 @@ export async function usePostgresAuthState(
     .maybeSingle();
 
   if (fetchError) {
-    console.error('[PostgresAuth] Error fetching session:', fetchError.message);
+    console.error('[PostgresAuth] Database connection error fetching session:', fetchError.message);
+    throw new Error(`[PostgresAuth] Fatal error fetching session from Supabase: ${fetchError.message}`);
   }
 
   let creds: AuthenticationCreds;
@@ -41,8 +42,8 @@ export async function usePostgresAuthState(
     }
   } else {
     creds = initAuthCreds();
-    // Initialize session record in DB
-    await supabase.from('whatsapp_auth_sessions').upsert({
+    // Initialize session record in DB with error check
+    const { error: initError } = await supabase.from('whatsapp_auth_sessions').upsert({
       id: sessionId,
       tenant_id: tenantId || null,
       creds: JSON.parse(JSON.stringify(creds, BufferJSON.replacer)),
@@ -50,56 +51,48 @@ export async function usePostgresAuthState(
       status: 'disconnected',
       updated_at: new Date().toISOString()
     });
+    if (initError) {
+      throw new Error(`[PostgresAuth] Failed to initialize session in DB: ${initError.message}`);
+    }
   }
 
   /**
-   * Strictly sequential write queue to ensure Signal keys are persisted in exact chronological order.
-   * Eliminates concurrent write races on Supabase.
+   * Strictly sequential write queue (Mutex) to ensure all Signal keys & credentials
+   * are persisted in exact chronological order without race conditions or overwriting.
    */
-  let flushQueue: Promise<void> = Promise.resolve();
-  const flushKeys = (): Promise<void> => {
-    flushQueue = flushQueue.then(async () => {
-      try {
-        const serializedKeys = JSON.parse(JSON.stringify(keysStore, BufferJSON.replacer));
-        await supabase
-          .from('whatsapp_auth_sessions')
-          .update({
-            keys: serializedKeys,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', sessionId);
-        console.log('[PostgresAuth] ✅ Critical Signal keys flushed to DB (ordered).');
-      } catch (err) {
-        console.warn('[PostgresAuth] flushKeys error:', (err as Error).message);
-      }
+  let writeQueue: Promise<void> = Promise.resolve();
+  const enqueueWrite = (fn: () => Promise<void>): Promise<void> => {
+    writeQueue = writeQueue.then(async () => {
+      await fn();
+    }).catch((err) => {
+      console.error('[PostgresAuth] Queue write failure:', err.message);
+      throw err;
     });
-    return flushQueue;
+    return writeQueue;
   };
 
-  let keysSaveTimeout: NodeJS.Timeout | null = null;
-  const debouncedSaveKeys = () => {
-    if (keysSaveTimeout) clearTimeout(keysSaveTimeout);
-    keysSaveTimeout = setTimeout(async () => {
-      try {
-        const serializedKeys = JSON.parse(JSON.stringify(keysStore, BufferJSON.replacer));
-        await supabase
-          .from('whatsapp_auth_sessions')
-          .update({
-            keys: serializedKeys,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', sessionId);
-      } catch (err) {
-        console.warn('[PostgresAuth] Debounced save warning:', (err as Error).message);
+  const flushKeys = (): Promise<void> => {
+    return enqueueWrite(async () => {
+      const serializedKeys = JSON.parse(JSON.stringify(keysStore, BufferJSON.replacer));
+      const { data, error } = await supabase
+        .from('whatsapp_auth_sessions')
+        .update({
+          keys: serializedKeys,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', sessionId)
+        .select('id')
+        .single();
+
+      if (error) {
+        throw new Error(`[PostgresAuth] Supabase error persisting keys: ${error.message}`);
       }
-    }, 400);
+      if (!data) {
+        throw new Error('[PostgresAuth] Auth session record not found during key flush');
+      }
+      console.log('[PostgresAuth] ✅ Signal keys persisted to DB (ordered & verified).');
+    });
   };
-
-  /**
-   * Critical key categories that must be persisted immediately (no debounce).
-   * These are used during E2EE session establishment and replay protection.
-   */
-  const CRITICAL_KEY_CATEGORIES = new Set(['session', 'pre-key', 'signed-pre-key', 'sender-key', 'sender-key-memory']);
 
   const keys: SignalKeyStore = {
     get: async (type, ids) => {
@@ -118,10 +111,8 @@ export async function usePostgresAuthState(
     },
     set: async (data: any) => {
       const dataObj = data as Record<string, Record<string, any>>;
-      let hasCriticalCategory = false;
 
       for (const category in dataObj) {
-        if (CRITICAL_KEY_CATEGORIES.has(category)) hasCriticalCategory = true;
         for (const id in dataObj[category]) {
           const value = dataObj[category][id];
           const key = `${category}-${id}`;
@@ -133,31 +124,34 @@ export async function usePostgresAuthState(
         }
       }
 
-      // Persist critical E2EE keys immediately to prevent session loss across restarts
-      if (hasCriticalCategory) {
-        await flushKeys();
-      } else {
-        debouncedSaveKeys();
-      }
+      // Persist all key updates sequentially through verified queue
+      await flushKeys();
     }
   };
 
   const saveCreds = async () => {
-    try {
-      if (keysSaveTimeout) clearTimeout(keysSaveTimeout);
+    return enqueueWrite(async () => {
       const serializedCreds = JSON.parse(JSON.stringify(creds, BufferJSON.replacer));
       const serializedKeys = JSON.parse(JSON.stringify(keysStore, BufferJSON.replacer));
-      await supabase
+      const { data, error } = await supabase
         .from('whatsapp_auth_sessions')
         .update({
           creds: serializedCreds,
           keys: serializedKeys,
           updated_at: new Date().toISOString()
         })
-        .eq('id', sessionId);
-    } catch (err) {
-      console.error('[PostgresAuth] Error saving creds & keys:', err);
-    }
+        .eq('id', sessionId)
+        .select('id')
+        .single();
+
+      if (error) {
+        throw new Error(`[PostgresAuth] Supabase error saving credentials: ${error.message}`);
+      }
+      if (!data) {
+        throw new Error('[PostgresAuth] Auth session record not found during creds save');
+      }
+      console.log('[PostgresAuth] ✅ Credentials saved to DB (ordered & verified).');
+    });
   };
 
   return {

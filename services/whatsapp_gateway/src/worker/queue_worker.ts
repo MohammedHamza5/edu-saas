@@ -86,15 +86,18 @@ export class QueueWorker {
         try {
           console.log(`[QueueWorker] Dispatching exam result to ${item.recipient_phone} (Student: ${item.student_name})...`);
           
-          await this.client.sendTextMessage(item.recipient_phone, item.message_body, item.id);
+          const result = await this.client.sendTextMessage(item.recipient_phone, item.message_body, item.id);
+          if (!result || !result.success || !result.messageId) {
+            throw new Error(`Dispatch failed: Gateway did not return a valid messageId for ${item.recipient_phone}`);
+          }
 
-          // 3. Mark as sent
+          // 3. Mark as sent only when valid messageId is returned
           await this.supabase.rpc('update_whatsapp_queue_status', {
             p_id: item.id,
             p_status: 'sent',
             p_error: null
           });
-          console.log(`[QueueWorker] Result for ${item.student_name} marked as SENT.`);
+          console.log(`[QueueWorker] Result for ${item.student_name} marked as SENT (MsgID: ${result.messageId}).`);
         } catch (itemErr) {
           const errMsg = (itemErr as Error).message;
           console.error(`[QueueWorker] Failed to dispatch item ${item.id}:`, errMsg);

@@ -48,6 +48,7 @@ export class BaileysGatewayClient {
   private tenantId?: string;
   private pacer: AntiBanPacer;
   private isConnecting: boolean = false;
+  private reconnectTimer: NodeJS.Timeout | null = null;
   private messageStore: Map<string, proto.IMessage> = new Map();
   private retryCache: SimpleCacheStore = new SimpleCacheStore();
 
@@ -181,6 +182,42 @@ export class BaileysGatewayClient {
         }
       });
 
+      // Track delivery confirmations from WhatsApp network
+      this.sock.ev.on('messages.update', async (updates) => {
+        for (const update of updates) {
+          if (update.key?.id && update.update?.status) {
+            const msgId = update.key.id;
+            const statusNum = update.update.status;
+            // status 3 = DELIVERY_ACK (double gray checkmark, delivered to recipient phone)
+            // status 4 = READ (blue checkmark, read by recipient)
+            if (statusNum >= 3) {
+              try {
+                const { data: item } = await this.supabase
+                  .from('whatsapp_outbox_queue')
+                  .select('id, metadata')
+                  .eq('metadata->>message_id', msgId)
+                  .maybeSingle();
+
+                if (item) {
+                  const updatedMeta = {
+                    ...(item.metadata || {}),
+                    receipt_status: statusNum === 4 ? 'read' : 'delivered',
+                    delivered_at: item.metadata?.delivered_at || new Date().toISOString()
+                  };
+                  await this.supabase
+                    .from('whatsapp_outbox_queue')
+                    .update({ metadata: updatedMeta })
+                    .eq('id', item.id);
+                  console.log(`[BaileysClient] 📬 Receipt updated for MsgID ${msgId}: ${statusNum === 4 ? 'READ' : 'DELIVERED'}`);
+                }
+              } catch (e) {
+                console.warn('[BaileysClient] Failed to record message receipt in DB:', (e as Error).message);
+              }
+            }
+          }
+        }
+      });
+
       this.sock.ev.on('connection.update', async (update) => {
         const { connection, lastDisconnect, qr } = update;
 
@@ -209,6 +246,10 @@ export class BaileysGatewayClient {
 
         if (connection === 'open') {
           this.isConnecting = false;
+          if (this.reconnectTimer) {
+            clearTimeout(this.reconnectTimer);
+            this.reconnectTimer = null;
+          }
           const userJid = this.sock?.user?.id || '';
           const phone = userJid.split(':')[0] || userJid.split('@')[0];
           const name = this.sock?.user?.name || 'EduSaaS WhatsApp Gateway';
@@ -231,6 +272,10 @@ export class BaileysGatewayClient {
 
         if (connection === 'close') {
           this.isConnecting = false;
+          if (this.reconnectTimer) {
+            clearTimeout(this.reconnectTimer);
+            this.reconnectTimer = null;
+          }
           const statusCode = (lastDisconnect?.error as Boom)?.output?.statusCode;
           const isLoggedOut = statusCode === DisconnectReason.loggedOut;
           const isConnectionReplaced = statusCode === DisconnectReason.connectionReplaced;
@@ -256,19 +301,23 @@ export class BaileysGatewayClient {
                 updated_at: new Date().toISOString()
               })
               .eq('id', this.sessionId);
-            setTimeout(() => this.initialize(), 3000);
+            this.reconnectTimer = setTimeout(() => this.initialize(), 3000);
           } else {
             // Reconnect without wiping credentials
             const reconnectDelay = statusCode === DisconnectReason.restartRequired ? 1000 : 3000;
             console.log(`[BaileysClient] Reconnecting in ${reconnectDelay}ms (Status: ${statusCode})...`);
-            setTimeout(() => this.initialize(), reconnectDelay);
+            this.reconnectTimer = setTimeout(() => this.initialize(), reconnectDelay);
           }
         }
       });
     } catch (err) {
       this.isConnecting = false;
+      if (this.reconnectTimer) {
+        clearTimeout(this.reconnectTimer);
+        this.reconnectTimer = null;
+      }
       console.error('[BaileysClient] Fatal initialization error:', err);
-      setTimeout(() => this.initialize(), 10000);
+      this.reconnectTimer = setTimeout(() => this.initialize(), 10000);
     }
   }
 
@@ -386,10 +435,17 @@ export class BaileysGatewayClient {
   public async forceRefreshSession(): Promise<void> {
     try {
       this.isConnecting = false;
+      if (this.reconnectTimer) {
+        clearTimeout(this.reconnectTimer);
+        this.reconnectTimer = null;
+      }
       if (this.sock) {
         try {
           this.sock.ev.removeAllListeners('connection.update');
           this.sock.ev.removeAllListeners('creds.update');
+          this.sock.ev.removeAllListeners('messages.upsert');
+          this.sock.ev.removeAllListeners('messages.update');
+          this.sock.ev.removeAllListeners('message-receipt.update');
           this.sock.end(undefined);
         } catch (_) {}
         this.sock = null;

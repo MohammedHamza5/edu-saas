@@ -84,8 +84,8 @@ app.get('/health', (_req: Request, res: Response) => {
   });
 });
 
-// 1.1 Live Diagnostic Logs endpoint
-app.get('/api/debug-logs', (_req: Request, res: Response) => {
+// 1.1 Live Diagnostic Logs endpoint (Secured)
+app.get('/api/debug-logs', authMiddleware, (_req: Request, res: Response) => {
   res.type('text/plain').send(logBuffer.join('\n'));
 });
 
@@ -133,8 +133,8 @@ app.get('/api/live-qr', async (req: Request, res: Response) => {
   });
 });
 
-// 2.2 Force Refresh / Reset QR Endpoint
-app.all('/api/refresh-qr', async (req: Request, res: Response) => {
+// 2.2 Force Refresh / Reset QR Endpoint (Secured)
+app.all('/api/refresh-qr', authMiddleware, async (req: Request, res: Response) => {
   const force = req.query.force === 'true' || req.body?.force === true;
   if (baileysClient && (!baileysClient.isConnected() || force)) {
     console.log('[Server] /api/refresh-qr called. Forcing fresh session & QR generation...');
@@ -255,39 +255,7 @@ app.post('/api/send', authMiddleware, async (req: Request, res: Response) => {
   }
 });
 
-// 6. Reset Signal E2EE Session for a Specific Phone (Surgically purges stale ratchets)
-app.post('/api/reset-contact-session', authMiddleware, async (req: Request, res: Response) => {
-  const { phone } = req.body;
-  if (!phone) {
-    return res.status(400).json({ error: 'Missing phone number' });
-  }
-  const cleanDigits = phone.replace(/\D/g, '');
-  try {
-    const { data: sessionRow } = await supabase
-      .from('whatsapp_auth_sessions')
-      .select('keys')
-      .eq('id', SESSION_ID)
-      .maybeSingle();
 
-    if (sessionRow?.keys) {
-      const keys = sessionRow.keys;
-      const toDelete = Object.keys(keys).filter(k => k.includes(cleanDigits));
-      for (const k of toDelete) {
-        delete keys[k];
-      }
-      await supabase
-        .from('whatsapp_auth_sessions')
-        .update({ keys, updated_at: new Date().toISOString() })
-        .eq('id', SESSION_ID);
-
-      console.log(`[Server] Reset Signal session for ${cleanDigits}. Purged keys:`, toDelete);
-      return res.json({ success: true, purgedKeys: toDelete });
-    }
-    return res.json({ success: true, purgedKeys: [] });
-  } catch (err) {
-    return res.status(500).json({ error: (err as Error).message });
-  }
-});
 
 // Self-KeepAlive for Free Cloud Instances (e.g. Render / Always-On)
 const KEEP_ALIVE_URL = process.env.RENDER_EXTERNAL_URL || process.env.KEEP_ALIVE_URL;
