@@ -235,6 +235,8 @@ export class BaileysGatewayClient {
               .update({
                 status: 'qr_ready',
                 qr_code: qrDataUrl,
+                connected_phone: null,
+                connected_name: null,
                 tenant_id: this.tenantId || null,
                 updated_at: new Date().toISOString()
               })
@@ -458,6 +460,8 @@ export class BaileysGatewayClient {
           keys: {},
           status: 'disconnected',
           qr_code: null,
+          connected_phone: null,
+          connected_name: null,
           tenant_id: this.tenantId || null,
           updated_at: new Date().toISOString()
         })

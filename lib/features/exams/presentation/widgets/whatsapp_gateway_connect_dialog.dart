@@ -41,10 +41,12 @@ class _WhatsAppGatewayConnectDialogState
   @override
   void initState() {
     super.initState();
-    _fetchStatus();
+    _fetchStatus().then((_) {
+      if (mounted && (_status?.qrCode == null || _status!.qrCode!.isEmpty)) {
+        _refreshQr();
+      }
+    });
     _startPolling();
-    // Proactively request fresh QR code from gateway
-    _refreshQr();
   }
 
   void _startPolling() {
@@ -306,7 +308,8 @@ class _WhatsAppGatewayConnectDialogState
                     color: badgeColor,
                   ),
                 ),
-                if (status?.connectedPhone != null &&
+                if (isConnected &&
+                    status?.connectedPhone != null &&
                     status!.connectedPhone!.isNotEmpty) ...[
                   const SizedBox(height: 2),
                   Text(

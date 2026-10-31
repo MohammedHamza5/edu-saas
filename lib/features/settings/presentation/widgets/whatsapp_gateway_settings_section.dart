@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -178,12 +177,6 @@ class _WhatsAppGatewaySettingsSectionState
                   ),
                 ),
 
-                // QR Code Block (if pairing requested / ready)
-                if (status != null && status.isQrReady) ...[
-                  const SizedBox(height: AppSpacing.s16),
-                  _buildQrCodeBox(status.qrCode!),
-                ],
-
                 // Metrics Row (if connected)
                 if (status != null && status.isConnected) ...[
                   const SizedBox(height: AppSpacing.s16),
@@ -262,7 +255,8 @@ class _WhatsAppGatewaySettingsSectionState
                     color: badgeColor,
                   ),
                 ),
-                if (status?.connectedPhone != null &&
+                if (isConnected &&
+                    status?.connectedPhone != null &&
                     status!.connectedPhone!.isNotEmpty) ...[
                   const SizedBox(height: 2),
                   Text(
@@ -286,55 +280,6 @@ class _WhatsAppGatewaySettingsSectionState
                 ],
               ],
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildQrCodeBox(String rawQrData) {
-    ImageProvider? imageProvider;
-    try {
-      if (rawQrData.contains('base64,')) {
-        final base64Str = rawQrData.split('base64,').last.trim();
-        final bytes = base64Decode(base64Str);
-        imageProvider = MemoryImage(bytes);
-      }
-    } catch (_) {
-      imageProvider = null;
-    }
-
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.s16),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Column(
-        children: [
-          Text(
-            context.l10n.whatsappScanQrInstruction,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
-          ),
-          const SizedBox(height: AppSpacing.s12),
-          if (imageProvider != null)
-            ClipRRect(
-              borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-              child: Image(
-                image: imageProvider,
-                width: 200,
-                height: 200,
-                fit: BoxFit.contain,
-              ),
-            )
-          else
-            const Icon(Icons.qr_code_2_rounded, size: 160, color: AppColors.textMuted),
-          const SizedBox(height: AppSpacing.s8),
-          Text(
-            context.l10n.whatsappQrAutoRefreshNote,
-            style: const TextStyle(fontSize: 10, color: AppColors.textMuted),
           ),
         ],
       ),
