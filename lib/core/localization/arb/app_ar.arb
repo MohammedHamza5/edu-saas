@@ -4098,5 +4098,12 @@
   "whatsappStudioDispatchTimingExamEnd": "بعد انتهاء موعد الاختبار بالكامل",
   "whatsappStudioDispatchTimingExamEndDesc": "يؤجل الإرسال لحين انتهاء وقت الامتحان العام منعاً لتسريب الإجابات",
   "whatsappStudioSimulatorTestTier": "محاكاة الدرجة في المعاينة:",
-  "whatsappStudioSaveAction": "حفظ إعدادات الاستوديو"
+  "whatsappStudioSaveAction": "حفظ إعدادات الاستوديو",
+  "whatsappPairingStepsHeader": "خطوات ربط واتساب السريعة:",
+  "whatsappPairingStep1": "1. افتح تطبيق واتساب على هاتف الأكاديمية.",
+  "whatsappPairingStep2": "2. انتقل إلى «الأجهزة المرتبطة» > «ربط جهاز».",
+  "whatsappPairingStep3": "3. وجّه كاميرا الهاتف نحو رمز الـ QR الظاهر أمامك.",
+  "whatsappGatewayConnecting": "جاري الاتصال بالسيرفر وتجهيز رمز الـ QR...",
+  "whatsappGatewayRegenerateAction": "توليد الرمز مجدداً",
+  "whatsappGatewayRegenerating": "جاري طلب الرمز..."
 }

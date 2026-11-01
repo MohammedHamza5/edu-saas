@@ -10292,5 +10292,19 @@
   "whatsappStudioSimulatorTestTier": "Preview Simulation Score:",
   "@whatsappStudioSimulatorTestTier": {},
   "whatsappStudioSaveAction": "Save Studio Preferences",
-  "@whatsappStudioSaveAction": {}
+  "@whatsappStudioSaveAction": {},
+  "whatsappPairingStepsHeader": "Quick Pairing Steps:",
+  "@whatsappPairingStepsHeader": {},
+  "whatsappPairingStep1": "1. Open WhatsApp on the academy's phone.",
+  "@whatsappPairingStep1": {},
+  "whatsappPairingStep2": "2. Go to Linked Devices > Link a Device.",
+  "@whatsappPairingStep2": {},
+  "whatsappPairingStep3": "3. Point the phone camera at the QR code.",
+  "@whatsappPairingStep3": {},
+  "whatsappGatewayConnecting": "Connecting to gateway and preparing QR code...",
+  "@whatsappGatewayConnecting": {},
+  "whatsappGatewayRegenerateAction": "Regenerate QR Code",
+  "@whatsappGatewayRegenerateAction": {},
+  "whatsappGatewayRegenerating": "Requesting fresh QR...",
+  "@whatsappGatewayRegenerating": {}
 }

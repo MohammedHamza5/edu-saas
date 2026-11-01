@@ -10061,4 +10061,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get whatsappStudioSaveAction => 'Save Studio Preferences';
+
+  @override
+  String get whatsappPairingStepsHeader => 'Quick Pairing Steps:';
+
+  @override
+  String get whatsappPairingStep1 =>
+      '1. Open WhatsApp on the academy\'s phone.';
+
+  @override
+  String get whatsappPairingStep2 => '2. Go to Linked Devices > Link a Device.';
+
+  @override
+  String get whatsappPairingStep3 =>
+      '3. Point the phone camera at the QR code.';
+
+  @override
+  String get whatsappGatewayConnecting =>
+      'Connecting to gateway and preparing QR code...';
+
+  @override
+  String get whatsappGatewayRegenerateAction => 'Regenerate QR Code';
+
+  @override
+  String get whatsappGatewayRegenerating => 'Requesting fresh QR...';
 }

@@ -10010,4 +10010,29 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get whatsappStudioSaveAction => 'حفظ إعدادات الاستوديو';
+
+  @override
+  String get whatsappPairingStepsHeader => 'خطوات ربط واتساب السريعة:';
+
+  @override
+  String get whatsappPairingStep1 =>
+      '1. افتح تطبيق واتساب على هاتف الأكاديمية.';
+
+  @override
+  String get whatsappPairingStep2 =>
+      '2. انتقل إلى «الأجهزة المرتبطة» > «ربط جهاز».';
+
+  @override
+  String get whatsappPairingStep3 =>
+      '3. وجّه كاميرا الهاتف نحو رمز الـ QR الظاهر أمامك.';
+
+  @override
+  String get whatsappGatewayConnecting =>
+      'جاري الاتصال بالسيرفر وتجهيز رمز الـ QR...';
+
+  @override
+  String get whatsappGatewayRegenerateAction => 'توليد الرمز مجدداً';
+
+  @override
+  String get whatsappGatewayRegenerating => 'جاري طلب الرمز...';
 }

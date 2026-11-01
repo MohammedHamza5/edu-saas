@@ -17760,6 +17760,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Save Studio Preferences'**
   String get whatsappStudioSaveAction;
+
+  /// No description provided for @whatsappPairingStepsHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Pairing Steps:'**
+  String get whatsappPairingStepsHeader;
+
+  /// No description provided for @whatsappPairingStep1.
+  ///
+  /// In en, this message translates to:
+  /// **'1. Open WhatsApp on the academy\'s phone.'**
+  String get whatsappPairingStep1;
+
+  /// No description provided for @whatsappPairingStep2.
+  ///
+  /// In en, this message translates to:
+  /// **'2. Go to Linked Devices > Link a Device.'**
+  String get whatsappPairingStep2;
+
+  /// No description provided for @whatsappPairingStep3.
+  ///
+  /// In en, this message translates to:
+  /// **'3. Point the phone camera at the QR code.'**
+  String get whatsappPairingStep3;
+
+  /// No description provided for @whatsappGatewayConnecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting to gateway and preparing QR code...'**
+  String get whatsappGatewayConnecting;
+
+  /// No description provided for @whatsappGatewayRegenerateAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Regenerate QR Code'**
+  String get whatsappGatewayRegenerateAction;
+
+  /// No description provided for @whatsappGatewayRegenerating.
+  ///
+  /// In en, this message translates to:
+  /// **'Requesting fresh QR...'**
+  String get whatsappGatewayRegenerating;
 }
 
 class _AppLocalizationsDelegate

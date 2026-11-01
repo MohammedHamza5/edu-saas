@@ -34,3 +34,23 @@ dns.lookup = (hostname, options, callback) => {
   }
   return origLookup(hostname, options, callback);
 };
+
+if (dns.promises && dns.promises.lookup) {
+  const origPromisesLookup = dns.promises.lookup;
+  dns.promises.lookup = async function (hostname, options) {
+    if (hosts[hostname]) {
+      if (options && options.all) {
+        return [{ address: hosts[hostname], family: 4 }];
+      }
+      return { address: hosts[hostname], family: 4 };
+    }
+    if (hostname.endsWith('.googleapis.com') || hostname.endsWith('.google.com')) {
+      const ip = '172.217.116.4';
+      if (options && options.all) {
+        return [{ address: ip, family: 4 }];
+      }
+      return { address: ip, family: 4 };
+    }
+    return origPromisesLookup.call(this, hostname, options);
+  };
+}
