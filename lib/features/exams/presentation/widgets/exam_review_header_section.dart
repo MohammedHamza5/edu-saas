@@ -74,8 +74,8 @@ class ExamReviewHeaderSection extends StatelessWidget {
                           ),
                           child: Text(
                             isPassed
-                                ? context.l10n.statusCompleted
-                                : context.l10n.statusFailed,
+                                ? context.l10n.passed
+                                : context.l10n.notPassed,
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.bold,

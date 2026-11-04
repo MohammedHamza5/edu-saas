@@ -69,10 +69,10 @@ class ExamResultStats {
 
     final correctCount = answers.where((a) => a.isCorrect == true).length;
     final incorrectCount = answers
-        .where((a) => a.selectedOptionId != null && a.isCorrect == false)
+        .where((a) => a.isAnswered && a.isCorrect == false)
         .length;
     final answeredCount =
-        answers.where((a) => a.selectedOptionId != null).length;
+        answers.where((a) => a.isAnswered).length;
     final skippedCount = (totalQuestions > answeredCount)
         ? (totalQuestions - answeredCount)
         : 0;

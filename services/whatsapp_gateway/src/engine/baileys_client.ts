@@ -71,6 +71,14 @@ export class BaileysGatewayClient {
     return this.sock;
   }
 
+  public getTenantId(): string | undefined {
+    return this.tenantId;
+  }
+
+  public getSessionId(): string {
+    return this.sessionId;
+  }
+
   public async initialize(): Promise<void> {
     if (this.isConnecting) return;
     this.isConnecting = true;

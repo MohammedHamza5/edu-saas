@@ -10,6 +10,8 @@ extension QuestionTypeUiExtension on QuestionType {
         return context.l10n.questionTypeMultipleChoice;
       case QuestionType.trueFalse:
         return context.l10n.questionTypeTrueFalse;
+      case QuestionType.gridIn:
+        return context.l10n.questionTypeGridIn;
     }
   }
 }

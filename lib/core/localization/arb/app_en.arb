@@ -5123,6 +5123,22 @@
     "description": "Multiple choice type"
   },
   "questionTypeTrueFalse": "True / False",
+  "questionTypeGridIn": "Student-Produced Response (Grid-in)",
+  "@questionTypeGridIn": {
+    "description": "Label for grid-in numerical response questions"
+  },
+  "gridInAnswerPlaceholder": "Enter your answer (e.g. 8, 0.5, 1/2)",
+  "@gridInAnswerPlaceholder": {
+    "description": "Placeholder for grid-in answer input"
+  },
+  "gridInInputLabel": "Your Answer",
+  "@gridInInputLabel": {
+    "description": "Label for student grid-in answer"
+  },
+  "gridInClearAnswer": "Clear",
+  "@gridInClearAnswer": {
+    "description": "Clear button for grid-in answer"
+  },
   "@questionTypeTrueFalse": {
     "description": "True or false type"
   },

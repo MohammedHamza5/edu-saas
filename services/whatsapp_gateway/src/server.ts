@@ -116,15 +116,19 @@ app.get('/api/live-qr', async (req: Request, res: Response) => {
     .select('status, qr_code, connected_phone, connected_name, auto_dispatch_enabled, updated_at');
 
   if (requestedTenantId) {
-    query = query.or(`tenant_id.eq.${requestedTenantId},id.eq.${SESSION_ID}`);
+    query = query.eq('tenant_id', requestedTenantId);
   } else {
     query = query.eq('id', SESSION_ID);
   }
 
   const { data: session } = await query.order('updated_at', { ascending: false }).limit(1).maybeSingle();
 
+  // Only report connected if this gateway instance actually serves the requested tenant
+  const isServingRequestedTenant = !requestedTenantId || requestedTenantId === baileysClient?.getTenantId();
+  const isConnected = (baileysClient && isServingRequestedTenant) ? baileysClient.isConnected() : false;
+
   return res.json({
-    connected: baileysClient ? baileysClient.isConnected() : false,
+    connected: isConnected,
     status: session?.status || 'disconnected',
     qrCode: session?.qr_code || null,
     connectedPhone: session?.connected_phone || null,
@@ -276,15 +280,26 @@ const startServer = async () => {
   let activeTenantId = TENANT_ID;
   if (!activeTenantId) {
     try {
-      const { data: tenant } = await supabase.from('tenants').select('id').limit(1).maybeSingle();
-      if (tenant?.id) {
-        activeTenantId = tenant.id;
-        console.log(`[Server] Auto-resolved active Tenant ID: ${activeTenantId}`);
-        // Backfill any unassociated session
-        await supabase
-          .from('whatsapp_auth_sessions')
-          .update({ tenant_id: activeTenantId })
-          .is('tenant_id', null);
+      // 1. Prioritize tenant_id already bound to this SESSION_ID
+      const { data: session } = await supabase
+        .from('whatsapp_auth_sessions')
+        .select('tenant_id')
+        .eq('id', SESSION_ID)
+        .maybeSingle();
+
+      if (session?.tenant_id) {
+        activeTenantId = session.tenant_id;
+        console.log(`[Server] Bound active Tenant ID from session '${SESSION_ID}': ${activeTenantId}`);
+      } else {
+        const { data: tenant } = await supabase.from('tenants').select('id').limit(1).maybeSingle();
+        if (tenant?.id) {
+          activeTenantId = tenant.id;
+          console.log(`[Server] Auto-resolved active Tenant ID: ${activeTenantId}`);
+          await supabase
+            .from('whatsapp_auth_sessions')
+            .update({ tenant_id: activeTenantId })
+            .is('tenant_id', null);
+        }
       }
     } catch (e) {
       console.warn('[Server] Failed to auto-resolve tenant:', (e as Error).message);

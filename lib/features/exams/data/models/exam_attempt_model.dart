@@ -40,6 +40,7 @@ class ExamAttemptModel extends ExamAttemptEntity {
                 attemptId: aMap['attempt_id']?.toString() ?? '',
                 questionId: aMap['question_id']?.toString() ?? '',
                 selectedOptionId: aMap['selected_option_id']?.toString(),
+                textAnswer: aMap['text_answer']?.toString(),
                 isCorrect: aMap['is_correct'] as bool?,
                 pointsEarned: (aMap['points_earned'] as num?)?.toDouble(),
                 answeredAt: aMap['answered_at'] != null
@@ -67,7 +68,7 @@ class ExamAttemptModel extends ExamAttemptEntity {
           (json['answered_questions_count'] as num).toInt();
     } else if (answersList.isNotEmpty) {
       answeredQuestionsCount =
-          answersList.where((a) => a.selectedOptionId != null).length;
+          answersList.where((a) => a.selectedOptionId != null || (a.textAnswer != null && a.textAnswer!.trim().isNotEmpty)).length;
     }
 
     return ExamAttemptModel(

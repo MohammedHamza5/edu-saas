@@ -3853,6 +3853,18 @@ class AppLocalizationsAr extends AppLocalizations {
   String get questionTypeTrueFalse => 'صح أو خطأ';
 
   @override
+  String get questionTypeGridIn => 'إدخال رقمي (Grid-in)';
+
+  @override
+  String get gridInAnswerPlaceholder => 'اكتب إجابتك هنا (مثال: 8، 0.5، 1/2)';
+
+  @override
+  String get gridInInputLabel => 'إجابتك المسجلة';
+
+  @override
+  String get gridInClearAnswer => 'مسح';
+
+  @override
   String get attemptStatusInProgress => 'قيد الأداء';
 
   @override
@@ -6348,7 +6360,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get statusDone => 'مكتمل';
 
   @override
-  String get statusFailed => 'فشل الرفع';
+  String get statusFailed => 'فشل';
 
   @override
   String get statusProcessing => 'قيد المعالجة';

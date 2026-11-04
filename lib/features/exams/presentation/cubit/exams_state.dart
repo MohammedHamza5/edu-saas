@@ -244,7 +244,8 @@ final class ExamTakingState extends ExamsState {
   ExamQuestionEntity get currentQuestion => questions[currentQuestionIndex];
   bool get hasNext => currentQuestionIndex < questions.length - 1;
   bool get hasPrevious => currentQuestionIndex > 0;
-  int get answeredCount => answers.length;
+  int get answeredCount =>
+      answers.values.where((v) => v.trim().isNotEmpty).length;
   int get totalQuestions => questions.length;
   bool get isCurrentQuestionFlaggedAsGuess =>
       questions.isNotEmpty &&

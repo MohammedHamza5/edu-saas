@@ -92,7 +92,7 @@ class _ExamReviewPageState extends State<ExamReviewPage> {
         questionImageUrl: question.imageUrl,
         options: question.options,
         savedAt: DateTime.now(),
-        userAnswerOptionId: answer?.selectedOptionId,
+        userAnswerOptionId: answer?.selectedOptionId ?? answer?.textAnswer,
         correctOptionId: correctOpt?.id,
         questionIndex: qIndex + 1,
         isPdfQuestion: widget.exam?.hasAttachedPdf == true,

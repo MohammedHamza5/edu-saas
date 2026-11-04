@@ -28,6 +28,8 @@ class ExamReviewQuestionView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hasAnswer = answer?.isAnswered ?? false;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSpacing.s20),
       child: Column(
@@ -116,9 +118,13 @@ class ExamReviewQuestionView extends StatelessWidget {
                         : (isTextAnImageUrl
                               ? question.questionText.trim()
                               : null);
+                    final isMetaText =
+                        question.questionText.trim().startsWith('Question ') ||
+                            question.questionText.trim().startsWith('سؤال ');
                     final shouldShowText =
                         question.questionText.trim().isNotEmpty &&
-                        !isTextAnImageUrl;
+                        !isTextAnImageUrl &&
+                        (!hasExplicitImage || !isMetaText);
 
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -158,7 +164,7 @@ class ExamReviewQuestionView extends StatelessWidget {
 
           const SizedBox(height: AppSpacing.s16),
 
-          if (answer == null || answer?.selectedOptionId == null)
+          if (!hasAnswer)
             Container(
               width: double.infinity,
               margin: const EdgeInsets.only(bottom: AppSpacing.s12),
@@ -192,8 +198,11 @@ class ExamReviewQuestionView extends StatelessWidget {
               ),
             ),
 
-          // ── Options List ──────────────────────────────────────────
-          ...question.options.asMap().entries.map((entry) {
+          if (question.questionType == QuestionType.gridIn) ...[
+            _buildGridInReviewCard(context),
+          ] else ...[
+            // ── Options List ──────────────────────────────────────────
+            ...question.options.asMap().entries.map((entry) {
             final optIndex = entry.key;
             final opt = entry.value;
 
@@ -321,6 +330,126 @@ class ExamReviewQuestionView extends StatelessWidget {
               ),
             );
           }),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGridInReviewCard(BuildContext context) {
+    final l10n = context.l10n;
+    final studentInput = answer?.textAnswer?.trim() ??
+        (answer?.selectedOptionId != null && !answer!.selectedOptionId!.contains('-')
+            ? answer!.selectedOptionId!.trim()
+            : null);
+    final hasInput = studentInput != null && studentInput.isNotEmpty;
+    final isCorrect = answer?.isCorrect == true;
+    final correctOptions = question.options
+        .where((o) => o.isCorrect == true)
+        .map((o) => o.optionText)
+        .toList();
+    final modelAnswerStr = correctOptions.isNotEmpty ? correctOptions.join(' / ') : '—';
+
+    final borderCol = isCorrect
+        ? AppColors.success
+        : (hasInput ? AppColors.error : AppColors.warning);
+    final bgCol = isCorrect
+        ? AppColors.success.withValues(alpha: 0.08)
+        : (hasInput ? AppColors.error.withValues(alpha: 0.08) : AppColors.warning.withValues(alpha: 0.06));
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: AppSpacing.s12),
+      padding: const EdgeInsets.all(AppSpacing.s16),
+      decoration: BoxDecoration(
+        color: bgCol,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+        border: Border.all(color: borderCol, width: 1.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                l10n.gridInInputLabel,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              _buildBadge(
+                isCorrect
+                    ? l10n.yourCorrectAnswer
+                    : (hasInput ? l10n.yourWrongAnswer : l10n.unansweredQuestion),
+                isCorrect
+                    ? Icons.check_circle_rounded
+                    : (hasInput ? Icons.cancel_rounded : Icons.help_outline_rounded),
+                isCorrect
+                    ? AppColors.success
+                    : (hasInput ? AppColors.error : AppColors.warning),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.s12),
+          // Student Recorded Answer Row
+          Row(
+            children: [
+              Text(
+                '${l10n.gridInInputLabel}: ',
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Text(
+                hasInput ? studentInput : '—',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: isCorrect
+                      ? AppColors.success
+                      : (hasInput ? AppColors.error : AppColors.textMuted),
+                  letterSpacing: 1.2,
+                ),
+              ),
+            ],
+          ),
+          if (!isCorrect) ...[
+            const SizedBox(height: AppSpacing.s10),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.s12,
+                vertical: AppSpacing.s8,
+              ),
+              decoration: BoxDecoration(
+                color: AppColors.success.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                border: Border.all(color: AppColors.success.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.check_circle_outline_rounded,
+                    size: 16,
+                    color: AppColors.success,
+                  ),
+                  const SizedBox(width: AppSpacing.s6),
+                  Text(
+                    '${l10n.correctAnswerLabel}: $modelAnswerStr',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.success,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     );

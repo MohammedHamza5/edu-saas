@@ -63,8 +63,11 @@ export class QueueWorker {
 
     try {
       // 1. Fetch next batch with DB row lock (FOR UPDATE SKIP LOCKED)
+      // STRICT MULTI-TENANCY: Only process queue items belonging to this client's tenant!
+      const tenantId = this.client.getTenantId();
       const { data: batch, error } = await this.supabase.rpc('fetch_next_whatsapp_queue_batch', {
-        p_batch_size: 5
+        p_batch_size: 5,
+        p_tenant_id: tenantId || null
       });
 
       if (error) {

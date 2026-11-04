@@ -6949,6 +6949,30 @@ abstract class AppLocalizations {
   /// **'True / False'**
   String get questionTypeTrueFalse;
 
+  /// Label for grid-in numerical response questions
+  ///
+  /// In en, this message translates to:
+  /// **'Student-Produced Response (Grid-in)'**
+  String get questionTypeGridIn;
+
+  /// Placeholder for grid-in answer input
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your answer (e.g. 8, 0.5, 1/2)'**
+  String get gridInAnswerPlaceholder;
+
+  /// Label for student grid-in answer
+  ///
+  /// In en, this message translates to:
+  /// **'Your Answer'**
+  String get gridInInputLabel;
+
+  /// Clear button for grid-in answer
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get gridInClearAnswer;
+
   /// Attempt status in progress
   ///
   /// In en, this message translates to:

@@ -128,32 +128,37 @@ class _WhatsAppGatewayConnectDialogState
     final status = _status;
     final isConnected = status?.isConnected ?? false;
     final screenSize = MediaQuery.sizeOf(context);
-    final isWide = screenSize.width >= 660 && screenSize.height >= 460;
+    final isWide = screenSize.width >= 580 && screenSize.height >= 400;
+    final double qrSize = screenSize.height < 550
+        ? 150.0
+        : screenSize.height < 680
+            ? 170.0
+            : 195.0;
 
     return AlertDialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
       ),
       titlePadding: const EdgeInsets.fromLTRB(
-        AppSpacing.s20,
         AppSpacing.s16,
-        AppSpacing.s20,
-        AppSpacing.s8,
+        AppSpacing.s12,
+        AppSpacing.s16,
+        AppSpacing.s6,
       ),
       contentPadding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.s20,
-        vertical: AppSpacing.s8,
+        horizontal: AppSpacing.s16,
+        vertical: AppSpacing.s6,
       ),
       actionsPadding: const EdgeInsets.fromLTRB(
-        AppSpacing.s20,
-        AppSpacing.s8,
-        AppSpacing.s20,
         AppSpacing.s16,
+        AppSpacing.s6,
+        AppSpacing.s16,
+        AppSpacing.s12,
       ),
       title: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(AppSpacing.s8),
+            padding: const EdgeInsets.all(AppSpacing.s6),
             decoration: BoxDecoration(
               color: const Color(0xFF25D366).withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
@@ -161,15 +166,15 @@ class _WhatsAppGatewayConnectDialogState
             child: const Icon(
               Icons.chat_bubble_outline_rounded,
               color: Color(0xFF25D366),
-              size: 22,
+              size: 20,
             ),
           ),
-          const SizedBox(width: AppSpacing.s12),
+          const SizedBox(width: AppSpacing.s10),
           Expanded(
             child: Text(
               l10n.whatsappGatewayDialogTitle,
               style: const TextStyle(
-                fontSize: 17,
+                fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -178,25 +183,28 @@ class _WhatsAppGatewayConnectDialogState
       ),
       content: ConstrainedBox(
         constraints: BoxConstraints(
-          maxWidth: isWide ? 680 : 420,
-          maxHeight: screenSize.height * 0.82,
+          maxWidth: isWide ? 620 : 380,
+          maxHeight: screenSize.height * 0.86,
         ),
-        child: SingleChildScrollView(
-          child: _isLoading
-              ? const Padding(
-                  padding: EdgeInsets.symmetric(vertical: AppSpacing.s32),
-                  child: Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                )
-              : isConnected
-                  ? _buildConnectedContent(context, status!)
-                  : _buildPairingContent(context, status, isWide),
+        child: Scrollbar(
+          thumbVisibility: isWide,
+          child: SingleChildScrollView(
+            child: _isLoading
+                ? const Padding(
+                    padding: EdgeInsets.symmetric(vertical: AppSpacing.s32),
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  )
+                : isConnected
+                    ? _buildConnectedContent(context, status!)
+                    : _buildPairingContent(context, status, isWide, qrSize),
+          ),
         ),
       ),
       actions: [
         TextButton.icon(
-          icon: const Icon(Icons.refresh_rounded, size: 18),
+          icon: const Icon(Icons.refresh_rounded, size: 16),
           label: Text(l10n.refresh),
           onPressed: _isLoading ? null : _fetchStatus,
         ),
@@ -219,23 +227,24 @@ class _WhatsAppGatewayConnectDialogState
     BuildContext context,
     WhatsAppGatewayStatusEntity? status,
     bool isWide,
+    double qrSize,
   ) {
     final l10n = context.l10n;
     final qrCode = status?.qrCode;
     final hasQr = qrCode != null && qrCode.isNotEmpty;
 
     final qrWidget = hasQr
-        ? _buildQrCodeSection(qrCode, qrSize: isWide ? 200 : 210)
-        : _buildLoadingQrSection();
+        ? _buildQrCodeSection(qrCode, qrSize: qrSize)
+        : _buildLoadingQrSection(qrSize: qrSize);
 
     final infoWidget = Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _buildStatusCard(status),
-        const SizedBox(height: AppSpacing.s10),
+        const SizedBox(height: AppSpacing.s8),
         _buildInstructionsCard(l10n),
-        const SizedBox(height: AppSpacing.s10),
+        const SizedBox(height: AppSpacing.s8),
         _buildAutoDispatchTile(l10n, status),
       ],
     );
@@ -245,7 +254,7 @@ class _WhatsAppGatewayConnectDialogState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           qrWidget,
-          const SizedBox(width: AppSpacing.s16),
+          const SizedBox(width: AppSpacing.s12),
           Expanded(child: infoWidget),
         ],
       );
@@ -256,11 +265,11 @@ class _WhatsAppGatewayConnectDialogState
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _buildStatusCard(status),
-        const SizedBox(height: AppSpacing.s12),
+        const SizedBox(height: AppSpacing.s10),
         qrWidget,
-        const SizedBox(height: AppSpacing.s12),
+        const SizedBox(height: AppSpacing.s10),
         _buildInstructionsCard(l10n),
-        const SizedBox(height: AppSpacing.s12),
+        const SizedBox(height: AppSpacing.s10),
         _buildAutoDispatchTile(l10n, status),
       ],
     );
@@ -460,11 +469,12 @@ class _WhatsAppGatewayConnectDialogState
     );
   }
 
-  Widget _buildLoadingQrSection() {
+  Widget _buildLoadingQrSection({double qrSize = 180}) {
     return Container(
+      width: qrSize + 24,
       padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.s16,
-        vertical: AppSpacing.s20,
+        horizontal: AppSpacing.s12,
+        vertical: AppSpacing.s16,
       ),
       decoration: BoxDecoration(
         color: AppColors.surface,

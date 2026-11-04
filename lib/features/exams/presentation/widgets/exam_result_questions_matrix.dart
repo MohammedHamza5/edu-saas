@@ -166,8 +166,7 @@ class ExamResultQuestionsMatrix extends StatelessWidget {
                       chipColor = AppColors.success;
                       chipBg = AppColors.success.withValues(alpha: 0.12);
                       chipIcon = Icons.check;
-                    } else if (ans.selectedOptionId != null &&
-                        ans.isCorrect == false) {
+                    } else if (ans.isAnswered && ans.isCorrect == false) {
                       chipColor = AppColors.error;
                       chipBg = AppColors.error.withValues(alpha: 0.12);
                       chipIcon = Icons.close;

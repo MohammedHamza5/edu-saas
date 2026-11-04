@@ -3870,6 +3870,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get questionTypeTrueFalse => 'True / False';
 
   @override
+  String get questionTypeGridIn => 'Student-Produced Response (Grid-in)';
+
+  @override
+  String get gridInAnswerPlaceholder => 'Enter your answer (e.g. 8, 0.5, 1/2)';
+
+  @override
+  String get gridInInputLabel => 'Your Answer';
+
+  @override
+  String get gridInClearAnswer => 'Clear';
+
+  @override
   String get attemptStatusInProgress => 'In Progress';
 
   @override

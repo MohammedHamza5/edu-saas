@@ -167,7 +167,10 @@ abstract final class ExamTakingSubmissionDialogs {
     for (int i = 0; i < state.questions.length; i++) {
       final qId = state.questions[i].id;
       if (state.answers.containsKey(qId)) {
-        answeredIndices.add(i);
+        final val = state.answers[qId];
+        if (val != null && val.trim().isNotEmpty) {
+          answeredIndices.add(i);
+        }
       }
       if (state.flaggedGuesses.contains(qId)) {
         flaggedIndices.add(i);

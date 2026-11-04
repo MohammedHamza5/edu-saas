@@ -5,6 +5,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../question_bank/presentation/widgets/question_display_widgets.dart';
 import '../../domain/entities/exam_entity.dart';
+import 'exam_grid_in_input_pane.dart';
 import 'exam_image_viewer.dart';
 import 'question_option_tile.dart';
 import '../extensions/exam_ui_extensions.dart';
@@ -162,9 +163,13 @@ class ExamTakingQuestionCard extends StatelessWidget {
                       : (isTextAnImageUrl
                           ? question.questionText.trim()
                           : null);
+                  final isMetaText =
+                      question.questionText.trim().startsWith('Question ') ||
+                          question.questionText.trim().startsWith('سؤال ');
                   final shouldShowText =
                       question.questionText.trim().isNotEmpty &&
-                          !isTextAnImageUrl;
+                          !isTextAnImageUrl &&
+                          (!hasExplicitImage || !isMetaText);
 
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -204,8 +209,14 @@ class ExamTakingQuestionCard extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.s20),
 
-        // Options list
-        if (question.options.isNotEmpty) ...[
+        // Grid-in (Numerical) or Multiple Choice Options
+        if (question.questionType == QuestionType.gridIn) ...[
+          ExamGridInInputPane(
+            currentAnswer: selectedOptionId,
+            onAnswerChanged: onSelectOption,
+            isSubmitting: isSubmitting,
+          ),
+        ] else if (question.options.isNotEmpty) ...[
           Text(
             l10n.chooseCorrectAnswer,
             style: const TextStyle(

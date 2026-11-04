@@ -2,12 +2,16 @@ import 'package:equatable/equatable.dart';
 
 enum QuestionType {
   multipleChoice,
-  trueFalse;
+  trueFalse,
+  gridIn;
 
   static QuestionType fromString(String value) {
     switch (value.toLowerCase()) {
       case 'true_false':
         return QuestionType.trueFalse;
+      case 'grid_in':
+      case 'numerical':
+        return QuestionType.gridIn;
       case 'multiple_choice':
       default:
         return QuestionType.multipleChoice;
@@ -20,6 +24,8 @@ enum QuestionType {
         return 'multiple_choice';
       case QuestionType.trueFalse:
         return 'true_false';
+      case QuestionType.gridIn:
+        return 'grid_in';
     }
   }
 
@@ -29,6 +35,8 @@ enum QuestionType {
         return 'اختيار من متعدد';
       case QuestionType.trueFalse:
         return 'صواب أو خطأ';
+      case QuestionType.gridIn:
+        return 'إدخال رقمي';
     }
   }
 }
@@ -364,6 +372,7 @@ class ExamAnswerEntity extends Equatable {
   final String attemptId;
   final String questionId;
   final String? selectedOptionId;
+  final String? textAnswer;
   final bool? isCorrect;
   final double? pointsEarned;
   final DateTime answeredAt;
@@ -373,10 +382,15 @@ class ExamAnswerEntity extends Equatable {
     required this.attemptId,
     required this.questionId,
     this.selectedOptionId,
+    this.textAnswer,
     this.isCorrect,
     this.pointsEarned,
     required this.answeredAt,
   });
+
+  bool get isAnswered =>
+      (selectedOptionId != null && selectedOptionId!.trim().isNotEmpty) ||
+      (textAnswer != null && textAnswer!.trim().isNotEmpty);
 
   @override
   List<Object?> get props => [
@@ -384,6 +398,7 @@ class ExamAnswerEntity extends Equatable {
     attemptId,
     questionId,
     selectedOptionId,
+    textAnswer,
     isCorrect,
     pointsEarned,
     answeredAt,
@@ -432,7 +447,7 @@ class ExamAttemptEntity extends Equatable {
   int get answeredCount {
     if (answeredQuestionsCount != null) return answeredQuestionsCount!;
     if (answers.isNotEmpty) {
-      return answers.where((a) => a.selectedOptionId != null).length;
+      return answers.where((a) => a.isAnswered).length;
     }
     return 0;
   }
@@ -624,7 +639,7 @@ class ExamEntity extends Equatable {
       return att.answeredQuestionsCount!;
     }
     if (att.answers.isNotEmpty) {
-      return att.answers.where((a) => a.selectedOptionId != null).length;
+      return att.answers.where((a) => a.isAnswered).length;
     }
     return 0;
   }
