@@ -84,10 +84,7 @@ class _PendingStudentCardState extends State<PendingStudentCard> {
                         gradient: const LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
-                          colors: [
-                            Color(0x33F59E0B),
-                            Color(0x14F59E0B),
-                          ],
+                          colors: [Color(0x33F59E0B), Color(0x14F59E0B)],
                         ),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
@@ -261,10 +258,7 @@ class _PendingStudentCardState extends State<PendingStudentCard> {
           gradient: const LinearGradient(
             begin: AlignmentDirectional.centerStart,
             end: AlignmentDirectional.centerEnd,
-            colors: [
-              Color(0xFF16A34A),
-              Color(0xFF059669),
-            ],
+            colors: [Color(0xFF16A34A), Color(0xFF059669)],
           ),
           borderRadius: BorderRadius.circular(10),
           boxShadow: const [
@@ -311,18 +305,13 @@ class _PendingStudentCardState extends State<PendingStudentCard> {
         backgroundColor: const Color(0xFFEF4444).withValues(alpha: 0.06),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
         minimumSize: const Size(0, 42),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
       onPressed: widget.onReject,
       icon: const Icon(Icons.close_rounded, size: 16),
       label: Text(
         context.l10n.rejectRequestAction,
-        style: const TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w600,
-        ),
+        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
       ),
     );
   }

@@ -28,6 +28,7 @@ class ExamCard extends StatelessWidget {
   final VoidCallback? onDelete;
   final VoidCallback? onDispatchResults;
   final VoidCallback? onMoveToFolder;
+  final void Function(ExamCategory targetCategory)? onMoveCategory;
 
   const ExamCard({
     super.key,
@@ -47,6 +48,7 @@ class ExamCard extends StatelessWidget {
     this.onDelete,
     this.onDispatchResults,
     this.onMoveToFolder,
+    this.onMoveCategory,
   });
 
   @override
@@ -223,6 +225,7 @@ class ExamCard extends StatelessWidget {
                               onDelete: onDelete,
                               onDispatchResults: onDispatchResults,
                               onMoveToFolder: onMoveToFolder,
+                              onMoveCategory: onMoveCategory,
                             ),
                           ],
                         ],

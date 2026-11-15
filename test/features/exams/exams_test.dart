@@ -116,6 +116,7 @@ class FakeExamsRepository implements ExamsRepository {
   Future<Result<ExamEntity>> createExam({
     String? groupId,
     required String title,
+    ExamCategory category = ExamCategory.realTest,
     int durationMinutes = 60,
     int maxScore = 100,
     int? passingScore,
@@ -191,6 +192,7 @@ class FakeExamsRepository implements ExamsRepository {
   Future<Result<ExamEntity>> updateDraftExamQuestions({
     required String examId,
     required String title,
+    ExamCategory? category,
     int? durationMinutes,
     int? maxScore,
     int? passingScore,
@@ -1508,7 +1510,7 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      expect(find.text('تقييمات المادة'), findsOneWidget);
+      expect(find.text('الاختبارات الحقيقية'), findsWidgets);
       expect(find.text('امتحان الجبر والتفاضل'), findsOneWidget);
     });
 
@@ -1833,6 +1835,13 @@ void main() {
         );
 
         fakeRepository.mockExams = [exam1, exam2, exam3];
+
+        tester.view.physicalSize = const Size(1200, 1600);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
 
         await tester.pumpWidget(
           createTestApp(

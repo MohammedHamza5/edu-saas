@@ -96,67 +96,83 @@ class TeacherCourseSyllabusView extends StatelessWidget {
                 bottom: 96,
               ),
               sliver: SliverList(
-                delegate: SliverChildListDelegate([
-                  // 1. Chapters in sequence
-                  for (int chIdx = 0; chIdx < chapters.length; chIdx++) ...[
-                    () {
-                      final ch = chapters[chIdx];
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    // 1. Chapters in sequence
+                    if (index < chapters.length) {
+                      final ch = chapters[index];
                       final chLessons =
                           lessons.where((l) => l.chapterId == ch.id).toList();
-                      final canMoveUp = chIdx > 0;
-                      final canMoveDown = chIdx < chapters.length - 1;
+                      final canMoveUp = index > 0;
+                      final canMoveDown = index < chapters.length - 1;
 
-                      return TeacherChapterCard(
-                        chapter: ch,
-                        chapterNumber: chIdx + 1,
-                        chapterLessons: chLessons,
-                        allChapters: chapters,
-                        isCollapsed: collapsedChapterIds.contains(ch.id),
-                        onToggleCollapse: () => onToggleChapterCollapse(ch.id),
-                        onMoveUp:
-                            canMoveUp ? () => onMoveChapter(chIdx, -1) : null,
-                        onMoveDown:
-                            canMoveDown ? () => onMoveChapter(chIdx, 1) : null,
-                        onAnalytics: () => onChapterAnalytics(ch, chLessons),
-                        onAddLesson: () =>
-                            onAddLessonToChapter(chapterId: ch.id),
-                        onToggleVisibility: () => onToggleChapterVisibility(ch),
-                        onEdit: () => onEditChapter(ch),
-                        onDelete: () => onDeleteChapter(ch),
-                        onOpenEditLesson: onOpenEditLesson,
-                        onReorderLesson: (fromIdx, toIdx) =>
-                            onReorderLesson(chLessons, fromIdx, toIdx),
-                        onMoveLessonToChapter: onMoveLessonToChapter,
-                        onLessonAnalytics: onLessonAnalytics,
-                        onDeleteLesson: onDeleteLesson,
-                        onToggleLessonVisibility: onToggleLessonVisibility,
+                      return RepaintBoundary(
+                        key: ValueKey('chapter_${ch.id}'),
+                        child: TeacherChapterCard(
+                          chapter: ch,
+                          chapterNumber: index + 1,
+                          chapterLessons: chLessons,
+                          allChapters: chapters,
+                          isCollapsed: collapsedChapterIds.contains(ch.id),
+                          onToggleCollapse: () => onToggleChapterCollapse(ch.id),
+                          onMoveUp:
+                              canMoveUp ? () => onMoveChapter(index, -1) : null,
+                          onMoveDown:
+                              canMoveDown ? () => onMoveChapter(index, 1) : null,
+                          onAnalytics: () => onChapterAnalytics(ch, chLessons),
+                          onAddLesson: () =>
+                              onAddLessonToChapter(chapterId: ch.id),
+                          onToggleVisibility: () =>
+                              onToggleChapterVisibility(ch),
+                          onEdit: () => onEditChapter(ch),
+                          onDelete: () => onDeleteChapter(ch),
+                          onOpenEditLesson: onOpenEditLesson,
+                          onReorderLesson: (fromIdx, toIdx) =>
+                              onReorderLesson(chLessons, fromIdx, toIdx),
+                          onMoveLessonToChapter: onMoveLessonToChapter,
+                          onLessonAnalytics: onLessonAnalytics,
+                          onDeleteLesson: onDeleteLesson,
+                          onToggleLessonVisibility: onToggleLessonVisibility,
+                        ),
                       );
-                    }(),
-                  ],
+                    }
 
-                  // 2. Unassigned General Lessons
-                  if (generalLessons.isNotEmpty)
-                    TeacherGeneralLessonsContainer(
-                      generalLessons: generalLessons,
-                      allChapters: chapters,
-                      onOpenEditLesson: onOpenEditLesson,
-                      onReorderLesson: (fromIdx, toIdx) =>
-                          onReorderLesson(generalLessons, fromIdx, toIdx),
-                      onMoveLessonToChapter: onMoveLessonToChapter,
-                      onLessonAnalytics: onLessonAnalytics,
-                      onDeleteLesson: onDeleteLesson,
-                      onToggleLessonVisibility: onToggleLessonVisibility,
-                    ),
+                    // 2. Unassigned General Lessons Container
+                    final generalLessonsIndex = chapters.length;
+                    if (generalLessons.isNotEmpty &&
+                        index == generalLessonsIndex) {
+                      return RepaintBoundary(
+                        key: const ValueKey('general_lessons_container'),
+                        child: TeacherGeneralLessonsContainer(
+                          generalLessons: generalLessons,
+                          allChapters: chapters,
+                          onOpenEditLesson: onOpenEditLesson,
+                          onReorderLesson: (fromIdx, toIdx) =>
+                              onReorderLesson(generalLessons, fromIdx, toIdx),
+                          onMoveLessonToChapter: onMoveLessonToChapter,
+                          onLessonAnalytics: onLessonAnalytics,
+                          onDeleteLesson: onDeleteLesson,
+                          onToggleLessonVisibility: onToggleLessonVisibility,
+                        ),
+                      );
+                    }
 
-                  // 3. Loading More Footer Indicator
-                  if (isLoadingMore)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: AppSpacing.s16),
-                      child: Center(
-                        child: AppLoadingView.compact(size: 24),
-                      ),
-                    ),
-                ]),
+                    // 3. Loading More Footer Indicator
+                    if (isLoadingMore) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: AppSpacing.s16),
+                        child: Center(
+                          child: AppLoadingView.compact(size: 24),
+                        ),
+                      );
+                    }
+
+                    return null;
+                  },
+                  childCount: chapters.length +
+                      (generalLessons.isNotEmpty ? 1 : 0) +
+                      (isLoadingMore ? 1 : 0),
+                ),
               ),
             ),
           ],

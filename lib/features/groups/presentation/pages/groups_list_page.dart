@@ -7,7 +7,6 @@ import '../../../../core/widgets/app_empty_view.dart';
 import '../../../../core/widgets/app_error_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
 import '../../../../core/widgets/responsive_container.dart';
-import '../../../../core/widgets/responsive_grid.dart';
 import '../cubit/groups_cubit.dart';
 import '../cubit/groups_state.dart';
 import '../widgets/create_group_dialog.dart';
@@ -222,20 +221,23 @@ class _GroupsListPageState extends State<GroupsListPage> {
                                     );
                                   },
                                 ))
-                        : SingleChildScrollView(
-                            child: ResponsiveGrid(
-                              mobileColumns: 1,
-                              tabletColumns: 2,
-                              desktopColumns: 3,
-                              spacing: AppSpacing.s16,
-                              runSpacing: AppSpacing.s16,
-                              children: displayedGroups
-                                  .map(
-                                    (group) =>
-                                        InteractiveGroupCard(group: group),
-                                  )
-                                  .toList(),
+                        : GridView.builder(
+                            padding: const EdgeInsets.only(bottom: 32),
+                            gridDelegate:
+                                const SliverGridDelegateWithMaxCrossAxisExtent(
+                              maxCrossAxisExtent: 420,
+                              crossAxisSpacing: AppSpacing.s16,
+                              mainAxisSpacing: AppSpacing.s16,
+                              mainAxisExtent: 240,
                             ),
+                            itemCount: displayedGroups.length,
+                            itemBuilder: (context, index) {
+                              final group = displayedGroups[index];
+                              return RepaintBoundary(
+                                key: ValueKey('group_${group.id}'),
+                                child: InteractiveGroupCard(group: group),
+                              );
+                            },
                           ),
                   ),
                 ],

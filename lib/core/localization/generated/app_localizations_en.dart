@@ -8521,6 +8521,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get folderNameLabel => 'Folder Name';
 
   @override
+  String get folderDefaultTitle => 'Folder';
+
+  @override
   String get folderNameRequired => 'Please enter a folder name';
 
   @override
@@ -10015,6 +10018,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get whatsappStudioTagEvaluation => 'Evaluation Phrase';
 
   @override
+  String get whatsappStudioTagStudyTime => 'Study Time';
+
+  @override
+  String get whatsappStudioTagLecturesProgress => 'Lectures Progress';
+
+  @override
+  String get whatsappStudioTagExamsProgress => 'Exams Progress';
+
+  @override
+  String get whatsappStudioTagCumulativeAvg => 'Cumulative Average';
+
+  @override
   String get whatsappStudioTierExcellentLabel => '🌟 Excellent (≥ 90%)';
 
   @override
@@ -10097,4 +10112,292 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get whatsappGatewayRegenerating => 'Requesting fresh QR...';
+
+  @override
+  String loadMoreWithCount(int current, int total) {
+    return 'Show more ($current of $total)';
+  }
+
+  @override
+  String get audioExplanationLabel => 'Audio Explanation';
+
+  @override
+  String get audioPlayTooltip => 'Play voice explanation';
+
+  @override
+  String get audioPauseTooltip => 'Pause voice explanation';
+
+  @override
+  String get audioSpeedTooltip => 'Playback speed';
+
+  @override
+  String get audioLoading => 'Loading audio...';
+
+  @override
+  String get audioError => 'Failed to load audio';
+
+  @override
+  String get addAudioExplanation => 'Add Voice Explanation';
+
+  @override
+  String get uploadAudioFile => 'Upload Audio File';
+
+  @override
+  String get recordVoice => 'Record Voice';
+
+  @override
+  String get removeAudio => 'Remove Audio';
+
+  @override
+  String get uploadingAudio => 'Uploading audio...';
+
+  @override
+  String get audioFileTooLarge => 'Audio file exceeds 20MB limit';
+
+  @override
+  String get recordingVoice => 'Recording voice explanation...';
+
+  @override
+  String get stopAndPreview => 'Stop & Preview';
+
+  @override
+  String get reRecord => 'Re-record';
+
+  @override
+  String get attachRecordedVoice => 'Attach Audio';
+
+  @override
+  String get cancelRecording => 'Cancel';
+
+  @override
+  String get micPermissionDenied =>
+      'Microphone permission denied. Please allow microphone access.';
+
+  @override
+  String get studentSubscriptionDurationTitle =>
+      'Subscription & Access Duration';
+
+  @override
+  String get subscriptionUnlimited => 'Unlimited (No Expiration)';
+
+  @override
+  String get subscriptionUnlimitedSubtitle =>
+      'Active account with no expiration date set';
+
+  @override
+  String get subscriptionActiveBadge => 'Active Subscription';
+
+  @override
+  String get subscriptionExpiredBadge => 'Subscription Expired';
+
+  @override
+  String subscriptionExpiresOn(String date, int days) {
+    return 'Expires on $date ($days days remaining)';
+  }
+
+  @override
+  String subscriptionExpiredOn(String date) {
+    return 'Expired on $date';
+  }
+
+  @override
+  String get setSubscriptionDurationAction =>
+      'Set / Extend Subscription Duration';
+
+  @override
+  String get setSubscriptionDialogTitle => 'Student Subscription Validity';
+
+  @override
+  String get setSubscriptionDialogDesc =>
+      'Set the expiration date for this student. Access will be automatically revoked upon expiration.';
+
+  @override
+  String get subscriptionPreset30Days => '+30 Days (1 Month)';
+
+  @override
+  String get subscriptionPreset60Days => '+60 Days (2 Months)';
+
+  @override
+  String get subscriptionPreset90Days => '+90 Days (3 Months)';
+
+  @override
+  String get subscriptionCustomDate => 'Custom Calendar Date';
+
+  @override
+  String get subscriptionClearLimit => 'Remove Limit (Unlimited)';
+
+  @override
+  String get saveSubscriptionAction => 'Save & Update Validity';
+
+  @override
+  String get subscriptionUpdateSuccess =>
+      'Student subscription duration updated successfully';
+
+  @override
+  String get subscriptionExpiredTitle =>
+      'Dear Student, your subscription has expired';
+
+  @override
+  String get subscriptionExpiredDesc =>
+      'Your access duration has elapsed. Please reach out to your teacher to renew your subscription and continue learning.';
+
+  @override
+  String get renewSubscriptionWhatsAppAction =>
+      'Contact Teacher to Renew (WhatsApp)';
+
+  @override
+  String renewWhatsAppMessage(String name) {
+    return 'Hello, I am $name and I would like to renew my subscription on the platform.';
+  }
+
+  @override
+  String get loadingExamDetails => 'Preparing exam details and questions...';
+
+  @override
+  String get failedToLoadExamDetails =>
+      'Could not load exam details. Please check your connection and try again.';
+
+  @override
+  String get subscriptionPreset40Days => '+40 Days';
+
+  @override
+  String get approvalSubscriptionSectionTitle =>
+      'Account Validity & Subscription';
+
+  @override
+  String get approvalSubscriptionSectionSubtitle =>
+      'Set how long the student can access the platform before automatic cutoff';
+
+  @override
+  String subscriptionRemainingDetailed(int days, int hours, int minutes) {
+    return '${days}d ${hours}h ${minutes}m';
+  }
+
+  @override
+  String get subscriptionUrgentBannerTitle =>
+      'Attention: Your subscription is expiring soon!';
+
+  @override
+  String get subscriptionUrgentBannerAction => 'Renew via WhatsApp';
+
+  @override
+  String subscriptionLiveDays(int days) {
+    return '$days Days';
+  }
+
+  @override
+  String subscriptionLiveHours(int hours) {
+    return '$hours Hours';
+  }
+
+  @override
+  String subscriptionLiveMinutes(int minutes) {
+    return '$minutes Min';
+  }
+
+  @override
+  String subscriptionLiveSeconds(int seconds) {
+    return '$seconds Sec';
+  }
+
+  @override
+  String subscriptionRemainingBadge(String time) {
+    return 'Remaining: $time';
+  }
+
+  @override
+  String subscriptionActiveUntil(String date) {
+    return 'Active until $date';
+  }
+
+  @override
+  String get studentNavQuestionBank => 'Question Bank';
+
+  @override
+  String get studentNavQuestionBankSubtitle => 'Interactive practice questions';
+
+  @override
+  String get studentNavRealTests => 'Real Tests';
+
+  @override
+  String get studentNavRealTestsSubtitle => 'Official timed test simulations';
+
+  @override
+  String get examCategoryRealTest => 'Real Test';
+
+  @override
+  String get examCategoryRealTestFull => 'Real Test (Official)';
+
+  @override
+  String get examCategoryQuestionBank => 'Question Bank';
+
+  @override
+  String get examCategoryQuestionBankFull => 'Question Bank (Practice)';
+
+  @override
+  String get examCategoryRealTestDesc =>
+      'Official timed simulation test with strict scoring';
+
+  @override
+  String get examCategoryQuestionBankDesc =>
+      'Self-paced interactive question practice bank';
+
+  @override
+  String get moveToQuestionBankAction => 'Move to Question Bank';
+
+  @override
+  String get moveToRealTestAction => 'Move to Real Tests';
+
+  @override
+  String get examMovedToBankSuccess =>
+      'Exam moved to Question Bank successfully';
+
+  @override
+  String get examMovedToRealTestSuccess =>
+      'Exam moved to Real Tests successfully';
+
+  @override
+  String get filterAllCategories => 'All Categories';
+
+  @override
+  String get filterRealTestsOnly => 'Real Tests';
+
+  @override
+  String get filterQuestionBankOnly => 'Question Bank';
+
+  @override
+  String get studentEmptyQuestionBankTitle =>
+      'No Question Bank practice available yet';
+
+  @override
+  String get studentEmptyQuestionBankSubtitle =>
+      'Your teacher will add practice question banks soon';
+
+  @override
+  String get studentEmptyRealTestsTitle =>
+      'No Real Tests scheduled at the moment';
+
+  @override
+  String get studentEmptyRealTestsSubtitle =>
+      'Stay tuned for upcoming official test simulations';
+
+  @override
+  String get questionBankHeroTitle => 'Question Bank | Unlimited Practice';
+
+  @override
+  String get questionBankHeroSubtitle =>
+      'Practice questions and build mastery without time constraints';
+
+  @override
+  String get realTestsHeroTitle => 'Real Tests | Official Exam Simulations';
+
+  @override
+  String get realTestsHeroSubtitle =>
+      'Timed exams designed to evaluate your real performance under official conditions';
+
+  @override
+  String get examCategorySelectLabel => 'Exam Classification';
+
+  @override
+  String get examCategoryTransferring => 'Transferring classification...';
 }

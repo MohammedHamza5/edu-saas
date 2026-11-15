@@ -68,8 +68,9 @@ class AssignGroupTile extends StatelessWidget {
             const SizedBox(width: AppSpacing.s8),
             OutlinedButton(
               style: OutlinedButton.styleFrom(
-                foregroundColor:
-                    isAssigned ? AppColors.error : AppColors.primary,
+                foregroundColor: isAssigned
+                    ? AppColors.error
+                    : AppColors.primary,
                 side: BorderSide(
                   color: isAssigned
                       ? AppColors.error.withValues(alpha: 0.4)

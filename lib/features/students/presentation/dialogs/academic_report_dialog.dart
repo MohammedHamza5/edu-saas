@@ -72,8 +72,8 @@ class _AcademicReportDialogState extends State<AcademicReportDialog> {
     _textController = TextEditingController();
     _selectedPhone =
         (widget.parentPhone != null && widget.parentPhone!.trim().isNotEmpty)
-            ? widget.parentPhone!.trim()
-            : (widget.studentPhone?.trim() ?? '');
+        ? widget.parentPhone!.trim()
+        : (widget.studentPhone?.trim() ?? '');
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
@@ -103,10 +103,8 @@ class _AcademicReportDialogState extends State<AcademicReportDialog> {
       );
     } catch (_) {
       try {
-        final res = await InjectionContainer.studentsRepository.getStudentAcademicReport(
-          widget.studentId,
-          days: days,
-        );
+        final res = await InjectionContainer.studentsRepository
+            .getStudentAcademicReport(widget.studentId, days: days);
         data = res.dataOrNull;
       } catch (_) {}
     }
@@ -389,9 +387,7 @@ class _AcademicReportDialogState extends State<AcademicReportDialog> {
               ],
 
               // 4. Academic Directives / Quick Decision Chips
-              AcademicReportDecisionChips(
-                onDecisionSelected: _applyDecision,
-              ),
+              AcademicReportDecisionChips(onDecisionSelected: _applyDecision),
               const SizedBox(height: AppSpacing.s12),
 
               // 5. Editable Message Area

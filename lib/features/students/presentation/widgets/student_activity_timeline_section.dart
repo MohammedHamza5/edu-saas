@@ -10,10 +10,7 @@ import 'student_360_stats_grid.dart';
 class StudentActivityTimelineSection extends StatelessWidget {
   final List<StudentActivityItem> activities;
 
-  const StudentActivityTimelineSection({
-    super.key,
-    required this.activities,
-  });
+  const StudentActivityTimelineSection({super.key, required this.activities});
 
   @override
   Widget build(BuildContext context) {

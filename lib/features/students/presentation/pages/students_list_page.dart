@@ -16,6 +16,7 @@ import '../../domain/entities/student_entity.dart';
 import '../cubit/students_cubit.dart';
 import '../cubit/students_state.dart';
 import '../dialogs/academic_report_dialog.dart';
+import '../dialogs/pending_student_dialogs.dart';
 import '../widgets/student_card.dart';
 import '../widgets/students_filter_bar.dart';
 
@@ -183,22 +184,22 @@ class _StudentsListPageState extends State<StudentsListPage> {
                             message: state.message,
                             onRetry: () =>
                                 context.read<StudentsCubit>().loadStudents(
-                                      status: _selectedStatus,
-                                      refresh: true,
-                                    ),
+                                  status: _selectedStatus,
+                                  refresh: true,
+                                ),
                           ),
                         );
                       }
                       if (state is StudentsLoaded) {
                         if (state.students.isEmpty) {
-                          final emptyWidget = _searchController.text
-                                  .trim()
-                                  .isNotEmpty
+                          final emptyWidget =
+                              _searchController.text.trim().isNotEmpty
                               ? AppEmptyView(
                                   icon: Icons.search_off_rounded,
-                                  message: context.l10n.noStudentsMatchingSearch(
-                                    _searchController.text.trim(),
-                                  ),
+                                  message: context.l10n
+                                      .noStudentsMatchingSearch(
+                                        _searchController.text.trim(),
+                                      ),
                                   actionText: context.l10n.clearSearch,
                                   onAction: () {
                                     _searchController.clear();
@@ -214,133 +215,136 @@ class _StudentsListPageState extends State<StudentsListPage> {
                                 );
                           return KeyedSubtree(
                             key: ValueKey(
-                                'students_empty_${_searchController.text.trim()}'),
+                              'students_empty_${_searchController.text.trim()}',
+                            ),
                             child: emptyWidget,
                           );
                         }
                         return KeyedSubtree(
                           key: const ValueKey('students_loaded_list'),
                           child: ListView.separated(
-                      controller: _scrollController,
-                      padding: const EdgeInsets.all(AppSpacing.s16),
-                      itemCount:
-                          state.students.length + (state.isLoadingMore ? 1 : 0),
-                      separatorBuilder: (_, __) =>
-                          const SizedBox(height: AppSpacing.s12),
-                      itemBuilder: (context, index) {
-                        if (index == state.students.length) {
-                          return const Padding(
-                            padding: EdgeInsets.all(AppSpacing.s16),
-                            child: Center(
-                              child: AppLoadingView.compact(size: 24),
-                            ),
+                            controller: _scrollController,
+                            padding: const EdgeInsets.all(AppSpacing.s16),
+                            itemCount:
+                                state.students.length +
+                                (state.isLoadingMore ? 1 : 0),
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(height: AppSpacing.s12),
+                            itemBuilder: (context, index) {
+                              if (index == state.students.length) {
+                                return const Padding(
+                                  padding: EdgeInsets.all(AppSpacing.s16),
+                                  child: Center(
+                                    child: AppLoadingView.compact(size: 24),
+                                  ),
+                                );
+                              }
+                              final student = state.students[index];
+                              return StudentCard(
+                                student: student,
+                                onTap: () => context.go(
+                                  '${AppRoutes.student360}?id=${student.id}',
+                                  extra: student,
+                                ),
+                                onAssignGroups: student.isActive
+                                    ? () => context.go(
+                                        AppRoutes.assignGroups,
+                                        extra: student.id,
+                                      )
+                                    : null,
+                                onApprove: student.isPending
+                                    ? () => PendingStudentDialogs
+                                        .showSmartApprovalDialog(
+                                          context,
+                                          student,
+                                        )
+                                    : null,
+                                onReject: student.isPending
+                                    ? () => _confirmAction(
+                                        context,
+                                        student: student,
+                                        action: 'reject',
+                                        title: context
+                                            .l10n
+                                            .rejectStudentConfirmTitle,
+                                        body: context.l10n
+                                            .rejectStudentConfirmBody(
+                                              student.fullName,
+                                            ),
+                                        confirmLabel:
+                                            context.l10n.rejectStudentAction,
+                                        confirmColor: AppColors.error,
+                                      )
+                                    : null,
+                                onSuspend: student.isActive
+                                    ? () => _confirmAction(
+                                        context,
+                                        student: student,
+                                        action: 'suspend',
+                                        title: context
+                                            .l10n
+                                            .suspendStudentConfirmTitle,
+                                        body: context.l10n
+                                            .suspendStudentConfirmBody(
+                                              student.fullName,
+                                            ),
+                                        confirmLabel:
+                                            context.l10n.suspendStudentAction,
+                                        confirmColor: AppColors.warning,
+                                      )
+                                    : null,
+                                onActivate: student.isSuspended
+                                    ? () => _confirmAction(
+                                        context,
+                                        student: student,
+                                        action: 'activate',
+                                        title: context
+                                            .l10n
+                                            .activateStudentConfirmTitle,
+                                        body: context.l10n
+                                            .activateStudentConfirmBody(
+                                              student.fullName,
+                                            ),
+                                        confirmLabel:
+                                            context.l10n.activateStudentAction,
+                                        confirmColor: AppColors.success,
+                                      )
+                                    : null,
+                                onDelete: () =>
+                                    _confirmDeleteStudent(context, student),
+                                onWhatsApp:
+                                    (student.parentPhone?.isNotEmpty == true ||
+                                        student.phone?.isNotEmpty == true)
+                                    ? () {
+                                        AcademicReportDialog.show(
+                                          context,
+                                          studentId: student.id,
+                                          studentName: student.fullName,
+                                          parentPhone: student.parentPhone,
+                                          studentPhone: student.phone,
+                                        );
+                                      }
+                                    : null,
+                              );
+                            },
+                          ),
+                        );
+                      }
+                      // Resilient auto-recovery: If cubit is in an unexpected state, reload students
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (mounted) {
+                          context.read<StudentsCubit>().loadStudents(
+                            status: _selectedStatus,
                           );
                         }
-                        final student = state.students[index];
-                        return StudentCard(
-                          student: student,
-                          onTap: () => context.go(
-                            '${AppRoutes.student360}?id=${student.id}',
-                            extra: student,
-                          ),
-                          onAssignGroups: student.isActive
-                              ? () => context.go(
-                                  AppRoutes.assignGroups,
-                                  extra: student.id,
-                                )
-                              : null,
-                          onApprove: student.isPending
-                              ? () => _confirmAction(
-                                  context,
-                                  student: student,
-                                  action: 'approve',
-                                  title:
-                                      context.l10n.approveStudentConfirmTitle,
-                                  body: context.l10n.approveStudentConfirmBody(
-                                    student.fullName,
-                                  ),
-                                  confirmLabel:
-                                      context.l10n.approveStudentAction,
-                                  confirmColor: AppColors.success,
-                                )
-                              : null,
-                          onReject: student.isPending
-                              ? () => _confirmAction(
-                                  context,
-                                  student: student,
-                                  action: 'reject',
-                                  title: context.l10n.rejectStudentConfirmTitle,
-                                  body: context.l10n.rejectStudentConfirmBody(
-                                    student.fullName,
-                                  ),
-                                  confirmLabel:
-                                      context.l10n.rejectStudentAction,
-                                  confirmColor: AppColors.error,
-                                )
-                              : null,
-                          onSuspend: student.isActive
-                              ? () => _confirmAction(
-                                  context,
-                                  student: student,
-                                  action: 'suspend',
-                                  title:
-                                      context.l10n.suspendStudentConfirmTitle,
-                                  body: context.l10n.suspendStudentConfirmBody(
-                                    student.fullName,
-                                  ),
-                                  confirmLabel:
-                                      context.l10n.suspendStudentAction,
-                                  confirmColor: AppColors.warning,
-                                )
-                              : null,
-                          onActivate: student.isSuspended
-                              ? () => _confirmAction(
-                                  context,
-                                  student: student,
-                                  action: 'activate',
-                                  title:
-                                      context.l10n.activateStudentConfirmTitle,
-                                  body: context.l10n.activateStudentConfirmBody(
-                                    student.fullName,
-                                  ),
-                                  confirmLabel:
-                                      context.l10n.activateStudentAction,
-                                  confirmColor: AppColors.success,
-                                )
-                              : null,
-                          onDelete: () => _confirmDeleteStudent(context, student),
-                          onWhatsApp: (student.parentPhone?.isNotEmpty == true ||
-                                  student.phone?.isNotEmpty == true)
-                              ? () {
-                                  AcademicReportDialog.show(
-                                    context,
-                                    studentId: student.id,
-                                    studentName: student.fullName,
-                                    parentPhone: student.parentPhone,
-                                    studentPhone: student.phone,
-                                  );
-                                }
-                              : null,
-                        );
-                      },
-                    ),
+                      });
+                      return KeyedSubtree(
+                        key: const ValueKey('students_fallback'),
+                        child: _buildSkeletonLoading(),
+                      );
+                    }(),
                   );
-                }
-                // Resilient auto-recovery: If cubit is in an unexpected state, reload students
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (mounted) {
-                    context.read<StudentsCubit>().loadStudents(
-                          status: _selectedStatus,
-                        );
-                  }
-                });
-                return KeyedSubtree(
-                  key: const ValueKey('students_fallback'),
-                  child: _buildSkeletonLoading(),
-                );
-              }(),
-            );
-          },
+                },
               ),
             ),
           ],

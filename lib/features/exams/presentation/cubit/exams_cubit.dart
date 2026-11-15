@@ -226,6 +226,7 @@ class ExamsCubit extends Cubit<ExamsState> {
   Future<ExamEntity?> createExam({
     String? groupId,
     required String title,
+    ExamCategory category = ExamCategory.realTest,
     int durationMinutes = 60,
     int maxScore = 100,
     int? passingScore,
@@ -248,6 +249,7 @@ class ExamsCubit extends Cubit<ExamsState> {
     final result = await _repository.createExam(
       groupId: groupId,
       title: title,
+      category: category,
       durationMinutes: durationMinutes,
       maxScore: maxScore,
       passingScore: passingScore,
@@ -351,10 +353,82 @@ class ExamsCubit extends Cubit<ExamsState> {
     );
   }
 
+  /// Atomically transfers an exam between Question Bank and Real Test categories
+  /// with an in-memory optimistic update ($O(1)$) to prevent screen flickering or full rebuilds.
+  Future<bool> moveExamCategory({
+    required String examId,
+    required ExamCategory targetCategory,
+  }) async {
+    final currentState = state;
+    if (currentState is! TeacherExamsLoaded) {
+      return false;
+    }
+
+    final examIndex = currentState.exams.indexWhere((e) => e.id == examId);
+    if (examIndex == -1) return false;
+
+    final originalExam = currentState.exams[examIndex];
+    if (originalExam.category == targetCategory) return true;
+
+    // 1. Optimistic Update (Immediate in-memory UI reflection)
+    final optimisticExam = originalExam.copyWith(category: targetCategory);
+    final optimisticList = List<ExamEntity>.from(currentState.exams);
+    optimisticList[examIndex] = optimisticExam;
+
+    emit(
+      currentState.copyWith(
+        exams: optimisticList,
+        selectedExam: currentState.selectedExam?.id == examId
+            ? optimisticExam
+            : currentState.selectedExam,
+      ),
+    );
+
+    // 2. Background persistence
+    final result = await _repository.moveExamCategory(
+      examId: examId,
+      targetCategory: targetCategory,
+    );
+
+    return result.when(
+      onSuccess: (serverExam) {
+        if (currentState.groupId != null) {
+          AppCache.exams.invalidate(
+            AppCache.userKey('teacher_exams_${currentState.groupId}'),
+          );
+        }
+        AppCache.exams.invalidate(AppCache.userKey('exam_details_$examId'));
+        return true;
+      },
+      onFailure: (failure) {
+        // Rollback on failure
+        final rollbackState = state;
+        if (rollbackState is TeacherExamsLoaded) {
+          final rollbackList = List<ExamEntity>.from(rollbackState.exams);
+          final rIndex = rollbackList.indexWhere((e) => e.id == examId);
+          if (rIndex != -1) {
+            rollbackList[rIndex] = originalExam;
+          }
+          emit(
+            rollbackState.copyWith(
+              exams: rollbackList,
+              selectedExam: rollbackState.selectedExam?.id == examId
+                  ? originalExam
+                  : rollbackState.selectedExam,
+              message: failure.message,
+            ),
+          );
+        }
+        return false;
+      },
+    );
+  }
+
   /// Updates an existing draft exam's metadata and atomic questions (Teacher flow)
   Future<ExamEntity?> updateDraftExamQuestions({
     required String examId,
     required String title,
+    ExamCategory? category,
     int? durationMinutes,
     int? maxScore,
     int? passingScore,
@@ -376,6 +450,7 @@ class ExamsCubit extends Cubit<ExamsState> {
     final result = await _repository.updateDraftExamQuestions(
       examId: examId,
       title: title,
+      category: category,
       durationMinutes: durationMinutes,
       maxScore: maxScore,
       passingScore: passingScore,
@@ -445,11 +520,27 @@ class ExamsCubit extends Cubit<ExamsState> {
     }
   }
 
-  /// Fetches complete details of an exam including questions and options
-  Future<ExamEntity?> getExamDetails(String examId) async {
+  /// Fetches complete details of an exam including questions and options with memory cache
+  Future<ExamEntity?> getExamDetails(
+    String examId, {
+    bool forceRefresh = false,
+  }) async {
+    final cacheKey = AppCache.userKey('exam_details_$examId');
+    if (!forceRefresh) {
+      final cached = AppCache.exams.get(cacheKey);
+      if (cached is ExamEntity &&
+          cached.activeVersion != null &&
+          cached.activeVersion!.questions.isNotEmpty) {
+        return cached;
+      }
+    }
+
     final result = await _repository.getExamDetails(examId);
     return result.when(
-      onSuccess: (exam) => exam,
+      onSuccess: (exam) {
+        AppCache.exams.put(cacheKey, exam);
+        return exam;
+      },
       onFailure: (failure) {
         AppLogger.w(
           'ExamsCubit',
@@ -458,6 +549,11 @@ class ExamsCubit extends Cubit<ExamsState> {
         return null;
       },
     );
+  }
+
+  /// Invalidates cached exam details
+  void invalidateExamDetailsCache(String examId) {
+    AppCache.exams.invalidate(AppCache.userKey('exam_details_$examId'));
   }
 
   /// Deletes or archives an exam with cascade cleanup (Teacher flow)
@@ -807,7 +903,13 @@ class ExamsCubit extends Cubit<ExamsState> {
           );
         } else {
           final existing = folderMap[fid]!;
+          final updatedName = (existing.name.trim().isEmpty &&
+                  exam.folderName != null &&
+                  exam.folderName!.trim().isNotEmpty)
+              ? exam.folderName!.trim()
+              : existing.name;
           folderMap[fid] = existing.copyWith(
+            name: updatedName,
             examCount: existing.examCount + 1,
           );
         }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -7,6 +8,7 @@ import '../extensions/localized_context_extension.dart';
 import '../network/supabase_service.dart';
 import '../router/app_router.dart';
 import '../theme/tenant_theme_cubit.dart';
+import '../utils/cache_manager.dart';
 import '../utils/prefetch_service.dart';
 import '../../features/notifications/presentation/cubit/notifications_cubit.dart';
 import '../../features/notifications/presentation/cubit/notifications_state.dart';
@@ -33,6 +35,8 @@ class StudentShell extends StatefulWidget {
 }
 
 class _StudentShellState extends State<StudentShell> {
+  Timer? _subscriptionGuardianTimer;
+
   @override
   void initState() {
     super.initState();
@@ -44,6 +48,34 @@ class _StudentShellState extends State<StudentShell> {
         } catch (_) {}
       }
     });
+
+    _startSubscriptionGuardian();
+  }
+
+  void _startSubscriptionGuardian() {
+    _subscriptionGuardianTimer?.cancel();
+    // Active heartbeat check every 3 seconds to guarantee instant in-session expulsion
+    _subscriptionGuardianTimer = Timer.periodic(
+      const Duration(seconds: 3),
+      (_) {
+        if (!mounted) return;
+        if (SupabaseService.currentUserRole == 'student' &&
+            SupabaseService.isSubscriptionExpired) {
+          _subscriptionGuardianTimer?.cancel();
+          _subscriptionGuardianTimer = null;
+          AppCache.clearAll();
+          if (mounted) {
+            context.go(AppRoutes.subscriptionExpired);
+          }
+        }
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _subscriptionGuardianTimer?.cancel();
+    super.dispose();
   }
 
   int _computeIndex(String path) {
@@ -53,8 +85,14 @@ class _StudentShellState extends State<StudentShell> {
       return 1;
     }
     if (path.contains('/content')) return 2;
-    if (path.startsWith('/student/assignments')) return 3;
-    if (path.startsWith('/student/exams')) return 4;
+    if (path.startsWith('/student/question-bank') ||
+        path.startsWith('/student/assignments')) {
+      return 3;
+    }
+    if (path.startsWith('/student/real-tests') ||
+        path.startsWith('/student/exams')) {
+      return 4;
+    }
     if (path.startsWith('/student/mistakes')) return 5;
     if (path.startsWith('/student/saved-questions')) return 6;
     if (path.startsWith('/student/attendance')) return 7;
@@ -74,13 +112,13 @@ class _StudentShellState extends State<StudentShell> {
         StudentShellContentNavigation.handleContentNavigation(context);
         break;
       case 3:
-        context.go(AppRoutes.studentAssignments);
+        context.go(AppRoutes.studentQuestionBank);
         break;
       case 4:
         if (Navigator.of(context).canPop()) {
           Navigator.of(context).popUntil((route) => route.isFirst);
         }
-        context.go(AppRoutes.studentExams);
+        context.go(AppRoutes.studentRealTests);
         break;
       case 5:
         context.go(AppRoutes.studentMistakes);

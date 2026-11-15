@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/widgets/app_loading_view.dart';
 import '../../../../core/widgets/teacher_group_filter_bar.dart';
 import '../../domain/entities/exam_entity.dart';
 import '../cubit/exams_cubit.dart';
@@ -108,179 +109,206 @@ class TeacherExamsLoadedView extends StatelessWidget {
 
     return RefreshIndicator(
       onRefresh: onRefresh,
-      child: SingleChildScrollView(
+      child: CustomScrollView(
         controller: scrollController,
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.only(bottom: 96),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            groupFilterBar,
-            const SizedBox(height: AppSpacing.s16),
+        slivers: [
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  groupFilterBar,
+                  const SizedBox(height: AppSpacing.s16),
 
-            // 1. Stats Banner
-            TeacherExamsStatsBanner(
-              totalCount: allExams.length,
-              generalCount: generalCount,
-              lectureCount: lectureCount,
-              unlinkedLectureCount: unlinkedLectureCount,
-              activeTypeFilter: activeTypeFilter,
-              onSelectFilter: (filter) {
-                onTypeFilterChanged(filter);
-                onLectureSubFilterChanged('all');
-              },
-              onAlertTap: unlinkedLectureCount > 0
-                  ? () {
-                      onTypeFilterChanged('lecture');
-                      onLectureSubFilterChanged('unlinked');
-                    }
-                  : null,
-            ),
-            const SizedBox(height: AppSpacing.s12),
+                  // 1. Stats Banner
+                  TeacherExamsStatsBanner(
+                    totalCount: allExams.length,
+                    generalCount: generalCount,
+                    lectureCount: lectureCount,
+                    unlinkedLectureCount: unlinkedLectureCount,
+                    activeTypeFilter: activeTypeFilter,
+                    onSelectFilter: (filter) {
+                      onTypeFilterChanged(filter);
+                      onLectureSubFilterChanged('all');
+                    },
+                    onAlertTap: unlinkedLectureCount > 0
+                        ? () {
+                            onTypeFilterChanged('lecture');
+                            onLectureSubFilterChanged('unlinked');
+                          }
+                        : null,
+                  ),
+                  const SizedBox(height: AppSpacing.s12),
 
-            // 2. Exam Folders Bar
-            ExamFoldersBar(
-              folders: state.folders,
-              selectedFolderId: state.selectedFolderId,
-              totalExamsCount: allExams.length,
-              uncategorizedCount: allExams
-                  .where((e) => e.folderId == null || e.folderId!.isEmpty)
-                  .length,
-              onSelectFolder: (fId) => cubit.selectFolder(fId),
-              onCreateFolder: () =>
-                  TeacherExamsActionsCoordinator.showCreateFolderDialog(
-                context: context,
-                cubit: cubit,
-                selectedGroupId: selectedGroupId,
-              ),
-              onEditFolder: (f) =>
-                  TeacherExamsActionsCoordinator.showEditFolderDialog(
-                context: context,
-                folder: f,
-                cubit: cubit,
-              ),
-              onDeleteFolder: (f) =>
-                  TeacherExamsActionsCoordinator.confirmDeleteFolder(
-                context: context,
-                folder: f,
-                cubit: cubit,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.s12),
+                  // 2. Exam Folders Bar
+                  ExamFoldersBar(
+                    folders: state.folders,
+                    selectedFolderId: state.selectedFolderId,
+                    totalExamsCount: allExams.length,
+                    uncategorizedCount: allExams
+                        .where((e) => e.folderId == null || e.folderId!.isEmpty)
+                        .length,
+                    onSelectFolder: (fId) => cubit.selectFolder(fId),
+                    onCreateFolder: () =>
+                        TeacherExamsActionsCoordinator.showCreateFolderDialog(
+                      context: context,
+                      cubit: cubit,
+                      selectedGroupId: selectedGroupId,
+                    ),
+                    onEditFolder: (f) =>
+                        TeacherExamsActionsCoordinator.showEditFolderDialog(
+                      context: context,
+                      folder: f,
+                      cubit: cubit,
+                    ),
+                    onDeleteFolder: (f) =>
+                        TeacherExamsActionsCoordinator.confirmDeleteFolder(
+                      context: context,
+                      folder: f,
+                      cubit: cubit,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.s12),
 
-            // 3. Filter Bar
-            TeacherExamsFilterBar(
-              totalCount: allExams.length,
-              generalCount: generalCount,
-              lectureCount: lectureCount,
-              linkedLectureCount: linkedLectureCount,
-              unlinkedLectureCount: unlinkedLectureCount,
-              publishedCount: publishedCount,
-              draftCount: draftCount,
-              activeTypeFilter: activeTypeFilter,
-              activeLectureSubFilter: activeLectureSubFilter,
-              activeStatusFilter: activeStatusFilter,
-              searchQuery: searchQuery,
-              hasActiveFilters: hasActiveFilters,
-              searchController: searchController,
-              onTypeFilterChanged: onTypeFilterChanged,
-              onLectureSubFilterChanged: onLectureSubFilterChanged,
-              onStatusFilterChanged: onStatusFilterChanged,
-              onSearchChanged: onSearchChanged,
-              onClearSearch: onClearSearch,
-              onResetAllFilters: onResetAllFilters,
-            ),
-            const SizedBox(height: AppSpacing.s16),
-
-            // 4. Exams Grid
-            TeacherExamsGridView(
-              filteredExams: filteredExams,
-              selectedFolderId: state.selectedFolderId,
-              isLoadingMore: state.isLoadingMore,
-              onClearFilters: () {
-                cubit.selectFolder(null);
-                onResetAllFilters();
-              },
-              onTapExam: onOpenExamDetails,
-              onEditQuestions: (exam) =>
-                  TeacherExamsActionsCoordinator.openEditDraftExam(
-                context: context,
-                exam: exam,
-                cubit: cubit,
-                selectedGroupId: selectedGroupId,
-                onReload: () => onRefresh(),
-              ),
-              onLinkLecture: (exam) {
-                if (selectedGroupId != null) {
-                  TeacherExamsActionsCoordinator.showLinkExamDialog(
-                    context: context,
-                    exam: exam,
-                    groupId: selectedGroupId!,
-                    cubit: cubit,
-                  );
-                }
-              },
-              onUnlinkLecture: (exam) {
-                if (selectedGroupId != null) {
-                  TeacherExamsActionsCoordinator.confirmUnlinkExam(
-                    context: context,
-                    exam: exam,
-                    groupId: selectedGroupId!,
-                    cubit: cubit,
-                  );
-                }
-              },
-              onConvertToLecture: (exam) {
-                if (selectedGroupId != null) {
-                  TeacherExamsActionsCoordinator.convertToLectureExam(
-                    context: context,
-                    exam: exam,
-                    groupId: selectedGroupId!,
-                    cubit: cubit,
-                  );
-                }
-              },
-              onConvertToGeneral: (exam) {
-                if (selectedGroupId != null) {
-                  TeacherExamsActionsCoordinator.confirmUnlinkExam(
-                    context: context,
-                    exam: exam,
-                    groupId: selectedGroupId!,
-                    cubit: cubit,
-                  );
-                }
-              },
-              onPublish: (exam) => TeacherExamsActionsCoordinator.publishExam(
-                context: context,
-                exam: exam,
-                cubit: cubit,
-              ),
-              onUnpublish: (exam) =>
-                  TeacherExamsActionsCoordinator.confirmUnpublish(
-                context: context,
-                exam: exam,
-                cubit: cubit,
-              ),
-              onDelete: (exam) =>
-                  TeacherExamsActionsCoordinator.handleDeleteExam(
-                context: context,
-                exam: exam,
-                cubit: cubit,
-              ),
-              onDispatchResults: (exam) =>
-                  TeacherExamsActionsCoordinator.openParentDispatch(
-                context: context,
-                exam: exam,
-              ),
-              onMoveToFolder: (exam) =>
-                  TeacherExamsActionsCoordinator.showMoveExamFolderDialog(
-                context: context,
-                exam: exam,
-                cubit: cubit,
+                  // 3. Filter Bar
+                  TeacherExamsFilterBar(
+                    totalCount: allExams.length,
+                    generalCount: generalCount,
+                    lectureCount: lectureCount,
+                    linkedLectureCount: linkedLectureCount,
+                    unlinkedLectureCount: unlinkedLectureCount,
+                    publishedCount: publishedCount,
+                    draftCount: draftCount,
+                    activeTypeFilter: activeTypeFilter,
+                    activeLectureSubFilter: activeLectureSubFilter,
+                    activeStatusFilter: activeStatusFilter,
+                    searchQuery: searchQuery,
+                    hasActiveFilters: hasActiveFilters,
+                    searchController: searchController,
+                    onTypeFilterChanged: onTypeFilterChanged,
+                    onLectureSubFilterChanged: onLectureSubFilterChanged,
+                    onStatusFilterChanged: onStatusFilterChanged,
+                    onSearchChanged: onSearchChanged,
+                    onClearSearch: onClearSearch,
+                    onResetAllFilters: onResetAllFilters,
+                  ),
+                  const SizedBox(height: AppSpacing.s16),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+
+          // 4. Virtualized Lazy Exams Grid
+          TeacherExamsGridView(
+            filteredExams: filteredExams,
+            selectedFolderId: state.selectedFolderId,
+            isLoadingMore: state.isLoadingMore,
+            onClearFilters: () {
+              cubit.selectFolder(null);
+              onResetAllFilters();
+            },
+            onTapExam: onOpenExamDetails,
+            onEditQuestions: (exam) =>
+                TeacherExamsActionsCoordinator.openEditDraftExam(
+              context: context,
+              exam: exam,
+              cubit: cubit,
+              selectedGroupId: selectedGroupId,
+              onReload: () => onRefresh(),
+            ),
+            onLinkLecture: (exam) {
+              if (selectedGroupId != null) {
+                TeacherExamsActionsCoordinator.showLinkExamDialog(
+                  context: context,
+                  exam: exam,
+                  groupId: selectedGroupId!,
+                  cubit: cubit,
+                );
+              }
+            },
+            onUnlinkLecture: (exam) {
+              if (selectedGroupId != null) {
+                TeacherExamsActionsCoordinator.confirmUnlinkExam(
+                  context: context,
+                  exam: exam,
+                  groupId: selectedGroupId!,
+                  cubit: cubit,
+                );
+              }
+            },
+            onConvertToLecture: (exam) {
+              if (selectedGroupId != null) {
+                TeacherExamsActionsCoordinator.convertToLectureExam(
+                  context: context,
+                  exam: exam,
+                  groupId: selectedGroupId!,
+                  cubit: cubit,
+                );
+              }
+            },
+            onConvertToGeneral: (exam) {
+              if (selectedGroupId != null) {
+                TeacherExamsActionsCoordinator.confirmUnlinkExam(
+                  context: context,
+                  exam: exam,
+                  groupId: selectedGroupId!,
+                  cubit: cubit,
+                );
+              }
+            },
+            onPublish: (exam) => TeacherExamsActionsCoordinator.publishExam(
+              context: context,
+              exam: exam,
+              cubit: cubit,
+            ),
+            onUnpublish: (exam) =>
+                TeacherExamsActionsCoordinator.confirmUnpublish(
+              context: context,
+              exam: exam,
+              cubit: cubit,
+            ),
+            onDelete: (exam) =>
+                TeacherExamsActionsCoordinator.handleDeleteExam(
+              context: context,
+              exam: exam,
+              cubit: cubit,
+            ),
+            onDispatchResults: (exam) =>
+                TeacherExamsActionsCoordinator.openParentDispatch(
+              context: context,
+              exam: exam,
+            ),
+            onMoveToFolder: (exam) =>
+                TeacherExamsActionsCoordinator.showMoveExamFolderDialog(
+              context: context,
+              exam: exam,
+              cubit: cubit,
+            ),
+            onMoveCategory: (exam, target) =>
+                TeacherExamsActionsCoordinator.moveExamCategory(
+              context: context,
+              exam: exam,
+              targetCategory: target,
+              cubit: cubit,
+            ),
+          ),
+
+          if (state.isLoadingMore)
+            const SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: AppSpacing.s16),
+                child: Center(
+                  child: AppLoadingView.compact(size: 24),
+                ),
+              ),
+            ),
+
+          const SliverToBoxAdapter(
+            child: SizedBox(height: 96),
+          ),
+        ],
       ),
     );
   }

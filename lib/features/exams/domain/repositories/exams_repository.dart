@@ -27,6 +27,7 @@ abstract class ExamsRepository implements ExamImageUploader {
   Future<Result<ExamEntity>> createExam({
     String? groupId,
     required String title,
+    ExamCategory category = ExamCategory.realTest,
     int durationMinutes = 60,
     int maxScore = 100,
     int? passingScore,
@@ -61,6 +62,7 @@ abstract class ExamsRepository implements ExamImageUploader {
   Future<Result<ExamEntity>> updateDraftExamQuestions({
     required String examId,
     required String title,
+    ExamCategory? category,
     int? durationMinutes,
     int? maxScore,
     int? passingScore,
@@ -163,6 +165,12 @@ abstract class ExamsRepository implements ExamImageUploader {
     required String contentId,
     required bool toLectureExam,
     required String groupId,
+  });
+
+  /// Atomically transfers an exam between Question Bank and Real Test categories.
+  Future<Result<ExamEntity>> moveExamCategory({
+    required String examId,
+    required ExamCategory targetCategory,
   });
 
   /// Deletes or archives an exam with cascade cleanup.

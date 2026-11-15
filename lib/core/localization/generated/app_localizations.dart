@@ -15019,6 +15019,12 @@ abstract class AppLocalizations {
   /// **'Folder Name'**
   String get folderNameLabel;
 
+  /// No description provided for @folderDefaultTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder'**
+  String get folderDefaultTitle;
+
   /// No description provided for @folderNameRequired.
   ///
   /// In en, this message translates to:
@@ -17677,6 +17683,30 @@ abstract class AppLocalizations {
   /// **'Evaluation Phrase'**
   String get whatsappStudioTagEvaluation;
 
+  /// No description provided for @whatsappStudioTagStudyTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Study Time'**
+  String get whatsappStudioTagStudyTime;
+
+  /// No description provided for @whatsappStudioTagLecturesProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Lectures Progress'**
+  String get whatsappStudioTagLecturesProgress;
+
+  /// No description provided for @whatsappStudioTagExamsProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Exams Progress'**
+  String get whatsappStudioTagExamsProgress;
+
+  /// No description provided for @whatsappStudioTagCumulativeAvg.
+  ///
+  /// In en, this message translates to:
+  /// **'Cumulative Average'**
+  String get whatsappStudioTagCumulativeAvg;
+
   /// No description provided for @whatsappStudioTierExcellentLabel.
   ///
   /// In en, this message translates to:
@@ -17826,6 +17856,492 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Requesting fresh QR...'**
   String get whatsappGatewayRegenerating;
+
+  /// No description provided for @loadMoreWithCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Show more ({current} of {total})'**
+  String loadMoreWithCount(int current, int total);
+
+  /// No description provided for @audioExplanationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio Explanation'**
+  String get audioExplanationLabel;
+
+  /// No description provided for @audioPlayTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Play voice explanation'**
+  String get audioPlayTooltip;
+
+  /// No description provided for @audioPauseTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause voice explanation'**
+  String get audioPauseTooltip;
+
+  /// No description provided for @audioSpeedTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Playback speed'**
+  String get audioSpeedTooltip;
+
+  /// No description provided for @audioLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading audio...'**
+  String get audioLoading;
+
+  /// No description provided for @audioError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load audio'**
+  String get audioError;
+
+  /// No description provided for @addAudioExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Voice Explanation'**
+  String get addAudioExplanation;
+
+  /// No description provided for @uploadAudioFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Audio File'**
+  String get uploadAudioFile;
+
+  /// No description provided for @recordVoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Record Voice'**
+  String get recordVoice;
+
+  /// No description provided for @removeAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Audio'**
+  String get removeAudio;
+
+  /// No description provided for @uploadingAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading audio...'**
+  String get uploadingAudio;
+
+  /// No description provided for @audioFileTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio file exceeds 20MB limit'**
+  String get audioFileTooLarge;
+
+  /// No description provided for @recordingVoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording voice explanation...'**
+  String get recordingVoice;
+
+  /// No description provided for @stopAndPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop & Preview'**
+  String get stopAndPreview;
+
+  /// No description provided for @reRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-record'**
+  String get reRecord;
+
+  /// No description provided for @attachRecordedVoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach Audio'**
+  String get attachRecordedVoice;
+
+  /// No description provided for @cancelRecording.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancelRecording;
+
+  /// No description provided for @micPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone permission denied. Please allow microphone access.'**
+  String get micPermissionDenied;
+
+  /// No description provided for @studentSubscriptionDurationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription & Access Duration'**
+  String get studentSubscriptionDurationTitle;
+
+  /// No description provided for @subscriptionUnlimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited (No Expiration)'**
+  String get subscriptionUnlimited;
+
+  /// No description provided for @subscriptionUnlimitedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Active account with no expiration date set'**
+  String get subscriptionUnlimitedSubtitle;
+
+  /// No description provided for @subscriptionActiveBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Subscription'**
+  String get subscriptionActiveBadge;
+
+  /// No description provided for @subscriptionExpiredBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription Expired'**
+  String get subscriptionExpiredBadge;
+
+  /// No description provided for @subscriptionExpiresOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Expires on {date} ({days} days remaining)'**
+  String subscriptionExpiresOn(String date, int days);
+
+  /// No description provided for @subscriptionExpiredOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired on {date}'**
+  String subscriptionExpiredOn(String date);
+
+  /// No description provided for @setSubscriptionDurationAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Set / Extend Subscription Duration'**
+  String get setSubscriptionDurationAction;
+
+  /// No description provided for @setSubscriptionDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Student Subscription Validity'**
+  String get setSubscriptionDialogTitle;
+
+  /// No description provided for @setSubscriptionDialogDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Set the expiration date for this student. Access will be automatically revoked upon expiration.'**
+  String get setSubscriptionDialogDesc;
+
+  /// No description provided for @subscriptionPreset30Days.
+  ///
+  /// In en, this message translates to:
+  /// **'+30 Days (1 Month)'**
+  String get subscriptionPreset30Days;
+
+  /// No description provided for @subscriptionPreset60Days.
+  ///
+  /// In en, this message translates to:
+  /// **'+60 Days (2 Months)'**
+  String get subscriptionPreset60Days;
+
+  /// No description provided for @subscriptionPreset90Days.
+  ///
+  /// In en, this message translates to:
+  /// **'+90 Days (3 Months)'**
+  String get subscriptionPreset90Days;
+
+  /// No description provided for @subscriptionCustomDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Calendar Date'**
+  String get subscriptionCustomDate;
+
+  /// No description provided for @subscriptionClearLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Limit (Unlimited)'**
+  String get subscriptionClearLimit;
+
+  /// No description provided for @saveSubscriptionAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Save & Update Validity'**
+  String get saveSubscriptionAction;
+
+  /// No description provided for @subscriptionUpdateSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Student subscription duration updated successfully'**
+  String get subscriptionUpdateSuccess;
+
+  /// No description provided for @subscriptionExpiredTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Dear Student, your subscription has expired'**
+  String get subscriptionExpiredTitle;
+
+  /// No description provided for @subscriptionExpiredDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Your access duration has elapsed. Please reach out to your teacher to renew your subscription and continue learning.'**
+  String get subscriptionExpiredDesc;
+
+  /// No description provided for @renewSubscriptionWhatsAppAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact Teacher to Renew (WhatsApp)'**
+  String get renewSubscriptionWhatsAppAction;
+
+  /// No description provided for @renewWhatsAppMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello, I am {name} and I would like to renew my subscription on the platform.'**
+  String renewWhatsAppMessage(String name);
+
+  /// No description provided for @loadingExamDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing exam details and questions...'**
+  String get loadingExamDetails;
+
+  /// No description provided for @failedToLoadExamDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load exam details. Please check your connection and try again.'**
+  String get failedToLoadExamDetails;
+
+  /// No description provided for @subscriptionPreset40Days.
+  ///
+  /// In en, this message translates to:
+  /// **'+40 Days'**
+  String get subscriptionPreset40Days;
+
+  /// No description provided for @approvalSubscriptionSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Validity & Subscription'**
+  String get approvalSubscriptionSectionTitle;
+
+  /// No description provided for @approvalSubscriptionSectionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set how long the student can access the platform before automatic cutoff'**
+  String get approvalSubscriptionSectionSubtitle;
+
+  /// No description provided for @subscriptionRemainingDetailed.
+  ///
+  /// In en, this message translates to:
+  /// **'{days}d {hours}h {minutes}m'**
+  String subscriptionRemainingDetailed(int days, int hours, int minutes);
+
+  /// No description provided for @subscriptionUrgentBannerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Attention: Your subscription is expiring soon!'**
+  String get subscriptionUrgentBannerTitle;
+
+  /// No description provided for @subscriptionUrgentBannerAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Renew via WhatsApp'**
+  String get subscriptionUrgentBannerAction;
+
+  /// No description provided for @subscriptionLiveDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} Days'**
+  String subscriptionLiveDays(int days);
+
+  /// No description provided for @subscriptionLiveHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} Hours'**
+  String subscriptionLiveHours(int hours);
+
+  /// No description provided for @subscriptionLiveMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} Min'**
+  String subscriptionLiveMinutes(int minutes);
+
+  /// No description provided for @subscriptionLiveSeconds.
+  ///
+  /// In en, this message translates to:
+  /// **'{seconds} Sec'**
+  String subscriptionLiveSeconds(int seconds);
+
+  /// No description provided for @subscriptionRemainingBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining: {time}'**
+  String subscriptionRemainingBadge(String time);
+
+  /// No description provided for @subscriptionActiveUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Active until {date}'**
+  String subscriptionActiveUntil(String date);
+
+  /// No description provided for @studentNavQuestionBank.
+  ///
+  /// In en, this message translates to:
+  /// **'Question Bank'**
+  String get studentNavQuestionBank;
+
+  /// No description provided for @studentNavQuestionBankSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Interactive practice questions'**
+  String get studentNavQuestionBankSubtitle;
+
+  /// No description provided for @studentNavRealTests.
+  ///
+  /// In en, this message translates to:
+  /// **'Real Tests'**
+  String get studentNavRealTests;
+
+  /// No description provided for @studentNavRealTestsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Official timed test simulations'**
+  String get studentNavRealTestsSubtitle;
+
+  /// No description provided for @examCategoryRealTest.
+  ///
+  /// In en, this message translates to:
+  /// **'Real Test'**
+  String get examCategoryRealTest;
+
+  /// No description provided for @examCategoryRealTestFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Real Test (Official)'**
+  String get examCategoryRealTestFull;
+
+  /// No description provided for @examCategoryQuestionBank.
+  ///
+  /// In en, this message translates to:
+  /// **'Question Bank'**
+  String get examCategoryQuestionBank;
+
+  /// No description provided for @examCategoryQuestionBankFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Question Bank (Practice)'**
+  String get examCategoryQuestionBankFull;
+
+  /// No description provided for @examCategoryRealTestDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Official timed simulation test with strict scoring'**
+  String get examCategoryRealTestDesc;
+
+  /// No description provided for @examCategoryQuestionBankDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Self-paced interactive question practice bank'**
+  String get examCategoryQuestionBankDesc;
+
+  /// No description provided for @moveToQuestionBankAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to Question Bank'**
+  String get moveToQuestionBankAction;
+
+  /// No description provided for @moveToRealTestAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to Real Tests'**
+  String get moveToRealTestAction;
+
+  /// No description provided for @examMovedToBankSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam moved to Question Bank successfully'**
+  String get examMovedToBankSuccess;
+
+  /// No description provided for @examMovedToRealTestSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam moved to Real Tests successfully'**
+  String get examMovedToRealTestSuccess;
+
+  /// No description provided for @filterAllCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'All Categories'**
+  String get filterAllCategories;
+
+  /// No description provided for @filterRealTestsOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Real Tests'**
+  String get filterRealTestsOnly;
+
+  /// No description provided for @filterQuestionBankOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Question Bank'**
+  String get filterQuestionBankOnly;
+
+  /// No description provided for @studentEmptyQuestionBankTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No Question Bank practice available yet'**
+  String get studentEmptyQuestionBankTitle;
+
+  /// No description provided for @studentEmptyQuestionBankSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your teacher will add practice question banks soon'**
+  String get studentEmptyQuestionBankSubtitle;
+
+  /// No description provided for @studentEmptyRealTestsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No Real Tests scheduled at the moment'**
+  String get studentEmptyRealTestsTitle;
+
+  /// No description provided for @studentEmptyRealTestsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay tuned for upcoming official test simulations'**
+  String get studentEmptyRealTestsSubtitle;
+
+  /// No description provided for @questionBankHeroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Question Bank | Unlimited Practice'**
+  String get questionBankHeroTitle;
+
+  /// No description provided for @questionBankHeroSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Practice questions and build mastery without time constraints'**
+  String get questionBankHeroSubtitle;
+
+  /// No description provided for @realTestsHeroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Real Tests | Official Exam Simulations'**
+  String get realTestsHeroTitle;
+
+  /// No description provided for @realTestsHeroSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Timed exams designed to evaluate your real performance under official conditions'**
+  String get realTestsHeroSubtitle;
+
+  /// No description provided for @examCategorySelectLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam Classification'**
+  String get examCategorySelectLabel;
+
+  /// No description provided for @examCategoryTransferring.
+  ///
+  /// In en, this message translates to:
+  /// **'Transferring classification...'**
+  String get examCategoryTransferring;
 }
 
 class _AppLocalizationsDelegate

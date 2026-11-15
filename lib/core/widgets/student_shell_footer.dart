@@ -38,80 +38,132 @@ class StudentShellFooter extends StatelessWidget {
         SupabaseService.currentUser?.email ?? context.l10n.roleStudent;
     final isProfileActive = currentLocation.startsWith(AppRoutes.studentProfile);
 
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.s10,
-        vertical: AppSpacing.s8,
-      ),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E293B).withValues(alpha: 0.85),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: const Color(0xFF334155).withValues(alpha: 0.7),
-        ),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: InkWell(
-              onTap: () => context.go(AppRoutes.studentProfile),
+    final expStr = SupabaseService.cachedSubscriptionExpiresAt;
+    final exp = expStr != null ? DateTime.tryParse(expStr) : null;
+    final int? daysRemaining = exp?.difference(DateTime.now()).inDays;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (daysRemaining != null) ...[
+          Container(
+            margin: const EdgeInsets.only(bottom: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: (daysRemaining < 3
+                      ? const Color(0xFFEF4444)
+                      : const Color(0xFF0284C7))
+                  .withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(8),
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    radius: 18,
-                    backgroundColor: isProfileActive ? AppColors.primary : const Color(0xFF334155),
-                    child: const Icon(
-                      Icons.school_rounded,
-                      size: 20,
-                      color: Color(0xFF38BDF8),
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.s10),
-                  Expanded(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          studentName,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: isProfileActive ? AppColors.primaryLight : Colors.white,
-                            fontSize: 13,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 1),
-                        Text(
-                          userEmail,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w400,
-                            color: const Color(0xFF94A3B8),
-                            fontSize: 11,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+              border: Border.all(
+                color: (daysRemaining < 3
+                        ? const Color(0xFFEF4444)
+                        : const Color(0xFF0284C7))
+                    .withValues(alpha: 0.35),
               ),
             ),
-          ),
-          const SizedBox(width: AppSpacing.s4),
-          const LanguageSwitcherButton(compact: true),
-          IconButton(
-            icon: const Icon(Icons.logout_rounded, size: 18),
-            tooltip: context.l10n.logout,
-            color: const Color(0xFFF87171),
-            visualDensity: VisualDensity.compact,
-            onPressed: () => _handleLogout(context),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.hourglass_bottom_rounded,
+                  size: 13,
+                  color: daysRemaining < 3
+                      ? const Color(0xFFEF4444)
+                      : const Color(0xFF38BDF8),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  context.l10n.subscriptionLiveDays(daysRemaining),
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: daysRemaining < 3
+                        ? const Color(0xFFFCA5A5)
+                        : const Color(0xFFBAE6FD),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
-      ),
+        Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.s10,
+            vertical: AppSpacing.s8,
+          ),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1E293B).withValues(alpha: 0.85),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: const Color(0xFF334155).withValues(alpha: 0.7),
+            ),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: InkWell(
+                  onTap: () => context.go(AppRoutes.studentProfile),
+                  borderRadius: BorderRadius.circular(8),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 18,
+                        backgroundColor: isProfileActive ? AppColors.primary : const Color(0xFF334155),
+                        child: const Icon(
+                          Icons.school_rounded,
+                          size: 20,
+                          color: Color(0xFF38BDF8),
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.s10),
+                      Expanded(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              studentName,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: isProfileActive ? AppColors.primaryLight : Colors.white,
+                                fontSize: 13,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 1),
+                            Text(
+                              userEmail,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                fontWeight: FontWeight.w400,
+                                color: const Color(0xFF94A3B8),
+                                fontSize: 11,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.s4),
+              const LanguageSwitcherButton(compact: true),
+              IconButton(
+                icon: const Icon(Icons.logout_rounded, size: 18),
+                tooltip: context.l10n.logout,
+                color: const Color(0xFFF87171),
+                visualDensity: VisualDensity.compact,
+                onPressed: () => _handleLogout(context),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -122,6 +174,10 @@ class StudentShellFooter extends StatelessWidget {
     final userEmail =
         SupabaseService.currentUser?.email ?? context.l10n.roleStudent;
     final isProfileActive = currentLocation.startsWith(AppRoutes.studentProfile);
+
+    final expStr = SupabaseService.cachedSubscriptionExpiresAt;
+    final exp = expStr != null ? DateTime.tryParse(expStr) : null;
+    final int? daysRemaining = exp?.difference(DateTime.now()).inDays;
 
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -139,6 +195,30 @@ class StudentShellFooter extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          if (daysRemaining != null) ...[
+            Tooltip(
+              message: context.l10n.subscriptionLiveDays(daysRemaining),
+              preferBelow: false,
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                margin: const EdgeInsets.only(bottom: 6),
+                decoration: BoxDecoration(
+                  color: (daysRemaining < 3
+                          ? const Color(0xFFEF4444)
+                          : const Color(0xFF0284C7))
+                      .withValues(alpha: 0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.hourglass_bottom_rounded,
+                  size: 13,
+                  color: daysRemaining < 3
+                      ? const Color(0xFFEF4444)
+                      : const Color(0xFF38BDF8),
+                ),
+              ),
+            ),
+          ],
           Tooltip(
             message: '$studentName\n$userEmail',
             preferBelow: false,

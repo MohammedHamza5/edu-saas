@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/utils/app_feedback.dart';
 import '../../domain/entities/exam_entity.dart';
 import '../../domain/entities/exam_folder_entity.dart';
 import '../cubit/exams_cubit.dart';
@@ -211,10 +213,42 @@ class TeacherExamsActionsCoordinator {
     required VoidCallback onReload,
   }) async {
     ExamEntity examToEdit = exam;
-    if (exam.activeVersion == null || exam.activeVersion!.questions.isEmpty) {
-      final fullExam = await cubit.getExamDetails(exam.id);
-      if (fullExam != null) {
-        examToEdit = fullExam;
+    final needsFetch =
+        exam.activeVersion == null || exam.activeVersion!.questions.isEmpty;
+
+    if (needsFetch) {
+      final l10n = context.l10n;
+      AppFeedback.showLoadingDialog(
+        context,
+        message: l10n.loadingExamDetails,
+      );
+
+      try {
+        final fullExam = await cubit
+            .getExamDetails(exam.id)
+            .timeout(const Duration(seconds: 10), onTimeout: () => null);
+
+        if (!context.mounted) return;
+        AppFeedback.hideLoadingDialog(context);
+
+        if (fullExam != null) {
+          examToEdit = fullExam;
+        } else {
+          AppFeedback.showError(
+            context,
+            l10n.failedToLoadExamDetails,
+          );
+          return;
+        }
+      } catch (e) {
+        if (context.mounted) {
+          AppFeedback.hideLoadingDialog(context);
+          AppFeedback.showError(
+            context,
+            context.l10n.failedToLoadExamDetails,
+          );
+        }
+        return;
       }
     }
 
@@ -236,8 +270,11 @@ class TeacherExamsActionsCoordinator {
       ),
     );
 
-    if (context.mounted && updated != null) {
-      onReload();
+    if (updated != null) {
+      cubit.invalidateExamDetailsCache(exam.id);
+      if (context.mounted) {
+        onReload();
+      }
     }
   }
 
@@ -458,5 +495,34 @@ class TeacherExamsActionsCoordinator {
         );
       },
     );
+  }
+
+  /// Transfers an exam between Question Bank and Real Test categories with instant feedback
+  static Future<void> moveExamCategory({
+    required BuildContext context,
+    required ExamEntity exam,
+    required ExamCategory targetCategory,
+    required ExamsCubit cubit,
+  }) async {
+    final l10n = context.l10n;
+    await HapticFeedback.mediumImpact();
+    final success = await cubit.moveExamCategory(
+      examId: exam.id,
+      targetCategory: targetCategory,
+    );
+
+    if (context.mounted) {
+      if (success) {
+        final message = targetCategory.isQuestionBank
+            ? l10n.examMovedToBankSuccess
+            : l10n.examMovedToRealTestSuccess;
+        AppFeedback.showSuccess(context, message);
+      } else {
+        AppFeedback.showError(
+          context,
+          context.l10n.errorOccurred,
+        );
+      }
+    }
   }
 }

@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/extensions/localized_context_extension.dart';
 
 class InteractiveLightboxDialog extends StatefulWidget {
   final String imageUrl;
@@ -39,7 +40,7 @@ class _InteractiveLightboxDialogState extends State<InteractiveLightboxDialog> {
     if (_transformationController.value != Matrix4.identity()) {
       _resetZoom();
     } else {
-      _transformationController.value = Matrix4.identity()..scale(2.5, 2.5);
+      _transformationController.value = Matrix4.diagonal3Values(2.5, 2.5, 1.0);
     }
   }
 
@@ -83,7 +84,35 @@ class _InteractiveLightboxDialogState extends State<InteractiveLightboxDialog> {
               IconButton(
                 onPressed: _retry,
                 icon: const Icon(Icons.refresh_rounded, color: Colors.white),
-                tooltip: 'إعادة المحاولة',
+                tooltip: context.l10n.retry,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (kIsWeb) {
+      return Image.network(
+        url,
+        key: ValueKey(url),
+        fit: BoxFit.contain,
+        loadingBuilder: (ctx, child, progress) {
+          if (progress == null) return child;
+          return const Center(
+            child: CircularProgressIndicator(color: Colors.white),
+          );
+        },
+        errorBuilder: (ctx, _, __) => Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.broken_image_rounded, color: Colors.white70, size: 48),
+              const SizedBox(height: 12),
+              IconButton(
+                onPressed: _retry,
+                icon: const Icon(Icons.refresh_rounded, color: Colors.white),
+                tooltip: context.l10n.retry,
               ),
             ],
           ),

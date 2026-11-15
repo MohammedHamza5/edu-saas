@@ -35,6 +35,7 @@ class CreateExamDraftHandler {
       draftCoordinator: draftCoordinator,
       isSubmitting: isSubmitting,
       title: controllers.title.text,
+      category: settings.category,
       duration: controllers.duration.text,
       maxScore: controllers.maxScore.text,
       passingScore: controllers.passingScore.text,
@@ -83,7 +84,9 @@ class CreateExamDraftHandler {
         required pdfFileSize,
         required pdfStoragePath,
         required defaultQuestionPoints,
+        category,
       }) {
+        if (category != null) settings.category = category;
         settings.shuffle = shuffle;
         settings.showResult = showResult;
         settings.allowRetake = allowRetake;

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../domain/entities/exam_entity.dart';
 import '../models/create_exam_draft_models.dart';
 import 'create_exam_draft_coordinator.dart';
 
@@ -12,6 +13,7 @@ class CreateExamDraftManager {
     required CreateExamDraftCoordinator draftCoordinator,
     required bool isSubmitting,
     required String title,
+    ExamCategory category = ExamCategory.realTest,
     required String duration,
     required String maxScore,
     required String passingScore,
@@ -38,6 +40,7 @@ class CreateExamDraftManager {
 
     final draftData = CreateExamDraftSerializer.serialize(
       title: title,
+      category: category,
       duration: duration,
       maxScore: maxScore,
       passingScore: passingScore,
@@ -81,6 +84,7 @@ class CreateExamDraftManager {
       required int? pdfFileSize,
       required String? pdfStoragePath,
       required int defaultQuestionPoints,
+      ExamCategory? category,
     })
     onApplySettings,
   }) {
@@ -109,6 +113,7 @@ class CreateExamDraftManager {
       pdfFileSize: v.pdfFileSize,
       pdfStoragePath: v.pdfStoragePath,
       defaultQuestionPoints: parsedPoints,
+      category: v.category,
     );
 
     if (v.questions != null && v.questions!.isNotEmpty) {

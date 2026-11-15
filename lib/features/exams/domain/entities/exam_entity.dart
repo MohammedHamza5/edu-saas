@@ -251,6 +251,8 @@ class ExamQuestionEntity extends Equatable {
   final String? imageUrl;
   final Map<String, dynamic>? imageMeta;
   final String? contextId;
+  final String? audioUrl;
+  final int? audioDurationSeconds;
 
   const ExamQuestionEntity({
     required this.id,
@@ -263,6 +265,8 @@ class ExamQuestionEntity extends Equatable {
     this.imageUrl,
     this.imageMeta,
     this.contextId,
+    this.audioUrl,
+    this.audioDurationSeconds,
   });
 
   ExamQuestionEntity copyWith({
@@ -276,6 +280,8 @@ class ExamQuestionEntity extends Equatable {
     String? imageUrl,
     Map<String, dynamic>? imageMeta,
     String? contextId,
+    String? audioUrl,
+    int? audioDurationSeconds,
   }) {
     return ExamQuestionEntity(
       id: id ?? this.id,
@@ -288,6 +294,8 @@ class ExamQuestionEntity extends Equatable {
       imageUrl: imageUrl ?? this.imageUrl,
       imageMeta: imageMeta ?? this.imageMeta,
       contextId: contextId ?? this.contextId,
+      audioUrl: audioUrl ?? this.audioUrl,
+      audioDurationSeconds: audioDurationSeconds ?? this.audioDurationSeconds,
     );
   }
 
@@ -303,6 +311,8 @@ class ExamQuestionEntity extends Equatable {
     imageUrl,
     imageMeta,
     contextId,
+    audioUrl,
+    audioDurationSeconds,
   ];
 }
 
@@ -524,6 +534,38 @@ class ExamAttemptEntity extends Equatable {
   ];
 }
 
+enum ExamCategory {
+  realTest,
+  questionBank;
+
+  static ExamCategory fromString(String? value) {
+    if (value == null) return ExamCategory.realTest;
+    switch (value.toLowerCase()) {
+      case 'question_bank':
+      case 'bank':
+      case 'questionbank':
+        return ExamCategory.questionBank;
+      case 'real_test':
+      case 'realtest':
+      case 'test':
+      default:
+        return ExamCategory.realTest;
+    }
+  }
+
+  String get value {
+    switch (this) {
+      case ExamCategory.realTest:
+        return 'real_test';
+      case ExamCategory.questionBank:
+        return 'question_bank';
+    }
+  }
+
+  bool get isRealTest => this == ExamCategory.realTest;
+  bool get isQuestionBank => this == ExamCategory.questionBank;
+}
+
 class ExamEntity extends Equatable {
   final String id;
   final String contentId;
@@ -531,6 +573,7 @@ class ExamEntity extends Equatable {
   final String groupId;
   final String? groupName;
   final String title;
+  final ExamCategory category;
   final int durationMinutes;
   final int maxScore;
   final int? passingScore;
@@ -565,6 +608,7 @@ class ExamEntity extends Equatable {
     required this.groupId,
     this.groupName,
     required this.title,
+    this.category = ExamCategory.realTest,
     this.durationMinutes = 60,
     this.maxScore = 100,
     this.passingScore,
@@ -665,6 +709,7 @@ class ExamEntity extends Equatable {
     String? groupId,
     String? groupName,
     String? title,
+    ExamCategory? category,
     int? durationMinutes,
     int? maxScore,
     int? passingScore,
@@ -700,6 +745,7 @@ class ExamEntity extends Equatable {
       groupId: groupId ?? this.groupId,
       groupName: groupName ?? this.groupName,
       title: title ?? this.title,
+      category: category ?? this.category,
       durationMinutes: durationMinutes ?? this.durationMinutes,
       maxScore: maxScore ?? this.maxScore,
       passingScore: passingScore ?? this.passingScore,
@@ -737,6 +783,7 @@ class ExamEntity extends Equatable {
     groupId,
     groupName,
     title,
+    category,
     durationMinutes,
     maxScore,
     passingScore,

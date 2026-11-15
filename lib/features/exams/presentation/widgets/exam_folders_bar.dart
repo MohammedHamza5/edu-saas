@@ -87,7 +87,9 @@ class ExamFoldersBar extends StatelessWidget {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        folder.name,
+                        folder.name.trim().isNotEmpty
+                            ? folder.name
+                            : context.l10n.folderDefaultTitle,
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight:

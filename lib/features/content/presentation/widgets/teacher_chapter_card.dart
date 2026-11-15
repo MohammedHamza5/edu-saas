@@ -359,73 +359,75 @@ class TeacherChapterCard extends StatelessWidget {
             ),
           ),
 
-          // Chapter Body with Animated CrossFade Accordion
+          // Chapter Body with Animated CrossFade Accordion (Lazy rendered when expanded)
           AnimatedCrossFade(
             firstChild: const SizedBox.shrink(),
-            secondChild: chapterLessons.isEmpty
-                ? Padding(
-                    padding: const EdgeInsets.all(AppSpacing.s24),
-                    child: Center(
-                      child: Column(
-                        children: [
-                          Icon(
-                            Icons.folder_open_rounded,
-                            size: 36,
-                            color: AppColors.textMuted.withValues(alpha: 0.6),
+            secondChild: isCollapsed
+                ? const SizedBox.shrink()
+                : chapterLessons.isEmpty
+                    ? Padding(
+                        padding: const EdgeInsets.all(AppSpacing.s24),
+                        child: Center(
+                          child: Column(
+                            children: [
+                              Icon(
+                                Icons.folder_open_rounded,
+                                size: 36,
+                                color: AppColors.textMuted.withValues(alpha: 0.6),
+                              ),
+                              const SizedBox(height: AppSpacing.s8),
+                              Text(
+                                l10n.emptyChapterPlaceholder,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: AppColors.textSecondary,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(height: AppSpacing.s8),
+                              TextButton.icon(
+                                onPressed: onAddLesson,
+                                icon: const Icon(Icons.add_rounded, size: 16),
+                                label: Text(l10n.emptyChapterTeacherAction),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: AppColors.primary,
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: AppSpacing.s8),
-                          Text(
-                            l10n.emptyChapterPlaceholder,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: AppColors.textSecondary,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          const SizedBox(height: AppSpacing.s8),
-                          TextButton.icon(
-                            onPressed: onAddLesson,
-                            icon: const Icon(Icons.add_rounded, size: 16),
-                            label: Text(l10n.emptyChapterTeacherAction),
-                            style: TextButton.styleFrom(
-                              foregroundColor: AppColors.primary,
-                            ),
-                          ),
-                        ],
+                        ),
+                      )
+                    : ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: AppSpacing.s8,
+                          horizontal: AppSpacing.s8,
+                        ),
+                        itemCount: chapterLessons.length,
+                        itemBuilder: (context, idx) {
+                          final lesson = chapterLessons[idx];
+                          return CourseLessonTile(
+                            key: ValueKey('chap_lesson_${lesson.id}'),
+                            content: lesson,
+                            index: idx,
+                            isSelected: false,
+                            onTap: () => onOpenEditLesson(lesson),
+                            lessonTitle: lesson.title,
+                            hasPdf: lesson.file != null,
+                            quizTitle: lesson.associatedExamTitle,
+                            canMoveUp: idx > 0,
+                            canMoveDown: idx < chapterLessons.length - 1,
+                            onMoveUp: () => onReorderLesson(idx, idx - 1),
+                            onMoveDown: () => onReorderLesson(idx, idx + 2),
+                            onMoveToChapter: () => onMoveLessonToChapter(lesson),
+                            onViewAnalytics: () => onLessonAnalytics(lesson),
+                            onEdit: () => onOpenEditLesson(lesson),
+                            onDelete: () => onDeleteLesson(lesson),
+                            onToggleVisibility: () =>
+                                onToggleLessonVisibility(lesson),
+                          );
+                        },
                       ),
-                    ),
-                  )
-                : ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(
-                      vertical: AppSpacing.s8,
-                      horizontal: AppSpacing.s8,
-                    ),
-                    itemCount: chapterLessons.length,
-                    itemBuilder: (context, idx) {
-                      final lesson = chapterLessons[idx];
-                      return CourseLessonTile(
-                        key: ValueKey('chap_lesson_${lesson.id}'),
-                        content: lesson,
-                        index: idx,
-                        isSelected: false,
-                        onTap: () => onOpenEditLesson(lesson),
-                        lessonTitle: lesson.title,
-                        hasPdf: lesson.file != null,
-                        quizTitle: lesson.associatedExamTitle,
-                        canMoveUp: idx > 0,
-                        canMoveDown: idx < chapterLessons.length - 1,
-                        onMoveUp: () => onReorderLesson(idx, idx - 1),
-                        onMoveDown: () => onReorderLesson(idx, idx + 2),
-                        onMoveToChapter: () => onMoveLessonToChapter(lesson),
-                        onViewAnalytics: () => onLessonAnalytics(lesson),
-                        onEdit: () => onOpenEditLesson(lesson),
-                        onDelete: () => onDeleteLesson(lesson),
-                        onToggleVisibility: () =>
-                            onToggleLessonVisibility(lesson),
-                      );
-                    },
-                  ),
             crossFadeState: isCollapsed
                 ? CrossFadeState.showFirst
                 : CrossFadeState.showSecond,

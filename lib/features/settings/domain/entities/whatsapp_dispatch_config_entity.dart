@@ -70,7 +70,7 @@ class WhatsAppDispatchConfigEntity extends Equatable {
     this.headerTemplate =
         'أهلاً بحضرتك يا فندم 🌸\nحبينا نطمن حضرتك على نتيجة اختبار نجلك الطالب/ *{student_name}* ({group_name}):',
     this.bodyTemplate =
-        '📝 *الاختبار:* {exam_title}\n🎯 *الدرجة:* {score} من {max_score} ({percentage}%)\n\n{evaluation_text}',
+        '📝 *الاختبار:* {exam_title}\n🎯 *الدرجة:* {score} من {max_score} ({percentage}%)\n\n{evaluation_text}\n\n━━━━━━━━━━━━━━━━━━━━\n📊 *متابعة المنصة الأكاديمية:*\n⏱️ وقت المذاكرة والتفاعل: {study_time}\n🎬 إنجاز المحاضرات: {lectures_progress}\n📑 إنجاز الاختبارات: {exams_progress}\n📈 المعدل التراكمي: {cumulative_avg}\n━━━━━━━━━━━━━━━━━━━━',
     this.footerTemplate =
         'نسأل الله له دوام التوفيق والتميز، ومع حضرتك في أي وقت لأي استفسار 🌸\n*{teacher_name}*',
     this.tierExcellentText =
@@ -156,6 +156,10 @@ class WhatsAppDispatchConfigEntity extends Equatable {
     double percentage = 96.0,
     String groupName = 'SAT Basics & Algebra Bootcamp',
     String teacherName = 'د. أنطونيوس أشرف',
+    String studyTime = '16 ساعة و 40 دقيقة',
+    String lecturesProgress = 'تمت مشاهدة 12 من 15 محاضرة (80%)',
+    String examsProgress = 'تم أداء 8 من 10 اختبارات (80%)',
+    String cumulativeAvg = '89.5%',
   }) {
     String eval;
     if (percentage >= 90) {
@@ -183,7 +187,11 @@ class WhatsAppDispatchConfigEntity extends Equatable {
         .replaceAll('{percentage}', percentage.toStringAsFixed(1))
         .replaceAll('{group_name}', safeGroupName)
         .replaceAll('{teacher_name}', teacherName)
-        .replaceAll('{evaluation_text}', eval);
+        .replaceAll('{evaluation_text}', eval)
+        .replaceAll('{study_time}', studyTime)
+        .replaceAll('{lectures_progress}', lecturesProgress)
+        .replaceAll('{exams_progress}', examsProgress)
+        .replaceAll('{cumulative_avg}', cumulativeAvg);
   }
 
   @override

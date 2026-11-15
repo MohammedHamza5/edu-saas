@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import '../../../../core/utils/app_logger.dart';
+import '../../../../core/utils/question_image_resolver.dart';
 import '../../../question_bank/domain/entities/question_revision_entity.dart';
 import '../../../question_bank/domain/repositories/question_bank_repository.dart';
 import '../../domain/services/exam_image_uploader.dart';
@@ -97,9 +98,11 @@ class CreateExamBuilderHelpers {
         points: q.points,
         sortOrder: idx + 1,
         options: optionsList,
-        imageUrl: q.imageUrl,
+        imageUrl: QuestionImageResolver.resolveUrl(q.imageUrl),
         imageMeta: q.imageMeta,
         contextId: q.contextId,
+        audioUrl: q.audioUrl,
+        audioDurationSeconds: q.audioDurationSeconds,
       );
     }).toList();
   }
@@ -151,7 +154,7 @@ class CreateExamBuilderHelpers {
           'license': 'teacher_owned',
           'attested_at': DateTime.now().toIso8601String(),
         },
-        imageUrl: q.imageUrl,
+        imageUrl: QuestionImageResolver.resolveUrl(q.imageUrl),
         imageMeta: q.imageMeta,
       )
           .catchError((Object err) {
@@ -275,6 +278,8 @@ class CreateExamBuilderHelpers {
       dq.localImageBytes = null;
       dq.imageMeta = eq.imageMeta;
       dq.contextId = eq.contextId;
+      dq.audioUrl = eq.audioUrl;
+      dq.audioDurationSeconds = eq.audioDurationSeconds;
 
       if (eq.questionType == QuestionType.trueFalse) {
         final correctOpt =
@@ -422,16 +427,29 @@ class CreateExamBuilderHelpers {
     });
   }
 
-  /// Awaits any in-flight background image uploads. Returns true if successful or none pending, false on error.
+  /// Awaits any in-flight background image or audio uploads. Returns true if successful or none pending, false on error.
   static Future<bool> awaitPendingUploads(
     List<CreateExamDraftQuestion> questions,
   ) async {
-    final pending = questions
+    final pendingImages = questions
         .where((q) => q.isUploadingImage && q.uploadFuture != null)
-        .toList();
-    if (pending.isEmpty) return true;
+        .map((q) => q.uploadFuture!);
+    final pendingAudio = questions
+        .where((q) => q.isUploadingAudio && q.audioUploadFuture != null)
+        .map((q) => q.audioUploadFuture!);
+
+    final allPending = [...pendingImages, ...pendingAudio];
+    if (allPending.isEmpty) {
+      if (questions.any((q) => q.isUploadingAudio)) {
+        for (int i = 0; i < 30; i++) {
+          if (!questions.any((q) => q.isUploadingAudio)) break;
+          await Future<void>.delayed(const Duration(milliseconds: 200));
+        }
+      }
+      return true;
+    }
     try {
-      await Future.wait(pending.map((q) => q.uploadFuture!));
+      await Future.wait(allPending);
       return true;
     } catch (e) {
       AppLogger.e('CreateExamBuilderHelpers', 'Pending upload error: $e');

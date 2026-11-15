@@ -18,16 +18,8 @@ class AcademicReportPeriodSelector extends StatelessWidget {
     final l10n = context.l10n;
 
     final periods = [
-      (
-        days: 7,
-        label: l10n.whatsappPeriod7Days,
-        icon: Icons.flash_on_rounded,
-      ),
-      (
-        days: 14,
-        label: l10n.whatsappPeriod14Days,
-        icon: Icons.timer_outlined,
-      ),
+      (days: 7, label: l10n.whatsappPeriod7Days, icon: Icons.flash_on_rounded),
+      (days: 14, label: l10n.whatsappPeriod14Days, icon: Icons.timer_outlined),
       (
         days: 30,
         label: l10n.whatsappPeriod30Days,
@@ -64,10 +56,7 @@ class AcademicReportPeriodSelector extends StatelessWidget {
                 size: 14,
                 color: isSelected ? Colors.white : AppColors.primary,
               ),
-              label: Text(
-                p.label,
-                style: const TextStyle(fontSize: 11),
-              ),
+              label: Text(p.label, style: const TextStyle(fontSize: 11)),
               selected: isSelected,
               selectedColor: AppColors.primary,
               labelStyle: TextStyle(

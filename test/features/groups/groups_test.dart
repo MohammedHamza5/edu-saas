@@ -43,6 +43,7 @@ class FakeStudentsRepository implements StudentsRepository {
   Future<Result<StudentEntity>> changeStudentStatus({
     required String studentId,
     required String action,
+    DateTime? expiresAt,
   }) async => throw UnimplementedError();
 
   @override
@@ -80,6 +81,12 @@ class FakeStudentsRepository implements StudentsRepository {
       periodDays: days,
     ),
   );
+
+  @override
+  Future<Result<StudentEntity>> setStudentSubscription({
+    required String studentId,
+    required DateTime? expiresAt,
+  }) async => throw UnimplementedError();
 }
 
 class FakeGroupsRepository implements GroupsRepository {

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../../../core/utils/question_image_resolver.dart';
 import 'exam_entity.dart';
 import 'question_difficulty_rating.dart';
 
@@ -151,7 +152,9 @@ class SavedQuestionEntity extends Equatable {
       examId: json['exam_id'] as String? ?? '',
       examTitle: json['exam_title'] as String? ?? '',
       questionText: json['question_text'] as String? ?? '',
-      questionImageUrl: json['question_image_url'] as String?,
+      questionImageUrl: QuestionImageResolver.resolveUrl(
+        json['question_image_url'] as String?,
+      ),
       options: (json['options'] as List<dynamic>? ?? []).map((o) {
         final optMap = o as Map<String, dynamic>;
         return QuestionOptionEntity(

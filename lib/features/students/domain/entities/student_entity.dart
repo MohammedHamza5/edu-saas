@@ -14,6 +14,7 @@ class StudentEntity extends Equatable {
   final String role; // always 'student' here
   final DateTime? lastActivityAt;
   final DateTime? createdAt;
+  final DateTime? subscriptionExpiresAt;
 
   const StudentEntity({
     required this.id,
@@ -27,12 +28,24 @@ class StudentEntity extends Equatable {
     this.role = 'student',
     this.lastActivityAt,
     this.createdAt,
+    this.subscriptionExpiresAt,
   });
 
   bool get isPending => status == 'pending';
   bool get isActive => status == 'active';
   bool get isRejected => status == 'rejected';
   bool get isSuspended => status == 'suspended';
+
+  bool get hasSubscriptionLimit => subscriptionExpiresAt != null;
+
+  bool get isSubscriptionExpired =>
+      subscriptionExpiresAt != null &&
+      DateTime.now().isAfter(subscriptionExpiresAt!);
+
+  int? get remainingSubscriptionDays {
+    if (subscriptionExpiresAt == null) return null;
+    return subscriptionExpiresAt!.difference(DateTime.now()).inDays;
+  }
 
   String get initials {
     final parts = fullName.trim().split(RegExp(r'\s+'));
@@ -54,6 +67,7 @@ class StudentEntity extends Equatable {
     String? role,
     DateTime? lastActivityAt,
     DateTime? createdAt,
+    DateTime? subscriptionExpiresAt,
   }) {
     return StudentEntity(
       id: id ?? this.id,
@@ -67,6 +81,8 @@ class StudentEntity extends Equatable {
       role: role ?? this.role,
       lastActivityAt: lastActivityAt ?? this.lastActivityAt,
       createdAt: createdAt ?? this.createdAt,
+      subscriptionExpiresAt:
+          subscriptionExpiresAt ?? this.subscriptionExpiresAt,
     );
   }
 
@@ -83,5 +99,6 @@ class StudentEntity extends Equatable {
     role,
     lastActivityAt,
     createdAt,
+    subscriptionExpiresAt,
   ];
 }

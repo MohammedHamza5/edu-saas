@@ -30,10 +30,7 @@ class StudentSectionTitle extends StatelessWidget {
 class Student360StatsGrid extends StatelessWidget {
   final Student360Entity stats;
 
-  const Student360StatsGrid({
-    super.key,
-    required this.stats,
-  });
+  const Student360StatsGrid({super.key, required this.stats});
 
   static Color pctColor(double pct) {
     if (pct >= 75) return AppColors.success;
@@ -72,7 +69,7 @@ class Student360StatsGrid extends StatelessWidget {
               ),
               progress: stats.assignmentsSubmitted > 0
                   ? (stats.assignmentsReviewed / stats.assignmentsSubmitted)
-                      .clamp(0.0, 1.0)
+                        .clamp(0.0, 1.0)
                   : null,
               color: AppColors.info,
             ),
@@ -145,10 +142,11 @@ class Student360StatCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.s8),
           Text(
             value,
-            style: (isCompact
-                    ? AppTypography.headingLarge
-                    : AppTypography.statFigureLarge)
-                .copyWith(color: color),
+            style:
+                (isCompact
+                        ? AppTypography.headingLarge
+                        : AppTypography.statFigureLarge)
+                    .copyWith(color: color),
           ),
           if (progress != null) ...[
             const SizedBox(height: AppSpacing.s6),

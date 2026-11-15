@@ -10,6 +10,7 @@ class AppRoutes {
   static const String registerStudent = '/register-student';
   static const String studentPending = '/student-pending';
   static const String tenantSuspended = '/tenant-suspended';
+  static const String subscriptionExpired = '/subscription-expired';
 
   // Role dashboards
   static const String teacherDashboard = '/teacher';
@@ -49,11 +50,14 @@ class AppRoutes {
   static const String teacherGroupAssignments =
       '/teacher/groups/:groupId/assignments';
   static const String studentAssignments = '/student/assignments';
+  static const String studentQuestionBank = '/student/question-bank';
+  static const String studentRealTests = '/student/real-tests';
 
   // Feature: Exams routes
   static const String teacherExams = '/teacher/exams';
   static const String teacherGroupExams = '/teacher/groups/:groupId/exams';
-  static const String teacherExamParentDispatch = '/teacher/exams/:examId/parent-dispatch';
+  static const String teacherExamParentDispatch =
+      '/teacher/exams/:examId/parent-dispatch';
   static const String studentExams = '/student/exams';
   static const String studentMistakes = '/student/mistakes';
   static const String mistakesPractice = '/student/mistakes/practice';

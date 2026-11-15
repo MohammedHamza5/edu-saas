@@ -27,6 +27,7 @@ class AnkiDrillCubit extends Cubit<AnkiDrillState> {
     _repeatedCount = 0;
     _totalReviewed = 0;
 
+    if (isClosed) return;
     _emitNextQuestion();
   }
 
@@ -115,6 +116,7 @@ class AnkiDrillCubit extends Cubit<AnkiDrillState> {
       );
     }
 
+    if (isClosed) return;
     _emitNextQuestion();
   }
 }

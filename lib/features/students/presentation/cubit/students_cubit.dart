@@ -230,6 +230,7 @@ class StudentsCubit extends Cubit<StudentsState> {
   Future<bool> changeStatus({
     required String studentId,
     required String action, // approve | reject | suspend | activate
+    DateTime? expiresAt,
   }) async {
     final prev = state;
 
@@ -238,6 +239,7 @@ class StudentsCubit extends Cubit<StudentsState> {
     final result = await _repository.changeStudentStatus(
       studentId: studentId,
       action: action,
+      expiresAt: expiresAt,
     );
 
     if (isClosed) return false;
@@ -273,19 +275,75 @@ class StudentsCubit extends Cubit<StudentsState> {
     );
   }
 
+  // ── Set / Extend / Clear Student Subscription ───────────────────────────
+
+  Future<bool> setStudentSubscription({
+    required String studentId,
+    required DateTime? expiresAt,
+  }) async {
+    final prev = state;
+    emit(StudentActionInProgress(studentId: studentId, action: 'subscription'));
+
+    final result = await _repository.setStudentSubscription(
+      studentId: studentId,
+      expiresAt: expiresAt,
+    );
+
+    if (isClosed) return false;
+
+    return result.when(
+      onSuccess: (updated) {
+        if (!isClosed) {
+          AppCache.students.clear();
+          emit(
+            StudentActionSuccess(
+              updatedStudent: updated,
+              action: 'subscription',
+            ),
+          );
+
+          if (prev is Student360Loaded) {
+            emit(prev.copyWith(student: updated));
+          } else if (prev is StudentsLoaded) {
+            final updatedList = prev.students
+                .map((s) => s.id == studentId ? updated : s)
+                .toList();
+            emit(prev.copyWith(students: updatedList));
+          } else {
+            loadStudents(
+              status: _currentStatus,
+              searchQuery: _currentSearch,
+              refresh: true,
+            );
+          }
+        }
+        return true;
+      },
+      onFailure: (failure) {
+        if (!isClosed) {
+          emit(prev);
+          emit(StudentsError(failure.message));
+        }
+        return false;
+      },
+    );
+  }
+
   /// Approves a pending student and simultaneously enrolls them into the chosen groups.
   /// Eliminates the friction where approved students see an empty screen.
   Future<bool> approveAndAssignGroups({
     required String studentId,
     required List<String> groupIds,
+    DateTime? subscriptionExpiresAt,
   }) async {
     final prev = state;
     emit(StudentActionInProgress(studentId: studentId, action: 'approve'));
 
-    // 1. Approve student status
+    // 1. Approve student status and set subscription duration atomically
     final statusResult = await _repository.changeStudentStatus(
       studentId: studentId,
       action: 'approve',
+      expiresAt: subscriptionExpiresAt,
     );
 
     if (isClosed) return false;
@@ -538,8 +596,9 @@ class StudentsCubit extends Cubit<StudentsState> {
     // 1. Optimistic Local State Update (O(1) in-memory transition)
     if (previousState is AssignGroupsLoaded) {
       if (add) {
-        final match =
-            previousState.availableGroups.where((g) => g.groupId == groupId);
+        final match = previousState.availableGroups.where(
+          (g) => g.groupId == groupId,
+        );
         if (match.isNotEmpty) {
           final target = match.first;
           final newCurrent = [...previousState.currentGroups, target];
@@ -555,8 +614,9 @@ class StudentsCubit extends Cubit<StudentsState> {
           );
         }
       } else {
-        final match =
-            previousState.currentGroups.where((g) => g.groupId == groupId);
+        final match = previousState.currentGroups.where(
+          (g) => g.groupId == groupId,
+        );
         if (match.isNotEmpty) {
           final target = match.first;
           final newCurrent = previousState.currentGroups

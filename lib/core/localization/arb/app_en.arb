@@ -9164,6 +9164,8 @@
   },
   "folderNameLabel": "Folder Name",
   "@folderNameLabel": {},
+  "folderDefaultTitle": "Folder",
+  "@folderDefaultTitle": {},
   "folderNameRequired": "Please enter a folder name",
   "@folderNameRequired": {},
   "folderColorLabel": "Folder Color",
@@ -10273,6 +10275,14 @@
   "@whatsappStudioTagTeacherName": {},
   "whatsappStudioTagEvaluation": "Evaluation Phrase",
   "@whatsappStudioTagEvaluation": {},
+  "whatsappStudioTagStudyTime": "Study Time",
+  "@whatsappStudioTagStudyTime": {},
+  "whatsappStudioTagLecturesProgress": "Lectures Progress",
+  "@whatsappStudioTagLecturesProgress": {},
+  "whatsappStudioTagExamsProgress": "Exams Progress",
+  "@whatsappStudioTagExamsProgress": {},
+  "whatsappStudioTagCumulativeAvg": "Cumulative Average",
+  "@whatsappStudioTagCumulativeAvg": {},
   "whatsappStudioTierExcellentLabel": "🌟 Excellent (≥ 90%)",
   "@whatsappStudioTierExcellentLabel": {},
   "whatsappStudioTierGoodLabel": "👏 Very Good (75% - 89%)",
@@ -10322,5 +10332,245 @@
   "whatsappGatewayRegenerateAction": "Regenerate QR Code",
   "@whatsappGatewayRegenerateAction": {},
   "whatsappGatewayRegenerating": "Requesting fresh QR...",
-  "@whatsappGatewayRegenerating": {}
+  "@whatsappGatewayRegenerating": {},
+  "loadMoreWithCount": "Show more ({current} of {total})",
+  "@loadMoreWithCount": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "audioExplanationLabel": "Audio Explanation",
+  "@audioExplanationLabel": {},
+  "audioPlayTooltip": "Play voice explanation",
+  "@audioPlayTooltip": {},
+  "audioPauseTooltip": "Pause voice explanation",
+  "@audioPauseTooltip": {},
+  "audioSpeedTooltip": "Playback speed",
+  "@audioSpeedTooltip": {},
+  "audioLoading": "Loading audio...",
+  "@audioLoading": {},
+  "audioError": "Failed to load audio",
+  "@audioError": {},
+  "addAudioExplanation": "Add Voice Explanation",
+  "@addAudioExplanation": {},
+  "uploadAudioFile": "Upload Audio File",
+  "@uploadAudioFile": {},
+  "recordVoice": "Record Voice",
+  "@recordVoice": {},
+  "removeAudio": "Remove Audio",
+  "@removeAudio": {},
+  "uploadingAudio": "Uploading audio...",
+  "@uploadingAudio": {},
+  "audioFileTooLarge": "Audio file exceeds 20MB limit",
+  "@audioFileTooLarge": {},
+  "recordingVoice": "Recording voice explanation...",
+  "@recordingVoice": {},
+  "stopAndPreview": "Stop & Preview",
+  "@stopAndPreview": {},
+  "reRecord": "Re-record",
+  "@reRecord": {},
+  "attachRecordedVoice": "Attach Audio",
+  "@attachRecordedVoice": {},
+  "cancelRecording": "Cancel",
+  "@cancelRecording": {},
+  "micPermissionDenied": "Microphone permission denied. Please allow microphone access.",
+  "@micPermissionDenied": {},
+  "studentSubscriptionDurationTitle": "Subscription & Access Duration",
+  "@studentSubscriptionDurationTitle": {},
+  "subscriptionUnlimited": "Unlimited (No Expiration)",
+  "@subscriptionUnlimited": {},
+  "subscriptionUnlimitedSubtitle": "Active account with no expiration date set",
+  "@subscriptionUnlimitedSubtitle": {},
+  "subscriptionActiveBadge": "Active Subscription",
+  "@subscriptionActiveBadge": {},
+  "subscriptionExpiredBadge": "Subscription Expired",
+  "@subscriptionExpiredBadge": {},
+  "subscriptionExpiresOn": "Expires on {date} ({days} days remaining)",
+  "@subscriptionExpiresOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionExpiredOn": "Expired on {date}",
+  "@subscriptionExpiredOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "setSubscriptionDurationAction": "Set / Extend Subscription Duration",
+  "@setSubscriptionDurationAction": {},
+  "setSubscriptionDialogTitle": "Student Subscription Validity",
+  "@setSubscriptionDialogTitle": {},
+  "setSubscriptionDialogDesc": "Set the expiration date for this student. Access will be automatically revoked upon expiration.",
+  "@setSubscriptionDialogDesc": {},
+  "subscriptionPreset30Days": "+30 Days (1 Month)",
+  "@subscriptionPreset30Days": {},
+  "subscriptionPreset60Days": "+60 Days (2 Months)",
+  "@subscriptionPreset60Days": {},
+  "subscriptionPreset90Days": "+90 Days (3 Months)",
+  "@subscriptionPreset90Days": {},
+  "subscriptionCustomDate": "Custom Calendar Date",
+  "@subscriptionCustomDate": {},
+  "subscriptionClearLimit": "Remove Limit (Unlimited)",
+  "@subscriptionClearLimit": {},
+  "saveSubscriptionAction": "Save & Update Validity",
+  "@saveSubscriptionAction": {},
+  "subscriptionUpdateSuccess": "Student subscription duration updated successfully",
+  "@subscriptionUpdateSuccess": {},
+  "subscriptionExpiredTitle": "Dear Student, your subscription has expired",
+  "@subscriptionExpiredTitle": {},
+  "subscriptionExpiredDesc": "Your access duration has elapsed. Please reach out to your teacher to renew your subscription and continue learning.",
+  "@subscriptionExpiredDesc": {},
+  "renewSubscriptionWhatsAppAction": "Contact Teacher to Renew (WhatsApp)",
+  "@renewSubscriptionWhatsAppAction": {},
+  "renewWhatsAppMessage": "Hello, I am {name} and I would like to renew my subscription on the platform.",
+  "@renewWhatsAppMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "loadingExamDetails": "Preparing exam details and questions...",
+  "@loadingExamDetails": {},
+  "failedToLoadExamDetails": "Could not load exam details. Please check your connection and try again.",
+  "@failedToLoadExamDetails": {},
+  "subscriptionPreset40Days": "+40 Days",
+  "@subscriptionPreset40Days": {},
+  "approvalSubscriptionSectionTitle": "Account Validity & Subscription",
+  "@approvalSubscriptionSectionTitle": {},
+  "approvalSubscriptionSectionSubtitle": "Set how long the student can access the platform before automatic cutoff",
+  "@approvalSubscriptionSectionSubtitle": {},
+  "subscriptionRemainingDetailed": "{days}d {hours}h {minutes}m",
+  "@subscriptionRemainingDetailed": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionUrgentBannerTitle": "Attention: Your subscription is expiring soon!",
+  "@subscriptionUrgentBannerTitle": {},
+  "subscriptionUrgentBannerAction": "Renew via WhatsApp",
+  "@subscriptionUrgentBannerAction": {},
+  "subscriptionLiveDays": "{days} Days",
+  "@subscriptionLiveDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionLiveHours": "{hours} Hours",
+  "@subscriptionLiveHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionLiveMinutes": "{minutes} Min",
+  "@subscriptionLiveMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionLiveSeconds": "{seconds} Sec",
+  "@subscriptionLiveSeconds": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionRemainingBadge": "Remaining: {time}",
+  "@subscriptionRemainingBadge": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "subscriptionActiveUntil": "Active until {date}",
+  "@subscriptionActiveUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "studentNavQuestionBank": "Question Bank",
+  "@studentNavQuestionBank": {},
+  "studentNavQuestionBankSubtitle": "Interactive practice questions",
+  "@studentNavQuestionBankSubtitle": {},
+  "studentNavRealTests": "Real Tests",
+  "@studentNavRealTests": {},
+  "studentNavRealTestsSubtitle": "Official timed test simulations",
+  "@studentNavRealTestsSubtitle": {},
+  "examCategoryRealTest": "Real Test",
+  "@examCategoryRealTest": {},
+  "examCategoryRealTestFull": "Real Test (Official)",
+  "@examCategoryRealTestFull": {},
+  "examCategoryQuestionBank": "Question Bank",
+  "@examCategoryQuestionBank": {},
+  "examCategoryQuestionBankFull": "Question Bank (Practice)",
+  "@examCategoryQuestionBankFull": {},
+  "examCategoryRealTestDesc": "Official timed simulation test with strict scoring",
+  "@examCategoryRealTestDesc": {},
+  "examCategoryQuestionBankDesc": "Self-paced interactive question practice bank",
+  "@examCategoryQuestionBankDesc": {},
+  "moveToQuestionBankAction": "Move to Question Bank",
+  "@moveToQuestionBankAction": {},
+  "moveToRealTestAction": "Move to Real Tests",
+  "@moveToRealTestAction": {},
+  "examMovedToBankSuccess": "Exam moved to Question Bank successfully",
+  "@examMovedToBankSuccess": {},
+  "examMovedToRealTestSuccess": "Exam moved to Real Tests successfully",
+  "@examMovedToRealTestSuccess": {},
+  "filterAllCategories": "All Categories",
+  "@filterAllCategories": {},
+  "filterRealTestsOnly": "Real Tests",
+  "@filterRealTestsOnly": {},
+  "filterQuestionBankOnly": "Question Bank",
+  "@filterQuestionBankOnly": {},
+  "studentEmptyQuestionBankTitle": "No Question Bank practice available yet",
+  "@studentEmptyQuestionBankTitle": {},
+  "studentEmptyQuestionBankSubtitle": "Your teacher will add practice question banks soon",
+  "@studentEmptyQuestionBankSubtitle": {},
+  "studentEmptyRealTestsTitle": "No Real Tests scheduled at the moment",
+  "@studentEmptyRealTestsTitle": {},
+  "studentEmptyRealTestsSubtitle": "Stay tuned for upcoming official test simulations",
+  "@studentEmptyRealTestsSubtitle": {},
+  "questionBankHeroTitle": "Question Bank | Unlimited Practice",
+  "@questionBankHeroTitle": {},
+  "questionBankHeroSubtitle": "Practice questions and build mastery without time constraints",
+  "@questionBankHeroSubtitle": {},
+  "realTestsHeroTitle": "Real Tests | Official Exam Simulations",
+  "@realTestsHeroTitle": {},
+  "realTestsHeroSubtitle": "Timed exams designed to evaluate your real performance under official conditions",
+  "@realTestsHeroSubtitle": {},
+  "examCategorySelectLabel": "Exam Classification",
+  "@examCategorySelectLabel": {},
+  "examCategoryTransferring": "Transferring classification...",
+  "@examCategoryTransferring": {}
 }

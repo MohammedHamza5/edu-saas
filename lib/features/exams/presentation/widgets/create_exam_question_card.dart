@@ -10,6 +10,7 @@ import '../models/create_exam_draft_models.dart';
 import 'create_exam_multiple_choice_section.dart';
 import 'create_exam_question_collapsed_card.dart';
 import 'create_exam_true_false_section.dart';
+import 'exam_audio_attachment_box.dart';
 import 'exam_image_attachment_box.dart';
 import '../extensions/exam_ui_extensions.dart';
 
@@ -22,6 +23,7 @@ class CreateExamQuestionCard extends StatefulWidget {
   final VoidCallback onRemove;
   final void Function(Uint8List bytes, String filename)? onImagePicked;
   final VoidCallback? onPointsChanged;
+  final VoidCallback? onAudioChanged;
   final VoidCallback? onAddOption;
   final ValueChanged<int>? onRemoveOption;
   final ValueChanged<List<String>>? onQuickFillOptions;
@@ -36,6 +38,7 @@ class CreateExamQuestionCard extends StatefulWidget {
     required this.onRemove,
     this.onImagePicked,
     this.onPointsChanged,
+    this.onAudioChanged,
     this.onAddOption,
     this.onRemoveOption,
     this.onQuickFillOptions,
@@ -207,6 +210,23 @@ class _CreateExamQuestionCardState extends State<CreateExamQuestionCard> {
                     q.uploadError = null;
                   }
                 });
+              },
+            ),
+            const SizedBox(height: AppSpacing.s12),
+
+            // Question Audio Explanation Attachment Box
+            ExamAudioAttachmentBox(
+              initialAudioUrl: q.audioUrl,
+              initialDurationSeconds: q.audioDurationSeconds,
+              onUploadingChanged: (isUploading) {
+                q.isUploadingAudio = isUploading;
+              },
+              onChanged: (data) {
+                setState(() {
+                  q.audioUrl = data.audioUrl;
+                  q.audioDurationSeconds = data.durationSeconds;
+                });
+                widget.onAudioChanged?.call();
               },
             ),
             const SizedBox(height: AppSpacing.s16),

@@ -51,4 +51,28 @@ class AppConfig {
 
   /// Whether both providers are shown for teacher selection.
   static bool get showBothProviders => defaultVideoProvider == 'both';
+
+  /// Audio storage provider ('supabase' or 'r2').
+  static String get audioStorageProvider {
+    if (dotenv.isInitialized) {
+      final val = dotenv.env['AUDIO_STORAGE_PROVIDER'];
+      if (val != null && val.isNotEmpty) return val;
+    }
+    return const String.fromEnvironment(
+      'AUDIO_STORAGE_PROVIDER',
+      defaultValue: 'supabase',
+    );
+  }
+
+  /// Cloudflare R2 public CDN URL if provider is 'r2'.
+  static String get r2PublicUrl {
+    if (dotenv.isInitialized) {
+      final val = dotenv.env['R2_PUBLIC_URL'];
+      if (val != null && val.isNotEmpty) return val;
+    }
+    return const String.fromEnvironment(
+      'R2_PUBLIC_URL',
+      defaultValue: '',
+    );
+  }
 }

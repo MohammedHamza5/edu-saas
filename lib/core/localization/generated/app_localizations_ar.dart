@@ -8478,6 +8478,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get folderNameLabel => 'اسم المجلد';
 
   @override
+  String get folderDefaultTitle => 'مجلد';
+
+  @override
   String get folderNameRequired => 'يرجى إدخال اسم المجلد';
 
   @override
@@ -9961,6 +9964,18 @@ class AppLocalizationsAr extends AppLocalizations {
   String get whatsappStudioTagEvaluation => 'عبارة التقييم';
 
   @override
+  String get whatsappStudioTagStudyTime => 'وقت المذاكرة';
+
+  @override
+  String get whatsappStudioTagLecturesProgress => 'إنجاز المحاضرات';
+
+  @override
+  String get whatsappStudioTagExamsProgress => 'إنجاز الاختبارات';
+
+  @override
+  String get whatsappStudioTagCumulativeAvg => 'المعدل التراكمي';
+
+  @override
   String get whatsappStudioTierExcellentLabel => '🌟 أداء ممتاز (≥ 90%)';
 
   @override
@@ -10047,4 +10062,287 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get whatsappGatewayRegenerating => 'جاري طلب الرمز...';
+
+  @override
+  String loadMoreWithCount(int current, int total) {
+    return 'عرض المزيد ($current من أصل $total)';
+  }
+
+  @override
+  String get audioExplanationLabel => 'شرح صوتي للمسألة';
+
+  @override
+  String get audioPlayTooltip => 'تشغيل الشرح الصوتي';
+
+  @override
+  String get audioPauseTooltip => 'إيقاف مؤقت';
+
+  @override
+  String get audioSpeedTooltip => 'سرعة التشغيل';
+
+  @override
+  String get audioLoading => 'جاري تحميل التسجيل...';
+
+  @override
+  String get audioError => 'تعذر تشغيل الصوت';
+
+  @override
+  String get addAudioExplanation => 'إضافة شرح صوتي';
+
+  @override
+  String get uploadAudioFile => 'رفع ملف صوتي';
+
+  @override
+  String get recordVoice => 'تسجيل صوتي';
+
+  @override
+  String get removeAudio => 'حذف التسجيل';
+
+  @override
+  String get uploadingAudio => 'جاري رفع الصوت...';
+
+  @override
+  String get audioFileTooLarge =>
+      'حجم الملف الصوتي يتجاوز الحد المسموح (20 ميجابايت)';
+
+  @override
+  String get recordingVoice => 'جاري تسجيل الشرح الصوتي...';
+
+  @override
+  String get stopAndPreview => 'إيقاف ومعاينة';
+
+  @override
+  String get reRecord => 'إعادة التسجيل';
+
+  @override
+  String get attachRecordedVoice => 'اعتماد الشرح';
+
+  @override
+  String get cancelRecording => 'إلغاء';
+
+  @override
+  String get micPermissionDenied =>
+      'تم رفض إذن الميكروفون. يرجى تفعيل إذن الميكروفون من إعدادات المتصفح.';
+
+  @override
+  String get studentSubscriptionDurationTitle => 'صلاحية الاشتراك وفترة الوصول';
+
+  @override
+  String get subscriptionUnlimited => 'مفتوح (بدون حد زمني)';
+
+  @override
+  String get subscriptionUnlimitedSubtitle => 'حساب نشط بدون تاريخ انتهاء محدد';
+
+  @override
+  String get subscriptionActiveBadge => 'اشتراك نشط';
+
+  @override
+  String get subscriptionExpiredBadge => 'منتهي الصلاحية';
+
+  @override
+  String subscriptionExpiresOn(String date, int days) {
+    return 'ينتهي في $date (متبقي $days يوماً)';
+  }
+
+  @override
+  String subscriptionExpiredOn(String date) {
+    return 'انتهى في $date';
+  }
+
+  @override
+  String get setSubscriptionDurationAction => 'تحديد / تجديد مدة الاشتراك';
+
+  @override
+  String get setSubscriptionDialogTitle => 'صلاحية اشتراك الطالب';
+
+  @override
+  String get setSubscriptionDialogDesc =>
+      'حدد تاريخ انتهاء اشتراك الطالب، وسيتم إيقاف وصوله للمنصة تلقائياً فور انتهاء المدة.';
+
+  @override
+  String get subscriptionPreset30Days => '+30 يوماً (شهر)';
+
+  @override
+  String get subscriptionPreset60Days => '+60 يوماً (شهرين)';
+
+  @override
+  String get subscriptionPreset90Days => '+90 يوماً (3 أشهر)';
+
+  @override
+  String get subscriptionCustomDate => 'تاريخ مخصص من التقويم';
+
+  @override
+  String get subscriptionClearLimit => 'إلغاء التحديد (حساب مفتوح)';
+
+  @override
+  String get saveSubscriptionAction => 'حفظ وتفعيل الصلاحية';
+
+  @override
+  String get subscriptionUpdateSuccess => 'تم تحديث مدة اشتراك الطالب بنجاح';
+
+  @override
+  String get subscriptionExpiredTitle =>
+      'عزيزي الطالب، انتهت فترة اشتراكك الحالية';
+
+  @override
+  String get subscriptionExpiredDesc =>
+      'انتهت صلاحية وصولك إلى المحتوى والامتحانات. يرجى التواصل مع المعلم لتجديد اشتراكك ومتابعة دروسك.';
+
+  @override
+  String get renewSubscriptionWhatsAppAction =>
+      'تواصل مع المعلم لتجديد الاشتراك (واتساب)';
+
+  @override
+  String renewWhatsAppMessage(String name) {
+    return 'مرحباً دكتور، أنا الطالب $name وأرغب في تجديد اشتراكي في المنصة.';
+  }
+
+  @override
+  String get loadingExamDetails => 'جاري تجهيز تفاصيل الاختبار والأسئلة...';
+
+  @override
+  String get failedToLoadExamDetails =>
+      'تعذر تحميل تفاصيل الاختبار، يرجى التحقق من الاتصال والمحاولة مجدداً.';
+
+  @override
+  String get subscriptionPreset40Days => '+40 يوماً';
+
+  @override
+  String get approvalSubscriptionSectionTitle => 'صلاحية الحساب والاشتراك';
+
+  @override
+  String get approvalSubscriptionSectionSubtitle =>
+      'حدد مدة وصول الطالب للمنصة قبل إيقاف الحساب التلقائي';
+
+  @override
+  String subscriptionRemainingDetailed(int days, int hours, int minutes) {
+    return '$days يوم و $hours س و $minutes د';
+  }
+
+  @override
+  String get subscriptionUrgentBannerTitle =>
+      'تنبيه: اقترب انتهاء فترة اشتراكك!';
+
+  @override
+  String get subscriptionUrgentBannerAction => 'تجديد عبر واتساب';
+
+  @override
+  String subscriptionLiveDays(int days) {
+    return '$days يوم';
+  }
+
+  @override
+  String subscriptionLiveHours(int hours) {
+    return '$hours ساعة';
+  }
+
+  @override
+  String subscriptionLiveMinutes(int minutes) {
+    return '$minutes دقيقة';
+  }
+
+  @override
+  String subscriptionLiveSeconds(int seconds) {
+    return '$seconds ثانية';
+  }
+
+  @override
+  String subscriptionRemainingBadge(String time) {
+    return 'متبقي: $time';
+  }
+
+  @override
+  String subscriptionActiveUntil(String date) {
+    return 'نشط حتى $date';
+  }
+
+  @override
+  String get studentNavQuestionBank => 'بنك الأسئلة';
+
+  @override
+  String get studentNavQuestionBankSubtitle => 'تدريبات وبنوك أسئلة تفاعلية';
+
+  @override
+  String get studentNavRealTests => 'الاختبارات الحقيقية';
+
+  @override
+  String get studentNavRealTestsSubtitle => 'محاكاة رسمية بتوقيت ودرجات';
+
+  @override
+  String get examCategoryRealTest => 'ريل تيست';
+
+  @override
+  String get examCategoryRealTestFull => 'ريل تيست (اختبار حقيقي)';
+
+  @override
+  String get examCategoryQuestionBank => 'كويسشن بانك';
+
+  @override
+  String get examCategoryQuestionBankFull => 'كويسشن بانك (بنك تدريب)';
+
+  @override
+  String get examCategoryRealTestDesc =>
+      'امتحان محاكاة حقيقي، بتوقيت صارم ورصد رسمي للدرجات';
+
+  @override
+  String get examCategoryQuestionBankDesc =>
+      'بنك تدريب تفاعلي للأسئلة بدون ضغط توقيت للتدرب الذاتي';
+
+  @override
+  String get moveToQuestionBankAction => 'نقل إلى بنك الأسئلة';
+
+  @override
+  String get moveToRealTestAction => 'نقل إلى الاختبارات الحقيقية';
+
+  @override
+  String get examMovedToBankSuccess => 'تم نقل الاختبار إلى بنك الأسئلة بنجاح';
+
+  @override
+  String get examMovedToRealTestSuccess =>
+      'تم نقل الاختبار إلى الاختبارات الحقيقية بنجاح';
+
+  @override
+  String get filterAllCategories => 'كل التصنيفات';
+
+  @override
+  String get filterRealTestsOnly => 'ريل تيست';
+
+  @override
+  String get filterQuestionBankOnly => 'كويسشن بانك';
+
+  @override
+  String get studentEmptyQuestionBankTitle =>
+      'لا توجد تدريبات في بنك الأسئلة حالياً';
+
+  @override
+  String get studentEmptyQuestionBankSubtitle =>
+      'سيقوم مدرسك بإضافة بنوك أسئلة وتدريبات تفاعلية قريباً';
+
+  @override
+  String get studentEmptyRealTestsTitle =>
+      'لا توجد اختبارات حقيقية مجدولة حالياً';
+
+  @override
+  String get studentEmptyRealTestsSubtitle =>
+      'ترقب مواعيد الاختبارات الرسمية والمحاكاة المعتمدة';
+
+  @override
+  String get questionBankHeroTitle => 'كويسشن بانك | تدريب غير محدود';
+
+  @override
+  String get questionBankHeroSubtitle =>
+      'تدرب على الأسئلة واكتشف نقاط قوتك وضعفك دون ضغط التوقيت';
+
+  @override
+  String get realTestsHeroTitle => 'ريل تيست | محاكاة الاختبارات الرسمية';
+
+  @override
+  String get realTestsHeroSubtitle =>
+      'اختبارات رسمية موقوتة لقياس مستواك الدقيق في بيئة الامتحان الحقيقية';
+
+  @override
+  String get examCategorySelectLabel => 'تصنيف الاختبار';
+
+  @override
+  String get examCategoryTransferring => 'جاري نقل التصنيف...';
 }

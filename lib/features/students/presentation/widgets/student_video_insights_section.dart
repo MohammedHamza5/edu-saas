@@ -11,10 +11,7 @@ import 'student_360_stats_grid.dart';
 class StudentVideoInsightsSection extends StatelessWidget {
   final List<StudentVideoInsight> insights;
 
-  const StudentVideoInsightsSection({
-    super.key,
-    required this.insights,
-  });
+  const StudentVideoInsightsSection({super.key, required this.insights});
 
   @override
   Widget build(BuildContext context) {

@@ -317,42 +317,59 @@ class _TeacherAssignmentsPageState extends State<TeacherAssignmentsPage> {
 
                   return RefreshIndicator(
                     onRefresh: () => _loadAssignments(forceRefresh: true),
-                    child: SingleChildScrollView(
+                    child: CustomScrollView(
                       controller: _scrollController,
                       physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.only(bottom: 96),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          groupFilterBar,
-                          const SizedBox(height: AppSpacing.s12),
-                          TeacherAssignmentFilterSection(
-                            searchController: _searchController,
-                            searchQuery: _searchQuery,
-                            activeStatusFilter: _activeStatusFilter,
-                            totalCount: allAssignments.length,
-                            openCount: openCount,
-                            needsGradingCount: needsGradingCount,
-                            pastDueCount: pastDueCount,
-                            onSearchChanged: _onSearchChanged,
-                            onClearSearch: _onClearSearch,
-                            onStatusFilterChanged: _onStatusFilterChanged,
-                            onResetAllFilters: _onResetAllFilters,
+                      slivers: [
+                        SliverToBoxAdapter(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              groupFilterBar,
+                              const SizedBox(height: AppSpacing.s12),
+                              TeacherAssignmentFilterSection(
+                                searchController: _searchController,
+                                searchQuery: _searchQuery,
+                                activeStatusFilter: _activeStatusFilter,
+                                totalCount: allAssignments.length,
+                                openCount: openCount,
+                                needsGradingCount: needsGradingCount,
+                                pastDueCount: pastDueCount,
+                                onSearchChanged: _onSearchChanged,
+                                onClearSearch: _onClearSearch,
+                                onStatusFilterChanged: _onStatusFilterChanged,
+                                onResetAllFilters: _onResetAllFilters,
+                              ),
+                              const SizedBox(height: AppSpacing.s16),
+                            ],
                           ),
-                          const SizedBox(height: AppSpacing.s16),
-                          TeacherAssignmentsGrid(
-                            assignments: filteredAssignments,
-                            isLoadingMore: state.isLoadingMore,
-                            onAssignmentTap: _showSubmissionsSheet,
-                            onAssignmentEdit: (assignment) =>
-                                EditAssignmentDialog.show(
-                              context,
-                              assignment,
+                        ),
+                        TeacherAssignmentsGrid(
+                          assignments: filteredAssignments,
+                          isLoadingMore: state.isLoadingMore,
+                          onAssignmentTap: _showSubmissionsSheet,
+                          onAssignmentEdit: (assignment) =>
+                              EditAssignmentDialog.show(
+                            context,
+                            assignment,
+                          ),
+                          onResetFilters: _onResetAllFilters,
+                        ),
+                        if (state.isLoadingMore)
+                          const SliverToBoxAdapter(
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                vertical: AppSpacing.s16,
+                              ),
+                              child: Center(
+                                child: AppLoadingView.compact(size: 24),
+                              ),
                             ),
-                            onResetFilters: _onResetAllFilters,
                           ),
-                        ],
-                      ),
+                        const SliverToBoxAdapter(
+                          child: SizedBox(height: 96),
+                        ),
+                      ],
                     ),
                   );
                 }

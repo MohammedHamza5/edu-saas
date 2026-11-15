@@ -122,6 +122,13 @@ final class Student360Loaded extends StudentsState {
 
   const Student360Loaded({required this.student, required this.stats});
 
+  Student360Loaded copyWith({StudentEntity? student, Student360Entity? stats}) {
+    return Student360Loaded(
+      student: student ?? this.student,
+      stats: stats ?? this.stats,
+    );
+  }
+
   @override
   List<Object?> get props => [student, stats];
 }

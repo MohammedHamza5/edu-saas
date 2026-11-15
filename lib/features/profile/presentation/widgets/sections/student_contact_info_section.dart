@@ -229,40 +229,14 @@ class _StudentContactInfoSectionState extends State<StudentContactInfoSection> {
             const SizedBox(height: AppSpacing.s16),
 
             // 4. Email (Read-Only)
-            TextFormField(
-              initialValue: widget.profile.email,
-              readOnly: true,
+            AppTextField(
+              controller: TextEditingController(text: widget.profile.email),
+              label: context.l10n.studentEmailReadOnlyLabel,
               enabled: false,
-              style: const TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-              decoration: InputDecoration(
-                labelText: context.l10n.studentEmailReadOnlyLabel,
-                prefixIcon: const Icon(
-                  Icons.lock_outline_rounded,
-                  size: 20,
-                  color: AppColors.textMuted,
-                ),
-                filled: true,
-                fillColor: AppColors.surfaceVariant.withValues(alpha: 0.45),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                  borderSide: const BorderSide(color: AppColors.border),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                  borderSide: const BorderSide(color: AppColors.border),
-                ),
-                disabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                  borderSide: const BorderSide(color: AppColors.border),
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.s14,
-                  vertical: AppSpacing.s12,
-                ),
+              prefixIcon: const Icon(
+                Icons.lock_outline_rounded,
+                size: 20,
+                color: AppColors.textMuted,
               ),
             ),
             const SizedBox(height: 6),

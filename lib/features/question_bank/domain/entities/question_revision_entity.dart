@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../../../core/utils/question_image_resolver.dart';
 
 /// Question revision entity representing an immutable content snapshot (§7.1, §10).
 class QuestionRevisionEntity extends Equatable {
@@ -60,23 +61,52 @@ class QuestionRevisionEntity extends Equatable {
     return [];
   }
 
-  /// Extracts primary image URL if any block in the stem is of type 'image' or 'asset'
+  /// Extracts primary image URL if any block in the stem is of type 'image', 'asset',
+  /// or contains a cropped asset, asset path, or image URL.
   String? get imageUrl {
+    // 1. Check explicit image or asset blocks
     for (final b in stemBlocks) {
-      if (b['type'] == 'image' || b['type'] == 'asset') {
-        final val = b['value']?.toString() ?? b['url']?.toString();
+      final type = b['type']?.toString();
+      if (type == 'image' || type == 'asset') {
+        final val = b['crop_asset']?.toString() ??
+            b['path']?.toString() ??
+            b['url']?.toString() ??
+            b['value']?.toString();
         if (val != null && val.trim().isNotEmpty) {
-          return val.trim();
+          return QuestionImageResolver.resolveUrl(val.trim());
         }
       }
     }
+
+    // 2. Check blocks with crop_asset or path even if not strictly typed 'image'
+    for (final b in stemBlocks) {
+      final crop = b['crop_asset']?.toString() ?? b['path']?.toString();
+      if (crop != null && crop.trim().isNotEmpty) {
+        return QuestionImageResolver.resolveUrl(crop.trim());
+      }
+    }
+
+    // 3. Check if any text block holds an image URL or markdown
+    for (final b in stemBlocks) {
+      final val = b['value']?.toString() ?? b['latex']?.toString();
+      if (val != null && val.trim().isNotEmpty) {
+        final resolved = QuestionImageResolver.resolveEffectiveImageUrl(
+          questionText: val.trim(),
+        );
+        if (resolved != null && resolved.isNotEmpty) {
+          return resolved;
+        }
+      }
+    }
+
     return null;
   }
 
   /// Extracts image metadata from the image block if present
   Map<String, dynamic>? get imageMeta {
     for (final b in stemBlocks) {
-      if (b['type'] == 'image' || b['type'] == 'asset') {
+      final type = b['type']?.toString();
+      if (type == 'image' || type == 'asset' || b.containsKey('crop_asset')) {
         if (b['meta'] is Map) {
           return Map<String, dynamic>.from(b['meta'] as Map);
         }

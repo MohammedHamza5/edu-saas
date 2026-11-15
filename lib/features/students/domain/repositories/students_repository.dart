@@ -27,6 +27,7 @@ abstract interface class StudentsRepository {
   Future<Result<StudentEntity>> changeStudentStatus({
     required String studentId,
     required String action,
+    DateTime? expiresAt,
   });
 
   /// Student 360° aggregated data for T-04 screen.
@@ -55,5 +56,11 @@ abstract interface class StudentsRepository {
   Future<Result<StudentAcademicReportEntity>> getStudentAcademicReport(
     String studentId, {
     int? days,
+  });
+
+  /// Sets, extends, or clears a student's subscription duration.
+  Future<Result<StudentEntity>> setStudentSubscription({
+    required String studentId,
+    required DateTime? expiresAt,
   });
 }

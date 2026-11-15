@@ -334,16 +334,16 @@ class _WhatsAppTemplateStudioDialogState
                       thickness: 1,
                       color: AppColors.border,
                     ),
-                    // Right Live Preview Simulator Panel (52% - Spacious & Prominent)
+                    // Right Live Preview Simulator Panel (Spacious & Prominent)
                     Expanded(
-                      flex: 11,
+                      flex: 13,
                       child: Container(
                         color: AppColors.surface,
                         padding: const EdgeInsets.all(AppSpacing.s20),
                         child: Center(
                           child: SingleChildScrollView(
                             child: ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 680),
+                              constraints: const BoxConstraints(maxWidth: 820),
                               child: WhatsAppLiveBubblePreview(
                                 config: _buildCurrentConfig(),
                               ),

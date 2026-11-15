@@ -24,6 +24,7 @@ abstract interface class ExamsRemoteDataSource {
   Future<ExamModel> createExam({
     String? groupId,
     required String title,
+    ExamCategory category = ExamCategory.realTest,
     int durationMinutes = 60,
     int maxScore = 100,
     int? passingScore,
@@ -54,6 +55,7 @@ abstract interface class ExamsRemoteDataSource {
   Future<ExamModel> updateDraftExamQuestions({
     required String examId,
     required String title,
+    ExamCategory? category,
     int? durationMinutes,
     int? maxScore,
     int? passingScore,
@@ -123,6 +125,10 @@ abstract interface class ExamsRemoteDataSource {
     required String contentId,
     required bool toLectureExam,
     required String groupId,
+  });
+  Future<ExamModel> moveExamCategory({
+    required String examId,
+    required ExamCategory targetCategory,
   });
   Future<Map<String, dynamic>> deleteExam({
     required String examId,
@@ -280,6 +286,7 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
           id,
           content_id,
           tenant_id,
+          exam_category,
           duration_minutes,
           max_score,
           passing_score,
@@ -423,6 +430,7 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
           id,
           content_id,
           tenant_id,
+          exam_category,
           duration_minutes,
           max_score,
           passing_score,
@@ -588,6 +596,7 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
           id,
           content_id,
           tenant_id,
+          exam_category,
           duration_minutes,
           max_score,
           passing_score,
@@ -634,6 +643,8 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
               image_url,
               image_meta,
               context_id,
+              audio_url,
+              audio_duration_seconds,
               question_options(
                 $optionsFields,
                 image_url,
@@ -677,6 +688,7 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
   Future<ExamModel> createExam({
     String? groupId,
     required String title,
+    ExamCategory category = ExamCategory.realTest,
     int durationMinutes = 60,
     int maxScore = 100,
     int? passingScore,
@@ -705,6 +717,9 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
         if (q.imageUrl != null) 'image_url': q.imageUrl,
         if (q.imageMeta != null) 'image_meta': q.imageMeta,
         if (q.contextId != null) 'context_id': q.contextId,
+        if (q.audioUrl != null) 'audio_url': q.audioUrl,
+        if (q.audioDurationSeconds != null)
+          'audio_duration_seconds': q.audioDurationSeconds,
         'options': q.options.asMap().entries.map((optEntry) {
           final j = optEntry.key;
           final opt = optEntry.value;
@@ -737,6 +752,7 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
           if (startAt != null) 'p_start_at': startAt.toUtc().toIso8601String(),
           if (endAt != null) 'p_end_at': endAt.toUtc().toIso8601String(),
           if (pdfFileId != null && pdfFileId.isNotEmpty) 'p_pdf_file_id': pdfFileId,
+          'p_exam_category': category.value,
           'p_questions': questionsPayload,
         },
       );
@@ -744,6 +760,13 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
       if (rpcRes != null && rpcRes is Map) {
         final examId = rpcRes['exam_id'] as String?;
         if (examId != null) {
+          // Double protection: Ensure exam_category is strictly persisted even if remote DB RPC was older version
+          try {
+            await _safeClient.from('exams').update({
+              'exam_category': category.value,
+            }).eq('id', examId);
+          } catch (_) {}
+
           if (isPublished && groupId != null && groupId.isNotEmpty) {
             unawaited(
               NotificationDispatcher.notifyNewExam(
@@ -793,6 +816,7 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
         .insert({
           'content_id': contentId,
           'tenant_id': tenantId,
+          'exam_category': category.value,
           'duration_minutes': durationMinutes,
           'max_score': maxScore,
           'passing_score': passingScore,
@@ -836,6 +860,9 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
             if (q.imageUrl != null) 'image_url': q.imageUrl,
             if (q.imageMeta != null) 'image_meta': q.imageMeta,
             if (q.contextId != null) 'context_id': q.contextId,
+            if (q.audioUrl != null) 'audio_url': q.audioUrl,
+            if (q.audioDurationSeconds != null)
+              'audio_duration_seconds': q.audioDurationSeconds,
           })
           .select('id')
           .single();
@@ -955,6 +982,7 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
   Future<ExamModel> updateDraftExamQuestions({
     required String examId,
     required String title,
+    ExamCategory? category,
     int? durationMinutes,
     int? maxScore,
     int? passingScore,
@@ -992,6 +1020,9 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
         if (q.imageUrl != null) 'image_url': q.imageUrl,
         if (q.imageMeta != null) 'image_meta': q.imageMeta,
         if (q.contextId != null) 'context_id': q.contextId,
+        if (q.audioUrl != null) 'audio_url': q.audioUrl,
+        if (q.audioDurationSeconds != null)
+          'audio_duration_seconds': q.audioDurationSeconds,
         'options': q.options.asMap().entries.map((optEntry) {
           final j = optEntry.key;
           final opt = optEntry.value;
@@ -1012,6 +1043,7 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
         params: {
           'p_exam_id': examId,
           'p_title': title.trim(),
+          if (category != null) 'p_exam_category': category.value,
           if (durationMinutes != null) 'p_duration_minutes': durationMinutes,
           if (maxScore != null) 'p_max_score': maxScore,
           if (passingScore != null) 'p_passing_score': passingScore,
@@ -1025,6 +1057,14 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
         },
       );
       if (rpcRes != null) {
+        if (category != null) {
+          try {
+            await _safeClient.from('exams').update({
+              'exam_category': category.value,
+              'updated_at': DateTime.now().toUtc().toIso8601String(),
+            }).eq('id', examId);
+          } catch (_) {}
+        }
         return await getExamDetails(examId);
       }
     } on PostgrestException catch (e) {
@@ -1054,6 +1094,7 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
     final examUpdates = <String, dynamic>{
       'updated_at': DateTime.now().toUtc().toIso8601String(),
     };
+    if (category != null) examUpdates['exam_category'] = category.value;
     if (durationMinutes != null) examUpdates['duration_minutes'] = durationMinutes;
     if (maxScore != null) examUpdates['max_score'] = maxScore;
     if (passingScore != null) examUpdates['passing_score'] = passingScore;
@@ -1139,6 +1180,9 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
             if (q.imageUrl != null) 'image_url': q.imageUrl,
             if (q.imageMeta != null) 'image_meta': q.imageMeta,
             if (q.contextId != null) 'context_id': q.contextId,
+            if (q.audioUrl != null) 'audio_url': q.audioUrl,
+            if (q.audioDurationSeconds != null)
+              'audio_duration_seconds': q.audioDurationSeconds,
           })
           .select('id')
           .single();
@@ -1465,6 +1509,38 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
           .update({'description': 'general_exam'})
           .eq('id', contentId);
     }
+  }
+
+  @override
+  Future<ExamModel> moveExamCategory({
+    required String examId,
+    required ExamCategory targetCategory,
+  }) async {
+    try {
+      final rpcRes = await _safeClient.rpc<dynamic>(
+        'move_exam_category',
+        params: {
+          'p_exam_id': examId,
+          'p_target_category': targetCategory.value,
+        },
+      );
+      if (rpcRes != null) {
+        return await getExamDetails(examId);
+      }
+    } catch (e) {
+      AppLogger.w(
+        'ExamsRemoteDataSource',
+        'move_exam_category RPC failed, falling back to direct update: $e',
+      );
+    }
+
+    // Direct fallback update
+    await _safeClient.from('exams').update({
+      'exam_category': targetCategory.value,
+      'updated_at': DateTime.now().toUtc().toIso8601String(),
+    }).eq('id', examId);
+
+    return await getExamDetails(examId);
   }
 
   @override

@@ -80,6 +80,8 @@ class MaterialsLibraryCubit extends Cubit<MaterialsLibraryState> {
       ),
     ).wait;
 
+    if (isClosed) return;
+
     if (foldersRes.isFailure || materialsRes.isFailure) {
       if (state.status != MaterialsLibraryStatus.loaded) {
         final error = foldersRes.failureOrNull?.message ??
@@ -134,6 +136,8 @@ class MaterialsLibraryCubit extends Cubit<MaterialsLibraryState> {
       pageSize: 40,
     );
 
+    if (isClosed) return;
+
     if (materialsRes.isFailure) {
       emit(state.copyWith(
         status: MaterialsLibraryStatus.error,
@@ -167,6 +171,8 @@ class MaterialsLibraryCubit extends Cubit<MaterialsLibraryState> {
       pageSize: 30,
     );
 
+    if (isClosed) return;
+
     if (materialsRes.isFailure) {
       emit(state.copyWith(
         status: MaterialsLibraryStatus.error,
@@ -195,6 +201,8 @@ class MaterialsLibraryCubit extends Cubit<MaterialsLibraryState> {
       pageSize: 30,
     );
 
+    if (isClosed) return;
+
     if (materialsRes.isSuccess) {
       final newItems = materialsRes.dataOrNull ?? [];
       emit(state.copyWith(
@@ -216,6 +224,7 @@ class MaterialsLibraryCubit extends Cubit<MaterialsLibraryState> {
       color: color,
       icon: icon,
     );
+    if (isClosed) return false;
 
     if (res.isSuccess && res.dataOrNull != null) {
       AppCache.materials.clear();
@@ -239,6 +248,7 @@ class MaterialsLibraryCubit extends Cubit<MaterialsLibraryState> {
       color: color,
       icon: icon,
     );
+    if (isClosed) return false;
 
     if (res.isSuccess && res.dataOrNull != null) {
       AppCache.materials.clear();
@@ -255,6 +265,7 @@ class MaterialsLibraryCubit extends Cubit<MaterialsLibraryState> {
 
   Future<bool> deleteFolder(String id) async {
     final res = await _repository.deleteFolder(id);
+    if (isClosed) return false;
     if (res.isSuccess) {
       AppCache.materials.clear();
       emit(state.copyWith(
@@ -273,6 +284,7 @@ class MaterialsLibraryCubit extends Cubit<MaterialsLibraryState> {
     int currentIndex = 0,
     String? error,
   }) {
+    if (isClosed) return;
     emit(state.copyWith(
       isUploading: isUploading,
       uploadProgress: progress,
@@ -300,6 +312,7 @@ class MaterialsLibraryCubit extends Cubit<MaterialsLibraryState> {
       mimeType: mimeType,
       fileHash: fileHash,
     );
+    if (isClosed) return null;
 
     if (res.isSuccess && res.dataOrNull != null) {
       AppCache.materials.clear();
@@ -341,6 +354,7 @@ class MaterialsLibraryCubit extends Cubit<MaterialsLibraryState> {
       description: description,
       folderId: state.currentFolder?.id,
     );
+    if (isClosed) return false;
 
     if (res.isSuccess && res.dataOrNull != null) {
       AppCache.materials.clear();
@@ -358,6 +372,7 @@ class MaterialsLibraryCubit extends Cubit<MaterialsLibraryState> {
       id: id,
       targetFolderId: targetFolderId,
     );
+    if (isClosed) return false;
 
     if (res.isSuccess) {
       AppCache.materials.clear();
@@ -373,6 +388,7 @@ class MaterialsLibraryCubit extends Cubit<MaterialsLibraryState> {
 
   Future<bool> deleteMaterial(String id) async {
     final res = await _repository.deleteMaterial(id);
+    if (isClosed) return false;
     if (res.isSuccess) {
       AppCache.materials.clear();
       emit(state.copyWith(

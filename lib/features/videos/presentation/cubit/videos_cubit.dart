@@ -22,6 +22,7 @@ class VideosCubit extends Cubit<VideosState> {
     emit(const VideosLoading());
 
     final result = await _repository.getVideosForGroup(groupId);
+    if (isClosed) return;
 
     result.when(
       onSuccess: (videos) {
@@ -52,6 +53,7 @@ class VideosCubit extends Cubit<VideosState> {
       progressFuture,
       playbackFuture,
     ]);
+    if (isClosed) return;
 
     final videoResult = results[0] as Result<VideoEntity>;
     final progressResult = results[1] as Result<VideoProgressEntity?>;
@@ -141,6 +143,7 @@ class VideosCubit extends Cubit<VideosState> {
       isSkipped: isSkipped,
       newSegment: newSegment,
     );
+    if (isClosed) return;
 
     result.when(
       onSuccess: (updatedProgress) {
@@ -176,6 +179,7 @@ class VideosCubit extends Cubit<VideosState> {
       videoBytes: videoBytes,
       fileName: fileName,
       onProgress: (sent, total) {
+        if (isClosed) return;
         if (total > 0) {
           final progress = (sent / total).clamp(0.0, 1.0);
           emit(
@@ -188,6 +192,7 @@ class VideosCubit extends Cubit<VideosState> {
         }
       },
     );
+    if (isClosed) return;
 
     result.when(
       onSuccess: (video) {
@@ -211,6 +216,7 @@ class VideosCubit extends Cubit<VideosState> {
       youtubeUrl: youtubeUrl,
       title: title,
     );
+    if (isClosed) return false;
 
     return result.when(
       onSuccess: (video) {
@@ -241,6 +247,7 @@ class VideosCubit extends Cubit<VideosState> {
       fileName: fileName,
       fileBytes: fileBytes,
     );
+    if (isClosed) return false;
 
     return result.when(
       onSuccess: (video) {

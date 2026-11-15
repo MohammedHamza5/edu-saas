@@ -40,9 +40,19 @@ class _FakeStudentsRepository implements StudentsRepository {
   Future<Result<StudentEntity>> changeStudentStatus({
     required String studentId,
     required String action,
+    DateTime? expiresAt,
   }) async {
     final s = students.firstWhere((e) => e.id == studentId);
-    return Success(s);
+    return Success(s.copyWith(subscriptionExpiresAt: expiresAt));
+  }
+
+  @override
+  Future<Result<StudentEntity>> setStudentSubscription({
+    required String studentId,
+    required DateTime? expiresAt,
+  }) async {
+    final s = students.firstWhere((e) => e.id == studentId);
+    return Success(s.copyWith(subscriptionExpiresAt: expiresAt));
   }
 
   @override

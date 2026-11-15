@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
 
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/utils/question_image_resolver.dart';
 import 'question_asset_block.dart';
 
 export 'option_card.dart';
@@ -95,17 +96,7 @@ class QuestionStemView extends StatelessWidget {
   }
 
   static bool isImageUrl(String str) {
-    final lower = str.trim().toLowerCase();
-    if (!lower.startsWith('http://') && !lower.startsWith('https://')) {
-      return false;
-    }
-    return lower.contains('.png') ||
-        lower.contains('.jpg') ||
-        lower.contains('.jpeg') ||
-        lower.contains('.webp') ||
-        lower.contains('.gif') ||
-        lower.contains('/storage/v1/object/') ||
-        lower.contains('/exam_images/');
+    return QuestionImageResolver.isImageUrl(str);
   }
 }
 

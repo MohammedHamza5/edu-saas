@@ -1,12 +1,14 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_card.dart';
-import '../../../question_bank/presentation/widgets/question_display_widgets.dart';
 import '../../domain/entities/exam_entity.dart';
 import 'exam_image_viewer.dart';
+import '../utils/question_image_resolver.dart';
+import 'question_audio_player.dart';
 
 class ExamReviewQuestionView extends StatelessWidget {
   final ExamQuestionEntity question;
@@ -108,23 +110,16 @@ class ExamReviewQuestionView extends StatelessWidget {
                 ),
                 Builder(
                   builder: (context) {
-                    final hasExplicitImage = question.imageUrl != null &&
-                        question.imageUrl!.trim().isNotEmpty;
-                    final isTextAnImageUrl = QuestionStemView.isImageUrl(
-                      question.questionText.trim(),
+                    final effectiveImageUrl =
+                        QuestionImageResolver.resolveEffectiveImageUrl(
+                      imageUrl: question.imageUrl,
+                      questionText: question.questionText,
                     );
-                    final effectiveImageUrl = hasExplicitImage
-                        ? question.imageUrl!
-                        : (isTextAnImageUrl
-                              ? question.questionText.trim()
-                              : null);
-                    final isMetaText =
-                        question.questionText.trim().startsWith('Question ') ||
-                            question.questionText.trim().startsWith('سؤال ');
                     final shouldShowText =
-                        question.questionText.trim().isNotEmpty &&
-                        !isTextAnImageUrl &&
-                        (!hasExplicitImage || !isMetaText);
+                        QuestionImageResolver.shouldShowQuestionText(
+                      question.questionText,
+                      effectiveImageUrl,
+                    );
 
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -153,6 +148,15 @@ class ExamReviewQuestionView extends StatelessWidget {
                               currentIndex + 1,
                               totalQuestions,
                             ),
+                          ),
+                        if (answer?.isCorrect != true &&
+                            question.audioUrl != null &&
+                            question.audioUrl!.trim().isNotEmpty)
+                          QuestionAudioPlayer(
+                            key: ValueKey('review_audio_${question.id}'),
+                            audioUrl: question.audioUrl,
+                            initialDurationSeconds:
+                                question.audioDurationSeconds,
                           ),
                       ],
                     );
@@ -300,26 +304,38 @@ class ExamReviewQuestionView extends StatelessWidget {
                       borderRadius: BorderRadius.circular(
                         AppSpacing.radiusSmall,
                       ),
-                      child: CachedNetworkImage(
-                        imageUrl: opt.imageUrl!,
-                        height: 120,
-                        memCacheWidth: 400,
-                        memCacheHeight: 250,
-                        maxWidthDiskCache: 600,
-                        fit: BoxFit.contain,
-                        placeholder: (ctx, _) => Container(
-                          height: 120,
-                          color: AppColors.surfaceVariant.withValues(alpha: 0.3),
-                          child: const Center(
-                            child: SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
+                      child: kIsWeb
+                          ? Image.network(
+                              opt.imageUrl!,
+                              height: 120,
+                              fit: BoxFit.contain,
+                              errorBuilder: (_, __, ___) =>
+                                  const SizedBox.shrink(),
+                            )
+                          : CachedNetworkImage(
+                              imageUrl: opt.imageUrl!,
+                              height: 120,
+                              memCacheWidth: 400,
+                              memCacheHeight: 250,
+                              maxWidthDiskCache: 600,
+                              fit: BoxFit.contain,
+                              placeholder: (ctx, _) => Container(
+                                height: 120,
+                                color: AppColors.surfaceVariant
+                                    .withValues(alpha: 0.3),
+                                child: const Center(
+                                  child: SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              errorWidget: (_, __, ___) =>
+                                  const SizedBox.shrink(),
                             ),
-                          ),
-                        ),
-                        errorWidget: (_, __, ___) => const SizedBox.shrink(),
-                      ),
                     ),
                   ],
                   if (statusBadge != null) ...[

@@ -23,6 +23,8 @@ class StudentDashboardCubit extends Cubit<StudentDashboardState> {
       forceRefresh: forceRefresh,
     );
 
+    if (isClosed) return;
+
     result.when(
       onSuccess: (stats) => emit(StudentDashboardLoaded(stats: stats)),
       onFailure: (failure) {

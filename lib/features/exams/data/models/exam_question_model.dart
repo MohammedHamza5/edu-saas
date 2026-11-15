@@ -1,3 +1,4 @@
+import '../../../../core/utils/question_image_resolver.dart';
 import '../../domain/entities/exam_entity.dart';
 import 'question_option_model.dart';
 
@@ -13,6 +14,8 @@ class ExamQuestionModel extends ExamQuestionEntity {
     super.imageUrl,
     super.imageMeta,
     super.contextId,
+    super.audioUrl,
+    super.audioDurationSeconds,
   });
 
   factory ExamQuestionModel.fromJson(Map<String, dynamic> json) {
@@ -37,9 +40,11 @@ class ExamQuestionModel extends ExamQuestionEntity {
       points: (json['points'] as num?)?.toInt() ?? 1,
       sortOrder: (json['sort_order'] as num?)?.toInt() ?? 0,
       options: optionsList,
-      imageUrl: json['image_url']?.toString(),
+      imageUrl: QuestionImageResolver.resolveUrl(json['image_url']?.toString()),
       imageMeta: json['image_meta'] is Map ? Map<String, dynamic>.from(json['image_meta'] as Map) : null,
       contextId: json['context_id']?.toString(),
+      audioUrl: json['audio_url']?.toString(),
+      audioDurationSeconds: (json['audio_duration_seconds'] as num?)?.toInt(),
     );
   }
 
@@ -54,6 +59,8 @@ class ExamQuestionModel extends ExamQuestionEntity {
       if (imageUrl != null) 'image_url': imageUrl,
       if (imageMeta != null) 'image_meta': imageMeta,
       if (contextId != null) 'context_id': contextId,
+      if (audioUrl != null) 'audio_url': audioUrl,
+      if (audioDurationSeconds != null) 'audio_duration_seconds': audioDurationSeconds,
     };
   }
 }

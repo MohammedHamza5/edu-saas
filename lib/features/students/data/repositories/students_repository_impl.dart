@@ -62,11 +62,13 @@ class StudentsRepositoryImpl implements StudentsRepository {
   Future<Result<StudentEntity>> changeStudentStatus({
     required String studentId,
     required String action,
+    DateTime? expiresAt,
   }) async {
     try {
       final student = await _remoteDataSource.changeStudentStatus(
         studentId: studentId,
         action: action,
+        expiresAt: expiresAt,
       );
       return Success(student);
     } on PostgrestException catch (e) {
@@ -161,12 +163,29 @@ class StudentsRepositoryImpl implements StudentsRepository {
   }) async {
     try {
       final report = await retryTransient(
-        () => _remoteDataSource.getStudentAcademicReport(
-          studentId,
-          days: days,
-        ),
+        () => _remoteDataSource.getStudentAcademicReport(studentId, days: days),
       );
       return Success(report);
+    } on PostgrestException catch (e) {
+      return FailureResult(ServerFailure(e.message, code: e.code));
+    } catch (e) {
+      return FailureResult(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<StudentEntity>> setStudentSubscription({
+    required String studentId,
+    required DateTime? expiresAt,
+  }) async {
+    try {
+      final updated = await retryTransient(
+        () => _remoteDataSource.setStudentSubscription(
+          studentId: studentId,
+          expiresAt: expiresAt,
+        ),
+      );
+      return Success(updated);
     } on PostgrestException catch (e) {
       return FailureResult(ServerFailure(e.message, code: e.code));
     } catch (e) {

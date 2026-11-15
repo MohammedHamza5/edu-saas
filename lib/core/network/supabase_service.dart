@@ -14,6 +14,7 @@ class SupabaseService {
 
   static const String _roleStorageKey = 'cached_user_role';
   static const String _statusStorageKey = 'cached_user_status';
+  static const String _subExpiresStorageKey = 'cached_user_sub_expires';
 
   static Timer? _sessionRefreshTimer;
   static _AppLifecycleSessionObserver? _lifecycleObserver;
@@ -48,6 +49,11 @@ class SupabaseService {
     } catch (_) {}
     try {
       _cachedStatus = await SecureStorageHelper.read(key: _statusStorageKey);
+    } catch (_) {}
+    try {
+      _cachedSubExpires = await SecureStorageHelper.read(
+        key: _subExpiresStorageKey,
+      );
     } catch (_) {}
 
     await Supabase.initialize(
@@ -113,9 +119,15 @@ class SupabaseService {
     // If expired or expiring within 600 seconds (10 minutes)
     if (expiresAt == null || (expiresAt - now) < 600) {
       try {
-        AppLogger.i('SupabaseService', '🔄 Proactively refreshing auth session token...');
+        AppLogger.i(
+          'SupabaseService',
+          '🔄 Proactively refreshing auth session token...',
+        );
         await client.auth.refreshSession();
-        AppLogger.s('SupabaseService', '✅ Auth session token successfully refreshed');
+        AppLogger.s(
+          'SupabaseService',
+          '✅ Auth session token successfully refreshed',
+        );
       } catch (e) {
         AppLogger.w('SupabaseService', '⚠️ Could not refresh session: $e');
       }
@@ -125,13 +137,16 @@ class SupabaseService {
   static void _startSessionKeeper() {
     _sessionRefreshTimer?.cancel();
     // Check every 5 minutes while app is running
-    _sessionRefreshTimer = Timer.periodic(const Duration(minutes: 5), (_) async {
+    _sessionRefreshTimer = Timer.periodic(const Duration(minutes: 5), (
+      _,
+    ) async {
       await ensureFreshSession();
     });
   }
 
   static User? get currentUser =>
       isInitialized ? client.auth.currentUser : null;
+
   /// Visible for testing only: override isAuthenticated in unit tests
   static bool? debugIsAuthenticated;
 
@@ -158,12 +173,34 @@ class SupabaseService {
     }
   }
 
+  static String? _cachedSubExpires;
+  static set currentSubscriptionExpiresAt(String? expiresAt) {
+    _cachedSubExpires = expiresAt;
+    if (expiresAt != null) {
+      SecureStorageHelper.write(key: _subExpiresStorageKey, value: expiresAt);
+    } else {
+      SecureStorageHelper.delete(key: _subExpiresStorageKey);
+    }
+  }
+
   static String? get cachedRole => _cachedRole;
   static String? get currentUserRole =>
       _cachedRole ?? (currentUser?.userMetadata?['role'] as String?);
   static String? get cachedStatus => _cachedStatus;
   static String? get currentUserStatus =>
       _cachedStatus ?? (currentUser?.userMetadata?['status'] as String?);
+  static String? get cachedSubscriptionExpiresAt => _cachedSubExpires;
+
+  /// True if current logged in user is an active student whose subscription has elapsed
+  static bool get isSubscriptionExpired {
+    if (currentUserRole != 'student') return false;
+    final expStr = _cachedSubExpires;
+    if (expStr == null || expStr.isEmpty) return false;
+    final exp = DateTime.tryParse(expStr);
+    if (exp == null) return false;
+    return DateTime.now().isAfter(exp);
+  }
+
   static String? get currentTenantId =>
       (currentUser?.userMetadata?['tenant_id'] as String?) ??
       (currentUser?.appMetadata['tenant_id'] as String?);
@@ -179,4 +216,3 @@ class _AppLifecycleSessionObserver with WidgetsBindingObserver {
     }
   }
 }
-

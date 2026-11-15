@@ -18,6 +18,7 @@ import '../cubit/mistakes_state.dart';
 import '../utils/student_exams_filter_helper.dart';
 import '../widgets/exam_folders_bar.dart';
 import '../widgets/momentum/student_academic_momentum_card.dart';
+import '../widgets/student_exam_category_header.dart';
 import '../widgets/student_exams_filter_bar.dart';
 import '../widgets/student_exams_grid_view.dart';
 import '../widgets/student_exams_overview_hub.dart';
@@ -27,8 +28,13 @@ import 'exam_result_page.dart';
 
 class StudentExamsPage extends StatefulWidget {
   final String? initialExamId;
+  final ExamCategory? requiredCategory;
 
-  const StudentExamsPage({super.key, this.initialExamId});
+  const StudentExamsPage({
+    super.key,
+    this.initialExamId,
+    this.requiredCategory,
+  });
 
   @override
   State<StudentExamsPage> createState() => _StudentExamsPageState();
@@ -38,8 +44,19 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
   StudentExamFilter _activeFilter = StudentExamFilter.all;
+  late ExamCategory _activeCategory =
+      widget.requiredCategory ?? ExamCategory.realTest;
   String _searchQuery = '';
   bool _isLoadingAll = false;
+
+  @override
+  void didUpdateWidget(StudentExamsPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.requiredCategory != null &&
+        widget.requiredCategory != oldWidget.requiredCategory) {
+      _activeCategory = widget.requiredCategory!;
+    }
+  }
 
   @override
   void initState() {
@@ -207,7 +224,11 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
             }
           },
         ),
-        title: Text(context.l10n.courseAssessmentsTitle),
+        title: Text(
+          _activeCategory.isRealTest
+              ? context.l10n.studentNavRealTests
+              : context.l10n.studentNavQuestionBank,
+        ),
         centerTitle: true,
         actions: [
           IconButton(
@@ -235,6 +256,40 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
 
                 // 1. Mistakes Bank Hero Banner (ALWAYS visible)
                 const StudentMistakesBankBanner(),
+                const SizedBox(height: AppSpacing.s12),
+
+                // 1.5 Student Exam Category Header (Real Test vs Question Bank)
+                BlocBuilder<ExamsCubit, ExamsState>(
+                  buildWhen: (prev, curr) => curr is StudentExamsLoaded,
+                  builder: (context, state) {
+                    final rawList = state is StudentExamsLoaded
+                        ? state.exams
+                        : <ExamEntity>[];
+                    final realCount = rawList
+                        .where(
+                          (e) =>
+                              !StudentExamsFilterHelper.isLessonQuiz(e) &&
+                              e.category.isRealTest,
+                        )
+                        .length;
+                    final bankCount = rawList
+                        .where(
+                          (e) =>
+                              !StudentExamsFilterHelper.isLessonQuiz(e) &&
+                              e.category.isQuestionBank,
+                        )
+                        .length;
+
+                    return StudentExamCategoryHeader(
+                      activeCategory: _activeCategory,
+                      onCategoryChanged: (cat) {
+                        setState(() => _activeCategory = cat);
+                      },
+                      realTestsCount: realCount,
+                      questionBankCount: bankCount,
+                    );
+                  },
+                ),
                 const SizedBox(height: AppSpacing.s12),
 
                 // 2. Exams Section via BlocConsumer
@@ -302,15 +357,23 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
                         selectedFolderId: state.selectedFolderId,
                         activeFilter: _activeFilter,
                         searchQuery: _searchQuery,
+                        categoryFilter: _activeCategory,
+                        masterFolders: state.folders,
                       );
 
                       if (summary.allExams.isEmpty) {
                         return Padding(
                           padding: const EdgeInsets.all(AppSpacing.s24),
                           child: AppEmptyView(
-                            message: context.l10n.noPublishedExams,
-                            subtitle: context.l10n.noPublishedExams,
-                            icon: Icons.quiz_outlined,
+                            message: _activeCategory.isRealTest
+                                ? context.l10n.studentEmptyRealTestsTitle
+                                : context.l10n.studentEmptyQuestionBankTitle,
+                            subtitle: _activeCategory.isRealTest
+                                ? context.l10n.studentEmptyRealTestsSubtitle
+                                : context.l10n.studentEmptyQuestionBankSubtitle,
+                            icon: _activeCategory.isRealTest
+                                ? Icons.timer_off_outlined
+                                : Icons.auto_stories_outlined,
                           ),
                         );
                       }

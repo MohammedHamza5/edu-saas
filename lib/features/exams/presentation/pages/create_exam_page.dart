@@ -103,6 +103,7 @@ class _CreateExamPageState extends State<CreateExamPage> {
       _settings.showResult = ex.showResult;
       _settings.allowRetake = ex.allowRetake;
       _settings.isPublished = ex.isPublished;
+      _settings.category = ex.category;
       _pdfState.fileId = ex.pdfFileId;
       _pdfState.fileName = ex.pdfFileName;
       _pdfState.fileSize = ex.pdfFileSize;
@@ -261,6 +262,7 @@ class _CreateExamPageState extends State<CreateExamPage> {
         targetExamId: widget.existingExam?.id ?? _savedExamId,
         groupId: widget.groupId,
         title: _controllers.title.text.trim(),
+        category: _settings.category,
         durationText: _controllers.duration.text.trim(),
         maxScoreText: _controllers.maxScore.text.trim(),
         passingScoreText: _controllers.passingScore.text.trim(),
@@ -340,11 +342,16 @@ class _CreateExamPageState extends State<CreateExamPage> {
             passingScoreController: _controllers.passingScore,
             defaultPointsController: _controllers.defaultPoints,
             isCreating: isCreating,
+            category: _settings.category,
             shuffle: _settings.shuffle,
             showResult: _settings.showResult,
             allowRetake: _settings.allowRetake,
             isPublished: _settings.isPublished,
             saveToQuestionBank: _settings.saveToQuestionBank,
+            onCategoryChanged: (cat) {
+              setState(() => _settings.category = cat);
+              _scheduleAutoSave();
+            },
             onApplyDefaultPoints: () {
               CreateExamQuestionActionsHandler.applyDefaultPointsToAll(
                 context: context,
@@ -452,6 +459,7 @@ class _CreateExamPageState extends State<CreateExamPage> {
             },
             onImagePicked: _handleQuestionImagePicked,
             onPointsChanged: _autoUpdateMaxScoreIfBalanced,
+            onAudioChanged: _scheduleAutoSave,
             onAddOption: (q) {
               setState(() {
                 CreateExamQuestionsCoordinator.addOption(

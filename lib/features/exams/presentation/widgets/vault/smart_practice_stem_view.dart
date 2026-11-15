@@ -3,6 +3,7 @@ import 'package:edu_saas/core/extensions/localized_context_extension.dart';
 import 'package:edu_saas/core/theme/app_colors.dart';
 import 'package:edu_saas/core/theme/app_spacing.dart';
 import 'package:edu_saas/features/exams/domain/entities/saved_question_entity.dart';
+import 'package:edu_saas/features/exams/presentation/utils/question_image_resolver.dart';
 import 'package:edu_saas/features/exams/presentation/widgets/exam_image_viewer.dart';
 
 class SmartPracticeStemView extends StatelessWidget {
@@ -72,13 +73,19 @@ class SmartPracticeStemView extends StatelessWidget {
       );
     }
 
-    final hasImage = question.questionImageUrl != null &&
-        question.questionImageUrl!.trim().isNotEmpty;
+    final effectiveImageUrl = QuestionImageResolver.resolveEffectiveImageUrl(
+      imageUrl: question.questionImageUrl,
+      questionText: question.questionText,
+    );
+    final shouldShowText = QuestionImageResolver.shouldShowQuestionText(
+      question.questionText,
+      effectiveImageUrl,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (question.questionText.trim().isNotEmpty)
+        if (shouldShowText)
           Text(
             question.questionText,
             style: const TextStyle(
@@ -88,12 +95,12 @@ class SmartPracticeStemView extends StatelessWidget {
               height: 1.55,
             ),
           ),
-        if (hasImage) ...[
+        if (effectiveImageUrl != null && effectiveImageUrl.isNotEmpty) ...[
           const SizedBox(height: AppSpacing.s16),
           ClipRRect(
             borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
             child: ExamImageViewer(
-              imageUrl: question.questionImageUrl!,
+              imageUrl: effectiveImageUrl,
               caption: question.examTitle,
             ),
           ),

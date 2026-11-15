@@ -94,6 +94,7 @@ class ExamsRepositoryImpl implements ExamsRepository {
   Future<Result<ExamEntity>> createExam({
     String? groupId,
     required String title,
+    ExamCategory category = ExamCategory.realTest,
     int durationMinutes = 60,
     int maxScore = 100,
     int? passingScore,
@@ -119,12 +120,15 @@ class ExamsRepositoryImpl implements ExamsRepository {
           imageUrl: q.imageUrl,
           imageMeta: q.imageMeta,
           contextId: q.contextId,
+          audioUrl: q.audioUrl,
+          audioDurationSeconds: q.audioDurationSeconds,
         );
       }).toList();
 
       final created = await _remoteDataSource.createExam(
         groupId: groupId,
         title: title,
+        category: category,
         durationMinutes: durationMinutes,
         maxScore: maxScore,
         passingScore: passingScore,
@@ -193,6 +197,7 @@ class ExamsRepositoryImpl implements ExamsRepository {
   Future<Result<ExamEntity>> updateDraftExamQuestions({
     required String examId,
     required String title,
+    ExamCategory? category,
     int? durationMinutes,
     int? maxScore,
     int? passingScore,
@@ -219,12 +224,15 @@ class ExamsRepositoryImpl implements ExamsRepository {
           imageUrl: q.imageUrl,
           imageMeta: q.imageMeta,
           contextId: q.contextId,
+          audioUrl: q.audioUrl,
+          audioDurationSeconds: q.audioDurationSeconds,
         );
       }).toList();
 
       final updated = await _remoteDataSource.updateDraftExamQuestions(
         examId: examId,
         title: title,
+        category: category,
         durationMinutes: durationMinutes,
         maxScore: maxScore,
         passingScore: passingScore,
@@ -553,6 +561,26 @@ class ExamsRepositoryImpl implements ExamsRepository {
         groupId: groupId,
       );
       return const Success(null);
+    } on PostgrestException catch (e) {
+      return FailureResult(ServerFailure(e.message, code: e.code));
+    } on AuthException catch (e) {
+      return FailureResult(AuthFailure(e.message, code: e.statusCode));
+    } catch (e) {
+      return FailureResult(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<ExamEntity>> moveExamCategory({
+    required String examId,
+    required ExamCategory targetCategory,
+  }) async {
+    try {
+      final updated = await _remoteDataSource.moveExamCategory(
+        examId: examId,
+        targetCategory: targetCategory,
+      );
+      return Success(updated);
     } on PostgrestException catch (e) {
       return FailureResult(ServerFailure(e.message, code: e.code));
     } on AuthException catch (e) {

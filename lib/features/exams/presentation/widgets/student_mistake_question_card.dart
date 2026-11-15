@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -7,7 +6,10 @@ import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../domain/entities/mistake_entities.dart';
+import '../utils/question_image_resolver.dart';
+import 'exam_image_viewer.dart';
 import 'mistake_reflection_selector.dart';
+import 'question_audio_player.dart';
 
 /// Card widget displaying a mistake question stem, media, previous wrong answer,
 /// error reflection taxonomy selector, and individual practice CTA.
@@ -22,49 +24,6 @@ class StudentMistakeQuestionCard extends StatelessWidget {
     required this.index,
     this.onOpenImage,
   });
-
-  void _defaultOpenImageDialog(BuildContext context, String imageUrl) {
-    if (onOpenImage != null) {
-      onOpenImage!(imageUrl);
-      return;
-    }
-    showDialog<void>(
-      context: context,
-      builder: (ctx) => Dialog(
-        backgroundColor: Colors.transparent,
-        insetPadding: const EdgeInsets.all(AppSpacing.s16),
-        child: Stack(
-          alignment: Alignment.topRight,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-              child: CachedNetworkImage(
-                imageUrl: imageUrl,
-                memCacheWidth: 800,
-                memCacheHeight: 800,
-                maxWidthDiskCache: 1200,
-                fit: BoxFit.contain,
-                placeholder: (_, __) => const SizedBox(
-                  height: 250,
-                  child: Center(child: CircularProgressIndicator()),
-                ),
-                errorWidget: (_, __, ___) => const SizedBox(
-                  height: 250,
-                  child: Center(
-                    child: Icon(Icons.broken_image, color: Colors.white, size: 40),
-                  ),
-                ),
-              ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.close, color: Colors.white, size: 28),
-              onPressed: () => Navigator.of(ctx).pop(),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -84,8 +43,8 @@ class StudentMistakeQuestionCard extends StatelessWidget {
           color: q.isResolved
               ? AppColors.success.withValues(alpha: 0.3)
               : q.isSkipped
-                  ? AppColors.warning.withValues(alpha: 0.35)
-                  : AppColors.error.withValues(alpha: 0.3),
+              ? AppColors.warning.withValues(alpha: 0.35)
+              : AppColors.error.withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -157,7 +116,9 @@ class StudentMistakeQuestionCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 11.5,
                         fontWeight: FontWeight.bold,
-                        color: q.isSkipped ? AppColors.warning : AppColors.error,
+                        color: q.isSkipped
+                            ? AppColors.warning
+                            : AppColors.error,
                       ),
                     ),
                   ],
@@ -185,13 +146,19 @@ class StudentMistakeQuestionCard extends StatelessWidget {
                           ? Icons.check_circle_rounded
                           : Icons.pending_actions_rounded,
                       size: 13,
-                      color: q.isResolved ? AppColors.success : AppColors.warning,
+                      color: q.isResolved
+                          ? AppColors.success
+                          : AppColors.warning,
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      q.isResolved ? l10n.badgeMastered : l10n.badgeNeedsPractice,
+                      q.isResolved
+                          ? l10n.badgeMastered
+                          : l10n.badgeNeedsPractice,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: q.isResolved ? AppColors.success : AppColors.warning,
+                        color: q.isResolved
+                            ? AppColors.success
+                            : AppColors.warning,
                         fontWeight: FontWeight.bold,
                         fontSize: 11,
                       ),
@@ -231,11 +198,17 @@ class StudentMistakeQuestionCard extends StatelessWidget {
               decoration: BoxDecoration(
                 color: AppColors.warning.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                border: Border.all(color: AppColors.warning.withValues(alpha: 0.2)),
+                border: Border.all(
+                  color: AppColors.warning.withValues(alpha: 0.2),
+                ),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.info_outline_rounded, size: 15, color: AppColors.warning),
+                  const Icon(
+                    Icons.info_outline_rounded,
+                    size: 15,
+                    color: AppColors.warning,
+                  ),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
@@ -256,15 +229,22 @@ class StudentMistakeQuestionCard extends StatelessWidget {
               decoration: BoxDecoration(
                 color: AppColors.error.withValues(alpha: 0.06),
                 borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                border: Border.all(color: AppColors.error.withValues(alpha: 0.2)),
+                border: Border.all(
+                  color: AppColors.error.withValues(alpha: 0.2),
+                ),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.cancel_outlined, size: 15, color: AppColors.error),
+                  const Icon(
+                    Icons.cancel_outlined,
+                    size: 15,
+                    color: AppColors.error,
+                  ),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
-                      q.selectedOptionText != null && q.selectedOptionText!.isNotEmpty
+                      q.selectedOptionText != null &&
+                              q.selectedOptionText!.isNotEmpty
                           ? l10n.previousWrongChoice(q.selectedOptionText!)
                           : l10n.wrongAnswerBadge,
                       style: const TextStyle(
@@ -280,47 +260,56 @@ class StudentMistakeQuestionCard extends StatelessWidget {
 
           const Divider(height: AppSpacing.s16),
 
-          // Question Stem
-          if (q.questionText.isNotEmpty) ...[
-            Text(
-              q.questionText,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                height: 1.45,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.s8),
-          ],
+          // Resolve Image & Question Stem
+          Builder(
+            builder: (context) {
+              final effectiveImageUrl =
+                  QuestionImageResolver.resolveEffectiveImageUrl(
+                imageUrl: q.imageUrl,
+                questionText: q.questionText,
+              );
+              final shouldShowText =
+                  QuestionImageResolver.shouldShowQuestionText(
+                q.questionText,
+                effectiveImageUrl,
+              );
 
-          // Question Image (if any)
-          if (q.imageUrl != null && q.imageUrl!.isNotEmpty) ...[
-            GestureDetector(
-              onTap: () => _defaultOpenImageDialog(context, q.imageUrl!),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                child: Container(
-                  constraints: const BoxConstraints(maxHeight: 200),
-                  width: double.infinity,
-                  color: Colors.black.withValues(alpha: 0.04),
-                  child: CachedNetworkImage(
-                    imageUrl: q.imageUrl!,
-                    memCacheWidth: 600,
-                    memCacheHeight: 600,
-                    maxWidthDiskCache: 800,
-                    fit: BoxFit.contain,
-                    placeholder: (_, __) => const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(AppSpacing.s16),
-                        child: CircularProgressIndicator(),
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (shouldShowText) ...[
+                    Text(
+                      q.questionText,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        height: 1.45,
                       ),
                     ),
-                    errorWidget: (_, __, ___) => const Padding(
-                      padding: EdgeInsets.all(AppSpacing.s16),
-                      child: Icon(Icons.broken_image, color: Colors.grey),
+                    const SizedBox(height: AppSpacing.s8),
+                  ],
+                  if (effectiveImageUrl != null &&
+                      effectiveImageUrl.isNotEmpty) ...[
+                    ExamImageViewer(
+                      key: ValueKey(
+                        'mistake_card_${q.questionId}_$effectiveImageUrl',
+                      ),
+                      imageUrl: effectiveImageUrl,
+                      imageMeta: q.imageMeta,
                     ),
-                  ),
-                ),
-              ),
+                    const SizedBox(height: AppSpacing.s8),
+                  ],
+                ],
+              );
+            },
+          ),
+
+          // Question Audio Explanation (if any)
+          if (q.audioUrl != null && q.audioUrl!.trim().isNotEmpty) ...[
+            QuestionAudioPlayer(
+              key: ValueKey('mistake_audio_${q.questionId}'),
+              audioUrl: q.audioUrl,
+              initialDurationSeconds: q.audioDurationSeconds,
             ),
             const SizedBox(height: AppSpacing.s8),
           ],
@@ -338,7 +327,9 @@ class StudentMistakeQuestionCard extends StatelessWidget {
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
                   border: wasChosen
-                      ? Border.all(color: AppColors.error.withValues(alpha: 0.3))
+                      ? Border.all(
+                          color: AppColors.error.withValues(alpha: 0.3),
+                        )
                       : null,
                 ),
                 child: Row(
@@ -355,7 +346,9 @@ class StudentMistakeQuestionCard extends StatelessWidget {
                       child: Text(
                         opt.optionText,
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: wasChosen ? FontWeight.bold : FontWeight.normal,
+                          fontWeight: wasChosen
+                              ? FontWeight.bold
+                              : FontWeight.normal,
                           color: wasChosen ? AppColors.error : null,
                         ),
                       ),
@@ -379,24 +372,40 @@ class StudentMistakeQuestionCard extends StatelessWidget {
             child: OutlinedButton.icon(
               onPressed: () {
                 final modeParam = q.isResolved ? 'resolved' : 'unresolved';
-                context.push('${AppRoutes.mistakesPractice}?examId=${q.sourceExamId}&mode=$modeParam');
+                context.push(
+                  '${AppRoutes.mistakesPractice}?examId=${q.sourceExamId}&mode=$modeParam',
+                );
               },
               icon: Icon(
-                q.isResolved ? Icons.restart_alt_rounded : Icons.fitness_center_rounded,
+                q.isResolved
+                    ? Icons.restart_alt_rounded
+                    : Icons.fitness_center_rounded,
                 size: 16,
               ),
               label: Text(
                 q.isResolved
                     ? l10n.practiceSingleQuestionAction
                     : l10n.practiceThisQuestion,
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               style: OutlinedButton.styleFrom(
-                foregroundColor: q.isResolved ? AppColors.success : theme.colorScheme.primary,
+                foregroundColor: q.isResolved
+                    ? AppColors.success
+                    : theme.colorScheme.primary,
                 side: BorderSide(
-                  color: (q.isResolved ? AppColors.success : theme.colorScheme.primary).withValues(alpha: 0.5),
+                  color:
+                      (q.isResolved
+                              ? AppColors.success
+                              : theme.colorScheme.primary)
+                          .withValues(alpha: 0.5),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 8,
+                ),
                 visualDensity: VisualDensity.compact,
               ),
             ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../domain/entities/exam_entity.dart';
+
 /// Encapsulates all TextEditingControllers and keys for the exam creator form.
 class CreateExamFormControllers {
   final formKey = GlobalKey<FormState>();
@@ -40,6 +42,7 @@ class CreateExamFormControllers {
 
 /// Encapsulates toggle flags and points configuration for the exam creator.
 class CreateExamSettingsState {
+  ExamCategory category = ExamCategory.realTest;
   bool shuffle = true;
   bool showResult = true;
   bool allowRetake = false;

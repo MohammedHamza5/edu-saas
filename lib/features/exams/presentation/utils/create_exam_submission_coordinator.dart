@@ -20,6 +20,7 @@ class CreateExamSubmissionCoordinator {
     required String? targetExamId,
     required String? groupId,
     required String title,
+    ExamCategory category = ExamCategory.realTest,
     required String durationText,
     required String maxScoreText,
     required String passingScoreText,
@@ -87,6 +88,7 @@ class CreateExamSubmissionCoordinator {
       resultExam = await cubit.updateDraftExamQuestions(
         examId: targetExamId,
         title: title,
+        category: category,
         durationMinutes: duration,
         maxScore: maxScore,
         passingScore: passingScore,
@@ -102,6 +104,7 @@ class CreateExamSubmissionCoordinator {
       resultExam = await cubit.createExam(
         groupId: groupId,
         title: title,
+        category: category,
         durationMinutes: duration,
         maxScore: maxScore,
         passingScore: passingScore,

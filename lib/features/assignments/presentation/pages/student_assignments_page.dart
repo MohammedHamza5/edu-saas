@@ -9,7 +9,6 @@ import '../../../../core/widgets/app_empty_view.dart';
 import '../../../../core/widgets/app_error_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
 import '../../../../core/widgets/responsive_container.dart';
-import '../../../../core/widgets/responsive_grid.dart';
 import '../../domain/entities/assignment_entity.dart';
 import '../cubit/assignments_cubit.dart';
 import '../cubit/assignments_state.dart';
@@ -193,54 +192,66 @@ class _StudentAssignmentsPageState extends State<StudentAssignmentsPage> {
                         : RefreshIndicator(
                             onRefresh: () =>
                                 _loadAssignments(forceRefresh: true),
-                            child: SingleChildScrollView(
+                            child: CustomScrollView(
                               controller: _scrollController,
                               physics: const AlwaysScrollableScrollPhysics(),
-                              padding: const EdgeInsets.all(AppSpacing.s16),
-                              child: Column(
-                                children: [
-                                  ResponsiveGrid(
-                                    mobileColumns: 1,
-                                    tabletColumns: 2,
-                                    desktopColumns: 3,
-                                    largeDesktopColumns: 4,
-                                    spacing: AppSpacing.s16,
-                                    runSpacing: AppSpacing.s16,
-                                    children: filtered.map((assignment) {
-                                      return AssignmentCard(
-                                        assignment: assignment,
-                                        isTeacher: false,
-                                        onTap: () {
-                                          Navigator.of(context)
-                                              .push<void>(
-                                                MaterialPageRoute<void>(
-                                                  builder: (_) =>
-                                                      BlocProvider.value(
-                                                        value: context
-                                                            .read<
-                                                              AssignmentsCubit
-                                                            >(),
-                                                        child:
-                                                            AssignmentSubmissionPage(
-                                                              assignment:
-                                                                  assignment,
-                                                            ),
-                                                      ),
-                                                ),
-                                              )
-                                              .then((_) {
-                                                if (context.mounted) {
-                                                  _loadAssignments(
-                                                    forceRefresh: true,
-                                                  );
-                                                }
-                                              });
-                                        },
-                                      );
-                                    }).toList(),
+                              slivers: [
+                                SliverPadding(
+                                  padding: const EdgeInsets.all(AppSpacing.s16),
+                                  sliver: SliverGrid(
+                                    gridDelegate:
+                                        const SliverGridDelegateWithMaxCrossAxisExtent(
+                                      maxCrossAxisExtent: 420,
+                                      crossAxisSpacing: AppSpacing.s16,
+                                      mainAxisSpacing: AppSpacing.s16,
+                                      mainAxisExtent: 260,
+                                    ),
+                                    delegate: SliverChildBuilderDelegate(
+                                      (context, index) {
+                                        final assignment = filtered[index];
+                                        return RepaintBoundary(
+                                          key: ValueKey(
+                                            'student_assignment_${assignment.id}',
+                                          ),
+                                          child: AssignmentCard(
+                                            assignment: assignment,
+                                            isTeacher: false,
+                                            onTap: () {
+                                              Navigator.of(context)
+                                                  .push<void>(
+                                                    MaterialPageRoute<void>(
+                                                      builder: (_) =>
+                                                          BlocProvider.value(
+                                                            value: context
+                                                                .read<
+                                                                  AssignmentsCubit
+                                                                >(),
+                                                            child:
+                                                                AssignmentSubmissionPage(
+                                                                  assignment:
+                                                                      assignment,
+                                                                ),
+                                                          ),
+                                                    ),
+                                                  )
+                                                  .then((_) {
+                                                    if (context.mounted) {
+                                                      _loadAssignments(
+                                                        forceRefresh: true,
+                                                      );
+                                                    }
+                                                  });
+                                            },
+                                          ),
+                                        );
+                                      },
+                                      childCount: filtered.length,
+                                    ),
                                   ),
-                                  if (state.isLoadingMore)
-                                    const Padding(
+                                ),
+                                if (state.isLoadingMore)
+                                  const SliverToBoxAdapter(
+                                    child: Padding(
                                       padding: EdgeInsets.symmetric(
                                         vertical: AppSpacing.s16,
                                       ),
@@ -248,8 +259,11 @@ class _StudentAssignmentsPageState extends State<StudentAssignmentsPage> {
                                         child: AppLoadingView.compact(size: 24),
                                       ),
                                     ),
-                                ],
-                              ),
+                                  ),
+                                const SliverToBoxAdapter(
+                                  child: SizedBox(height: 48),
+                                ),
+                              ],
                             ),
                           ),
                   ),

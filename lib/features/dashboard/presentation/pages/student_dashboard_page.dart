@@ -29,6 +29,7 @@ import '../widgets/academic_performance_card.dart';
 import '../widgets/continue_learning_card.dart';
 import '../widgets/student_enrolled_courses_section.dart';
 import '../widgets/student_quick_study_hub.dart';
+import '../widgets/student_subscription_countdown_banner.dart';
 import '../widgets/urgent_tasks_radar_card.dart';
 
 class StudentDashboardPage extends StatefulWidget {
@@ -306,6 +307,9 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              // 0. Live Subscription Countdown & Health Guardian Banner
+                              const StudentSubscriptionCountdownBanner(),
+
                               // 1. Academic Hero Banner
                               AcademicHeroBanner(
                                 title: context.l10n.welcomeStudentHeader(

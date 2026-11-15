@@ -94,5 +94,23 @@ void main() {
       expect(WhatsAppDispatchTiming.fromDbValue('exam_end'), WhatsAppDispatchTiming.examEnd);
       expect(WhatsAppDispatchTiming.instant.toDbValue(), 'instant');
     });
+
+    test('renderLivePreview correctly substitutes smart online metrics tags', () {
+      const config = WhatsAppDispatchConfigEntity.defaultConfiguration;
+
+      final rendered = config.renderLivePreview(
+        studentName: 'عمر أحمد',
+        examTitle: 'الجبر المتقدم',
+        studyTime: '20 ساعة و 15 دقيقة',
+        lecturesProgress: 'تمت مشاهدة 14 من 15 محاضرة (93%)',
+        examsProgress: 'تم أداء 9 من 10 اختبارات (90%)',
+        cumulativeAvg: '94.2%',
+      );
+
+      expect(rendered.contains('20 ساعة و 15 دقيقة'), isTrue);
+      expect(rendered.contains('تمت مشاهدة 14 من 15 محاضرة (93%)'), isTrue);
+      expect(rendered.contains('تم أداء 9 من 10 اختبارات (90%)'), isTrue);
+      expect(rendered.contains('94.2%'), isTrue);
+    });
   });
 }

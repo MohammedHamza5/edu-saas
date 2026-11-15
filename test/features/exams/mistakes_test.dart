@@ -45,6 +45,66 @@ void main() {
       expect(wrongQuestion.selectedOptionText, equals('Option B (wrong)'));
     });
 
+    test('MistakeQuestionEntity correctly handles grid-in questions and text answers', () {
+      const gridInSkipped = MistakeQuestionEntity(
+        mistakeId: 'm3',
+        questionId: 'q3',
+        questionText: 'Find x: 2x = 10',
+        questionType: 'grid_in',
+        points: 5,
+        sortOrder: 3,
+        isResolved: false,
+        failureCount: 1,
+        sourceExamId: 'exam1',
+        sourceExamTitle: 'Math Exam',
+        lastSelectedOptionId: null,
+        selectedOptionText: null,
+        options: [],
+      );
+
+      const gridInAnsweredWrong = MistakeQuestionEntity(
+        mistakeId: 'm4',
+        questionId: 'q4',
+        questionText: 'Find x: 3x = 12',
+        questionType: 'grid_in',
+        points: 5,
+        sortOrder: 4,
+        isResolved: false,
+        failureCount: 1,
+        sourceExamId: 'exam1',
+        sourceExamTitle: 'Math Exam',
+        lastSelectedOptionId: null,
+        selectedOptionText: '3', // student entered 3 instead of 4
+        options: [],
+      );
+
+      expect(gridInSkipped.isGridIn, isTrue);
+      expect(gridInSkipped.isSkipped, isTrue);
+      expect(gridInSkipped.isWrongAnswer, isFalse);
+
+      expect(gridInAnsweredWrong.isGridIn, isTrue);
+      expect(gridInAnsweredWrong.isSkipped, isFalse);
+      expect(gridInAnsweredWrong.isWrongAnswer, isTrue);
+      expect(gridInAnsweredWrong.selectedOptionText, equals('3'));
+    });
+
+    test('MistakeAnswerFeedbackModel parses grid-in feedback correctly', () {
+      final json = {
+        'question_id': 'q_grid',
+        'question_type': 'grid_in',
+        'text_answer': '83',
+        'correct_text': '83',
+        'is_correct': true,
+      };
+
+      final feedback = MistakeAnswerFeedbackModel.fromJson(json);
+
+      expect(feedback.questionId, equals('q_grid'));
+      expect(feedback.textAnswer, equals('83'));
+      expect(feedback.correctText, equals('83'));
+      expect(feedback.isCorrect, isTrue);
+    });
+
     test('MistakeSummaryModel parses breakdown fields with safe defaults', () {
       final json = {
         'total_mistakes': 10,

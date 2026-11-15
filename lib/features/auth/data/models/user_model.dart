@@ -10,6 +10,7 @@ class UserModel extends UserEntity {
     required super.email,
     super.phone,
     super.parentPhone,
+    super.subscriptionExpiresAt,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -29,6 +30,11 @@ class UserModel extends UserEntity {
       _ => UserStatus.pending,
     };
 
+    final expiresAtRaw = json['subscription_expires_at'];
+    final DateTime? subscriptionExpiresAt = expiresAtRaw != null
+        ? DateTime.tryParse(expiresAtRaw.toString())
+        : null;
+
     return UserModel(
       id: json['id'] as String,
       tenantId: json['tenant_id'] as String,
@@ -38,6 +44,7 @@ class UserModel extends UserEntity {
       email: json['email'] as String? ?? '',
       phone: json['phone'] as String?,
       parentPhone: json['parent_phone'] as String?,
+      subscriptionExpiresAt: subscriptionExpiresAt,
     );
   }
 
@@ -51,6 +58,7 @@ class UserModel extends UserEntity {
       'email': email,
       'phone': phone,
       'parent_phone': parentPhone,
+      'subscription_expires_at': subscriptionExpiresAt?.toIso8601String(),
     };
   }
 }

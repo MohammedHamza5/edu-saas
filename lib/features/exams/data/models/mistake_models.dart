@@ -1,3 +1,4 @@
+import '../../../../core/utils/question_image_resolver.dart';
 import '../../domain/entities/mistake_entities.dart';
 
 class MistakeSummaryModel extends MistakeSummaryEntity {
@@ -87,6 +88,8 @@ class MistakeQuestionModel extends MistakeQuestionEntity {
     required super.sortOrder,
     super.imageUrl,
     super.imageMeta,
+    super.audioUrl,
+    super.audioDurationSeconds,
     required super.isResolved,
     required super.failureCount,
     super.lastFailedAt,
@@ -112,10 +115,12 @@ class MistakeQuestionModel extends MistakeQuestionEntity {
       questionType: (json['question_type'] as String?) ?? 'single_choice',
       points: (json['points'] as num?)?.toInt() ?? 1,
       sortOrder: (json['sort_order'] as num?)?.toInt() ?? 0,
-      imageUrl: json['image_url'] as String?,
+      imageUrl: QuestionImageResolver.resolveUrl(json['image_url'] as String?),
       imageMeta: json['image_meta'] is Map
           ? Map<String, dynamic>.from(json['image_meta'] as Map)
           : null,
+      audioUrl: json['audio_url'] as String?,
+      audioDurationSeconds: (json['audio_duration_seconds'] as num?)?.toInt(),
       isResolved: json['is_resolved'] as bool? ?? false,
       failureCount: (json['failure_count'] as num?)?.toInt() ?? 1,
       lastFailedAt: json['last_failed_at'] != null
@@ -136,7 +141,9 @@ class MistakeAnswerFeedbackModel extends MistakeAnswerFeedbackEntity {
   const MistakeAnswerFeedbackModel({
     required super.questionId,
     super.selectedOptionId,
+    super.textAnswer,
     super.correctOptionId,
+    super.correctText,
     required super.isCorrect,
   });
 
@@ -144,7 +151,9 @@ class MistakeAnswerFeedbackModel extends MistakeAnswerFeedbackEntity {
     return MistakeAnswerFeedbackModel(
       questionId: (json['question_id'] as String?) ?? '',
       selectedOptionId: json['selected_option_id'] as String?,
+      textAnswer: json['text_answer'] as String?,
       correctOptionId: json['correct_option_id'] as String?,
+      correctText: json['correct_text'] as String?,
       isCorrect: json['is_correct'] as bool? ?? false,
     );
   }

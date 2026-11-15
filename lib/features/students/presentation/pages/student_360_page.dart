@@ -23,6 +23,7 @@ import '../widgets/student_360_stats_grid.dart';
 import '../widgets/student_account_actions_card.dart';
 import '../widgets/student_activity_timeline_section.dart';
 import '../widgets/student_smart_engagement_card.dart';
+import '../widgets/student_subscription_card.dart';
 import '../widgets/student_video_insights_section.dart';
 import '../widgets/student_whatsapp_report_card.dart';
 
@@ -150,7 +151,8 @@ class _Student360PageState extends State<Student360Page> {
                         color: AppColors.error,
                       ),
                       tooltip: context.l10n.deleteStudentAction,
-                      onPressed: () => _confirmDeleteStudent(context, state.student),
+                      onPressed: () =>
+                          _confirmDeleteStudent(context, state.student),
                     ),
                   ],
                 );
@@ -191,10 +193,7 @@ class _Student360PageState extends State<Student360Page> {
                     const SizedBox(height: AppSpacing.s16),
 
                     // ── One-Click WhatsApp Parent Progress Report ──
-                    StudentWhatsAppReportCard(
-                      student: student,
-                      stats: stats,
-                    ),
+                    StudentWhatsAppReportCard(student: student, stats: stats),
 
                     const SizedBox(height: AppSpacing.s16),
 
@@ -301,7 +300,9 @@ class _Student360PageState extends State<Student360Page> {
                     // ── Video Insights Section ────────────────────────────
                     if (stats.videoInsights.isNotEmpty) ...[
                       const SizedBox(height: AppSpacing.s20),
-                      StudentVideoInsightsSection(insights: stats.videoInsights),
+                      StudentVideoInsightsSection(
+                        insights: stats.videoInsights,
+                      ),
                     ],
 
                     // ── Activity Timeline Section ─────────────────────────
@@ -345,6 +346,8 @@ class _Student360PageState extends State<Student360Page> {
                     // ── Danger zone / Account actions ──────────────────────
                     StudentSectionTitle(context.l10n.accountActionsTitle),
                     const SizedBox(height: AppSpacing.s8),
+                    StudentSubscriptionCard(student: student),
+                    const SizedBox(height: AppSpacing.s20),
                     StudentAccountActionsCard(student: student),
                   ],
                 ),

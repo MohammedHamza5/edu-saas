@@ -48,6 +48,7 @@ class _FakeExamsRepository implements ExamsRepository {
   Future<Result<ExamEntity>> createExam({
     String? groupId,
     required String title,
+    ExamCategory category = ExamCategory.realTest,
     int durationMinutes = 60,
     int maxScore = 100,
     int? passingScore,
@@ -82,6 +83,7 @@ class _FakeExamsRepository implements ExamsRepository {
   Future<Result<ExamEntity>> updateDraftExamQuestions({
     required String examId,
     required String title,
+    ExamCategory? category,
     int? durationMinutes,
     int? maxScore,
     int? passingScore,
@@ -577,7 +579,7 @@ void main() {
 
           await tester.pumpAndSettle();
 
-          expect(find.text('تقييمات المادة'), findsOneWidget);
+          expect(find.byType(StudentExamsPage), findsOneWidget);
           expect(find.byType(ExamCard), findsNWidgets(2));
           final exc = tester.takeException();
           expect(exc, isNull);

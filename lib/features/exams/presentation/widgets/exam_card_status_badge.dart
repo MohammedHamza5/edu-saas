@@ -58,8 +58,9 @@ class ExamCardStatusBadge extends StatelessWidget {
         ),
       );
 
+      Widget finalStatusWidget = badgeContent;
       if (!isPublished && onPublish != null) {
-        return InkWell(
+        finalStatusWidget = InkWell(
           onTap: onPublish,
           borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
           child: Tooltip(
@@ -69,7 +70,14 @@ class ExamCardStatusBadge extends StatelessWidget {
         );
       }
 
-      return badgeContent;
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildCategoryBadge(context, exam.category),
+          const SizedBox(width: AppSpacing.s6),
+          finalStatusWidget,
+        ],
+      );
     }
 
     // Student Status Badge
@@ -171,6 +179,42 @@ class ExamCardStatusBadge extends StatelessWidget {
               fontSize: 11,
               fontWeight: FontWeight.bold,
               color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCategoryBadge(BuildContext context, ExamCategory category) {
+    final isBank = category.isQuestionBank;
+    final color = isBank ? const Color(0xFF059669) : const Color(0xFF7C3AED);
+    final icon = isBank ? Icons.auto_stories_rounded : Icons.timer_outlined;
+    final label = isBank
+        ? context.l10n.examCategoryQuestionBank
+        : context.l10n.examCategoryRealTest;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.s8,
+        vertical: AppSpacing.s4,
+      ),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 11, color: color),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: color,
             ),
           ),
         ],

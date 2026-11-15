@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -80,12 +81,18 @@ class ExamTakingWorkspace extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isDesktop = constraints.maxWidth >= 900;
-        final defaultDockWidth =
-            (constraints.maxWidth * 0.38).clamp(380.0, 560.0);
-        const minDockWidth = 320.0;
-        final maxDockWidth = constraints.maxWidth * 0.65;
-        final dockWidth = (customDockWidth ?? defaultDockWidth)
-            .clamp(minDockWidth, maxDockWidth);
+        final double maxDockWidth =
+            math.max(320.0, constraints.maxWidth * 0.65).toDouble();
+        final double minDockWidth =
+            math.min(320.0, maxDockWidth).toDouble();
+        final double defaultDockWidth = isDesktop
+            ? (constraints.maxWidth * 0.38)
+                .clamp(minDockWidth, math.min(560.0, maxDockWidth).toDouble())
+            : constraints.maxWidth;
+        final double dockWidth = isDesktop
+            ? (customDockWidth ?? defaultDockWidth)
+                .clamp(minDockWidth, maxDockWidth)
+            : constraints.maxWidth;
         final isDocked = isDesktop && dockMode.isDocked;
         final rightPadding = isDocked ? dockWidth : 0.0;
 

@@ -50,23 +50,23 @@ class StudentShellDestinations {
         ],
       ),
 
-      // Section 3: Tasks & Exams
+      // Section 3: Tasks & Assessments (Question Bank & Real Test)
       AdaptiveSidebarSection(
-        title: l10n.assignmentsListTitle,
+        title: l10n.questionBankAndExams,
         destinations: [
           AdaptiveDestination(
-            icon: Icons.assignment_outlined,
-            selectedIcon: Icons.assignment_rounded,
-            label: l10n.studentNavAssignments,
-            subtitle: l10n.studentNavAssignmentsSubtitle,
-            tooltip: l10n.assignmentsListTitle,
+            icon: Icons.auto_stories_outlined,
+            selectedIcon: Icons.auto_stories_rounded,
+            label: l10n.studentNavQuestionBank,
+            subtitle: l10n.studentNavQuestionBankSubtitle,
+            tooltip: l10n.studentNavQuestionBank,
           ),
           AdaptiveDestination(
-            icon: Icons.quiz_outlined,
-            selectedIcon: Icons.quiz_rounded,
-            label: l10n.studentNavExams,
-            subtitle: l10n.studentNavExamsSubtitle,
-            tooltip: l10n.examsListTitle,
+            icon: Icons.timer_outlined,
+            selectedIcon: Icons.timer_rounded,
+            label: l10n.studentNavRealTests,
+            subtitle: l10n.studentNavRealTestsSubtitle,
+            tooltip: l10n.studentNavRealTests,
           ),
           AdaptiveDestination(
             icon: Icons.auto_stories_outlined,

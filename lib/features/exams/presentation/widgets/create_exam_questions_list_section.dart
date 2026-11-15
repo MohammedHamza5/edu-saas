@@ -11,6 +11,7 @@ class CreateExamQuestionsListSection extends StatelessWidget {
   final void Function(int qIndex) onRemove;
   final void Function(int qIndex, Uint8List bytes, String filename) onImagePicked;
   final VoidCallback onPointsChanged;
+  final VoidCallback? onAudioChanged;
   final void Function(CreateExamDraftQuestion q) onAddOption;
   final void Function(CreateExamDraftQuestion q, int optIdx) onRemoveOption;
   final void Function(CreateExamDraftQuestion q, List<String> letters) onQuickFillOptions;
@@ -23,6 +24,7 @@ class CreateExamQuestionsListSection extends StatelessWidget {
     required this.onRemove,
     required this.onImagePicked,
     required this.onPointsChanged,
+    this.onAudioChanged,
     required this.onAddOption,
     required this.onRemoveOption,
     required this.onQuickFillOptions,
@@ -45,6 +47,7 @@ class CreateExamQuestionsListSection extends StatelessWidget {
             onImagePicked: (bytes, filename) =>
                 onImagePicked(qIndex, bytes, filename),
             onPointsChanged: onPointsChanged,
+            onAudioChanged: onAudioChanged,
             onAddOption: () => onAddOption(questions[qIndex]),
             onRemoveOption: (optIdx) =>
                 onRemoveOption(questions[qIndex], optIdx),

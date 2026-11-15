@@ -51,6 +51,10 @@ class CreateExamDraftQuestion {
   bool isUploadingImage = false;
   String? uploadError;
   String? contextId;
+  String? audioUrl;
+  int? audioDurationSeconds;
+  bool isUploadingAudio = false;
+  Future<String>? audioUploadFuture;
   bool isExpanded;
 
   CreateExamDraftQuestion({
@@ -77,6 +81,8 @@ class CreateExamDraftQuestion {
         'imageUrl': imageUrl,
         'imageMeta': imageMeta,
         'contextId': contextId,
+        'audioUrl': audioUrl,
+        'audioDurationSeconds': audioDurationSeconds,
         'isExpanded': isExpanded,
         'options': options.map((o) => o.toJson()).toList(),
       };
@@ -97,6 +103,8 @@ class CreateExamDraftQuestion {
       q.imageMeta = Map<String, dynamic>.from(json['imageMeta'] as Map);
     }
     q.contextId = json['contextId'] as String?;
+    q.audioUrl = json['audioUrl'] as String?;
+    q.audioDurationSeconds = json['audioDurationSeconds'] as int?;
     final rawOptions = json['options'] as List?;
     if (rawOptions != null && rawOptions.isNotEmpty) {
       for (final opt in q.options) {
@@ -124,6 +132,7 @@ class CreateExamDraftSerializer {
 
   static Map<String, dynamic> serialize({
     required String title,
+    ExamCategory category = ExamCategory.realTest,
     required String duration,
     required String maxScore,
     required String passingScore,
@@ -142,6 +151,7 @@ class CreateExamDraftSerializer {
     return {
       'savedAt': DateTime.now().toIso8601String(),
       'title': title,
+      'category': category.value,
       'duration': duration,
       'maxScore': maxScore,
       'passingScore': passingScore,
@@ -175,6 +185,9 @@ class CreateExamDraftSerializer {
 
     return CreateExamDraftValues(
       title: data['title'] as String?,
+      category: data['category'] != null
+          ? ExamCategory.fromString(data['category']?.toString())
+          : null,
       duration: data['duration'] as String?,
       maxScore: data['maxScore'] as String?,
       passingScore: data['passingScore'] as String?,
@@ -201,6 +214,7 @@ class CreateExamDraftSerializer {
 /// Parsed draft values container.
 class CreateExamDraftValues {
   final String? title;
+  final ExamCategory? category;
   final String? duration;
   final String? maxScore;
   final String? passingScore;
@@ -218,6 +232,7 @@ class CreateExamDraftValues {
 
   const CreateExamDraftValues({
     this.title,
+    this.category,
     this.duration,
     this.maxScore,
     this.passingScore,

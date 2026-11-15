@@ -142,10 +142,13 @@ class RetryHelper {
 
         // Calculate jittered exponential backoff:
         // delay = min(initialDelay * (multiplier ^ (attempt - 1)), maxDelay) + random(jitter)
-        final exponentialMs = policy.initialDelay.inMilliseconds *
+        final exponentialMs =
+            policy.initialDelay.inMilliseconds *
             pow(policy.backoffMultiplier, attempt - 1);
-        final clampedMs =
-            min(exponentialMs.toInt(), policy.maxDelay.inMilliseconds);
+        final clampedMs = min(
+          exponentialMs.toInt(),
+          policy.maxDelay.inMilliseconds,
+        );
         final jitterMs = policy.jitter.inMilliseconds > 0
             ? _random.nextInt(policy.jitter.inMilliseconds)
             : 0;
@@ -154,7 +157,7 @@ class RetryHelper {
         AppLogger.w(
           'RetryHelper',
           'Transient network glitch on attempt $attempt/${policy.maxAttempts}. '
-          'Retrying in ${totalDelay.inMilliseconds}ms... (Error: $error)',
+              'Retrying in ${totalDelay.inMilliseconds}ms... (Error: $error)',
         );
 
         onRetry?.call(error, attempt, totalDelay);
@@ -170,10 +173,9 @@ Future<T> retryTransient<T>(
   RetryPolicy policy = const RetryPolicy(),
   bool Function(Object error)? shouldRetry,
   void Function(Object error, int attempt, Duration delay)? onRetry,
-}) =>
-    RetryHelper.retry<T>(
-      operation,
-      policy: policy,
-      shouldRetry: shouldRetry,
-      onRetry: onRetry,
-    );
+}) => RetryHelper.retry<T>(
+  operation,
+  policy: policy,
+  shouldRetry: shouldRetry,
+  onRetry: onRetry,
+);

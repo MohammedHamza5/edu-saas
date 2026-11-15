@@ -10,10 +10,7 @@ import '../../domain/entities/student_360_entity.dart';
 class StudentSmartEngagementCard extends StatelessWidget {
   final Student360Entity stats;
 
-  const StudentSmartEngagementCard({
-    super.key,
-    required this.stats,
-  });
+  const StudentSmartEngagementCard({super.key, required this.stats});
 
   @override
   Widget build(BuildContext context) {

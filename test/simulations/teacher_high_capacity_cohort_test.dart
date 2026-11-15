@@ -79,6 +79,7 @@ class _CohortStudentsRepo implements StudentsRepository {
   Future<Result<StudentEntity>> changeStudentStatus({
     required String studentId,
     required String action, // 'approve' | 'reject' | 'suspend'
+    DateTime? expiresAt,
   }) async {
     final existing = backend.students[studentId];
     if (existing == null) {
@@ -165,6 +166,12 @@ class _CohortStudentsRepo implements StudentsRepository {
 
   @override
   Future<Result<List<StudentGroupInfo>>> getAvailableGroupsForStudent(String studentId) async => const Success([]);
+
+  @override
+  Future<Result<StudentEntity>> setStudentSubscription({
+    required String studentId,
+    required DateTime? expiresAt,
+  }) async => throw UnimplementedError();
 }
 
 class _CohortGroupsRepo implements GroupsRepository {
@@ -294,6 +301,7 @@ class _CohortExamsRepo implements ExamsRepository {
     DateTime? endAt,
     bool isPublished = false,
     String? pdfFileId,
+    ExamCategory category = ExamCategory.realTest,
     required List<ExamQuestionEntity> initialQuestions,
   }) async {
     final exam = ExamEntity(
@@ -308,6 +316,7 @@ class _CohortExamsRepo implements ExamsRepository {
       shuffleQuestions: shuffleQuestions,
       showResult: showResult,
       allowRetake: allowRetake,
+      category: category,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
     );
@@ -381,7 +390,23 @@ class _CohortExamsRepo implements ExamsRepository {
   @override
   Future<Result<ExamEntity>> updateExam({required String examId, required String title, int? durationMinutes, int? maxScore, int? passingScore, bool? shuffleQuestions, bool? showResult, bool? allowRetake, DateTime? startAt, DateTime? endAt, bool? isPublished, String? pdfFileId, bool clearPdfFile = false}) async => throw UnimplementedError();
   @override
-  Future<Result<ExamEntity>> updateDraftExamQuestions({required String examId, required String title, int? durationMinutes, int? maxScore, int? passingScore, bool? shuffleQuestions, bool? showResult, bool? allowRetake, DateTime? startAt, DateTime? endAt, bool? isPublished, String? pdfFileId, bool clearPdfFile = false, required List<ExamQuestionEntity> questions}) async => throw UnimplementedError();
+  Future<Result<ExamEntity>> updateDraftExamQuestions({
+    required String examId,
+    required String title,
+    ExamCategory? category,
+    int? durationMinutes,
+    int? maxScore,
+    int? passingScore,
+    bool? shuffleQuestions,
+    bool? showResult,
+    bool? allowRetake,
+    DateTime? startAt,
+    DateTime? endAt,
+    bool? isPublished,
+    String? pdfFileId,
+    bool clearPdfFile = false,
+    required List<ExamQuestionEntity> questions,
+  }) async => throw UnimplementedError();
   @override
   Future<Result<ExamVersionEntity>> publishExamVersion(String versionId) async => throw UnimplementedError();
   @override

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/widgets/whatsapp_interactive_dialog.dart';
+import '../../../../core/widgets/whatsapp_interactive_dialog.dart';
 import '../../../../core/utils/whatsapp_report_generator.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../domain/entities/student_entity.dart';
@@ -20,14 +20,16 @@ class StudentWhatsAppReportCard extends StatelessWidget {
   });
 
   void _openWhatsAppReport(BuildContext context) {
-    final isSatGroup = stats.groups.any((g) =>
-        g.groupName.toUpperCase().contains('SAT') ||
-        g.groupLevel.toUpperCase().contains('SAT'));
+    final isSatGroup = stats.groups.any(
+      (g) =>
+          g.groupName.toUpperCase().contains('SAT') ||
+          g.groupLevel.toUpperCase().contains('SAT'),
+    );
     final targetScore = isSatGroup ? 800 : 100;
     final examScore = stats.examAverage > 0
         ? (isSatGroup
-            ? (stats.examAverage * 8).round()
-            : stats.examAverage.round())
+              ? (stats.examAverage * 8).round()
+              : stats.examAverage.round())
         : 0;
     final groupName = stats.groups.isNotEmpty
         ? stats.groups.first.groupName
@@ -112,13 +114,8 @@ class StudentWhatsAppReportCard extends StatelessWidget {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
-                    icon: const Icon(
-                      Icons.share_rounded,
-                      size: 16,
-                    ),
-                    label: Text(
-                      context.l10n.createAndShareReport,
-                    ),
+                    icon: const Icon(Icons.share_rounded, size: 16),
+                    label: Text(context.l10n.createAndShareReport),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF25D366),
                       foregroundColor: Colors.white,
@@ -186,9 +183,7 @@ class StudentWhatsAppReportCard extends StatelessWidget {
                     vertical: AppSpacing.s8,
                   ),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(
-                      AppSpacing.radiusSmall,
-                    ),
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
                   ),
                 ),
                 onPressed: () => _openWhatsAppReport(context),

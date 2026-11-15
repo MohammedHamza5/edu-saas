@@ -35,6 +35,7 @@ class AuthCubit extends Cubit<AuthState> {
         if (user == null) {
           SupabaseService.currentRole = null;
           SupabaseService.currentStatus = null;
+          SupabaseService.currentSubscriptionExpiresAt = null;
           AppLogger.i(_tag, 'No active session — user unauthenticated');
           emit(const AuthUnauthenticated());
         } else {
@@ -106,6 +107,7 @@ class AuthCubit extends Cubit<AuthState> {
         AppCache.setCurrentUser(null);
         SupabaseService.currentRole = null;
         SupabaseService.currentStatus = null;
+        SupabaseService.currentSubscriptionExpiresAt = null;
         AppLogger.w(
           _tag,
           'checkAuthStatus failed with no active session — treating as unauthenticated',
@@ -195,6 +197,9 @@ class AuthCubit extends Cubit<AuthState> {
         );
         SupabaseService.currentRole = user.role.name;
         SupabaseService.currentStatus = user.status.name;
+        SupabaseService.currentSubscriptionExpiresAt = user
+            .subscriptionExpiresAt
+            ?.toIso8601String();
         emit(AuthPendingApproval(user));
       },
       onFailure: (failure) {
@@ -211,6 +216,7 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> logout() async {
     SupabaseService.currentRole = null;
     SupabaseService.currentStatus = null;
+    SupabaseService.currentSubscriptionExpiresAt = null;
     // Stop student engagement tracking
     StudentActivityTracker.instance.stop();
     // Clear all cached data to prevent stale data across sessions and switch user context to null
@@ -247,6 +253,8 @@ class AuthCubit extends Cubit<AuthState> {
   void _routeUserByState(UserEntity user) {
     SupabaseService.currentRole = user.role.name;
     SupabaseService.currentStatus = user.status.name;
+    SupabaseService.currentSubscriptionExpiresAt = user.subscriptionExpiresAt
+        ?.toIso8601String();
     AppLogger.d(_tag, 'Routing user by status: ${user.status.name}');
     switch (user.status) {
       case UserStatus.pending:
@@ -256,6 +264,14 @@ class AuthCubit extends Cubit<AuthState> {
         );
         emit(AuthPendingApproval(user));
       case UserStatus.active:
+        if (user.isSubscriptionExpired) {
+          AppLogger.w(
+            _tag,
+            'User status: ACTIVE but SUBSCRIPTION EXPIRED → blocking access',
+          );
+          emit(const AuthError('SUBSCRIPTION_EXPIRED'));
+          return;
+        }
         AppLogger.s(_tag, 'User status: ACTIVE → authenticated successfully');
         if (user.role == UserRole.student) {
           StudentActivityTracker.instance.start();

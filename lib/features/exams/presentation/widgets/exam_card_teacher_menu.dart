@@ -18,6 +18,7 @@ class ExamCardTeacherMenu extends StatelessWidget {
   final VoidCallback? onDelete;
   final VoidCallback? onDispatchResults;
   final VoidCallback? onMoveToFolder;
+  final void Function(ExamCategory targetCategory)? onMoveCategory;
 
   const ExamCardTeacherMenu({
     super.key,
@@ -34,6 +35,7 @@ class ExamCardTeacherMenu extends StatelessWidget {
     this.onDelete,
     this.onDispatchResults,
     this.onMoveToFolder,
+    this.onMoveCategory,
   });
 
   @override
@@ -78,6 +80,10 @@ class ExamCardTeacherMenu extends StatelessWidget {
           onDispatchResults!();
         } else if (val == 'move_folder' && onMoveToFolder != null) {
           onMoveToFolder!();
+        } else if (val == 'move_to_bank' && onMoveCategory != null) {
+          onMoveCategory!(ExamCategory.questionBank);
+        } else if (val == 'move_to_real_test' && onMoveCategory != null) {
+          onMoveCategory!(ExamCategory.realTest);
         }
       },
       itemBuilder: (ctx) => [
@@ -279,6 +285,51 @@ class ExamCardTeacherMenu extends StatelessWidget {
               ],
             ),
           ),
+        if (onMoveCategory != null) ...[
+          const PopupMenuDivider(),
+          if (exam.category.isRealTest)
+            PopupMenuItem(
+              value: 'move_to_bank',
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.auto_stories_outlined,
+                    size: 18,
+                    color: Color(0xFF059669),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    ctx.l10n.moveToQuestionBankAction,
+                    style: const TextStyle(
+                      color: Color(0xFF059669),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            )
+          else
+            PopupMenuItem(
+              value: 'move_to_real_test',
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.timer_outlined,
+                    size: 18,
+                    color: Color(0xFF7C3AED),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    ctx.l10n.moveToRealTestAction,
+                    style: const TextStyle(
+                      color: Color(0xFF7C3AED),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
         if (onDelete != null) ...[
           const PopupMenuDivider(),
           PopupMenuItem(

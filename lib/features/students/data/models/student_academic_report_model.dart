@@ -62,8 +62,7 @@ class StudentAcademicReportModel extends StudentAcademicReportEntity {
       avgVideoPercentage:
           (videosMap['avg_percentage'] as num?)?.toDouble() ?? 0.0,
       totalAssignedVideos: (videosMap['total_assigned'] as num?)?.toInt() ?? 0,
-      assignmentsSubmitted:
-          (assignmentsMap['submitted'] as num?)?.toInt() ?? 0,
+      assignmentsSubmitted: (assignmentsMap['submitted'] as num?)?.toInt() ?? 0,
       assignmentsReviewed: (assignmentsMap['reviewed'] as num?)?.toInt() ?? 0,
       totalAssignedAssignments:
           (assignmentsMap['total_assigned'] as num?)?.toInt() ?? 0,
@@ -73,8 +72,7 @@ class StudentAcademicReportModel extends StudentAcademicReportEntity {
       latestExamTitle: latestExamMap?['title']?.toString(),
       latestExamScore: (latestExamMap?['score'] as num?)?.toInt(),
       latestExamMaxScore: (latestExamMap?['max_score'] as num?)?.toInt(),
-      latestExamPercentage:
-          (latestExamMap?['percentage'] as num?)?.toDouble(),
+      latestExamPercentage: (latestExamMap?['percentage'] as num?)?.toDouble(),
       activeStudyMinutes:
           (engagementMap['active_minutes'] as num?)?.toInt() ?? 0,
       lastSeenAt: lastSeenAt,

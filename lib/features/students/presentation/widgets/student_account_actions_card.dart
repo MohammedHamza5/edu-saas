@@ -12,10 +12,7 @@ import '../cubit/students_cubit.dart';
 class StudentAccountActionsCard extends StatelessWidget {
   final StudentEntity student;
 
-  const StudentAccountActionsCard({
-    super.key,
-    required this.student,
-  });
+  const StudentAccountActionsCard({super.key, required this.student});
 
   @override
   Widget build(BuildContext context) {

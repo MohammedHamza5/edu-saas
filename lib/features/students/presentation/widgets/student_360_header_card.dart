@@ -10,10 +10,7 @@ import '../../domain/entities/student_entity.dart';
 class Student360HeaderCard extends StatelessWidget {
   final StudentEntity student;
 
-  const Student360HeaderCard({
-    super.key,
-    required this.student,
-  });
+  const Student360HeaderCard({super.key, required this.student});
 
   @override
   Widget build(BuildContext context) {
@@ -22,9 +19,7 @@ class Student360HeaderCard extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 32,
-            backgroundColor: AppColors.primaryLight.withValues(
-              alpha: 0.15,
-            ),
+            backgroundColor: AppColors.primaryLight.withValues(alpha: 0.15),
             backgroundImage: student.avatarUrl != null
                 ? NetworkImage(student.avatarUrl!)
                 : null,
@@ -141,10 +136,7 @@ class Student360HeaderCard extends StatelessWidget {
 class StudentStatusBadge extends StatelessWidget {
   final String status;
 
-  const StudentStatusBadge({
-    super.key,
-    required this.status,
-  });
+  const StudentStatusBadge({super.key, required this.status});
 
   @override
   Widget build(BuildContext context) {

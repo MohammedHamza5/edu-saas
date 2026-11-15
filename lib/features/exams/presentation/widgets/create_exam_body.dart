@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../domain/entities/exam_entity.dart';
 import '../models/create_exam_draft_models.dart';
 import 'create_exam_bottom_bar.dart';
 import 'create_exam_draft_banner.dart';
@@ -26,11 +27,13 @@ class CreateExamBody extends StatelessWidget {
   final TextEditingController passingScoreController;
   final TextEditingController defaultPointsController;
   final bool isCreating;
+  final ExamCategory category;
   final bool shuffle;
   final bool showResult;
   final bool allowRetake;
   final bool isPublished;
   final bool saveToQuestionBank;
+  final ValueChanged<ExamCategory> onCategoryChanged;
   final VoidCallback onApplyDefaultPoints;
   final ValueChanged<int> onDefaultPointsChanged;
   final ValueChanged<bool> onShuffleChanged;
@@ -69,6 +72,7 @@ class CreateExamBody extends StatelessWidget {
   final ValueChanged<int> onRemoveQuestion;
   final void Function(int, Uint8List, String) onImagePicked;
   final VoidCallback onPointsChanged;
+  final VoidCallback? onAudioChanged;
   final void Function(CreateExamDraftQuestion) onAddOption;
   final void Function(CreateExamDraftQuestion, int) onRemoveOption;
   final void Function(CreateExamDraftQuestion, List<String>) onQuickFillOptions;
@@ -91,11 +95,13 @@ class CreateExamBody extends StatelessWidget {
     required this.passingScoreController,
     required this.defaultPointsController,
     required this.isCreating,
+    this.category = ExamCategory.realTest,
     required this.shuffle,
     required this.showResult,
     required this.allowRetake,
     required this.isPublished,
     required this.saveToQuestionBank,
+    required this.onCategoryChanged,
     required this.onApplyDefaultPoints,
     required this.onDefaultPointsChanged,
     required this.onShuffleChanged,
@@ -128,6 +134,7 @@ class CreateExamBody extends StatelessWidget {
     required this.onRemoveQuestion,
     required this.onImagePicked,
     required this.onPointsChanged,
+    this.onAudioChanged,
     required this.onAddOption,
     required this.onRemoveOption,
     required this.onQuickFillOptions,
@@ -166,11 +173,13 @@ class CreateExamBody extends StatelessWidget {
               passingScoreController: passingScoreController,
               defaultPointsController: defaultPointsController,
               isCreating: isCreating,
+              category: category,
               shuffle: shuffle,
               showResult: showResult,
               allowRetake: allowRetake,
               isPublished: isPublished,
               saveToQuestionBank: saveToQuestionBank,
+              onCategoryChanged: onCategoryChanged,
               onApplyDefaultPoints: onApplyDefaultPoints,
               onDefaultPointsChanged: onDefaultPointsChanged,
               onShuffleChanged: onShuffleChanged,
@@ -234,6 +243,7 @@ class CreateExamBody extends StatelessWidget {
               onRemove: onRemoveQuestion,
               onImagePicked: onImagePicked,
               onPointsChanged: onPointsChanged,
+              onAudioChanged: onAudioChanged,
               onAddOption: onAddOption,
               onRemoveOption: onRemoveOption,
               onQuickFillOptions: onQuickFillOptions,

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../utils/question_image_resolver.dart';
 import 'interactive_lightbox_dialog.dart';
 
 /// Production-grade resilient image viewer for exam questions and diagrams.
@@ -115,7 +116,8 @@ class _ExamImageViewerState extends State<ExamImageViewer> {
   }
 
   String get _effectiveUrl {
-    final base = widget.imageUrl.trim();
+    final base = QuestionImageResolver.resolveUrl(widget.imageUrl) ??
+        widget.imageUrl.trim();
     if (_cacheBustKey == 0) return base;
     final separator = base.contains('?') ? '&' : '?';
     return '$base${separator}_rb=$_cacheBustKey';

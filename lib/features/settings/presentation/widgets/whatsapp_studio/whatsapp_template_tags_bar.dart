@@ -24,6 +24,10 @@ class WhatsAppTemplateTagsBar extends StatelessWidget {
       (key: '{group_name}', label: l10n.whatsappStudioTagGroupName),
       (key: '{teacher_name}', label: l10n.whatsappStudioTagTeacherName),
       (key: '{evaluation_text}', label: l10n.whatsappStudioTagEvaluation),
+      (key: '{study_time}', label: l10n.whatsappStudioTagStudyTime),
+      (key: '{lectures_progress}', label: l10n.whatsappStudioTagLecturesProgress),
+      (key: '{exams_progress}', label: l10n.whatsappStudioTagExamsProgress),
+      (key: '{cumulative_avg}', label: l10n.whatsappStudioTagCumulativeAvg),
     ];
 
     return Wrap(

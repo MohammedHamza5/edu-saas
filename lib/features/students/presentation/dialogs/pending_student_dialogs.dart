@@ -109,8 +109,10 @@ class PendingStudentDialogs {
                     color: AppColors.textMuted,
                     splashRadius: 18,
                     padding: EdgeInsets.zero,
-                    constraints:
-                        const BoxConstraints(minWidth: 32, minHeight: 32),
+                    constraints: const BoxConstraints(
+                      minWidth: 32,
+                      minHeight: 32,
+                    ),
                   ),
                 ],
               ),
@@ -133,8 +135,9 @@ class PendingStudentDialogs {
                         minimumSize: const Size(0, 48),
                         elevation: 0,
                         shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(AppSpacing.radiusSmall),
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.radiusSmall,
+                          ),
                         ),
                       ),
                       onPressed: () => Navigator.pop(ctx, true),
@@ -158,10 +161,7 @@ class PendingStudentDialogs {
     if (confirmed != true) return;
     if (!context.mounted) return;
     final cubit = context.read<StudentsCubit>();
-    await cubit.changeStatus(
-      studentId: student.id,
-      action: 'reject',
-    );
+    await cubit.changeStatus(studentId: student.id, action: 'reject');
     if (!context.mounted) return;
     await cubit.loadPendingStudents();
   }
@@ -179,16 +179,22 @@ class PendingStudentDialogs {
     }
     if (!context.mounted) return;
 
-    final selectedGroupIds =
-        await SmartStudentApprovalDialog.show(context, student);
-    if (selectedGroupIds == null) return;
+    final approvalResult = await SmartStudentApprovalDialog.show(
+      context,
+      student,
+    );
+    if (approvalResult == null) return;
     if (!context.mounted) return;
     final cubit = context.read<StudentsCubit>();
+
+    final selectedGroupIds = approvalResult.groupIds;
+    final subscriptionExpiresAt = approvalResult.subscriptionExpiresAt;
 
     if (selectedGroupIds.isNotEmpty) {
       final success = await cubit.approveAndAssignGroups(
         studentId: student.id,
         groupIds: selectedGroupIds.toList(),
+        subscriptionExpiresAt: subscriptionExpiresAt,
       );
       if (!context.mounted) return;
       if (success) {
@@ -204,6 +210,7 @@ class PendingStudentDialogs {
       final success = await cubit.changeStatus(
         studentId: student.id,
         action: 'approve',
+        expiresAt: subscriptionExpiresAt,
       );
       if (!context.mounted) return;
       if (success) {

@@ -66,9 +66,7 @@ class StudentsFilterBar extends StatelessWidget {
               filled: true,
               fillColor: AppColors.surfaceVariant,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(
-                  AppSpacing.radiusMedium,
-                ),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
                 borderSide: BorderSide.none,
               ),
             ),
@@ -85,25 +83,18 @@ class StudentsFilterBar extends StatelessWidget {
               vertical: AppSpacing.s8,
             ),
             itemCount: statusFilters.length,
-            separatorBuilder: (_, __) =>
-                const SizedBox(width: AppSpacing.s8),
+            separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.s8),
             itemBuilder: (context, i) {
               final f = statusFilters[i];
               final selected = selectedStatus == f.value;
               return FilterChip(
                 label: Text(f.label),
                 selected: selected,
-                selectedColor: AppColors.primaryLight.withValues(
-                  alpha: 0.2,
-                ),
+                selectedColor: AppColors.primaryLight.withValues(alpha: 0.2),
                 checkmarkColor: AppColors.primary,
                 labelStyle: TextStyle(
-                  color: selected
-                      ? AppColors.primary
-                      : AppColors.textSecondary,
-                  fontWeight: selected
-                      ? FontWeight.bold
-                      : FontWeight.normal,
+                  color: selected ? AppColors.primary : AppColors.textSecondary,
+                  fontWeight: selected ? FontWeight.bold : FontWeight.normal,
                   fontSize: 12,
                 ),
                 onSelected: (_) => onFilterTap(f.value),

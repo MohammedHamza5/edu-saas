@@ -161,7 +161,9 @@ class _PendingStudentsPageState extends State<PendingStudentsPage> {
                             AppSpacing.radiusLarge,
                           ),
                           border: Border.all(
-                            color: AppColors.primaryLight.withValues(alpha: 0.3),
+                            color: AppColors.primaryLight.withValues(
+                              alpha: 0.3,
+                            ),
                             width: 1,
                           ),
                         ),
@@ -170,7 +172,9 @@ class _PendingStudentsPageState extends State<PendingStudentsPage> {
                             Container(
                               padding: const EdgeInsets.all(AppSpacing.s8),
                               decoration: BoxDecoration(
-                                color: AppColors.primary.withValues(alpha: 0.18),
+                                color: AppColors.primary.withValues(
+                                  alpha: 0.18,
+                                ),
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: const Icon(
@@ -201,9 +205,7 @@ class _PendingStudentsPageState extends State<PendingStudentsPage> {
                     if (index == state.pending.length + 1) {
                       return const Padding(
                         padding: EdgeInsets.symmetric(vertical: AppSpacing.s16),
-                        child: Center(
-                          child: AppLoadingView.compact(size: 24),
-                        ),
+                        child: Center(child: AppLoadingView.compact(size: 24)),
                       );
                     }
 

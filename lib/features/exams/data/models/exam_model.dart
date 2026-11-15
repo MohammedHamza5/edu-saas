@@ -10,6 +10,7 @@ class ExamModel extends ExamEntity {
     required super.groupId,
     super.groupName,
     required super.title,
+    super.category = ExamCategory.realTest,
     super.durationMinutes,
     super.maxScore,
     super.passingScore,
@@ -196,22 +197,25 @@ class ExamModel extends ExamEntity {
 
     final isLectureExam = json['is_lecture_exam'] as bool? ??
         (json['linked_lesson_id'] != null);
+    final category = ExamCategory.fromString(
+      json['exam_category']?.toString() ?? json['category']?.toString(),
+    );
     final linkedLessonId = json['linked_lesson_id']?.toString();
     final linkedLessonTitle = json['linked_lesson_title']?.toString();
 
     String? folderId = json['folder_id']?.toString();
-    String? folderName;
-    String? folderColor;
+    String? folderName = json['folder_name']?.toString();
+    String? folderColor = json['folder_color']?.toString();
     if (json['folder'] is Map) {
       final f = json['folder'] as Map;
       folderId ??= f['id']?.toString();
-      folderName = f['name']?.toString();
-      folderColor = f['color']?.toString();
+      folderName ??= f['name']?.toString();
+      folderColor ??= f['color']?.toString();
     } else if (json['exam_folders'] is Map) {
       final f = json['exam_folders'] as Map;
       folderId ??= f['id']?.toString();
-      folderName = f['name']?.toString();
-      folderColor = f['color']?.toString();
+      folderName ??= f['name']?.toString();
+      folderColor ??= f['color']?.toString();
     }
 
     final pdfFileId = json['pdf_file_id']?.toString();
@@ -227,6 +231,7 @@ class ExamModel extends ExamEntity {
       groupId: groupId,
       groupName: groupName,
       title: title.isNotEmpty ? title : 'امتحان بدون عنوان',
+      category: category,
       durationMinutes: (json['duration_minutes'] as num?)?.toInt() ?? 60,
       maxScore: (json['max_score'] as num?)?.toInt() ?? 100,
       passingScore: (json['passing_score'] as num?)?.toInt(),
@@ -265,6 +270,7 @@ class ExamModel extends ExamEntity {
       'id': id,
       'content_id': contentId,
       'tenant_id': tenantId,
+      'exam_category': category.value,
       'duration_minutes': durationMinutes,
       'max_score': maxScore,
       if (passingScore != null) 'passing_score': passingScore,

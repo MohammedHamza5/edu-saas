@@ -14,9 +14,15 @@ class StudentModel extends StudentEntity {
     super.role,
     super.lastActivityAt,
     super.createdAt,
+    super.subscriptionExpiresAt,
   });
 
   factory StudentModel.fromJson(Map<String, dynamic> json) {
+    final expiresAtRaw = json['subscription_expires_at'];
+    final DateTime? subscriptionExpiresAt = expiresAtRaw != null
+        ? DateTime.tryParse(expiresAtRaw.toString())
+        : null;
+
     return StudentModel(
       id: json['id'] as String,
       tenantId: json['tenant_id'] as String? ?? '',
@@ -33,6 +39,7 @@ class StudentModel extends StudentEntity {
       createdAt: json['created_at'] != null
           ? DateTime.tryParse(json['created_at'] as String)
           : null,
+      subscriptionExpiresAt: subscriptionExpiresAt,
     );
   }
 
@@ -46,6 +53,7 @@ class StudentModel extends StudentEntity {
     'avatar_url': avatarUrl,
     'status': status,
     'role': role,
+    'subscription_expires_at': subscriptionExpiresAt?.toIso8601String(),
   };
 }
 

@@ -43,27 +43,49 @@ class StudentExamsFilterHelper {
     String? selectedFolderId,
     required StudentExamFilter activeFilter,
     String searchQuery = '',
+    ExamCategory? categoryFilter,
+    List<ExamFolderEntity>? masterFolders,
   }) {
-    final allExams = rawExams.where((e) => !isLessonQuiz(e)).toList();
+    final allExams = rawExams.where((e) {
+      if (isLessonQuiz(e)) return false;
+      if (categoryFilter != null && e.category != categoryFilter) return false;
+      return true;
+    }).toList();
+
+    final Map<String, ExamFolderEntity> masterMap = {
+      for (final f in masterFolders ?? const <ExamFolderEntity>[]) f.id: f,
+    };
 
     final Map<String, ExamFolderEntity> folderMap = {};
     for (final exam in allExams) {
       if (exam.folderId != null && exam.folderId!.trim().isNotEmpty) {
         final fid = exam.folderId!.trim();
+        final rawExamName = exam.folderName?.trim() ?? '';
+        final fallbackName = masterMap[fid]?.name.trim() ?? '';
+        final resolvedName =
+            rawExamName.isNotEmpty ? rawExamName : fallbackName;
+        final resolvedColor =
+            exam.folderColor ?? masterMap[fid]?.color ?? '#5B4FE0';
+
         if (!folderMap.containsKey(fid)) {
           folderMap[fid] = ExamFolderEntity(
             id: fid,
             tenantId: exam.tenantId,
             groupId: exam.groupId,
-            name: exam.folderName ?? '',
-            color: exam.folderColor ?? '#5B4FE0',
+            name: resolvedName,
+            color: resolvedColor,
             examCount: 1,
             createdAt: exam.createdAt,
             updatedAt: exam.updatedAt,
           );
         } else {
           final existing = folderMap[fid]!;
+          final updatedName =
+              (existing.name.trim().isEmpty && resolvedName.isNotEmpty)
+                  ? resolvedName
+                  : existing.name;
           folderMap[fid] = existing.copyWith(
+            name: updatedName,
             examCount: existing.examCount + 1,
           );
         }

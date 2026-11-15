@@ -25,6 +25,7 @@ abstract interface class StudentsRemoteDataSource {
   Future<StudentModel> changeStudentStatus({
     required String studentId,
     required String action,
+    DateTime? expiresAt,
   });
 
   Future<Student360Model> getStudent360(String studentId);
@@ -48,6 +49,12 @@ abstract interface class StudentsRemoteDataSource {
   Future<StudentAcademicReportModel> getStudentAcademicReport(
     String studentId, {
     int? days,
+  });
+
+  /// Sets, extends, or clears a student's subscription expiration duration.
+  Future<StudentModel> setStudentSubscription({
+    required String studentId,
+    required DateTime? expiresAt,
   });
 }
 
@@ -75,7 +82,7 @@ class StudentsRemoteDataSourceImpl implements StudentsRemoteDataSource {
     var filterQuery = _c
         .from('users')
         .select(
-          'id, tenant_id, full_name, email, phone, parent_phone, avatar_url, status, role, last_activity_at, created_at',
+          'id, tenant_id, full_name, email, phone, parent_phone, avatar_url, status, role, last_activity_at, created_at, subscription_expires_at',
         )
         .eq('role', 'student');
 
@@ -107,7 +114,7 @@ class StudentsRemoteDataSourceImpl implements StudentsRemoteDataSource {
     final response = await _c
         .from('users')
         .select(
-          'id, tenant_id, full_name, email, phone, parent_phone, avatar_url, status, role, last_activity_at, created_at',
+          'id, tenant_id, full_name, email, phone, parent_phone, avatar_url, status, role, last_activity_at, created_at, subscription_expires_at',
         )
         .eq('role', 'student')
         .eq('status', 'pending')
@@ -126,18 +133,33 @@ class StudentsRemoteDataSourceImpl implements StudentsRemoteDataSource {
   Future<StudentModel> changeStudentStatus({
     required String studentId,
     required String action,
+    DateTime? expiresAt,
   }) async {
     try {
       // 1. Primary: Atomic PostgreSQL RPC via PostgREST (bypasses browser CORS & gateway blocks)
+      final params = <String, dynamic>{
+        'p_student_id': studentId,
+        'p_action': action,
+      };
+      if (expiresAt != null) {
+        params['p_expires_at'] = expiresAt.toUtc().toIso8601String();
+      }
       await _c.rpc<dynamic>(
         'approve_student',
-        params: {'p_student_id': studentId, 'p_action': action},
+        params: params,
       );
     } catch (_) {
       // 2. Secondary fallback: Edge Function
+      final body = <String, dynamic>{
+        'student_id': studentId,
+        'action': action,
+      };
+      if (expiresAt != null) {
+        body['subscription_expires_at'] = expiresAt.toUtc().toIso8601String();
+      }
       final result = await _c.functions.invoke(
         'approve-student',
-        body: {'student_id': studentId, 'action': action},
+        body: body,
       );
 
       if (result.status != 200) {
@@ -159,7 +181,7 @@ class StudentsRemoteDataSourceImpl implements StudentsRemoteDataSource {
     final response = await _c
         .from('users')
         .select(
-          'id, tenant_id, full_name, email, phone, parent_phone, avatar_url, status, role, last_activity_at, created_at',
+          'id, tenant_id, full_name, email, phone, parent_phone, avatar_url, status, role, last_activity_at, created_at, subscription_expires_at',
         )
         .eq('id', studentId)
         .single();
@@ -407,5 +429,28 @@ class StudentsRemoteDataSourceImpl implements StudentsRemoteDataSource {
       studentName: '',
       periodDays: days,
     );
+  }
+
+  @override
+  Future<StudentModel> setStudentSubscription({
+    required String studentId,
+    required DateTime? expiresAt,
+  }) async {
+    try {
+      await _c.rpc<dynamic>(
+        'set_student_subscription',
+        params: {
+          'p_student_id': studentId,
+          'p_expires_at': expiresAt?.toUtc().toIso8601String(),
+        },
+      );
+    } catch (e) {
+      AppLogger.e(
+        'StudentsRemoteDataSource',
+        'Failed to set student subscription ($studentId): $e',
+      );
+      rethrow;
+    }
+    return getStudent(studentId);
   }
 }

@@ -55,9 +55,7 @@ class AcademicReportStatsBar extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surfaceVariant.withValues(alpha: 0.4),
         borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-        border: Border.all(
-          color: AppColors.border.withValues(alpha: 0.6),
-        ),
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.6)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,

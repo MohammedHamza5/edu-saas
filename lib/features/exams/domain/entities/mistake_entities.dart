@@ -130,6 +130,8 @@ class MistakeQuestionEntity extends Equatable {
   final int sortOrder;
   final String? imageUrl;
   final Map<String, dynamic>? imageMeta;
+  final String? audioUrl;
+  final int? audioDurationSeconds;
   final bool isResolved;
   final int failureCount;
   final DateTime? lastFailedAt;
@@ -150,6 +152,8 @@ class MistakeQuestionEntity extends Equatable {
     required this.sortOrder,
     this.imageUrl,
     this.imageMeta,
+    this.audioUrl,
+    this.audioDurationSeconds,
     required this.isResolved,
     required this.failureCount,
     this.lastFailedAt,
@@ -171,6 +175,8 @@ class MistakeQuestionEntity extends Equatable {
     int? sortOrder,
     String? imageUrl,
     Map<String, dynamic>? imageMeta,
+    String? audioUrl,
+    int? audioDurationSeconds,
     bool? isResolved,
     int? failureCount,
     DateTime? lastFailedAt,
@@ -191,6 +197,8 @@ class MistakeQuestionEntity extends Equatable {
       sortOrder: sortOrder ?? this.sortOrder,
       imageUrl: imageUrl ?? this.imageUrl,
       imageMeta: imageMeta ?? this.imageMeta,
+      audioUrl: audioUrl ?? this.audioUrl,
+      audioDurationSeconds: audioDurationSeconds ?? this.audioDurationSeconds,
       isResolved: isResolved ?? this.isResolved,
       failureCount: failureCount ?? this.failureCount,
       lastFailedAt: lastFailedAt ?? this.lastFailedAt,
@@ -204,10 +212,15 @@ class MistakeQuestionEntity extends Equatable {
     );
   }
 
-  /// Returns true if the student skipped the question without selecting any option.
-  bool get isSkipped => lastSelectedOptionId == null || lastSelectedOptionId!.isEmpty;
+  /// Returns true if this question is a student-produced response (grid-in).
+  bool get isGridIn => questionType == 'grid_in';
 
-  /// Returns true if the student chose an incorrect option.
+  /// Returns true if the student skipped the question without selecting any option or entering an answer.
+  bool get isSkipped =>
+      (lastSelectedOptionId == null || lastSelectedOptionId!.isEmpty) &&
+      (selectedOptionText == null || selectedOptionText!.trim().isEmpty);
+
+  /// Returns true if the student chose an incorrect option or wrong text answer.
   bool get isWrongAnswer => !isSkipped;
 
   @override
@@ -220,6 +233,8 @@ class MistakeQuestionEntity extends Equatable {
         sortOrder,
         imageUrl,
         imageMeta,
+        audioUrl,
+        audioDurationSeconds,
         isResolved,
         failureCount,
         lastFailedAt,
@@ -236,13 +251,17 @@ class MistakeQuestionEntity extends Equatable {
 class MistakeAnswerFeedbackEntity extends Equatable {
   final String questionId;
   final String? selectedOptionId;
+  final String? textAnswer;
   final String? correctOptionId;
+  final String? correctText;
   final bool isCorrect;
 
   const MistakeAnswerFeedbackEntity({
     required this.questionId,
     this.selectedOptionId,
+    this.textAnswer,
     this.correctOptionId,
+    this.correctText,
     required this.isCorrect,
   });
 
@@ -250,7 +269,9 @@ class MistakeAnswerFeedbackEntity extends Equatable {
   List<Object?> get props => [
         questionId,
         selectedOptionId,
+        textAnswer,
         correctOptionId,
+        correctText,
         isCorrect,
       ];
 }

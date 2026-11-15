@@ -215,16 +215,16 @@ class _WhatsAppLiveBubblePreviewState extends State<WhatsAppLiveBubblePreview> {
           Container(
             color: bgColor,
             padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.s20,
-              vertical: AppSpacing.s20,
+              horizontal: AppSpacing.s24,
+              vertical: AppSpacing.s24,
             ),
             child: Align(
               alignment: AlignmentDirectional.centerStart,
               child: Container(
-                constraints: const BoxConstraints(maxWidth: 560),
+                constraints: const BoxConstraints(maxWidth: 680),
                 padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.s16,
-                  vertical: AppSpacing.s14,
+                  horizontal: AppSpacing.s20,
+                  vertical: 18,
                 ),
                 decoration: BoxDecoration(
                   color: bubbleColor,
@@ -239,8 +239,8 @@ class _WhatsAppLiveBubblePreviewState extends State<WhatsAppLiveBubblePreview> {
                       color: Colors.black.withValues(
                         alpha: _isDarkMode ? 0.35 : 0.1,
                       ),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
                     ),
                   ],
                 ),
@@ -252,7 +252,7 @@ class _WhatsAppLiveBubblePreviewState extends State<WhatsAppLiveBubblePreview> {
                     children: [
                       // Render message with WhatsApp *bold* formatting support
                       _buildFormattedText(text, textColor),
-                      const SizedBox(height: AppSpacing.s8),
+                      const SizedBox(height: AppSpacing.s10),
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         mainAxisAlignment: MainAxisAlignment.end,
@@ -260,14 +260,15 @@ class _WhatsAppLiveBubblePreviewState extends State<WhatsAppLiveBubblePreview> {
                           Text(
                             '10:25 م',
                             style: TextStyle(
-                              fontSize: 11,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
                               color: timeColor,
                             ),
                           ),
                           const SizedBox(width: AppSpacing.s6),
                           const Icon(
                             Icons.done_all_rounded,
-                            size: 16,
+                            size: 18,
                             color: Color(0xFF53BDEB), // Double Blue Ticks
                           ),
                         ],
@@ -297,8 +298,8 @@ class _WhatsAppLiveBubblePreviewState extends State<WhatsAppLiveBubblePreview> {
         TextSpan(
           text: part,
           style: TextStyle(
-            fontSize: 14.5,
-            height: 1.6,
+            fontSize: 15.5,
+            height: 1.65,
             fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
             color: baseTextColor,
           ),
@@ -326,36 +327,36 @@ class _WhatsAppLiveBubblePreviewState extends State<WhatsAppLiveBubblePreview> {
       color: Colors.transparent,
       child: InkWell(
         onTap: () => setState(() => _simulatedPercentage = pct),
-        borderRadius: BorderRadius.circular(AppSpacing.radiusSmall + 2),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
           padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.s12,
-            vertical: AppSpacing.s8,
+            horizontal: AppSpacing.s16,
+            vertical: AppSpacing.s12,
           ),
           decoration: BoxDecoration(
             color: isSelected
                 ? (_isDarkMode
-                    ? accentColor.withValues(alpha: 0.22)
-                    : accentColor.withValues(alpha: 0.14))
+                    ? accentColor.withValues(alpha: 0.25)
+                    : accentColor.withValues(alpha: 0.16))
                 : (_isDarkMode
                     ? const Color(0xFF1E293B)
                     : const Color(0xFFF1F5F9)),
-            borderRadius: BorderRadius.circular(AppSpacing.radiusSmall + 2),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
             border: Border.all(
               color: isSelected
                   ? accentColor
                   : (_isDarkMode
                       ? const Color(0xFF334155)
                       : const Color(0xFFCBD5E1)),
-              width: isSelected ? 1.8 : 1.0,
+              width: isSelected ? 2.0 : 1.2,
             ),
             boxShadow: isSelected
                 ? [
                     BoxShadow(
-                      color: accentColor.withValues(alpha: 0.25),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
+                      color: accentColor.withValues(alpha: 0.35),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
                     ),
                   ]
                 : null,
@@ -363,23 +364,32 @@ class _WhatsAppLiveBubblePreviewState extends State<WhatsAppLiveBubblePreview> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                icon,
-                size: 16,
-                color: isSelected
-                    ? accentColor
-                    : (_isDarkMode ? Colors.white60 : AppColors.textSecondary),
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.s6),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? accentColor.withValues(alpha: 0.2)
+                      : Colors.transparent,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  icon,
+                  size: 18,
+                  color: isSelected
+                      ? accentColor
+                      : (_isDarkMode ? Colors.white70 : AppColors.textSecondary),
+                ),
               ),
-              const SizedBox(width: AppSpacing.s6),
+              const SizedBox(width: AppSpacing.s8),
               Text(
                 label,
                 style: TextStyle(
-                  fontSize: 12.5,
+                  fontSize: 14,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
                   color: isSelected
                       ? (_isDarkMode ? Colors.white : accentColor)
                       : (_isDarkMode
-                          ? Colors.white70
+                          ? Colors.white
                           : AppColors.textPrimary),
                 ),
               ),

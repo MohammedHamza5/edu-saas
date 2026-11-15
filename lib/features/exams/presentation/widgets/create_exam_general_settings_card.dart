@@ -4,6 +4,8 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_text_field.dart';
+import '../../domain/entities/exam_entity.dart';
+import 'exam_category_selector.dart';
 
 /// Card containing all general settings for the exam being created or edited.
 class CreateExamGeneralSettingsCard extends StatelessWidget {
@@ -13,11 +15,13 @@ class CreateExamGeneralSettingsCard extends StatelessWidget {
   final TextEditingController passingScoreController;
   final TextEditingController defaultPointsController;
   final bool isCreating;
+  final ExamCategory category;
   final bool shuffle;
   final bool showResult;
   final bool allowRetake;
   final bool isPublished;
   final bool saveToQuestionBank;
+  final ValueChanged<ExamCategory> onCategoryChanged;
   final VoidCallback onApplyDefaultPoints;
   final ValueChanged<int> onDefaultPointsChanged;
   final ValueChanged<bool> onShuffleChanged;
@@ -35,11 +39,13 @@ class CreateExamGeneralSettingsCard extends StatelessWidget {
     required this.passingScoreController,
     required this.defaultPointsController,
     required this.isCreating,
+    this.category = ExamCategory.realTest,
     required this.shuffle,
     required this.showResult,
     required this.allowRetake,
     required this.isPublished,
     required this.saveToQuestionBank,
+    required this.onCategoryChanged,
     required this.onApplyDefaultPoints,
     required this.onDefaultPointsChanged,
     required this.onShuffleChanged,
@@ -95,6 +101,13 @@ class CreateExamGeneralSettingsCard extends StatelessWidget {
               }
               return null;
             },
+          ),
+          const SizedBox(height: AppSpacing.s16),
+
+          ExamCategorySelector(
+            selectedCategory: category,
+            onCategoryChanged: onCategoryChanged,
+            enabled: !isCreating,
           ),
           const SizedBox(height: AppSpacing.s16),
 

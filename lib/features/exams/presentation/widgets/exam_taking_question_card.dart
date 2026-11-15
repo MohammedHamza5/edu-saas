@@ -3,10 +3,10 @@ import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_card.dart';
-import '../../../question_bank/presentation/widgets/question_display_widgets.dart';
 import '../../domain/entities/exam_entity.dart';
 import 'exam_grid_in_input_pane.dart';
 import 'exam_image_viewer.dart';
+import '../utils/question_image_resolver.dart';
 import 'question_option_tile.dart';
 import '../extensions/exam_ui_extensions.dart';
 
@@ -153,23 +153,16 @@ class ExamTakingQuestionCard extends StatelessWidget {
               const SizedBox(height: AppSpacing.s12),
               Builder(
                 builder: (context) {
-                  final hasExplicitImage = question.imageUrl != null &&
-                      question.imageUrl!.trim().isNotEmpty;
-                  final isTextAnImageUrl = QuestionStemView.isImageUrl(
-                    question.questionText.trim(),
+                  final effectiveImageUrl =
+                      QuestionImageResolver.resolveEffectiveImageUrl(
+                    imageUrl: question.imageUrl,
+                    questionText: question.questionText,
                   );
-                  final effectiveImageUrl = hasExplicitImage
-                      ? question.imageUrl!
-                      : (isTextAnImageUrl
-                          ? question.questionText.trim()
-                          : null);
-                  final isMetaText =
-                      question.questionText.trim().startsWith('Question ') ||
-                          question.questionText.trim().startsWith('سؤال ');
                   final shouldShowText =
-                      question.questionText.trim().isNotEmpty &&
-                          !isTextAnImageUrl &&
-                          (!hasExplicitImage || !isMetaText);
+                      QuestionImageResolver.shouldShowQuestionText(
+                    question.questionText,
+                    effectiveImageUrl,
+                  );
 
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

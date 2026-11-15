@@ -55,13 +55,26 @@ class _MistakesPracticePageState extends State<MistakesPracticePage> {
   }
 
   void _submitPractice() {
+    final state = context.read<MistakesCubit>().state;
+    List<MistakeQuestionEntity> questions = [];
+    if (state is MistakesLoaded) {
+      questions = state.questions;
+    }
     final cubit = context.read<MistakesCubit>();
-    final answersList = _selectedAnswers.entries
-        .map((e) => {
-              'question_id': e.key,
-              'selected_option_id': e.value,
-            })
-        .toList();
+    final answersList = _selectedAnswers.entries.map((e) {
+      final matches = questions.where((item) => item.questionId == e.key);
+      final isGridIn = matches.isNotEmpty ? matches.first.isGridIn : false;
+      if (isGridIn) {
+        return {
+          'question_id': e.key,
+          'text_answer': e.value,
+        };
+      }
+      return {
+        'question_id': e.key,
+        'selected_option_id': e.value,
+      };
+    }).toList();
     cubit.submitPractice(answersList);
   }
 
