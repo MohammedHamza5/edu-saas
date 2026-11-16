@@ -84,7 +84,7 @@ class VoiceRecordingService {
 
       final config = RecordConfig(
         encoder: encoder,
-        bitRate: 128000,
+        bitRate: 32000,
         sampleRate: 44100,
         numChannels: 1,
         autoGain: true,

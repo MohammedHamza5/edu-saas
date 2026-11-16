@@ -15655,6 +15655,24 @@ abstract class AppLocalizations {
   /// **'Exam time is up! Auto-submitting and grading your answers...'**
   String get timeExpiredAutoSubmittingNotice;
 
+  /// No description provided for @timeExpiredSubmissionFailedNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam time is up, but automatic submission failed due to a connection issue. Your answers are safely stored on your device.'**
+  String get timeExpiredSubmissionFailedNotice;
+
+  /// No description provided for @retrySubmissionNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry Submission Now'**
+  String get retrySubmissionNow;
+
+  /// No description provided for @exitExamEmergencyAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit to Exams List'**
+  String get exitExamEmergencyAction;
+
   /// No description provided for @viewStudentAnswersAction.
   ///
   /// In en, this message translates to:

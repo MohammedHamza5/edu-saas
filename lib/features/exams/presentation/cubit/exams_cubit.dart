@@ -27,9 +27,9 @@ class ExamsCubit extends Cubit<ExamsState> {
   ExamsCubit({
     required ExamsRepository repository,
     ExamAnswersStorage? answersStorage,
-  })  : _repository = repository,
-        _answersStorage = answersStorage ?? InMemoryExamAnswersStorage(),
-        super(const ExamsInitial());
+  }) : _repository = repository,
+       _answersStorage = answersStorage ?? InMemoryExamAnswersStorage(),
+       super(const ExamsInitial());
 
   @override
   Future<void> close() {
@@ -131,7 +131,10 @@ class ExamsCubit extends Cubit<ExamsState> {
       onSuccess: (newExams) {
         _teacherPage = nextPage;
         final allExams = [...currentState.exams, ...newExams];
-        AppCache.exams.put(AppCache.userKey('teacher_exams_${currentState.groupId}'), allExams);
+        AppCache.exams.put(
+          AppCache.userKey('teacher_exams_${currentState.groupId}'),
+          allExams,
+        );
         emit(
           currentState.copyWith(
             exams: allExams,
@@ -321,7 +324,9 @@ class ExamsCubit extends Cubit<ExamsState> {
         final currentState = state;
         if (currentState is TeacherExamsLoaded) {
           if (currentState.groupId != null) {
-            AppCache.exams.invalidate(AppCache.userKey('teacher_exams_${currentState.groupId}'));
+            AppCache.exams.invalidate(
+              AppCache.userKey('teacher_exams_${currentState.groupId}'),
+            );
           }
           final index = currentState.exams.indexWhere(
             (e) => e.id == updatedExam.id,
@@ -854,7 +859,10 @@ class ExamsCubit extends Cubit<ExamsState> {
       onSuccess: (exams) {
         if (isClosed) return;
         // Double check state hasn't transitioned to an active ExamTakingState while waiting for network
-        if (state is ExamTakingState && !(state as ExamTakingState).submitSuccess) return;
+        if (state is ExamTakingState &&
+            !(state as ExamTakingState).submitSuccess) {
+          return;
+        }
 
         AppCache.exams.put(cacheKey, exams);
         if (exams.isEmpty) {
@@ -877,7 +885,8 @@ class ExamsCubit extends Cubit<ExamsState> {
       onFailure: (failure) {
         if (isClosed) return;
         if (state is! StudentExamsLoaded &&
-            (state is! ExamTakingState || (state as ExamTakingState).submitSuccess)) {
+            (state is! ExamTakingState ||
+                (state as ExamTakingState).submitSuccess)) {
           emit(ExamsError(failure.message));
         }
       },
@@ -903,7 +912,8 @@ class ExamsCubit extends Cubit<ExamsState> {
           );
         } else {
           final existing = folderMap[fid]!;
-          final updatedName = (existing.name.trim().isEmpty &&
+          final updatedName =
+              (existing.name.trim().isEmpty &&
                   exam.folderName != null &&
                   exam.folderName!.trim().isNotEmpty)
               ? exam.folderName!.trim()
@@ -966,103 +976,101 @@ class ExamsCubit extends Cubit<ExamsState> {
 
     try {
       // 1. Fetch full details to ensure we have questions
-    final detailsRes = await _repository.getExamDetails(exam.id);
-    final fullExam = detailsRes
-        .when(
-          onSuccess: (e) => e,
-          onFailure: (_) => exam,
-        )
-        .copyWith(
-          isLectureExam:
-              isLectureExam || exam.isLectureExam || exam.isLinkedToLesson,
-        );
+      final detailsRes = await _repository.getExamDetails(exam.id);
+      final fullExam = detailsRes
+          .when(onSuccess: (e) => e, onFailure: (_) => exam)
+          .copyWith(
+            isLectureExam:
+                isLectureExam || exam.isLectureExam || exam.isLinkedToLesson,
+          );
 
-    // 2. Start attempt via RPC
-    final attemptRes = await _repository.startExam(exam.id);
+      // 2. Start attempt via RPC
+      final attemptRes = await _repository.startExam(exam.id);
 
-    switch (attemptRes) {
-      case FailureResult(:final failure):
-        emit(ExamsError(failure.message));
-        return false;
-      case Success(:final data):
-        final attempt = data;
-        final questions = attempt.questions.isNotEmpty
-            ? attempt.questions
-            : (fullExam.activeVersion?.questions ?? <ExamQuestionEntity>[]);
-
-        if (questions.isEmpty) {
-          emit(const ExamsError('لا توجد أسئلة منشورة في هذا الامتحان بعد'));
+      switch (attemptRes) {
+        case FailureResult(:final failure):
+          emit(ExamsError(failure.message));
           return false;
-        }
+        case Success(:final data):
+          final attempt = data;
+          final questions = attempt.questions.isNotEmpty
+              ? attempt.questions
+              : (fullExam.activeVersion?.questions ?? <ExamQuestionEntity>[]);
 
-        final isUntimed =
-            isLectureExam ||
-            fullExam.durationMinutes <= 0 ||
-            exam.durationMinutes <= 0;
-        int remaining = 0;
+          if (questions.isEmpty) {
+            emit(const ExamsError('لا توجد أسئلة منشورة في هذا الامتحان بعد'));
+            return false;
+          }
 
-        if (!isUntimed) {
-          final totalSeconds = (fullExam.durationMinutes > 0
-                  ? fullExam.durationMinutes
-                  : exam.durationMinutes) *
-              60;
+          final isUntimed =
+              isLectureExam ||
+              fullExam.durationMinutes <= 0 ||
+              exam.durationMinutes <= 0;
+          int remaining = 0;
 
-          // 1. Prefer server-authoritative remaining seconds (immune to client clock skew)
-          if (attempt.remainingSeconds != null &&
-              attempt.remainingSeconds! > 0) {
-            remaining = attempt.remainingSeconds!;
-          } else {
-            // 2. Fallback: calculate elapsed time using UTC
-            final nowUtc = DateTime.now().toUtc();
-            final startedUtc = attempt.startedAt.toUtc();
-            final elapsedSeconds = nowUtc.difference(startedUtc).inSeconds;
+          if (!isUntimed) {
+            final totalSeconds =
+                (fullExam.durationMinutes > 0
+                    ? fullExam.durationMinutes
+                    : exam.durationMinutes) *
+                60;
 
-            // If elapsed is negative or unreasonable on an attempt granted by the server,
-            // guard against client clock skew by granting totalSeconds.
-            if (elapsedSeconds < 0 || elapsedSeconds >= totalSeconds) {
-              remaining = totalSeconds;
+            // 1. Prefer server-authoritative remaining seconds (immune to client clock skew)
+            if (attempt.remainingSeconds != null &&
+                attempt.remainingSeconds! > 0) {
+              remaining = attempt.remainingSeconds!;
             } else {
-              remaining = totalSeconds - elapsedSeconds;
+              // 2. Fallback: calculate elapsed time using UTC
+              final nowUtc = DateTime.now().toUtc();
+              final startedUtc = attempt.startedAt.toUtc();
+              final elapsedSeconds = nowUtc.difference(startedUtc).inSeconds;
+
+              // If elapsed is negative or unreasonable on an attempt granted by the server,
+              // guard against client clock skew by granting totalSeconds.
+              if (elapsedSeconds < 0 || elapsedSeconds >= totalSeconds) {
+                remaining = totalSeconds;
+              } else {
+                remaining = totalSeconds - elapsedSeconds;
+              }
+            }
+
+            // Safety guard: The backend server authorized this attempt, so never block at initialization
+            if (remaining <= 0) {
+              remaining = totalSeconds;
             }
           }
 
-          // Safety guard: The backend server authorized this attempt, so never block at initialization
-          if (remaining <= 0) {
-            remaining = totalSeconds;
+          // 3. Restore and merge saved answers:
+          //    a) Server-side synced answers from prior sessions / devices
+          final mergedAnswers = <String, String>{};
+          for (final ans in attempt.answers) {
+            final optId = ans.selectedOptionId;
+            if (optId != null && optId.isNotEmpty) {
+              mergedAnswers[ans.questionId] = optId;
+            }
           }
-        }
+          //    b) Local storage overlay (in case student answered while offline/disconnected)
+          try {
+            final localAnswers = await _answersStorage.getAnswers(attempt.id);
+            mergedAnswers.addAll(localAnswers);
+          } catch (_) {}
 
-        // 3. Restore and merge saved answers:
-        //    a) Server-side synced answers from prior sessions / devices
-        final mergedAnswers = <String, String>{};
-        for (final ans in attempt.answers) {
-          final optId = ans.selectedOptionId;
-          if (optId != null && optId.isNotEmpty) {
-            mergedAnswers[ans.questionId] = optId;
+          emit(
+            ExamTakingState(
+              exam: fullExam,
+              attempt: attempt,
+              questions: questions,
+              answers: mergedAnswers,
+              remainingSeconds: remaining,
+              isUntimed: isUntimed,
+            ),
+          );
+
+          if (!isUntimed) {
+            _startTimer();
           }
-        }
-        //    b) Local storage overlay (in case student answered while offline/disconnected)
-        try {
-          final localAnswers = await _answersStorage.getAnswers(attempt.id);
-          mergedAnswers.addAll(localAnswers);
-        } catch (_) {}
-
-        emit(
-          ExamTakingState(
-            exam: fullExam,
-            attempt: attempt,
-            questions: questions,
-            answers: mergedAnswers,
-            remainingSeconds: remaining,
-            isUntimed: isUntimed,
-          ),
-        );
-
-        if (!isUntimed) {
-          _startTimer();
-        }
-        return true;
-    }
+          return true;
+      }
     } catch (e, st) {
       AppLogger.e(
         'ExamsCubit',
@@ -1091,11 +1099,13 @@ class ExamsCubit extends Cubit<ExamsState> {
 
       if (!currentState.isUntimed && currentState.remainingSeconds <= 1) {
         timer.cancel();
-        emit(currentState.copyWith(
-          remainingSeconds: 0,
-          isExpired: true,
-          questionTimes: updatedTimes,
-        ));
+        emit(
+          currentState.copyWith(
+            remainingSeconds: 0,
+            isExpired: true,
+            questionTimes: updatedTimes,
+          ),
+        );
         submitExam(reason: ExamSubmissionReason.timeExpired);
       } else {
         emit(
@@ -1129,8 +1139,9 @@ class ExamsCubit extends Cubit<ExamsState> {
     final currentState = state;
     if (currentState is! ExamTakingState) return;
 
-    final updatedEliminated =
-        Map<String, Set<String>>.from(currentState.eliminatedOptions);
+    final updatedEliminated = Map<String, Set<String>>.from(
+      currentState.eliminatedOptions,
+    );
     final currentSet = Set<String>.from(updatedEliminated[questionId] ?? {});
     if (currentSet.contains(optionId)) {
       currentSet.remove(optionId);
@@ -1145,18 +1156,22 @@ class ExamsCubit extends Cubit<ExamsState> {
   void toggleScratchpad({bool? open}) {
     final currentState = state;
     if (currentState is! ExamTakingState) return;
-    emit(currentState.copyWith(
-      isScratchpadOpen: open ?? !currentState.isScratchpadOpen,
-    ));
+    emit(
+      currentState.copyWith(
+        isScratchpadOpen: open ?? !currentState.isScratchpadOpen,
+      ),
+    );
   }
 
   /// Toggles background between transparent overlay and math grid paper
   void toggleScratchpadBackground() {
     final currentState = state;
     if (currentState is! ExamTakingState) return;
-    emit(currentState.copyWith(
-      isScratchpadGridBackground: !currentState.isScratchpadGridBackground,
-    ));
+    emit(
+      currentState.copyWith(
+        isScratchpadGridBackground: !currentState.isScratchpadGridBackground,
+      ),
+    );
   }
 
   /// Sets the active drawing tool (pen, highlighter, eraser)
@@ -1178,8 +1193,9 @@ class ExamsCubit extends Cubit<ExamsState> {
     final currentState = state;
     if (currentState is! ExamTakingState) return;
     final qId = currentState.currentQuestion.id;
-    final updatedMap =
-        Map<String, List<DrawingStroke>>.from(currentState.questionScratchpads);
+    final updatedMap = Map<String, List<DrawingStroke>>.from(
+      currentState.questionScratchpads,
+    );
     final currentStrokes = List<DrawingStroke>.from(updatedMap[qId] ?? []);
     currentStrokes.add(stroke);
     updatedMap[qId] = currentStrokes;
@@ -1191,8 +1207,9 @@ class ExamsCubit extends Cubit<ExamsState> {
     final currentState = state;
     if (currentState is! ExamTakingState) return;
     final qId = currentState.currentQuestion.id;
-    final updatedMap =
-        Map<String, List<DrawingStroke>>.from(currentState.questionScratchpads);
+    final updatedMap = Map<String, List<DrawingStroke>>.from(
+      currentState.questionScratchpads,
+    );
     final currentStrokes = List<DrawingStroke>.from(updatedMap[qId] ?? []);
     if (currentStrokes.isNotEmpty) {
       currentStrokes.removeLast();
@@ -1206,8 +1223,9 @@ class ExamsCubit extends Cubit<ExamsState> {
     final currentState = state;
     if (currentState is! ExamTakingState) return;
     final qId = currentState.currentQuestion.id;
-    final updatedMap =
-        Map<String, List<DrawingStroke>>.from(currentState.questionScratchpads);
+    final updatedMap = Map<String, List<DrawingStroke>>.from(
+      currentState.questionScratchpads,
+    );
     updatedMap[qId] = const [];
     emit(currentState.copyWith(questionScratchpads: updatedMap));
   }
@@ -1223,19 +1241,23 @@ class ExamsCubit extends Cubit<ExamsState> {
     emit(currentState.copyWith(answers: updatedAnswers));
 
     // 1. Persist draft answers locally in background (instant hardware-backed recovery)
-    unawaited(_answersStorage.saveAnswers(
-      attemptId: currentState.attempt.id,
-      answers: updatedAnswers,
-    ));
+    unawaited(
+      _answersStorage.saveAnswers(
+        attemptId: currentState.attempt.id,
+        answers: updatedAnswers,
+      ),
+    );
 
     // 2. Debounced live sync to server database (server-side recovery across devices/refreshes)
     _syncAnswersDebounce?.cancel();
     _syncAnswersDebounce = Timer(const Duration(milliseconds: 1000), () {
       if (isClosed) return;
-      unawaited(_repository.syncExamAnswers(
-        attemptId: currentState.attempt.id,
-        answers: updatedAnswers,
-      ));
+      unawaited(
+        _repository.syncExamAnswers(
+          attemptId: currentState.attempt.id,
+          answers: updatedAnswers,
+        ),
+      );
     });
   }
 
@@ -1247,10 +1269,12 @@ class ExamsCubit extends Cubit<ExamsState> {
     // Immediately flush any pending answer sync before switching questions
     if (_syncAnswersDebounce?.isActive ?? false) {
       _syncAnswersDebounce?.cancel();
-      unawaited(_repository.syncExamAnswers(
-        attemptId: currentState.attempt.id,
-        answers: currentState.answers,
-      ));
+      unawaited(
+        _repository.syncExamAnswers(
+          attemptId: currentState.attempt.id,
+          answers: currentState.answers,
+        ),
+      );
     }
 
     if (index >= 0 && index < currentState.questions.length) {
@@ -1265,6 +1289,10 @@ class ExamsCubit extends Cubit<ExamsState> {
     final currentState = state;
     if (currentState is! ExamTakingState) return false;
 
+    final effectiveReason = currentState.isExpired
+        ? ExamSubmissionReason.timeExpired
+        : reason;
+
     _countdownTimer?.cancel();
     _syncAnswersDebounce?.cancel();
     emit(currentState.copyWith(isSubmitting: true));
@@ -1272,7 +1300,7 @@ class ExamsCubit extends Cubit<ExamsState> {
     final result = await _repository.submitExam(
       attemptId: currentState.attempt.id,
       answers: currentState.answers,
-      reason: reason,
+      reason: effectiveReason,
     );
 
     return result.when(

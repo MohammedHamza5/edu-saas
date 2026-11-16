@@ -60,23 +60,17 @@ class _ExamTakingPageState extends State<ExamTakingPage>
   @override
   void initState() {
     super.initState();
-    ExamResultPage.retakeBuilder = (
-      ctx,
-      cubit,
-      isLecture,
-      nextLesson,
-      nextIndex,
-      totalCount,
-    ) =>
-        BlocProvider.value(
-          value: cubit,
-          child: ExamTakingPage(
-            isLectureExam: isLecture,
-            nextLesson: nextLesson,
-            nextLessonIndex: nextIndex,
-            totalLessonsCount: totalCount,
-          ),
-        );
+    ExamResultPage.retakeBuilder =
+        (ctx, cubit, isLecture, nextLesson, nextIndex, totalCount) =>
+            BlocProvider.value(
+              value: cubit,
+              child: ExamTakingPage(
+                isLectureExam: isLecture,
+                nextLesson: nextLesson,
+                nextLessonIndex: nextIndex,
+                totalLessonsCount: totalCount,
+              ),
+            );
     WidgetsBinding.instance.addObserver(this);
     setExamSecurityActive(true);
     _initSavedQuestions();
@@ -84,8 +78,8 @@ class _ExamTakingPageState extends State<ExamTakingPage>
 
   Future<void> _initSavedQuestions() async {
     try {
-      final res =
-          await InjectionContainer.savedQuestionsRepository.getSavedQuestions();
+      final res = await InjectionContainer.savedQuestionsRepository
+          .getSavedQuestions();
       if (res.isSuccess && res.dataOrNull != null && mounted) {
         setState(() {
           _savedQuestionIds.addAll(res.dataOrNull!.map((q) => q.questionId));
@@ -168,8 +162,8 @@ class _ExamTakingPageState extends State<ExamTakingPage>
           _isAutoSubmitting = true;
         });
         context.read<ExamsCubit>().submitExam(
-              reason: ExamSubmissionReason.forcedExit,
-            );
+          reason: ExamSubmissionReason.forcedExit,
+        );
       },
     );
   }
@@ -180,8 +174,8 @@ class _ExamTakingPageState extends State<ExamTakingPage>
       state: state,
       onConfirm: () {
         context.read<ExamsCubit>().submitExam(
-              reason: ExamSubmissionReason.studentSubmitted,
-            );
+          reason: ExamSubmissionReason.studentSubmitted,
+        );
       },
     );
   }
@@ -285,7 +279,11 @@ class _ExamTakingPageState extends State<ExamTakingPage>
               previous.answers != current.answers ||
               previous.answeredCount != current.answeredCount ||
               previous.isSubmitting != current.isSubmitting ||
-              previous.submitSuccess != current.submitSuccess;
+              previous.submitSuccess != current.submitSuccess ||
+              previous.isExpired != current.isExpired ||
+              previous.errorMessage != current.errorMessage ||
+              (previous.remainingSeconds <= 0) !=
+                  (current.remainingSeconds <= 0);
         }
         return true;
       },
@@ -368,12 +366,15 @@ class _ExamTakingPageState extends State<ExamTakingPage>
               isCalculatorActive: _dockMode.isVisible && _dockTab.isCalculator,
               onToggleCalculator: () =>
                   _toggleCalculator(MediaQuery.of(context).size.width >= 900),
-              isQuestionSaved: _savedQuestionIds.contains(state.currentQuestion.id),
+              isQuestionSaved: _savedQuestionIds.contains(
+                state.currentQuestion.id,
+              ),
               isSubmitting: state.isSubmitting,
               onToggleVault: () => _toggleCurrentQuestionVault(context, state),
               onOpenReviewGrid: () => _openBluebookReviewGrid(context, state),
             ),
-            floatingActionButton: (MediaQuery.of(context).size.width < 900 &&
+            floatingActionButton:
+                (MediaQuery.of(context).size.width < 900 &&
                     state.exam.hasAttachedPdf &&
                     !_showMobilePdfOverlay &&
                     !state.isSubmitting)
@@ -402,10 +403,8 @@ class _ExamTakingPageState extends State<ExamTakingPage>
                   showMobilePdfOverlay: _showMobilePdfOverlay,
                   customDockWidth: _customDockWidth,
                   isDraggingDockSplitter: _isDraggingDockSplitter,
-                  onDockModeChanged: (mode) =>
-                      setState(() => _dockMode = mode),
-                  onDockTabChanged: (tab) =>
-                      setState(() => _dockTab = tab),
+                  onDockModeChanged: (mode) => setState(() => _dockMode = mode),
+                  onDockTabChanged: (tab) => setState(() => _dockTab = tab),
                   onDesmosModeChanged: (mode) =>
                       setState(() => _desmosMode = mode),
                   onToggleDesktopPdfPane: (show) =>
@@ -432,15 +431,15 @@ class _ExamTakingPageState extends State<ExamTakingPage>
                       _toggleCurrentQuestionVault(context, state),
                   onSelectOption: (optionId) {
                     context.read<ExamsCubit>().selectAnswer(
-                          question.id,
-                          optionId,
-                        );
+                      question.id,
+                      optionId,
+                    );
                   },
                   onToggleEliminateOption: (optionId) {
                     context.read<ExamsCubit>().toggleEliminateOption(
-                          question.id,
-                          optionId,
-                        );
+                      question.id,
+                      optionId,
+                    );
                   },
                   onPrevious: () =>
                       context.read<ExamsCubit>().goToQuestion(qIndex - 1),
@@ -451,7 +450,22 @@ class _ExamTakingPageState extends State<ExamTakingPage>
                 ),
                 // Digital Scratchpad Overlay (Transparent or Grid paper canvas)
                 const ExamScratchpadOverlay(),
-                if (state.isSubmitting)
+                if (state.isExpired ||
+                    (!state.isUntimed && state.remainingSeconds <= 0))
+                  ExamTimeExpiredOverlay(
+                    isSubmitting: state.isSubmitting,
+                    errorMessage: state.errorMessage,
+                    onRetry: () {
+                      context.read<ExamsCubit>().submitExam(
+                        reason: ExamSubmissionReason.timeExpired,
+                      );
+                    },
+                    onEmergencyExit: () {
+                      context.read<ExamsCubit>().exitExamTaking();
+                      Navigator.of(context).pop();
+                    },
+                  )
+                else if (state.isSubmitting)
                   const ExamSubmittingBlockingOverlay()
                 else if (_isPrivacyShieldActive)
                   ExamPrivacyShieldOverlay(
@@ -463,12 +477,7 @@ class _ExamTakingPageState extends State<ExamTakingPage>
                         _isPrivacyShieldActive = false;
                       });
                     },
-                  )
-                else if (state.isExpired ||
-                    (!state.isUntimed &&
-                        state.remainingSeconds <= 0 &&
-                        state.isSubmitting))
-                  const ExamTimeExpiredOverlay(),
+                  ),
               ],
             ),
           ),

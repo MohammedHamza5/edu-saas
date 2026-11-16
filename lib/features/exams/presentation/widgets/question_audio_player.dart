@@ -14,12 +14,14 @@ class QuestionAudioPlayer extends StatefulWidget {
   final String? audioUrl;
   final int? initialDurationSeconds;
   final Uint8List? localBytes;
+  final bool isUploading;
 
   const QuestionAudioPlayer({
     super.key,
     required this.audioUrl,
     this.initialDurationSeconds,
     this.localBytes,
+    this.isUploading = false,
   });
 
   @override
@@ -75,6 +77,16 @@ class _QuestionAudioPlayerState extends State<QuestionAudioPlayer> {
   }
 
   @override
+  void didUpdateWidget(covariant QuestionAudioPlayer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialDurationSeconds != oldWidget.initialDurationSeconds &&
+        widget.initialDurationSeconds != null &&
+        widget.initialDurationSeconds! > 0) {
+      _duration = Duration(seconds: widget.initialDurationSeconds!);
+    }
+  }
+
+  @override
   void dispose() {
     _stateSubscription?.cancel();
     _positionSubscription?.cancel();
@@ -99,6 +111,14 @@ class _QuestionAudioPlayerState extends State<QuestionAudioPlayer> {
       try {
         if (_playerState == PlayerState.paused) {
           await _player.resume();
+        } else if (_playerState == PlayerState.completed) {
+          await _player.seek(Duration.zero);
+          await _player.setPlaybackRate(_playbackSpeed);
+          if (hasBytes) {
+            await _player.play(BytesSource(widget.localBytes!));
+          } else {
+            await _player.play(UrlSource(resolvedUrl!));
+          }
         } else {
           await _player.setPlaybackRate(_playbackSpeed);
           if (hasBytes) {
@@ -139,8 +159,9 @@ class _QuestionAudioPlayerState extends State<QuestionAudioPlayer> {
 
   @override
   Widget build(BuildContext context) {
+    final hasBytes = widget.localBytes != null && widget.localBytes!.isNotEmpty;
     final resolvedUrl = AudioUrlResolver.resolve(widget.audioUrl);
-    if (resolvedUrl == null || resolvedUrl.isEmpty) {
+    if (!hasBytes && (resolvedUrl == null || resolvedUrl.isEmpty)) {
       return const SizedBox.shrink();
     }
 
@@ -189,6 +210,38 @@ class _QuestionAudioPlayerState extends State<QuestionAudioPlayer> {
                   color: AppColors.primary,
                 ),
               ),
+              if (widget.isUploading) ...[
+                const SizedBox(width: AppSpacing.s8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(
+                        width: 10,
+                        height: 10,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 1.5,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        l10n.uploadingAudio,
+                        style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
               const Spacer(),
               // Speed multiplier pill button
               InkWell(

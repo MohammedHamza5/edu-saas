@@ -574,10 +574,12 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
         'get_exam_details',
         params: {'p_exam_id': examId},
       );
-      if (rpcRes is Map<String, dynamic>) {
-        return ExamModel.fromJson(rpcRes);
-      } else if (rpcRes is Map) {
-        return ExamModel.fromJson(Map<String, dynamic>.from(rpcRes));
+      if (rpcRes is Map<String, dynamic> || rpcRes is Map) {
+        final map = rpcRes is Map<String, dynamic>
+            ? Map<String, dynamic>.from(rpcRes)
+            : Map<String, dynamic>.from(rpcRes as Map);
+        await _enrichQuestionsAudioAndImagesIfNeeded(map);
+        return ExamModel.fromJson(map);
       }
     } on PostgrestException catch (e) {
       // Fall back to the direct select only if the RPC doesn't exist yet.
@@ -682,6 +684,73 @@ class ExamsRemoteDataSourceImpl implements ExamsRemoteDataSource {
     }
 
     return ExamModel.fromJson(map);
+  }
+
+  Future<void> _enrichQuestionsAudioAndImagesIfNeeded(
+    Map<String, dynamic> map,
+  ) async {
+    final versions = map['exam_versions'];
+    if (versions is! List || versions.isEmpty) return;
+
+    final questionIds = <String>[];
+    for (final v in versions) {
+      if (v is! Map) continue;
+      final questions = v['exam_questions'];
+      if (questions is! List) continue;
+      for (final q in questions) {
+        if (q is Map) {
+          // If audio_url is already present as a key in the RPC payload (migration 0120+),
+          // no client-side enrichment is needed.
+          if (q.containsKey('audio_url')) return;
+          final id = q['id'];
+          if (id is String && id.isNotEmpty) {
+            questionIds.add(id);
+          }
+        }
+      }
+    }
+
+    if (questionIds.isEmpty) return;
+
+    try {
+      final rows = await _safeClient
+          .from('exam_questions')
+          .select('id, audio_url, audio_duration_seconds, image_url, image_meta')
+          .inFilter('id', questionIds);
+
+      final dataMap = <String, Map<String, dynamic>>{};
+      for (final item in rows) {
+        final id = item['id'];
+        if (id is String && id.isNotEmpty) {
+          dataMap[id] = item;
+        }
+      }
+
+      for (final v in versions) {
+        if (v is! Map) continue;
+        final questions = v['exam_questions'];
+        if (questions is! List) continue;
+        for (final q in questions) {
+          if (q is Map) {
+            final id = q['id'] as String?;
+            if (id != null && dataMap.containsKey(id)) {
+              final enriched = dataMap[id]!;
+              q['audio_url'] = enriched['audio_url'];
+              q['audio_duration_seconds'] = enriched['audio_duration_seconds'];
+              q['image_url'] = enriched['image_url'];
+              q['image_meta'] = enriched['image_meta'];
+            }
+          }
+        }
+      }
+    } catch (e, stack) {
+      AppLogger.e(
+        'ExamsRemoteDataSource',
+        'Failed to defensively enrich exam questions audio and images',
+        error: e,
+        stackTrace: stack,
+      );
+    }
   }
 
   @override

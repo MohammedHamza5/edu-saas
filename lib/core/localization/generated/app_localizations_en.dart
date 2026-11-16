@@ -8880,6 +8880,16 @@ class AppLocalizationsEn extends AppLocalizations {
       'Exam time is up! Auto-submitting and grading your answers...';
 
   @override
+  String get timeExpiredSubmissionFailedNotice =>
+      'Exam time is up, but automatic submission failed due to a connection issue. Your answers are safely stored on your device.';
+
+  @override
+  String get retrySubmissionNow => 'Retry Submission Now';
+
+  @override
+  String get exitExamEmergencyAction => 'Exit to Exams List';
+
+  @override
   String get viewStudentAnswersAction => 'Review Student Answers';
 
   @override

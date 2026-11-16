@@ -115,7 +115,10 @@ class _ExamAudioAttachmentBoxState extends State<ExamAudioAttachmentBox>
         _isRecording = true;
         _recordingSeconds = 0;
         _recordedPreview = null;
+        _audioUrl = null;
+        _isUploading = false;
       });
+      widget.onUploadingChanged?.call(false);
     } catch (e, stack) {
       AppLogger.e('ExamAudioAttachmentBox', 'Failed to start recording', error: e, stackTrace: stack);
       if (mounted) {
@@ -136,9 +139,29 @@ class _ExamAudioAttachmentBoxState extends State<ExamAudioAttachmentBox>
 
       setState(() {
         _isRecording = false;
+        _recordedPreview = result;
+        _durationSeconds = result.durationSeconds;
+        _isUploading = true;
       });
       _setUploading(true);
+      unawaited(_uploadRecordingInBackground(result));
 
+    } catch (e, stack) {
+      _pulseController.stop();
+      AppLogger.e('ExamAudioAttachmentBox', 'Failed to stop recording', error: e, stackTrace: stack);
+      if (mounted) {
+        setState(() {
+          _isRecording = false;
+          _isUploading = false;
+        });
+        _setUploading(false);
+        AppFeedback.showError(context, l10n.audioError);
+      }
+    }
+  }
+
+  Future<void> _uploadRecordingInBackground(VoiceRecordingResult result) async {
+    try {
       final mimeType = result.fileName.endsWith('.webm') ? 'audio/webm' : 'audio/mp4';
       final uploadedUrl = await _uploadService.uploadAudio(
         bytes: result.bytes,
@@ -148,10 +171,16 @@ class _ExamAudioAttachmentBoxState extends State<ExamAudioAttachmentBox>
 
       if (!mounted) return;
 
+      // If user discarded or removed audio while uploading, do not restore
+      if (_recordedPreview == null && _audioUrl == null) {
+        _setUploading(false);
+        return;
+      }
+
       setState(() {
         _audioUrl = uploadedUrl;
         _durationSeconds = result.durationSeconds;
-        _recordedPreview = null;
+        _isUploading = false;
       });
       _setUploading(false);
 
@@ -160,14 +189,13 @@ class _ExamAudioAttachmentBoxState extends State<ExamAudioAttachmentBox>
         durationSeconds: _durationSeconds,
       ));
     } catch (e, stack) {
-      _pulseController.stop();
-      AppLogger.e('ExamAudioAttachmentBox', 'Failed to stop and upload recording', error: e, stackTrace: stack);
+      AppLogger.e('ExamAudioAttachmentBox', 'Failed to upload voice recording in background', error: e, stackTrace: stack);
       if (mounted) {
         setState(() {
-          _isRecording = false;
+          _isUploading = false;
         });
         _setUploading(false);
-        AppFeedback.showError(context, l10n.audioError);
+        AppFeedback.showError(context, context.l10n.audioError);
       }
     }
   }
@@ -181,54 +209,19 @@ class _ExamAudioAttachmentBoxState extends State<ExamAudioAttachmentBox>
     });
   }
 
-  Future<void> _uploadAndAttachRecording() async {
-    if (_recordedPreview == null) return;
-    final l10n = context.l10n;
-    final preview = _recordedPreview!;
-
-    setState(() => _isUploading = true);
-
-    try {
-      final mimeType = preview.fileName.endsWith('.webm') ? 'audio/webm' : 'audio/mp4';
-      final uploadedUrl = await _uploadService.uploadAudio(
-        bytes: preview.bytes,
-        fileName: preview.fileName,
-        mimeType: mimeType,
-      );
-
-      if (!mounted) return;
-
-      setState(() {
-        _audioUrl = uploadedUrl;
-        _durationSeconds = preview.durationSeconds;
-        _recordedPreview = null;
-        _isUploading = false;
-      });
-
-      widget.onChanged((
-        audioUrl: _audioUrl,
-        durationSeconds: _durationSeconds,
-      ));
-    } catch (e, stack) {
-      AppLogger.e('ExamAudioAttachmentBox', 'Failed to upload voice recording', error: e, stackTrace: stack);
-      if (mounted) {
-        setState(() => _isUploading = false);
-        AppFeedback.showError(context, l10n.audioError);
-      }
-    }
-  }
-
   Future<void> _reRecord() async {
     setState(() {
+      _audioUrl = null;
+      _durationSeconds = null;
       _recordedPreview = null;
+      _isUploading = false;
     });
+    _setUploading(false);
+    widget.onChanged((
+      audioUrl: null,
+      durationSeconds: null,
+    ));
     await _startRecording();
-  }
-
-  void _discardPreview() {
-    setState(() {
-      _recordedPreview = null;
-    });
   }
 
   Future<void> _pickAndUploadAudio() async {
@@ -291,7 +284,10 @@ class _ExamAudioAttachmentBoxState extends State<ExamAudioAttachmentBox>
     setState(() {
       _audioUrl = null;
       _durationSeconds = null;
+      _recordedPreview = null;
+      _isUploading = false;
     });
+    _setUploading(false);
     widget.onChanged((
       audioUrl: null,
       durationSeconds: null,
@@ -319,9 +315,10 @@ class _ExamAudioAttachmentBoxState extends State<ExamAudioAttachmentBox>
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final hasAudio = (_audioUrl != null && _audioUrl!.trim().isNotEmpty) || _recordedPreview != null;
 
-    // 1. Uploading state
-    if (_isUploading) {
+    // 1. Uploading state (only when uploading a picked file without any audio/preview ready)
+    if (_isUploading && !hasAudio) {
       return Container(
         margin: const EdgeInsets.only(top: AppSpacing.s8),
         padding: const EdgeInsets.all(AppSpacing.s12),
@@ -408,7 +405,7 @@ class _ExamAudioAttachmentBoxState extends State<ExamAudioAttachmentBox>
               visualDensity: VisualDensity.compact,
             ),
             const SizedBox(width: AppSpacing.s4),
-            // Stop and preview button
+            // Stop and preview button (WhatsApp-style instant transition)
             FilledButton.icon(
               onPressed: _stopRecordingAndPreview,
               icon: const Icon(Icons.stop_rounded, size: 16),
@@ -424,66 +421,7 @@ class _ExamAudioAttachmentBoxState extends State<ExamAudioAttachmentBox>
       );
     }
 
-    // 3. Recorded local preview state (Before cloud upload)
-    if (_recordedPreview != null) {
-      return Container(
-        margin: const EdgeInsets.only(top: AppSpacing.s8),
-        padding: const EdgeInsets.all(AppSpacing.s8),
-        decoration: BoxDecoration(
-          color: AppColors.primary.withValues(alpha: 0.03),
-          borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-          border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            QuestionAudioPlayer(
-              audioUrl: _recordedPreview!.previewPathOrUrl,
-              initialDurationSeconds: _recordedPreview!.durationSeconds,
-              localBytes: _recordedPreview!.bytes,
-            ),
-            const SizedBox(height: AppSpacing.s4),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton.icon(
-                  onPressed: _reRecord,
-                  icon: const Icon(Icons.refresh_rounded, size: 16),
-                  label: Text(l10n.reRecord),
-                  style: TextButton.styleFrom(
-                    visualDensity: VisualDensity.compact,
-                    foregroundColor: AppColors.textSecondary,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.s4),
-                TextButton.icon(
-                  onPressed: _discardPreview,
-                  icon: const Icon(Icons.delete_outline_rounded, size: 16),
-                  label: Text(l10n.cancelRecording),
-                  style: TextButton.styleFrom(
-                    visualDensity: VisualDensity.compact,
-                    foregroundColor: AppColors.error,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.s8),
-                FilledButton.icon(
-                  onPressed: _uploadAndAttachRecording,
-                  icon: const Icon(Icons.check_rounded, size: 16),
-                  label: Text(l10n.attachRecordedVoice),
-                  style: FilledButton.styleFrom(
-                    visualDensity: VisualDensity.compact,
-                    backgroundColor: AppColors.primary,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      );
-    }
-
-    // 4. Fully uploaded & attached state
-    final hasAudio = _audioUrl != null && _audioUrl!.trim().isNotEmpty;
+    // 3. Audio present (Instant playback from local memory or cloud CDN + non-blocking background sync)
     if (hasAudio) {
       return Container(
         margin: const EdgeInsets.only(top: AppSpacing.s8),
@@ -491,16 +429,18 @@ class _ExamAudioAttachmentBoxState extends State<ExamAudioAttachmentBox>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             QuestionAudioPlayer(
-              audioUrl: _audioUrl,
-              initialDurationSeconds: _durationSeconds,
+              audioUrl: _audioUrl ?? _recordedPreview?.previewPathOrUrl,
+              initialDurationSeconds: _durationSeconds ?? _recordedPreview?.durationSeconds,
+              localBytes: _recordedPreview?.bytes,
+              isUploading: _isUploading,
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton.icon(
-                  onPressed: _startRecording,
-                  icon: const Icon(Icons.mic_rounded, size: 16),
-                  label: Text(l10n.recordVoice),
+                  onPressed: _reRecord,
+                  icon: const Icon(Icons.refresh_rounded, size: 16),
+                  label: Text(l10n.reRecord),
                   style: TextButton.styleFrom(
                     visualDensity: VisualDensity.compact,
                     foregroundColor: AppColors.primary,

@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/extensions/localized_context_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_loading_view.dart';
 import '../cubit/exams_cubit.dart';
@@ -42,15 +43,20 @@ class ExamPrivacyShieldOverlay extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(AppSpacing.s12),
                     decoration: BoxDecoration(
-                      color: (isAutoSubmitting ? AppColors.error : AppColors.warning)
-                          .withValues(alpha: 0.12),
+                      color:
+                          (isAutoSubmitting
+                                  ? AppColors.error
+                                  : AppColors.warning)
+                              .withValues(alpha: 0.12),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       isAutoSubmitting
                           ? Icons.lock_outline_rounded
                           : Icons.warning_amber_rounded,
-                      color: isAutoSubmitting ? AppColors.error : AppColors.warning,
+                      color: isAutoSubmitting
+                          ? AppColors.error
+                          : AppColors.warning,
                       size: 40,
                     ),
                   ),
@@ -61,7 +67,9 @@ class ExamPrivacyShieldOverlay extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: isAutoSubmitting ? AppColors.error : AppColors.warning,
+                      color: isAutoSubmitting
+                          ? AppColors.error
+                          : AppColors.warning,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.s8),
@@ -139,57 +147,135 @@ class ExamPrivacyShieldOverlay extends StatelessWidget {
 
 /// Overlay displayed when the examination time limit expires.
 class ExamTimeExpiredOverlay extends StatelessWidget {
-  const ExamTimeExpiredOverlay({super.key});
+  final bool isSubmitting;
+  final String? errorMessage;
+  final VoidCallback? onRetry;
+  final VoidCallback? onEmergencyExit;
+
+  const ExamTimeExpiredOverlay({
+    super.key,
+    this.isSubmitting = false,
+    this.errorMessage,
+    this.onRetry,
+    this.onEmergencyExit,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final hasError = errorMessage != null && !isSubmitting;
+
     return Positioned.fill(
-      child: Container(
-        color: Colors.black.withValues(alpha: 0.88),
-        padding: const EdgeInsets.all(AppSpacing.s24),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-          child: Center(
-            child: AppCard(
-              padding: const EdgeInsets.all(AppSpacing.s24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(AppSpacing.s12),
-                    decoration: BoxDecoration(
-                      color: AppColors.warning.withValues(alpha: 0.12),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.timer_off_outlined,
-                      color: AppColors.warning,
-                      size: 40,
-                    ),
+      child: PopScope(
+        canPop: false,
+        child: Container(
+          color: Colors.black.withValues(alpha: 0.88),
+          padding: const EdgeInsets.all(AppSpacing.s24),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 440),
+                child: AppCard(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.s28,
+                    vertical: AppSpacing.s28,
                   ),
-                  const SizedBox(height: AppSpacing.s16),
-                  Text(
-                    context.l10n.submissionReasonTimeExpired,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.warning,
-                    ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(AppSpacing.s12),
+                        decoration: BoxDecoration(
+                          color:
+                              (hasError ? AppColors.error : AppColors.warning)
+                                  .withValues(alpha: 0.12),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          hasError
+                              ? Icons.cloud_off_rounded
+                              : Icons.timer_off_outlined,
+                          color: hasError ? AppColors.error : AppColors.warning,
+                          size: 40,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.s16),
+                      Text(
+                        context.l10n.submissionReasonTimeExpired,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: hasError ? AppColors.error : AppColors.warning,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.s8),
+                      Text(
+                        hasError
+                            ? context.l10n.timeExpiredSubmissionFailedNotice
+                            : context.l10n.timeExpiredAutoSubmittingNotice,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: AppColors.textSecondary,
+                          height: 1.5,
+                        ),
+                      ),
+                      if (hasError && errorMessage!.trim().isNotEmpty) ...[
+                        const SizedBox(height: AppSpacing.s12),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.s12,
+                            vertical: AppSpacing.s8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.error.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: AppColors.error.withValues(alpha: 0.2),
+                            ),
+                          ),
+                          child: Text(
+                            errorMessage!,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.error,
+                            ),
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: AppSpacing.s20),
+                      if (hasError) ...[
+                        AppButton(
+                          text: context.l10n.retrySubmissionNow,
+                          icon: Icons.refresh_rounded,
+                          isLoading: isSubmitting,
+                          isFullWidth: true,
+                          onPressed: onRetry,
+                        ),
+                        if (onEmergencyExit != null) ...[
+                          const SizedBox(height: AppSpacing.s8),
+                          TextButton.icon(
+                            onPressed: onEmergencyExit,
+                            icon: const Icon(
+                              Icons.arrow_back_rounded,
+                              size: 16,
+                            ),
+                            label: Text(
+                              context.l10n.exitExamEmergencyAction,
+                              style: const TextStyle(fontSize: 13),
+                            ),
+                          ),
+                        ],
+                      ] else ...[
+                        const Center(child: AppLoadingView.signature()),
+                      ],
+                    ],
                   ),
-                  const SizedBox(height: AppSpacing.s8),
-                  Text(
-                    context.l10n.timeExpiredAutoSubmittingNotice,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: AppColors.textSecondary,
-                      height: 1.5,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.s20),
-                  const Center(child: AppLoadingView.signature()),
-                ],
+                ),
               ),
             ),
           ),
@@ -233,7 +319,9 @@ class ExamSubmittingBlockingOverlay extends StatelessWidget {
                         height: 36,
                         child: CircularProgressIndicator(
                           strokeWidth: 3.5,
-                          valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            AppColors.primary,
+                          ),
                         ),
                       ),
                     ),

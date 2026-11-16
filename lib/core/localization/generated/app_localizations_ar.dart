@@ -8837,6 +8837,16 @@ class AppLocalizationsAr extends AppLocalizations {
       'انتهى وقت الامتحان! جاري التسليم التلقائي وحساب درجتك...';
 
   @override
+  String get timeExpiredSubmissionFailedNotice =>
+      'انتهى وقت الامتحان، لكن تعذر التسليم التلقائي بسبب انقطاع الاتصال. إجاباتك محفوظة بأمان على جهازك.';
+
+  @override
+  String get retrySubmissionNow => 'إعادة محاولة التسليم الآن';
+
+  @override
+  String get exitExamEmergencyAction => 'الخروج إلى قائمة الاختبارات';
+
+  @override
   String get viewStudentAnswersAction => 'عرض ورقة إجابة الطالب';
 
   @override

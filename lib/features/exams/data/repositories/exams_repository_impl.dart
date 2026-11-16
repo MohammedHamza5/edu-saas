@@ -24,9 +24,9 @@ class ExamsRepositoryImpl implements ExamsRepository {
     ExamsRemoteDataSource? remoteDataSource,
     ExamImageUploader? imageUploadService,
     ExamDraftStorage? draftStorage,
-  })  : _remoteDataSource = remoteDataSource ?? ExamsRemoteDataSourceImpl(),
-        _imageUploadService = imageUploadService ?? ExamImageUploadService(),
-        _draftStorage = draftStorage ?? const ExamDraftLocalDataSource();
+  }) : _remoteDataSource = remoteDataSource ?? ExamsRemoteDataSourceImpl(),
+       _imageUploadService = imageUploadService ?? ExamImageUploadService(),
+       _draftStorage = draftStorage ?? const ExamDraftLocalDataSource();
 
   @override
   Future<Result<List<ExamEntity>>> getGroupExams(
@@ -59,10 +59,7 @@ class ExamsRepositoryImpl implements ExamsRepository {
   }) async {
     try {
       final exams = await retryTransient(
-        () => _remoteDataSource.getStudentExams(
-          page: page,
-          pageSize: pageSize,
-        ),
+        () => _remoteDataSource.getStudentExams(page: page, pageSize: pageSize),
       );
       return Success(exams);
     } on PostgrestException catch (e) {
@@ -345,10 +342,12 @@ class ExamsRepositoryImpl implements ExamsRepository {
     ExamSubmissionReason reason = ExamSubmissionReason.studentSubmitted,
   }) async {
     try {
-      final attempt = await _remoteDataSource.submitExam(
-        attemptId: attemptId,
-        answers: answers,
-        reason: reason,
+      final attempt = await retryTransient(
+        () => _remoteDataSource.submitExam(
+          attemptId: attemptId,
+          answers: answers,
+          reason: reason,
+        ),
       );
       return Success(attempt);
     } on PostgrestException catch (e) {
@@ -417,9 +416,13 @@ class ExamsRepositoryImpl implements ExamsRepository {
   }
 
   @override
-  Future<Result<MistakeSummaryEntity>> getStudentMistakesSummary(String studentId) async {
+  Future<Result<MistakeSummaryEntity>> getStudentMistakesSummary(
+    String studentId,
+  ) async {
     try {
-      final summary = await _remoteDataSource.getStudentMistakesSummary(studentId);
+      final summary = await _remoteDataSource.getStudentMistakesSummary(
+        studentId,
+      );
       return Success(summary);
     } on PostgrestException catch (e) {
       return FailureResult(ServerFailure(e.message, code: e.code));
@@ -489,7 +492,9 @@ class ExamsRepositoryImpl implements ExamsRepository {
   }
 
   @override
-  Future<Result<List<Map<String, dynamic>>>> getGroupLessons(String groupId) async {
+  Future<Result<List<Map<String, dynamic>>>> getGroupLessons(
+    String groupId,
+  ) async {
     try {
       final lessons = await _remoteDataSource.getGroupLessons(groupId);
       return Success(lessons);
@@ -616,7 +621,9 @@ class ExamsRepositoryImpl implements ExamsRepository {
     String examId,
   ) async {
     try {
-      final roster = await _remoteDataSource.getExamParentDispatchRoster(examId);
+      final roster = await _remoteDataSource.getExamParentDispatchRoster(
+        examId,
+      );
       return Success(roster);
     } on PostgrestException catch (e) {
       return FailureResult(ServerFailure(e.message, code: e.code));
@@ -648,7 +655,9 @@ class ExamsRepositoryImpl implements ExamsRepository {
   }
 
   @override
-  Future<Result<List<ExamFolderEntity>>> getExamFolders({String? groupId}) async {
+  Future<Result<List<ExamFolderEntity>>> getExamFolders({
+    String? groupId,
+  }) async {
     try {
       final folders = await _remoteDataSource.getExamFolders(groupId: groupId);
       return Success(folders);
@@ -778,4 +787,3 @@ class ExamsRepositoryImpl implements ExamsRepository {
     return _draftStorage.clearDraft(draftKey);
   }
 }
-

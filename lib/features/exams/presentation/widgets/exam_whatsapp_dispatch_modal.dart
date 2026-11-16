@@ -95,12 +95,14 @@ class _ExamWhatsAppDispatchModalState extends State<ExamWhatsAppDispatchModal> {
       _selectedPreset = 'لم يؤدِ الاختبار حتى الآن، يرجى التنبيه عليه.';
     } else {
       final pct = widget.student.bestPercentage ?? 0.0;
-      if (pct >= 85) {
-        _selectedPreset = 'أداء استثنائي ومستوى مشرف جداً، استمر!';
-      } else if (pct >= 65) {
-        _selectedPreset = 'مستوى ممتاز، اجتاز الاختبار بنجاح واقتدار.';
+      if (pct >= 90) {
+        _selectedPreset = '🌟 أداء استثنائي مشرف، ما شاء الله استيعاب متميز وتفوق ملحوظ!';
+      } else if (pct >= 75) {
+        _selectedPreset = '👏 مستوى جيد جداً واجتهاد واضح، مستمرون في المتابعة للوصول للدرجة النهائية.';
+      } else if (pct >= 60) {
+        _selectedPreset = '👍 أداء لا بأس به، تم اجتياز الاختبار ونعمل سوياً على تعزيز النقاط التي تحتاج مراجعة.';
       } else {
-        _selectedPreset = 'الدرجة أقل من المتوقع، يرجى متابعة مذاكرة الدرس.';
+        _selectedPreset = '💡 الدرجة تحتاج مزيداً من الاهتمام والمراجعة الدقيقة لأسئلة الامتحان، وتم توجيه الطالب لمراجعة الأخطاء.';
       }
     }
   }
@@ -117,14 +119,14 @@ class _ExamWhatsAppDispatchModalState extends State<ExamWhatsAppDispatchModal> {
         ? _customNoteController.text.trim()
         : _selectedPreset;
 
-    return WhatsAppReportGenerator.generateExamResultReport(
+    return WhatsAppReportGenerator.generateCanonicalExamReport(
       studentName: widget.student.studentName,
       examTitle: widget.exam.title,
       score: (widget.student.bestScore ?? 0).toDouble(),
       maxScore: widget.exam.maxScore.toDouble(),
       percentage: widget.student.bestPercentage ?? 0.0,
       groupName: widget.student.groupName,
-      teacherNotes: note,
+      evaluationText: note,
       teacherName: widget.teacherName,
       isNotTaken: !widget.student.isSubmitted,
     );
@@ -139,10 +141,10 @@ class _ExamWhatsAppDispatchModalState extends State<ExamWhatsAppDispatchModal> {
       ];
     }
     return [
-      'أداء استثنائي ومستوى مشرف جداً، استمر!',
-      'مستوى ممتاز، اجتاز الاختبار بنجاح واقتدار.',
-      'مستوى جيد مع حاجة لمراجعة بعض المسائل الهامة.',
-      'الدرجة أقل من المتوقع، يرجى متابعة مذاكرة الدرس.',
+      '🌟 أداء استثنائي مشرف، ما شاء الله استيعاب متميز وتفوق ملحوظ!',
+      '👏 مستوى جيد جداً واجتهاد واضح، مستمرون في المتابعة للوصول للدرجة النهائية.',
+      '👍 أداء لا بأس به، تم اجتياز الاختبار ونعمل سوياً على تعزيز النقاط التي تحتاج مراجعة.',
+      '💡 الدرجة تحتاج مزيداً من الاهتمام والمراجعة الدقيقة لأسئلة الامتحان، وتم توجيه الطالب لمراجعة الأخطاء.',
       'يرجى من ولي الأمر التواصل مع المدرس للمتابعة.',
     ];
   }
